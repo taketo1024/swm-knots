@@ -90,5 +90,11 @@ public func *<K: Ring, n: TPInt, m: TPInt, p: TPInt>(lhs: Matrix<K, n, m>, rhs: 
 }
 
 public func det<K: Ring, n: TPInt>(A: Matrix<K, n, n>) -> K {
-    return 0
+    return SymGroup<n>.all.reduce(0, combine: {
+        (res: K, s: SymGroup<n>) -> K in
+        res + K(sgn(s)) * (0 ..< n.value).reduce(1, combine: {
+            (p: K, i: Int) -> K in
+            p * A[i, s[i]]
+        })
+    })
 }

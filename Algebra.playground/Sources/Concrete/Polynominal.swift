@@ -5,6 +5,10 @@ public struct Polynominal<K: Field>: CustomStringConvertible {
     public let degree: Int
     
     public init(integerLiteral value: IntegerLiteralType) {
+        self.init(value)
+    }
+    
+    public init(_ value: Int) {
         let k = K.init(integerLiteral: value as! K.IntegerLiteralType)
         self.init(coeffs: [k])
     }

@@ -1,6 +1,7 @@
 import Foundation
 
 public protocol Ring: IntegerLiteralConvertible, Equatable {
+    init(_ intValue: Int)
     static var zero: Self {get}
     static var one: Self {get}
     static func +(lhs: Self, rhs: Self) -> Self
