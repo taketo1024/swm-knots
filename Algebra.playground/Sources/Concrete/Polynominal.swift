@@ -26,7 +26,7 @@ public struct Polynominal<K: Field>: CustomStringConvertible {
         self.coeffs = coeffs
         self.degree = {
             let n = coeffs.count - 1
-            return n - (coeffs.reverse().indexOf{$0 != K.zero()} ?? n)
+            return n - (coeffs.reverse().indexOf{$0 != K.zero} ?? n)
             }()
     }
     
@@ -93,7 +93,7 @@ public func *<K: Field>(a: K, f: Polynominal<K>) -> Polynominal<K> {
 public func *<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Polynominal<K> {
     return Polynominal(degree: lhs.degree + rhs.degree) {
         (n: Int) in
-        (0 ... n).reduce(K.zero()) {
+        (0 ... n).reduce(K.zero) {
             $0 + lhs.coeff($1) * rhs.coeff(n - $1)
         }
     }

@@ -1,8 +1,8 @@
 import Foundation
 
 public protocol Ring: IntegerLiteralConvertible, Equatable {
-    static func zero() -> Self
-    static func one() -> Self
+    static var zero: Self {get}
+    static var one: Self {get}
     static func +(lhs: Self, rhs: Self) -> Self
     prefix static func -(x: Self) -> Self
     static func -(lhs: Self, rhs: Self) -> Self
@@ -10,11 +10,11 @@ public protocol Ring: IntegerLiteralConvertible, Equatable {
 }
 
 public extension Ring {
-    static func zero() -> Self {
+    static var zero: Self {
         return Self.init(integerLiteral: 0 as! Self.IntegerLiteralType)
     }
     
-    static func one() -> Self {
+    static var one: Self {
         return Self.init(integerLiteral: 1 as! Self.IntegerLiteralType)
     }
 }
