@@ -52,3 +52,18 @@ extension SymGroup: CustomStringConvertible {
 public func *<n: TPInt>(lhs: SymGroup<n>, rhs: SymGroup<n>) -> SymGroup<n> {
     return SymGroup{ lhs[rhs[$0]] }
 }
+
+public func sgn<n: TPInt>(s: SymGroup<n>) -> Int {
+    switch n.value {
+    case 0, 1:
+        return 1
+    case let l:
+        let r = (0 ..< l - 1)
+            .flatMap{ i in (i + 1 ..< l).map{j in (i, j)} }
+            .reduce((1, 1), combine: {
+                (r: (Int, Int), pair: (Int, Int)) -> (Int, Int) in
+                return (r.0 * (pair.0 - pair.1) , r.1 * (s[pair.0] - s[pair.1]))
+            })
+        return r.0 / r.1
+    }
+}
