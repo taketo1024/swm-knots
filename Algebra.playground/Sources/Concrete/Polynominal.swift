@@ -1,15 +1,11 @@
 import Foundation
 
-public struct Polynominal<K: Field>: CustomStringConvertible {
+public struct Polynominal<K: Field> {
     private let coeffs: [K]
     public let degree: Int
     
-    public init(integerLiteral value: IntegerLiteralType) {
-        self.init(value)
-    }
-    
     public init(_ value: Int) {
-        let k = K.init(integerLiteral: value as! K.IntegerLiteralType)
+        let k = K(value)
         self.init(coeffs: [k])
     }
     
@@ -22,38 +18,16 @@ public struct Polynominal<K: Field>: CustomStringConvertible {
         self.init(coeffs: coeffs)
     }
     
-    public init(monomial d: Int) {
-        self.init(degree: d) { $0 == d ? 1 : 0 }
-    }
-    
     private init(coeffs: [K]) {
         self.coeffs = coeffs
         self.degree = {
             let n = coeffs.count - 1
-            return n - (coeffs.reverse().indexOf{$0 != K.zero} ?? n)
+            return n - (coeffs.reverse().indexOf{$0 != K(0)} ?? n)
             }()
     }
     
-    public var description: String {
-        let zero: K = 0
-        let res = coeffs.enumerate().flatMap {
-            (n: Int, a: K) -> String? in
-            switch(a, n) {
-            case (zero, _): return nil
-            case ( _, 0): return "\(a)"
-            case ( 1, 1): return "x"
-            case (-1, 1): return "-x"
-            case ( _, 1): return "\(a)x"
-            case ( 1, _): return "x^\(n)"
-            case (-1, _): return "-x^\(n)"
-            default: return "\(a)x^\(n)"
-            }
-            }.reverse().joinWithSeparator(" + ")
-        return res.isEmpty ? "0" : res
-    }
-    
     public func coeff(n: Int) -> K {
-        return n <= degree ? coeffs[n] : 0
+        return n <= degree ? coeffs[n] : K(0)
     }
     
     public var leadCoeff: K {
@@ -62,8 +36,12 @@ public struct Polynominal<K: Field>: CustomStringConvertible {
     
     public func toMonic() -> Polynominal<K> {
         let a = leadCoeff
-        return (a == 0) ? 0 : (1 / a) * self
+        return (a == K(0)) ? 0 : (K(1) / a) * self
     }
+}
+
+public func Monomial<K>(coeff a: K, degree d: Int) -> Polynominal<K> {
+    return Polynominal(degree: d) { $0 == d ? a : K(0) }
 }
 
 extension Polynominal: Ring {
@@ -76,6 +54,11 @@ extension Polynominal: Ring {
         let merged = (0 ... deg).map { f(coeff($0), p.coeff($0)) }
         return Polynominal<K>(coeffs: merged)
     }
+}
+
+public func ==<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Bool {
+    return (lhs.degree == rhs.degree) &&
+        (0 ... lhs.degree).reduce(true) { $0 && (lhs.coeff($1) == rhs.coeff($1)) }
 }
 
 public func +<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Polynominal<K> {
@@ -97,32 +80,35 @@ public func *<K: Field>(a: K, f: Polynominal<K>) -> Polynominal<K> {
 public func *<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Polynominal<K> {
     return Polynominal(degree: lhs.degree + rhs.degree) {
         (n: Int) in
-        (0 ... n).reduce(K.zero) {
+        (0 ... n).reduce(K(0)) {
             $0 + lhs.coeff($1) * rhs.coeff(n - $1)
         }
     }
 }
 
-public func ==<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Bool {
-    return (lhs.degree == rhs.degree) &&
-        (0 ... lhs.degree).reduce(true) { $0 && (lhs.coeff($1) == rhs.coeff($1)) }
-}
-
 extension Polynominal: EuclideanRing {
     public func euclideanDiv(rhs: Polynominal) -> (q: Polynominal, r: Polynominal) {
-        if rhs == 0 {
+        guard rhs != 0 else {
             fatalError("divide by 0")
-        } else if degree < rhs.degree {
+        }
+        
+        if degree < rhs.degree {
             return (0, self)
         } else {
             return (0 ... degree - rhs.degree)
                 .reverse()
                 .reduce( (0, self) ) {
                     (res, d: Int) -> (Polynominal<K>, Polynominal<K>) in
-                    let a = res.r.leadCoeff / rhs.leadCoeff
-                    let q = a * Polynominal(monomial: d)
                     
-                    return (res.q + q, res.r - q * rhs)
+                    let g = res.r
+                    if g.degree < rhs.degree {
+                        return res
+                    } else {
+                        let q = Monomial(coeff: res.r.leadCoeff / rhs.leadCoeff, degree: d)
+                        let r = res.r - q * rhs
+                        //print("\(res.r) = \(q) * (\(rhs)) ... \(r)")
+                        return (res.q + q, r)
+                    }
             }
         }
     }
@@ -136,3 +122,30 @@ public func %<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Polynominal
     return lhs.euclideanDiv(rhs).r
 }
 
+extension Polynominal: IntegerLiteralConvertible {
+    public init(integerLiteral value: IntegerLiteralType) {
+        self.init(value)
+    }
+}
+
+extension Polynominal: CustomStringConvertible {
+    public var description: String {
+        let _0 = K(0)
+        let _1 = K(1)
+        
+        let res = coeffs.enumerate().flatMap {
+            (n: Int, a: K) -> String? in
+            switch(a, n) {
+            case (_0,  _): return nil
+            case ( _,  0): return "\(a)"
+            case ( _1, 1): return "x"
+            case (-_1, 1): return "-x"
+            case ( _,  1): return "\(a)x"
+            case ( _1, _): return "x^\(n)"
+            case (-_1, _): return "-x^\(n)"
+            default: return "\(a)x^\(n)"
+            }
+            }.reverse().joinWithSeparator(" + ")
+        return res.isEmpty ? "0" : res
+    }
+}

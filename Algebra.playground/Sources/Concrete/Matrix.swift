@@ -35,11 +35,11 @@ public struct Matrix<K: Ring, Rows: TPInt, Cols: TPInt> {
     }
     
     public static var zero: Matrix<K, Rows, Cols> {
-        return self.init { _ in 0 }
+        return self.init { _ in K(0) }
     }
     
     public static var identity: Matrix<K, Rows, Cols> {
-        return self.init { $0 == $1 ? 1 : 0 }
+        return self.init { $0 == $1 ? K(1) : K(0) }
     }
 }
 
@@ -85,14 +85,16 @@ public func *<K: Ring, n: TPInt, m: TPInt>(lhs: Matrix<K, n, m>, k: K) -> Matrix
 
 public func *<K: Ring, n: TPInt, m: TPInt, p: TPInt>(lhs: Matrix<K, n, m>, rhs: Matrix<K, m, p>) -> Matrix<K, n, p> {
     return Matrix<K, n, p> { (i, k) -> K in
-        return (0 ..< m.value).map({j in lhs[i, j] * rhs[j, k]}).reduce(0, combine: {$0 + $1})
+        return (0 ..< m.value)
+                .map({j in lhs[i, j] * rhs[j, k]})
+                .reduce(K(0), combine: {$0 + $1})
     }
 }
 
 public func det<K: Ring, n: TPInt>(A: Matrix<K, n, n>) -> K {
-    return Permutation<n>.all.reduce(0, combine: {
+    return Permutation<n>.all.reduce(K(0), combine: {
         (res: K, s: Permutation<n>) -> K in
-        res + K(sgn(s)) * (0 ..< n.value).reduce(1, combine: {
+        res + K(sgn(s)) * (0 ..< n.value).reduce(K(1), combine: {
             (p: K, i: Int) -> K in
             p * A[i, s[i]]
         })

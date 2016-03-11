@@ -1,6 +1,6 @@
 import Foundation
 
-public struct RationalNumber: Field, CustomStringConvertible {
+public struct RationalNumber: Field {
     public let p, q: Integer
     
     public init(_ p: Integer, _ q: Integer) {
@@ -14,18 +14,6 @@ public struct RationalNumber: Field, CustomStringConvertible {
     public init(_ n: Integer) {
         self.p = n
         self.q = 1
-    }
-    
-    public init(integerLiteral value: IntegerLiteralType) {
-        self.init(Integer(value))
-    }
-    
-    public var description: String {
-        switch q {
-        case 1:  return "\(p)"
-        case -1: return "\(-p)"
-        default: return "\(p)/\(q)"
-        }
     }
     
     public func reduce() -> RationalNumber {
@@ -56,4 +44,20 @@ public func *(lhs: RationalNumber, rhs: RationalNumber) -> RationalNumber {
 
 public func /(lhs: RationalNumber, rhs: RationalNumber) -> RationalNumber {
     return RationalNumber(lhs.p * rhs.q, lhs.q * rhs.p).reduce()
+}
+
+extension RationalNumber: IntegerLiteralConvertible {
+    public init(integerLiteral value: IntegerLiteralType) {
+        self.init(Integer(value))
+    }
+}
+
+extension RationalNumber: CustomStringConvertible {
+    public var description: String {
+        switch q {
+        case 1:  return "\(p)"
+        case -1: return "\(-p)"
+        default: return "\(p)/\(q)"
+        }
+    }
 }
