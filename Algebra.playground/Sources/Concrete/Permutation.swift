@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SymGroup<n: TPInt>: Group {
+public struct Permutation<n: TPInt>: Group {
     public var degree: Int { return n.value }
     
     private var elements: [Int]
@@ -27,21 +27,21 @@ public struct SymGroup<n: TPInt>: Group {
         return elements[i]
     }
     
-    public static var identity: SymGroup<n> {
-        return SymGroup<n>{ $0 }
+    public static var identity: Permutation<n> {
+        return Permutation<n>{ $0 }
     }
     
-    public var inverse: SymGroup<n> {
+    public var inverse: Permutation<n> {
         let inv = (0 ..< degree).sort{ self[$0] < self[$1] }
-        return SymGroup(elements: inv)
+        return Permutation(elements: inv)
     }
     
-    public static var all: [SymGroup<n>] {
-        return perm(n.value).map{ SymGroup(elements: $0) }
+    public static var all: [Permutation<n>] {
+        return perm(n.value).map{ Permutation(elements: $0) }
     }
 }
 
-extension SymGroup: CustomStringConvertible {
+extension Permutation: CustomStringConvertible {
     public var description: String {
         return "(" + (0 ..< degree).map({ i in
             return "\(self[i])"
@@ -49,11 +49,11 @@ extension SymGroup: CustomStringConvertible {
     }
 }
 
-public func *<n: TPInt>(lhs: SymGroup<n>, rhs: SymGroup<n>) -> SymGroup<n> {
-    return SymGroup{ lhs[rhs[$0]] }
+public func *<n: TPInt>(lhs: Permutation<n>, rhs: Permutation<n>) -> Permutation<n> {
+    return Permutation{ lhs[rhs[$0]] }
 }
 
-public func sgn<n: TPInt>(s: SymGroup<n>) -> Int {
+public func sgn<n: TPInt>(s: Permutation<n>) -> Int {
     switch n.value {
     case 0, 1:
         return 1
