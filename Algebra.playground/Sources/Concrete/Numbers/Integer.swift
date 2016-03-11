@@ -9,7 +9,7 @@ extension Integer: EuclideanRing {
         return abs(self)
     }
     
-    public func div(rhs: Integer) -> (q: Integer, r: Integer) {
+    public func euclideanDiv(rhs: Integer) -> (q: Integer, r: Integer) {
         let q = self / rhs
         return (q: q, r: self - q * rhs)
     }

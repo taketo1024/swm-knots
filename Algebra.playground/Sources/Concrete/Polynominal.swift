@@ -109,7 +109,7 @@ public func ==<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Bool {
 }
 
 extension Polynominal: EuclideanRing {
-    public func div(rhs: Polynominal) -> (q: Polynominal, r: Polynominal) {
+    public func euclideanDiv(rhs: Polynominal) -> (q: Polynominal, r: Polynominal) {
         if rhs == 0 {
             fatalError("divide by 0")
         } else if degree < rhs.degree {
@@ -129,10 +129,10 @@ extension Polynominal: EuclideanRing {
 }
 
 public func /<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Polynominal<K> {
-    return lhs.div(rhs).q
+    return lhs.euclideanDiv(rhs).q
 }
 
 public func %<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Polynominal<K> {
-    return lhs.div(rhs).r
+    return lhs.euclideanDiv(rhs).r
 }
 
