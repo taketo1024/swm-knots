@@ -13,15 +13,32 @@ public func /%<T: EuclideanRing>(lhs: T, rhs: T) -> (q: T, r: T) {
 }
 
 public func gcd<T: EuclideanRing>(x: T, _ y: T) -> T {
-    switch(x.degree, y.degree) {
-    case (_, 0):
-        return x
-    case (0, _):
+    switch x {
+    case 0:
         return y
-    case let (a, b) where a >= b:
-        return gcd(x % y, y)
     default:
-        return gcd(x, y % x)
+        return gcd(y % x, x)
     }
+}
+
+public func euclideanAlgorithm<T: EuclideanRing>(x: T, _ y: T) -> (q0: T, q1: T, r: T) {
+    func gcd(x: T, _ y: T, _ q: [T]) -> (q: [T], r: T) {
+        switch x {
+        case 0:
+            return (q, y)
+        default:
+            let res = y /% x
+            return gcd(res.r, x, [res.q] + q)
+        }
+    }
+    
+    let result = gcd(x, y, [])
+    
+    typealias M = Matrix<T, TPInt_2, TPInt_2>
+    let m = result.q.reduce(M.identity) { (m: M, q: T) -> M in
+        m * M(-q, 1, 1, 0)
+    }
+    
+    return (q0: m[1, 0], q1: m[1, 1], r: result.r)
 }
 
