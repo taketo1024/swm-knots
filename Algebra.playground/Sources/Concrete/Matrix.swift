@@ -91,6 +91,10 @@ public func *<K: Ring, n: TPInt, m: TPInt, p: TPInt>(lhs: Matrix<K, n, m>, rhs: 
     }
 }
 
+public func ^<K: Ring, n: TPInt>(lhs: Matrix<K, n, n>, rhs: Int) -> Matrix<K, n, n> {
+    return (rhs == 0) ? Matrix<K, n, n>.identity : lhs * (lhs ^ (rhs - 1))
+}
+
 public func det<K: Ring, n: TPInt>(A: Matrix<K, n, n>) -> K {
     return Permutation<n>.all.reduce(K(0), combine: {
         (res: K, s: Permutation<n>) -> K in

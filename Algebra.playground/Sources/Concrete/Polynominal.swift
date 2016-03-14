@@ -4,26 +4,26 @@ public struct Polynominal<K: Field> {
     private let coeffs: [K]
     public let degree: Int
     
-    public init(_ value: Int) {
-        let k = K(value)
-        self.init(coeffs: [k])
-    }
-    
-    public init(_ descending: K...) {
-        self.init(coeffs: descending.reverse())
-    }
-    
-    public init(degree: Int, gen: (Int -> K)) {
-        let coeffs = (0 ... degree).map(gen)
-        self.init(coeffs: coeffs)
-    }
-    
-    private init(coeffs: [K]) {
+    public init(coeffs: [K]) {
         self.coeffs = coeffs
         self.degree = {
             let n = coeffs.count - 1
             return n - (coeffs.reverse().indexOf{$0 != K(0)} ?? n)
             }()
+    }
+    
+    public init(_ value: Int) {
+        let k = K(value)
+        self.init(coeffs: [k])
+    }
+    
+    public init(_ coeffs: K...) {
+        self.init(coeffs: coeffs)
+    }
+    
+    public init(degree: Int, gen: (Int -> K)) {
+        let coeffs = (0 ... degree).map(gen)
+        self.init(coeffs: coeffs)
     }
     
     public func coeff(n: Int) -> K {
