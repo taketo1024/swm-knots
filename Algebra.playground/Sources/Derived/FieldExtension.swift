@@ -12,7 +12,7 @@ public struct FieldExtension<F: TPPolynominal>: Field {
         self.f = f
     }
     
-    public init(_ n: Integer) {
+    public init(_ n: Int) {
         self.init(Polynominal<K>(n))
     }
     
@@ -67,7 +67,7 @@ public func ^<F: TPPolynominal>(lhs: FieldExtension<F>, rhs: Int) -> FieldExtens
 
 extension FieldExtension: IntegerLiteralConvertible {
     public init(integerLiteral value: IntegerLiteralType) {
-        self.init(Integer(value))
+        self.init(Z(value))
     }
 }
 

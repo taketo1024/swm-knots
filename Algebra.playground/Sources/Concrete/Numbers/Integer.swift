@@ -1,15 +1,15 @@
 import Foundation
 
-public typealias Integer = Int
+public typealias Z = Int
 
-extension Integer: Ring {}
+extension Z: Ring { }
 
-extension Integer: EuclideanRing {
+extension Z: EuclideanRing {
     public var degree: Int {
         return abs(self)
     }
     
-    public func euclideanDiv(rhs: Integer) -> (q: Integer, r: Integer) {
+    public func euclideanDiv(rhs: Z) -> (q: Z, r: Z) {
         let q = self / rhs
         return (q: q, r: self - q * rhs)
     }

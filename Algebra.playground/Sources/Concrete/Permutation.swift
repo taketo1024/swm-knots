@@ -41,12 +41,8 @@ public struct Permutation<n: TPInt>: Group {
     }
 }
 
-extension Permutation: CustomStringConvertible {
-    public var description: String {
-        return "(" + (0 ..< degree).map({ i in
-            return "\(self[i])"
-        }).joinWithSeparator(", ") + ")"
-    }
+public func ==<n: TPInt>(lhs: Permutation<n>, rhs: Permutation<n>) -> Bool {
+    return lhs.elements == rhs.elements
 }
 
 public func *<n: TPInt>(lhs: Permutation<n>, rhs: Permutation<n>) -> Permutation<n> {
@@ -65,5 +61,13 @@ public func sgn<n: TPInt>(s: Permutation<n>) -> Int {
                 return (r.0 * (pair.0 - pair.1) , r.1 * (s[pair.0] - s[pair.1]))
             })
         return r.0 / r.1
+    }
+}
+
+extension Permutation: CustomStringConvertible {
+    public var description: String {
+        return "(" + (0 ..< degree).map({ i in
+            return "\(self[i])"
+        }).joinWithSeparator(", ") + ")"
     }
 }

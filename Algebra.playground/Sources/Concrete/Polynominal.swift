@@ -45,6 +45,8 @@ public func Monomial<K>(coeff a: K, degree d: Int) -> Polynominal<K> {
 }
 
 extension Polynominal: Ring {
+    public static var zero: Polynominal { return 0 }
+    
     public func map(f: (K -> K)) -> Polynominal<K> {
         return Polynominal<K>(coeffs: coeffs.map(f))
     }
@@ -67,10 +69,6 @@ public func +<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Polynominal
 
 public prefix func -<K: Field>(lhs: Polynominal<K>) -> Polynominal<K> {
     return lhs.map { -$0 }
-}
-
-public func -<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Polynominal<K> {
-    return lhs.produceWith(rhs) { $0 - $1 }
 }
 
 public func *<K: Field>(a: K, f: Polynominal<K>) -> Polynominal<K> {

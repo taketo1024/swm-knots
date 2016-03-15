@@ -4,11 +4,11 @@ public protocol TPInt {
     static var value: Int { get }
 }
 
-public class TPInt_0 : TPInt {
+public struct TPInt_0 : TPInt {
     public static let value = 0
 }
 
-public class TPInt_Succ<n: TPInt> : TPInt {
+public struct TPInt_Succ<n: TPInt> : TPInt {
     public static var value: Int {
         return n.value + 1
     }
