@@ -4,7 +4,7 @@ public struct Q: Field {
     public let p, q: Z
     
     public init(_ p: Z, _ q: Z) {
-        if q == 0 {
+        guard q != 0 else {
             fatalError("denom: 0")
         }
         self.p = p

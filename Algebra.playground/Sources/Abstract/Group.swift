@@ -5,7 +5,14 @@ public protocol Group: Monoid {
 }
 
 public func ^<G: Group>(lhs: G, rhs: Int) -> G {
-    return (rhs == 0) ? G.identity : lhs * (lhs ^ (rhs - 1))
+    switch rhs {
+    case let n where n > 0:
+        return lhs * (lhs ^ (n - 1))
+    case let n where n < 0:
+        return lhs.inverse * (lhs ^ (n + 1))
+    default:
+        return G.identity
+    }
 }
 
 public extension Group {

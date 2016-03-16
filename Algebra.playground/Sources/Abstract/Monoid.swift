@@ -11,3 +11,8 @@ extension Monoid {
         return self
     }
 }
+
+public func ^<G: Monoid>(lhs: G, rhs: Int) -> G {
+    return (rhs == 0) ? G.identity : lhs * (lhs ^ (rhs - 1))
+}
+
