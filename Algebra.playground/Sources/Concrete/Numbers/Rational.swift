@@ -15,13 +15,13 @@ public struct Q: Field {
         self.init(n, 1)
     }
     
-    public func reduce() -> Q {
-        let d = abs(gcd(p, q)) * (q / abs(q))
-        return Q(p / d, q / d)
-    }
-    
     public var inverse: Q {
         return Q(q, p)
+    }
+    
+    public var reduced: Q {
+        let d = abs(gcd(p, q)) * (q / abs(q))
+        return Q(p / d, q / d)
     }
 }
 
@@ -57,7 +57,7 @@ extension Q: IntegerLiteralConvertible {
 
 extension Q: CustomStringConvertible {
     public var description: String {
-        let r = self.reduce()
+        let r = reduced
         switch r.q {
         case 1:  return "\(r.p)"
         default: return "\(r.p)/\(r.q)"

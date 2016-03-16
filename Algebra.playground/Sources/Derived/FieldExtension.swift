@@ -20,7 +20,7 @@ public struct FieldExtension<F: TPPolynominal>: Field {
         self.init(Polynominal<K>(coeffs: coeffs))
     }
     
-    public func reduce() -> FieldExtension<F> {
+    public var reduced: FieldExtension<F> {
         return FieldExtension(f % g)
     }
     
@@ -57,12 +57,8 @@ public func *<F: TPPolynominal>(lhs: FieldExtension<F>, rhs: FieldExtension<F>) 
     return FieldExtension( (lhs.f * rhs.f) % lhs.g)
 }
 
-public func /<F: TPPolynominal>(lhs: FieldExtension<F>, rhs: FieldExtension<F>) -> FieldExtension<F> {
-    return (lhs * rhs.inverse).reduce()
-}
-
 public func ^<F: TPPolynominal>(lhs: FieldExtension<F>, rhs: Int) -> FieldExtension<F> {
-    return (rhs == 0) ? FieldExtension(1) : lhs * (lhs ^ (rhs - 1)).reduce()
+    return (rhs == 0) ? FieldExtension(1) : lhs * (lhs ^ (rhs - 1)).reduced
 }
 
 extension FieldExtension: IntegerLiteralConvertible {
