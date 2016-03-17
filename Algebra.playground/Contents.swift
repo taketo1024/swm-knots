@@ -2,46 +2,27 @@
 
 import Foundation
 
-/* frequently used types */
+public struct P5: IntIdeal {
+    public static let generator = 5
+}
 
-typealias _1 = TPInt_1
-typealias _2 = TPInt_2
-typealias _3 = TPInt_3
-typealias _4 = TPInt_4
+typealias Z_5 = IntQuotient<P5>
+let a: Z_5 = 2
+let b: Z_5 = 4
+let c: Z_5 = 8
+a + b
+a * b
 
-typealias N = UInt
-typealias Z = Integer
-typealias Q = RationalNumber
-typealias R = RealNumber
+typealias F_5 = IntQuotientField<P5>
+let x: F_5 = 2
+x * x.inverse == 1
 
-typealias Qx = Polynominal<Q>
-typealias Rx = Polynominal<R>
 
-typealias M2_Z = Matrix<Z,_2,_2>
-typealias M3_Z = Matrix<Z,_3,_3>
-typealias M4_Z = Matrix<Z,_4,_4>
+public struct F: PolynominalIdeal {
+    public typealias R = Polynominal<Q>
+    public static let generator = R(1, 1, 1)
+}
 
-typealias M2_Q = Matrix<Q,_2,_2>
-typealias M3_Q = Matrix<Q,_3,_3>
-typealias M4_Q = Matrix<Q,_4,_4>
-
-typealias M2_R = Matrix<R,_2,_2>
-typealias M3_R = Matrix<R,_3,_3>
-typealias M4_R = Matrix<R,_4,_4>
-
-typealias S_2 = Permutation<_2>
-typealias S_3 = Permutation<_3>
-typealias S_4 = Permutation<_4>
-
-/* sample */
-
-let a: Matrix<Z,_3,_2> = Matrix(2, 3, 1, 4, 2, 1)
-let b: Matrix<Z,_2,_3> = Matrix(3, 1, 2, 2, 4, 2)
-let c: Matrix<Z,_3,_3> = a * b
-
-typealias M = Matrix<Qx, _2, _2>
-
-let x = M(Qx(3, 2, 3), Qx(2, 1),
-          Qx(-1, 3)  , Qx(3, 2))
-
-det(x)
+typealias L = PolynominalQuotientField<Q, F>
+let f = L(0, 1)
+f * f * f == 1

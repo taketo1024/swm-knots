@@ -1,6 +1,12 @@
 import Foundation
 
-public struct Polynominal<K: Field> {
+public protocol PolynominalType: EuclideanRing {
+    typealias CoeffType: Field
+}
+
+public struct Polynominal<K: Field>: PolynominalType {
+    public typealias CoeffType = K
+    
     private let coeffs: [K]
     public let degree: Int
     
