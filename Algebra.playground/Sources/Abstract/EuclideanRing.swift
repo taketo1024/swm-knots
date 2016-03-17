@@ -12,33 +12,34 @@ public func /%<T: EuclideanRing>(lhs: T, rhs: T) -> (q: T, r: T) {
     return lhs.euclideanDiv(rhs)
 }
 
-public func gcd<T: EuclideanRing>(x: T, _ y: T) -> T {
-    switch x {
+public func gcd<T: EuclideanRing>(a: T, _ b: T) -> T {
+    switch b {
     case T(0):
-        return y
+        return a
     default:
-        return gcd(y % x, x)
+        return gcd(b, a % b)
     }
 }
 
-public func euclideanAlgorithm<T: EuclideanRing>(x: T, _ y: T) -> (q0: T, q1: T, r: T) {
-    func gcd(x: T, _ y: T, _ q: [T]) -> (q: [T], r: T) {
-        switch x {
+public func bezout<T: EuclideanRing>(a: T, _ b: T) -> (x: T, y: T, r: T) {
+    typealias M = Matrix<T, TPInt_2, TPInt_2>
+    
+    func euclid(a: T, _ b: T, _ qs: [T]) -> (qs: [T], r: T) {
+        switch b {
         case T(0):
-            return (q, y)
+            return (qs, a)
         default:
-            let res = y /% x
-            return gcd(res.r, x, [res.q] + q)
+            let (q, r) = a /% b
+            return euclid(b, r, [q] + qs)
         }
     }
     
-    let result = gcd(x, y, [])
+    let (qs, r) = euclid(a, b, [])
     
-    typealias M = Matrix<T, TPInt_2, TPInt_2>
-    let m = result.q.reduce(M.identity) { (m: M, q: T) -> M in
-        m * M(-q, T(1), T(1), T(0))
+    let m = qs.reduce(M.identity) { (m: M, q: T) -> M in
+        m * M(T(0), T(1), T(1), -q)
     }
     
-    return (q0: m[1, 0], q1: m[1, 1], r: result.r)
+    return (x: m[0, 0], y: m[0, 1], r: r)
 }
 

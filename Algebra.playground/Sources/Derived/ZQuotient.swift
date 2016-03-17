@@ -2,13 +2,13 @@ import Foundation
 
 // common protocol used in Z_<n> and F_<n>
 
-public protocol ZQuotient: Ring, CustomStringConvertible {
+public protocol ZQuotient: Ring, IntegerLiteralConvertible, CustomStringConvertible {
     typealias n: TPInt
     var mod: Int {get}
     var a: Z {get}
 }
 
-extension ZQuotient {
+public extension ZQuotient {
     public var mod: Int {
         return n.value
     }
@@ -40,7 +40,7 @@ public func *<R: ZQuotient>(lhs: R, rhs: R) -> R {
     return R(lhs.a * rhs.a)
 }
 
-public struct Z_<k: TPInt>: ZQuotient, IntegerLiteralConvertible {
+public struct Z_<k: TPInt>: ZQuotient {
     public typealias n = k
     
     public let a: Z
@@ -54,7 +54,7 @@ public struct Z_<k: TPInt>: ZQuotient, IntegerLiteralConvertible {
     }
 }
 
-public struct F_<p: TPInt>: ZQuotient, Field, IntegerLiteralConvertible {
+public struct F_<p: TPInt>: ZQuotient, Field {
     public typealias n = p
     
     public let a: Z
@@ -68,18 +68,18 @@ public struct F_<p: TPInt>: ZQuotient, Field, IntegerLiteralConvertible {
     }
     
     public var inverse: F_<p> {
-        guard a != 0 else {
+        if a == 0 {
             fatalError("0-inverse")
         }
         
-        // find: p * x + a * y = 1
-        // then: a^-1 = y (mod p)
-
-        let res = euclideanAlgorithm(mod, a)
-        guard res.r == 1 else {
+        // find: a * x + p * y = 1
+        // then: a^-1 = x (mod p)
+        let (x, _, r) = bezout(a, mod)
+        
+        if r != 1 {
             fatalError("modular: \(p.value) is non-prime.")
         }
         
-        return F_(res.q1)
+        return F_(x)
     }
 }

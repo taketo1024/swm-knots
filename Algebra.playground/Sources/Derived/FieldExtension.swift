@@ -4,7 +4,7 @@ public struct FieldExtension<F: TPPolynominal>: Field {
     typealias K = F.K
     
     let f: Polynominal<K>
-    private var g: Polynominal<K> {
+    private var m: Polynominal<K> {
         return F.value
     }
     
@@ -21,19 +21,19 @@ public struct FieldExtension<F: TPPolynominal>: Field {
     }
     
     public var reduced: FieldExtension<F> {
-        return FieldExtension(f % g)
+        return FieldExtension(f % m)
     }
     
     public var inverse: FieldExtension<F> {
-        // find: a * f + b * g = r (r: const)
-        // then: f^-1 = a / r (mod g)
+        // find: f * p + m * q = r (r: const)
+        // then: f^-1 = r^-1 * p (mod m)
         
-        let res = euclideanAlgorithm(f, g)
-        if res.r == 0 || res.r.degree > 0 {
-            fatalError("\(f) and \(g) is not coprime.")
+        let (p, _, r) = bezout(f, m)
+        if r == 0 || r.degree > 0 {
+            fatalError("\(f) and \(m) is not coprime.")
         }
         
-        return FieldExtension((1 / res.r) * res.q0)
+        return FieldExtension((F.K(1) / r.coeff(0)) * p)
     }
 }
 
@@ -54,7 +54,7 @@ public func -<F: TPPolynominal>(lhs: FieldExtension<F>, rhs: FieldExtension<F>) 
 }
 
 public func *<F: TPPolynominal>(lhs: FieldExtension<F>, rhs: FieldExtension<F>) -> FieldExtension<F> {
-    return FieldExtension( (lhs.f * rhs.f) % lhs.g)
+    return FieldExtension( (lhs.f * rhs.f) % lhs.m)
 }
 
 public func ^<F: TPPolynominal>(lhs: FieldExtension<F>, rhs: Int) -> FieldExtension<F> {
@@ -69,6 +69,6 @@ extension FieldExtension: IntegerLiteralConvertible {
 
 extension FieldExtension: CustomStringConvertible {
     public var description: String {
-        return "\(f % g) mod (\(g))"
+        return "\(f % m) mod (\(m))"
     }
 }
