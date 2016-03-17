@@ -4,29 +4,21 @@ public protocol IntIdeal: EuclideanPrincipalIdeal {
     typealias R = Z
 }
 
-public struct IntQuotient<P: IntIdeal where P.R == Z>: EuclideanQuotientRing, IntegerLiteralConvertible {
+public struct IntQuotient<P: IntIdeal where P.R == Z>: EuclideanQuotientRing {
     public typealias I = P
     public let value: Z
     
     public init(_ value: Z) {
         self.value = value
-    }
-    
-    public init(integerLiteral value: Int) {
-        self.init(value)
     }
 }
 
-public struct IntQuotientField<P: IntIdeal where P.R == Z>: EuclideanQuotientRing, Field, IntegerLiteralConvertible {
+public struct IntQuotientField<P: IntIdeal where P.R == Z>: EuclideanQuotientRing, Field {
     public typealias I = P
     public let value: Z
     
     public init(_ value: Z) {
         self.value = value
-    }
-    
-    public init(integerLiteral value: Int) {
-        self.init(value)
     }
     
     public var inverse: IntQuotientField<P> {

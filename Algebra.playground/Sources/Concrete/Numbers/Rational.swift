@@ -49,12 +49,6 @@ public func /(lhs: Q, rhs: Q) -> Q {
     return Q(lhs.p * rhs.q, lhs.q * rhs.p)
 }
 
-extension Q: IntegerLiteralConvertible {
-    public init(integerLiteral value: IntegerLiteralType) {
-        self.init(value)
-    }
-}
-
 extension Q: CustomStringConvertible {
     public var description: String {
         let r = reduced

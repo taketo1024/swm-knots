@@ -17,12 +17,10 @@ typealias F_5 = IntQuotientField<P5>
 let x: F_5 = 2
 x * x.inverse == 1
 
-
 public struct F: PolynominalIdeal {
     public typealias R = Polynominal<Q>
     public static let generator = R(1, 1, 1)
 }
 
 typealias L = PolynominalQuotientField<Q, F>
-let f = L(0, 1)
-f * f * f == 1
+let f: L = 1

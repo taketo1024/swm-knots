@@ -126,12 +126,6 @@ public func %<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Polynominal
     return lhs.euclideanDiv(rhs).r
 }
 
-extension Polynominal: IntegerLiteralConvertible {
-    public init(integerLiteral value: IntegerLiteralType) {
-        self.init(value)
-    }
-}
-
 extension Polynominal: CustomStringConvertible {
     public var description: String {
         let _0 = K(0)

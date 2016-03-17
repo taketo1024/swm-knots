@@ -4,7 +4,7 @@ public protocol PolynominalIdeal: EuclideanPrincipalIdeal {
     typealias R = PolynominalType
 }
 
-public struct PolynominalQuotient<K: Field, P: PolynominalIdeal where P.R == Polynominal<K>>: EuclideanQuotientRing, IntegerLiteralConvertible {
+public struct PolynominalQuotient<K: Field, P: PolynominalIdeal where P.R == Polynominal<K>>: EuclideanQuotientRing {
     public typealias I = P
     public typealias R = Polynominal<K>
     public let value: R
@@ -20,14 +20,10 @@ public struct PolynominalQuotient<K: Field, P: PolynominalIdeal where P.R == Pol
     public init(_ value: R) {
         self.value = value
     }
-    
-    public init(integerLiteral value: Int) {
-        self.init(value)
-    }
 }
 
 public struct PolynominalQuotientField <K: Field, P: PolynominalIdeal where P.R == Polynominal<K>>
-    : EuclideanQuotientRing, Field, IntegerLiteralConvertible
+    : EuclideanQuotientRing, Field
 {
     public typealias I = P
     public typealias R = Polynominal<K>
@@ -43,10 +39,6 @@ public struct PolynominalQuotientField <K: Field, P: PolynominalIdeal where P.R 
     
     public init(_ value: R) {
         self.value = value
-    }
-    
-    public init(integerLiteral value: Int) {
-        self.init(value)
     }
     
     public var inverse: PolynominalQuotientField<K, P> {
