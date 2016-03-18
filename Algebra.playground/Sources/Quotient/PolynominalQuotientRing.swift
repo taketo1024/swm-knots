@@ -52,7 +52,7 @@ public struct PolynominalQuotientField <K: Field, P: PolynominalIdeal where P.R 
             fatalError("\(f) and \(m) is not coprime.")
         }
         
-        return PolynominalQuotientField((K(1) / r.coeff(0)) * p)
+        return PolynominalQuotientField((K(1) / r[0]) * p)
     }
 }
 
