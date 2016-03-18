@@ -28,13 +28,13 @@ public struct Polynominal<K_: Field>: PolynominalType {
     }
     
     public subscript(n: Int) -> K {
-        return coeffs[n]
+        return (n <= degree) ? coeffs[n] : 0
     }
     
     public var degree: Int {
         let n = coeffs.count - 1
         for i in 0 ..< n {
-            if self[n - i] != 0 {
+            if coeffs[n - i] != 0 {
                 return n - i
             }
         }
@@ -61,7 +61,7 @@ public struct Polynominal<K_: Field>: PolynominalType {
     }
 }
 
-public func Monomial<K>(coeff a: K, degree d: Int) -> Polynominal<K> {
+public func Monomial<K>(degree d: Int, coeff a: K) -> Polynominal<K> {
     return Polynominal(degree: d) { $0 == d ? a : K(0) }
 }
 
@@ -92,32 +92,37 @@ public func *<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Polynominal
 }
 
 extension Polynominal: EuclideanRing {
-    public func euclideanDiv(rhs: Polynominal) -> (q: Polynominal, r: Polynominal) {
-        guard rhs != 0 else {
-            fatalError("divide by 0")
-        }
-        
-        if degree < rhs.degree {
-            return (0, self)
-        } else {
-            return (0 ... degree - rhs.degree)
-                .reverse()
-                .reduce( (0, self) ) {
-                    (res, d: Int) -> (Polynominal<K>, Polynominal<K>) in
-                    
-                    let g = res.r
-                    if g.degree < rhs.degree {
-                        return res
-                    } else {
-                        let q = Monomial(coeff: res.r.leadCoeff / rhs.leadCoeff, degree: d)
-                        let r = res.r - q * rhs
-                        //print("\(res.r) = \(q) * (\(rhs)) ... \(r)")
-                        return (res.q + q, r)
-                    }
-            }
-        }
+    public func euclideanDiv(g: Polynominal<K>) -> (q: Polynominal<K>, r: Polynominal<K>) {
+        return eucDiv(self, g)
     }
 }
+
+public func eucDiv<K: Field>(f: Polynominal<K>, _ g: Polynominal<K>) -> (q: Polynominal<K>, r: Polynominal<K>) {
+    if g == 0 {
+        fatalError("divide by 0")
+    }
+    
+    if f.degree < g.degree {
+        return (0, f)
+    }
+    
+    func eucDivMonomial(f: Polynominal<K>, _ g: Polynominal<K>) -> (q: Polynominal<K>, r: Polynominal<K>) {
+        let n = f.degree - g.degree
+        let a = f[f.degree] / g[g.degree]
+        let q = Monomial(degree: n, coeff: a)
+        let r = f - q * g
+        return (q, r)
+    }
+    
+    return (0 ... f.degree - g.degree)
+        .reverse()
+        .reduce( (0, f) ) { (result: (Polynominal<K>, Polynominal<K>), degree: Int) in
+            let (q, r) = result
+            let m = eucDivMonomial(r, g)
+            return (q + m.q, m.r)
+    }
+}
+
 
 public func /<K: Field>(lhs: Polynominal<K>, rhs: Polynominal<K>) -> Polynominal<K> {
     return lhs.euclideanDiv(rhs).q
