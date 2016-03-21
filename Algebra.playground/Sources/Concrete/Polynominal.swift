@@ -102,19 +102,19 @@ public func eucDiv<K: Field>(f: Polynominal<K>, _ g: Polynominal<K>) -> (q: Poly
         fatalError("divide by 0")
     }
     
-    if f.degree < g.degree {
-        return (0, f)
-    }
-    
     func eucDivMonomial(f: Polynominal<K>, _ g: Polynominal<K>) -> (q: Polynominal<K>, r: Polynominal<K>) {
         let n = f.degree - g.degree
-        let a = f[f.degree] / g[g.degree]
-        let q = Monomial(degree: n, coeff: a)
-        let r = f - q * g
-        return (q, r)
+        if(n < 0) {
+            return (0, f)
+        } else {
+            let a = f[f.degree] / g[g.degree]
+            let q = Monomial(degree: n, coeff: a)
+            let r = f - q * g
+            return (q, r)
+        }
     }
     
-    return (0 ... f.degree - g.degree)
+    return (0 ... max(0, f.degree - g.degree))
         .reverse()
         .reduce( (0, f) ) { (result: (Polynominal<K>, Polynominal<K>), degree: Int) in
             let (q, r) = result
