@@ -28,7 +28,7 @@ public struct Polynominal<K_: Field>: PolynominalType {
     }
     
     public subscript(n: Int) -> K {
-        return (n <= degree) ? coeffs[n] : 0
+        return n <= degree ? coeffs[n] : 0
     }
     
     public var degree: Int {
@@ -65,24 +65,24 @@ public func Monomial<K>(degree d: Int, coeff a: K) -> Polynominal<K> {
     return Polynominal(degree: d) { $0 == d ? a : 0 }
 }
 
-public func ==<K: Field>(f: Polynominal<K>, g: Polynominal<K>) -> Bool {
+public func == <K: Field>(f: Polynominal<K>, g: Polynominal<K>) -> Bool {
     return (f.degree == g.degree) &&
         (0 ... f.degree).reduce(true) { $0 && (f[$1] == g[$1]) }
 }
 
-public func +<K: Field>(f: Polynominal<K>, g: Polynominal<K>) -> Polynominal<K> {
+public func + <K: Field>(f: Polynominal<K>, g: Polynominal<K>) -> Polynominal<K> {
     return Polynominal<K>(degree: max(f.degree, g.degree)) { f[$0] + g[$0] }
 }
 
-public prefix func -<K: Field>(f: Polynominal<K>) -> Polynominal<K> {
+public prefix func - <K: Field>(f: Polynominal<K>) -> Polynominal<K> {
     return f.map { -$0 }
 }
 
-public func *<K: Field>(a: K, f: Polynominal<K>) -> Polynominal<K> {
+public func * <K: Field>(a: K, f: Polynominal<K>) -> Polynominal<K> {
     return f.map{ a * $0 }
 }
 
-public func *<K: Field>(f: Polynominal<K>, g: Polynominal<K>) -> Polynominal<K> {
+public func * <K: Field>(f: Polynominal<K>, g: Polynominal<K>) -> Polynominal<K> {
     return Polynominal(degree: f.degree + g.degree) {
         (n: Int) in
         (0 ... n).reduce(0) {
@@ -99,7 +99,7 @@ extension Polynominal: EuclideanRing {
         
         func eucDivMonomial(f: Polynominal<K>, _ g: Polynominal<K>) -> (q: Polynominal<K>, r: Polynominal<K>) {
             let n = f.degree - g.degree
-            if(n < 0) {
+            if n < 0 {
                 return (0, f)
             } else {
                 let a = f[f.degree] / g[g.degree]

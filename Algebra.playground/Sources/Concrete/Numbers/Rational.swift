@@ -25,27 +25,27 @@ public struct RationalNumber: Field {
     }
 }
 
-public func ==(a: RationalNumber, b: RationalNumber) -> Bool {
+public func == (a: RationalNumber, b: RationalNumber) -> Bool {
     return a.p * b.q == a.q * b.p
 }
 
-public func +(a: RationalNumber, b: RationalNumber) -> RationalNumber {
+public func + (a: RationalNumber, b: RationalNumber) -> RationalNumber {
     return RationalNumber(a.p * b.q + a.q * b.p, a.q * b.q)
 }
 
-public prefix func -(a: RationalNumber) -> RationalNumber {
+public prefix func - (a: RationalNumber) -> RationalNumber {
     return RationalNumber(-a.p, a.q)
 }
 
-public func -(a: RationalNumber, b: RationalNumber) -> RationalNumber {
+public func - (a: RationalNumber, b: RationalNumber) -> RationalNumber {
     return RationalNumber(a.p * b.q - a.q * b.p, a.q * b.q)
 }
 
-public func *(a: RationalNumber, b: RationalNumber) -> RationalNumber {
+public func * (a: RationalNumber, b: RationalNumber) -> RationalNumber {
     return RationalNumber(a.p * b.p, a.q * b.q)
 }
 
-public func /(a: RationalNumber, b: RationalNumber) -> RationalNumber {
+public func / (a: RationalNumber, b: RationalNumber) -> RationalNumber {
     return RationalNumber(a.p * b.q, a.q * b.p)
 }
 

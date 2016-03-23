@@ -2,12 +2,12 @@ import Foundation
 
 public protocol PrincipalIdeal {
     typealias R: Ring
-    static var generator: R {get}
+    static var generator: R { get }
 }
 
 public protocol EuclideanPrincipalIdeal: PrincipalIdeal {
     typealias R: EuclideanRing
-    static var generator: R {get}
+    static var generator: R { get }
 }
 
 public protocol QuotientRing: Ring {
@@ -39,18 +39,18 @@ extension EuclideanQuotientRing {
     }
 }
 
-public func ==<R: EuclideanQuotientRing>(a: R, b: R) -> Bool {
+public func == <R: EuclideanQuotientRing>(a: R, b: R) -> Bool {
     return (a.value - b.value) % a.mod == R.I.R(0)
 }
 
-public func +<R: EuclideanQuotientRing>(a: R, b: R) -> R {
+public func + <R: EuclideanQuotientRing>(a: R, b: R) -> R {
     return R(a.value + b.value)
 }
 
-public prefix func -<R: EuclideanQuotientRing>(a: R) -> R {
+public prefix func - <R: EuclideanQuotientRing>(a: R) -> R {
     return R(-a.value)
 }
 
-public func *<R: EuclideanQuotientRing>(a: R, b: R) -> R {
+public func * <R: EuclideanQuotientRing>(a: R, b: R) -> R {
     return R(a.value * b.value)
 }

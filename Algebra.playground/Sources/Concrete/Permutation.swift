@@ -13,15 +13,15 @@ public struct Permutation<n: TPInt>: Group {
         self.elements = elements
     }
     
-    public init(_ dict: [Int:Int]) {
+    public init(_ dict: [Int: Int]) {
         self.init({ dict[$0] ?? $0 })
     }
     
     public init(_ cyclic: Int...) {
-        self.init({ cyclic.indexOf($0).flatMap({ i in cyclic[ (i + 1) % cyclic.count]}) ?? $0 })
+        self.init({ cyclic.indexOf($0).flatMap({ i in cyclic[(i + 1) % cyclic.count]}) ?? $0 })
     }
     
-    public init(_ gen: (Int) -> Int) {
+    public init(_ gen: (Int -> Int)) {
         let elements = (0 ..< n.value).map(gen)
         self.init(elements: elements)
     }
@@ -48,11 +48,11 @@ public struct Permutation<n: TPInt>: Group {
     }
 }
 
-public func ==<n: TPInt>(a: Permutation<n>, b: Permutation<n>) -> Bool {
+public func == <n: TPInt>(a: Permutation<n>, b: Permutation<n>) -> Bool {
     return a.elements == b.elements
 }
 
-public func *<n: TPInt>(a: Permutation<n>, b: Permutation<n>) -> Permutation<n> {
+public func * <n: TPInt>(a: Permutation<n>, b: Permutation<n>) -> Permutation<n> {
     return Permutation{ a[b[$0]] }
 }
 
@@ -62,7 +62,7 @@ public func sgn<n: TPInt>(s: Permutation<n>) -> Int {
         return 1
     case let l:
         let r = (0 ..< l - 1)
-            .flatMap{ i in (i + 1 ..< l).map{j in (i, j)} }
+            .flatMap{ i in (i + 1 ..< l).map{ j in (i, j) } }
             .reduce((1, 1), combine: {
                 (r: (Int, Int), pair: (Int, Int)) -> (Int, Int) in
                 return (r.0 * (pair.0 - pair.1) , r.1 * (s[pair.0] - s[pair.1]))
