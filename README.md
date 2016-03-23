@@ -103,7 +103,7 @@ d * d == 6        // true
 
 ## Project Structure
 * Abstract
-  * [Monoid](Algebra.playground/Sources/Abstract/MonoidGroup.swift)
+  * [Monoid](Algebra.playground/Sources/Abstract/Monoid.swift)
   * [Group](Algebra.playground/Sources/Abstract/Group.swift)
   * [AdditiveGroup](Algebra.playground/Sources/Abstract/AdditiveGroup.swift)
   * [Ring](Algebra.playground/Sources/Abstract/Ring.swift)
