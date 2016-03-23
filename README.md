@@ -103,24 +103,24 @@ d * d == 6        // true
 
 ## Project Structure
 * Abstract
-  * [Monoid](blob/master/Algebra.playground/Sources/Abstract/MonoidGroup.swift)
-  * [Group](blob/master/Algebra.playground/Sources/Abstract/Group.swift)
-  * [AdditiveGroup](blob/master/Algebra.playground/Sources/Abstract/AdditiveGroup.swift)
-  * [Ring](blob/master/Algebra.playground/Sources/Abstract/Ring.swift)
-  * [EuclideanRing](blob/master/Algebra.playground/Sources/Abstract/EuclideanRing.swift)
-  * [Field](blob/master/Algebra.playground/Sources/Abstract/Field.swift)
+  * [Monoid](Algebra.playground/Sources/Abstract/MonoidGroup.swift)
+  * [Group](Algebra.playground/Sources/Abstract/Group.swift)
+  * [AdditiveGroup](Algebra.playground/Sources/Abstract/AdditiveGroup.swift)
+  * [Ring](Algebra.playground/Sources/Abstract/Ring.swift)
+  * [EuclideanRing](Algebra.playground/Sources/Abstract/EuclideanRing.swift)
+  * [Field](Algebra.playground/Sources/Abstract/Field.swift)
 * Concrete
   * Numbers
-    * [Integer](blob/master/Algebra.playground/Sources/Concrete/Numbers/Integer.swift)
-    * [Rational](blob/master/Algebra.playground/Sources/Concrete/Numbers/Rational.swift)
-    * [Real](blob/master/Algebra.playground/Sources/Concrete/Numbers/Real.swift)
-  * [Permutation](blob/master/Algebra.playground/Sources/Concrete/Permutation.swift)
-  * [Matrix](blob/master/Algebra.playground/Sources/Concrete/Matrix.swift)
-  * [Polynominal](blob/master/Algebra.playground/Sources/Concrete/Polynominal.swift)
+    * [Integer](Algebra.playground/Sources/Concrete/Numbers/Integer.swift)
+    * [Rational](Algebra.playground/Sources/Concrete/Numbers/Rational.swift)
+    * [Real](Algebra.playground/Sources/Concrete/Numbers/Real.swift)
+  * [Permutation](Algebra.playground/Sources/Concrete/Permutation.swift)
+  * [Matrix](Algebra.playground/Sources/Concrete/Matrix.swift)
+  * [Polynominal](Algebra.playground/Sources/Concrete/Polynominal.swift)
 * Quotient
-  * [QuotientRing](blob/master/Algebra.playground/Sources/Quotient/QuotientRing.swift)
-  * [IntQuotientRing](blob/master/Algebra.playground/Sources/Quotient/IntQuotientRing.swift)
-  * [PolynominalQuotientRing](blob/master/Algebra.playground/Sources/Quotient/PolynominalQuotientRing.swift)
+  * [QuotientRing](Algebra.playground/Sources/Quotient/QuotientRing.swift)
+  * [IntQuotientRing](Algebra.playground/Sources/Quotient/IntQuotientRing.swift)
+  * [PolynominalQuotientRing](Algebra.playground/Sources/Quotient/PolynominalQuotientRing.swift)
 
 ## Guide to Abstract Algebra
 
