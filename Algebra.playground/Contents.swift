@@ -35,6 +35,9 @@ do {
     let b = M(2, 1, 1, 2)
     a + b
     a * b
+    
+    a + b == b + a  // commutative
+    a * b != b * a  // noncommutative
 }
 
 /*

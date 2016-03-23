@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Matrix<K: Ring, n: TPInt, m: TPInt> {
+public struct Matrix<K: Ring, n: TPInt, m: TPInt>: Equatable {
     public var rows: Int { return n.value }
     public var cols: Int { return m.value }
     
@@ -51,6 +51,17 @@ extension Matrix: CustomStringConvertible {
             }).joinWithSeparator(", ")
         }).joinWithSeparator("; ") + "]"
     }
+}
+
+public func ==<K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>, b: Matrix<K, n, m>) -> Bool {
+    for i in 0 ..< n.value {
+        for j in 0 ..< m.value {
+            if a[i, j] != b[i, j] {
+                return false
+            }
+        }
+    }
+    return true
 }
 
 public func +<K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>, b: Matrix<K, n, m>) -> Matrix<K, n, m> {
