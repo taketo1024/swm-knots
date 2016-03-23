@@ -1,9 +1,9 @@
 import Foundation
 
-public typealias R = Double
+public typealias RealNumber = Double
 
-extension R: Field {
-    public var inverse: R {
+extension RealNumber: Field {
+    public var inverse: RealNumber {
         return 1 / self
     }
 }

@@ -1,23 +1,23 @@
 import Foundation
 
 public protocol IntIdeal: EuclideanPrincipalIdeal {
-    typealias R = Z
+    typealias R = Integer
 }
 
-public struct IntQuotient<P: IntIdeal where P.R == Z>: EuclideanQuotientRing {
+public struct IntQuotient<P: IntIdeal where P.R == Integer>: EuclideanQuotientRing {
     public typealias I = P
-    public let value: Z
+    public let value: Integer
     
-    public init(_ value: Z) {
+    public init(_ value: Integer) {
         self.value = value
     }
 }
 
-public struct IntQuotientField<P: IntIdeal where P.R == Z>: EuclideanQuotientRing, Field {
+public struct IntQuotientField<P: IntIdeal where P.R == Integer>: EuclideanQuotientRing, Field {
     public typealias I = P
-    public let value: Z
+    public let value: Integer
     
-    public init(_ value: Z) {
+    public init(_ value: Integer) {
         self.value = value
     }
     
