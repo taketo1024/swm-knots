@@ -1,32 +1,36 @@
 import Foundation
 
 public protocol EuclideanRing: Ring {
-    var degree: Int {get}
-    func euclideanDiv(rhs: Self) -> (q: Self, r: Self)
-    static func /(lhs: Self, rhs: Self) -> Self
-    static func %(lhs: Self, rhs: Self) -> Self
+    var degree: Int { get }
+    static func eucDiv(a: Self, _ b: Self) -> (q: Self, r: Self)
+    static func %(a: Self, b: Self) -> Self
+}
+
+public func %<R: EuclideanRing>(a: R, b: R) -> R {
+    return R.eucDiv(a, b).r
 }
 
 infix operator /% { associativity left precedence 150 }
-public func /%<T: EuclideanRing>(lhs: T, rhs: T) -> (q: T, r: T) {
-    return lhs.euclideanDiv(rhs)
+
+public func /%<R: EuclideanRing>(a: R, b: R) -> (q: R, r: R) {
+    return R.eucDiv(a, b)
 }
 
-public func gcd<T: EuclideanRing>(a: T, _ b: T) -> T {
+public func gcd<R: EuclideanRing>(a: R, _ b: R) -> R {
     switch b {
-    case T(0):
+    case 0:
         return a
     default:
         return gcd(b, a % b)
     }
 }
 
-public func bezout<T: EuclideanRing>(a: T, _ b: T) -> (x: T, y: T, r: T) {
-    typealias M = Matrix<T, TPInt_2, TPInt_2>
+public func bezout<R: EuclideanRing>(a: R, _ b: R) -> (x: R, y: R, r: R) {
+    typealias M = Matrix<R, TPInt_2, TPInt_2>
     
-    func euclid(a: T, _ b: T, _ qs: [T]) -> (qs: [T], r: T) {
+    func euclid(a: R, _ b: R, _ qs: [R]) -> (qs: [R], r: R) {
         switch b {
-        case T(0):
+        case 0:
             return (qs, a)
         default:
             let (q, r) = a /% b
@@ -36,8 +40,8 @@ public func bezout<T: EuclideanRing>(a: T, _ b: T) -> (x: T, y: T, r: T) {
     
     let (qs, r) = euclid(a, b, [])
     
-    let m = qs.reduce(M.identity) { (m: M, q: T) -> M in
-        m * M(T(0), T(1), T(1), -q)
+    let m = qs.reduce(M.identity) { (m: M, q: R) -> M in
+        m * M(0, 1, 1, -q)
     }
     
     return (x: m[0, 0], y: m[0, 1], r: r)

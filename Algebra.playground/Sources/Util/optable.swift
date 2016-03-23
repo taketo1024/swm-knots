@@ -23,5 +23,5 @@ public func printMulOpTable<M: Monoid>(values: [M]) {
 }
 
 public func printPowOpTable<M: Monoid>(values: [M], _ n: Int) {
-    printOpTable("^", rows: values, cols: Array(0 ... n)) { $0 ^ $1 }
+    printOpTable("^", rows: values, cols: Array(0 ... n)) { $0 ** $1 }
 }

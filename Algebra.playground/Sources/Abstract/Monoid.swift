@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol Monoid: Equatable {
-    static func *(lhs: Self, rhs: Self) -> Self
+    static func *(a: Self, b: Self) -> Self
     static var identity: Self {get}
     var reduced: Self {get}
 }
@@ -12,7 +12,9 @@ extension Monoid {
     }
 }
 
-public func ^<G: Monoid>(lhs: G, rhs: Int) -> G {
-    return (rhs == 0) ? G.identity : lhs * (lhs ^ (rhs - 1))
+infix operator ** { associativity left precedence 160 }
+
+public func **<G: Monoid>(a: G, b: Int) -> G {
+    return (b == 0) ? G.identity : a * (a ** (b - 1))
 }
 

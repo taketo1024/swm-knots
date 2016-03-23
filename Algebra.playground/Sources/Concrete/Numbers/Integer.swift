@@ -9,8 +9,8 @@ extension Z: EuclideanRing {
         return abs(self)
     }
     
-    public func euclideanDiv(rhs: Z) -> (q: Z, r: Z) {
-        let q = self / rhs
-        return (q: q, r: self - q * rhs)
+    public static func eucDiv(a: Z, _ b: Z) -> (q: Z, r: Z) {
+        let q = a / b
+        return (q: q, r: a - q * b)
     }
 }

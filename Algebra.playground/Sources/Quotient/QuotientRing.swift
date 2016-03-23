@@ -39,18 +39,18 @@ extension EuclideanQuotientRing {
     }
 }
 
-public func ==<R: EuclideanQuotientRing>(lhs: R, rhs: R) -> Bool {
-    return (lhs.value - rhs.value) % lhs.mod == R.I.R(0)
+public func ==<R: EuclideanQuotientRing>(a: R, b: R) -> Bool {
+    return (a.value - b.value) % a.mod == R.I.R(0)
 }
 
-public func +<R: EuclideanQuotientRing>(lhs: R, rhs: R) -> R {
-    return R(lhs.value + rhs.value)
+public func +<R: EuclideanQuotientRing>(a: R, b: R) -> R {
+    return R(a.value + b.value)
 }
 
-public prefix func -<R: EuclideanQuotientRing>(lhs: R) -> R {
-    return R(-lhs.value)
+public prefix func -<R: EuclideanQuotientRing>(a: R) -> R {
+    return R(-a.value)
 }
 
-public func *<R: EuclideanQuotientRing>(lhs: R, rhs: R) -> R {
-    return R(lhs.value * rhs.value)
+public func *<R: EuclideanQuotientRing>(a: R, b: R) -> R {
+    return R(a.value * b.value)
 }

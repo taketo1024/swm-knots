@@ -3,6 +3,6 @@ import Foundation
 public protocol Field: Group, Ring {
 }
 
-public func /<F: Field>(lhs: F, rhs: F) -> F {
-    return lhs * rhs.inverse
+public func /<F: Field>(a: F, b: F) -> F {
+    return a * b.inverse
 }

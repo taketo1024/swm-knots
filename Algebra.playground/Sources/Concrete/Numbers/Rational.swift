@@ -25,28 +25,28 @@ public struct Q: Field {
     }
 }
 
-public func ==(lhs: Q, rhs: Q) -> Bool {
-    return lhs.p * rhs.q == lhs.q * rhs.p
+public func ==(a: Q, b: Q) -> Bool {
+    return a.p * b.q == a.q * b.p
 }
 
-public func +(lhs: Q, rhs: Q) -> Q {
-    return Q(lhs.p * rhs.q + lhs.q * rhs.p, lhs.q * rhs.q)
+public func +(a: Q, b: Q) -> Q {
+    return Q(a.p * b.q + a.q * b.p, a.q * b.q)
 }
 
-public prefix func -(lhs: Q) -> Q {
-    return Q(-lhs.p, lhs.q)
+public prefix func -(a: Q) -> Q {
+    return Q(-a.p, a.q)
 }
 
-public func -(lhs: Q, rhs: Q) -> Q {
-    return Q(lhs.p * rhs.q - lhs.q * rhs.p, lhs.q * rhs.q)
+public func -(a: Q, b: Q) -> Q {
+    return Q(a.p * b.q - a.q * b.p, a.q * b.q)
 }
 
-public func *(lhs: Q, rhs: Q) -> Q {
-    return Q(lhs.p * rhs.p, lhs.q * rhs.q)
+public func *(a: Q, b: Q) -> Q {
+    return Q(a.p * b.p, a.q * b.q)
 }
 
-public func /(lhs: Q, rhs: Q) -> Q {
-    return Q(lhs.p * rhs.q, lhs.q * rhs.p)
+public func /(a: Q, b: Q) -> Q {
+    return Q(a.p * b.q, a.q * b.p)
 }
 
 extension Q: CustomStringConvertible {

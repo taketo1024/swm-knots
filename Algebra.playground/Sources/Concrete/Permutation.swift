@@ -41,12 +41,12 @@ public struct Permutation<n: TPInt>: Group {
     }
 }
 
-public func ==<n: TPInt>(lhs: Permutation<n>, rhs: Permutation<n>) -> Bool {
-    return lhs.elements == rhs.elements
+public func ==<n: TPInt>(a: Permutation<n>, b: Permutation<n>) -> Bool {
+    return a.elements == b.elements
 }
 
-public func *<n: TPInt>(lhs: Permutation<n>, rhs: Permutation<n>) -> Permutation<n> {
-    return Permutation{ lhs[rhs[$0]] }
+public func *<n: TPInt>(a: Permutation<n>, b: Permutation<n>) -> Permutation<n> {
+    return Permutation{ a[b[$0]] }
 }
 
 public func sgn<n: TPInt>(s: Permutation<n>) -> Int {
