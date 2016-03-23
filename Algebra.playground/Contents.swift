@@ -1,4 +1,8 @@
-//: Playground - noun: a place where people can play
+// Swifty Algebra 
+// https://github.com/taketo1024/SwiftyAlgebra
+//
+// Created by Taketo Sano (taketo1024)
+// Licensed under CC0 1.0 Universal.
 
 import Foundation
 
