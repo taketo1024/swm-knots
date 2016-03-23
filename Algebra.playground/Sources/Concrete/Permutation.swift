@@ -2,20 +2,23 @@ import Foundation
 
 public struct Permutation<n: TPInt>: Group {
     public var degree: Int { return n.value }
-    
-    private var elements: [Int]
+    private var elements: [Int] //
     
     private init(elements: [Int]) {
         let set = Set(elements)
         guard let min = set.minElement(), max = set.maxElement()
             where set.count == n.value && min == 0 && max == n.value - 1 else {
-                fatalError()
+                fatalError("invalid input: \(elements)")
         }
         self.elements = elements
     }
     
-    public init(_ elements: Int...) {
-        self.init(elements: elements)
+    public init(_ dict: [Int:Int]) {
+        self.init({ dict[$0] ?? $0 })
+    }
+    
+    public init(_ cyclic: Int...) {
+        self.init({ cyclic.indexOf($0).flatMap({ i in cyclic[ (i + 1) % cyclic.count]}) ?? $0 })
     }
     
     public init(_ gen: (Int) -> Int) {
@@ -34,6 +37,10 @@ public struct Permutation<n: TPInt>: Group {
     public var inverse: Permutation<n> {
         let inv = (0 ..< degree).sort{ self[$0] < self[$1] }
         return Permutation(elements: inv)
+    }
+    
+    public func apply(i: Int) -> Int {
+        return self[i]
     }
     
     public static var all: [Permutation<n>] {
@@ -67,7 +74,7 @@ public func sgn<n: TPInt>(s: Permutation<n>) -> Int {
 extension Permutation: CustomStringConvertible {
     public var description: String {
         return "(" + (0 ..< degree).map({ i in
-            return "\(self[i])"
+            return "\(i): \(self[i])"
         }).joinWithSeparator(", ") + ")"
     }
 }
