@@ -1,4 +1,4 @@
-# Protocol-Oriented Algebra
+# Swifty Algebra
 
 Sample project to explain concepts of [Abstract Algebra](https://en.wikipedia.org/wiki/Abstract_algebra) by implementing in Swift.
 
@@ -133,4 +133,4 @@ d * d == 6        // true
 7. [代数拡大で数を作ろう！](http://qiita.com/taketo1024/items/ccf7ece3dfeb98b38946)
 
 ## License
-ProtocolOrientedAlgebra is licensed under [CC0 1.0](LICENSE).
+**Swifty Algebra** is licensed under [CC0 1.0 Universal](LICENSE).
