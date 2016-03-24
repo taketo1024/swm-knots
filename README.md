@@ -131,7 +131,7 @@ struct g: PolynominalIdeal {
     static let generator = Polynominal<ℝ>(1, 0, 1)
 }
 
-// C = ℝ[x]/(x^2 + 1) = ℝ(i)
+// ℂ = ℝ[x]/(x^2 + 1) = ℝ(i)
 typealias ℂ = PolynominalQuotient<g>  
 
 let i = ℂ(0, 1)      // i = √-1
