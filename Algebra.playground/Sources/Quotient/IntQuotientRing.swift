@@ -26,4 +26,3 @@ public struct IntQuotientField<P: IntIdeal where P.R == Integer>: EuclideanQuoti
         return IntQuotientField(x)
     }
 }
-
