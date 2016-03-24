@@ -125,17 +125,20 @@ let δ = β * γ     // δ = √6 in M
 #### ℂ: Complex Number Field
 
 ```swift
-struct g: TPPolynominal {
-    typealias K = R
-    static let value: Polynominal<R> = Polynominal<R>(1, 0, 1)
+// g(x) = x^2 + 1 in ℝ[x]
+struct g: PolynominalIdeal {
+    typealias R = Polynominal<ℝ>
+    static let generator = Polynominal<ℝ>(1, 0, 1)
 }
-typealias ℂ = PolynominalQuotient<g>  // C = R[x]/(x^2 + 1)
+
+// C = ℝ[x]/(x^2 + 1) = ℝ(i)
+typealias ℂ = PolynominalQuotient<g>  
+
+let i = ℂ(0, 1)      // i = √-1
+i * i == -1          // true
  
-let i = ℂ(0, 1)        // i = √-1
-i * i == -1            // true
- 
-let z = 3 + 2 * i      // z = 3 + 2i
-z * z == 5 + 12 * i    // true
+let z = 3 + 2 * i    // z = 3 + 2i
+z * z == 5 + 12 * i  // true
 ```
 
 ## Project Structure
