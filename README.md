@@ -48,6 +48,21 @@ let τ = 𝔖_5([0: 2, 1: 3, 2: 4, 3: 0, 4: 1]) // two-line notation
 σ * τ == τ * σ   // false: noncommutative
 ```
 
+### Polynominal
+
+```swift
+typealias ℚx = Polynominal<ℚ>
+
+let f = ℚx(0, 2, -3, 1) // f(x) = x^3 − 3x^2 + 2x
+let g = ℚx(6, -5, 1)    // g(x) = x^2 − 5x + 6
+    
+f + g  // (f + g)(x) = x^3 - 2x^2 - 3x + 6
+f * g  // (f * g)(x) = x^5 - 8x^4 + 23x^3 - 28x^2 + 12x
+f % g  // (f % g)(x) = 6x - 12
+    
+gcd(f, g) // 6x - 12
+```
+
 ### Integer Quotient (Finite Field)
 
 ```swift
@@ -70,35 +85,57 @@ x * y == 1      // true
 
 ### Polynominal Quotient (Field Extension)
 
+#### ℚ(√2),  ℚ(√2, √3)
+
 ```swift
+// g(x) = x^2 - 2 in ℚ[x]
 struct g: PolynominalIdeal {
     typealias R = Polynominal<ℚ>
     static let generator = Polynominal<ℚ>(-2, 0, 1)
 }
-typealias L = PolynominalQuotientField<ℚ, g>  // L = ℚ[x]/(g)
 
-let a = L(0, 1) // a = √2 in L
-a * a == 2      // true
+// L = ℚ[x]/(g) = ℚ(√2)
+typealias L = PolynominalQuotientField<ℚ, g>  
 
-(1 + a) * (1 + a) == 3 + 2 * a  // true: (1 + √2)^2   = 3 + 2√2
-1 / (1 + a)       == -1 + a     // true: 1 / (1 + √2) = -1 + √2
+let α = L(0, 1) // α = √2 in L
+α * α == 2      // true
 
+(1 + α) * (1 + α) == 3 + 2 * α  // true: (1 + √2)^2   = 3 + 2√2
+1 / (1 + α)       == -1 + α     // true: 1 / (1 + √2) = -1 + √2
+
+// h(x) = x^2 - 3 in L[x]
 struct h: PolynominalIdeal {
     typealias R = Polynominal<L>
     static let generator = R(-3, 0, 1)
 }
-typealias M = PolynominalQuotientField<L, h>  // M = L[x]/(h)
+// M = L[x]/(h) = L(√3) = ℚ(√2, √3)
+typealias M = PolynominalQuotientField<L, h>  
 
-let b = M(a)      // b = √2 in M
-let c = M(0, 1)   // c = √3 in M
-let d = b * c     // d = √6 in M
+let β = M(α)      // β = √2 in M
+let γ = M(0, 1)   // γ = √3 in M
+let δ = β * γ     // δ = √6 in M
 
-b * b == 2        // true
-c * c == 3        // true
-d * d == 6        // true
+β * β == 2        // true
+γ * γ == 3        // true
+δ * δ == 6        // true
 
-(b + c) ** 2 == 5 + 2 * d // true: (√2 + √3)^2 = 5 + 2√6
+(β + γ) ** 2 == 5 + 2 * δ // true: (√2 + √3)^2 = 5 + 2√6
+```
+
+#### ℂ: Complex Number Field
+
+```swift
+struct g: TPPolynominal {
+    typealias K = R
+    static let value: Polynominal<R> = Polynominal<R>(1, 0, 1)
 }
+typealias ℂ = PolynominalQuotient<g>  // C = R[x]/(x^2 + 1)
+ 
+let i = ℂ(0, 1)        // i = √-1
+i * i == -1            // true
+ 
+let z = 3 + 2 * i      // z = 3 + 2i
+z * z == 5 + 12 * i    // true
 ```
 
 ## Project Structure
