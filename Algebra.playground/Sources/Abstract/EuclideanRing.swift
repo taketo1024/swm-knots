@@ -3,16 +3,16 @@ import Foundation
 public protocol EuclideanRing: Ring {
     var degree: Int { get }
     static func eucDiv(a: Self, _ b: Self) -> (q: Self, r: Self)
-    static func %(a: Self, b: Self) -> Self
+    static func % (a: Self, b: Self) -> Self
 }
 
-public func %<R: EuclideanRing>(a: R, b: R) -> R {
+public func % <R: EuclideanRing>(a: R, b: R) -> R {
     return R.eucDiv(a, b).r
 }
 
 infix operator /% { associativity left precedence 150 }
 
-public func /%<R: EuclideanRing>(a: R, b: R) -> (q: R, r: R) {
+public func /% <R: EuclideanRing>(a: R, b: R) -> (q: R, r: R) {
     return R.eucDiv(a, b)
 }
 
@@ -46,4 +46,3 @@ public func bezout<R: EuclideanRing>(a: R, _ b: R) -> (x: R, y: R, r: R) {
     
     return (x: m[0, 0], y: m[0, 1], r: r)
 }
-

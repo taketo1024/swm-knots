@@ -1,4 +1,4 @@
-import Foundation
+ import Foundation
 
 public struct Matrix<K: Ring, n: TPInt, m: TPInt>: Equatable {
     public var rows: Int { return n.value }
@@ -53,7 +53,7 @@ extension Matrix: CustomStringConvertible {
     }
 }
 
-public func ==<K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>, b: Matrix<K, n, m>) -> Bool {
+public func == <K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>, b: Matrix<K, n, m>) -> Bool {
     for i in 0 ..< n.value {
         for j in 0 ..< m.value {
             if a[i, j] != b[i, j] {
@@ -64,37 +64,37 @@ public func ==<K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>, b: Matrix<K, n, 
     return true
 }
 
-public func +<K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>, b: Matrix<K, n, m>) -> Matrix<K, n, m> {
+public func + <K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>, b: Matrix<K, n, m>) -> Matrix<K, n, m> {
     return Matrix<K, n, m>{ (i, j) -> K in
         return a[i, j] + b[i, j]
     }
 }
 
-public prefix func -<K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>) -> Matrix<K, n, m> {
+public prefix func - <K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>) -> Matrix<K, n, m> {
     return Matrix<K, n, m>{ (i, j) -> K in
         return -a[i, j]
     }
 }
 
-public func -<K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>, b: Matrix<K, n, m>) -> Matrix<K, n, m> {
+public func - <K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>, b: Matrix<K, n, m>) -> Matrix<K, n, m> {
     return Matrix<K, n, m>{ (i, j) -> K in
         return a[i, j] + b[i, j]
     }
 }
 
-public func *<K: Ring, n: TPInt, m: TPInt>(k: K, b: Matrix<K, n, m>) -> Matrix<K, n, m> {
+public func * <K: Ring, n: TPInt, m: TPInt>(k: K, b: Matrix<K, n, m>) -> Matrix<K, n, m> {
     return Matrix<K, n, m> { (i, j) -> K in
         return k * b[i, j]
     }
 }
 
-public func *<K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>, k: K) -> Matrix<K, n, m> {
+public func * <K: Ring, n: TPInt, m: TPInt>(a: Matrix<K, n, m>, k: K) -> Matrix<K, n, m> {
     return Matrix<K, n, m> { (i, j) -> K in
         return a[i, j] * k
     }
 }
 
-public func *<K: Ring, n: TPInt, m: TPInt, p: TPInt>(a: Matrix<K, n, m>, b: Matrix<K, m, p>) -> Matrix<K, n, p> {
+public func * <K: Ring, n: TPInt, m: TPInt, p: TPInt>(a: Matrix<K, n, m>, b: Matrix<K, m, p>) -> Matrix<K, n, p> {
     return Matrix<K, n, p> { (i, k) -> K in
         return (0 ..< m.value)
                 .map({j in a[i, j] * b[j, k]})
@@ -102,8 +102,8 @@ public func *<K: Ring, n: TPInt, m: TPInt, p: TPInt>(a: Matrix<K, n, m>, b: Matr
     }
 }
 
-public func **<K: Ring, n: TPInt>(a: Matrix<K, n, n>, b: Int) -> Matrix<K, n, n> {
-    return (b == 0) ? Matrix<K, n, n>.identity : a * (a ** (b - 1))
+public func ** <K: Ring, n: TPInt>(a: Matrix<K, n, n>, b: Int) -> Matrix<K, n, n> {
+    return b == 0 ? Matrix<K, n, n>.identity : a * (a ** (b - 1))
 }
 
 public func det<K: Ring, n: TPInt>(A: Matrix<K, n, n>) -> K {
