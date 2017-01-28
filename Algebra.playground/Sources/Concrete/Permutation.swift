@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Permutation<n: TPInt>: Group {
+public struct Permutation<n: _Int>: Group {
     public var degree: Int { return n.value }
     fileprivate var elements: [Int] //
     
@@ -49,15 +49,15 @@ public struct Permutation<n: TPInt>: Group {
     }
 }
 
-public func == <n: TPInt>(a: Permutation<n>, b: Permutation<n>) -> Bool {
+public func == <n: _Int>(a: Permutation<n>, b: Permutation<n>) -> Bool {
     return a.elements == b.elements
 }
 
-public func * <n: TPInt>(a: Permutation<n>, b: Permutation<n>) -> Permutation<n> {
+public func * <n: _Int>(a: Permutation<n>, b: Permutation<n>) -> Permutation<n> {
     return Permutation{ a[b[$0]] }
 }
 
-public func sgn<n: TPInt>(_ s: Permutation<n>) -> Int {
+public func sgn<n: _Int>(_ s: Permutation<n>) -> Int {
     switch n.value {
     case 0, 1:
         return 1

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct IntQuotientRing<n: TPInt>: EuclideanQuotientRing {
+public struct IntQuotientRing<n: _Int>: EuclideanQuotientRing {
     public typealias R = IntegerNumber
     
     public let value: Int
@@ -14,7 +14,7 @@ public struct IntQuotientRing<n: TPInt>: EuclideanQuotientRing {
     }
 }
 
-public struct IntQuotientField<p: TPInt>: EuclideanQuotientField {
+public struct IntQuotientField<p: _Int>: EuclideanQuotientField {
     public typealias R = IntegerNumber
     
     public let value: Int

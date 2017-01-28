@@ -31,8 +31,7 @@ do {
  */
 
 do {
-    typealias n = TPInt_2
-    typealias M = Matrix<Z, n, n>
+    typealias M = Matrix<Z,_2,_2>
     
     let a = M(1, 2, 3, 4)
     let b = M(2, 1, 1, 2)
@@ -47,7 +46,7 @@ do {
  * Permutation Sample.
  */
 
-typealias S_5 = Permutation<TPInt_5>
+typealias S_5 = Permutation<_5>
 
 do {
     let σ = S_5(0, 1, 2) // cyclic notation
@@ -66,7 +65,7 @@ do {
  * Integer Quotient Sample
  */
 
-typealias F_5 = IntQuotientField<TPInt_5>
+typealias F_5 = IntQuotientField<_5>
 
 do {
     let x: F_5 = 2
@@ -78,14 +77,14 @@ do {
  * Polynomial Quotient Sample
  */
 
-struct g: TPPolynomial {
+struct g: _Polynomial {
     typealias K = Q
     static let value = Polynomial<Q>(-2, 0, 1)
 }
 
 typealias L = PolynomialQuotientField<Q, g>
 
-struct h: TPPolynomial {
+struct h: _Polynomial {
     typealias K = L
     static let value = Polynomial<L>(-3, 0, 1)
 }

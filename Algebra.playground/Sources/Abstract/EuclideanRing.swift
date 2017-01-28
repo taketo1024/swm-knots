@@ -26,7 +26,7 @@ public func gcd<R: EuclideanRing>(_ a: R, _ b: R) -> R {
 }
 
 public func bezout<R: EuclideanRing>(_ a: R, _ b: R) -> (x: R, y: R, r: R) {
-    typealias M = Matrix<R, TPInt_2, TPInt_2>
+    typealias M = Matrix<R, _2, _2>
     
     func euclid(_ a: R, _ b: R, _ qs: [R]) -> (qs: [R], r: R) {
         switch b {
