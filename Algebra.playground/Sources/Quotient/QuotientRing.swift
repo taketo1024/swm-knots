@@ -1,34 +1,24 @@
 import Foundation
 
-public protocol PrincipalIdeal {
+public protocol QuotientRing: Ring, CustomStringConvertible {
     associatedtype R: Ring
-    static var generator: R { get }
-}
-
-public protocol EuclideanPrincipalIdeal: PrincipalIdeal {
-    associatedtype R: EuclideanRing
-    static var generator: R { get }
-}
-
-public protocol QuotientRing: Ring {
-    associatedtype I: PrincipalIdeal
-    init(_ r: I.R)
-}
-
-public protocol EuclideanQuotientRing: QuotientRing, CustomStringConvertible {
-    associatedtype I: EuclideanPrincipalIdeal
-    associatedtype R = I.R
     
-    var value: I.R { get }
-    var mod: I.R { get }
+    var value: R { get }
+    var mod: R { get }
     var reduced: Self { get }
+    
+    init(_ r: R)
 }
+
+public protocol QuotientField: QuotientRing, Field {}
+
+public protocol EuclideanQuotientRing: QuotientRing {
+    associatedtype R: EuclideanRing
+}
+
+public protocol EuclideanQuotientField: EuclideanQuotientRing, QuotientField {}
 
 extension EuclideanQuotientRing {
-    public var mod: I.R {
-        return I.generator
-    }
-    
     public var reduced: Self {
         let r = value % mod
         return Self.init(r)
@@ -40,7 +30,7 @@ extension EuclideanQuotientRing {
 }
 
 public func == <R: EuclideanQuotientRing>(a: R, b: R) -> Bool {
-    return (a.value - b.value) % a.mod == R.I.R(0)
+    return (a.value - b.value) % a.mod == 0
 }
 
 public func + <R: EuclideanQuotientRing>(a: R, b: R) -> R {

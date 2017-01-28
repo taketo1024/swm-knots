@@ -66,11 +66,7 @@ do {
  * Integer Quotient Sample
  */
 
-struct I: IntIdeal {
-    static let generator = 5
-}
-
-typealias F_5 = IntQuotientField<I>
+typealias F_5 = IntQuotientField<TPInt_5>
 
 do {
     let x: F_5 = 2
@@ -82,16 +78,16 @@ do {
  * Polynomial Quotient Sample
  */
 
-struct g: PolynomialIdeal {
-    typealias R = Polynomial<Q>
-    static let generator = R(-2, 0, 1)
+struct g: TPPolynomial {
+    typealias K = Q
+    static let value = Polynomial<Q>(-2, 0, 1)
 }
 
 typealias L = PolynomialQuotientField<Q, g>
 
-struct h: PolynomialIdeal {
-    typealias R = Polynomial<L>
-    static let generator = R(-3, 0, 1)
+struct h: TPPolynomial {
+    typealias K = L
+    static let value = Polynomial<L>(-3, 0, 1)
 }
 
 typealias M = PolynomialQuotientField<L, h>

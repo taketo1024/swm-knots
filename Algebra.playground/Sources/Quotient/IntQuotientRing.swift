@@ -1,27 +1,35 @@
 import Foundation
 
-public protocol IntIdeal: EuclideanPrincipalIdeal {
-    typealias R = IntegerNumber
-}
-
-public struct IntQuotient<P: IntIdeal>: EuclideanQuotientRing where P.R == IntegerNumber {
-    public typealias I = P
-    public let value: IntegerNumber
+public struct IntQuotientRing<n: TPInt>: EuclideanQuotientRing {
+    public typealias R = IntegerNumber
     
-    public init(_ value: IntegerNumber) {
-        self.value = value
-    }
-}
-
-public struct IntQuotientField<P: IntIdeal>: EuclideanQuotientRing, Field where P.R == IntegerNumber {
-    public typealias I = P
-    public let value: IntegerNumber
+    public let value: Int
     
-    public init(_ value: IntegerNumber) {
+    public init(_ value: R) {
         self.value = value
     }
     
-    public var inverse: IntQuotientField<P> {
+    public var mod: Int {
+        return n.value
+    }
+}
+
+public struct IntQuotientField<p: TPInt>: EuclideanQuotientField {
+    public typealias R = IntegerNumber
+    
+    public let value: Int
+    
+    public init(_ value: R) {
+        self.value = value
+        
+        // TODO check if p is prime.
+    }
+    
+    public var mod: Int {
+        return p.value
+    }
+    
+    public var inverse: IntQuotientField<p> {
         let (x, _, _) = bezout(value, mod)
         return IntQuotientField(x)
     }
