@@ -79,22 +79,22 @@ do {
 }
 
 /*
- * Polynominal Quotient Sample
+ * Polynomial Quotient Sample
  */
 
-struct g: PolynominalIdeal {
-    typealias R = Polynominal<Q>
+struct g: PolynomialIdeal {
+    typealias R = Polynomial<Q>
     static let generator = R(-2, 0, 1)
 }
 
-typealias L = PolynominalQuotientField<Q, g>
+typealias L = PolynomialQuotientField<Q, g>
 
-struct h: PolynominalIdeal {
-    typealias R = Polynominal<L>
+struct h: PolynomialIdeal {
+    typealias R = Polynomial<L>
     static let generator = R(-3, 0, 1)
 }
 
-typealias M = PolynominalQuotientField<L, h>
+typealias M = PolynomialQuotientField<L, h>
 
 do {
     let a = L(0, 1)

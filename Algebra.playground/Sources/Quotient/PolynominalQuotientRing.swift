@@ -1,12 +1,12 @@
 import Foundation
 
-public protocol PolynominalIdeal: EuclideanPrincipalIdeal {
-    associatedtype R = PolynominalType
+public protocol PolynomialIdeal: EuclideanPrincipalIdeal {
+    associatedtype R = PolynomialType
 }
 
-public struct PolynominalQuotient<K: Field, P: PolynominalIdeal>: EuclideanQuotientRing where P.R == Polynominal<K> {
+public struct PolynomialQuotient<K: Field, P: PolynomialIdeal>: EuclideanQuotientRing where P.R == Polynomial<K> {
     public typealias I = P
-    public typealias R = Polynominal<K>
+    public typealias R = Polynomial<K>
     public let value: R
     
     public init(_ value: Int) {
@@ -22,9 +22,9 @@ public struct PolynominalQuotient<K: Field, P: PolynominalIdeal>: EuclideanQuoti
     }
 }
 
-public struct PolynominalQuotientField <K: Field, P: PolynominalIdeal>: EuclideanQuotientRing, Field where P.R == Polynominal<K> {
+public struct PolynomialQuotientField <K: Field, P: PolynomialIdeal>: EuclideanQuotientRing, Field where P.R == Polynomial<K> {
     public typealias I = P
-    public typealias R = Polynominal<K>
+    public typealias R = Polynomial<K>
     public let value: R
     
     public init(_ value: Int) {
@@ -39,7 +39,7 @@ public struct PolynominalQuotientField <K: Field, P: PolynominalIdeal>: Euclidea
         self.value = value
     }
     
-    public var inverse: PolynominalQuotientField<K, P> {
+    public var inverse: PolynomialQuotientField<K, P> {
         let (f, m) = (value, mod)
         
         // find: f * p + m * q = r (r: const)
@@ -50,7 +50,7 @@ public struct PolynominalQuotientField <K: Field, P: PolynominalIdeal>: Euclidea
             fatalError("\(f) and \(m) is not coprime.")
         }
         
-        return PolynominalQuotientField(r[0].inverse * p)
+        return PolynomialQuotientField(r[0].inverse * p)
     }
 }
 
