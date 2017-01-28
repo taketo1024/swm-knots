@@ -1,6 +1,6 @@
 import Foundation
 
-public func perm(n: Int) -> [[Int]] {
+public func perm(_ n: Int) -> [[Int]] {
     switch n {
     case 0:
         return [[]]

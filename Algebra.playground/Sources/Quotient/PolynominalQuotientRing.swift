@@ -1,10 +1,10 @@
 import Foundation
 
 public protocol PolynominalIdeal: EuclideanPrincipalIdeal {
-    typealias R = PolynominalType
+    associatedtype R = PolynominalType
 }
 
-public struct PolynominalQuotient<K: Field, P: PolynominalIdeal where P.R == Polynominal<K>>: EuclideanQuotientRing {
+public struct PolynominalQuotient<K: Field, P: PolynominalIdeal>: EuclideanQuotientRing where P.R == Polynominal<K> {
     public typealias I = P
     public typealias R = Polynominal<K>
     public let value: R
@@ -22,9 +22,7 @@ public struct PolynominalQuotient<K: Field, P: PolynominalIdeal where P.R == Pol
     }
 }
 
-public struct PolynominalQuotientField <K: Field, P: PolynominalIdeal where P.R == Polynominal<K>>
-    : EuclideanQuotientRing, Field
-{
+public struct PolynominalQuotientField <K: Field, P: PolynominalIdeal>: EuclideanQuotientRing, Field where P.R == Polynominal<K> {
     public typealias I = P
     public typealias R = Polynominal<K>
     public let value: R

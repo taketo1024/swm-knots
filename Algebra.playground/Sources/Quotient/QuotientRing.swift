@@ -1,23 +1,23 @@
 import Foundation
 
 public protocol PrincipalIdeal {
-    typealias R: Ring
+    associatedtype R: Ring
     static var generator: R { get }
 }
 
 public protocol EuclideanPrincipalIdeal: PrincipalIdeal {
-    typealias R: EuclideanRing
+    associatedtype R: EuclideanRing
     static var generator: R { get }
 }
 
 public protocol QuotientRing: Ring {
-    typealias I: PrincipalIdeal
+    associatedtype I: PrincipalIdeal
     init(_ r: I.R)
 }
 
 public protocol EuclideanQuotientRing: QuotientRing, CustomStringConvertible {
-    typealias I: EuclideanPrincipalIdeal
-    typealias R = I.R
+    associatedtype I: EuclideanPrincipalIdeal
+    associatedtype R = I.R
     
     var value: I.R { get }
     var mod: I.R { get }

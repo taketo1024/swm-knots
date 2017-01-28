@@ -1,7 +1,7 @@
 import Foundation
 
-public protocol Ring: AdditiveGroup, Monoid, IntegerLiteralConvertible {
-    typealias IntegerLiteralType = Int
+public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
+    associatedtype IntegerLiteralType = Int
     init(_ intValue: Int)
 }
 

@@ -1,16 +1,16 @@
 import Foundation
 
-public func printOpTable<T1, T2>(symbol: String, rows: [T1], cols: [T2], op: (T1, T2) -> T1) {
+public func printOpTable<T1, T2>(_ symbol: String, rows: [T1], cols: [T2], op: (T1, T2) -> T1) {
     let head = (0 ..< cols.count).reduce("\(symbol)\t|") { (res, j) in
         "\(res)\t\(cols[j])"
     }
-    let line = String(count: 4 * (cols.count + 1) + 2, repeatedValue: Character("-"))
+    let line = String(repeating: "-", count: 4 * (cols.count + 1) + 2)
     let body = (0 ..< rows.count).map { i in
         return (0 ..< cols.count).reduce("\(rows[i])\t|") { (res, j) in
             "\(res)\t\(op(rows[i], cols[j]))"
         }
     }
-    let result = ([head, line] + body).joinWithSeparator("\n")
+    let result = ([head, line] + body).joined(separator: "\n")
     print(result)
 }
 

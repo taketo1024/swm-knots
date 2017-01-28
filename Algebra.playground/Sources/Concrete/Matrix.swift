@@ -4,9 +4,9 @@ public struct Matrix<K: Ring, n: TPInt, m: TPInt>: Equatable {
     public var rows: Int { return n.value }
     public var cols: Int { return m.value }
     
-    private var elements: [K]
+    fileprivate var elements: [K]
     
-    private func index(i: Int, _ j: Int) -> Int {
+    private func index(_ i: Int, _ j: Int) -> Int {
         return (i * cols) + j
     }
     
@@ -48,8 +48,8 @@ extension Matrix: CustomStringConvertible {
         return "[" + (0 ..< rows).map({ i in
             return (0 ..< cols).map({ j in
                 return "\(self[i, j])"
-            }).joinWithSeparator(", ")
-        }).joinWithSeparator("; ") + "]"
+            }).joined(separator: ", ")
+        }).joined(separator: "; ") + "]"
     }
 }
 
@@ -98,7 +98,7 @@ public func * <K: Ring, n: TPInt, m: TPInt, p: TPInt>(a: Matrix<K, n, m>, b: Mat
     return Matrix<K, n, p> { (i, k) -> K in
         return (0 ..< m.value)
                 .map({j in a[i, j] * b[j, k]})
-                .reduce(0, combine: {$0 + $1})
+                .reduce(0) {$0 + $1}
     }
 }
 
@@ -107,11 +107,11 @@ public func ** <K: Ring, n: TPInt>(a: Matrix<K, n, n>, b: Int) -> Matrix<K, n, n
 }
 
 public func det<K: Ring, n: TPInt>(A: Matrix<K, n, n>) -> K {
-    return Permutation<n>.all.reduce(0, combine: {
+    return Permutation<n>.all.reduce(0) {
         (res: K, s: Permutation<n>) -> K in
-        res + K(sgn(s)) * (0 ..< n.value).reduce(1, combine: {
+        res + K(sgn(s)) * (0 ..< n.value).reduce(1) {
             (p: K, i: Int) -> K in
             p * A[i, s[i]]
-        })
-    })
+        }
+    }
 }

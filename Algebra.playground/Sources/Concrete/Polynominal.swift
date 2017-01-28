@@ -1,13 +1,13 @@
 import Foundation
 
 public protocol PolynominalType: EuclideanRing {
-    typealias K: Field
+    associatedtype K: Field
 }
 
 public struct Polynominal<K_: Field>: PolynominalType {
     public typealias K = K_
     
-    private let coeffs: [K]
+    fileprivate let coeffs: [K]
     
     public init(coeffs: [K]) {
         self.coeffs = coeffs
@@ -22,7 +22,7 @@ public struct Polynominal<K_: Field>: PolynominalType {
         self.init(coeffs: coeffs)
     }
     
-    public init(degree: Int, gen: (Int -> K)) {
+    public init(degree: Int, gen: ((Int) -> K)) {
         let coeffs = (0 ... degree).map(gen)
         self.init(coeffs: coeffs)
     }
@@ -51,7 +51,7 @@ public struct Polynominal<K_: Field>: PolynominalType {
         }
     }
     
-    public func map(f: (K -> K)) -> Polynominal<K> {
+    public func map(f: ((K) -> K)) -> Polynominal<K> {
         return Polynominal<K>(coeffs: coeffs.map(f))
     }
     
@@ -92,12 +92,12 @@ public func * <K: Field>(f: Polynominal<K>, g: Polynominal<K>) -> Polynominal<K>
 }
 
 extension Polynominal: EuclideanRing {
-    public static func eucDiv<K: Field>(f: Polynominal<K>, _ g: Polynominal<K>) -> (q: Polynominal<K>, r: Polynominal<K>) {
+    public static func eucDiv<K: Field>(_ f: Polynominal<K>, _ g: Polynominal<K>) -> (q: Polynominal<K>, r: Polynominal<K>) {
         if g == 0 {
             fatalError("divide by 0")
         }
         
-        func eucDivMonomial(f: Polynominal<K>, _ g: Polynominal<K>) -> (q: Polynominal<K>, r: Polynominal<K>) {
+        func eucDivMonomial(_ f: Polynominal<K>, _ g: Polynominal<K>) -> (q: Polynominal<K>, r: Polynominal<K>) {
             let n = f.degree - g.degree
             if n < 0 {
                 return (0, f)
@@ -110,7 +110,7 @@ extension Polynominal: EuclideanRing {
         }
         
         return (0 ... max(0, f.degree - g.degree))
-            .reverse()
+            .reversed()
             .reduce( (0, f) ) { (result: (Polynominal<K>, Polynominal<K>), degree: Int) in
                 let (q, r) = result
                 let m = eucDivMonomial(r, g)
@@ -121,7 +121,7 @@ extension Polynominal: EuclideanRing {
 
 extension Polynominal: CustomStringConvertible {
     public var description: String {
-        let res = coeffs.enumerate().flatMap {
+        let res = coeffs.enumerated().flatMap {
             (n: Int, a: K) -> String? in
             switch(a, n) {
             case ( 0, _): return nil
@@ -133,7 +133,7 @@ extension Polynominal: CustomStringConvertible {
             case (-1, _): return "-x^\(n)"
             default: return "\(a)x^\(n)"
             }
-            }.reverse().joinWithSeparator(" + ")
+            }.reversed().joined(separator: " + ")
         return res.isEmpty ? "0" : res
     }
 }

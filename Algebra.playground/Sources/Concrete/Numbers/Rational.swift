@@ -1,9 +1,9 @@
 import Foundation
 
 public struct RationalNumber: Field {
-    public let p, q: Integer
+    public let p, q: IntegerNumber
     
-    public init(_ p: Integer, _ q: Integer) {
+    public init(_ p: IntegerNumber, _ q: IntegerNumber) {
         guard q != 0 else {
             fatalError("denom: 0")
         }
@@ -11,7 +11,7 @@ public struct RationalNumber: Field {
         self.q = q
     }
     
-    public init(_ n: Integer) {
+    public init(_ n: IntegerNumber) {
         self.init(n, 1)
     }
     
