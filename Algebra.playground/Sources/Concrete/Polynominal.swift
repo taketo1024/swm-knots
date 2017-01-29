@@ -2,6 +2,7 @@ import Foundation
 
 public protocol PolynomialType: EuclideanRing {
     associatedtype K: Field
+    func apply(_ x: K) -> K
 }
 
 public struct Polynomial<K_: Field>: PolynomialType {
@@ -45,13 +46,13 @@ public struct Polynomial<K_: Field>: PolynomialType {
         return self[degree]
     }
     
-    public func apply(x: K) -> K {
+    public func apply(_ x: K) -> K {
         return (0 ... degree).reduce(0) { (sum, i) -> K in
             sum + (self[i] * (x ** i))
         }
     }
     
-    public func map(f: ((K) -> K)) -> Polynomial<K> {
+    public func map(_ f: ((K) -> K)) -> Polynomial<K> {
         return Polynomial<K>(coeffs: coeffs.map(f))
     }
     

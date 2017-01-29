@@ -6,17 +6,13 @@
 
 import Foundation
 
-/*
- * Aliases populary used in Math.
- */
+// Aliases populary used in Math.
 
 typealias Z = IntegerNumber
 typealias Q = RationalNumber
 typealias R = RealNumber
 
-/*
- * Rational Number Sample.
- */
+// Rational Number Sample.
 
 do {
     let a = Q(4, 5)
@@ -26,9 +22,7 @@ do {
     b / a
 }
 
-/*
- * Matrix Sample.
- */
+// Matrix Sample.
 
 do {
     typealias M = Matrix<Z,_2,_2>
@@ -42,9 +36,7 @@ do {
     a * b != b * a  // noncommutative
 }
 
-/*
- * Permutation Sample.
- */
+// Permutation Sample.
 
 typealias S_5 = Permutation<_5>
 
@@ -61,9 +53,7 @@ do {
     σ * τ != τ * σ   // noncommutative
 }
 
-/*
- * Integer Quotient Sample
- */
+// Integer Quotient Sample
 
 typealias F_5 = IntQuotientField<_5>
 
@@ -73,9 +63,7 @@ do {
     x * x.inverse == 1
 }
 
-/*
- * Polynomial Quotient Sample
- */
+// Polynomial Quotient Sample
 
 struct g: _Polynomial {
     typealias K = Q
