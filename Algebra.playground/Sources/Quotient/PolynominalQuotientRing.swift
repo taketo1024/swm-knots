@@ -9,7 +9,7 @@ public struct PolynomialQuotientRing<K: Field, P: _Polynomial>: EuclideanQuotien
     }
     
     public init(_ coeffs: K...) {
-        self.init(R(coeffs: coeffs))
+        self.init(R(coeffs))
     }
     
     public init(_ value: R) {
@@ -30,7 +30,7 @@ public struct PolynomialQuotientField<K: Field, P: _Polynomial>: EuclideanQuotie
     }
     
     public init(_ coeffs: K...) {
-        self.init(R(coeffs: coeffs))
+        self.init(R(coeffs))
     }
     
     public init(_ value: R) {
@@ -52,6 +52,6 @@ public struct PolynomialQuotientField<K: Field, P: _Polynomial>: EuclideanQuotie
             fatalError("\(value) and \(mod) is not coprime.")
         }
         
-        return PolynomialQuotientField(r[0].inverse * p)
+        return PolynomialQuotientField(R(r.coeff(0).inverse) * p)
     }
 }
