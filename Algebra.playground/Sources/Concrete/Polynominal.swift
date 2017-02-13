@@ -16,6 +16,7 @@ public protocol PolynomialType: Ring, CustomStringConvertible {
     
     func apply(_ x: R) -> R
     func map(_ f: ((R) -> R)) -> Self
+    var derivative: Self {get}
 }
 
 public extension PolynomialType {
@@ -59,6 +60,12 @@ public extension PolynomialType {
     
     public func map(_ f: ((R) -> R)) -> Self {
         return Self.init(coeffs.map(f))
+    }
+    
+    public var derivative: Self {
+        return Self.init(degree: degree - 1) {
+            R($0 + 1) * coeff($0 + 1)
+        }
     }
 }
 
