@@ -25,6 +25,10 @@ public func gcd<R: EuclideanRing>(_ a: R, _ b: R) -> R {
     }
 }
 
+public func lcm<R: EuclideanRing>(_ a: R, _ b: R) -> R {
+    return R.eucDiv(a * b, gcd(a, b)).q
+}
+
 public func bezout<R: EuclideanRing>(_ a: R, _ b: R) -> (x: R, y: R, r: R) {
     typealias M = Matrix<R, _2, _2>
     

@@ -1,7 +1,7 @@
 import Foundation
 
 public struct RationalNumber: Field {
-    public let p, q: IntegerNumber
+    fileprivate let p, q: IntegerNumber
     
     public init(_ p: IntegerNumber, _ q: IntegerNumber) {
         guard q != 0 else {
@@ -22,6 +22,14 @@ public struct RationalNumber: Field {
     public var reduced: RationalNumber {
         let d = abs(gcd(p, q)) * (q / abs(q))
         return RationalNumber(p / d, q / d)
+    }
+    
+    public var numerator: IntegerNumber {
+        return reduced.p
+    }
+    
+    public var denominator: IntegerNumber {
+        return reduced.q
     }
 }
 
