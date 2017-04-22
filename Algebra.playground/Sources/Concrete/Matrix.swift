@@ -10,6 +10,15 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: AdditiveGroup {
         return (i * cols) + j
     }
     
+    public subscript(index: Int) -> R {
+        get {
+            return elements[index]
+        }
+        set {
+            elements[index] = newValue
+        }
+    }
+    
     public subscript(i: Int, j: Int) -> R {
         get {
             return elements[index(i, j)]
@@ -36,7 +45,10 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: AdditiveGroup {
     public init(_ gen: (Int, Int) -> R) {
         let rows = n.value
         let cols = m.value
-        let elements = (0 ..< rows * cols).map { gen($0 / rows, $0 % cols) }
+        let elements = (0 ..< rows * cols).map { (index: Int) -> R in
+            let (i, j) = index /% cols
+            return gen(i, j)
+        }
         self.init(elements: elements)
     }
     
@@ -46,6 +58,24 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: AdditiveGroup {
     
     public static var identity: Matrix<R, n, m> {
         return self.init { $0 == $1 ? 1 : 0 }
+    }
+}
+
+public typealias ColVector<R: Ring, n: _Int> = Matrix<R, n, _1>
+public typealias RowVector<R: Ring, m: _Int> = Matrix<R, _1, m>
+
+public extension Matrix {
+    public func rowVector(_ i: Int) -> RowVector<R, m> {
+        return RowVector<R, m>{(_, j) -> R in
+            return self[i, j]
+        }
+    }
+    
+    public func colVector(_ j: Int) -> ColVector<R, n> {
+        return ColVector<R, n>{(i, j0) -> R in
+            print("\(i), \(j0)")
+            return self[i, j0]
+        }
     }
 }
 
@@ -119,5 +149,38 @@ public func det<R: Ring, n: _Int>(a: Matrix<R, n, n>) -> R {
             (p: R, i: Int) -> R in
             p * a[i, s[i]]
         }
+    }
+}
+
+extension Matrix : Sequence {
+    public typealias Iterator = MatrixIterator<R, n, m>
+    public func makeIterator() -> Iterator {
+        return MatrixIterator(self)
+    }
+}
+
+public struct MatrixIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
+    private let value: Matrix<R, n, m>
+    private var current = (0, 0)
+    
+    public init(_ value: Matrix<R, n, m>) {
+        self.value = value
+    }
+    
+    mutating public func next() -> (value: R, row: Int, col: Int)? {
+        guard current.0 < n.value && current.1 < m.value else {
+            return nil
+        }
+        
+        defer {
+            switch current {
+            case let c where c.1 + 1 >= m.value:
+                current = (c.0 + 1, 0)
+            case let c:
+                current = (c.0, c.1 + 1)
+            }
+        }
+        
+        return (value[current.0, current.1], current.0, current.1)
     }
 }
