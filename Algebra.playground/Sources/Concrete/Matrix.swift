@@ -184,3 +184,48 @@ public struct MatrixIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
         return (value[current.0, current.1], current.0, current.1)
     }
 }
+
+// Elementary Matrix Operations (mutating)
+
+public extension Matrix {
+    public mutating func multiplyRow(at i: Int, by r: R) {
+        for j in 0 ..< self.cols {
+            self[i, j] = r * self[i, j]
+        }
+    }
+    
+    public mutating func multiplyCol(at j: Int, by r: R) {
+        for i in 0 ..< self.rows {
+            self[i, j] = r * self[i, j]
+        }
+    }
+    
+    public mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R = 1) {
+        for j in 0 ..< self.cols {
+            self[i1, j] = self[i1, j] + (self[i0, j] * r)
+        }
+    }
+    
+    public mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R = 1) {
+        for i in 0 ..< self.rows {
+            self[i, j1] = self[i, j1] + (self[i, j0] * r)
+        }
+    }
+    
+    public mutating func swapRows(_ i0: Int, _ i1: Int) {
+        for j in 0 ..< self.cols {
+            let a = self[i0, j]
+            self[i0, j] = self[i1, j]
+            self[i1, j] = a
+        }
+    }
+    
+    public mutating func swapCols(_ j0: Int, _ j1: Int) {
+        for i in 0 ..< self.rows {
+            let a = self[i, j0]
+            self[i, j0] = self[i, j1]
+            self[i, j1] = a
+        }
+    }
+}
+
