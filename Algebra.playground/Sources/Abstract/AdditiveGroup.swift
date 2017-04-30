@@ -6,6 +6,8 @@ public protocol AdditiveGroup: Equatable {
     static var zero: Self { get }
 }
 
-public func - <G: AdditiveGroup>(a: G, b: G) -> G {
-    return (a + (-b))
+public extension AdditiveGroup {
+    public static func -(a: Self, b: Self) -> Self {
+        return (a + (-b))
+    }
 }

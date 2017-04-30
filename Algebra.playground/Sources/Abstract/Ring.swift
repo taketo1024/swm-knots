@@ -6,11 +6,12 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
 }
 
 public extension Ring {
+    // required init from `ExpressibleByIntegerLiteral`
     public init(integerLiteral value: Int) {
         self.init(value)
     }
     
-    static var zero: Self {
+    public static var zero: Self {
         return Self.init(0)
     }
     
