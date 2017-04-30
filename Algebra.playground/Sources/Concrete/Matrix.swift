@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
+public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence, CustomStringConvertible {
     public typealias R = _R
     public let rows: Int
     public let cols: Int
@@ -65,10 +65,6 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
         return self.init { _ in 0 }
     }
     
-    public static var identity: Matrix<R, n, m> {
-        return self.init { $0 == $1 ? 1 : 0 }
-    }
-    
     public var leftIdentity: Matrix<R, n, n> {
         return Matrix<R, n, n>(rows: rows, cols: rows) { $0 == $1 ? 1 : 0 }
     }
@@ -96,15 +92,7 @@ public extension Matrix {
     }
 }
 
-extension Matrix: CustomStringConvertible {
-    public var description: String {
-        return "[" + (0 ..< rows).map({ i in
-            return (0 ..< cols).map({ j in
-                return "\(self[i, j])"
-            }).joined(separator: ", ")
-        }).joined(separator: "; ") + "]"
-    }
-}
+// Matrix Operations
 
 public func == <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Bool {
     return a.elements == b.elements
@@ -152,7 +140,7 @@ public func ** <R: Ring, n: _Int>(a: Matrix<R, n, n>, k: Int) -> Matrix<R, n, n>
     return k == 0 ? a.leftIdentity : a * (a ** (k - 1))
 }
 
-public func det<R: Ring, n: _Int>(a: Matrix<R, n, n>) -> R {
+public func det<R: Ring, n: _Int>(_ a: Matrix<R, n, n>) -> R {
     return Permutation<n>.all.reduce(0) {
         (res: R, s: Permutation<n>) -> R in
         res + R(sgn(s)) * (0 ..< a.rows).reduce(1) {
@@ -162,7 +150,21 @@ public func det<R: Ring, n: _Int>(a: Matrix<R, n, n>) -> R {
     }
 }
 
-extension Matrix : Sequence {
+// CustomStringConvertible
+
+public extension Matrix {
+    public var description: String {
+        return "[" + (0 ..< rows).map({ i in
+            return (0 ..< cols).map({ j in
+                return "\(self[i, j])"
+            }).joined(separator: ", ")
+        }).joined(separator: "; ") + "]"
+    }
+}
+
+// Sequence / Iterator
+
+public extension Matrix {
     public typealias Iterator = MatrixIterator<R, n, m>
     public func makeIterator() -> Iterator {
         return MatrixIterator(self)
@@ -239,7 +241,22 @@ public extension Matrix {
     }
 }
 
+// SquareMatrix
+
+public typealias SquareMatrix<R: Ring, n: _Int> = Matrix<R, n, n>
+
+public extension Matrix where n == m {
+    public static var identity: Matrix<R, n, n> {
+        return self.init { $0 == $1 ? 1 : 0 }
+    }
+
+    public var determinant: R {
+        return det(self)
+    }
+}
+
 // TypeLooseMatrix
+
 public struct _TypeLooseSize : _Int { public static let value = 0 }
 public typealias TypeLooseMatrix<R: Ring> = Matrix<R, _TypeLooseSize, _TypeLooseSize>
 
