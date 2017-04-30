@@ -2,10 +2,10 @@ import Foundation
 
 public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
     public typealias R = _R
-    public var rows: Int { return n.value }
-    public var cols: Int { return m.value }
+    public let rows: Int
+    public let cols: Int
     
-    fileprivate var elements: [R]
+    internal var elements: [R]
     
     private func index(_ i: Int, _ j: Int) -> Int {
         return (i * cols) + j
@@ -29,22 +29,36 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
         }
     }
     
-    private init(elements: [R]) {
+    // root initializer
+    internal init(rows: Int, cols: Int, elements: [R]) {
+        guard rows > 0 && cols > 0 else {
+            fatalError("illegal matrix size (\(rows), \(cols))")
+        }
+        self.rows = rows
+        self.cols = cols
         self.elements = elements
     }
-    
-    public init(_ elements: R...) {
-        self.init(elements: elements)
-    }
-    
-    public init(_ gen: (Int, Int) -> R) {
-        let rows = n.value
-        let cols = m.value
+
+    internal init(rows: Int, cols: Int, gen: (Int, Int) -> R) {
         let elements = (0 ..< rows * cols).map { (index: Int) -> R in
             let (i, j) = index /% cols
             return gen(i, j)
         }
-        self.init(elements: elements)
+        self.init(rows: rows, cols: cols, elements: elements)
+    }
+
+    public init(_ elements: R...) {
+        if n.self == _TypeLooseSize.self || m.self == _TypeLooseSize.self {
+            fatalError("attempted to initialize TypeLooseMatrix without specifying rows/cols.")
+        }
+        self.init(rows: n.value, cols: m.value, elements: elements)
+    }
+    
+    public init(_ gen: (Int, Int) -> R) {
+        if n.self == _TypeLooseSize.self || m.self == _TypeLooseSize.self {
+            fatalError("attempted to initialize TypeLooseMatrix without specifying rows/cols.")
+        }
+        self.init(rows: n.value, cols: m.value, gen: gen)
     }
     
     public static var zero: Matrix<R, n, m> {
@@ -53,6 +67,14 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
     
     public static var identity: Matrix<R, n, m> {
         return self.init { $0 == $1 ? 1 : 0 }
+    }
+    
+    public var leftIdentity: Matrix<R, n, n> {
+        return Matrix<R, n, n>(rows: rows, cols: rows) { $0 == $1 ? 1 : 0 }
+    }
+    
+    public var rightIdentity: Matrix<R, m, m> {
+        return Matrix<R, m, m>(rows: cols, cols: cols) { $0 == $1 ? 1 : 0 }
     }
 }
 
@@ -85,62 +107,55 @@ extension Matrix: CustomStringConvertible {
 }
 
 public func == <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Bool {
-    for i in 0 ..< n.value {
-        for j in 0 ..< m.value {
-            if a[i, j] != b[i, j] {
-                return false
-            }
-        }
-    }
-    return true
+    return a.elements == b.elements
 }
 
 public func + <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>{ (i, j) -> R in
+    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
         return a[i, j] + b[i, j]
     }
 }
 
 public prefix func - <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>{ (i, j) -> R in
+    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
         return -a[i, j]
     }
 }
 
 public func - <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>{ (i, j) -> R in
-        return a[i, j] + b[i, j]
+    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
+        return a[i, j] - b[i, j]
     }
 }
 
-public func * <R: Ring, n: _Int, m: _Int>(r: R, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
-    return Matrix<R, n, m> { (i, j) -> R in
-        return r * b[i, j]
+public func * <R: Ring, n: _Int, m: _Int>(r: R, a: Matrix<R, n, m>) -> Matrix<R, n, m> {
+    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
+        return r * a[i, j]
     }
 }
 
 public func * <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, r: R) -> Matrix<R, n, m> {
-    return Matrix<R, n, m> { (i, j) -> R in
+    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
         return a[i, j] * r
     }
 }
 
 public func * <R: Ring, n: _Int, m: _Int, p: _Int>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
-    return Matrix<R, n, p> { (i, k) -> R in
-        return (0 ..< m.value)
+    return Matrix<R, n, p>(rows: a.rows, cols: b.cols) { (i, k) -> R in
+        return (0 ..< a.cols)
                 .map({j in a[i, j] * b[j, k]})
                 .reduce(0) {$0 + $1}
     }
 }
 
-public func ** <R: Ring, n: _Int>(a: Matrix<R, n, n>, b: Int) -> Matrix<R, n, n> {
-    return b == 0 ? Matrix<R, n, n>.identity : a * (a ** (b - 1))
+public func ** <R: Ring, n: _Int>(a: Matrix<R, n, n>, k: Int) -> Matrix<R, n, n> {
+    return k == 0 ? a.leftIdentity : a * (a ** (k - 1))
 }
 
 public func det<R: Ring, n: _Int>(a: Matrix<R, n, n>) -> R {
     return Permutation<n>.all.reduce(0) {
         (res: R, s: Permutation<n>) -> R in
-        res + R(sgn(s)) * (0 ..< n.value).reduce(1) {
+        res + R(sgn(s)) * (0 ..< a.rows).reduce(1) {
             (p: R, i: Int) -> R in
             p * a[i, s[i]]
         }
@@ -163,13 +178,13 @@ public struct MatrixIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
     }
     
     mutating public func next() -> (value: R, row: Int, col: Int)? {
-        guard current.0 < n.value && current.1 < m.value else {
+        guard current.0 < value.rows && current.1 < value.cols else {
             return nil
         }
         
         defer {
             switch current {
-            case let c where c.1 + 1 >= m.value:
+            case let c where c.1 + 1 >= value.cols:
                 current = (c.0 + 1, 0)
             case let c:
                 current = (c.0, c.1 + 1)
@@ -224,3 +239,16 @@ public extension Matrix {
     }
 }
 
+// TypeLooseMatrix
+public struct _TypeLooseSize : _Int { public static let value = 0 }
+public typealias TypeLooseMatrix<R: Ring> = Matrix<R, _TypeLooseSize, _TypeLooseSize>
+
+public extension Matrix where n == _TypeLooseSize, m == _TypeLooseSize {
+    public init(_ rows: Int, _ cols: Int, _ elements: [R]) {
+        self.init(rows: rows, cols: cols, elements: elements)
+    }
+    
+    public init(_ rows: Int, _ cols: Int, _ gen: (Int, Int) -> R) {
+        self.init(rows: rows, cols: cols, gen: gen)
+    }
+}

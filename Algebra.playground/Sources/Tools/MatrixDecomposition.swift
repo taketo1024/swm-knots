@@ -3,8 +3,8 @@ import Foundation
 public func eliminateMatrix<R: EuclideanRing, n: _Int, m: _Int>(_ A: Matrix<R, n, m>) -> (B: Matrix<R, n, m>, P: Matrix<R, m, m>, Q: Matrix<R, n, n>) {
     
     var B = A
-    var P = Matrix<R, m, m>.identity
-    var Q = Matrix<R, n, n>.identity
+    var P = A.rightIdentity
+    var Q = A.leftIdentity
     
     eliminateMatrix(&B, &P, &Q, 0)
     
