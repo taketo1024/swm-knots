@@ -1,6 +1,7 @@
 import Foundation
 
-public struct Matrix<R: Ring, n: _Int, m: _Int>: AdditiveGroup {
+public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
+    public typealias R = _R
     public var rows: Int { return n.value }
     public var cols: Int { return m.value }
     
@@ -26,12 +27,6 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: AdditiveGroup {
         set {
             elements[index(i, j)] = newValue
         }
-    }
-    
-    public init(_ value: Int) {
-        self.init({
-            ($0 == $1) ? R(value) : 0
-        })
     }
     
     private init(elements: [R]) {
