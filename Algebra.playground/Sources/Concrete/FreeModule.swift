@@ -3,6 +3,7 @@ import Foundation
 public struct FreeModule<_R: Ring>: Module, Hashable, CustomStringConvertible {
     public typealias R = _R
     
+    public let name: String
     internal let dict: [String : R]
     
     public subscript(a: String) -> R {
@@ -12,10 +13,12 @@ public struct FreeModule<_R: Ring>: Module, Hashable, CustomStringConvertible {
     }
     
     public init(_ name: String) {
-        self.init([name: 1])
+        self.name = name
+        self.dict = [name: 1]
     }
     
     public init(_ dict: [String : R]) {
+        self.name = ""
         self.dict = dict
     }
     
@@ -27,12 +30,16 @@ public struct FreeModule<_R: Ring>: Module, Hashable, CustomStringConvertible {
         return Array(dict.keys)
     }
     
+    public func coeff(_ name: String) -> R {
+        return dict[name] ?? 0
+    }
+    
     public var hashValue: Int {
         return 0 // TODO
     }
     
     public var description: String {
-        return dict.isEmpty ? "0" : Array(dict.keys).sorted().map({"\(self[$0])\($0)"}).joined(separator: " + ")
+        return dict.isEmpty ? "0" : Array(dict.keys).sorted().map({"\(coeff($0))\($0)"}).joined(separator: " + ")
     }
 }
 
