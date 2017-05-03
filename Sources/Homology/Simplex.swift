@@ -8,10 +8,13 @@
 
 import Foundation
 
-public struct Vertex: Equatable, Hashable, CustomStringConvertible {
+public struct Vertex: Equatable, Comparable, Hashable, CustomStringConvertible {
     public let id: String
-    internal init(_ id: String) {
+    internal let index: Int
+    
+    internal init(_ id: String, _ index: Int) {
         self.id = id
+        self.index = index
     }
     
     public var hashValue: Int {
@@ -25,12 +28,16 @@ public struct Vertex: Equatable, Hashable, CustomStringConvertible {
     public static func ==(a: Vertex, b: Vertex) -> Bool {
         return a.id == b.id
     }
+    
+    public static func <(a: Vertex, b: Vertex) -> Bool {
+        return a.index < b.index
+    }
 }
 
 public struct VertexSet: CustomStringConvertible {
     public let vertices: [Vertex]
     public init(number: Int, prefix: String = "v") {
-        self.vertices = (0 ..< number).map { Vertex("\(prefix)\($0)") }
+        self.vertices = (0 ..< number).map { Vertex("\(prefix)\($0)", $0) }
     }
     
     public func simplex(_ indices: Int...) -> Simplex {
@@ -43,14 +50,16 @@ public struct VertexSet: CustomStringConvertible {
     }
 }
 
+// MEMO: 'un'ordered set of vertices (though we use OrderedSet)
+
 public struct Simplex: Equatable, Hashable, CustomStringConvertible {
-    public let vertices: [Vertex]
+    public let vertices: OrderedSet<Vertex>
     public var dim: Int {
         return vertices.count - 1
     }
     
-    internal init(_ vertices: [Vertex]) {
-        self.vertices = vertices
+    internal init<S: Sequence>(_ vertices: S) where S.Iterator.Element == Vertex {
+        self.vertices = OrderedSet(sequence: vertices.sorted())
     }
     
     public func face(_ index: Int) -> Simplex {
@@ -63,7 +72,7 @@ public struct Simplex: Equatable, Hashable, CustomStringConvertible {
     }
     
     public func contains(_ s: Simplex) -> Bool {
-        return s.dim <= self.dim && Set(s.vertices).isSubset(of: self.vertices)
+        return s.vertices.isSubset(of: self.vertices)
     }
     
     public func allSubsimplices() -> [Simplex] {
@@ -84,18 +93,10 @@ public struct Simplex: Equatable, Hashable, CustomStringConvertible {
     }
     
     public var description: String {
-        return vertices.description
+        return Array(vertices).description
     }
     
     public static func ==(a: Simplex, b: Simplex) -> Bool {
-        return a.dim == b.dim && Set(a.vertices) == Set(b.vertices)
-    }
-}
-
-public struct SimplicialComplex {
-    public let simplices: [Simplex]
-    
-    public init(simplices: [Simplex]) {
-        self.simplices = simplices
+        return Set(a.vertices) == Set(b.vertices)
     }
 }

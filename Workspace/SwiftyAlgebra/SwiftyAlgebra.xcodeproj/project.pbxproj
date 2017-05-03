@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		140BCD4F1EBA1AED00D7CE74 /* OrderedSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140BCD4E1EBA1AED00D7CE74 /* OrderedSet.swift */; };
+		140BCD511EBA3F8A00D7CE74 /* ChainComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */; };
 		1424F4C61EB9976C0052581F /* SwiftyAlgebra.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1424F4BC1EB9976C0052581F /* SwiftyAlgebra.framework */; };
 		1424F4CB1EB9976C0052581F /* SwiftyAlgebraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4CA1EB9976C0052581F /* SwiftyAlgebraTests.swift */; };
 		1424F4CD1EB9976C0052581F /* SwiftyAlgebra.h in Headers */ = {isa = PBXBuildFile; fileRef = 1424F4BF1EB9976C0052581F /* SwiftyAlgebra.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -52,6 +53,7 @@
 
 /* Begin PBXFileReference section */
 		140BCD4E1EBA1AED00D7CE74 /* OrderedSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderedSet.swift; sourceTree = "<group>"; };
+		140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChainComplex.swift; sourceTree = "<group>"; };
 		1424F4BC1EB9976C0052581F /* SwiftyAlgebra.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftyAlgebra.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1424F4BF1EB9976C0052581F /* SwiftyAlgebra.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftyAlgebra.h; sourceTree = "<group>"; };
 		1424F4C01EB9976C0052581F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -256,6 +258,7 @@
 			isa = PBXGroup;
 			children = (
 				147D98081EBA0CD200C736AC /* Simplex.swift */,
+				140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */,
 			);
 			path = Homology;
 			sourceTree = "<group>";
@@ -373,6 +376,7 @@
 				1424F4FA1EB997780052581F /* EuclideanRing.swift in Sources */,
 				1424F4F91EB997780052581F /* AdditiveGroup.swift in Sources */,
 				1424F5071EB997780052581F /* Rational.swift in Sources */,
+				140BCD511EBA3F8A00D7CE74 /* ChainComplex.swift in Sources */,
 				1424F5011EB997780052581F /* Matrix.swift in Sources */,
 				1424F50A1EB997780052581F /* IntQuotientRing.swift in Sources */,
 				147D98061EB9B26200C736AC /* Dictionary.swift in Sources */,
