@@ -45,7 +45,7 @@ public struct Permutation<n: _Int>: Group {
     }
     
     public static var all: [Permutation<n>] {
-        return perm(n.value).map{ Permutation(elements: $0) }
+        return rawPermutation(n.value).map{ Permutation(elements: $0) }
     }
 }
 
@@ -77,5 +77,19 @@ extension Permutation: CustomStringConvertible {
         return "(" + (0 ..< degree).map({ i in
             return "\(i): \(self[i])"
         }).joined(separator: ", ") + ")"
+    }
+}
+
+internal func rawPermutation(_ n: Int) -> [[Int]] {
+    switch n {
+    case 0:
+        return [[]]
+    default:
+        let prev = rawPermutation(n - 1)
+        return (0 ..< n).flatMap({ (i: Int) -> [[Int]] in
+            prev.map({ (s: [Int]) -> [Int] in
+                [i] + s.map{ $0 < i ? $0 : $0 + 1 }
+            })
+        })
     }
 }

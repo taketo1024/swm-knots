@@ -7,7 +7,6 @@ import SwiftyAlgebra
 
 typealias Z = IntegerNumber
 typealias Q = RationalNumber
-typealias R = RealNumber
 
 // Rational Number Sample.
 
@@ -18,3 +17,7 @@ do {
     a * b
     b / a
 }
+
+typealias R = Polynomial<Q>
+let x = R.indeterminate
+let f = Q(2) * x + Q(3) * x**2
