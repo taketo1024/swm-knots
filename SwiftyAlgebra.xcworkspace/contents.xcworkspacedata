@@ -5,10 +5,10 @@
       location = "group:Workspace/SwiftyAlgebra/SwiftyAlgebra.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:Workspace/Numbers.playground">
+      location = "group:Workspace/AlgebraicExtensions.playground">
    </FileRef>
    <FileRef
-      location = "group:Workspace/AlgebraicExtensions.playground">
+      location = "group:Workspace/FreeModules.playground">
    </FileRef>
    <FileRef
       location = "group:Workspace/IntegerQuotients.playground">
@@ -17,9 +17,9 @@
       location = "group:Workspace/Matrices.playground">
    </FileRef>
    <FileRef
-      location = "group:Workspace/Permutations.playground">
+      location = "group:Workspace/Numbers.playground">
    </FileRef>
    <FileRef
-      location = "group:Workspace/FreeModules.playground">
+      location = "group:Workspace/Permutations.playground">
    </FileRef>
 </Workspace>
