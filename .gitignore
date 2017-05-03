@@ -1,2 +1,4 @@
 xcuserdata
-
+*.swiftdoc
+*.swiftmodule
+*.dylib
