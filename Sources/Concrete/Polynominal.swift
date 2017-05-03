@@ -2,8 +2,8 @@ import Foundation
 
 // concrete Polynomial-type over a field
 
-public struct Polynomial<K: Field>: EuclideanRing, CustomStringConvertible {
-    
+public struct Polynomial<K: Field>: EuclideanRing, Module, CustomStringConvertible {
+    public typealias R = K
     public let coeffs: [K]
     
     public init(_ value: Int) {
@@ -115,6 +115,14 @@ public func *<K: Field>(f: Polynomial<K>, g: Polynomial<K>) -> Polynomial<K> {
             (res:K, i:Int) in res + f.coeff(i) * g.coeff(k - i)
         }
     }
+}
+
+public func *<K: Field>(r: K, f: Polynomial<K>) -> Polynomial<K> {
+    return f.map { r * $0 }
+}
+
+public func *<K: Field>(f: Polynomial<K>, r: K) -> Polynomial<K> {
+    return f.map { $0 * r }
 }
 
 extension Polynomial {

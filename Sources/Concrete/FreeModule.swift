@@ -66,3 +66,8 @@ public func *<R: Ring>(r: R, a: FreeModule<R>) -> FreeModule<R> {
     let dict = a.dict.mapValues{r * $0}
     return FreeModule<R>(dict)
 }
+
+public func *<R: Ring>(a: FreeModule<R>, r: R) -> FreeModule<R> {
+    let dict = a.dict.mapValues{$0 * r}
+    return FreeModule<R>(dict)
+}
