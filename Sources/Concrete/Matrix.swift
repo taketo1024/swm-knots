@@ -31,7 +31,7 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence, CustomString
     
     // root initializer
     internal init(rows: Int, cols: Int, elements: [R]) {
-        guard rows > 0 && cols > 0 else {
+        guard rows >= 0 && cols >= 0 else {
             fatalError("illegal matrix size (\(rows), \(cols))")
         }
         self.rows = rows
@@ -89,6 +89,17 @@ public extension Matrix {
             print("\(i), \(j0)")
             return self[i, j0]
         }
+    }
+}
+
+public extension ColVector {
+    static func unit(_ i: Int) -> ColVector<R, n> {
+        return ColVector<R, n>{ (j, _) in (i == j) ? 1 : 0 }
+    }
+    
+    // I don't like this..
+    static func typeLooseUnit(_ n: Int, _ i: Int) -> Matrix<R, _TypeLooseSize, _TypeLooseSize> {
+        return Matrix<R, _TypeLooseSize, _TypeLooseSize>(n, 1){ (j, _) in (i == j) ? R(1) : _R(0) }
     }
 }
 

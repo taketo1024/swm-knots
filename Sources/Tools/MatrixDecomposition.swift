@@ -1,5 +1,26 @@
 import Foundation
 
+public func kerIm<R: EuclideanRing, n: _Int, m: _Int>(_ A: Matrix<R, n, m>) -> (ker: [ColVector<R, m>], im: [ColVector<R, n>]) {
+    
+    let (B, P, Q) = eliminateMatrix(A)
+    let diag = (0 ..< min(B.rows, B.cols)).map{ B[$0, $0] }
+    let imDim  = diag.filter({$0 != 0}).count
+    let kerDim = A.cols - imDim
+    
+    let kers = (A.cols - kerDim ..< A.cols).map { (i) -> ColVector<R, m> in
+        return P * ColVector<R, m>.unit(i)
+    }
+    
+    let imgs = (0 ..< imDim).map { (i) -> ColVector<R, n> in
+        let v = Q * ColVector<R, n>.unit(i)
+        return diag[i] * v
+    }
+    
+    return (kers, imgs)
+
+}
+
+// B = Q^-1 A P
 public func eliminateMatrix<R: EuclideanRing, n: _Int, m: _Int>(_ A: Matrix<R, n, m>) -> (B: Matrix<R, n, m>, P: Matrix<R, m, m>, Q: Matrix<R, n, n>) {
     
     var B = A
