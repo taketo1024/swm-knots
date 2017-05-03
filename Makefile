@@ -1,9 +1,7 @@
 MOD=SwiftyAlgebra
-BIN=main
-PRJDIR=Algebra.playground
-MODSRC=$(PRJDIR)/Sources/**/*.swift
-BINSRC=$(PRJDIR)/Content.swift
-MODULE=$(MOD).swiftmodule $(MOD).swiftdoc
+SRC=Sources/**/*.swift
+BIN=$(MOD).swiftmodule $(MOD).swiftdoc
+
 SWIFTC=swiftc
 SWIFT=swift
 ifdef SWIFTPATH
@@ -15,15 +13,10 @@ ifeq ($(OS),Darwin)
 	SWIFTC=xcrun -sdk macosx swiftc
 endif
 
-all: $(BIN)
-module: $(MODULE)
+module: $(BIN)
 clean:
-	-rm $(BIN) $(MODULE) lib$(MOD).*
-$(BIN): $(BINSRC)
-	$(SWIFTC) $(BINSRC)
-test: $(BIN)
-	prove ./$(BIN)
-$(MODULE): $(MODSRC)
-	$(SWIFTC) -emit-library -emit-module $(MODSRC) -module-name $(MOD)
-repl: $(MODULE)
+	-rm $(BIN) lib$(MOD).*
+$(BIN): $(SRC)
+	$(SWIFTC) -emit-library -emit-module $(SRC) -module-name $(MOD)
+repl: $(BIN)
 	$(SWIFT) -I. -L. -l$(MOD)

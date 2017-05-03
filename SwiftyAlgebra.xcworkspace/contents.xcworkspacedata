@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:Workspace/SwiftyAlgebra/SwiftyAlgebra.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Workspace/Numbers.playground">
+   </FileRef>
+   <FileRef
+      location = "group:Workspace/AlgebraicExtensions.playground">
+   </FileRef>
+   <FileRef
+      location = "group:Workspace/IntegerQuotients.playground">
+   </FileRef>
+   <FileRef
+      location = "group:Workspace/Matrices.playground">
+   </FileRef>
+   <FileRef
+      location = "group:Workspace/Permutations.playground">
+   </FileRef>
+   <FileRef
+      location = "group:Workspace/FreeModules.playground">
+   </FileRef>
+</Workspace>
