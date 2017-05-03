@@ -30,12 +30,13 @@
 		1424F50A1EB997780052581F /* IntQuotientRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4ED1EB997780052581F /* IntQuotientRing.swift */; };
 		1424F50B1EB997780052581F /* PolynominalQuotientRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4EE1EB997780052581F /* PolynominalQuotientRing.swift */; };
 		1424F50C1EB997780052581F /* MatrixDecomposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F01EB997780052581F /* MatrixDecomposition.swift */; };
-		1424F50D1EB997780052581F /* QPolynomial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F11EB997780052581F /* QPolynomial.swift */; };
+		1424F50D1EB997780052581F /* PolynomialFactorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F11EB997780052581F /* PolynomialFactorization.swift */; };
 		1424F50E1EB997780052581F /* TPInt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F31EB997780052581F /* TPInt.swift */; };
 		1424F50F1EB997780052581F /* TPPolynomial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F41EB997780052581F /* TPPolynomial.swift */; };
 		1424F5101EB997780052581F /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F61EB997780052581F /* extensions.swift */; };
 		1424F5111EB997780052581F /* optable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F71EB997780052581F /* optable.swift */; };
 		1424F5121EB997780052581F /* perm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F81EB997780052581F /* perm.swift */; };
+		147D98031EB9B06900C736AC /* IntegerFactorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98021EB9B06900C736AC /* IntegerFactorization.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,12 +76,13 @@
 		1424F4ED1EB997780052581F /* IntQuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntQuotientRing.swift; sourceTree = "<group>"; };
 		1424F4EE1EB997780052581F /* PolynominalQuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolynominalQuotientRing.swift; sourceTree = "<group>"; };
 		1424F4F01EB997780052581F /* MatrixDecomposition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixDecomposition.swift; sourceTree = "<group>"; };
-		1424F4F11EB997780052581F /* QPolynomial.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QPolynomial.swift; sourceTree = "<group>"; };
+		1424F4F11EB997780052581F /* PolynomialFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolynomialFactorization.swift; sourceTree = "<group>"; };
 		1424F4F31EB997780052581F /* TPInt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TPInt.swift; sourceTree = "<group>"; };
 		1424F4F41EB997780052581F /* TPPolynomial.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TPPolynomial.swift; sourceTree = "<group>"; };
 		1424F4F61EB997780052581F /* extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
 		1424F4F71EB997780052581F /* optable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = optable.swift; sourceTree = "<group>"; };
 		1424F4F81EB997780052581F /* perm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = perm.swift; sourceTree = "<group>"; };
+		147D98021EB9B06900C736AC /* IntegerFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntegerFactorization.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -213,7 +215,8 @@
 			isa = PBXGroup;
 			children = (
 				1424F4F01EB997780052581F /* MatrixDecomposition.swift */,
-				1424F4F11EB997780052581F /* QPolynomial.swift */,
+				1424F4F11EB997780052581F /* PolynomialFactorization.swift */,
+				147D98021EB9B06900C736AC /* IntegerFactorization.swift */,
 			);
 			path = Tools;
 			sourceTree = "<group>";
@@ -367,7 +370,8 @@
 				1424F50F1EB997780052581F /* TPPolynomial.swift in Sources */,
 				1424F50C1EB997780052581F /* MatrixDecomposition.swift in Sources */,
 				1424F50B1EB997780052581F /* PolynominalQuotientRing.swift in Sources */,
-				1424F50D1EB997780052581F /* QPolynomial.swift in Sources */,
+				147D98031EB9B06900C736AC /* IntegerFactorization.swift in Sources */,
+				1424F50D1EB997780052581F /* PolynomialFactorization.swift in Sources */,
 				1424F5031EB997780052581F /* Polynominal.swift in Sources */,
 				1424F4FD1EB997780052581F /* Module.swift in Sources */,
 				1424F5111EB997780052581F /* optable.swift in Sources */,
@@ -578,6 +582,7 @@
 				1424F4D21EB9976C0052581F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1424F4D31EB9976C0052581F /* Build configuration list for PBXNativeTarget "SwiftyAlgebraTests" */ = {
 			isa = XCConfigurationList;
@@ -586,6 +591,7 @@
 				1424F4D51EB9976C0052581F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
