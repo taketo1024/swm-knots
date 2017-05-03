@@ -52,6 +52,6 @@ public struct PolynomialQuotientField<K: Field, P: _Polynomial>: EuclideanQuotie
             fatalError("\(value) and \(mod) is not coprime.")
         }
         
-        return PolynomialQuotientField(R(r.coeff(0).inverse) * p)
+        return PolynomialQuotientField(R([r.coeff(0).inverse]) * p)
     }
 }
