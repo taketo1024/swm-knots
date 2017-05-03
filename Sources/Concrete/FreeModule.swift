@@ -39,7 +39,12 @@ public struct FreeModule<_R: Ring>: Module, Hashable, CustomStringConvertible {
     }
     
     public var description: String {
-        return dict.isEmpty ? "0" : Array(dict.keys).sorted().map({"\(coeff($0))\($0)"}).joined(separator: " + ")
+        return dict.isEmpty ? "0" :
+            Array(dict.keys)
+                .sorted()
+                .map({coeff($0) == R.zero ? "" : "\(coeff($0))\($0)"})
+                .filter({$0 != ""})
+                .joined(separator: " + ")
     }
 }
 
