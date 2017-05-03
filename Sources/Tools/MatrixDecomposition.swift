@@ -8,11 +8,11 @@ public func kerIm<R: EuclideanRing, n: _Int, m: _Int>(_ A: Matrix<R, n, m>) -> (
     let kerDim = A.cols - imDim
     
     let kers = (A.cols - kerDim ..< A.cols).map { (i) -> ColVector<R, m> in
-        return P * ColVector<R, m>.unit(i)
+        return P * ColVector<R, m>.unit(size:P.cols, i)
     }
     
     let imgs = (0 ..< imDim).map { (i) -> ColVector<R, n> in
-        let v = Q * ColVector<R, n>.unit(i)
+        let v = Q * ColVector<R, n>.unit(size:Q.cols, i)
         return diag[i] * v
     }
     

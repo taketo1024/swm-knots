@@ -97,9 +97,9 @@ public extension ColVector {
         return ColVector<R, n>{ (j, _) in (i == j) ? 1 : 0 }
     }
     
-    // I don't like this..
-    static func typeLooseUnit(_ n: Int, _ i: Int) -> Matrix<R, _TypeLooseSize, _TypeLooseSize> {
-        return Matrix<R, _TypeLooseSize, _TypeLooseSize>(n, 1){ (j, _) in (i == j) ? R(1) : _R(0) }
+    // MEMO this is used in case n == _TypeLooseSize
+    static func unit(size: Int, _ i: Int) -> ColVector<R, n> {
+        return ColVector<R, n>(rows: size, cols: 1){ (j, _) in (i == j) ? 1 : 0 }
     }
 }
 
