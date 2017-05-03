@@ -63,6 +63,10 @@ public struct Polynomial<K: Field>: EuclideanRing, Module, CustomStringConvertib
         return self.map{ $0 / a }
     }
     
+    public static var indeterminate: Polynomial<K> {
+        return Polynomial<K>(0, 1)
+    }
+    
     public static func eucDiv<K: Field>(_ f: Polynomial<K>, _ g: Polynomial<K>) -> (q: Polynomial<K>, r: Polynomial<K>) {
         if g == 0 {
             fatalError("divide by 0")

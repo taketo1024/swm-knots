@@ -1,5 +1,7 @@
 import Foundation
 
+infix operator /%: MultiplicationPrecedence
+
 public protocol EuclideanRing: Ring {
     var degree: Int { get }
     static func eucDiv(_ a: Self, _ b: Self) -> (q: Self, r: Self)
@@ -9,8 +11,6 @@ public protocol EuclideanRing: Ring {
 public func % <R: EuclideanRing>(_ a: R, b: R) -> R {
     return R.eucDiv(a, b).r
 }
-
-infix operator /% { associativity left precedence 150 }
 
 public func /% <R: EuclideanRing>(_ a: R, b: R) -> (q: R, r: R) {
     return R.eucDiv(a, b)

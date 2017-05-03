@@ -18,4 +18,8 @@ public extension Ring {
     static var identity: Self {
         return Self.init(1)
     }
+    
+    static func **(a: Self, n: Int) -> Self {
+        return (0 ..< n).reduce(Self.identity){ (res, _) in res * a }
+    }
 }
