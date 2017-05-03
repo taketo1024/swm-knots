@@ -22,4 +22,7 @@
    <FileRef
       location = "group:Workspace/Permutations.playground">
    </FileRef>
+   <FileRef
+      location = "group:Workspace/Homology.playground">
+   </FileRef>
 </Workspace>
