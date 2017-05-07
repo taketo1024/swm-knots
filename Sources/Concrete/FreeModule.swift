@@ -1,6 +1,8 @@
 import Foundation
 
-public struct FreeModule<A: Hashable, _R: Ring>: Module, CustomStringConvertible {
+public typealias FreeModuleBase = Hashable
+
+public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, CustomStringConvertible {
     public typealias R = _R
     internal let dict: [A : R]
     
@@ -55,11 +57,11 @@ public struct FreeModule<A: Hashable, _R: Ring>: Module, CustomStringConvertible
 
 // Operations
 
-public func ==<A: Hashable, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
+public func ==<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
     return a.dict == b.dict
 }
 
-public func +<A: Hashable, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A, R>) -> FreeModule<A, R> {
+public func +<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A, R>) -> FreeModule<A, R> {
     let basisElements = Set(a.dict.keys).union(Set(b.dict.keys))
     let dict = Dictionary.generateBy(keys: basisElements) {
         a.coeff($0) + b.coeff($0)
@@ -67,17 +69,17 @@ public func +<A: Hashable, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A, R>) ->
     return FreeModule<A, R>(dict)
 }
 
-public prefix func -<A: Hashable, R: Ring>(a: FreeModule<A, R>) -> FreeModule<A, R> {
+public prefix func -<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>) -> FreeModule<A, R> {
     let dict = a.dict.mapValues{-$0}
     return FreeModule<A, R>(dict)
 }
 
-public func *<A: Hashable, R: Ring>(r: R, a: FreeModule<A, R>) -> FreeModule<A, R> {
+public func *<A: FreeModuleBase, R: Ring>(r: R, a: FreeModule<A, R>) -> FreeModule<A, R> {
     let dict = a.dict.mapValues{r * $0}
     return FreeModule<A, R>(dict)
 }
 
-public func *<A: Hashable, R: Ring>(a: FreeModule<A, R>, r: R) -> FreeModule<A, R> {
+public func *<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>, r: R) -> FreeModule<A, R> {
     let dict = a.dict.mapValues{$0 * r}
     return FreeModule<A, R>(dict)
 }

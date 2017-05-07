@@ -52,7 +52,7 @@ public struct VertexSet: CustomStringConvertible {
 
 // MEMO: 'un'ordered set of vertices (though we use OrderedSet)
 
-public struct Simplex: Equatable, Hashable, CustomStringConvertible {
+public struct Simplex: FreeModuleBase, CustomStringConvertible {
     public let vertices: OrderedSet<Vertex>
     public var dim: Int {
         return vertices.count - 1

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct FreeModuleHom<A: Hashable, R: Ring>: ModuleHom {
+public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
     public typealias M = FreeModule<A, R>
     public typealias Dom = M
     public typealias Codom = M
