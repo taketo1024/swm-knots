@@ -24,5 +24,7 @@ let map: [String : M] =
      "d" : d + a]
 
 let f = FreeModuleHom<String, Z>(map)
-let kers = f.kerIm().Ker
-print(kers)
+let x = f.appliedTo(a + 2 * b)
+let k = f.kernelBases
+
+print(k)
