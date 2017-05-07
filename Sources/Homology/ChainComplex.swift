@@ -8,6 +8,7 @@
 
 import Foundation
 
+// TODO also support <R: Field>
 public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
     public typealias M = FreeModule<A, R>
     public typealias F = FreeModuleHom<A, R>
@@ -27,4 +28,15 @@ public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
     public var description: String {
         return chainBases.description
     }
+}
+
+public extension ChainComplex where R: EuclideanRing {
+    public func cycles(_ i: Int) -> [M] {
+        return boundaryMaps[i].kernel
+    }
+    
+    public func boundaries(_ i: Int) -> [M] {
+        return boundaryMaps[i + 1].image
+    }
+    
 }

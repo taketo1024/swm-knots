@@ -27,20 +27,20 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
 
 // MEMO this implementation is not good. improve if there is a better way.
 public extension FreeModuleHom where R: EuclideanRing {
-    public var kernelBases : [FreeModule<A, R>] {
+    public var kernel : [FreeModule<A, R>] {
         if !info.initialized {
             self.initializeInfo()
         }
         
-        return info.kernelBases
+        return info.kernel
     }
     
-    public var imageBases : [FreeModule<A, R>] {
+    public var image : [FreeModule<A, R>] {
         if !info.initialized {
             self.initializeInfo()
         }
         
-        return info.imageBases
+        return info.image
     }
     
     private func initializeInfo() {
@@ -55,13 +55,13 @@ public extension FreeModuleHom where R: EuclideanRing {
         
         let E = MatrixElimination(matrix)
         
-        info.kernelBases = E.kernelVectors.map{ (v) in
+        info.kernel = E.kernelVectors.map{ (v) in
             (0 ..< v.rows).reduce(M.zero){(res, i) in
                 res + v[i] * M(inBasis[i])
             }
         }
         
-        info.imageBases = E.imageVectors.map{ (v) in
+        info.image = E.imageVectors.map{ (v) in
             (0 ..< v.rows).reduce(M.zero){(res, i) in
                 res + v[i] * M(outBasis[i])
             }
@@ -74,7 +74,7 @@ public extension FreeModuleHom where R: EuclideanRing {
 // boxed class to avoid recomputation of costful functions.
 fileprivate class FreeModuleHomInfo<A: FreeModuleBase, R: Ring> {
     var initialized = false
-    var kernelBases: [FreeModule<A, R>] = []
-    var imageBases: [FreeModule<A, R>] = []
+    var kernel: [FreeModule<A, R>] = []
+    var image: [FreeModule<A, R>] = []
     init() {}
 }

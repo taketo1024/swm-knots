@@ -68,7 +68,11 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
     }
     
     public func faces() -> [Simplex] {
-        return (0 ... dim).map{ face($0) }
+        if dim == 0 {
+            return []
+        } else {
+            return (0 ... dim).map{ face($0) }
+        }
     }
     
     public func contains(_ s: Simplex) -> Bool {
@@ -123,8 +127,8 @@ public struct SimplicialComplex {
             chns[s.dim].append(s)
         }
         
-        var bnds: [F] = [F.zero]
-        bnds += (1 ... dim).map { (i) -> F in
+        var bmaps: [F] = []
+        bmaps += (0 ... dim).map { (i) -> F in
             let from = chns[i]
             let map = Dictionary.generateBy(keys: from){ (s) -> M in
                 return s.faces().enumerated().reduce(M.zero){ (res, el) -> M in
@@ -134,8 +138,8 @@ public struct SimplicialComplex {
             }
             return F(map)
         }
-        bnds += [F.zero]
+        bmaps += [F.zero]
         
-        return ChainComplex(chainBases: chns, boundaryMaps: bnds)
+        return ChainComplex(chainBases: chns, boundaryMaps: bmaps)
     }
 }
