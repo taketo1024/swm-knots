@@ -72,6 +72,10 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence, CustomString
     public var rightIdentity: Matrix<R, m, m> {
         return Matrix<R, m, m>(rows: cols, cols: cols) { $0 == $1 ? 1 : 0 }
     }
+    
+    public var transpose: Matrix<R, m, n> {
+        return Matrix<R, m, n>(rows: cols, cols: rows) { self[$1, $0] }
+    }
 }
 
 public typealias ColVector<R: Ring, n: _Int> = Matrix<R, n, _1>
