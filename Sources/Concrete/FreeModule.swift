@@ -1,37 +1,36 @@
 import Foundation
 
-public struct FreeModule<Key: Hashable, _R: Ring>: Module, Hashable, CustomStringConvertible {
+public struct FreeModule<A: Hashable, _R: Ring>: Module, CustomStringConvertible {
     public typealias R = _R
-    internal let dict: [Key : R]
+    internal let dict: [A : R]
     
-    public subscript(a: Key) -> R {
-        get {
-            return dict[a] ?? 0
-        }
-    }
-    
-    public init(_ key: Key) {
-        self.dict = [key: 1]
-    }
-    
-    public init(_ dict: [Key : R]) {
+    internal init(_ dict: [A : R]) {
         self.dict = dict
     }
     
-    public static var zero: FreeModule<Key, R> {
-        return FreeModule<Key, R>.init([:])
+    // generates a basis element
+    public init(_ a: A) {
+        self.init([a: 1])
     }
     
-    public var bases: [Key] {
+    public static var zero: FreeModule<A, R> {
+        return FreeModule<A, R>.init([:])
+    }
+    
+    public var isBasis: Bool {
+        return dict.count == 1 && dict.values.first! == R.identity
+    }
+    
+    public var basisElement: A {
+        return dict.keys.first!
+    }
+    
+    public var basisElements: [A] {
         return Array(dict.keys)
     }
     
-    public func coeff(_ key: Key) -> R {
-        return dict[key] ?? 0
-    }
-    
-    public var hashValue: Int {
-        return 0 // TODO
+    public func coeff(_ basisElement: A) -> R {
+        return dict[basisElement] ?? 0
     }
     
     public var description: String {
@@ -51,29 +50,29 @@ public struct FreeModule<Key: Hashable, _R: Ring>: Module, Hashable, CustomStrin
 
 // Operations
 
-public func ==<Key: Hashable, R: Ring>(a: FreeModule<Key, R>, b: FreeModule<Key, R>) -> Bool {
+public func ==<A: Hashable, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
     return a.dict == b.dict
 }
 
-public func +<Key: Hashable, R: Ring>(a: FreeModule<Key, R>, b: FreeModule<Key, R>) -> FreeModule<Key, R> {
-    let keys = Set(a.dict.keys).union(Set(b.dict.keys))
-    let dict = Dictionary.generateBy(keys: keys) {
-        a[$0] + b[$0]
+public func +<A: Hashable, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A, R>) -> FreeModule<A, R> {
+    let basisElements = Set(a.dict.keys).union(Set(b.dict.keys))
+    let dict = Dictionary.generateBy(keys: basisElements) {
+        a.coeff($0) + b.coeff($0)
     }
-    return FreeModule<Key, R>(dict)
+    return FreeModule<A, R>(dict)
 }
 
-public prefix func -<Key: Hashable, R: Ring>(a: FreeModule<Key, R>) -> FreeModule<Key, R> {
+public prefix func -<A: Hashable, R: Ring>(a: FreeModule<A, R>) -> FreeModule<A, R> {
     let dict = a.dict.mapValues{-$0}
-    return FreeModule<Key, R>(dict)
+    return FreeModule<A, R>(dict)
 }
 
-public func *<Key: Hashable, R: Ring>(r: R, a: FreeModule<Key, R>) -> FreeModule<Key, R> {
+public func *<A: Hashable, R: Ring>(r: R, a: FreeModule<A, R>) -> FreeModule<A, R> {
     let dict = a.dict.mapValues{r * $0}
-    return FreeModule<Key, R>(dict)
+    return FreeModule<A, R>(dict)
 }
 
-public func *<Key: Hashable, R: Ring>(a: FreeModule<Key, R>, r: R) -> FreeModule<Key, R> {
+public func *<A: Hashable, R: Ring>(a: FreeModule<A, R>, r: R) -> FreeModule<A, R> {
     let dict = a.dict.mapValues{$0 * r}
-    return FreeModule<Key, R>(dict)
+    return FreeModule<A, R>(dict)
 }

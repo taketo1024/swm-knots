@@ -15,12 +15,8 @@ let C = SimplicialChainComplex<Z>(simplices: s.allSubsimplices())
 
 print("complex: \(C)")
 
-let d2 = C.boundary(2)
-let d1 = C.boundary(1)
+let d2 = C.boundaryMap(2)
+let d1 = C.boundaryMap(1)
 
 let (cycles, boundaries) = d2.kerIm()
 print("\ncycle: \(cycles)")
-
-for b in boundaries {
-    print(d1.appliedTo(b))
-}

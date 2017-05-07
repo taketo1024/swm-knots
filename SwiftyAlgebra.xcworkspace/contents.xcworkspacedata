@@ -8,9 +8,6 @@
       location = "group:Workspace/AlgebraicExtensions.playground">
    </FileRef>
    <FileRef
-      location = "group:Workspace/FreeModules.playground">
-   </FileRef>
-   <FileRef
       location = "group:Workspace/IntegerQuotients.playground">
    </FileRef>
    <FileRef
@@ -21,6 +18,9 @@
    </FileRef>
    <FileRef
       location = "group:Workspace/Permutations.playground">
+   </FileRef>
+   <FileRef
+      location = "group:Workspace/FreeModules.playground">
    </FileRef>
    <FileRef
       location = "group:Workspace/Homology.playground">

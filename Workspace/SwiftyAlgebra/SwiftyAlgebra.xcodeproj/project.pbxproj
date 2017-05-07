@@ -180,10 +180,10 @@
 		1424F4DF1EB997780052581F /* Concrete */ = {
 			isa = PBXGroup;
 			children = (
-				1424F4E01EB997780052581F /* FreeModule.swift */,
 				1424F4E11EB997780052581F /* Matrix.swift */,
 				1424F4E21EB997780052581F /* Permutation.swift */,
 				1424F4E31EB997780052581F /* Polynominal.swift */,
+				1424F4E01EB997780052581F /* FreeModule.swift */,
 			);
 			path = Concrete;
 			sourceTree = "<group>";
@@ -191,8 +191,8 @@
 		1424F4E41EB997780052581F /* Morphisms */ = {
 			isa = PBXGroup;
 			children = (
-				1424F4E51EB997780052581F /* FreeModHom.swift */,
 				1424F4E61EB997780052581F /* Hom.swift */,
+				1424F4E51EB997780052581F /* FreeModHom.swift */,
 			);
 			name = Morphisms;
 			path = Hom;

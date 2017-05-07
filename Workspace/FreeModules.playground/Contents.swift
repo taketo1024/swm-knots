@@ -17,10 +17,12 @@ let c = M("c")
 let d = M("d")
 let zero = M.zero
 
-let map: [M : M] =
-    [a: a + b,
-     b: b + c,
-     c: c + d,
-     d: d + a]
+let map: [String : M] =
+    ["a" : a + b,
+     "b" : b + c,
+     "c" : c + d,
+     "d" : d + a]
 
 let f = FreeModuleHom<String, Z>(map)
+let kers = f.kerIm().Ker
+print(kers)
