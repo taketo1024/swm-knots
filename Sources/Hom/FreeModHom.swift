@@ -44,18 +44,20 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
 public extension FreeModuleHom where R: EuclideanRing {
     public func kerIm() -> (Ker: [FreeModule<A, R>], Im: [FreeModule<A, R>]) {
         typealias M = FreeModule<A, R>
-        let (kerVecs, imVecs) = SwiftyAlgebra.kerIm(matrix)
+        let E = MatrixElimination(matrix)
         
-        let kers = kerVecs.map{ (v) in
+        let kers = E.kernelVectors.map{ (v) in
             (0 ..< v.rows).reduce(M.zero){(res, i) in
                 res + v[i] * M(inBasis[i])
             }
         }
-        let ims = imVecs.map{ (v) in
+        
+        let ims = E.imageVectors.map{ (v) in
             (0 ..< v.rows).reduce(M.zero){(res, i) in
                 res + v[i] * M(outBasis[i])
             }
         }
+        
         return (kers, ims)
     }
 }

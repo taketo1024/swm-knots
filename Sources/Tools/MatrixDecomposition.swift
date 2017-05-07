@@ -1,23 +1,46 @@
 import Foundation
 
-public func kerIm<R: EuclideanRing, n: _Int, m: _Int>(_ A: Matrix<R, n, m>) -> (ker: [ColVector<R, m>], im: [ColVector<R, n>]) {
-    
-    let (B, P, Q) = eliminateMatrix(A)
-    let diag = (0 ..< min(B.rows, B.cols)).map{ B[$0, $0] }
-    let imDim  = diag.filter({$0 != 0}).count
-    let kerDim = A.cols - imDim
-    
-    let kers = (A.cols - kerDim ..< A.cols).map { (i) -> ColVector<R, m> in
-        return P * ColVector<R, m>.unit(size:P.cols, i)
-    }
-    
-    let imgs = (0 ..< imDim).map { (i) -> ColVector<R, n> in
-        let v = Q * ColVector<R, n>.unit(size:Q.cols, i)
-        return diag[i] * v
-    }
-    
-    return (kers, imgs)
+// Boxed class for lazy computation.
 
+public class MatrixElimination<R: EuclideanRing, n: _Int, m: _Int> {
+    public let matrix: Matrix<R, n, m>
+    
+    public init(_ matrix: Matrix<R, n, m>) {
+        self.matrix = matrix
+    }
+    
+    public lazy var elimination: (B: Matrix<R, n, m>, P: Matrix<R, m, m>, Q: Matrix<R, n, n>) = eliminateMatrix(self.matrix)
+    
+    public lazy var diagonal: [R] = {[unowned self] in
+        let (B, _, _) = self.elimination
+        return (0 ..< min(B.rows, B.cols)).map{ B[$0, $0] }
+    }()
+    
+    public lazy var rank: Int = {[unowned self] in
+        return self.diagonal.filter({$0 != 0}).count
+    }()
+    
+    public lazy var kernelVectors: [ColVector<R, m>] = { [unowned self] in
+        let A = self.matrix
+        let (B, P, _) = self.elimination
+        let k = A.cols - self.rank
+        
+        return (A.cols - k ..< A.cols).map { (i) -> ColVector<R, m> in
+            return P * ColVector<R, m>.unit(size:P.cols, i)
+        }
+    }()
+    
+    public lazy var imageVectors: [ColVector<R, n>] = { [unowned self] in
+        let A = self.matrix
+        let (B, _, Q) = self.elimination
+        let d = self.diagonal
+        let r = self.rank
+        
+        return (0 ..< r).map { (i) -> ColVector<R, n> in
+            let v = Q * ColVector<R, n>.unit(size:Q.cols, i)
+            return d[i] * v
+        }
+    }()
 }
 
 // B = Q^-1 A P
