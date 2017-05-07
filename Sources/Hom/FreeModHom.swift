@@ -5,13 +5,25 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
     public typealias Dom = M
     public typealias Codom = M
     
+    let inBasis: [A]
+    let outBasis: [A]
     fileprivate let mapping: [A : M]
-    fileprivate let info: FreeModuleHomInfo<A, R>
+    fileprivate let _info: FreeModuleHomInfo<A, R>
     
-    // MEMO: the key is the basis element
     public init(_ mapping: [A : M]) {
+        // TODO sort if possible
+        let inBasis = Array(mapping.keys)
+        let outBasis = Array( Set(mapping.values.flatMap { $0.basisElements }) )
+        // --TODO
+        
+        self.init(inBasis: inBasis, outBasis: outBasis, mapping: mapping)
+    }
+    
+    public init(inBasis: [A], outBasis: [A], mapping: [A : M]) {
+        self.inBasis = inBasis
+        self.outBasis = outBasis
         self.mapping = mapping
-        self.info = FreeModuleHomInfo<A, R>()
+        self._info = FreeModuleHomInfo<A, R>()
     }
     
     public static var zero: FreeModuleHom<A, R> {
@@ -27,54 +39,46 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
 
 // MEMO this implementation is not good. improve if there is a better way.
 public extension FreeModuleHom where R: EuclideanRing {
-    public var kernel : [FreeModule<A, R>] {
-        if !info.initialized {
-            self.initializeInfo()
-        }
-        
-        return info.kernel
+    public var kernel: [M] {
+        return elimination.kernelVectors.map{ M.vec2El($0, basis: inBasis) }
     }
     
-    public var image : [FreeModule<A, R>] {
-        if !info.initialized {
+    public var image: [M] {
+        return elimination.imageVectors.map{ M.vec2El($0, basis: outBasis) }
+    }
+    
+    internal var elimination: MatrixElimination<R, _TypeLooseSize, _TypeLooseSize> {
+        return info.elimination as! MatrixElimination<R, _TypeLooseSize, _TypeLooseSize>
+    }
+    
+    internal var info: FreeModuleHomInfo<A, R> {
+        if !_info.initialized {
             self.initializeInfo()
         }
         
-        return info.image
+        return _info
     }
     
     private func initializeInfo() {
-        // TODO sort if possible
-        let inBasis = Array(mapping.keys)
-        let outBasis = Array( Set(mapping.values.flatMap { $0.basisElements }) )
+        let info = _info
+        
         let matrix = TypeLooseMatrix<R>(outBasis.count, inBasis.count) { (i, j) -> R in
             let from = inBasis[j]
             let to  = outBasis[i]
             return mapping[from]?.coeff(to) ?? 0
         }
         
-        let E = MatrixElimination(matrix)
-        
-        info.kernel = E.kernelVectors.map{ (v) in
-            (0 ..< v.rows).reduce(M.zero){(res, i) in
-                res + v[i] * M(inBasis[i])
-            }
-        }
-        
-        info.image = E.imageVectors.map{ (v) in
-            (0 ..< v.rows).reduce(M.zero){(res, i) in
-                res + v[i] * M(outBasis[i])
-            }
-        }
-        
+        info.elimination = MatrixElimination(matrix)
         info.initialized = true
     }
 }
 
 // boxed class to avoid recomputation of costful functions.
-fileprivate class FreeModuleHomInfo<A: FreeModuleBase, R: Ring> {
-    var initialized = false
-    var kernel: [FreeModule<A, R>] = []
-    var image: [FreeModule<A, R>] = []
+internal class FreeModuleHomInfo<A: FreeModuleBase, R: Ring> {
+    typealias M = FreeModule<A, R>
+    fileprivate var initialized = false
+    
+    var elimination: Any!
+    
     init() {}
 }

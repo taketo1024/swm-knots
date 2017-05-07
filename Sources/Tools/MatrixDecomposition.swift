@@ -21,13 +21,17 @@ public class MatrixElimination<R: EuclideanRing, n: _Int, m: _Int> {
         self.mode = mode
     }
     
-    private lazy var process: EliminationProcess<R, n, m> = EliminationProcess(self.target, self.mode)
+    private lazy var eliminationResult: (Matrix<R, n, m>, [EliminationStep<R>]) = {[unowned self] in
+        var e = EliminationProcessor(self.target, self.mode)
+        return e.run()
+    }()
     
-    public lazy var result: Matrix<R, n, m> = self.process.result
+    public  lazy var result:  Matrix<R, n, m>      = self.eliminationResult.0
+    private lazy var process: [EliminationStep<R>] = self.eliminationResult.1
     
     public lazy var left: Matrix<R, n, n> = {[unowned self] in
         var Q = self.target.leftIdentity
-        for s in self.process.process {
+        for s in self.process {
             switch s {
             case .AddRow(_, _, _), .InvRow(_), .SwapRows(_, _):
                 s.applyTo(&Q)
@@ -39,7 +43,7 @@ public class MatrixElimination<R: EuclideanRing, n: _Int, m: _Int> {
     
     public lazy var leftInverse: Matrix<R, n, n> = {[unowned self] in
         var Q = self.target.leftIdentity
-        for s in self.process.process.reversed() {
+        for s in self.process.reversed() {
             switch s {
             case .AddRow(_, _, _), .InvRow(_), .SwapRows(_, _):
                 s.applyInverseTo(&Q)
@@ -51,7 +55,7 @@ public class MatrixElimination<R: EuclideanRing, n: _Int, m: _Int> {
     
     public lazy var right: Matrix<R, m, m> = {[unowned self] in
         var P = self.target.rightIdentity
-        for s in self.process.process {
+        for s in self.process {
             switch s {
             case .AddCol(_, _, _), .InvCol(_), .SwapCols(_, _):
                 s.applyTo(&P)
@@ -63,7 +67,7 @@ public class MatrixElimination<R: EuclideanRing, n: _Int, m: _Int> {
     
     public lazy var rightInverse: Matrix<R, m, m> = {[unowned self] in
         var P = self.target.rightIdentity
-        for s in self.process.process.reversed() {
+        for s in self.process.reversed() {
             switch s {
             case .AddCol(_, _, _), .InvCol(_), .SwapCols(_, _):
                 s.applyInverseTo(&P)
@@ -140,7 +144,7 @@ private enum EliminationStep<R: EuclideanRing> {
     }
 }
 
-fileprivate struct EliminationProcess<R: EuclideanRing, n: _Int, m: _Int> {
+fileprivate struct EliminationProcessor<R: EuclideanRing, n: _Int, m: _Int> {
     let mode: EliminationMode
     var result: Matrix<R, n, m>
     var process: [EliminationStep<R>]
@@ -150,12 +154,11 @@ fileprivate struct EliminationProcess<R: EuclideanRing, n: _Int, m: _Int> {
         self.mode = mode
         self.result = target
         self.process = []
-        run()
     }
     
-    mutating func run() {
+    mutating func run() -> (Matrix<R, n, m>, [EliminationStep<R>]) {
         guard var (a, i0, j0) = findNextMinNonZero() else { // when A = O
-            return
+            return (result, process)
         }
         
         let doRows = (mode != .ColsOnly)
@@ -215,8 +218,9 @@ fileprivate struct EliminationProcess<R: EuclideanRing, n: _Int, m: _Int> {
         
         if itr < min(result.rows, result.cols) - 1 {
             itr += 1
-            run()
+            let _ = run()
         }
+        return (result, process)
     }
     
     mutating func apply(_ s: EliminationStep<R>) {

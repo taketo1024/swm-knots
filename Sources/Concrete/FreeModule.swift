@@ -53,6 +53,13 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, CustomStringConve
             .joined(separator: " + ")
         return sum.isEmpty ? "0" : sum
     }
+    
+    internal static func vec2El<n: _Int>(_ v: ColVector<R, n>, basis: [A]) -> FreeModule<A, R> {
+        typealias M = FreeModule<A, R>
+        return (0 ..< v.rows).reduce(M.zero){(res, i) in
+            res + v[i] * M(basis[i])
+        }
+    }
 }
 
 // Operations
