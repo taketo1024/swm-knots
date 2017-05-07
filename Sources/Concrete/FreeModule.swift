@@ -13,6 +13,11 @@ public struct FreeModule<A: Hashable, _R: Ring>: Module, CustomStringConvertible
         self.init([a: 1])
     }
     
+    public init(_ pairs: (R, A)...) {
+        let dict = Dictionary(pairs.map{($1, $0)})
+        self.init(dict)
+    }
+    
     public static var zero: FreeModule<A, R> {
         return FreeModule<A, R>.init([:])
     }
