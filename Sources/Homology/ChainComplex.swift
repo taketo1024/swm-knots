@@ -13,12 +13,24 @@ public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
     public typealias M = FreeModule<A, R>
     public typealias F = FreeModuleHom<A, R>
     
-    public let chainBases: [[A]] // [[0-chain], [1-chain], ..., [n-chain]]
-    public let boundaryMaps: [F] // [(d_0 = 0), (d_1 = C_1 -> C_0), ..., (d_n: C_n -> C_{n-1}), (d_{n+1} = 0)]
+    fileprivate let chainBases: [[A]] // [[0-chain], [1-chain], ..., [n-chain]]
+    fileprivate let boundaryMaps: [F] // [(d_0 = 0), (d_1 = C_1 -> C_0), ..., (d_n: C_n -> C_{n-1}), (d_{n+1} = 0)]
     
     public init(chainBases: [[A]], boundaryMaps: [F]) {
         self.chainBases = chainBases
         self.boundaryMaps = boundaryMaps
+    }
+    
+    public init(chainBases: [[A]], boundaryMapTable: [[R]]) {
+        let boundaryMaps = boundaryMapTable.enumerated().map { (i, table) -> FreeModuleHom<A, R> in
+            let inBasis  = chainBases[i]
+            let outBasis = (i > 0) ? chainBases[i - 1] : []
+            let matrix = TypeLooseMatrix<R>(rows: outBasis.count, cols: inBasis.count, elements: table)
+            return FreeModuleHom(inBasis: inBasis,
+                                 outBasis: outBasis,
+                                 matrix: matrix)
+        }
+        self.init(chainBases: chainBases, boundaryMaps: boundaryMaps)
     }
     
     public init(_ pairs: ([A], F)...) {

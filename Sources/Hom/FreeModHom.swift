@@ -7,6 +7,9 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
     
     public let inBasis: [A]
     public let outBasis: [A]
+    
+    // TODO might rather keep the matrix than this table.
+    
     fileprivate let mapping: [A : M]
     fileprivate let _info: FreeModuleHomInfo<A, R>
     

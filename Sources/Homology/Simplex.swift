@@ -133,8 +133,7 @@ public struct SimplicialComplex {
             chns[s.dim].append(s)
         }
         
-        var bmaps: [F] = []
-        bmaps += (0 ... dim).map { (i) -> F in
+        let  bmaps: [F] = (0 ... dim).map { (i) -> F in
             let from = chns[i]
             let map = Dictionary.generateBy(keys: from){ (s) -> M in
                 return s.faces().enumerated().reduce(M.zero){ (res, el) -> M in
@@ -144,7 +143,6 @@ public struct SimplicialComplex {
             }
             return F(inBasis: chns[i], outBasis: (i > 0) ? chns[i - 1] : [], mapping: map)
         }
-        bmaps += [F.zero]
         
         return ChainComplex(chainBases: chns, boundaryMaps: bmaps)
     }

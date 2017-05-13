@@ -41,3 +41,11 @@ print()
 let s = V.simplex
 let H4 = SimplicialComplex([s(0,1,3),s(1,4,3),s(1,2,4),s(4,2,0),s(4,0,5),s(0,1,5),s(1,2,5),s(2,3,5),s(0,3,2),s(3,4,5)], generate: true).ZHomology()
 print("H(RP^2; Z) =", H4.detailDescription)
+print()
+
+// RP^2 cellular
+let bases: [[String]] = [["e0"], ["e1"], ["e2"]]
+let table: [[Z]] = [[0], [0], [2]]
+let H5 = ChainComplex(chainBases: bases, boundaryMapTable: table).homology()
+print("H(RP^2; Z) =", H5.detailDescription)
+print()
