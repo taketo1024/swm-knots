@@ -87,24 +87,20 @@ public class MatrixElimination<R: EuclideanRing, n: _Int, m: _Int> {
         return self.diagonal.filter({$0 != 0}).count
     }()
     
+    public lazy var kernelPart: Matrix<R, m, _TypeLooseSize> = { [unowned self] in
+        return self.right.submatrix(colsInRange: self.rank ..< self.cols)
+    }()
+    
     public lazy var kernelVectors: [ColVector<R, m>] = { [unowned self] in
-        let P = self.right
-        let k = self.cols - self.rank
-        
-        return (self.cols - k ..< self.cols).map { (i) -> ColVector<R, m> in
-            return P * ColVector<R, m>.unit(size:self.cols, i)
-        }
+        return self.kernelPart.toColVectors()
+    }()
+    
+    public lazy var imagePart: Matrix<R, n, _TypeLooseSize> = { [unowned self] in
+        return self.leftInverse.submatrix(colsInRange: 0 ..< self.rank)
     }()
     
     public lazy var imageVectors: [ColVector<R, n>] = { [unowned self] in
-        let Qinv = self.leftInverse
-        let d = self.diagonal
-        let r = self.rank
-        
-        return (0 ..< r).map { (i) -> ColVector<R, n> in
-            let v = Qinv * ColVector<R, n>.unit(size:self.rows, i)
-            return d[i] * v
-        }
+        return self.imagePart.toColVectors()
     }()
 }
 
