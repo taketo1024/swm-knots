@@ -82,6 +82,14 @@ public typealias ColVector<R: Ring, n: _Int> = Matrix<R, n, _1>
 public typealias RowVector<R: Ring, m: _Int> = Matrix<R, _1, m>
 
 public extension Matrix {
+    public func rowArray(_ i: Int) -> [R] {
+        return (0 ..< cols).map{ j in self[i, j] }
+    }
+    
+    public func colArray(_ j: Int) -> [R] {
+        return (0 ..< rows).map{ i in self[i, j] }
+    }
+    
     public func rowVector(_ i: Int) -> RowVector<R, m> {
         return RowVector<R, m>(rows: 1, cols: cols){(_, j) -> R in
             return self[i, j]
@@ -102,21 +110,21 @@ public extension Matrix {
         return (0 ..< cols).map { colVector($0) }
     }
     
-    func submatrix(colsInRange c: CountableRange<Int>) -> Matrix<R, n, _TypeLooseSize> {
-        return Matrix<R, n, _TypeLooseSize>(rows: self.rows, cols: c.upperBound - c.lowerBound) {
+    func submatrix<m0: _Int>(colsInRange c: CountableRange<Int>) -> Matrix<R, n, m0> {
+        return Matrix<R, n, m0>(rows: self.rows, cols: c.upperBound - c.lowerBound) {
             self[$0, $1 + c.lowerBound]
         }
     }
     
-    func submatrix(rowsInRange r: CountableRange<Int>) -> Matrix<R, _TypeLooseSize, m> {
-        return Matrix<R, _TypeLooseSize, m>(rows: r.upperBound - r.lowerBound, cols: self.cols) {
+    func submatrix<n0: _Int>(rowsInRange r: CountableRange<Int>) -> Matrix<R, n0, m> {
+        return Matrix<R, n0, m>(rows: r.upperBound - r.lowerBound, cols: self.cols) {
             self[$0 + r.lowerBound, $1]
         }
     }
     
-    func submatrix(inRange: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> TypeLooseMatrix<R> {
+    func submatrix<n0: _Int, m0: _Int>(inRange: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> Matrix<R, n0, m0> {
         let (r, c) = inRange
-        return TypeLooseMatrix<R>(rows: r.upperBound - r.lowerBound, cols: c.upperBound - c.lowerBound) {
+        return Matrix<R, n0, m0>(rows: r.upperBound - r.lowerBound, cols: c.upperBound - c.lowerBound) {
             self[$0 + r.lowerBound, $1 + c.lowerBound]
         }
     }
@@ -201,6 +209,14 @@ public extension Matrix {
             }).joined(separator: ", ")
         }).joined(separator: "; ") + "]"
     }
+
+    public var alignedDescription: String {
+        return "[\t" + (0 ..< rows).map({ i in
+            return (0 ..< cols).map({ j in
+                return "\(self[i, j])"
+            }).joined(separator: ",\t")
+        }).joined(separator: "\n\t") + "]"
+    }
 }
 
 // Sequence / Iterator
@@ -278,6 +294,14 @@ public extension Matrix {
             let a = self[i, j0]
             self[i, j0] = self[i, j1]
             self[i, j1] = a
+        }
+    }
+    
+    public mutating func replaceElements(_ gen: (Int, Int) -> R) {
+        for i in 0 ..< self.rows {
+            for j in 0 ..< self.cols {
+                self[i, j] = gen(i, j)
+            }
         }
     }
 }
