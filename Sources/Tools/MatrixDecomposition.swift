@@ -96,7 +96,10 @@ public class MatrixElimination<R: EuclideanRing, n: _Int, m: _Int> {
     }()
     
     public lazy var imagePart: Matrix<R, n, _TypeLooseSize> = { [unowned self] in
-        return self.leftInverse.submatrix(colsInRange: 0 ..< self.rank)
+        let d = self.diagonal
+        var a: Matrix<R, n, _TypeLooseSize> = self.leftInverse.submatrix(colsInRange: 0 ..< self.rank)
+        a.replaceElements() { (i, j) in d[j] * a[i, j] }
+        return a
     }()
     
     public lazy var imageVectors: [ColVector<R, n>] = { [unowned self] in
