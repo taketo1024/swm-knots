@@ -31,7 +31,11 @@ public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
     }
     
     public func boundaryMap(_ i: Int) -> FreeModuleHom<A, R> {
-        return boundaryMaps[i]
+        return (0 ... dim).contains(i) ? boundaryMaps[i] : F.zero
+    }
+    
+    public func homology() -> Homology<A, R> {
+        return Homology(self)
     }
     
     public var description: String {
@@ -47,5 +51,8 @@ public extension ChainComplex where R: EuclideanRing {
     public func boundaries(_ i: Int) -> [M] {
         return boundaryMaps[i + 1].image
     }
-    
+
+    public func homology() -> Homology<A, R> {
+        return Homology(self)
+    }
 }
