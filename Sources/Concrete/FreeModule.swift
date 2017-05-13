@@ -4,89 +4,76 @@ public typealias FreeModuleBase = Hashable
 
 public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, CustomStringConvertible {
     public typealias R = _R
-    internal let dict: [A : R]
     
-    internal init(_ dict: [A : R]) {
-        self.dict = dict
+    public let basis: [A]
+    public let table: [A : R] // FIXME revert!
+    
+    internal init(basis: [A], table: [A : R]) {
+        self.basis = basis
+        self.table = table
     }
     
     // generates a basis element
     public init(_ a: A) {
-        self.init([a: 1])
+        self.init(basis: [a], table: [a: 1])
     }
     
-    public init(_ pairs: (R, A)...) {
-        let dict = Dictionary(pairs.map{($1, $0)})
-        self.init(dict)
+    public init(basis: [A], values: [R]) {
+        guard basis.count == values.count else {
+            fatalError("#basis (\(basis.count)) != #values (\(values.count))")
+        }
+        let pairs = basis.enumerated().map { (i, a) in (a, values[i]) }
+        self.init(basis: basis, table: Dictionary(pairs) )
     }
-    
+
     public static var zero: FreeModule<A, R> {
-        return FreeModule<A, R>.init([:])
+        return FreeModule<A, R>.init(basis: [], table: [:])
     }
     
-    public var isBasis: Bool {
-        return dict.count == 1 && dict.values.first! == R.identity
+    public func coeff(_ a: A) -> R {
+        return table[a] ?? 0
     }
     
-    public var basisElement: A {
-        return dict.keys.first!
-    }
-    
-    public var basisElements: [A] {
-        return Array(dict.keys)
-    }
-    
-    public func coeff(_ basisElement: A) -> R {
-        return dict[basisElement] ?? 0
+    public var coeffs: [R] {
+        return basis.map{ coeff($0) }
     }
     
     public var description: String {
-        let sum = Array(dict.keys)
-            .map({(m) in
-                switch coeff(m) {
-                case R.zero:     return ""
-                case R.identity: return "\(m)"
-                case let r:      return "\(r)\(m)"
-                }
-            })
-            .filter({$0 != ""})
-            .joined(separator: " + ")
+        let sum =
+            basis.map { a in (coeff(a), a) }
+                .filter { (r, _) in r != R.zero }
+                .map { (r, a) in (r == R.identity) ? "\(a)" : "\(r)\(a)" }
+                .joined(separator: " + ")
+        
         return sum.isEmpty ? "0" : sum
-    }
-    
-    internal static func vec2El<n: _Int>(_ v: ColVector<R, n>, basis: [A]) -> FreeModule<A, R> {
-        typealias M = FreeModule<A, R>
-        return (0 ..< v.rows).reduce(M.zero){(res, i) in
-            res + v[i] * M(basis[i])
-        }
     }
 }
 
 // Operations
 
 public func ==<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
-    return a.dict == b.dict
+    return a.table == b.table
 }
 
 public func +<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A, R>) -> FreeModule<A, R> {
-    let basisElements = Set(a.dict.keys).union(Set(b.dict.keys))
-    let dict = Dictionary.generateBy(keys: basisElements) {
+    let basis = a.basis + b.basis.filter{!a.basis.contains($0)}
+    let table = Dictionary.generateBy(keys: basis) {
         a.coeff($0) + b.coeff($0)
     }
-    return FreeModule<A, R>(dict)
+    return FreeModule<A, R>(basis: basis, table: table)
 }
 
 public prefix func -<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>) -> FreeModule<A, R> {
-    let dict = a.dict.mapValues{-$0}
-    return FreeModule<A, R>(dict)
+    let table = a.table.mapValues{-$0}
+    return FreeModule<A, R>(basis: a.basis, table: table)
 }
 
 public func *<A: FreeModuleBase, R: Ring>(r: R, a: FreeModule<A, R>) -> FreeModule<A, R> {
-    let dict = a.dict.mapValues{r * $0}
-    return FreeModule<A, R>(dict)
+    let table = a.table.mapValues{r * $0}
+    return FreeModule<A, R>(basis: a.basis, table: table)
 }
 
 public func *<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>, r: R) -> FreeModule<A, R> {
-    let dict = a.dict.mapValues{$0 * r}
-    return FreeModule<A, R>(dict)
+    let table = a.table.mapValues{$0 * r}
+    return FreeModule<A, R>(basis: a.basis, table: table)
 }

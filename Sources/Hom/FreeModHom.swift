@@ -5,15 +5,15 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
     public typealias Dom = M
     public typealias Codom = M
     
-    let inBasis: [A]
-    let outBasis: [A]
+    public let inBasis: [A]
+    public let outBasis: [A]
     fileprivate let mapping: [A : M]
     fileprivate let _info: FreeModuleHomInfo<A, R>
     
     public init(_ mapping: [A : M]) {
         // TODO sort if possible
         let inBasis = Array(mapping.keys)
-        let outBasis = Array( Set(mapping.values.flatMap { $0.basisElements }) )
+        let outBasis = Array( Set(mapping.values.flatMap { $0.basis }) )
         // --TODO
         
         self.init(inBasis: inBasis, outBasis: outBasis, mapping: mapping)
@@ -26,12 +26,23 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
         self._info = FreeModuleHomInfo<A, R>()
     }
     
+    public init<n: _Int, m: _Int>(inBasis: [A], outBasis: [A], matrix m: Matrix<R, n, m>) {
+        let outBasisM = outBasis.map {M($0)}
+        let mapping = Dictionary(
+            inBasis.enumerated().map{ (j, a) in
+                (a, outBasisM.enumerated().reduce(M.zero) { (res, enm) in
+                    res + enm.1 * m[enm.0, j]
+                })
+        })
+        self.init(inBasis: inBasis, outBasis: outBasis, mapping: mapping)
+    }
+    
     public static var zero: FreeModuleHom<A, R> {
         return FreeModuleHom([:])
     }
     
     public func appliedTo(_ m: M) -> M {
-        return m.basisElements.reduce(M.zero) {
+        return m.basis.reduce(M.zero) {
             $0 + m.coeff($1) * (mapping[$1] ?? M.zero)
         }
     }
@@ -40,11 +51,11 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
 // MEMO this implementation is not good. improve if there is a better way.
 public extension FreeModuleHom where R: EuclideanRing {
     public var kernel: [M] {
-        return elimination.kernelVectors.map{ M.vec2El($0, basis: inBasis) }
+        return elimination.kernelVectors.map{ M(basis: inBasis, values: $0.colArray(0)) }
     }
     
     public var image: [M] {
-        return elimination.imageVectors.map{ M.vec2El($0, basis: outBasis) }
+        return elimination.imageVectors.map{ M(basis: outBasis, values: $0.colArray(0)) }
     }
     
     internal var elimination: MatrixElimination<R, _TypeLooseSize, _TypeLooseSize> {
