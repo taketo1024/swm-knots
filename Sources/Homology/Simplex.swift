@@ -59,7 +59,7 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
     }
     
     internal init<S: Sequence>(_ vertices: S) where S.Iterator.Element == Vertex {
-        self.vertices = OrderedSet(sequence: vertices.sorted())
+        self.vertices = OrderedSet(vertices.sorted())
     }
     
     public func face(_ index: Int) -> Simplex {
@@ -80,7 +80,7 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
     }
     
     public func allSubsimplices() -> [Simplex] {
-        var queue = OrderedSet(sequence: [self])
+        var queue = OrderedSet([self])
         var i = 0
         while(i < queue.count) {
             let s = queue[i]
@@ -110,12 +110,12 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
 }
 
 public struct SimplicialComplex {
-    public let simplices: Set<Simplex>
+    public let simplices: OrderedSet<Simplex>
     
     public init<S: Sequence>(_ simplices: S, generate: Bool = false) where S.Iterator.Element == Simplex {
         self.simplices = generate ?
-            simplices.reduce(Set()) { $0.union($1.allSubsimplices()) }
-            : Set(simplices)
+            simplices.reduce(OrderedSet()) { $0 + $1.allSubsimplices() }
+            : OrderedSet(simplices)
     }
     
     public func chainComplex<R: Ring>() -> ChainComplex<Simplex, R> {
@@ -155,5 +155,11 @@ public struct SimplicialComplex {
     
     public func ZHomology() -> Homology<Simplex, IntegerNumber> {
         return Homology(chainComplex())
+    }
+}
+
+fileprivate extension OrderedSet {
+    convenience init<S: Sequence>(_ s: S) where S.Iterator.Element == T {
+        self.init(sequence: s)
     }
 }
