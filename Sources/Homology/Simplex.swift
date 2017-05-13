@@ -148,4 +148,12 @@ public struct SimplicialComplex {
         
         return ChainComplex(chainBases: chns, boundaryMaps: bmaps)
     }
+    
+    public func homology<R: Ring>() -> Homology<Simplex, R> {
+        return Homology(chainComplex())
+    }
+    
+    public func ZHomology() -> Homology<Simplex, IntegerNumber> {
+        return Homology(chainComplex())
+    }
 }
