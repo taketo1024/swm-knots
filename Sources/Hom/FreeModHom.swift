@@ -5,8 +5,8 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
     public typealias Dom = M
     public typealias Codom = M
     
-    public let inBasis: [A]
-    public let outBasis: [A]
+    public let domainBasis: [A]
+    public let codomainBasis: [A]
     
     // TODO might rather keep the matrix than this table.
     
@@ -15,29 +15,29 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
     
     public init(_ mapping: [A : M]) {
         // TODO sort if possible
-        let inBasis = Array(mapping.keys)
-        let outBasis = Array( Set(mapping.values.flatMap { $0.basis }) )
+        let domainBasis = Array(mapping.keys)
+        let codomainBasis = Array( Set(mapping.values.flatMap { $0.basis }) )
         // --TODO
         
-        self.init(inBasis: inBasis, outBasis: outBasis, mapping: mapping)
+        self.init(domainBasis: domainBasis, codomainBasis: codomainBasis, mapping: mapping)
     }
     
-    public init(inBasis: [A], outBasis: [A], mapping: [A : M]) {
-        self.inBasis = inBasis
-        self.outBasis = outBasis
+    public init(domainBasis: [A], codomainBasis: [A], mapping: [A : M]) {
+        self.domainBasis = domainBasis
+        self.codomainBasis = codomainBasis
         self.mapping = mapping
         self._info = FreeModuleHomInfo<A, R>()
     }
     
-    public init<n: _Int, m: _Int>(inBasis: [A], outBasis: [A], matrix m: Matrix<R, n, m>) {
-        let outBasisM = outBasis.map {M($0)}
+    public init<n: _Int, m: _Int>(domainBasis: [A], codomainBasis: [A], matrix m: Matrix<R, n, m>) {
+        let codomainBasisM = codomainBasis.map {M($0)}
         let mapping = Dictionary(
-            inBasis.enumerated().map{ (j, a) in
-                (a, outBasisM.enumerated().reduce(M.zero) { (res, enm) in
+            domainBasis.enumerated().map{ (j, a) in
+                (a, codomainBasisM.enumerated().reduce(M.zero) { (res, enm) in
                     res + enm.1 * m[enm.0, j]
                 })
         })
-        self.init(inBasis: inBasis, outBasis: outBasis, mapping: mapping)
+        self.init(domainBasis: domainBasis, codomainBasis: codomainBasis, mapping: mapping)
     }
     
     public static var zero: FreeModuleHom<A, R> {
@@ -53,12 +53,12 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
 
 // MEMO this implementation is not good. improve if there is a better way.
 public extension FreeModuleHom where R: EuclideanRing {
-    public var kernel: [M] {
-        return elimination.kernelVectors.map{ M(basis: inBasis, values: $0.colArray(0)) }
+    public var kernelGenerators: [M] {
+        return elimination.kernelVectors.map{ M(basis: domainBasis, values: $0.colArray(0)) }
     }
     
-    public var image: [M] {
-        return elimination.imageVectors.map{ M(basis: outBasis, values: $0.colArray(0)) }
+    public var imageGenerators: [M] {
+        return elimination.imageVectors.map{ M(basis: codomainBasis, values: $0.colArray(0)) }
     }
     
     internal var elimination: MatrixElimination<R, _TypeLooseSize, _TypeLooseSize> {
@@ -76,9 +76,9 @@ public extension FreeModuleHom where R: EuclideanRing {
     private func initializeInfo() {
         let info = _info
         
-        let matrix = TypeLooseMatrix<R>(outBasis.count, inBasis.count) { (i, j) -> R in
-            let from = inBasis[j]
-            let to  = outBasis[i]
+        let matrix = TypeLooseMatrix<R>(codomainBasis.count, domainBasis.count) { (i, j) -> R in
+            let from = domainBasis[j]
+            let to  = codomainBasis[i]
             return mapping[from]?.coeff(to) ?? 0
         }
         

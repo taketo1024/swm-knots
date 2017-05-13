@@ -23,11 +23,11 @@ public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
     
     public init(chainBases: [[A]], boundaryMapTable: [[R]]) {
         let boundaryMaps = boundaryMapTable.enumerated().map { (i, table) -> FreeModuleHom<A, R> in
-            let inBasis  = chainBases[i]
-            let outBasis = (i > 0) ? chainBases[i - 1] : []
-            let matrix = TypeLooseMatrix<R>(rows: outBasis.count, cols: inBasis.count, elements: table)
-            return FreeModuleHom(inBasis: inBasis,
-                                 outBasis: outBasis,
+            let domainBasis  = chainBases[i]
+            let codomainBasis = (i > 0) ? chainBases[i - 1] : []
+            let matrix = TypeLooseMatrix<R>(rows: codomainBasis.count, cols: domainBasis.count, elements: table)
+            return FreeModuleHom(domainBasis: domainBasis,
+                                 codomainBasis: codomainBasis,
                                  matrix: matrix)
         }
         self.init(chainBases: chainBases, boundaryMaps: boundaryMaps)
@@ -57,11 +57,11 @@ public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
 
 public extension ChainComplex where R: EuclideanRing {
     public func cycles(_ i: Int) -> [M] {
-        return boundaryMaps[i].kernel
+        return boundaryMaps[i].kernelGenerators
     }
     
     public func boundaries(_ i: Int) -> [M] {
-        return boundaryMaps[i + 1].image
+        return boundaryMaps[i + 1].imageGenerators
     }
 
     public func homology() -> Homology<A, R> {

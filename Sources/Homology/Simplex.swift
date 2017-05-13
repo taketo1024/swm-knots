@@ -141,7 +141,7 @@ public struct SimplicialComplex {
                     return res + R(sgn(i)) * M(t)
                 }
             }
-            return F(inBasis: chns[i], outBasis: (i > 0) ? chns[i - 1] : [], mapping: map)
+            return F(domainBasis: chns[i], codomainBasis: (i > 0) ? chns[i - 1] : [], mapping: map)
         }
         
         return ChainComplex(chainBases: chns, boundaryMaps: bmaps)

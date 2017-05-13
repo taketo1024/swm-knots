@@ -43,7 +43,7 @@ public extension Homology where R: EuclideanRing {
             let d0 = chainComplex.boundaryMap(i)
             let d1 = chainComplex.boundaryMap(i + 1)
             
-            let b = d0.inBasis                // basis of the i-th Chain group C_i
+            let b = d0.domainBasis                // basis of the i-th Chain group C_i
             let Z = d0.elimination.kernelPart // Z_i in C_i : the i-th Cycle group
             let B = d1.elimination.imagePart  // B_i in Z_i : the i-th Boundary group
             
