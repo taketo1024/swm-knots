@@ -21,6 +21,15 @@ public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
         self.boundaryMaps = boundaryMaps
     }
     
+    public init(_ pairs: ([A], F)...) {
+        self.chainBases = pairs.map{$0.0}
+        self.boundaryMaps = pairs.map{$0.1}
+    }
+    
+    public var dim: Int {
+        return self.chainBases.count - 1
+    }
+    
     public func boundaryMap(_ i: Int) -> FreeModuleHom<A, R> {
         return boundaryMaps[i]
     }
