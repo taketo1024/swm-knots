@@ -83,15 +83,41 @@ public typealias RowVector<R: Ring, m: _Int> = Matrix<R, _1, m>
 
 public extension Matrix {
     public func rowVector(_ i: Int) -> RowVector<R, m> {
-        return RowVector<R, m>{(_, j) -> R in
+        return RowVector<R, m>(rows: 1, cols: cols){(_, j) -> R in
             return self[i, j]
         }
     }
     
     public func colVector(_ j: Int) -> ColVector<R, n> {
-        return ColVector<R, n>{(i, j0) -> R in
-            print("\(i), \(j0)")
-            return self[i, j0]
+        return ColVector<R, n>(rows: rows, cols: 1){(i, _) -> R in
+            return self[i, j]
+        }
+    }
+    
+    func toRowVectors() -> [RowVector<R, m>] {
+        return (0 ..< rows).map { rowVector($0) }
+    }
+    
+    func toColVectors() -> [ColVector<R, n>] {
+        return (0 ..< cols).map { colVector($0) }
+    }
+    
+    func submatrix(colsInRange c: CountableRange<Int>) -> Matrix<R, n, _TypeLooseSize> {
+        return Matrix<R, n, _TypeLooseSize>(rows: self.rows, cols: c.upperBound - c.lowerBound) {
+            self[$0, $1 + c.lowerBound]
+        }
+    }
+    
+    func submatrix(rowsInRange r: CountableRange<Int>) -> Matrix<R, _TypeLooseSize, m> {
+        return Matrix<R, _TypeLooseSize, m>(rows: r.upperBound - r.lowerBound, cols: self.cols) {
+            self[$0 + r.lowerBound, $1]
+        }
+    }
+    
+    func submatrix(inRange: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> TypeLooseMatrix<R> {
+        let (r, c) = inRange
+        return TypeLooseMatrix<R>(rows: r.upperBound - r.lowerBound, cols: c.upperBound - c.lowerBound) {
+            self[$0 + r.lowerBound, $1 + c.lowerBound]
         }
     }
 }
