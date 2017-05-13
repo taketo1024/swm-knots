@@ -92,6 +92,10 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
         return Array(queue)
     }
     
+    public func skeleton(_ dim: Int) -> [Simplex] {
+        return allSubsimplices().filter{$0.dim <= dim}
+    }
+    
     public var hashValue: Int {
         return description.hashValue
     }
@@ -106,10 +110,12 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
 }
 
 public struct SimplicialComplex {
-    public let simplices: [Simplex]
+    public let simplices: Set<Simplex>
     
-    public init(_ simplices: [Simplex]) {
-        self.simplices = simplices
+    public init<S: Sequence>(_ simplices: S, generate: Bool = false) where S.Iterator.Element == Simplex {
+        self.simplices = generate ?
+            simplices.reduce(Set()) { $0.union($1.allSubsimplices()) }
+            : Set(simplices)
     }
     
     public func chainComplex<R: Ring>() -> ChainComplex<Simplex, R> {
@@ -136,7 +142,7 @@ public struct SimplicialComplex {
                     return res + R(sgn(i)) * M(t)
                 }
             }
-            return F(map)
+            return F(inBasis: chns[i], outBasis: (i > 0) ? chns[i - 1] : [], mapping: map)
         }
         bmaps += [F.zero]
         
