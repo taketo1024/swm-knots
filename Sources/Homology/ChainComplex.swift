@@ -13,8 +13,8 @@ public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
     public typealias M = FreeModule<A, R>
     public typealias F = FreeModuleHom<A, R>
     
-    fileprivate let chainBases: [[A]] // [[0-chain], [1-chain], ..., [n-chain]]
-    fileprivate let boundaryMaps: [F] // [(d_0 = 0), (d_1 = C_1 -> C_0), ..., (d_n: C_n -> C_{n-1}), (d_{n+1} = 0)]
+    private let chainBases: [[A]] // [[0-chain], [1-chain], ..., [n-chain]]
+    private let boundaryMaps: [F] // [(d_0 = 0), (d_1 = C_1 -> C_0), ..., (d_n: C_n -> C_{n-1}), (d_{n+1} = 0)]
     
     public init(chainBases: [[A]], boundaryMaps: [F]) {
         self.chainBases = chainBases
@@ -42,12 +42,12 @@ public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
         return self.chainBases.count - 1
     }
     
-    public func boundaryMap(_ i: Int) -> FreeModuleHom<A, R> {
-        return (0 ... dim).contains(i) ? boundaryMaps[i] : F.zero
+    public func chainBasis(_ i: Int) -> [A] {
+        return (0 ... dim).contains(i) ? chainBases[i] : []
     }
     
-    public func homology() -> Homology<A, R> {
-        return Homology(self)
+    public func boundaryMap(_ i: Int) -> FreeModuleHom<A, R> {
+        return (0 ... dim).contains(i) ? boundaryMaps[i] : F.zero
     }
     
     public var description: String {
@@ -56,12 +56,20 @@ public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
 }
 
 public extension ChainComplex where R: EuclideanRing {
+    public func cycleRank(_ i: Int) -> Int {
+        return boundaryMap(i).kernelRank
+    }
+    
     public func cycles(_ i: Int) -> [M] {
-        return boundaryMaps[i].kernelGenerators
+        return boundaryMap(i).kernelGenerators
+    }
+    
+    public func boundaryRank(_ i: Int) -> Int {
+        return boundaryMap(i + 1).imageRank
     }
     
     public func boundaries(_ i: Int) -> [M] {
-        return boundaryMaps[i + 1].imageGenerators
+        return boundaryMap(i + 1).imageGenerators
     }
 
     public func homology() -> Homology<A, R> {

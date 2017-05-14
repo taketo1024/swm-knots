@@ -68,12 +68,16 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
 
 // MEMO this implementation is not good. improve if there is a better way.
 public extension FreeModuleHom where R: EuclideanRing {
-    internal var elimination: MatrixElimination<R, _TypeLooseSize, _TypeLooseSize> {
-        return matrix.rankNormalElimination
+    public var kernelRank: Int {
+        return matrix.rankNormalElimination.nullity
     }
     
     public var kernelGenerators: [M] {
         return matrix.rankNormalElimination.kernelVectors.map{ M(basis: domainBasis, values: $0.colArray(0)) }
+    }
+    
+    public var imageRank: Int {
+        return matrix.rankNormalElimination.rank
     }
     
     public var imageGenerators: [M] {

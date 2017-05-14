@@ -43,9 +43,9 @@ public extension Homology where R: EuclideanRing {
             let d0 = chainComplex.boundaryMap(i)
             let d1 = chainComplex.boundaryMap(i + 1)
             
-            let b = d0.domainBasis                // basis of the i-th Chain group C_i
-            let Z = d0.elimination.kernelPart // Z_i in C_i : the i-th Cycle group
-            let B = d1.elimination.imagePart  // B_i in Z_i : the i-th Boundary group
+            let b = d0.domainBasis // basis of the i-th Chain group C_i
+            let Z = d0.matrix.rankNormalElimination.kernelPart // Z_i in C_i : the i-th Cycle group
+            let B = d1.matrix.rankNormalElimination.imagePart  // B_i in Z_i : the i-th Boundary group
             
             return FreeModuleQuotient(basis: b, divident: Z, divisor: B) // H_i = Z_i / B_i : the i-th Homology group
 

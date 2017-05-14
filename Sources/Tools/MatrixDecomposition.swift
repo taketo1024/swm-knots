@@ -40,8 +40,7 @@ public extension MatrixElimination where R: EuclideanRing {
         }
     }
     
-    // TODO rename to rankNormalForm
-    public  var result: Matrix<R, n, m> {
+    public var rankNormalForm: Matrix<R, n, m> {
         return eliminationResult.result
     }
     
@@ -98,12 +97,19 @@ public extension MatrixElimination where R: EuclideanRing {
     }
     
     public var diagonal: [R] {
-        let B = result
-        return (0 ..< min(self.rows, self.cols)).map{ B[$0, $0] }
+        let B = rankNormalForm
+        let r = min(self.rows, self.cols)
+        return (0 ..< r).map{ B[$0, $0] }
     }
     
     public var rank: Int {
-        return diagonal.filter({$0 != 0}).count
+        let B = rankNormalForm
+        let r = min(self.rows, self.cols)
+        return (0 ..< r).filter{ B[$0, $0] != R.zero }.count
+    }
+    
+    public var nullity: Int {
+        return cols - rank
     }
     
     public var kernelPart: Matrix<R, m, _TypeLooseSize> {
