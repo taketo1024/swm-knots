@@ -7,6 +7,8 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence, CustomString
     
     internal var elements: [R]
     
+    fileprivate let _rankNormalElimination = Box<MatrixElimination<R, n, m>>()
+    
     private func index(_ i: Int, _ j: Int) -> Int {
         return (i * cols) + j
     }
@@ -189,16 +191,6 @@ public func ** <R: Ring, n: _Int>(a: Matrix<R, n, n>, k: Int) -> Matrix<R, n, n>
     return k == 0 ? a.leftIdentity : a * (a ** (k - 1))
 }
 
-public func det<R: Ring, n: _Int>(_ a: Matrix<R, n, n>) -> R {
-    return Permutation<n>.all.reduce(0) {
-        (res: R, s: Permutation<n>) -> R in
-        res + R(sgn(s)) * (0 ..< a.rows).reduce(1) {
-            (p: R, i: Int) -> R in
-            p * a[i, s[i]]
-        }
-    }
-}
-
 // CustomStringConvertible
 
 public extension Matrix {
@@ -315,8 +307,8 @@ public extension Matrix where n == m {
         return self.init { $0 == $1 ? 1 : 0 }
     }
 
-    public var determinant: R {
-        return det(self)
+    public var det: R {
+        return _determinant(self)
     }
 }
 
@@ -332,5 +324,34 @@ public extension Matrix where n == _TypeLooseSize, m == _TypeLooseSize {
     
     public init(_ rows: Int, _ cols: Int, _ gen: (Int, Int) -> R) {
         self.init(rows: rows, cols: cols, gen: gen)
+    }
+}
+
+// rank normal form
+public extension Matrix where R: EuclideanRing {
+    public var rankNormalElimination: MatrixElimination<R, n, m> {
+        let box = _rankNormalElimination
+        switch box.content {
+        case let e?: return e
+        default:
+            let e = MatrixElimination<R, n, m>(self)
+            box.content = e
+            return e
+        }
+    }
+    
+    public var rank: Int {
+        return rankNormalElimination.rank
+    }
+}
+
+// FIXME this implementation is a disaster.
+private func _determinant<R: Ring, n: _Int>(_ a: Matrix<R, n, n>) -> R {
+    return Permutation<n>.all.reduce(0) {
+        (res: R, s: Permutation<n>) -> R in
+        res + R(sgn(s)) * (0 ..< a.rows).reduce(1) {
+            (p: R, i: Int) -> R in
+            p * a[i, s[i]]
+        }
     }
 }
