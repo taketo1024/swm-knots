@@ -8,31 +8,50 @@ public enum EliminationMode {
 
 // Boxed class for lazy computation.
 // B = Q A P (A: matrix, B: result, Q: left, P: right)
-public class MatrixElimination<R: EuclideanRing, n: _Int, m: _Int> {
+
+public class MatrixElimination<R: Ring, n: _Int, m: _Int> {
     public let target: Matrix<R, n, m>
-    private let rows: Int
-    private let cols: Int
-    private let mode: EliminationMode
+    public let mode: EliminationMode
+    fileprivate let rows: Int
+    fileprivate let cols: Int
     
     public init(_ matrix: Matrix<R, n, m>, mode: EliminationMode = .Both) {
         self.target = matrix
+        self.mode = mode
         self.rows = matrix.rows
         self.cols = matrix.cols
-        self.mode = mode
     }
     
-    private lazy var _result: (Matrix<R, n, m>, [EliminationStep<R>]) = {[unowned self] in
-        var e = EliminationProcessor(self.target, self.mode)
-        e.run()
-        return (e.result, e.process)
-    }()
+    fileprivate var _eliminationResult: (result: Matrix<R, n, m>, process: [EliminationStep<R>])?
+}
+
+public extension MatrixElimination where R: EuclideanRing {
+    private var eliminationResult: (result: Matrix<R, n, m>, process: [EliminationStep<R>]) {
+        switch _eliminationResult{
+        case let r?:
+            return r
+        default:
+            var e = EliminationProcessor(self.target, self.mode)
+            e.run()
+            
+            let result = (e.result, e.process)
+            _eliminationResult = result
+            return result
+        }
+    }
     
-    public  lazy var result:  Matrix<R, n, m>      = self._result.0
-    private lazy var process: [EliminationStep<R>] = self._result.1
+    // TODO rename to rankNormalForm
+    public  var result: Matrix<R, n, m> {
+        return eliminationResult.result
+    }
     
-    public lazy var left: Matrix<R, n, n> = {[unowned self] in
-        var Q = self.target.leftIdentity
-        for s in self.process {
+    private var eliminationProcess: [EliminationStep<R>] {
+        return eliminationResult.process
+    }
+    
+    public var left: Matrix<R, n, n> {
+        var Q = target.leftIdentity
+        for s in eliminationProcess {
             switch s {
             case .AddRow(_, _, _), .InvRow(_), .SwapRows(_, _):
                 s.applyTo(&Q)
@@ -40,11 +59,11 @@ public class MatrixElimination<R: EuclideanRing, n: _Int, m: _Int> {
             }
         }
         return Q
-    }()
+    }
     
-    public lazy var leftInverse: Matrix<R, n, n> = {[unowned self] in
-        var Q = self.target.leftIdentity
-        for s in self.process.reversed() {
+    public var leftInverse: Matrix<R, n, n> {
+        var Q = target.leftIdentity
+        for s in eliminationProcess.reversed() {
             switch s {
             case .AddRow(_, _, _), .InvRow(_), .SwapRows(_, _):
                 s.applyInverseTo(&Q)
@@ -52,11 +71,11 @@ public class MatrixElimination<R: EuclideanRing, n: _Int, m: _Int> {
             }
         }
         return Q
-    }()
+    }
     
-    public lazy var right: Matrix<R, m, m> = {[unowned self] in
-        var P = self.target.rightIdentity
-        for s in self.process {
+    public var right: Matrix<R, m, m> {
+        var P = target.rightIdentity
+        for s in eliminationProcess {
             switch s {
             case .AddCol(_, _, _), .InvCol(_), .SwapCols(_, _):
                 s.applyTo(&P)
@@ -64,11 +83,11 @@ public class MatrixElimination<R: EuclideanRing, n: _Int, m: _Int> {
             }
         }
         return P
-    }()
+    }
     
-    public lazy var rightInverse: Matrix<R, m, m> = {[unowned self] in
-        var P = self.target.rightIdentity
-        for s in self.process.reversed() {
+    public var rightInverse: Matrix<R, m, m> {
+        var P = target.rightIdentity
+        for s in eliminationProcess.reversed() {
             switch s {
             case .AddCol(_, _, _), .InvCol(_), .SwapCols(_, _):
                 s.applyInverseTo(&P)
@@ -76,38 +95,38 @@ public class MatrixElimination<R: EuclideanRing, n: _Int, m: _Int> {
             }
         }
         return P
-    }()
+    }
     
-    public lazy var diagonal: [R] = {[unowned self] in
-        let B = self.result
+    public var diagonal: [R] {
+        let B = result
         return (0 ..< min(self.rows, self.cols)).map{ B[$0, $0] }
-    }()
+    }
     
-    public lazy var rank: Int = {[unowned self] in
-        return self.diagonal.filter({$0 != 0}).count
-    }()
+    public var rank: Int {
+        return diagonal.filter({$0 != 0}).count
+    }
     
-    public lazy var kernelPart: Matrix<R, m, _TypeLooseSize> = { [unowned self] in
-        return self.right.submatrix(colsInRange: self.rank ..< self.cols)
-    }()
+    public var kernelPart: Matrix<R, m, _TypeLooseSize> {
+        return right.submatrix(colsInRange: rank ..< cols)
+    }
     
-    public lazy var kernelVectors: [ColVector<R, m>] = { [unowned self] in
-        return self.kernelPart.toColVectors()
-    }()
+    public var kernelVectors: [ColVector<R, m>] {
+        return kernelPart.toColVectors()
+    }
     
-    public lazy var imagePart: Matrix<R, n, _TypeLooseSize> = { [unowned self] in
-        let d = self.diagonal
-        var a: Matrix<R, n, _TypeLooseSize> = self.leftInverse.submatrix(colsInRange: 0 ..< self.rank)
+    public var imagePart: Matrix<R, n, _TypeLooseSize> {
+        let d = diagonal
+        var a: Matrix<R, n, _TypeLooseSize> = leftInverse.submatrix(colsInRange: 0 ..< self.rank)
         a.replaceElements() { (i, j) in d[j] * a[i, j] }
         return a
-    }()
+    }
     
-    public lazy var imageVectors: [ColVector<R, n>] = { [unowned self] in
-        return self.imagePart.toColVectors()
-    }()
+    public var imageVectors: [ColVector<R, n>] {
+        return imagePart.toColVectors()
+    }
 }
 
-private enum EliminationStep<R: EuclideanRing> {
+private enum EliminationStep<R: Ring> {
     case AddRow(at: Int, to: Int, mul: R)
     case InvRow(Int)
     case SwapRows(Int, Int)
@@ -144,7 +163,7 @@ private enum EliminationStep<R: EuclideanRing> {
     }
 }
 
-fileprivate struct EliminationProcessor<R: EuclideanRing, n: _Int, m: _Int> {
+private struct EliminationProcessor<R: EuclideanRing, n: _Int, m: _Int> {
     let mode: EliminationMode
     let rows: Int
     let cols: Int
