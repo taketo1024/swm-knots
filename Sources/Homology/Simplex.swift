@@ -118,7 +118,7 @@ public struct SimplicialComplex {
             : OrderedSet(simplices)
     }
     
-    public func chainComplex<R: Ring>() -> ChainComplex<Simplex, R> {
+    public func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<Simplex, R> {
         typealias M = FreeModule<Simplex, R>
         typealias F = FreeModuleHom<Simplex, R>
         
@@ -147,12 +147,8 @@ public struct SimplicialComplex {
         return ChainComplex(chainBases: chns, boundaryMaps: bmaps)
     }
     
-    public func homology<R: Ring>() -> Homology<Simplex, R> {
-        return Homology(chainComplex())
-    }
-    
     public func ZHomology() -> Homology<Simplex, IntegerNumber> {
-        return Homology(chainComplex())
+        return Homology(chainComplex(type: IntegerNumber.self))
     }
 }
 

@@ -65,22 +65,3 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
         return Dictionary(pairs)
     }
 }
-
-// MEMO this implementation is not good. improve if there is a better way.
-public extension FreeModuleHom where R: EuclideanRing {
-    public var kernelRank: Int {
-        return matrix.rankNormalElimination.nullity
-    }
-    
-    public var kernelGenerators: [M] {
-        return matrix.rankNormalElimination.kernelVectors.map{ M(basis: domainBasis, values: $0.colArray(0)) }
-    }
-    
-    public var imageRank: Int {
-        return matrix.rankNormalElimination.rank
-    }
-    
-    public var imageGenerators: [M] {
-        return matrix.rankNormalElimination.imageVectors.map{ M(basis: codomainBasis, values: $0.colArray(0)) }
-    }
-}

@@ -73,9 +73,11 @@ public extension FreeModuleQuotient where R: EuclideanRing {
         
         let (k, l) = (M.cols, N.cols)
         
-        let P : Matrix<R, k, l> = FreeModuleQuotient.calculateP(M, N)
-        let T: Matrix<R, n, k>  = M * P.rankNormalElimination.leftInverse
-        let diag: [R] = P.rankNormalElimination.diagonal
+        let P: Matrix<R, k, l> = FreeModuleQuotient.calculateP(M, N)
+        let e = P.eliminate()
+        
+        let T: Matrix<R, n, k>  = M * e.leftInverse
+        let diag: [R] = e.diagonal
         
         let freePart: [FreeModuleQuotientGenerator] = (l ..< k).map { j in
             .Free(generator: FM(basis: basis, values: T.colArray(j)))
@@ -96,9 +98,8 @@ public extension FreeModuleQuotient where R: EuclideanRing {
         
         let (k, l) = (M.cols, N.cols)
         
-        let E = EuclideanMatrixElimination(M, mode: .RowsOnly)
-        let L:  Matrix<R, n, n> = E.left
-        let D:  Matrix<R, k, k> = (L * M).submatrix(rowsInRange: 0 ..< k)
+        let L : Matrix<R, n, n> = M.eliminate(mode: .RowsOnly).left
+        let D : Matrix<R, k, k> = (L * M).submatrix(rowsInRange: 0 ..< k)
         let DP: Matrix<R, k, l> = (L * N).submatrix(rowsInRange: 0 ..< k)
         
         return  Matrix<R, k, l>(rows: k, cols: l) { (i, j) in

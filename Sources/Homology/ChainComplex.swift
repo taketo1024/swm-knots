@@ -13,9 +13,10 @@ public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
     public typealias M = FreeModule<A, R>
     public typealias F = FreeModuleHom<A, R>
     
-    private let chainBases: [[A]] // [[0-chain], [1-chain], ..., [n-chain]]
-    private let boundaryMaps: [F] // [(d_0 = 0), (d_1 = C_1 -> C_0), ..., (d_n: C_n -> C_{n-1}), (d_{n+1} = 0)]
+    public let chainBases: [[A]] // [[0-chain], [1-chain], ..., [n-chain]]
+    public let boundaryMaps: [F] // [(d_0 = 0), (d_1 = C_1 -> C_0), ..., (d_n: C_n -> C_{n-1}), (d_{n+1} = 0)]
     
+    // root initializer
     public init(chainBases: [[A]], boundaryMaps: [F]) {
         self.chainBases = chainBases
         self.boundaryMaps = boundaryMaps
@@ -34,45 +35,14 @@ public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
     }
     
     public init(_ pairs: ([A], F)...) {
-        self.chainBases = pairs.map{$0.0}
-        self.boundaryMaps = pairs.map{$0.1}
+        self.init(chainBases: pairs.map{$0.0}, boundaryMaps: pairs.map{$0.1})
     }
     
     public var dim: Int {
         return self.chainBases.count - 1
     }
     
-    public func chainBasis(_ i: Int) -> [A] {
-        return (0 ... dim).contains(i) ? chainBases[i] : []
-    }
-    
-    public func boundaryMap(_ i: Int) -> FreeModuleHom<A, R> {
-        return (0 ... dim).contains(i) ? boundaryMaps[i] : F.zero
-    }
-    
     public var description: String {
         return chainBases.description
-    }
-}
-
-public extension ChainComplex where R: EuclideanRing {
-    public func cycleRank(_ i: Int) -> Int {
-        return boundaryMap(i).kernelRank
-    }
-    
-    public func cycles(_ i: Int) -> [M] {
-        return boundaryMap(i).kernelGenerators
-    }
-    
-    public func boundaryRank(_ i: Int) -> Int {
-        return boundaryMap(i + 1).imageRank
-    }
-    
-    public func boundaries(_ i: Int) -> [M] {
-        return boundaryMap(i + 1).imageGenerators
-    }
-
-    public func homology() -> Homology<A, R> {
-        return Homology(self)
     }
 }

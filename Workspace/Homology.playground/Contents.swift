@@ -52,7 +52,7 @@ do {
 do {
     let bases: [[String]] = [["e0"], ["e10", "e11"], ["e2"]]
     let table: [[Z]] = [[0], [0, 0], [2, 0]]
-    let H = ChainComplex(chainBases: bases, boundaryMapTable: table).homology()
+    let H = Homology(ChainComplex(chainBases: bases, boundaryMapTable: table))
     print("H(Kl; Z) =", H.detailDescription, "\n")
 }
 

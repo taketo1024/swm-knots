@@ -12,9 +12,9 @@ public struct Homology<A: FreeModuleBase, R: Ring>: CustomStringConvertible {
     public let chainComplex: ChainComplex<A, R>
     public let groups: [FreeModuleQuotient<A, R>]
     
-    public init(_ chainComplex: ChainComplex<A, R>) {
+    public init(chainComplex: ChainComplex<A, R>, groups: [FreeModuleQuotient<A, R>]) {
         self.chainComplex = chainComplex
-        self.groups = []
+        self.groups = groups
     }
     
     public func bettiNumer(i: Int) -> Int {
@@ -38,17 +38,22 @@ public struct Homology<A: FreeModuleBase, R: Ring>: CustomStringConvertible {
 
 public extension Homology where R: EuclideanRing {
     public init(_ chainComplex: ChainComplex<A, R>) {
-        self.chainComplex = chainComplex
-        self.groups = (0 ... chainComplex.dim).map { i in
-            let d0 = chainComplex.boundaryMap(i)
-            let d1 = chainComplex.boundaryMap(i + 1)
-            
-            let b = d0.domainBasis // basis of the i-th Chain group C_i
-            let Z = d0.matrix.rankNormalElimination.kernelPart // Z_i in C_i : the i-th Cycle group
-            let B = d1.matrix.rankNormalElimination.imagePart  // B_i in Z_i : the i-th Boundary group
-            
-            return FreeModuleQuotient(basis: b, divident: Z, divisor: B) // H_i = Z_i / B_i : the i-th Homology group
+        let dim = chainComplex.dim
+        
+        let topMap = FreeModuleHom<A, R>(domainBasis: [], codomainBasis: chainComplex.chainBases[dim], mapping:[:])
+        let boundaryMaps = chainComplex.boundaryMaps + [topMap]
+        let elims = boundaryMaps.map { $0.matrix.eliminate() }
 
+        let groups: [FreeModuleQuotient<A, R>] = (0 ... dim).map { i in
+            let map = chainComplex.boundaryMaps[i]
+            let basis = map.domainBasis // basis of the i-th Chain group C_i
+            
+            let Z = elims[i].kernelPart     // Z_i in C_i : the i-th Cycle group
+            let B = elims[i + 1].imagePart  // B_i in Z_i : the i-th Boundary group
+            
+            return FreeModuleQuotient(basis: basis, divident: Z, divisor: B) // H_i = Z_i / B_i : the i-th Homology group
         }
+
+        self.init(chainComplex: chainComplex, groups: groups)
     }
 }
