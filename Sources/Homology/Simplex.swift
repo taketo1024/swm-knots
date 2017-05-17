@@ -133,7 +133,7 @@ public struct SimplicialComplex {
             chns[s.dim].append(s)
         }
         
-        let  bmaps: [F] = (0 ... dim).map { (i) -> F in
+        let bmaps: [F] = (0 ... dim).map { (i) -> F in
             let from = chns[i]
             let map = Dictionary.generateBy(keys: from){ (s) -> M in
                 return s.faces().enumerated().reduce(M.zero){ (res, el) -> M in
@@ -146,9 +146,12 @@ public struct SimplicialComplex {
         
         return ChainComplex(chainBases: chns, boundaryMaps: bmaps)
     }
-    
-    public func ZHomology() -> Homology<Simplex, IntegerNumber> {
-        return Homology(chainComplex(type: IntegerNumber.self))
+}
+
+public extension Homology where A == Simplex, R: EuclideanRing {
+    public init(_ s: SimplicialComplex, _ type: R.Type) {
+        let c: ChainComplex<Simplex, R> = s.chainComplex(type: R.self)
+        self.init(c)
     }
 }
 
