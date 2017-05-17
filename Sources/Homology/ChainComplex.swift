@@ -22,8 +22,9 @@ public struct ChainComplex<A: Hashable, R: Ring>: CustomStringConvertible {
         self.boundaryMaps = boundaryMaps
     }
     
-    public init(chainBases: [[A]], boundaryMapTable: [[R]]) {
-        let boundaryMaps = boundaryMapTable.enumerated().map { (i, table) -> FreeModuleHom<A, R> in
+    public init(_ pairs: ([A], table: [R])...) {
+        let chainBases = pairs.map{$0.0}
+        let boundaryMaps = pairs.map{$0.1}.enumerated().map { (i, table) -> FreeModuleHom<A, R> in
             let domainBasis  = chainBases[i]
             let codomainBasis = (i > 0) ? chainBases[i - 1] : []
             let matrix = TypeLooseMatrix<R>(rows: codomainBasis.count, cols: domainBasis.count, elements: table)

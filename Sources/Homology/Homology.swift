@@ -32,7 +32,7 @@ public struct Homology<A: FreeModuleBase, R: Ring>: CustomStringConvertible {
     public var detailDescription: String {
         return "{\n"
             + groups.enumerated().map{"\t\($0) : \($1),\t\($1.generators.map{$0.generator})"}.joined(separator: ",\n")
-            + "\n}, eulerChacteristic: \(eulerCharacteristic)"
+            + "\n}"
     }
 }
 
