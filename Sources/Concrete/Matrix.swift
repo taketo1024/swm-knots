@@ -327,8 +327,8 @@ public extension Matrix where n == _TypeLooseSize, m == _TypeLooseSize {
 
 // Matrix Elimination
 public extension Matrix where R: EuclideanRing {
-    public func eliminate(mode: EliminationMode = .Both) -> EuclideanMatrixElimination<R, n, m> {
-        return EuclideanMatrixElimination(self, mode: mode)
+    public func eliminate(mode: EliminationMode = .Both) -> BaseMatrixElimination<R, n, m> {
+        return R.matrixElimination(self, mode: mode)
     }
 }
 
