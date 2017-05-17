@@ -9,8 +9,9 @@ public struct IntQuotientRing<n: _Int>: IntQuotientType {
     
     public let value: Int
     
+    // root initializer
     public init(_ value: R) {
-        self.value = value
+        self.value = (value % n.value)
     }
     
     public var mod: Int {

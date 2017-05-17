@@ -5,7 +5,6 @@ public protocol QuotientRing: Ring, CustomStringConvertible {
     
     var value: R { get }
     var mod: R { get }
-    var reduced: Self { get }
     
     init(_ r: R)
 }
@@ -19,13 +18,12 @@ public protocol EuclideanQuotientRing: QuotientRing {
 public protocol EuclideanQuotientField: EuclideanQuotientRing, QuotientField {}
 
 extension EuclideanQuotientRing {
-    public var reduced: Self {
-        let r = value % mod
-        return Self.init(r)
+    public var description: String {
+        return "[\(value)]"
     }
     
-    public var description: String {
-        return "\(value % mod) mod \(mod)"
+    public var detailDescription: String {
+        return "(\(value) mod \(mod))"
     }
 }
 

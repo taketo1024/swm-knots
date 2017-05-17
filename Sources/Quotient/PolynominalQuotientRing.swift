@@ -4,16 +4,17 @@ public struct PolynomialQuotientRing<K: Field, P: _Polynomial>: EuclideanQuotien
     public typealias R = Polynomial<K>
     public let value: R
     
+    // root initializer
+    public init(_ value: R) {
+        self.value = (value % P.value)
+    }
+    
     public init(_ value: Int) {
         self.init(R(value))
     }
     
     public init(_ coeffs: K...) {
         self.init(R(coeffs))
-    }
-    
-    public init(_ value: R) {
-        self.value = value
     }
     
     public var mod: R {
@@ -25,18 +26,18 @@ public struct PolynomialQuotientField<K: Field, P: _Polynomial>: EuclideanQuotie
     public typealias R = Polynomial<K>
     public let value: R
     
+    public init(_ value: R) {
+        self.value = (value % P.value)
+        
+        // TODO check if P is irreducible.
+    }
+    
     public init(_ value: Int) {
         self.init(R(value))
     }
     
     public init(_ coeffs: K...) {
         self.init(R(coeffs))
-    }
-    
-    public init(_ value: R) {
-        self.value = value
-        
-        // TODO check if P is irreducible.
     }
     
     public var mod: R {

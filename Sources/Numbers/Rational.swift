@@ -5,10 +5,15 @@ public struct RationalNumber: Field {
     
     public init(_ p: IntegerNumber, _ q: IntegerNumber) {
         guard q != 0 else {
-            fatalError("denom: 0")
+            fatalError("Given 0 for the dominator of a RationalNumber")
         }
-        self.p = p
-        self.q = q
+        
+        let d = abs(gcd(p, q)) * (q / abs(q))
+        if d == 1 {
+            (self.p, self.q) = (p, q)
+        } else {
+            (self.p, self.q) = (p / d, q / d)
+        }
     }
     
     public init(_ n: IntegerNumber) {
@@ -17,11 +22,6 @@ public struct RationalNumber: Field {
     
     public var inverse: RationalNumber {
         return RationalNumber(q, p)
-    }
-    
-    public var reduced: RationalNumber {
-        let d = abs(gcd(p, q)) * (q / abs(q))
-        return RationalNumber(p / d, q / d)
     }
     
     public var numerator: IntegerNumber {
