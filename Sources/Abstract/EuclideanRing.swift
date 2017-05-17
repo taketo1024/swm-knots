@@ -52,7 +52,7 @@ public func bezout<R: EuclideanRing>(_ a: R, _ b: R) -> (x: R, y: R, r: R) {
 }
 
 public extension EuclideanRing {
-    static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: EliminationMode) -> BaseMatrixElimination<Self, n, m> {
+    static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m> {
         return EuclideanMatrixElimination<Self, n, m>(A, mode: mode)
     }
 }

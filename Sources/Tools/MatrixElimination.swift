@@ -1,19 +1,19 @@
 import Foundation
 
-public enum EliminationMode {
+public enum MatrixEliminationMode {
     case Both
-    case RowsOnly
-    case ColsOnly
+    case Rows
+    case Cols
 }
 
 // an abstract class
 public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
     public let target: Matrix<R, n, m>
-    public let mode: EliminationMode
+    public let mode: MatrixEliminationMode
     fileprivate let rows: Int
     fileprivate let cols: Int
     
-    public init(_ matrix: Matrix<R, n, m>, mode: EliminationMode = .Both) {
+    public init(_ matrix: Matrix<R, n, m>, mode: MatrixEliminationMode = .Both) {
         self.target = matrix
         self.mode = mode
         self.rows = matrix.rows
@@ -212,7 +212,7 @@ fileprivate extension Matrix {
 
 // base abstract class
 fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
-    let mode: EliminationMode
+    let mode: MatrixEliminationMode
     let rows: Int
     let cols: Int
     
@@ -220,7 +220,7 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
     var process: [EliminationStep<R>]
     private(set) var itr = 0
     
-    init(_ target: Matrix<R, n, m>, _ mode: EliminationMode = .Both) {
+    init(_ target: Matrix<R, n, m>, _ mode: MatrixEliminationMode = .Both) {
         self.mode = mode
         self.rows = target.rows
         self.cols = target.cols
@@ -231,9 +231,9 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
     func run() {
         let maxItr: Int = {
             switch mode {
-            case .Both:     return min(rows, cols)
-            case .RowsOnly: return rows
-            case .ColsOnly: return cols
+            case .Both: return min(rows, cols)
+            case .Rows: return rows
+            case .Cols: return cols
             }
         }()
         
@@ -268,11 +268,11 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
             return (itr ..< rows).flatMap{ i in
                      (itr ..< cols).map{ j in (i, j) }
                    }.makeIterator()
-        case .RowsOnly:
+        case .Rows:
             return (itr ..< rows).flatMap{ i in
                      (0 ..< cols).map{ j in (i, j) }
                    }.makeIterator()
-        case .ColsOnly:
+        case .Cols:
             return (itr ..< cols).flatMap{ j in
                      (0 ..< rows).map{ i in (i, j) }
                    }.makeIterator()
@@ -283,8 +283,8 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
 fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _Int>: BaseEliminationProcessor<R, n, m> {
     
     override func iteration() -> Bool {
-        let doRows = (mode != .ColsOnly)
-        let doCols = (mode != .RowsOnly)
+        let doRows = (mode != .Cols)
+        let doCols = (mode != .Rows)
 
         guard var (i0, j0) = next() else {
             return false
@@ -339,7 +339,7 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
     
     override func postProcess() {
         switch mode {
-        case .RowsOnly:
+        case .Rows:
             var step = 0
             align: while step < rows {
                 for j in 0 ..< cols {
@@ -352,7 +352,7 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
                 }
                 step += 1
             }
-        case .ColsOnly:
+        case .Cols:
             var step = 0
             align: while step < cols {
                 for i in 0 ..< rows {
@@ -390,7 +390,7 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
         
         // at this point, it is guaranteed that result[i, j0] == 0 for (i >= itr, i != i0)
         
-        if mode == .RowsOnly {
+        if mode == .Rows {
             for i in 0 ..< itr {
                 if i == i0 || result[i, j0] == 0 {
                     continue
@@ -427,7 +427,7 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
         
         // at this point, it is guaranteed that result[i0, j] == 0 for (j >= itr, j != j0)
         
-        if mode == .ColsOnly {
+        if mode == .Cols {
             for j in 0 ..< itr {
                 if j == j0 || result[i0, j] == 0 {
                     continue
@@ -462,8 +462,8 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
 fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEliminationProcessor<R, n, m> {
     
     override func iteration() -> Bool {
-        let doRows = (mode != .ColsOnly)
-        let doCols = (mode != .RowsOnly)
+        let doRows = (mode != .Cols)
+        let doCols = (mode != .Rows)
         
         guard var (i0, j0) = next() else {
             return false

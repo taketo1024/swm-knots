@@ -75,7 +75,7 @@ class MatrixDecompositionTests: XCTestCase {
     func testRowEliminationRandomM55() {
         for _ in 0 ..< 10 {
             let A = randomM55()
-            let E = A.eliminate(mode: .RowsOnly)
+            let E = A.eliminate(mode: .Rows)
             XCTAssertEqual(E.right, M55.identity)
             XCTAssertEqual(E.rankNormalForm, E.left * A)
             XCTAssertEqual(A, E.leftInverse * E.rankNormalForm)
@@ -85,7 +85,7 @@ class MatrixDecompositionTests: XCTestCase {
     func testRowEliminationRegularM55() {
         for _ in 0 ..< 10 {
             let A = randomRegularM55()
-            let E = A.eliminate(mode: .RowsOnly)
+            let E = A.eliminate(mode: .Rows)
             XCTAssertEqual(E.right, M55.identity)
             XCTAssertEqual(E.rankNormalForm, E.left * A)
             XCTAssertEqual(A, E.leftInverse * E.rankNormalForm)
@@ -96,7 +96,7 @@ class MatrixDecompositionTests: XCTestCase {
     func testRowEliminationSingularM55() {
         for _ in 0 ..< 10 {
             let A = randomSingularM55()
-            let E = A.eliminate(mode: .RowsOnly)
+            let E = A.eliminate(mode: .Rows)
             XCTAssertEqual(E.right, M55.identity)
             XCTAssertEqual(E.rankNormalForm, E.left * A)
             XCTAssertEqual(A, E.leftInverse * E.rankNormalForm)
@@ -106,7 +106,7 @@ class MatrixDecompositionTests: XCTestCase {
     func testColEliminationRandomM55() {
         for _ in 0 ..< 10 {
             let A = randomM55()
-            let E = A.eliminate(mode: .ColsOnly)
+            let E = A.eliminate(mode: .Cols)
             XCTAssertEqual(E.left, M55.identity)
             XCTAssertEqual(E.rankNormalForm, A * E.right)
             XCTAssertEqual(A, E.rankNormalForm * E.rightInverse)
@@ -116,7 +116,7 @@ class MatrixDecompositionTests: XCTestCase {
     func testColEliminationRegularM55() {
         for _ in 0 ..< 10 {
             let A = randomRegularM55()
-            let E = A.eliminate(mode: .ColsOnly)
+            let E = A.eliminate(mode: .Cols)
             XCTAssertEqual(E.left, M55.identity)
             XCTAssertEqual(E.rankNormalForm, A * E.right)
             XCTAssertEqual(A, E.rankNormalForm * E.rightInverse)
@@ -127,7 +127,7 @@ class MatrixDecompositionTests: XCTestCase {
     func testColEliminationSingularM55() {
         for _ in 0 ..< 10 {
             let A = randomSingularM55()
-            let E = A.eliminate(mode: .ColsOnly)
+            let E = A.eliminate(mode: .Cols)
             XCTAssertEqual(E.left, M55.identity)
             XCTAssertEqual(E.rankNormalForm, A * E.right)
             XCTAssertEqual(A, E.rankNormalForm * E.rightInverse)

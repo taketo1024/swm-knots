@@ -3,7 +3,7 @@ import Foundation
 public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
     associatedtype IntegerLiteralType = Int
     init(_ intValue: Int)
-    static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: EliminationMode) -> BaseMatrixElimination<Self, n, m>
+    static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m>
 }
 
 public extension Ring {
@@ -25,7 +25,7 @@ public extension Ring {
     }
     
     // must override in subclass
-    static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: EliminationMode) -> BaseMatrixElimination<Self, n, m> {
+    static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m> {
         return BaseMatrixElimination<Self, n, m>(A, mode: mode)
     }
 }
