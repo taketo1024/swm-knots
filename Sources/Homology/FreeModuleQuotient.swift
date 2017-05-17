@@ -96,7 +96,7 @@ public extension FreeModuleQuotient where R: EuclideanRing {
         
         let (k, l) = (M.cols, N.cols)
         
-        let E = MatrixElimination(M, mode: .RowsOnly)
+        let E = EuclideanMatrixElimination(M, mode: .RowsOnly)
         let L:  Matrix<R, n, n> = E.left
         let D:  Matrix<R, k, k> = (L * M).submatrix(rowsInRange: 0 ..< k)
         let DP: Matrix<R, k, l> = (L * N).submatrix(rowsInRange: 0 ..< k)

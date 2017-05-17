@@ -6,10 +6,9 @@ public enum EliminationMode {
     case ColsOnly
 }
 
-// Boxed class for lazy computation.
-// B = Q A P (A: matrix, B: result, Q: left, P: right)
+// abstract class
 
-public class MatrixElimination<R: Ring, n: _Int, m: _Int> {
+public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
     public let target: Matrix<R, n, m>
     public let mode: EliminationMode
     fileprivate let rows: Int
@@ -22,30 +21,19 @@ public class MatrixElimination<R: Ring, n: _Int, m: _Int> {
         self.cols = matrix.cols
     }
     
-    fileprivate var _eliminationResult: (result: Matrix<R, n, m>, process: [EliminationStep<R>])?
-}
-
-public extension MatrixElimination where R: EuclideanRing {
-    private var eliminationResult: (result: Matrix<R, n, m>, process: [EliminationStep<R>]) {
-        switch _eliminationResult{
-        case let r?:
-            return r
-        default:
-            var e = EliminationProcessor(self.target, self.mode)
-            e.run()
-            
-            let result = (e.result, e.process)
-            _eliminationResult = result
-            return result
-        }
+    fileprivate var resultStorage: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>])?
+    
+     // override point
+    fileprivate var result: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>]) {
+        fatalError("MatrixElimination is not impled for Ring \(R.self).")
     }
     
     public var rankNormalForm: Matrix<R, n, m> {
-        return eliminationResult.result
+        return result.matrix
     }
     
     private var eliminationProcess: [EliminationStep<R>] {
-        return eliminationResult.process
+        return result.process
     }
     
     public var left: Matrix<R, n, n> {
@@ -129,6 +117,28 @@ public extension MatrixElimination where R: EuclideanRing {
     
     public var imageVectors: [ColVector<R, n>] {
         return imagePart.toColVectors()
+    }
+}
+
+public class EuclideanMatrixElimination<R: EuclideanRing, n: _Int, m: _Int>: BaseMatrixElimination<R, n, m> {
+    fileprivate override var result: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>]) {
+        switch resultStorage{
+        case let r?:
+            return r
+        default:
+            var e = EliminationProcessor(self.target, self.mode)
+            e.run()
+            
+            let result = (e.result, e.process)
+            resultStorage = result
+            return result
+        }
+    }
+}
+
+public class FieldMatrixElimination<R: Field, n: _Int, m: _Int>: BaseMatrixElimination<R, n, m> {
+    fileprivate override var result: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>]) {
+        fatalError("not yet impled.")
     }
 }
 

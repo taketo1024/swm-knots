@@ -7,7 +7,7 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence, CustomString
     
     internal var elements: [R]
     
-    fileprivate let _rankNormalElimination = Box<MatrixElimination<R, n, m>>()
+    fileprivate let _rankNormalElimination = Box<Any>() // TODO remove
     
     private func index(_ i: Int, _ j: Int) -> Int {
         return (i * cols) + j
@@ -329,12 +329,12 @@ public extension Matrix where n == _TypeLooseSize, m == _TypeLooseSize {
 
 // rank normal form
 public extension Matrix where R: EuclideanRing {
-    public var rankNormalElimination: MatrixElimination<R, n, m> {
+    public var rankNormalElimination: EuclideanMatrixElimination<R, n, m> {
         let box = _rankNormalElimination
         switch box.content {
-        case let e?: return e
+        case let e?: return e as! EuclideanMatrixElimination<R, n, m>
         default:
-            let e = MatrixElimination<R, n, m>(self)
+            let e = EuclideanMatrixElimination<R, n, m>(self)
             box.content = e
             return e
         }
