@@ -29,7 +29,7 @@
 		1424F5061EB997780052581F /* Integer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4E81EB997780052581F /* Integer.swift */; };
 		1424F5071EB997780052581F /* Rational.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4E91EB997780052581F /* Rational.swift */; };
 		1424F5081EB997780052581F /* Real.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4EA1EB997780052581F /* Real.swift */; };
-		1424F5091EB997780052581F /* AbstractQuotientRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4EC1EB997780052581F /* AbstractQuotientRing.swift */; };
+		1424F5091EB997780052581F /* QuotientRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4EC1EB997780052581F /* QuotientRing.swift */; };
 		1424F50A1EB997780052581F /* IntQuotientRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4ED1EB997780052581F /* IntQuotientRing.swift */; };
 		1424F50B1EB997780052581F /* PolynominalQuotientRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4EE1EB997780052581F /* PolynominalQuotientRing.swift */; };
 		1424F50C1EB997780052581F /* MatrixElimination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F01EB997780052581F /* MatrixElimination.swift */; };
@@ -73,7 +73,7 @@
 		1424F4DC1EB997780052581F /* Module.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Module.swift; sourceTree = "<group>"; };
 		1424F4DD1EB997780052581F /* Monoid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Monoid.swift; sourceTree = "<group>"; };
 		1424F4DE1EB997780052581F /* Ring.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Ring.swift; sourceTree = "<group>"; };
-		1424F4E01EB997780052581F /* FreeModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreeModule.swift; sourceTree = "<group>"; };
+		1424F4E01EB997780052581F /* FreeModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FreeModule.swift; path = ../Concrete/FreeModule.swift; sourceTree = "<group>"; };
 		1424F4E11EB997780052581F /* Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Matrix.swift; sourceTree = "<group>"; };
 		1424F4E21EB997780052581F /* Permutation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Permutation.swift; sourceTree = "<group>"; };
 		1424F4E31EB997780052581F /* Polynominal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Polynominal.swift; sourceTree = "<group>"; };
@@ -82,9 +82,9 @@
 		1424F4E81EB997780052581F /* Integer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Integer.swift; sourceTree = "<group>"; };
 		1424F4E91EB997780052581F /* Rational.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Rational.swift; sourceTree = "<group>"; };
 		1424F4EA1EB997780052581F /* Real.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Real.swift; sourceTree = "<group>"; };
-		1424F4EC1EB997780052581F /* AbstractQuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AbstractQuotientRing.swift; sourceTree = "<group>"; };
-		1424F4ED1EB997780052581F /* IntQuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntQuotientRing.swift; sourceTree = "<group>"; };
-		1424F4EE1EB997780052581F /* PolynominalQuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolynominalQuotientRing.swift; sourceTree = "<group>"; };
+		1424F4EC1EB997780052581F /* QuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QuotientRing.swift; path = ../Quotient/QuotientRing.swift; sourceTree = "<group>"; };
+		1424F4ED1EB997780052581F /* IntQuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = IntQuotientRing.swift; path = ../Quotient/IntQuotientRing.swift; sourceTree = "<group>"; };
+		1424F4EE1EB997780052581F /* PolynominalQuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PolynominalQuotientRing.swift; path = ../Quotient/PolynominalQuotientRing.swift; sourceTree = "<group>"; };
 		1424F4F01EB997780052581F /* MatrixElimination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixElimination.swift; sourceTree = "<group>"; };
 		1424F4F11EB997780052581F /* PolynomialFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolynomialFactorization.swift; sourceTree = "<group>"; };
 		1424F4F31EB997780052581F /* TPInt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TPInt.swift; sourceTree = "<group>"; };
@@ -93,7 +93,7 @@
 		144AD28E1EC13D9E00E23890 /* IntMatrixEliminationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntMatrixEliminationTests.swift; sourceTree = "<group>"; };
 		144AD2901EC21A4500E23890 /* Homology.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Homology.swift; sourceTree = "<group>"; };
 		145339BF1EC7D67100F014F4 /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
-		1473F1111EC76715003B1D55 /* FreeModuleQuotient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreeModuleQuotient.swift; sourceTree = "<group>"; };
+		1473F1111EC76715003B1D55 /* FreeModuleQuotient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FreeModuleQuotient.swift; path = ../Homology/FreeModuleQuotient.swift; sourceTree = "<group>"; };
 		147D98021EB9B06900C736AC /* IntegerFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntegerFactorization.swift; sourceTree = "<group>"; };
 		147D98051EB9B26200C736AC /* Dictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dictionary.swift; sourceTree = "<group>"; };
 		147D98081EBA0CD200C736AC /* Simplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Simplex.swift; sourceTree = "<group>"; };
@@ -164,7 +164,6 @@
 				1424F4E71EB997780052581F /* Numbers */,
 				1424F4DF1EB997780052581F /* Concrete */,
 				1424F4E41EB997780052581F /* Morphisms */,
-				1424F4EB1EB997780052581F /* Quotient */,
 				147D98071EBA0C0C00C736AC /* Homology */,
 				1424F4EF1EB997780052581F /* Tools */,
 				1424F4F21EB997780052581F /* TypeParameters */,
@@ -178,13 +177,16 @@
 		1424F4D71EB997780052581F /* Abstract */ = {
 			isa = PBXGroup;
 			children = (
+				1424F4DD1EB997780052581F /* Monoid.swift */,
+				1424F4DB1EB997780052581F /* Group.swift */,
 				1424F4D81EB997780052581F /* AdditiveGroup.swift */,
+				1424F4DE1EB997780052581F /* Ring.swift */,
 				1424F4D91EB997780052581F /* EuclideanRing.swift */,
 				1424F4DA1EB997780052581F /* Field.swift */,
-				1424F4DB1EB997780052581F /* Group.swift */,
 				1424F4DC1EB997780052581F /* Module.swift */,
-				1424F4DD1EB997780052581F /* Monoid.swift */,
-				1424F4DE1EB997780052581F /* Ring.swift */,
+				1424F4E01EB997780052581F /* FreeModule.swift */,
+				1424F4EC1EB997780052581F /* QuotientRing.swift */,
+				1473F1111EC76715003B1D55 /* FreeModuleQuotient.swift */,
 			);
 			path = Abstract;
 			sourceTree = "<group>";
@@ -195,7 +197,7 @@
 				1424F4E11EB997780052581F /* Matrix.swift */,
 				1424F4E21EB997780052581F /* Permutation.swift */,
 				1424F4E31EB997780052581F /* Polynominal.swift */,
-				1424F4E01EB997780052581F /* FreeModule.swift */,
+				1424F4EE1EB997780052581F /* PolynominalQuotientRing.swift */,
 			);
 			path = Concrete;
 			sourceTree = "<group>";
@@ -216,18 +218,9 @@
 				1424F4E81EB997780052581F /* Integer.swift */,
 				1424F4E91EB997780052581F /* Rational.swift */,
 				1424F4EA1EB997780052581F /* Real.swift */,
+				1424F4ED1EB997780052581F /* IntQuotientRing.swift */,
 			);
 			path = Numbers;
-			sourceTree = "<group>";
-		};
-		1424F4EB1EB997780052581F /* Quotient */ = {
-			isa = PBXGroup;
-			children = (
-				1424F4EC1EB997780052581F /* AbstractQuotientRing.swift */,
-				1424F4ED1EB997780052581F /* IntQuotientRing.swift */,
-				1424F4EE1EB997780052581F /* PolynominalQuotientRing.swift */,
-			);
-			path = Quotient;
 			sourceTree = "<group>";
 		};
 		1424F4EF1EB997780052581F /* Tools */ = {
@@ -273,7 +266,6 @@
 				147D98081EBA0CD200C736AC /* Simplex.swift */,
 				140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */,
 				144AD2901EC21A4500E23890 /* Homology.swift */,
-				1473F1111EC76715003B1D55 /* FreeModuleQuotient.swift */,
 			);
 			path = Homology;
 			sourceTree = "<group>";
@@ -397,7 +389,7 @@
 				1424F50A1EB997780052581F /* IntQuotientRing.swift in Sources */,
 				147D98061EB9B26200C736AC /* Dictionary.swift in Sources */,
 				1424F50E1EB997780052581F /* TPInt.swift in Sources */,
-				1424F5091EB997780052581F /* AbstractQuotientRing.swift in Sources */,
+				1424F5091EB997780052581F /* QuotientRing.swift in Sources */,
 				140BCD4F1EBA1AED00D7CE74 /* OrderedSet.swift in Sources */,
 				1473F1121EC76715003B1D55 /* FreeModuleQuotient.swift in Sources */,
 				1424F4FF1EB997780052581F /* Ring.swift in Sources */,

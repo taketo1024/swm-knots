@@ -65,4 +65,8 @@ extension RationalNumber: CustomStringConvertible {
         default: return "\(r.p)/\(r.q)"
         }
     }
+    
+    public static var symbol: String {
+        return "Q"
+    }
 }

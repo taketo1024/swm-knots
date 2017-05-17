@@ -207,6 +207,10 @@ public extension Matrix {
             }).joined(separator: ",\t")
         }).joined(separator: "\n\t") + "]"
     }
+    
+    public static var symbol: String {
+        return "M(\((n.self == _TypeLooseSize.self ? "?" : "\(n.value)")), \((m.self == _TypeLooseSize.self ? "?" : "\(m.value)")); \(R.symbol))"
+    }
 }
 
 // Sequence / Iterator

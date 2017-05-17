@@ -146,4 +146,8 @@ extension Polynomial {
             }.reversed().joined(separator: " + ")
         return res.isEmpty ? "0" : res
     }
+    
+    public static var symbol: String {
+        return "\(R.symbol)[x]"
+    }
 }

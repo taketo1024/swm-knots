@@ -20,6 +20,10 @@ public struct PolynomialQuotientRing<K: Field, P: _Polynomial>: EuclideanQuotien
     public var mod: R {
         return P.value
     }
+    
+    public static var symbol: String {
+        return "\(R.symbol)[x]/\(P.value)"
+    }
 }
 
 public struct PolynomialQuotientField<K: Field, P: _Polynomial>: EuclideanQuotientField where K == P.K {
@@ -54,5 +58,9 @@ public struct PolynomialQuotientField<K: Field, P: _Polynomial>: EuclideanQuotie
         }
         
         return PolynomialQuotientField(r.coeff(0).inverse * p)
+    }
+    
+    public static var symbol: String {
+        return "\(R.symbol)[x]/\(P.value)"
     }
 }

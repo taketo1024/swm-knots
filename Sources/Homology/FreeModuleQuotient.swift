@@ -8,6 +8,7 @@
 
 import Foundation
 
+// TODO endow an algebraic structure. 
 
 public enum FreeModuleQuotientGenerator<A: FreeModuleBase, R: Ring>: CustomStringConvertible {
     case Free(generator: FreeModule<A, R>)
@@ -28,10 +29,9 @@ public enum FreeModuleQuotientGenerator<A: FreeModuleBase, R: Ring>: CustomStrin
     }
     
     public var description: String {
-        let name = (R.self == IntegerNumber.self) ? "Z" : "\(R.self)"
         switch self{
-        case .Free(_): return name
-        case let .Tor(f, _): return "\(name)/\(f)"
+        case .Free(_): return R.symbol
+        case let .Tor(f, _): return "\(R.symbol)/\(f)"
         }
     }
 }

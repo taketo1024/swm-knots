@@ -47,6 +47,10 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, CustomStringConve
         
         return sum.isEmpty ? "0" : sum
     }
+    
+    public static var symbol: String {
+        return "FM(\(R.symbol))"
+    }
 }
 
 // Operations

@@ -17,6 +17,10 @@ public struct IntQuotientRing<n: _Int>: IntQuotientType {
     public var mod: Int {
         return n.value
     }
+    
+    public static var symbol: String {
+        return "Z/\(n.value)"
+    }
 }
 
 public struct IntQuotientField<p: _Int>: IntQuotientType, EuclideanQuotientField {
@@ -37,5 +41,9 @@ public struct IntQuotientField<p: _Int>: IntQuotientType, EuclideanQuotientField
     public var inverse: IntQuotientField<p> {
         let (x, _, _) = bezout(value, mod)
         return IntQuotientField(x)
+    }
+    
+    public static var symbol: String {
+        return "Z/\(p.value)"
     }
 }
