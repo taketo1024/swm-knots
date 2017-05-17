@@ -265,16 +265,16 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
     func indexIterator() -> IndexingIterator<[(Int, Int)]> {
         switch mode {
         case .Both:
-            return (itr ..< rows).flatMap{ i in
-                     (itr ..< cols).map{ j in (i, j) }
+            return (itr ..< cols).flatMap{ j in
+                     (itr ..< rows).map{ i in (i, j) }
                    }.makeIterator()
         case .Rows:
-            return (itr ..< rows).flatMap{ i in
-                     (0 ..< cols).map{ j in (i, j) }
+            return (0 ..< cols).flatMap{ j in
+                     (itr ..< rows).map{ i in (i, j) }
                    }.makeIterator()
         case .Cols:
-            return (itr ..< cols).flatMap{ j in
-                     (0 ..< rows).map{ i in (i, j) }
+            return (0 ..< rows).flatMap{ i in
+                     (itr ..< cols).map{ j in (i, j) }
                    }.makeIterator()
         }
     }
@@ -496,7 +496,7 @@ fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEli
             apply(.MulRow(at: i0, by: a.inverse))
         }
         
-        for i in itr ..< rows {
+        for i in 0 ..< rows {
             if i == i0 || result[i, j0] == 0 {
                 continue
             }
@@ -511,7 +511,7 @@ fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEli
             apply(.MulCol(at: i0, by: a.inverse))
         }
         
-        for j in itr ..< cols {
+        for j in 0 ..< cols {
             if j == j0 || result[i0, j] == 0 {
                 continue
             }
