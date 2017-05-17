@@ -6,8 +6,7 @@ public enum EliminationMode {
     case ColsOnly
 }
 
-// abstract class
-
+// an abstract class
 public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
     public let target: Matrix<R, n, m>
     public let mode: EliminationMode
@@ -38,49 +37,45 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
     
     public var left: Matrix<R, n, n> {
         var Q = target.leftIdentity
-        for s in eliminationProcess {
-            switch s {
-            case .AddRow(_, _, _), .InvRow(_), .SwapRows(_, _):
-                s.applyTo(&Q)
-            default: ()
-            }
-        }
+        
+        eliminationProcess
+            .filter{ $0.isRowOperation }
+            .forEach { Q.apply($0) }
+        
         return Q
     }
     
     public var leftInverse: Matrix<R, n, n> {
         var Q = target.leftIdentity
-        for s in eliminationProcess.reversed() {
-            switch s {
-            case .AddRow(_, _, _), .InvRow(_), .SwapRows(_, _):
-                s.applyInverseTo(&Q)
-            default: ()
-            }
-        }
+        
+        eliminationProcess
+            .filter{ $0.isRowOperation }
+            .reversed()
+            .map { invert($0) }
+            .forEach{ Q.apply($0) }
+        
         return Q
     }
     
     public var right: Matrix<R, m, m> {
         var P = target.rightIdentity
-        for s in eliminationProcess {
-            switch s {
-            case .AddCol(_, _, _), .InvCol(_), .SwapCols(_, _):
-                s.applyTo(&P)
-            default: ()
-            }
-        }
+        
+        eliminationProcess
+            .filter{ $0.isColOperation }
+            .forEach { P.apply($0) }
+        
         return P
     }
     
     public var rightInverse: Matrix<R, m, m> {
         var P = target.rightIdentity
-        for s in eliminationProcess.reversed() {
-            switch s {
-            case .AddCol(_, _, _), .InvCol(_), .SwapCols(_, _):
-                s.applyInverseTo(&P)
-            default: ()
-            }
-        }
+        
+        eliminationProcess
+            .filter{ $0.isColOperation }
+            .reversed()
+            .map { invert($0) }
+            .forEach{ P.apply($0) }
+        
         return P
     }
     
@@ -118,6 +113,19 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
     public var imageVectors: [ColVector<R, n>] {
         return imagePart.toColVectors()
     }
+    
+    fileprivate func invert(_ s: EliminationStep<R>) -> EliminationStep<R> {
+        switch s {
+        case let .AddRow(i, j, r):
+            return .AddRow(at: i, to: j, mul: -r)
+        case let .AddCol(i, j, r):
+            return .AddCol(at: i, to: j, mul: -r)
+        case .MulRow(at: _, by: -1), .MulCol(at: _, by: -1), .SwapRows(_, _), .SwapCols(_, _):
+            return s
+        default:
+            fatalError("\(s) in not invertible.")
+        }
+    }
 }
 
 public class EuclideanMatrixElimination<R: EuclideanRing, n: _Int, m: _Int>: BaseMatrixElimination<R, n, m> {
@@ -140,41 +148,57 @@ public class FieldMatrixElimination<R: Field, n: _Int, m: _Int>: BaseMatrixElimi
     fileprivate override var result: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>]) {
         fatalError("not yet impled.")
     }
+
+    fileprivate override func invert(_ s: EliminationStep<R>) -> EliminationStep<R> {
+        switch s {
+        case let .MulRow(at: i, by: r):
+            return .MulRow(at: i, by: r.inverse)
+        case let .MulCol(at: i, by: r):
+            return .MulCol(at: i, by: r.inverse)
+        default:
+            return super.invert(s)
+        }
+    }
 }
 
-private enum EliminationStep<R: Ring> {
+fileprivate enum EliminationStep<R: Ring> {
     case AddRow(at: Int, to: Int, mul: R)
-    case InvRow(Int)
+    case MulRow(at: Int, by: R)
     case SwapRows(Int, Int)
     case AddCol(at: Int, to: Int, mul: R)
-    case InvCol(Int)
+    case MulCol(at: Int, by: R)
     case SwapCols(Int, Int)
     
-    func applyTo<n: _Int, m: _Int>(_ A: inout Matrix<R, n, m>) {
+    var isRowOperation: Bool {
         switch self {
-        case let .AddRow(i, j, r):
-            A.addRow(at: i, to: j, multipliedBy: r)
-        case let .InvRow(i):
-            A.multiplyRow(at: i, by: -1)
-        case let .SwapRows(i, j):
-            A.swapRows(i, j)
-        case let .AddCol(i, j, r):
-            A.addCol(at: i, to: j, multipliedBy: r)
-        case let .InvCol(i):
-            A.multiplyCol(at: i, by: -1)
-        case let .SwapCols(i, j):
-            A.swapCols(i, j)
+        case .AddRow, .MulRow, .SwapRows: return true
+        default: return false
         }
     }
     
-    func applyInverseTo<n: _Int, m: _Int>(_ A: inout Matrix<R, n, m>) {
+    var isColOperation: Bool {
         switch self {
+        case .AddCol, .MulCol, .SwapCols: return true
+        default: return false
+        }
+    }
+}
+
+fileprivate extension Matrix {
+    mutating func apply(_ s: EliminationStep<R>) {
+        switch s {
         case let .AddRow(i, j, r):
-            A.addRow(at: i, to: j, multipliedBy: -r)
+            addRow(at: i, to: j, multipliedBy: r)
+        case let .MulRow(i, r):
+            multiplyRow(at: i, by: r)
+        case let .SwapRows(i, j):
+            swapRows(i, j)
         case let .AddCol(i, j, r):
-            A.addCol(at: i, to: j, multipliedBy: -r)
-        case _:
-            applyTo(&A)
+            addCol(at: i, to: j, multipliedBy: r)
+        case let .MulCol(i, r):
+            multiplyCol(at: i, by: r)
+        case let .SwapCols(i, j):
+            swapCols(i, j)
         }
     }
 }
@@ -236,9 +260,9 @@ private struct EliminationProcessor<R: EuclideanRing, n: _Int, m: _Int> {
             // TODO maybe implement NumberType or Comparable
             if R.self == IntegerNumber.self && (result[i0, j0] as! IntegerNumber) < 0 {
                 if doRows {
-                    self.apply(.InvRow(i0))
+                    self.apply(.MulRow(at: i0, by: -1))
                 } else {
-                    self.apply(.InvCol(j0))
+                    self.apply(.MulCol(at: j0, by: -1))
                 }
             }
             
@@ -258,7 +282,7 @@ private struct EliminationProcessor<R: EuclideanRing, n: _Int, m: _Int> {
     }
     
     mutating func apply(_ s: EliminationStep<R>) {
-        s.applyTo(&result)
+        result.apply(s)
         process.append(s)
     }
     
