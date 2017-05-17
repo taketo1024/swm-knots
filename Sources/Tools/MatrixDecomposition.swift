@@ -20,11 +20,24 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
         self.cols = matrix.cols
     }
     
-    fileprivate var resultStorage: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>])?
-    
-     // override point
-    fileprivate var result: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>]) {
+    // override point
+    fileprivate func processor() -> BaseEliminationProcessor<R, n, m> {
         fatalError("MatrixElimination is not impled for Ring \(R.self).")
+    }
+    
+    fileprivate var resultStorage: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>])?
+    fileprivate var result: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>]) {
+        switch resultStorage {
+        case let r?:
+            return r
+        default:
+            let e = processor()
+            e.run()
+            
+            let result = (e.result, e.process)
+            resultStorage = result
+            return result
+        }
     }
     
     public var rankNormalForm: Matrix<R, n, m> {
@@ -129,24 +142,14 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
 }
 
 public class EuclideanMatrixElimination<R: EuclideanRing, n: _Int, m: _Int>: BaseMatrixElimination<R, n, m> {
-    fileprivate override var result: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>]) {
-        switch resultStorage{
-        case let r?:
-            return r
-        default:
-            var e = EliminationProcessor(self.target, self.mode)
-            e.run()
-            
-            let result = (e.result, e.process)
-            resultStorage = result
-            return result
-        }
+    fileprivate override func processor() -> BaseEliminationProcessor<R, n, m> {
+        return EuclideanEliminationProcessor(target, mode)
     }
 }
 
 public class FieldMatrixElimination<R: Field, n: _Int, m: _Int>: BaseMatrixElimination<R, n, m> {
-    fileprivate override var result: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>]) {
-        fatalError("not yet impled.")
+    fileprivate override func processor() -> BaseEliminationProcessor<R, n, m> {
+        return FieldEliminationProcessor(target, mode)
     }
 
     fileprivate override func invert(_ s: EliminationStep<R>) -> EliminationStep<R> {
@@ -160,6 +163,8 @@ public class FieldMatrixElimination<R: Field, n: _Int, m: _Int>: BaseMatrixElimi
         }
     }
 }
+
+// EliminationStep
 
 fileprivate enum EliminationStep<R: Ring> {
     case AddRow(at: Int, to: Int, mul: R)
@@ -203,13 +208,17 @@ fileprivate extension Matrix {
     }
 }
 
-private struct EliminationProcessor<R: EuclideanRing, n: _Int, m: _Int> {
+// EliminationProcessor
+
+// base abstract class
+fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
     let mode: EliminationMode
     let rows: Int
     let cols: Int
+    
     var result: Matrix<R, n, m>
     var process: [EliminationStep<R>]
-    var itr = 0
+    private(set) var itr = 0
     
     init(_ target: Matrix<R, n, m>, _ mode: EliminationMode = .Both) {
         self.mode = mode
@@ -219,74 +228,148 @@ private struct EliminationProcessor<R: EuclideanRing, n: _Int, m: _Int> {
         self.process = []
     }
     
-    mutating func run() {
-        let doRows = (mode != .ColsOnly)
-        let doCols = (mode != .RowsOnly)
-        let maxItr = (mode == .Both)     ? min(rows, cols) :
-                     (mode == .RowsOnly) ? rows : cols
+    func run() {
+        let maxItr: Int = {
+            switch mode {
+            case .Both:     return min(rows, cols)
+            case .RowsOnly: return rows
+            case .ColsOnly: return cols
+            }
+        }()
         
-        iteration: while itr < maxItr {
-            guard var (_, i0, j0) = findNextMinNonZero() else {
-                break iteration
+        while itr < maxItr {
+            if iteration() {
+                itr += 1
+            } else {
+                break
             }
-            
-            elimination: while true {
-                if doRows && !eliminateRow(&i0, j0) {
-                    continue elimination
-                }
-                if doCols && !eliminateCol(i0, &j0) {
-                    continue elimination
-                }
-                
-                if doRows && doCols {
-                    let a = result[i0, j0]
-                    for i in itr ..< rows {
-                        for j in itr ..< cols {
-                            if i == i0 || j == j0 || result[i, j] == 0 {
-                                continue
-                            }
-                            
-                            let b = result[i, j]
-                            if b % a != 0 {
-                                self.apply(.AddRow(at: i, to: i0, mul: 1))
-                                continue elimination
-                            }
-                        }
-                    }
-                }
-                break elimination
-            }
-            
-            // TODO maybe implement NumberType or Comparable
-            if R.self == IntegerNumber.self && (result[i0, j0] as! IntegerNumber) < 0 {
-                if doRows {
-                    self.apply(.MulRow(at: i0, by: -1))
-                } else {
-                    self.apply(.MulCol(at: j0, by: -1))
-                }
-            }
-            
-            if doRows && i0 > itr {
-                self.apply(.SwapRows(itr, i0))
-            }
-            
-            if doCols && j0 > itr {
-                self.apply(.SwapCols(itr, j0))
-            }
-
-            itr += 1
         }
         
-        // post process
         postProcess()
     }
     
-    mutating func apply(_ s: EliminationStep<R>) {
+    // override point
+    func iteration() -> Bool {
+        fatalError()
+    }
+    
+    func apply(_ s: EliminationStep<R>) {
         result.apply(s)
         process.append(s)
     }
     
-    private mutating func eliminateRow(_ i0: inout Int, _ j0: Int) -> Bool {
+    func postProcess() {
+    }
+    
+    // TODO better use lazy sequence.
+    func indexIterator() -> IndexingIterator<[(Int, Int)]> {
+        switch mode {
+        case .Both:
+            return (itr ..< rows).flatMap{ i in
+                     (itr ..< cols).map{ j in (i, j) }
+                   }.makeIterator()
+        case .RowsOnly:
+            return (itr ..< rows).flatMap{ i in
+                     (0 ..< cols).map{ j in (i, j) }
+                   }.makeIterator()
+        case .ColsOnly:
+            return (itr ..< cols).flatMap{ j in
+                     (0 ..< rows).map{ i in (i, j) }
+                   }.makeIterator()
+        }
+    }
+}
+
+fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _Int>: BaseEliminationProcessor<R, n, m> {
+    
+    override func iteration() -> Bool {
+        let doRows = (mode != .ColsOnly)
+        let doCols = (mode != .RowsOnly)
+
+        guard var (i0, j0) = next() else {
+            return false
+        }
+        
+        elimination: while true {
+            if doRows && !eliminateRow(&i0, j0) {
+                continue elimination
+            }
+            if doCols && !eliminateCol(i0, &j0) {
+                continue elimination
+            }
+            
+            if doRows && doCols {
+                let a = result[i0, j0]
+                for i in itr ..< rows {
+                    for j in itr ..< cols {
+                        if i == i0 || j == j0 || result[i, j] == 0 {
+                            continue
+                        }
+                        
+                        let b = result[i, j]
+                        if b % a != 0 {
+                            self.apply(.AddRow(at: i, to: i0, mul: 1))
+                            continue elimination
+                        }
+                    }
+                }
+            }
+            break elimination
+        }
+        
+        // TODO maybe implement NumberType or Comparable
+        if R.self == IntegerNumber.self && (result[i0, j0] as! IntegerNumber) < 0 {
+            if doRows {
+                self.apply(.MulRow(at: i0, by: -1))
+            } else {
+                self.apply(.MulCol(at: j0, by: -1))
+            }
+        }
+        
+        if doRows && i0 > itr {
+            self.apply(.SwapRows(itr, i0))
+        }
+        
+        if doCols && j0 > itr {
+            self.apply(.SwapCols(itr, j0))
+        }
+        
+        return true
+    }
+    
+    override func postProcess() {
+        switch mode {
+        case .RowsOnly:
+            var step = 0
+            align: while step < rows {
+                for j in 0 ..< cols {
+                    let arr = (step ..< rows).filter{ result[$0, j] != 0}
+                    if arr.count == 1, let i = arr.first {
+                        apply(.SwapRows(i, step))
+                        step += 1
+                        continue align
+                    }
+                }
+                step += 1
+            }
+        case .ColsOnly:
+            var step = 0
+            align: while step < cols {
+                for i in 0 ..< rows {
+                    let arr = (step ..< cols).filter{ result[i, $0] != 0}
+                    if arr.count == 1, let j = arr.first {
+                        apply(.SwapCols(j, step))
+                        step += 1
+                        continue align
+                    }
+                }
+                step += 1
+            }
+        default: ()
+        }
+    }
+    
+    private func eliminateRow(_ i0: inout Int, _ j0: Int) -> Bool {
         let a = result[i0, j0]
         
         for i in itr ..< rows {
@@ -323,7 +406,7 @@ private struct EliminationProcessor<R: EuclideanRing, n: _Int, m: _Int> {
         return true
     }
     
-    private mutating func eliminateCol(_ i0: Int, _ j0: inout Int) -> Bool {
+    private func eliminateCol(_ i0: Int, _ j0: inout Int) -> Bool {
         let a = result[i0, j0]
         
         for j in itr ..< cols {
@@ -360,69 +443,91 @@ private struct EliminationProcessor<R: EuclideanRing, n: _Int, m: _Int> {
         return true
     }
     
-    private func findNextMinNonZero() -> (value: R, row: Int, col: Int)? {
-        var next: (value: R, row: Int, col: Int)? = nil
-        
-        func update(_ i: Int, _ j: Int) {
+    private func next() -> (Int, Int)? {
+        let res = indexIterator().reduce(nil) { (res: (R, Int, Int)?, next: (Int, Int)) -> (R, Int, Int)? in
+            let (i, j) = next
             let a = result[i, j]
-            if a != 0 && (next == nil || a.degree < next!.0.degree) {
-                next = (a, i, j)
+            
+            if a != 0 && (res == nil || a.degree < res!.0.degree) {
+                return (a, i, j)
+            } else {
+                return res
             }
         }
         
-        switch mode {
-        case .Both:
-            for i in itr ..< rows {
-                for j in itr ..< cols {
-                    update(i, j)
-                }
-            }
-        case .RowsOnly:
-            for i in itr ..< rows {
-                for j in 0 ..< cols {
-                    update(i, j)
-                }
-            }
-        case .ColsOnly:
-            for j in itr ..< cols {
-                for i in 0 ..< rows {
-                    update(i, j)
-                }
-            }
-        }
-        
-        return next
-    }
-    
-    private mutating func postProcess() {
-        switch mode {
-        case .RowsOnly:
-            var step = 0
-            align: while step < rows {
-                for j in 0 ..< cols {
-                    let arr = (step ..< rows).filter{ result[$0, j] != 0}
-                    if arr.count == 1, let i = arr.first {
-                        apply(.SwapRows(i, step))
-                        step += 1
-                        continue align
-                    }
-                }
-                step += 1
-            }
-        case .ColsOnly:
-            var step = 0
-            align: while step < cols {
-                for i in 0 ..< rows {
-                    let arr = (step ..< cols).filter{ result[i, $0] != 0}
-                    if arr.count == 1, let j = arr.first {
-                        apply(.SwapCols(j, step))
-                        step += 1
-                        continue align
-                    }
-                }
-                step += 1
-            }
-        default: ()
-        }
+        return res.flatMap{ res in (res.1, res.2) }
     }
 }
+
+fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEliminationProcessor<R, n, m> {
+    
+    override func iteration() -> Bool {
+        let doRows = (mode != .ColsOnly)
+        let doCols = (mode != .RowsOnly)
+        
+        guard var (i0, j0) = next() else {
+            return false
+        }
+        
+        if doRows && i0 > itr {
+            self.apply(.SwapRows(itr, i0))
+            i0 = itr
+        }
+        
+        if doCols && j0 > itr {
+            self.apply(.SwapCols(itr, j0))
+            j0 = itr
+        }
+        
+        if doRows {
+            eliminateRow(i0, j0)
+        }
+        
+        if doCols {
+            eliminateCol(i0, j0)
+        }
+    
+        return true
+    }
+    
+    private func eliminateRow(_ i0: Int, _ j0: Int) {
+        let a = result[i0, j0]
+        if a != R.identity {
+            apply(.MulRow(at: i0, by: a.inverse))
+        }
+        
+        for i in itr ..< rows {
+            if i == i0 || result[i, j0] == 0 {
+                continue
+            }
+            
+            apply(.AddRow(at: i0, to: i, mul: -result[i, j0]))
+        }
+    }
+    
+    private func eliminateCol(_ i0: Int, _ j0: Int) {
+        let a = result[i0, j0]
+        if a != R.identity {
+            apply(.MulCol(at: i0, by: a.inverse))
+        }
+        
+        for j in itr ..< cols {
+            if j == j0 || result[i0, j] == 0 {
+                continue
+            }
+            
+            apply(.AddCol(at: j0, to: j, mul: -result[i0, j]))
+        }
+    }
+    
+    private func next() -> (row: Int, col: Int)? {
+        for (i, j) in indexIterator() {
+            let a = result[i, j]
+            if a != 0 {
+                return (i, j)
+            }
+        }
+        return nil
+    }
+}
+

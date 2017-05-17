@@ -37,3 +37,10 @@ do {
     let kernel = E.kernelVectors.first!
     A * kernel == ColVector<Z, _3>.zero
 }
+
+let A = Matrix<Q,_2,_2>(3, 2, 4, 1)
+let e = A.eliminate()
+e.left * A * e.right
+let x = e.right * e.left
+x * A
+
