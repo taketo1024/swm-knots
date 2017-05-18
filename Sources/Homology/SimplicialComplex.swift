@@ -9,9 +9,11 @@
 import Foundation
 
 public struct SimplicialComplex {
+    public let vertexSet: VertexSet
     public let simplices: OrderedSet<Simplex>
     
-    public init<S: Sequence>(_ simplices: S, generate: Bool = false) where S.Iterator.Element == Simplex {
+    public init<S: Sequence>(_ vertexSet: VertexSet, _ simplices: S, generate: Bool = false) where S.Iterator.Element == Simplex {
+        self.vertexSet = vertexSet
         self.simplices = generate ?
             simplices.reduce(OrderedSet()) { $0 + $1.allSubsimplices() }
             : OrderedSet(simplices)
@@ -99,13 +101,23 @@ public extension SimplicialComplex {
     static func ball(dim: Int) -> SimplicialComplex {
         let V = VertexSet(number: dim + 1)
         let s = V.simplex(indices: Array(0...dim))
-        return SimplicialComplex([s], generate: true)
+        return SimplicialComplex(V, [s], generate: true)
     }
     
     static func sphere(dim: Int) -> SimplicialComplex {
         let V = VertexSet(number: dim + 2)
         let ss = V.simplex(indices: Array(0...dim + 1)).skeleton(dim)
-        return SimplicialComplex(ss, generate: true)
+        return SimplicialComplex(V, ss, generate: true)
     }
 }
 
+// disjoint union
+public func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
+    let (n1, n2) = (K1.vertexSet.vertices.count, K2.vertexSet.vertices.count)
+    let V = VertexSet(number: n1 + n2)
+    let simplices =
+        K1.simplices.map { s in V.simplex(indices: s.vertices.map{$0.index}) }
+            + K2.simplices.map { s in V.simplex(indices: s.vertices.map{$0.index + n1})
+    }
+    return SimplicialComplex(V, simplices)
+}
