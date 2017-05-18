@@ -15,4 +15,8 @@ extension IntegerNumber: EuclideanRing {
     public static var symbol: String {
         return "Z"
     }
+    
+    public var evenOddSign: Int {
+        return (self % 2 == 0) ? 1 : -1
+    }
 }

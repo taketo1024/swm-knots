@@ -37,7 +37,8 @@ do {
             return [V.simplex(v0, v1, v2), V.simplex(v1, v2, v3)]
         }
     }
-    let H = Homology(SimplicialComplex(faces, generate: true), Z.self)
+    let C = SimplicialComplex(faces, generate: true)
+    let H = Homology(C, Z.self)
     print("H(T^2; Z) =", H.detailDescription, "\n")
 }
 
@@ -45,7 +46,8 @@ do {
 do {
     let s = V.simplex(_:)
     let faces = [s(0,1,3),s(1,4,3),s(1,2,4),s(4,2,0),s(4,0,5),s(0,1,5),s(1,2,5),s(2,3,5),s(0,3,2),s(3,4,5)]
-    let H = Homology(SimplicialComplex(faces, generate: true), Z.self)
+    let C = SimplicialComplex(faces, generate: true)
+    let H = Homology(C, Z.self)
     print("H(RP^2; Z) =", H.detailDescription, "\n")
 }
 
@@ -64,7 +66,8 @@ do {
 do {
     let s = V.simplex(_:)
     let faces = [s(0,1,3), s(1,3,4),s(1,2,4),s(2,4,5),s(2,3,5),s(3,5,0)]
-    let H = Homology(SimplicialComplex(faces, generate: true), Z.self)
+    let C = SimplicialComplex(faces, generate: true)
+    let H = Homology(C, Z.self)
     print("H(M; Z) =", H.detailDescription, "\n")
 }
 
@@ -72,9 +75,11 @@ do {
 do {
     let s = V.simplex(_:)
     let faces = [s(0,1,3),s(1,4,3),s(1,2,4),s(4,2,0),s(4,0,5),s(0,1,5),s(1,2,5),s(2,3,5),s(0,3,2),s(3,4,5)]
-    let H = Homology(SimplicialComplex(faces, generate: true), Z_2.self)
+    let C = SimplicialComplex(faces, generate: true)
+    
+    let H = Homology(C, Z_2.self)
     print("H(RP^2; Z/2) =", H.detailDescription, "\n")
-
-    let H2 = Homology(SimplicialComplex(faces, generate: true), Q.self)
+    
+    let H2 = Homology(C, Q.self)
     print("H(RP^2; Q) =", H2.detailDescription, "\n")
 }

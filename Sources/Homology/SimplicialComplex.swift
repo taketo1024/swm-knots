@@ -21,10 +21,6 @@ public struct SimplicialComplex {
         typealias M = FreeModule<Simplex, R>
         typealias F = FreeModuleHom<Simplex, R>
         
-        func sgn(_ i: Int) -> Int {
-            return (i % 2 == 0) ? 1 : -1
-        }
-        
         let dim = simplices.reduce(0){ max($0, $1.dim) }
         
         var chns: [[Simplex]] = (0 ... dim).map{_ in []}
@@ -34,22 +30,63 @@ public struct SimplicialComplex {
         
         let bmaps: [F] = (0 ... dim).map { (i) -> F in
             let from = chns[i]
-            let map = Dictionary.generateBy(keys: from){ (s) -> M in
-                return s.faces().enumerated().reduce(M.zero){ (res, el) -> M in
-                    let (i, t) = el
-                    return res + R(sgn(i)) * M(t)
-                }
-            }
-            return F(domainBasis: chns[i], codomainBasis: (i > 0) ? chns[i - 1] : [], mapping: map)
+            let to = (i > 0) ? chns[i - 1] : []
+            let matrix: TypeLooseMatrix<R> = boundaryMapMatrix(from, to)
+            return F(domainBasis: from, codomainBasis: to, matrix: matrix)
         }
         
         return ChainComplex(chainBases: chns, boundaryMaps: bmaps)
     }
+    
+    public func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<Simplex, R> {
+        typealias M = FreeModule<Simplex, R>
+        typealias F = FreeModuleHom<Simplex, R>
+        
+        let dim = simplices.reduce(0){ max($0, $1.dim) }
+        
+        var chns: [[Simplex]] = (0 ... dim).map{_ in []}
+        for s in simplices {
+            chns[s.dim].append(s)
+        }
+        
+        // Regard the basis of C_i as the dual basis of C^i.
+        // Since <δf, c> = <f, ∂c>, the matrix is given by the transpose.
+        
+        let bmaps: [F] = (0 ... dim).map { (i) -> F in
+            let from = chns[i]
+            let to = (i < dim) ? chns[i + 1] : []
+            let matrix: TypeLooseMatrix<R> = boundaryMapMatrix(to, from).transpose
+            return F(domainBasis: from, codomainBasis: to, matrix: matrix)
+        }
+        
+        return CochainComplex(chainBases: chns, boundaryMaps: bmaps)
+    }
+    
+    private func boundaryMapMatrix<R: Ring>(_ from: [Simplex], _ to : [Simplex]) -> TypeLooseMatrix<R> {
+        var matrix = TypeLooseMatrix(rows: to.count, cols: from.count) { _ in R.zero }
+        let toIndex = Dictionary(to.enumerated().map{($1, $0)})
+        
+        from.enumerated().forEach { (j, s) in
+            s.faces().enumerated().forEach { (k, t) in
+                let i = toIndex[t]!
+                matrix[i, j] = R(k.evenOddSign)
+            }
+        }
+        
+        return matrix
+    }
 }
 
-public extension Homology where A == Simplex, R: EuclideanRing {
+public extension Homology where chainType == DescendingChainType, A == Simplex, R: EuclideanRing {
     public init(_ s: SimplicialComplex, _ type: R.Type) {
         let c: ChainComplex<Simplex, R> = s.chainComplex(type: R.self)
+        self.init(c)
+    }
+}
+
+public extension Cohomology where chainType == AscendingChainType, A == Simplex, R: EuclideanRing {
+    public init(_ s: SimplicialComplex, _ type: R.Type) {
+        let c: CochainComplex<Simplex, R> = s.cochainComplex(type: R.self)
         self.init(c)
     }
 }
