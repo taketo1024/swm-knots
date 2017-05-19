@@ -13,7 +13,6 @@ import XCTest
 
 class IntMatrixEliminationTests: XCTestCase {
     
-    typealias Z = IntegerNumber
     typealias M55 = Matrix<Z, _5, _5>
     
     override func setUp() {

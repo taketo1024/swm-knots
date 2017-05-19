@@ -13,7 +13,6 @@ import XCTest
 
 class RationalMatrixEliminationTests: XCTestCase {
     
-    typealias Q = RationalNumber
     typealias M55 = Matrix<Q, _5, _5>
     
     override func setUp() {

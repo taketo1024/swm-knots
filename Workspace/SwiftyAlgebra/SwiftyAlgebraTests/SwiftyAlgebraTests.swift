@@ -9,6 +9,11 @@
 import XCTest
 @testable import SwiftyAlgebra
 
+internal typealias Z = IntegerNumber
+internal typealias Q = RationalNumber
+internal typealias R = RealNumber
+internal typealias Z_2 = IntQuotientField<_2>
+
 class SwiftyAlgebraTests: XCTestCase {
     
     override func setUp() {

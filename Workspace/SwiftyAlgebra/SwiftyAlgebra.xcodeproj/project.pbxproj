@@ -157,9 +157,9 @@
 		1424F4C91EB9976C0052581F /* SwiftyAlgebraTests */ = {
 			isa = PBXGroup;
 			children = (
+				1424F4CA1EB9976C0052581F /* SwiftyAlgebraTests.swift */,
 				144AD28E1EC13D9E00E23890 /* IntMatrixEliminationTests.swift */,
 				141CA4651ECBF67B00776A02 /* RationalMatrixEliminationTests.swift */,
-				1424F4CA1EB9976C0052581F /* SwiftyAlgebraTests.swift */,
 				1424F4CC1EB9976C0052581F /* Info.plist */,
 			);
 			path = SwiftyAlgebraTests;

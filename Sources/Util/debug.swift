@@ -8,6 +8,10 @@
 
 import Foundation
 
+public func measure<T>(_ f: (Void) -> T) -> T {
+    return measure("", f)
+}
+
 public func measure<T>(_ label: String, _ f: (Void) -> T) -> T {
     let date = Date()
     defer {
