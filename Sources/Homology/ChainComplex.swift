@@ -38,7 +38,7 @@ public struct BaseChainComplex<chainType: ChainType, A: Hashable, R: Ring>: Cust
             let j = (descending) ? (i - 1) : (i + 1)
             let codomainBasis = (0 <= j && j < chainBases.count) ? chainBases[j] : []
             
-            let matrix = TypeLooseMatrix<R>(rows: codomainBasis.count, cols: domainBasis.count, elements: table)
+            let matrix = TypeLooseMatrix<R>(rows: codomainBasis.count, cols: domainBasis.count, grid: table)
             return FreeModuleHom(domainBasis: domainBasis,
                                  codomainBasis: codomainBasis,
                                  matrix: matrix)

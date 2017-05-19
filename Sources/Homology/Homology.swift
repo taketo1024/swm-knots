@@ -44,7 +44,7 @@ public extension BaseHomology where R: EuclideanRing {
             let Z = elims[i].kernelPart     // Z_i in C_i : the i-th Cycle group
             
             let j = (descending) ? (i + 1) : (i - 1)
-            let B = (0 <= j && j < elims.count) ? elims[j].imagePart : TypeLooseMatrix(rows: basis.count, cols: 0, elements:[])  // B_i in Z_i : the i-th Boundary group
+            let B = (0 <= j && j < elims.count) ? elims[j].imagePart : TypeLooseMatrix(rows: basis.count, cols: 0, grid:[])  // B_i in Z_i : the i-th Boundary group
             
             return FreeModuleQuotient(basis: basis, divident: Z, divisor: B) // H_i = Z_i / B_i : the i-th Homology group
         }

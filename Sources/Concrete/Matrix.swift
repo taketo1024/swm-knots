@@ -5,7 +5,7 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence, CustomString
     public let rows: Int
     public let cols: Int
     
-    internal var elements: [R]
+    internal var grid: [R]
     
     private func index(_ i: Int, _ j: Int) -> Int {
         return (i * cols) + j
@@ -13,45 +13,45 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence, CustomString
     
     public subscript(index: Int) -> R {
         get {
-            return elements[index]
+            return grid[index]
         }
         set {
-            elements[index] = newValue
+            grid[index] = newValue
         }
     }
     
     public subscript(i: Int, j: Int) -> R {
         get {
-            return elements[index(i, j)]
+            return grid[index(i, j)]
         }
         set {
-            elements[index(i, j)] = newValue
+            grid[index(i, j)] = newValue
         }
     }
     
     // root initializer
-    internal init(rows: Int, cols: Int, elements: [R]) {
+    internal init(rows: Int, cols: Int, grid: [R]) {
         guard rows >= 0 && cols >= 0 else {
             fatalError("illegal matrix size (\(rows), \(cols))")
         }
         self.rows = rows
         self.cols = cols
-        self.elements = elements
+        self.grid = grid
     }
 
     internal init(rows: Int, cols: Int, gen: (Int, Int) -> R) {
-        let elements = (0 ..< rows * cols).map { (index: Int) -> R in
+        let grid = (0 ..< rows * cols).map { (index: Int) -> R in
             let (i, j) = index /% cols
             return gen(i, j)
         }
-        self.init(rows: rows, cols: cols, elements: elements)
+        self.init(rows: rows, cols: cols, grid: grid)
     }
 
-    public init(_ elements: R...) {
+    public init(_ grid: R...) {
         if n.self == _TypeLooseSize.self || m.self == _TypeLooseSize.self {
             fatalError("attempted to initialize TypeLooseMatrix without specifying rows/cols.")
         }
-        self.init(rows: n.value, cols: m.value, elements: elements)
+        self.init(rows: n.value, cols: m.value, grid: grid)
     }
     
     public init(_ gen: (Int, Int) -> R) {
@@ -144,7 +144,7 @@ public extension ColVector {
 // Matrix Operations
 
 public func == <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Bool {
-    return a.elements == b.elements
+    return a.grid == b.grid
 }
 
 public func + <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
@@ -320,8 +320,8 @@ public struct _TypeLooseSize : _Int { public static let value = 0 }
 public typealias TypeLooseMatrix<R: Ring> = Matrix<R, _TypeLooseSize, _TypeLooseSize>
 
 public extension Matrix where n == _TypeLooseSize, m == _TypeLooseSize {
-    public init(_ rows: Int, _ cols: Int, _ elements: [R]) {
-        self.init(rows: rows, cols: cols, elements: elements)
+    public init(_ rows: Int, _ cols: Int, _ grid: [R]) {
+        self.init(rows: rows, cols: cols, grid: grid)
     }
     
     public init(_ rows: Int, _ cols: Int, _ gen: (Int, Int) -> R) {
