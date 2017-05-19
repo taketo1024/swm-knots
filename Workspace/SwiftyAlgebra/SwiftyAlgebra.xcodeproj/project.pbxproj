@@ -47,6 +47,7 @@
 		147D98031EB9B06900C736AC /* IntegerFactorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98021EB9B06900C736AC /* IntegerFactorization.swift */; };
 		147D98061EB9B26200C736AC /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98051EB9B26200C736AC /* Dictionary.swift */; };
 		147D98091EBA0CD200C736AC /* Simplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98081EBA0CD200C736AC /* Simplex.swift */; };
+		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,7 +63,7 @@
 /* Begin PBXFileReference section */
 		140BCD4E1EBA1AED00D7CE74 /* OrderedSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderedSet.swift; sourceTree = "<group>"; };
 		140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChainComplex.swift; sourceTree = "<group>"; };
-		140E809F1ECDEA8E00B89719 /* combinations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = combinations.swift; sourceTree = "<group>"; };
+		140E809F1ECDEA8E00B89719 /* combinations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = combinations.swift; path = ../Util/combinations.swift; sourceTree = "<group>"; };
 		141417301ECE984800B167CB /* Sequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
 		141CA4651ECBF67B00776A02 /* RationalMatrixEliminationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RationalMatrixEliminationTests.swift; sourceTree = "<group>"; };
 		1424F4BC1EB9976C0052581F /* SwiftyAlgebra.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftyAlgebra.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -103,6 +104,7 @@
 		147D98021EB9B06900C736AC /* IntegerFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntegerFactorization.swift; sourceTree = "<group>"; };
 		147D98051EB9B26200C736AC /* Dictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dictionary.swift; sourceTree = "<group>"; };
 		147D98081EBA0CD200C736AC /* Simplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Simplex.swift; sourceTree = "<group>"; };
+		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -232,6 +234,7 @@
 		1424F4EF1EB997780052581F /* Tools */ = {
 			isa = PBXGroup;
 			children = (
+				140E809F1ECDEA8E00B89719 /* combinations.swift */,
 				1424F4F01EB997780052581F /* MatrixElimination.swift */,
 				1424F4F11EB997780052581F /* PolynomialFactorization.swift */,
 				147D98021EB9B06900C736AC /* IntegerFactorization.swift */,
@@ -251,7 +254,7 @@
 		1424F4F51EB997780052581F /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				140E809F1ECDEA8E00B89719 /* combinations.swift */,
+				DD3B16EF1ECECC5500EC6C2A /* debug.swift */,
 				1424F4F71EB997780052581F /* optable.swift */,
 				145339BF1EC7D67100F014F4 /* Box.swift */,
 			);
@@ -402,6 +405,7 @@
 				140BCD4F1EBA1AED00D7CE74 /* OrderedSet.swift in Sources */,
 				1473F1121EC76715003B1D55 /* FreeModuleQuotient.swift in Sources */,
 				1424F4FF1EB997780052581F /* Ring.swift in Sources */,
+				DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */,
 				145339C01EC7D67100F014F4 /* Box.swift in Sources */,
 				1424F5061EB997780052581F /* Integer.swift in Sources */,
 				1424F5001EB997780052581F /* FreeModule.swift in Sources */,
