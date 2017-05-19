@@ -19,6 +19,15 @@ public struct SimplicialComplex {
             : OrderedSet(simplices)
     }
     
+    public var dim: Int {
+        return simplices.reduce(0) { max($0, $1.dim) }
+    }
+    
+    public func skeleton(_ dim: Int) -> SimplicialComplex {
+        let sub = simplices.filter{ $0.dim <= dim }
+        return SimplicialComplex(vertexSet, sub)
+    }
+    
     public func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<Simplex, R> {
         typealias M = FreeModule<Simplex, R>
         typealias F = FreeModuleHom<Simplex, R>
@@ -94,8 +103,16 @@ public extension Cohomology where chainType == AscendingChainType, A == Simplex,
 }
 
 public extension SimplicialComplex {
-    static var point: SimplicialComplex {
+    static func point() -> SimplicialComplex {
         return SimplicialComplex.ball(dim: 0)
+    }
+    
+    static func interval() -> SimplicialComplex {
+        return SimplicialComplex.ball(dim: 1)
+    }
+    
+    static func circle() -> SimplicialComplex {
+        return SimplicialComplex.sphere(dim: 1)
     }
     
     static func ball(dim: Int) -> SimplicialComplex {
@@ -105,9 +122,11 @@ public extension SimplicialComplex {
     }
     
     static func sphere(dim: Int) -> SimplicialComplex {
-        let V = VertexSet(number: dim + 2)
-        let ss = V.simplex(indices: Array(0...dim + 1)).skeleton(dim)
-        return SimplicialComplex(V, ss, generate: true)
+        return ball(dim: dim + 1).skeleton(dim)
+    }
+    
+    static func torus(dim: Int) -> SimplicialComplex {
+        return (1 ..< dim).reduce(SimplicialComplex.circle()) { (r, _) in r * SimplicialComplex.circle() }
     }
 }
 
@@ -119,5 +138,46 @@ public func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
         K1.simplices.map { s in V.simplex(indices: s.vertices.map{$0.index}) }
             + K2.simplices.map { s in V.simplex(indices: s.vertices.map{$0.index + n1})
     }
+    return SimplicialComplex(V, simplices)
+}
+
+// product complex
+public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
+    let (n1, n2) = (K1.vertexSet.vertices.count, K2.vertexSet.vertices.count)
+    let V = VertexSet(number: n1 * n2)
+    
+    // discard simplices that are faces of others.
+    let S1 = K1.simplices.filter{ s in K1.simplices.forAll{ t in t == s || !t.contains(s) } }
+    let S2 = K2.simplices.filter{ s in K2.simplices.forAll{ t in t == s || !t.contains(s) } }
+    let simplexPairs: [(Simplex, Simplex)] = S1.flatMap{ s in S2.map{ t in (s, t) } }
+    
+    let indexPairs: [[(Int, Int)]] = simplexPairs.flatMap{(s, t) -> [[(Int, Int)]] in
+        (0 ... s.dim + t.dim).flatMap{ k -> [[(Int, Int)]] in
+            // list of ordered indices [(i0 <= i1 <= ... <= ik), ... ]
+            let Is: [[Int]] = multicombi(s.dim + 1, k + 1)
+            let Js: [[Int]]  = multicombi(t.dim + 1, k + 1)
+            
+            // list of pairs of ordered indices [(I, J), ...]
+            let allPairs: [([Int], [Int])]  = Is.flatMap{ I in Js.map{ J in (I, J) } }
+            
+            // filter valid pairs that form a k-simplex
+            let validPairs = allPairs.filter{ (I, J) in
+                (0 ..< k).forAll{ (i: Int) -> Bool in
+                    (I[i] != I[i + 1]) || (J[i] != J[i + 1])
+                }
+            }
+            
+            // indexPairs that correspond to the indices of each VertexSets
+            return validPairs.map{ (I, J) -> [(Int, Int)] in
+                zip(I, J).map{ (i, j) in (s.vertices[i].index, t.vertices[j].index) }
+            }
+        }
+    }
+    
+    let simplices = indexPairs.map { (list: [(Int, Int)]) -> Simplex in
+        let indices = list.map{ (i, j) in i * n2 + j }
+        return V.simplex(indices: indices)
+    }
+    
     return SimplicialComplex(V, simplices)
 }

@@ -28,16 +28,7 @@ do {
 
 // T^2 = S^1 x S^1
 do {
-    let faces = (0 ..< 3).flatMap{ i in
-        (0 ..< 3).flatMap { j -> [Simplex] in
-            let v0 = i * 3 + j
-            let v1 = v0 + ((j < 2) ? 1 : -2)
-            let v2 = (v0 + 3) % 9
-            let v3 = v2 + ((j < 2) ? 1 : -2)
-            return [V.simplex(v0, v1, v2), V.simplex(v1, v2, v3)]
-        }
-    }
-    let C = SimplicialComplex(V, faces, generate: true)
+    let C = SimplicialComplex.torus(dim: 2)
     let H = Homology(C, Z.self)
     print("H(T^2; Z) =", H.detailDescription, "\n")
 }

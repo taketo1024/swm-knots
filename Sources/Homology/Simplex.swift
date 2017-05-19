@@ -96,10 +96,6 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
         return Array(queue)
     }
     
-    public func skeleton(_ dim: Int) -> [Simplex] {
-        return allSubsimplices().filter{$0.dim <= dim}
-    }
-    
     public var hashValue: Int {
         return description.hashValue
     }
