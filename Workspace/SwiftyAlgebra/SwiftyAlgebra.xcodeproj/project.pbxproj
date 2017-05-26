@@ -47,6 +47,8 @@
 		147D98031EB9B06900C736AC /* IntegerFactorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98021EB9B06900C736AC /* IntegerFactorization.swift */; };
 		147D98061EB9B26200C736AC /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98051EB9B26200C736AC /* Dictionary.swift */; };
 		147D98091EBA0CD200C736AC /* Simplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98081EBA0CD200C736AC /* Simplex.swift */; };
+		14E7BECB1ED84B3400BBA72A /* Sample.h in Headers */ = {isa = PBXBuildFile; fileRef = 14E7BEC91ED84B3400BBA72A /* Sample.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		14E7BECC1ED84B3400BBA72A /* Sample.mm in Sources */ = {isa = PBXBuildFile; fileRef = 14E7BECA1ED84B3400BBA72A /* Sample.mm */; };
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
 /* End PBXBuildFile section */
 
@@ -104,6 +106,8 @@
 		147D98021EB9B06900C736AC /* IntegerFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntegerFactorization.swift; sourceTree = "<group>"; };
 		147D98051EB9B26200C736AC /* Dictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dictionary.swift; sourceTree = "<group>"; };
 		147D98081EBA0CD200C736AC /* Simplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Simplex.swift; sourceTree = "<group>"; };
+		14E7BEC91ED84B3400BBA72A /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
+		14E7BECA1ED84B3400BBA72A /* Sample.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Sample.mm; sourceTree = "<group>"; };
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -176,6 +180,7 @@
 				1424F4EF1EB997780052581F /* Tools */,
 				1424F4F21EB997780052581F /* TypeParameters */,
 				147D98041EB9B24900C736AC /* Extensions */,
+				14E7BEC71ED84A8700BBA72A /* Libraries */,
 				1424F4F51EB997780052581F /* Util */,
 			);
 			name = Sources;
@@ -282,6 +287,24 @@
 			path = Homology;
 			sourceTree = "<group>";
 		};
+		14E7BEC71ED84A8700BBA72A /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				14E7BEC81ED84AEE00BBA72A /* Eigen */,
+			);
+			path = Libraries;
+			sourceTree = "<group>";
+		};
+		14E7BEC81ED84AEE00BBA72A /* Eigen */ = {
+			isa = PBXGroup;
+			children = (
+				14E7BEC91ED84B3400BBA72A /* Sample.h */,
+				14E7BECA1ED84B3400BBA72A /* Sample.mm */,
+			);
+			name = Eigen;
+			path = EigenWrapper;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -289,6 +312,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14E7BECB1ED84B3400BBA72A /* Sample.h in Headers */,
 				1424F4CD1EB9976C0052581F /* SwiftyAlgebra.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -344,6 +368,7 @@
 				TargetAttributes = {
 					1424F4BB1EB9976C0052581F = {
 						CreatedOnToolsVersion = 8.3.2;
+						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
 					1424F4C41EB9976C0052581F = {
@@ -408,6 +433,7 @@
 				DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */,
 				145339C01EC7D67100F014F4 /* Box.swift in Sources */,
 				1424F5061EB997780052581F /* Integer.swift in Sources */,
+				14E7BECC1ED84B3400BBA72A /* Sample.mm in Sources */,
 				1424F5001EB997780052581F /* FreeModule.swift in Sources */,
 				147D98091EBA0CD200C736AC /* Simplex.swift in Sources */,
 				1424F5041EB997780052581F /* FreeModHom.swift in Sources */,
@@ -553,6 +579,7 @@
 		1424F4D11EB9976C0052581F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -560,12 +587,14 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
+				HEADER_SEARCH_PATHS = ../../Libraries/;
 				INFOPLIST_FILE = SwiftyAlgebra/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.taketo1024.SwiftyAlgebra;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -573,6 +602,7 @@
 		1424F4D21EB9976C0052581F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -580,6 +610,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
+				HEADER_SEARCH_PATHS = ../../Libraries/;
 				INFOPLIST_FILE = SwiftyAlgebra/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
@@ -595,6 +626,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				HEADER_SEARCH_PATHS = ../../Libraries/;
 				INFOPLIST_FILE = SwiftyAlgebraTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.taketo1024.SwiftyAlgebraTests;
@@ -608,6 +640,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				HEADER_SEARCH_PATHS = ../../Libraries/;
 				INFOPLIST_FILE = SwiftyAlgebraTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.taketo1024.SwiftyAlgebraTests;
