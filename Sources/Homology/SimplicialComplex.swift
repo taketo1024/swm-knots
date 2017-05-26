@@ -66,7 +66,7 @@ public struct SimplicialComplex {
         let bmaps: [F] = (0 ... dim).map { (i) -> F in
             let from = chns[i]
             let to = (i < dim) ? chns[i + 1] : []
-            let matrix: TypeLooseMatrix<R> = boundaryMapMatrix(to, from).transpose
+            let matrix: TypeLooseMatrix<R> = boundaryMapMatrix(to, from).transposed
             return F(domainBasis: from, codomainBasis: to, matrix: matrix)
         }
         

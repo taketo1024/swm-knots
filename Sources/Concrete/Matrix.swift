@@ -7,28 +7,6 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence, CustomString
     
     internal var grid: [R]
     
-    private func index(_ i: Int, _ j: Int) -> Int {
-        return (i * cols) + j
-    }
-    
-    public subscript(index: Int) -> R {
-        get {
-            return grid[index]
-        }
-        set {
-            grid[index] = newValue
-        }
-    }
-    
-    public subscript(i: Int, j: Int) -> R {
-        get {
-            return grid[index(i, j)]
-        }
-        set {
-            grid[index(i, j)] = newValue
-        }
-    }
-    
     // root initializer
     internal init(rows: Int, cols: Int, grid: [R]) {
         guard rows >= 0 && cols >= 0 else {
@@ -64,18 +42,70 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence, CustomString
     public static var zero: Matrix<R, n, m> {
         return self.init { _ in 0 }
     }
-    
-    public var leftIdentity: Matrix<R, n, n> {
-        return Matrix<R, n, n>(rows: rows, cols: rows) { $0 == $1 ? 1 : 0 }
+}
+
+// Matrix Operations
+
+public extension Matrix {
+    private func gridIndex(_ i: Int, _ j: Int) -> Int {
+        return (i * cols) + j
     }
     
-    public var rightIdentity: Matrix<R, m, m> {
-        return Matrix<R, m, m>(rows: cols, cols: cols) { $0 == $1 ? 1 : 0 }
+    public subscript(index: Int) -> R {
+        get { return grid[index] }
+        set { grid[index] = newValue }
     }
     
-    public var transpose: Matrix<R, m, n> {
-        return Matrix<R, m, n>(rows: cols, cols: rows) { self[$1, $0] }
+    public subscript(i: Int, j: Int) -> R {
+        get { return grid[gridIndex(i, j)] }
+        set { grid[gridIndex(i, j)] = newValue }
     }
+}
+
+public func == <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Bool {
+    return a.grid == b.grid
+}
+
+public func + <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
+    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
+        return a[i, j] + b[i, j]
+    }
+}
+
+public prefix func - <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>) -> Matrix<R, n, m> {
+    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
+        return -a[i, j]
+    }
+}
+
+public func - <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
+    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
+        return a[i, j] - b[i, j]
+    }
+}
+
+public func * <R: Ring, n: _Int, m: _Int>(r: R, a: Matrix<R, n, m>) -> Matrix<R, n, m> {
+    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
+        return r * a[i, j]
+    }
+}
+
+public func * <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, r: R) -> Matrix<R, n, m> {
+    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
+        return a[i, j] * r
+    }
+}
+
+public func * <R: Ring, n: _Int, m: _Int, p: _Int>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
+    return Matrix<R, n, p>(rows: a.rows, cols: b.cols) { (i, k) -> R in
+        return (0 ..< a.cols)
+            .map({j in a[i, j] * b[j, k]})
+            .reduce(0) {$0 + $1}
+    }
+}
+
+public func ** <R: Ring, n: _Int>(a: Matrix<R, n, n>, k: Int) -> Matrix<R, n, n> {
+    return k == 0 ? a.leftIdentity : a * (a ** (k - 1))
 }
 
 public typealias ColVector<R: Ring, n: _Int> = Matrix<R, n, _1>
@@ -128,65 +158,86 @@ public extension Matrix {
             self[$0 + r.lowerBound, $1 + c.lowerBound]
         }
     }
-}
-
-public extension ColVector {
-    static func unit(_ i: Int) -> ColVector<R, n> {
-        return ColVector<R, n>{ (j, _) in (i == j) ? 1 : 0 }
+    
+    public var leftIdentity: Matrix<R, n, n> {
+        return Matrix<R, n, n>(rows: rows, cols: rows) { $0 == $1 ? 1 : 0 }
     }
     
-    // MEMO this is used in case n == _TypeLooseSize
-    static func unit(size: Int, _ i: Int) -> ColVector<R, n> {
-        return ColVector<R, n>(rows: size, cols: 1){ (j, _) in (i == j) ? 1 : 0 }
+    public var rightIdentity: Matrix<R, m, m> {
+        return Matrix<R, m, m>(rows: cols, cols: cols) { $0 == $1 ? 1 : 0 }
+    }
+    
+    public var transposed: Matrix<R, m, n> {
+        return Matrix<R, m, n>(rows: cols, cols: rows) { self[$1, $0] }
     }
 }
 
-// Matrix Operations
+// Elementary Matrix Operations (mutating)
 
-public func == <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Bool {
-    return a.grid == b.grid
-}
-
-public func + <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-        return a[i, j] + b[i, j]
+public extension Matrix {
+    public mutating func multiplyRow(at i: Int, by r: R) {
+        for j in 0 ..< self.cols {
+            self[i, j] = r * self[i, j]
+        }
+    }
+    
+    public mutating func multiplyCol(at j: Int, by r: R) {
+        for i in 0 ..< self.rows {
+            self[i, j] = r * self[i, j]
+        }
+    }
+    
+    public mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R = 1) {
+        for j in 0 ..< self.cols {
+            self[i1, j] = self[i1, j] + (self[i0, j] * r)
+        }
+    }
+    
+    public mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R = 1) {
+        for i in 0 ..< self.rows {
+            self[i, j1] = self[i, j1] + (self[i, j0] * r)
+        }
+    }
+    
+    public mutating func swapRows(_ i0: Int, _ i1: Int) {
+        for j in 0 ..< self.cols {
+            let a = self[i0, j]
+            self[i0, j] = self[i1, j]
+            self[i1, j] = a
+        }
+    }
+    
+    public mutating func swapCols(_ j0: Int, _ j1: Int) {
+        for i in 0 ..< self.rows {
+            let a = self[i, j0]
+            self[i, j0] = self[i, j1]
+            self[i, j1] = a
+        }
     }
 }
 
-public prefix func - <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-        return -a[i, j]
+// Matrix Elimination
+
+public extension Matrix where R: EuclideanRing {
+    public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<R, n, m> {
+        return R.matrixElimination(self, mode: mode)
     }
 }
 
-public func - <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-        return a[i, j] - b[i, j]
+// SquareMatrix
+
+public typealias SquareMatrix<R: Ring, n: _Int> = Matrix<R, n, n>
+
+public extension Matrix where n == m {
+    public static var identity: Matrix<R, n, n> {
+        return self.init { $0 == $1 ? 1 : 0 }
     }
 }
 
-public func * <R: Ring, n: _Int, m: _Int>(r: R, a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-        return r * a[i, j]
+public extension Matrix where R: EuclideanRing, n == m {
+    public var determinant: R {
+        return self.eliminate().diagonal.reduce(R.identity) { $0 * $1 }
     }
-}
-
-public func * <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, r: R) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-        return a[i, j] * r
-    }
-}
-
-public func * <R: Ring, n: _Int, m: _Int, p: _Int>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
-    return Matrix<R, n, p>(rows: a.rows, cols: b.cols) { (i, k) -> R in
-        return (0 ..< a.cols)
-                .map({j in a[i, j] * b[j, k]})
-                .reduce(0) {$0 + $1}
-    }
-}
-
-public func ** <R: Ring, n: _Int>(a: Matrix<R, n, n>, k: Int) -> Matrix<R, n, n> {
-    return k == 0 ? a.leftIdentity : a * (a ** (k - 1))
 }
 
 // CustomStringConvertible
@@ -248,72 +299,6 @@ public struct MatrixIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
     }
 }
 
-// Elementary Matrix Operations (mutating)
-
-public extension Matrix {
-    public mutating func multiplyRow(at i: Int, by r: R) {
-        for j in 0 ..< self.cols {
-            self[i, j] = r * self[i, j]
-        }
-    }
-    
-    public mutating func multiplyCol(at j: Int, by r: R) {
-        for i in 0 ..< self.rows {
-            self[i, j] = r * self[i, j]
-        }
-    }
-    
-    public mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R = 1) {
-        for j in 0 ..< self.cols {
-            self[i1, j] = self[i1, j] + (self[i0, j] * r)
-        }
-    }
-    
-    public mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R = 1) {
-        for i in 0 ..< self.rows {
-            self[i, j1] = self[i, j1] + (self[i, j0] * r)
-        }
-    }
-    
-    public mutating func swapRows(_ i0: Int, _ i1: Int) {
-        for j in 0 ..< self.cols {
-            let a = self[i0, j]
-            self[i0, j] = self[i1, j]
-            self[i1, j] = a
-        }
-    }
-    
-    public mutating func swapCols(_ j0: Int, _ j1: Int) {
-        for i in 0 ..< self.rows {
-            let a = self[i, j0]
-            self[i, j0] = self[i, j1]
-            self[i, j1] = a
-        }
-    }
-    
-    public mutating func replaceElements(_ gen: (Int, Int) -> R) {
-        for i in 0 ..< self.rows {
-            for j in 0 ..< self.cols {
-                self[i, j] = gen(i, j)
-            }
-        }
-    }
-}
-
-// SquareMatrix
-
-public typealias SquareMatrix<R: Ring, n: _Int> = Matrix<R, n, n>
-
-public extension Matrix where n == m {
-    public static var identity: Matrix<R, n, n> {
-        return self.init { $0 == $1 ? 1 : 0 }
-    }
-
-    public var det: R {
-        return _determinant(self)
-    }
-}
-
 // TypeLooseMatrix
 
 public struct _TypeLooseSize : _Int { public static let value = 0 }
@@ -326,23 +311,5 @@ public extension Matrix where n == _TypeLooseSize, m == _TypeLooseSize {
     
     public init(_ rows: Int, _ cols: Int, _ gen: (Int, Int) -> R) {
         self.init(rows: rows, cols: cols, gen: gen)
-    }
-}
-
-// Matrix Elimination
-public extension Matrix where R: EuclideanRing {
-    public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<R, n, m> {
-        return R.matrixElimination(self, mode: mode)
-    }
-}
-
-// FIXME this implementation is a disaster.
-private func _determinant<R: Ring, n: _Int>(_ a: Matrix<R, n, n>) -> R {
-    return Permutation<n>.all.reduce(0) {
-        (res: R, s: Permutation<n>) -> R in
-        res + R(sgn(s)) * (0 ..< a.rows).reduce(1) {
-            (p: R, i: Int) -> R in
-            p * a[i, s[i]]
-        }
     }
 }

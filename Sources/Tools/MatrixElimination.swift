@@ -119,7 +119,9 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
     public var imagePart: Matrix<R, n, _TypeLooseSize> {
         let d = diagonal
         var a: Matrix<R, n, _TypeLooseSize> = leftInverse.submatrix(colsInRange: 0 ..< self.rank)
-        a.replaceElements() { (i, j) in d[j] * a[i, j] }
+        (0 ..< min(d.count, a.cols)).forEach {
+            a.multiplyCol(at: $0, by: d[$0])
+        }
         return a
     }
     
