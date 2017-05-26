@@ -13,13 +13,13 @@
 #import <Eigen/Geometry>
 
 using namespace Eigen;
-typedef Matrix<int, Dynamic, Dynamic, RowMajor> MXi;
+typedef Matrix<NSInteger, Dynamic, Dynamic, RowMajor> MXi;
 
 @implementation Sample
 
-+ (void)multiple:(int *)result :(int)aRow :(int)aCol :(int)bCol :(const int[])aGrid :(const int[])bGrid {
-    Map<MXi>a(const_cast<int *>(aGrid), aRow, aCol);
-    Map<MXi>b(const_cast<int *>(bGrid), aCol, bCol);
++ (void)multiple:(NSInteger *)result :(NSInteger)aRow :(NSInteger)aCol :(NSInteger)bCol :(const NSInteger[])aGrid :(const NSInteger[])bGrid {
+    Map<MXi>a(const_cast<NSInteger *>(aGrid), aRow, aCol);
+    Map<MXi>b(const_cast<NSInteger *>(bGrid), aCol, bCol);
     Map<MXi>(result, aRow, bCol) = a * b;
 }
 

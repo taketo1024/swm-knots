@@ -98,9 +98,9 @@ public func * <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, r: R) -> Matrix<R,
 
 public func * <R: Ring, n: _Int, m: _Int, p: _Int>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
     if R.self == IntegerNumber.self, let aGrid = a.grid as? [IntegerNumber], let bGrid = b.grid as? [IntegerNumber] {
-        var result = Array(repeating: Int32(0), count: a.rows * b.cols)
-        Sample.multiple(&result, Int32(a.rows), Int32(a.cols), Int32(b.cols), aGrid.map{Int32($0)}, bGrid.map{Int32($0)})
-        return Matrix<R, n, p>(rows: a.rows, cols: b.cols, grid: result.map{ IntegerNumber($0) as! R })
+        var result = Array(repeating: 0, count: a.rows * b.cols)
+        Sample.multiple(&result, a.rows, a.cols, b.cols, aGrid, bGrid)
+        return Matrix<R, n, p>(rows: a.rows, cols: b.cols, grid: result.map{ $0 as! R })
     }
     
     return Matrix<R, n, p>(rows: a.rows, cols: b.cols) { (i, k) -> R in
