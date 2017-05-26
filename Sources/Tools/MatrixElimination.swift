@@ -213,6 +213,52 @@ fileprivate extension Matrix {
 // EliminationProcessor
 
 // base abstract class
+
+fileprivate struct EliminationIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
+    typealias Element = (Int, Int)
+    
+    private weak var p: BaseEliminationProcessor<R, n, m>!
+    private var current: (Int, Int)
+    
+    init(_ processor: BaseEliminationProcessor<R, n, m>) {
+        self.p = processor
+        
+        switch p.mode {
+        case .Both:
+            current = (p.itr, p.itr)
+        case .Rows:
+            current = (p.itr, 0)
+        case .Cols:
+            current = (0, p.itr)
+        }
+    }
+    
+    mutating func next() -> (Int, Int)? {
+        guard current.0 < p.rows && current.1 < p.cols else {
+            return nil
+        }
+        
+        defer {
+            switch p.mode {
+            case .Both, .Rows:
+                if current.0 + 1 >= p.rows {
+                    current = (p.itr, current.1 + 1)
+                } else {
+                    current = (current.0 + 1, current.1)
+                }
+            case .Cols:
+                if current.1 + 1 >= p.cols {
+                    current = (current.0 + 1, p.itr)
+                } else {
+                    current = (current.0, current.1 + 1)
+                }
+            }
+        }
+        
+        return (current.0, current.1)
+    }
+}
+
 fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
     let mode: MatrixEliminationMode
     let rows: Int
@@ -263,22 +309,8 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
     func postProcess() {
     }
     
-    // TODO better use lazy sequence.
-    func indexIterator() -> IndexingIterator<[(Int, Int)]> {
-        switch mode {
-        case .Both:
-            return (itr ..< cols).flatMap{ j in
-                     (itr ..< rows).map{ i in (i, j) }
-                   }.makeIterator()
-        case .Rows:
-            return (0 ..< cols).flatMap{ j in
-                     (itr ..< rows).map{ i in (i, j) }
-                   }.makeIterator()
-        case .Cols:
-            return (0 ..< rows).flatMap{ i in
-                     (itr ..< cols).map{ j in (i, j) }
-                   }.makeIterator()
-        }
+    func indexIterator() -> AnySequence<(Int, Int)> {
+        return AnySequence({ return EliminationIterator(self) })
     }
 }
 
@@ -300,7 +332,7 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
                 continue elimination
             }
             
-            if doRows && doCols {
+            if doRows && doCols && !result[i0, j0].isUnit {
                 let a = result[i0, j0]
                 for i in itr ..< rows {
                     for j in itr ..< cols {
@@ -446,18 +478,27 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
     }
     
     private func next() -> (Int, Int)? {
-        let res = indexIterator().reduce(nil) { (res: (R, Int, Int)?, next: (Int, Int)) -> (R, Int, Int)? in
-            let (i, j) = next
+        var min = R.zero
+        var (i0, j0) = (0, 0)
+        
+        for (i, j) in indexIterator() {
             let a = result[i, j]
             
-            if a != 0 && (res == nil || a.degree < res!.0.degree) {
-                return (a, i, j)
-            } else {
-                return res
+            if a.isUnit {
+                return (i, j)
+            }
+            
+            if a != 0 && (min == 0 || a.degree < min.degree) {
+                min = a
+                (i0, j0) = (i, j)
             }
         }
         
-        return res.flatMap{ res in (res.1, res.2) }
+        if min == 0 {
+            return nil
+        } else {
+            return (i0, j0)
+        }
     }
 }
 

@@ -27,6 +27,9 @@ class SwiftyAlgebraTests: XCTestCase {
     }
     
     func testExample() {
+        let C = SimplicialComplex.torus(dim: 4)
+        let H = Homology(C, Z.self)
+        print("H(T^2; Z) =", H.detailDescription, "\n")
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
