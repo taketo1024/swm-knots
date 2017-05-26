@@ -11,17 +11,19 @@ typealias R = RealNumber
 
 typealias M = FreeModule<String, Z>
 
+let domain   = ["a", "b", "c", "d"]
+let codomain = ["x", "y", "z"]
+let map = [
+    1, 2, 1,  1,
+    2, 0, 2, -1,
+    1, 3, 3,  2
+]
+
+let f = FreeModuleHom(domainBasis: domain, codomainBasis: codomain, mapping: map)
+
 let a = M("a")
 let b = M("b")
-let c = M("c")
-let d = M("d")
-let zero = M.zero
+let x = a + 2 * b
+let y = f.appliedTo(x) // (x + 2y + z) + 2(2x + 3z)
 
-let map: [String : M] =
-    ["a" : a + b,
-     "b" : b + c,
-     "c" : c + d,
-     "d" : d + a]
-
-let f = FreeModuleHom<String, Z>(map)
-let x = f.appliedTo(a + 2 * b)
+print(y)
