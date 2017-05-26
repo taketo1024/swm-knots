@@ -10,6 +10,6 @@
 
 @interface Sample : NSObject
 
-- (void)run;
++ (void)multiple:(int *)result :(int)aRow :(int)aCol :(int)bCol :(const int[])aGrid :(const int[])bGrid;
 
 @end

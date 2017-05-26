@@ -12,24 +12,15 @@
 #import <Eigen/Core>
 #import <Eigen/Geometry>
 
+using namespace Eigen;
+typedef Matrix<int, Dynamic, Dynamic, RowMajor> MXi;
+
 @implementation Sample
 
-- (void)run {
-    using namespace Eigen;
-    
-    Matrix3d A, B;
-    
-    A << 3.0, 6.0, 3.0,
-    2.0, 1.0, 2.0,
-    1.0, 2.0, 1.0;
-    int k = 0;
-    
-    B << 1.0, 0.0, 0.0,
-    -A(k+1,k)/A(k,k), 1.0, 0.0,
-    -A(k+2,k)/A(k,k), 0.0, 1.0;
-    
-    
-    std::cout << "m\n" << B * A << std::endl;
++ (void)multiple:(int *)result :(int)aRow :(int)aCol :(int)bCol :(const int[])aGrid :(const int[])bGrid {
+    Map<MXi>a(const_cast<int *>(aGrid), aRow, aCol);
+    Map<MXi>b(const_cast<int *>(bGrid), aCol, bCol);
+    Map<MXi>(result, aRow, bCol) = a * b;
 }
 
 @end
