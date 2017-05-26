@@ -3,6 +3,7 @@ import Foundation
 public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
     associatedtype IntegerLiteralType = Int
     init(_ intValue: Int)
+    var isUnit: Bool { get }
     static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m>
 }
 
@@ -12,6 +13,10 @@ public extension Ring {
         self.init(value)
     }
     
+    public var isUnit: Bool {
+        return (self == Self.identity) || (self == -Self.identity)
+    }
+
     public static var zero: Self {
         return Self.init(0)
     }

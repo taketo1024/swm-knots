@@ -8,6 +8,12 @@ public protocol EuclideanRing: Ring {
     static func % (a: Self, b: Self) -> Self
 }
 
+public extension EuclideanRing {
+    public var isUnit: Bool {
+        return (self != 0) && (1 % self == 0)
+    }
+}
+
 public func % <R: EuclideanRing>(_ a: R, b: R) -> R {
     return R.eucDiv(a, b).r
 }

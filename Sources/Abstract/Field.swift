@@ -8,6 +8,10 @@ public func / <F: Field>(a: F, b: F) -> F {
 }
 
 public extension Field {
+    var isUnit: Bool {
+        return self != 0
+    }
+    
     var degree: Int {
         return self == Self.zero ? 0 : 1
     }
