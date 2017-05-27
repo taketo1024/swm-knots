@@ -47,7 +47,7 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence, CustomString
 // Matrix Operations
 
 public extension Matrix {
-    private func gridIndex(_ i: Int, _ j: Int) -> Int {
+    internal func gridIndex(_ i: Int, _ j: Int) -> Int {
         return (i * cols) + j
     }
     
@@ -181,43 +181,83 @@ public extension Matrix {
 // Elementary Matrix Operations (mutating)
 
 public extension Matrix {
-    public mutating func multiplyRow(at i: Int, by r: R) {
-        for j in 0 ..< self.cols {
-            self[i, j] = r * self[i, j]
+    public mutating func multiplyRow(at i0: Int, by r: R) {
+        var p = UnsafeMutablePointer(&grid)
+        p += gridIndex(i0, 0)
+        
+        for _ in 0 ..< cols {
+            p.pointee = r * p.pointee
+            p += 1
         }
     }
     
-    public mutating func multiplyCol(at j: Int, by r: R) {
-        for i in 0 ..< self.rows {
-            self[i, j] = r * self[i, j]
+    public mutating func multiplyCol(at j0: Int, by r: R) {
+        var p = UnsafeMutablePointer(&grid)
+        p += gridIndex(0, j0)
+        
+        for _ in 0 ..< rows {
+            p.pointee = r * p.pointee
+            p += cols
         }
     }
     
     public mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R = 1) {
-        for j in 0 ..< self.cols {
-            self[i1, j] = self[i1, j] + (self[i0, j] * r)
+        var p0 = UnsafeMutablePointer(&grid)
+        p0 += gridIndex(i0, 0)
+        
+        var p1 = UnsafeMutablePointer(&grid)
+        p1 += gridIndex(i1, 0)
+        
+        for _ in 0 ..< cols {
+            p1.pointee = p1.pointee + r * p0.pointee
+            p0 += 1
+            p1 += 1
         }
     }
     
     public mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R = 1) {
-        for i in 0 ..< self.rows {
-            self[i, j1] = self[i, j1] + (self[i, j0] * r)
+        var p0 = UnsafeMutablePointer(&grid)
+        p0 += gridIndex(0, j0)
+        
+        var p1 = UnsafeMutablePointer(&grid)
+        p1 += gridIndex(0, j1)
+        
+        for _ in 0 ..< rows {
+            p1.pointee = p1.pointee + r * p0.pointee
+            p0 += cols
+            p1 += cols
         }
     }
     
     public mutating func swapRows(_ i0: Int, _ i1: Int) {
-        for j in 0 ..< self.cols {
-            let a = self[i0, j]
-            self[i0, j] = self[i1, j]
-            self[i1, j] = a
+        var p0 = UnsafeMutablePointer(&grid)
+        p0 += gridIndex(i0, 0)
+        
+        var p1 = UnsafeMutablePointer(&grid)
+        p1 += gridIndex(i1, 0)
+        
+        for _ in 0 ..< cols {
+            let a = p0.pointee
+            p0.pointee = p1.pointee
+            p1.pointee = a
+            p0 += 1
+            p1 += 1
         }
     }
     
     public mutating func swapCols(_ j0: Int, _ j1: Int) {
-        for i in 0 ..< self.rows {
-            let a = self[i, j0]
-            self[i, j0] = self[i, j1]
-            self[i, j1] = a
+        var p0 = UnsafeMutablePointer(&grid)
+        p0 += gridIndex(0, j0)
+        
+        var p1 = UnsafeMutablePointer(&grid)
+        p1 += gridIndex(0, j1)
+        
+        for _ in 0 ..< rows {
+            let a = p0.pointee
+            p0.pointee = p1.pointee
+            p1.pointee = a
+            p0 += cols
+            p1 += cols
         }
     }
 }
