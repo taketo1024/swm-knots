@@ -41,11 +41,11 @@
 		144AD28F1EC13D9E00E23890 /* IntMatrixEliminationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144AD28E1EC13D9E00E23890 /* IntMatrixEliminationTests.swift */; };
 		144AD2911EC21A4500E23890 /* Homology.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144AD2901EC21A4500E23890 /* Homology.swift */; };
 		145339C01EC7D67100F014F4 /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145339BF1EC7D67100F014F4 /* Box.swift */; };
-		146A839F1ECC47CA0055E433 /* SimplicialComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146A839E1ECC47CA0055E433 /* SimplicialComplex.swift */; };
 		1473F1121EC76715003B1D55 /* FreeModuleQuotient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1473F1111EC76715003B1D55 /* FreeModuleQuotient.swift */; };
 		147D98031EB9B06900C736AC /* IntegerFactorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98021EB9B06900C736AC /* IntegerFactorization.swift */; };
 		147D98061EB9B26200C736AC /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98051EB9B26200C736AC /* Dictionary.swift */; };
-		147D98091EBA0CD200C736AC /* Simplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98081EBA0CD200C736AC /* Simplex.swift */; };
+		14929C9E1ED9C798006ACAC5 /* Simplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14929C9C1ED9C798006ACAC5 /* Simplex.swift */; };
+		14929C9F1ED9C798006ACAC5 /* SimplicialComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */; };
 		14B2FB8C1ED8FBA000C182EB /* MatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */; };
 		14E7BECB1ED84B3400BBA72A /* EigenLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 14E7BEC91ED84B3400BBA72A /* EigenLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		14E7BECC1ED84B3400BBA72A /* EigenLib.mm in Sources */ = {isa = PBXBuildFile; fileRef = 14E7BECA1ED84B3400BBA72A /* EigenLib.mm */; };
@@ -89,9 +89,9 @@
 		1424F4E81EB997780052581F /* Integer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Integer.swift; sourceTree = "<group>"; };
 		1424F4E91EB997780052581F /* Rational.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Rational.swift; sourceTree = "<group>"; };
 		1424F4EA1EB997780052581F /* Real.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Real.swift; sourceTree = "<group>"; };
-		1424F4EC1EB997780052581F /* QuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QuotientRing.swift; path = ../Quotient/QuotientRing.swift; sourceTree = "<group>"; };
-		1424F4ED1EB997780052581F /* IntQuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = IntQuotientRing.swift; path = ../Quotient/IntQuotientRing.swift; sourceTree = "<group>"; };
-		1424F4EE1EB997780052581F /* PolynominalQuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PolynominalQuotientRing.swift; path = ../Quotient/PolynominalQuotientRing.swift; sourceTree = "<group>"; };
+		1424F4EC1EB997780052581F /* QuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuotientRing.swift; sourceTree = "<group>"; };
+		1424F4ED1EB997780052581F /* IntQuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntQuotientRing.swift; sourceTree = "<group>"; };
+		1424F4EE1EB997780052581F /* PolynominalQuotientRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolynominalQuotientRing.swift; sourceTree = "<group>"; };
 		1424F4F01EB997780052581F /* MatrixElimination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixElimination.swift; sourceTree = "<group>"; };
 		1424F4F11EB997780052581F /* PolynomialFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolynomialFactorization.swift; sourceTree = "<group>"; };
 		1424F4F31EB997780052581F /* TPInt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TPInt.swift; sourceTree = "<group>"; };
@@ -100,11 +100,9 @@
 		144AD28E1EC13D9E00E23890 /* IntMatrixEliminationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntMatrixEliminationTests.swift; sourceTree = "<group>"; };
 		144AD2901EC21A4500E23890 /* Homology.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Homology.swift; sourceTree = "<group>"; };
 		145339BF1EC7D67100F014F4 /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
-		146A839E1ECC47CA0055E433 /* SimplicialComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimplicialComplex.swift; sourceTree = "<group>"; };
-		1473F1111EC76715003B1D55 /* FreeModuleQuotient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FreeModuleQuotient.swift; path = ../Homology/FreeModuleQuotient.swift; sourceTree = "<group>"; };
+		1473F1111EC76715003B1D55 /* FreeModuleQuotient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreeModuleQuotient.swift; sourceTree = "<group>"; };
 		147D98021EB9B06900C736AC /* IntegerFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntegerFactorization.swift; sourceTree = "<group>"; };
 		147D98051EB9B26200C736AC /* Dictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dictionary.swift; sourceTree = "<group>"; };
-		147D98081EBA0CD200C736AC /* Simplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Simplex.swift; sourceTree = "<group>"; };
 		14929C941ED9BFE5006ACAC5 /* AlgebraicExtensions.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = AlgebraicExtensions.playground; sourceTree = "<group>"; };
 		14929C951ED9BFE5006ACAC5 /* FreeModules.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = FreeModules.playground; sourceTree = "<group>"; };
 		14929C961ED9BFE5006ACAC5 /* Homology.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Homology.playground; sourceTree = "<group>"; };
@@ -112,6 +110,8 @@
 		14929C981ED9BFE5006ACAC5 /* Matrices.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Matrices.playground; sourceTree = "<group>"; };
 		14929C991ED9BFE5006ACAC5 /* Numbers.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Numbers.playground; sourceTree = "<group>"; };
 		14929C9A1ED9BFE5006ACAC5 /* Permutations.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Permutations.playground; sourceTree = "<group>"; };
+		14929C9C1ED9C798006ACAC5 /* Simplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Simplex.swift; sourceTree = "<group>"; };
+		14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimplicialComplex.swift; sourceTree = "<group>"; };
 		14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixTests.swift; sourceTree = "<group>"; };
 		14E7BEC91ED84B3400BBA72A /* EigenLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EigenLib.h; path = EigenWrapper/EigenLib.h; sourceTree = "<group>"; };
 		14E7BECA1ED84B3400BBA72A /* EigenLib.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = EigenLib.mm; path = EigenWrapper/EigenLib.mm; sourceTree = "<group>"; };
@@ -185,6 +185,7 @@
 				1424F4E71EB997780052581F /* Numbers */,
 				1424F4DF1EB997780052581F /* Concrete */,
 				1424F4E41EB997780052581F /* Morphisms */,
+				14929C9B1ED9C798006ACAC5 /* Geometry */,
 				147D98071EBA0C0C00C736AC /* Homology */,
 				1424F4EF1EB997780052581F /* Tools */,
 				1424F4F21EB997780052581F /* TypeParameters */,
@@ -287,8 +288,6 @@
 		147D98071EBA0C0C00C736AC /* Homology */ = {
 			isa = PBXGroup;
 			children = (
-				147D98081EBA0CD200C736AC /* Simplex.swift */,
-				146A839E1ECC47CA0055E433 /* SimplicialComplex.swift */,
 				140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */,
 				144AD2901EC21A4500E23890 /* Homology.swift */,
 			);
@@ -307,6 +306,15 @@
 				14929C9A1ED9BFE5006ACAC5 /* Permutations.playground */,
 			);
 			path = Playgrounds;
+			sourceTree = "<group>";
+		};
+		14929C9B1ED9C798006ACAC5 /* Geometry */ = {
+			isa = PBXGroup;
+			children = (
+				14929C9C1ED9C798006ACAC5 /* Simplex.swift */,
+				14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */,
+			);
+			path = Geometry;
 			sourceTree = "<group>";
 		};
 		14E7BEC71ED84A8700BBA72A /* Libraries */ = {
@@ -447,13 +455,12 @@
 				1424F5061EB997780052581F /* Integer.swift in Sources */,
 				14E7BECC1ED84B3400BBA72A /* EigenLib.mm in Sources */,
 				1424F5001EB997780052581F /* FreeModule.swift in Sources */,
-				147D98091EBA0CD200C736AC /* Simplex.swift in Sources */,
 				1424F5041EB997780052581F /* FreeModHom.swift in Sources */,
-				146A839F1ECC47CA0055E433 /* SimplicialComplex.swift in Sources */,
 				140E80A01ECDEA8E00B89719 /* combinations.swift in Sources */,
 				1424F5051EB997780052581F /* Hom.swift in Sources */,
 				1424F5081EB997780052581F /* Real.swift in Sources */,
 				1424F4FB1EB997780052581F /* Field.swift in Sources */,
+				14929C9E1ED9C798006ACAC5 /* Simplex.swift in Sources */,
 				141417311ECE984800B167CB /* Sequence.swift in Sources */,
 				1424F4FE1EB997780052581F /* Monoid.swift in Sources */,
 				1424F50F1EB997780052581F /* TPPolynomial.swift in Sources */,
@@ -466,6 +473,7 @@
 				1424F5111EB997780052581F /* optable.swift in Sources */,
 				1424F5021EB997780052581F /* Permutation.swift in Sources */,
 				1424F4FC1EB997780052581F /* Group.swift in Sources */,
+				14929C9F1ED9C798006ACAC5 /* SimplicialComplex.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
