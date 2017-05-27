@@ -81,26 +81,4 @@ public extension FreeModuleQuotient where R: EuclideanRing {
         
         self.init(freePart + torPart)
     }
-    
-    private static func calculateP<n:_Int, k:_Int, l:_Int>(_ M: Matrix<R, n, k>, _ N: Matrix<R, n, l>) -> Matrix<R, k, l> {
-        // With the left-elimination on M as LM = [D; 0], LN = LMP = [DP; 0].
-        // LN must be divisible by each diagonal factor of D.
-        
-        let (k, l) = (M.cols, N.cols)
-        
-        let L : Matrix<R, n, n> = M.eliminate(mode: .Rows).left
-        let D : Matrix<R, k, k> = (L * M).submatrix(rowsInRange: 0 ..< k)
-        let DP: Matrix<R, k, l> = (L * N).submatrix(rowsInRange: 0 ..< k)
-        
-        return  Matrix<R, k, l>(rows: k, cols: l) { (i, j) in
-            let a = D[i, i]
-            let (q, r) = DP[i, j] /% a
-            
-            guard r == 0 else {
-                fatalError("N is not a submodule of M.")
-            }
-            
-            return q
-        }
-    }
 }
