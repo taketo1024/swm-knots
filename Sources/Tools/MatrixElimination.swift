@@ -10,8 +10,8 @@ public enum MatrixEliminationMode {
 public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
     public let target: Matrix<R, n, m>
     public let mode: MatrixEliminationMode
-    fileprivate let rows: Int
-    fileprivate let cols: Int
+    public let rows: Int
+    public let cols: Int
     
     public init(_ matrix: Matrix<R, n, m>, mode: MatrixEliminationMode = .Both) {
         self.target = matrix
@@ -307,7 +307,7 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
         return AnySequence({ return EliminationIterator(self) })
     }
     
-    private func log(_ msg: String) {
+    private func log(_ msg: @autoclosure () -> String) {
         if debug {
             print(msg)
         }
