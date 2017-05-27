@@ -222,15 +222,7 @@ fileprivate struct EliminationIterator<R: Ring, n: _Int, m: _Int> : IteratorProt
     
     init(_ processor: BaseEliminationProcessor<R, n, m>) {
         self.p = processor
-        
-        switch p.mode {
-        case .Both:
-            current = (p.itr, p.itr)
-        case .Rows:
-            current = (p.itr, 0)
-        case .Cols:
-            current = (0, p.itr)
-        }
+        self.current = (p.itr, p.itr)
     }
     
     mutating func next() -> (Int, Int)? {
@@ -240,18 +232,16 @@ fileprivate struct EliminationIterator<R: Ring, n: _Int, m: _Int> : IteratorProt
         
         defer {
             switch p.mode {
-            case .Both, .Rows:
+            case .Both:
                 if current.0 + 1 >= p.rows {
                     current = (p.itr, current.1 + 1)
                 } else {
                     current = (current.0 + 1, current.1)
                 }
+            case .Rows:
+                current = (current.0 + 1, current.1)
             case .Cols:
-                if current.1 + 1 >= p.cols {
-                    current = (current.0 + 1, p.itr)
-                } else {
-                    current = (current.0, current.1 + 1)
-                }
+                current = (current.0, current.1 + 1)
             }
         }
         
@@ -266,7 +256,11 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
     
     var result: Matrix<R, n, m>
     var process: [EliminationStep<R>]
+    
+    let maxItr: Int
     private(set) var itr = 0
+    
+    var debug: Bool = false
     
     init(_ target: Matrix<R, n, m>, _ mode: MatrixEliminationMode = .Both) {
         self.mode = mode
@@ -274,16 +268,17 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
         self.cols = target.cols
         self.result = target
         self.process = []
+        self.maxItr = {
+            switch mode {
+            case .Both: return min(target.rows, target.cols)
+            case .Rows: return target.rows
+            case .Cols: return target.cols
+            }
+        }()
     }
     
     func run() {
-        let maxItr: Int = {
-            switch mode {
-            case .Both: return min(rows, cols)
-            case .Rows: return rows
-            case .Cols: return cols
-            }
-        }()
+        log("-----Start (mode: \(mode))-----\n\n\(result.alignedDescription)\n")
         
         while itr < maxItr {
             if iteration() {
@@ -293,7 +288,7 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
             }
         }
         
-        postProcess()
+        log("-----Done (\(process.count) steps)-----\n\nResult:\n\(result.alignedDescription)\n")
     }
     
     // override point
@@ -304,13 +299,18 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
     func apply(_ s: EliminationStep<R>) {
         result.apply(s)
         process.append(s)
-    }
-    
-    func postProcess() {
+        
+        log("\(itr)/\(maxItr): \(s) \n\n\(result.alignedDescription)\n")
     }
     
     func indexIterator() -> AnySequence<(Int, Int)> {
         return AnySequence({ return EliminationIterator(self) })
+    }
+    
+    private func log(_ msg: String) {
+        if debug {
+            print(msg)
+        }
     }
 }
 
@@ -321,7 +321,11 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
         let doCols = (mode != .Rows)
 
         guard var (i0, j0) = next() else {
-            return false
+            if mode == .Both { // The area left is O. Exit iteration.
+                return false
+            } else {           // The target row/col is O. Continue iteration.
+                return true
+            }
         }
         
         elimination: while true {
@@ -371,35 +375,27 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
         return true
     }
     
-    override func postProcess() {
-        switch mode {
-        case .Rows:
-            var step = 0
-            align: while step < rows {
-                for j in 0 ..< cols {
-                    let arr = (step ..< rows).filter{ result[$0, j] != 0}
-                    if arr.count == 1, let i = arr.first {
-                        apply(.SwapRows(i, step))
-                        step += 1
-                        continue align
-                    }
-                }
-                step += 1
+    private func next() -> (Int, Int)? {
+        var min = R.zero
+        var (i0, j0) = (0, 0)
+        
+        for (i, j) in indexIterator() {
+            let a = result[i, j]
+            
+            if a.isUnit {
+                return (i, j)
             }
-        case .Cols:
-            var step = 0
-            align: while step < cols {
-                for i in 0 ..< rows {
-                    let arr = (step ..< cols).filter{ result[i, $0] != 0}
-                    if arr.count == 1, let j = arr.first {
-                        apply(.SwapCols(j, step))
-                        step += 1
-                        continue align
-                    }
-                }
-                step += 1
+            
+            if a != 0 && (min == 0 || a.degree < min.degree) {
+                min = a
+                (i0, j0) = (i, j)
             }
-        default: ()
+        }
+        
+        if min != 0 {
+            return (i0, j0)
+        } else {
+            return nil
         }
     }
     
@@ -476,30 +472,6 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
         
         return true
     }
-    
-    private func next() -> (Int, Int)? {
-        var min = R.zero
-        var (i0, j0) = (0, 0)
-        
-        for (i, j) in indexIterator() {
-            let a = result[i, j]
-            
-            if a.isUnit {
-                return (i, j)
-            }
-            
-            if a != 0 && (min == 0 || a.degree < min.degree) {
-                min = a
-                (i0, j0) = (i, j)
-            }
-        }
-        
-        if min == 0 {
-            return nil
-        } else {
-            return (i0, j0)
-        }
-    }
 }
 
 fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEliminationProcessor<R, n, m> {
@@ -509,7 +481,11 @@ fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEli
         let doCols = (mode != .Rows)
         
         guard var (i0, j0) = next() else {
-            return false
+            if mode == .Both { // The area left is O. Exit iteration.
+                return false
+            } else {           // The target row/col is O. Continue iteration.
+                return true
+            }
         }
         
         if doRows && i0 > itr {
@@ -531,6 +507,16 @@ fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEli
         }
     
         return true
+    }
+    
+    private func next() -> (row: Int, col: Int)? {
+        for (i, j) in indexIterator() {
+            let a = result[i, j]
+            if a != 0 {
+                return (i, j)
+            }
+        }
+        return nil
     }
     
     private func eliminateRow(_ i0: Int, _ j0: Int) {
@@ -561,16 +547,6 @@ fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEli
             
             apply(.AddCol(at: j0, to: j, mul: -result[i0, j]))
         }
-    }
-    
-    private func next() -> (row: Int, col: Int)? {
-        for (i, j) in indexIterator() {
-            let a = result[i, j]
-            if a != 0 {
-                return (i, j)
-            }
-        }
-        return nil
     }
 }
 
