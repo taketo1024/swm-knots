@@ -47,6 +47,7 @@
 		14929C9E1ED9C798006ACAC5 /* Simplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14929C9C1ED9C798006ACAC5 /* Simplex.swift */; };
 		14929C9F1ED9C798006ACAC5 /* SimplicialComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */; };
 		14A85FF11ED9C8C300A754EA /* Vertex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A85FF01ED9C8C300A754EA /* Vertex.swift */; };
+		14A85FF31ED9D63E00A754EA /* GeometricComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */; };
 		14B2FB8C1ED8FBA000C182EB /* MatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */; };
 		14E7BECB1ED84B3400BBA72A /* EigenLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 14E7BEC91ED84B3400BBA72A /* EigenLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		14E7BECC1ED84B3400BBA72A /* EigenLib.mm in Sources */ = {isa = PBXBuildFile; fileRef = 14E7BECA1ED84B3400BBA72A /* EigenLib.mm */; };
@@ -114,6 +115,7 @@
 		14929C9C1ED9C798006ACAC5 /* Simplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Simplex.swift; sourceTree = "<group>"; };
 		14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimplicialComplex.swift; sourceTree = "<group>"; };
 		14A85FF01ED9C8C300A754EA /* Vertex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vertex.swift; sourceTree = "<group>"; };
+		14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeometricComplex.swift; sourceTree = "<group>"; };
 		14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixTests.swift; sourceTree = "<group>"; };
 		14E7BEC91ED84B3400BBA72A /* EigenLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EigenLib.h; path = EigenWrapper/EigenLib.h; sourceTree = "<group>"; };
 		14E7BECA1ED84B3400BBA72A /* EigenLib.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = EigenLib.mm; path = EigenWrapper/EigenLib.mm; sourceTree = "<group>"; };
@@ -315,6 +317,7 @@
 			children = (
 				14A85FF01ED9C8C300A754EA /* Vertex.swift */,
 				14929C9C1ED9C798006ACAC5 /* Simplex.swift */,
+				14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */,
 				14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */,
 			);
 			path = Geometry;
@@ -477,6 +480,7 @@
 				1424F5111EB997780052581F /* optable.swift in Sources */,
 				1424F5021EB997780052581F /* Permutation.swift in Sources */,
 				1424F4FC1EB997780052581F /* Group.swift in Sources */,
+				14A85FF31ED9D63E00A754EA /* GeometricComplex.swift in Sources */,
 				14929C9F1ED9C798006ACAC5 /* SimplicialComplex.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -8,69 +8,56 @@
 
 import Foundation
 
-public struct SimplicialComplex {
+public struct SimplicialComplex: GeometricComplex {
+    public let dim: Int
     public let vertexSet: VertexSet
-    public let simplices: [Simplex]
+    internal let simplicesList: [[Simplex]]
     
-    public init<S: Sequence>(_ vertexSet: VertexSet, _ simplices: S, generate: Bool = false) where S.Iterator.Element == Simplex {
+    // root initializer
+    public init(_ vertexSet: VertexSet, _ simplices: [[Simplex]]) {
+        self.dim = simplices.count - 1
         self.vertexSet = vertexSet
-        self.simplices = generate ? {
-            simplices.reduce([]) { (list, s) in list + s.allSubsimplices() }.unique()
-            }() : Array(simplices)
+        self.simplicesList = simplices
     }
     
-    public var dim: Int {
-        return simplices.reduce(0) { max($0, $1.dim) }
+    public init<S: Sequence>(_ vertexSet: VertexSet, _ simplices: S, generate: Bool = false) where S.Iterator.Element == Simplex {
+        let simplices = { () -> [[Simplex]] in
+            let dim = simplices.reduce(0) { max($0, $1.dim) }
+            let set = generate ? simplices.reduce(Set<Simplex>()){$0.union($1.allSubsimplices()) } : Set(simplices)
+            
+            var simplices: [[Simplex]] = (0 ... dim).map{_ in []}
+            for s in set {
+                simplices[s.dim].append(s)
+            }
+            return simplices
+        }()
+        self.init(vertexSet, simplices)
     }
     
     public func skeleton(_ dim: Int) -> SimplicialComplex {
-        let sub = simplices.filter{ $0.dim <= dim }
+        let sub = Array(simplicesList[0 ... dim])
         return SimplicialComplex(vertexSet, sub)
     }
     
-    public func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<Simplex, R> {
-        typealias M = FreeModule<Simplex, R>
-        typealias F = FreeModuleHom<Simplex, R>
-        
-        let dim = simplices.reduce(0){ max($0, $1.dim) }
-        
-        var chns: [[Simplex]] = (0 ... dim).map{_ in []}
-        for s in simplices {
-            chns[s.dim].append(s)
-        }
-        
-        let bmaps: [F] = (0 ... dim).map { (i) -> F in
-            let from = chns[i]
-            let to = (i > 0) ? chns[i - 1] : []
-            let matrix: TypeLooseMatrix<R> = boundaryMapMatrix(from, to)
-            return F(domainBasis: from, codomainBasis: to, matrix: matrix)
-        }
-        
-        return ChainComplex(chainBases: chns, boundaryMaps: bmaps)
+    public func simplices(_ i: Int) -> [Simplex] {
+        return (0...dim).contains(i) ? simplicesList[i] : []
     }
     
-    public func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<Simplex, R> {
-        typealias M = FreeModule<Simplex, R>
-        typealias F = FreeModuleHom<Simplex, R>
-        
-        let dim = simplices.reduce(0){ max($0, $1.dim) }
-        
-        var chns: [[Simplex]] = (0 ... dim).map{_ in []}
-        for s in simplices {
-            chns[s.dim].append(s)
-        }
-        
+    public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Simplex, R> {
+        let from = simplices(i)
+        let to = (i > 0) ? simplices(i - 1) : []
+        let matrix: TypeLooseMatrix<R> = boundaryMapMatrix(from, to)
+        return FreeModuleHom<Simplex, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
+    }
+
+    public func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Simplex, R> {
         // Regard the basis of C_i as the dual basis of C^i.
         // Since <δf, c> = <f, ∂c>, the matrix is given by the transpose.
         
-        let bmaps: [F] = (0 ... dim).map { (i) -> F in
-            let from = chns[i]
-            let to = (i < dim) ? chns[i + 1] : []
-            let matrix: TypeLooseMatrix<R> = boundaryMapMatrix(to, from).transposed
-            return F(domainBasis: from, codomainBasis: to, matrix: matrix)
-        }
-        
-        return CochainComplex(chainBases: chns, boundaryMaps: bmaps)
+        let from = simplices(i)
+        let to = (i < dim) ? simplices(i + 1) : []
+        let matrix: TypeLooseMatrix<R> = boundaryMapMatrix(to, from).transposed
+        return FreeModuleHom<Simplex, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
     }
     
     private func boundaryMapMatrix<R: Ring>(_ from: [Simplex], _ to : [Simplex]) -> TypeLooseMatrix<R> {
@@ -85,20 +72,6 @@ public struct SimplicialComplex {
         }
         
         return matrix
-    }
-}
-
-public extension Homology where chainType == DescendingChainType, A == Simplex, R: EuclideanRing {
-    public init(_ s: SimplicialComplex, _ type: R.Type) {
-        let c: ChainComplex<Simplex, R> = s.chainComplex(type: R.self)
-        self.init(c)
-    }
-}
-
-public extension Cohomology where chainType == AscendingChainType, A == Simplex, R: EuclideanRing {
-    public init(_ s: SimplicialComplex, _ type: R.Type) {
-        let c: CochainComplex<Simplex, R> = s.cochainComplex(type: R.self)
-        self.init(c)
     }
 }
 
@@ -134,9 +107,11 @@ public extension SimplicialComplex {
 public func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
     let (n1, n2) = (K1.vertexSet.vertices.count, K2.vertexSet.vertices.count)
     let V = VertexSet(number: n1 + n2)
-    let simplices =
-        K1.simplices.map { s in V.simplex(indices: s.vertices.map{$0.index}) }
-            + K2.simplices.map { s in V.simplex(indices: s.vertices.map{$0.index + n1})
+    let dim = max(K1.dim, K2.dim)
+    
+    let simplices = (0 ... dim).map{ i in
+        K1.simplices(i).map{ s in V.simplex(indices: s.vertices.map{$0.index}) } +
+            K2.simplices(i).map{ s in V.simplex(indices: s.vertices.map{$0.index + n1}) }
     }
     return SimplicialComplex(V, simplices)
 }
@@ -147,8 +122,12 @@ public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
     let V = VertexSet(number: n1 * n2)
     
     // discard simplices that are faces of others.
-    let S1 = K1.simplices.filter{ s in K1.simplices.forAll{ t in t == s || !t.contains(s) } }
-    let S2 = K2.simplices.filter{ s in K2.simplices.forAll{ t in t == s || !t.contains(s) } }
+    func distinctSimplices(_ K: SimplicialComplex) -> Set<Simplex> {
+        let set = Set(K.simplicesList.joined())
+        return Set( set.filter{ s in set.forAll{ t in t == s || !t.contains(s) } } )
+    }
+    
+    let (S1, S2) = (distinctSimplices(K1), distinctSimplices(K2))
     let simplexPairs: [(Simplex, Simplex)] = S1.flatMap{ s in S2.map{ t in (s, t) } }
     
     let indexPairs: [[(Int, Int)]] = simplexPairs.flatMap{(s, t) -> [[(Int, Int)]] in
