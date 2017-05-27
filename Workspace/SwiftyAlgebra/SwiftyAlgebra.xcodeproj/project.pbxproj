@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		140BCD4F1EBA1AED00D7CE74 /* OrderedSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140BCD4E1EBA1AED00D7CE74 /* OrderedSet.swift */; };
 		140BCD511EBA3F8A00D7CE74 /* ChainComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */; };
 		140E80A01ECDEA8E00B89719 /* combinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140E809F1ECDEA8E00B89719 /* combinations.swift */; };
 		141417311ECE984800B167CB /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141417301ECE984800B167CB /* Sequence.swift */; };
@@ -64,7 +63,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		140BCD4E1EBA1AED00D7CE74 /* OrderedSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderedSet.swift; sourceTree = "<group>"; };
 		140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChainComplex.swift; sourceTree = "<group>"; };
 		140E809F1ECDEA8E00B89719 /* combinations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = combinations.swift; path = ../Util/combinations.swift; sourceTree = "<group>"; };
 		141417301ECE984800B167CB /* Sequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
@@ -272,7 +270,6 @@
 		147D98041EB9B24900C736AC /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				140BCD4E1EBA1AED00D7CE74 /* OrderedSet.swift */,
 				147D98051EB9B26200C736AC /* Dictionary.swift */,
 				141417301ECE984800B167CB /* Sequence.swift */,
 			);
@@ -430,7 +427,6 @@
 				147D98061EB9B26200C736AC /* Dictionary.swift in Sources */,
 				1424F50E1EB997780052581F /* TPInt.swift in Sources */,
 				1424F5091EB997780052581F /* QuotientRing.swift in Sources */,
-				140BCD4F1EBA1AED00D7CE74 /* OrderedSet.swift in Sources */,
 				1473F1121EC76715003B1D55 /* FreeModuleQuotient.swift in Sources */,
 				1424F4FF1EB997780052581F /* Ring.swift in Sources */,
 				DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */,

@@ -54,16 +54,22 @@ public struct VertexSet: CustomStringConvertible {
     }
 }
 
-// MEMO: 'un'ordered set of vertices (though we use OrderedSet)
+// MEMO: 'un'ordered set of vertices
 
 public struct Simplex: FreeModuleBase, CustomStringConvertible {
-    public let vertices: OrderedSet<Vertex>
+    public let vertices: [Vertex]
+    private let verticesSet: Set<Vertex>
+    private let id: String
+    
     public var dim: Int {
         return vertices.count - 1
     }
     
     internal init<S: Sequence>(_ vertices: S) where S.Iterator.Element == Vertex {
-        self.vertices = OrderedSet(vertices.sorted())
+        self.vertices = vertices.sorted().unique()
+        self.verticesSet = Set(self.vertices)
+        
+        self.id = "(\(self.vertices.map{$0.description}.joined(separator: ", ")))"
     }
     
     public func face(_ index: Int) -> Simplex {
@@ -80,11 +86,11 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
     }
     
     public func contains(_ s: Simplex) -> Bool {
-        return s.vertices.isSubset(of: self.vertices)
+        return s.verticesSet.isSubset(of: self.verticesSet)
     }
     
     public func allSubsimplices() -> [Simplex] {
-        var queue = OrderedSet([self])
+        var queue = [self]
         var i = 0
         while(i < queue.count) {
             let s = queue[i]
@@ -93,24 +99,18 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
             }
             i += 1
         }
-        return Array(queue)
+        return queue.unique()
     }
     
     public var hashValue: Int {
-        return description.hashValue
+        return id.hashValue
     }
     
     public var description: String {
-        return "(\(Array(vertices).map{$0.description}.joined(separator: ", ")))"
+        return id
     }
     
     public static func ==(a: Simplex, b: Simplex) -> Bool {
-        return Set(a.vertices) == Set(b.vertices)
-    }
-}
-
-internal extension OrderedSet {
-    convenience init<S: Sequence>(_ s: S) where S.Iterator.Element == T {
-        self.init(sequence: s)
+        return a.id == b.id // should be `a.verticesSet == b.verticesSet` but for performance.
     }
 }

@@ -60,7 +60,7 @@ public func ==<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A,
 }
 
 public func +<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A, R>) -> FreeModule<A, R> {
-    let basis = a.basis + b.basis.filter{!a.basis.contains($0)}
+    let basis = (a.basis + b.basis).unique()
     let values = basis.map { x in a.value(forBasisElement: x) + b.value(forBasisElement: x) }
     return FreeModule<A, R>(basis: basis, values: values)
 }
@@ -78,4 +78,20 @@ public func *<A: FreeModuleBase, R: Ring>(r: R, a: FreeModule<A, R>) -> FreeModu
 public func *<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>, r: R) -> FreeModule<A, R> {
     let values = a.values.map{$0 * r}
     return FreeModule<A, R>(basis: a.basis, values: values)
+}
+
+public extension FreeModule {
+    public static func transform<n:_Int, m:_Int>(elements: [FreeModule<A, R>], matrix Q: Matrix<R, n, m>) -> [FreeModule<A, R>] {
+        if elements.isEmpty {
+            return []
+        }
+        
+        let basis = elements.first!.basis
+        let P = Matrix<R, _TypeLooseSize, n>(rows: basis.count, cols: elements.count) { (i, j) in
+            elements[j].values[i]
+        }
+        let PQ = P * Q
+        
+        return (0 ..< Q.cols).map{ j in FreeModule<A, R>(basis: basis, values: PQ.colArray(j)) }
+    }
 }

@@ -68,11 +68,7 @@ public extension FreeModuleQuotient where R: EuclideanRing {
         let E = P.eliminate()
         let Q: Matrix<R, k, k> = E.leftInverse
         
-        let newBasis = (0 ..< k).map{ j in
-            (0 ..< k).reduce(M.zero) { (res, i) in
-                res + basis[i] * Q[i, j] // FIXME! this is so slow!
-            }
-        }
+        let newBasis = M.transform(elements: basis, matrix: Q)
         let diag: [R] = E.diagonal
         
         let torPart: [FreeModuleQuotientGenerator]  = diag.enumerated()

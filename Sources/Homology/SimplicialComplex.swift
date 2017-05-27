@@ -10,13 +10,13 @@ import Foundation
 
 public struct SimplicialComplex {
     public let vertexSet: VertexSet
-    public let simplices: OrderedSet<Simplex>
+    public let simplices: [Simplex]
     
     public init<S: Sequence>(_ vertexSet: VertexSet, _ simplices: S, generate: Bool = false) where S.Iterator.Element == Simplex {
         self.vertexSet = vertexSet
-        self.simplices = generate ?
-            simplices.reduce(OrderedSet()) { $0 + $1.allSubsimplices() }
-            : OrderedSet(simplices)
+        self.simplices = generate ? {
+            simplices.reduce([]) { (list, s) in list + s.allSubsimplices() }.unique()
+            }() : Array(simplices)
     }
     
     public var dim: Int {
@@ -177,7 +177,7 @@ public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
     let simplices = indexPairs.map { (list: [(Int, Int)]) -> Simplex in
         let indices = list.map{ (i, j) in i * n2 + j }
         return V.simplex(indices: indices)
-    }
+    }.unique()
     
     return SimplicialComplex(V, simplices)
 }
