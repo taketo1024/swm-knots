@@ -39,7 +39,7 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, CustomStringConve
     }
     
     public var description: String {
-        let sum = basis.enumerated()
+        let sum: String = basis.enumerated()
             .map {($1, values[$0])}
             .filter{ (_, r) in r != R.zero }
             .map { (a, r) in (r == R.identity) ? "\(a)" : "\(r)\(a)" }

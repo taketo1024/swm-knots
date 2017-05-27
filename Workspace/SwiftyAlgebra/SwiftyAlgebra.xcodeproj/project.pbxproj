@@ -205,9 +205,9 @@
 				1424F4DE1EB997780052581F /* Ring.swift */,
 				1424F4D91EB997780052581F /* EuclideanRing.swift */,
 				1424F4DA1EB997780052581F /* Field.swift */,
+				1424F4EC1EB997780052581F /* QuotientRing.swift */,
 				1424F4DC1EB997780052581F /* Module.swift */,
 				1424F4E01EB997780052581F /* FreeModule.swift */,
-				1424F4EC1EB997780052581F /* QuotientRing.swift */,
 				1473F1111EC76715003B1D55 /* FreeModuleQuotient.swift */,
 			);
 			path = Abstract;
