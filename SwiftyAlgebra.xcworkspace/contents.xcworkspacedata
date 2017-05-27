@@ -4,25 +4,4 @@
    <FileRef
       location = "group:Workspace/SwiftyAlgebra/SwiftyAlgebra.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:Workspace/AlgebraicExtensions.playground">
-   </FileRef>
-   <FileRef
-      location = "group:Workspace/IntegerQuotients.playground">
-   </FileRef>
-   <FileRef
-      location = "group:Workspace/Matrices.playground">
-   </FileRef>
-   <FileRef
-      location = "group:Workspace/Numbers.playground">
-   </FileRef>
-   <FileRef
-      location = "group:Workspace/Permutations.playground">
-   </FileRef>
-   <FileRef
-      location = "group:Workspace/FreeModules.playground">
-   </FileRef>
-   <FileRef
-      location = "group:Workspace/Homology.playground">
-   </FileRef>
 </Workspace>
