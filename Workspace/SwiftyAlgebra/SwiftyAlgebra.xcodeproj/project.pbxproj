@@ -604,6 +604,7 @@
 				INFOPLIST_FILE = SwiftyAlgebra/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				OTHER_SWIFT_FLAGS = "-DUSE_EIGEN";
 				PRODUCT_BUNDLE_IDENTIFIER = com.taketo1024.SwiftyAlgebra;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -627,6 +628,7 @@
 				INFOPLIST_FILE = SwiftyAlgebra/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				OTHER_SWIFT_FLAGS = "-DUSE_EIGEN";
 				PRODUCT_BUNDLE_IDENTIFIER = com.taketo1024.SwiftyAlgebra;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

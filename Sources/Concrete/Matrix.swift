@@ -97,11 +97,13 @@ public func * <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, r: R) -> Matrix<R,
 }
 
 public func * <R: Ring, n: _Int, m: _Int, p: _Int>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
+    #if USE_EIGEN
     if R.self == IntegerNumber.self, let aGrid = a.grid as? [IntegerNumber], let bGrid = b.grid as? [IntegerNumber] {
         var result = Array(repeating: 0, count: a.rows * b.cols)
         EigenLib.multiple(&result, a.rows, a.cols, b.cols, aGrid, bGrid)
         return Matrix<R, n, p>(rows: a.rows, cols: b.cols, grid: result.map{ $0 as! R })
     }
+    #endif
     
     return Matrix<R, n, p>(rows: a.rows, cols: b.cols) { (i, k) -> R in
         return (0 ..< a.cols)
