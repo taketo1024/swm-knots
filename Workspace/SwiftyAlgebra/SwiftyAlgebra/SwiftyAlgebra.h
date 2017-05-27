@@ -16,4 +16,4 @@ FOUNDATION_EXPORT const unsigned char SwiftyAlgebraVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <SwiftyAlgebra/PublicHeader.h>
 
-#import "Sample.h"
+#import "EigenLib.h"

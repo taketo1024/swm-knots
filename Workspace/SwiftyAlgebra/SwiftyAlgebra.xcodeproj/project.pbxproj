@@ -47,8 +47,8 @@
 		147D98061EB9B26200C736AC /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98051EB9B26200C736AC /* Dictionary.swift */; };
 		147D98091EBA0CD200C736AC /* Simplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98081EBA0CD200C736AC /* Simplex.swift */; };
 		14B2FB8C1ED8FBA000C182EB /* MatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */; };
-		14E7BECB1ED84B3400BBA72A /* Sample.h in Headers */ = {isa = PBXBuildFile; fileRef = 14E7BEC91ED84B3400BBA72A /* Sample.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		14E7BECC1ED84B3400BBA72A /* Sample.mm in Sources */ = {isa = PBXBuildFile; fileRef = 14E7BECA1ED84B3400BBA72A /* Sample.mm */; };
+		14E7BECB1ED84B3400BBA72A /* EigenLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 14E7BEC91ED84B3400BBA72A /* EigenLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		14E7BECC1ED84B3400BBA72A /* EigenLib.mm in Sources */ = {isa = PBXBuildFile; fileRef = 14E7BECA1ED84B3400BBA72A /* EigenLib.mm */; };
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
 /* End PBXBuildFile section */
 
@@ -106,8 +106,8 @@
 		147D98051EB9B26200C736AC /* Dictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dictionary.swift; sourceTree = "<group>"; };
 		147D98081EBA0CD200C736AC /* Simplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Simplex.swift; sourceTree = "<group>"; };
 		14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixTests.swift; sourceTree = "<group>"; };
-		14E7BEC91ED84B3400BBA72A /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
-		14E7BECA1ED84B3400BBA72A /* Sample.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Sample.mm; sourceTree = "<group>"; };
+		14E7BEC91ED84B3400BBA72A /* EigenLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EigenLib.h; path = EigenWrapper/EigenLib.h; sourceTree = "<group>"; };
+		14E7BECA1ED84B3400BBA72A /* EigenLib.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = EigenLib.mm; path = EigenWrapper/EigenLib.mm; sourceTree = "<group>"; };
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -290,19 +290,10 @@
 		14E7BEC71ED84A8700BBA72A /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				14E7BEC81ED84AEE00BBA72A /* Eigen */,
+				14E7BEC91ED84B3400BBA72A /* EigenLib.h */,
+				14E7BECA1ED84B3400BBA72A /* EigenLib.mm */,
 			);
 			path = Libraries;
-			sourceTree = "<group>";
-		};
-		14E7BEC81ED84AEE00BBA72A /* Eigen */ = {
-			isa = PBXGroup;
-			children = (
-				14E7BEC91ED84B3400BBA72A /* Sample.h */,
-				14E7BECA1ED84B3400BBA72A /* Sample.mm */,
-			);
-			name = Eigen;
-			path = EigenWrapper;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -312,7 +303,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				14E7BECB1ED84B3400BBA72A /* Sample.h in Headers */,
+				14E7BECB1ED84B3400BBA72A /* EigenLib.h in Headers */,
 				1424F4CD1EB9976C0052581F /* SwiftyAlgebra.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -432,7 +423,7 @@
 				DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */,
 				145339C01EC7D67100F014F4 /* Box.swift in Sources */,
 				1424F5061EB997780052581F /* Integer.swift in Sources */,
-				14E7BECC1ED84B3400BBA72A /* Sample.mm in Sources */,
+				14E7BECC1ED84B3400BBA72A /* EigenLib.mm in Sources */,
 				1424F5001EB997780052581F /* FreeModule.swift in Sources */,
 				147D98091EBA0CD200C736AC /* Simplex.swift in Sources */,
 				1424F5041EB997780052581F /* FreeModHom.swift in Sources */,

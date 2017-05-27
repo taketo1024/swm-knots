@@ -1,12 +1,12 @@
 //
-//  Sample.m
+//  EigenLib.m
 //  SwiftyAlgebra
 //
 //  Created by Taketo Sano on 2017/05/26.
 //  Copyright © 2017年 Taketo Sano. All rights reserved.
 //
 
-#import "Sample.h"
+#import "EigenLib.h"
 
 #import <iostream>
 #import <Eigen/Core>
@@ -15,7 +15,7 @@
 using namespace Eigen;
 typedef Matrix<NSInteger, Dynamic, Dynamic, RowMajor> MXi;
 
-@implementation Sample
+@implementation EigenLib
 
 + (void)multiple:(NSInteger *)result :(NSInteger)aRow :(NSInteger)aCol :(NSInteger)bCol :(const NSInteger[])aGrid :(const NSInteger[])bGrid {
     Map<MXi>a(const_cast<NSInteger *>(aGrid), aRow, aCol);

@@ -1,5 +1,5 @@
 //
-//  Sample.h
+//  EigenLib.h
 //  SwiftyAlgebra
 //
 //  Created by Taketo Sano on 2017/05/26.
@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface Sample : NSObject
+@interface EigenLib : NSObject
 
 + (void)multiple:(NSInteger *)result :(NSInteger)aRow :(NSInteger)aCol :(NSInteger)bCol :(const NSInteger[])aGrid :(const NSInteger[])bGrid;
 
