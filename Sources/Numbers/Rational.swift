@@ -25,11 +25,11 @@ public struct RationalNumber: Field {
     }
     
     public var numerator: IntegerNumber {
-        return reduced.p
+        return p
     }
     
     public var denominator: IntegerNumber {
-        return reduced.q
+        return q
     }
 }
 
@@ -59,10 +59,9 @@ public func / (a: RationalNumber, b: RationalNumber) -> RationalNumber {
 
 extension RationalNumber: CustomStringConvertible {
     public var description: String {
-        let r = reduced
-        switch r.q {
-        case 1:  return "\(r.p)"
-        default: return "\(r.p)/\(r.q)"
+        switch self {
+        case 1:  return "\(p)"
+        default: return "\(p)/\(q)"
         }
     }
     
