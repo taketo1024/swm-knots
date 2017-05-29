@@ -6,6 +6,7 @@
 //  Copyright © 2017年 Taketo Sano. All rights reserved.
 //
 
+#ifdef USE_EIGEN
 #import "EigenLib.h"
 
 #import <iostream>
@@ -24,3 +25,5 @@ typedef Matrix<NSInteger, Dynamic, Dynamic, RowMajor> MXi;
 }
 
 @end
+
+#endif
