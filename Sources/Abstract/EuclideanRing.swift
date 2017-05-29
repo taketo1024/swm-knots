@@ -12,14 +12,14 @@ public extension EuclideanRing {
     public var isUnit: Bool {
         return (self != 0) && (1 % self == 0)
     }
-}
-
-public func % <R: EuclideanRing>(_ a: R, b: R) -> R {
-    return R.eucDiv(a, b).r
-}
-
-public func /% <R: EuclideanRing>(_ a: R, b: R) -> (q: R, r: R) {
-    return R.eucDiv(a, b)
+    
+    public static func % (_ a: Self, b: Self) -> Self {
+        return Self.eucDiv(a, b).r
+    }
+    
+    public static func /% (_ a: Self, b: Self) -> (q: Self, r: Self) {
+        return Self.eucDiv(a, b)
+    }
 }
 
 public func gcd<R: EuclideanRing>(_ a: R, _ b: R) -> R {

@@ -18,6 +18,22 @@ public protocol EuclideanQuotientRing: QuotientRing {
 public protocol EuclideanQuotientField: EuclideanQuotientRing, QuotientField {}
 
 extension EuclideanQuotientRing {
+    public static func == (a: Self, b: Self) -> Bool {
+        return (a.value - b.value) % a.mod == 0
+    }
+    
+    public static func + (a: Self, b: Self) -> Self {
+        return Self.init(a.value + b.value)
+    }
+    
+    public static prefix func - (a: Self) -> Self {
+        return Self.init(-a.value)
+    }
+    
+    public static func * (a: Self, b: Self) -> Self {
+        return Self.init(a.value * b.value)
+    }
+    
     public var description: String {
         return "[\(value)]"
     }
@@ -27,18 +43,3 @@ extension EuclideanQuotientRing {
     }
 }
 
-public func == <R: EuclideanQuotientRing>(a: R, b: R) -> Bool {
-    return (a.value - b.value) % a.mod == 0
-}
-
-public func + <R: EuclideanQuotientRing>(a: R, b: R) -> R {
-    return R(a.value + b.value)
-}
-
-public prefix func - <R: EuclideanQuotientRing>(a: R) -> R {
-    return R(-a.value)
-}
-
-public func * <R: EuclideanQuotientRing>(a: R, b: R) -> R {
-    return R(a.value * b.value)
-}

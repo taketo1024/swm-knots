@@ -93,43 +93,37 @@ public struct Polynomial<K: Field>: EuclideanRing, Module, CustomStringConvertib
                 return (q + m.q, m.r)
         }
     }
-}
-
-public func Monomial<K>(degree d: Int, coeff a: K) -> Polynomial<K> {
-    return Polynomial(degree: d) { $0 == d ? a : 0 }
-}
-
-public func ==<K: Field>(f: Polynomial<K>, g: Polynomial<K>) -> Bool {
-    return (f.degree == g.degree) &&
-        (0 ... f.degree).reduce(true) { $0 && (f.coeff($1) == g.coeff($1)) }
-}
-
-public func +<K: Field>(f: Polynomial<K>, g: Polynomial<K>) -> Polynomial<K> {
-    return Polynomial<K>(degree: max(f.degree, g.degree)) { f.coeff($0) + g.coeff($0) }
-}
-
-public prefix func -<K: Field>(f: Polynomial<K>) -> Polynomial<K> {
-    return f.map { -$0 }
-}
-
-public func *<K: Field>(f: Polynomial<K>, g: Polynomial<K>) -> Polynomial<K> {
-    return Polynomial<K>(degree: f.degree + g.degree) {
-        (k: Int) in
-        (max(0, k - g.degree) ... min(k, f.degree)).reduce(0) {
-            (res:K, i:Int) in res + f.coeff(i) * g.coeff(k - i)
+    
+    public static func == (f: Polynomial<K>, g: Polynomial<K>) -> Bool {
+        return (f.degree == g.degree) &&
+            (0 ... f.degree).reduce(true) { $0 && (f.coeff($1) == g.coeff($1)) }
+    }
+    
+    public static func + (f: Polynomial<K>, g: Polynomial<K>) -> Polynomial<K> {
+        return Polynomial<K>(degree: max(f.degree, g.degree)) { f.coeff($0) + g.coeff($0) }
+    }
+    
+    public static prefix func - (f: Polynomial<K>) -> Polynomial<K> {
+        return f.map { -$0 }
+    }
+    
+    public static func * (f: Polynomial<K>, g: Polynomial<K>) -> Polynomial<K> {
+        return Polynomial<K>(degree: f.degree + g.degree) {
+            (k: Int) in
+            (max(0, k - g.degree) ... min(k, f.degree)).reduce(0) {
+                (res:K, i:Int) in res + f.coeff(i) * g.coeff(k - i)
+            }
         }
     }
-}
-
-public func *<K: Field>(r: K, f: Polynomial<K>) -> Polynomial<K> {
-    return f.map { r * $0 }
-}
-
-public func *<K: Field>(f: Polynomial<K>, r: K) -> Polynomial<K> {
-    return f.map { $0 * r }
-}
-
-extension Polynomial {
+    
+    public static func * (r: K, f: Polynomial<K>) -> Polynomial<K> {
+        return f.map { r * $0 }
+    }
+    
+    public static func * (f: Polynomial<K>, r: K) -> Polynomial<K> {
+        return f.map { $0 * r }
+    }
+    
     public var description: String {
         let res = coeffs.enumerated().flatMap {
             (n: Int, a: K) -> String? in
@@ -150,4 +144,12 @@ extension Polynomial {
     public static var symbol: String {
         return "\(R.symbol)[x]"
     }
+    
+    public var hashValue: Int {
+        return leadCoeff.hashValue
+    }
+}
+
+public func Monomial<K>(degree d: Int, coeff a: K) -> Polynomial<K> {
+    return Polynomial(degree: d) { $0 == d ? a : 0 }
 }

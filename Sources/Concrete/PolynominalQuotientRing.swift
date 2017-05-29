@@ -24,6 +24,10 @@ public struct PolynomialQuotientRing<K: Field, P: _Polynomial>: EuclideanQuotien
     public static var symbol: String {
         return "\(R.symbol)[x]/\(P.value)"
     }
+    
+    public var hashValue: Int {
+        return value.hashValue
+    }
 }
 
 public struct PolynomialQuotientField<K: Field, P: _Polynomial>: EuclideanQuotientField where K == P.K {
@@ -62,5 +66,9 @@ public struct PolynomialQuotientField<K: Field, P: _Polynomial>: EuclideanQuotie
     
     public static var symbol: String {
         return "\(R.symbol)[x]/\(P.value)"
+    }
+    
+    public var hashValue: Int {
+        return value.hashValue
     }
 }

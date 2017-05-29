@@ -38,6 +38,31 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, CustomStringConve
         return table[a] ?? R.zero
     }
     
+    public static func == (a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
+        return a.table == b.table // bases need not be in same order.
+    }
+    
+    public static func + (a: FreeModule<A, R>, b: FreeModule<A, R>) -> FreeModule<A, R> {
+        let basis = (a.basis + b.basis).unique()
+        let values = basis.map { x in a.value(forBasisElement: x) + b.value(forBasisElement: x) }
+        return FreeModule<A, R>(basis: basis, values: values)
+    }
+    
+    public static prefix func - (a: FreeModule<A, R>) -> FreeModule<A, R> {
+        let values = a.values.map{-$0}
+        return FreeModule<A, R>(basis: a.basis, values: values)
+    }
+    
+    public static func * (r: R, a: FreeModule<A, R>) -> FreeModule<A, R> {
+        let values = a.values.map{r * $0}
+        return FreeModule<A, R>(basis: a.basis, values: values)
+    }
+    
+    public static func * (a: FreeModule<A, R>, r: R) -> FreeModule<A, R> {
+        let values = a.values.map{$0 * r}
+        return FreeModule<A, R>(basis: a.basis, values: values)
+    }
+    
     public var description: String {
         let sum: String = basis.enumerated()
             .map {($1, values[$0])}
@@ -51,34 +76,13 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, CustomStringConve
     public static var symbol: String {
         return "FM(\(R.symbol))"
     }
+    
+    public var hashValue: Int {
+        return values.count > 0 ? values[0].hashValue : 0
+    }
 }
 
 // Operations
-
-public func ==<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
-    return a.table == b.table // bases need not be in same order.
-}
-
-public func +<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>, b: FreeModule<A, R>) -> FreeModule<A, R> {
-    let basis = (a.basis + b.basis).unique()
-    let values = basis.map { x in a.value(forBasisElement: x) + b.value(forBasisElement: x) }
-    return FreeModule<A, R>(basis: basis, values: values)
-}
-
-public prefix func -<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>) -> FreeModule<A, R> {
-    let values = a.values.map{-$0}
-    return FreeModule<A, R>(basis: a.basis, values: values)
-}
-
-public func *<A: FreeModuleBase, R: Ring>(r: R, a: FreeModule<A, R>) -> FreeModule<A, R> {
-    let values = a.values.map{r * $0}
-    return FreeModule<A, R>(basis: a.basis, values: values)
-}
-
-public func *<A: FreeModuleBase, R: Ring>(a: FreeModule<A, R>, r: R) -> FreeModule<A, R> {
-    let values = a.values.map{$0 * r}
-    return FreeModule<A, R>(basis: a.basis, values: values)
-}
 
 public extension FreeModule {
     public static func transform<n:_Int, m:_Int>(elements: [FreeModule<A, R>], matrix Q: Matrix<R, n, m>) -> [FreeModule<A, R>] {

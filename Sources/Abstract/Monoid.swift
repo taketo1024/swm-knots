@@ -7,18 +7,18 @@ precedencegroup ExponentiativePrecedence {
 
 infix operator **: ExponentiativePrecedence
 
-public protocol Monoid: Equatable {
+public protocol Monoid: Equatable, Hashable {
     static func * (a: Self, b: Self) -> Self
     static var identity: Self { get }
     static var symbol: String { get }
 }
 
-extension Monoid {
+public extension Monoid {
     public static var symbol: String {
         return "\(Self.self)"
     }
-}
-
-public func ** <G: Monoid>(a: G, b: Int) -> G {
-    return b == 0 ? G.identity : a * (a ** (b - 1))
+    
+    public static func ** (a: Self, b: Int) -> Self {
+        return b == 0 ? Self.identity : a * (a ** (b - 1))
+    }
 }

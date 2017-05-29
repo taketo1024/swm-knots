@@ -60,60 +60,56 @@ public extension Matrix {
         get { return grid[gridIndex(i, j)] }
         set { grid[gridIndex(i, j)] = newValue }
     }
-}
-
-public func == <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Bool {
-    return a.grid == b.grid
-}
-
-public func + <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-        return a[i, j] + b[i, j]
-    }
-}
-
-public prefix func - <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-        return -a[i, j]
-    }
-}
-
-public func - <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-        return a[i, j] - b[i, j]
-    }
-}
-
-public func * <R: Ring, n: _Int, m: _Int>(r: R, a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-        return r * a[i, j]
-    }
-}
-
-public func * <R: Ring, n: _Int, m: _Int>(a: Matrix<R, n, m>, r: R) -> Matrix<R, n, m> {
-    return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-        return a[i, j] * r
-    }
-}
-
-public func * <R: Ring, n: _Int, m: _Int, p: _Int>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
-    #if USE_EIGEN
-    if R.self == IntegerNumber.self, let aGrid = a.grid as? [IntegerNumber], let bGrid = b.grid as? [IntegerNumber] {
-        var result = Array(repeating: 0, count: a.rows * b.cols)
-        EigenLib.multiple(&result, a.rows, a.cols, b.cols, aGrid, bGrid)
-        return Matrix<R, n, p>(rows: a.rows, cols: b.cols, grid: result.map{ $0 as! R })
-    }
-    #endif
     
-    return Matrix<R, n, p>(rows: a.rows, cols: b.cols) { (i, k) -> R in
-        return (0 ..< a.cols)
-            .map({j in a[i, j] * b[j, k]})
-            .reduce(0) {$0 + $1}
+    public static func == (a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Bool {
+        return a.grid == b.grid
     }
-}
-
-public func ** <R: Ring, n: _Int>(a: Matrix<R, n, n>, k: Int) -> Matrix<R, n, n> {
-    return k == 0 ? a.leftIdentity : a * (a ** (k - 1))
+    
+    public static func + (a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
+        return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
+            return a[i, j] + b[i, j]
+        }
+    }
+    
+    public static prefix func - (a: Matrix<R, n, m>) -> Matrix<R, n, m> {
+        return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
+            return -a[i, j]
+        }
+    }
+    
+    public static func - (a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
+        return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
+            return a[i, j] - b[i, j]
+        }
+    }
+    
+    public static func * (r: R, a: Matrix<R, n, m>) -> Matrix<R, n, m> {
+        return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
+            return r * a[i, j]
+        }
+    }
+    
+    public static func * (a: Matrix<R, n, m>, r: R) -> Matrix<R, n, m> {
+        return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
+            return a[i, j] * r
+        }
+    }
+    
+    public static func * <p: _Int>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
+        #if USE_EIGEN
+            if R.self == IntegerNumber.self, let aGrid = a.grid as? [IntegerNumber], let bGrid = b.grid as? [IntegerNumber] {
+                var result = Array(repeating: 0, count: a.rows * b.cols)
+                EigenLib.multiple(&result, a.rows, a.cols, b.cols, aGrid, bGrid)
+                return Matrix<R, n, p>(rows: a.rows, cols: b.cols, grid: result.map{ $0 as! R })
+            }
+        #endif
+        
+        return Matrix<R, n, p>(rows: a.rows, cols: b.cols) { (i, k) -> R in
+            return (0 ..< a.cols)
+                .map({j in a[i, j] * b[j, k]})
+                .reduce(0) {$0 + $1}
+        }
+    }
 }
 
 public typealias ColVector<R: Ring, n: _Int> = Matrix<R, n, _1>
@@ -280,6 +276,10 @@ public extension Matrix where n == m {
     public static var identity: Matrix<R, n, n> {
         return self.init { $0 == $1 ? 1 : 0 }
     }
+    
+    public static func ** (a: Matrix<R, n, n>, k: Int) -> Matrix<R, n, n> {
+        return k == 0 ? a.leftIdentity : a * (a ** (k - 1))
+    }
 }
 
 public extension Matrix where R: EuclideanRing, n == m {
@@ -309,6 +309,10 @@ public extension Matrix {
     
     public static var symbol: String {
         return "M(\((n.self == Dynamic.self ? "?" : "\(n.intValue)")), \((m.self == Dynamic.self ? "?" : "\(m.intValue)")); \(R.symbol))"
+    }
+    
+    public var hashValue: Int {
+        return grid.count > 0 ? grid[0].hashValue : 0
     }
 }
 

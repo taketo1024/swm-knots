@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Permutation<n: _Int>: Group {
+public struct Permutation<n: _Int>: Group, CustomStringConvertible {
     public var degree: Int { return n.intValue }
     fileprivate var elements: [Int] //
     
@@ -44,39 +44,41 @@ public struct Permutation<n: _Int>: Group {
         return self[i]
     }
     
+    public var signature: Int {
+        switch n.intValue {
+        case 0, 1:
+            return 1
+        case let l:
+            let r = (0 ..< l - 1)
+                .flatMap{ i in (i + 1 ..< l).map{ j in (i, j) } }
+                .reduce((1, 1)) {
+                    (r: (Int, Int), pair: (Int, Int)) -> (Int, Int) in
+                    return (r.0 * (pair.0 - pair.1) , r.1 * (self[pair.0] - self[pair.1]))
+            }
+            return r.0 / r.1
+        }
+    }
+    
     public static var all: [Permutation<n>] {
         return rawPermutation(n.intValue).map{ Permutation(elements: $0) }
     }
-}
-
-public func == <n: _Int>(a: Permutation<n>, b: Permutation<n>) -> Bool {
-    return a.elements == b.elements
-}
-
-public func * <n: _Int>(a: Permutation<n>, b: Permutation<n>) -> Permutation<n> {
-    return Permutation{ a[b[$0]] }
-}
-
-public func sgn<n: _Int>(_ s: Permutation<n>) -> Int {
-    switch n.intValue {
-    case 0, 1:
-        return 1
-    case let l:
-        let r = (0 ..< l - 1)
-            .flatMap{ i in (i + 1 ..< l).map{ j in (i, j) } }
-            .reduce((1, 1)) {
-                (r: (Int, Int), pair: (Int, Int)) -> (Int, Int) in
-                return (r.0 * (pair.0 - pair.1) , r.1 * (s[pair.0] - s[pair.1]))
-            }
-        return r.0 / r.1
+    
+    public static func == (a: Permutation<n>, b: Permutation<n>) -> Bool {
+        return a.elements == b.elements
     }
-}
-
-extension Permutation: CustomStringConvertible {
+    
+    public static func * (a: Permutation<n>, b: Permutation<n>) -> Permutation<n> {
+        return Permutation{ a[b[$0]] }
+    }
+    
     public var description: String {
         return "(" + (0 ..< degree).map({ i in
             return "\(i): \(self[i])"
         }).joined(separator: ", ") + ")"
+    }
+    
+    public var hashValue: Int {
+        return elements.count > 0 ? elements[0].hashValue + 1 : 0
     }
 }
 

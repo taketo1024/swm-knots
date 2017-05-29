@@ -21,16 +21,16 @@ public extension Ring {
         return Self.init(0)
     }
     
-    static var identity: Self {
+    public static var identity: Self {
         return Self.init(1)
     }
     
-    static func **(a: Self, n: Int) -> Self {
+    public static func **(a: Self, n: Int) -> Self {
         return (0 ..< n).reduce(Self.identity){ (res, _) in res * a }
     }
     
     // must override in subclass
-    static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m> {
+    public static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m> {
         return BaseMatrixElimination<Self, n, m>(A, mode: mode)
     }
 }

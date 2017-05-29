@@ -21,6 +21,10 @@ public struct IntQuotientRing<n: _Int>: IntQuotientType {
     public static var symbol: String {
         return "Z/\(n.intValue)"
     }
+    
+    public var hashValue: Int {
+        return value.hashValue
+    }
 }
 
 public struct IntQuotientField<p: _Int>: IntQuotientType, EuclideanQuotientField {
@@ -45,5 +49,9 @@ public struct IntQuotientField<p: _Int>: IntQuotientType, EuclideanQuotientField
     
     public static var symbol: String {
         return "Z/\(p.intValue)"
+    }
+    
+    public var hashValue: Int {
+        return value.hashValue
     }
 }

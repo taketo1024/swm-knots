@@ -31,33 +31,31 @@ public struct RationalNumber: Field {
     public var denominator: IntegerNumber {
         return q
     }
-}
-
-public func == (a: RationalNumber, b: RationalNumber) -> Bool {
-    return a.p * b.q == a.q * b.p
-}
-
-public func + (a: RationalNumber, b: RationalNumber) -> RationalNumber {
-    return RationalNumber(a.p * b.q + a.q * b.p, a.q * b.q)
-}
-
-public prefix func - (a: RationalNumber) -> RationalNumber {
-    return RationalNumber(-a.p, a.q)
-}
-
-public func - (a: RationalNumber, b: RationalNumber) -> RationalNumber {
-    return RationalNumber(a.p * b.q - a.q * b.p, a.q * b.q)
-}
-
-public func * (a: RationalNumber, b: RationalNumber) -> RationalNumber {
-    return RationalNumber(a.p * b.p, a.q * b.q)
-}
-
-public func / (a: RationalNumber, b: RationalNumber) -> RationalNumber {
-    return RationalNumber(a.p * b.q, a.q * b.p)
-}
-
-extension RationalNumber: CustomStringConvertible {
+    
+    public static func == (a: RationalNumber, b: RationalNumber) -> Bool {
+        return a.p * b.q == a.q * b.p
+    }
+    
+    public static func + (a: RationalNumber, b: RationalNumber) -> RationalNumber {
+        return RationalNumber(a.p * b.q + a.q * b.p, a.q * b.q)
+    }
+    
+    public static prefix func - (a: RationalNumber) -> RationalNumber {
+        return RationalNumber(-a.p, a.q)
+    }
+    
+    public static func - (a: RationalNumber, b: RationalNumber) -> RationalNumber {
+        return RationalNumber(a.p * b.q - a.q * b.p, a.q * b.q)
+    }
+    
+    public static func * (a: RationalNumber, b: RationalNumber) -> RationalNumber {
+        return RationalNumber(a.p * b.p, a.q * b.q)
+    }
+    
+    public static func / (a: RationalNumber, b: RationalNumber) -> RationalNumber {
+        return RationalNumber(a.p * b.q, a.q * b.p)
+    }
+    
     public var description: String {
         switch self {
         case 1:  return "\(p)"
@@ -67,5 +65,9 @@ extension RationalNumber: CustomStringConvertible {
     
     public static var symbol: String {
         return "Q"
+    }
+    
+    public var hashValue: Int {
+        return (p.hashValue &* 31) &+ q.hashValue
     }
 }

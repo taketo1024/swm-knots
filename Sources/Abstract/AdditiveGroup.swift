@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol AdditiveGroup: Equatable {
+public protocol AdditiveGroup: Equatable, Hashable {
     static func + (a: Self, b: Self) -> Self
     prefix static func - (x: Self) -> Self
     static var zero: Self { get }
