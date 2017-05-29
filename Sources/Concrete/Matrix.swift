@@ -26,17 +26,17 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence, CustomString
     }
 
     public init(_ grid: R...) {
-        if n.self == _TypeLooseSize.self || m.self == _TypeLooseSize.self {
-            fatalError("attempted to initialize TypeLooseMatrix without specifying rows/cols.")
+        if n.self == Dynamic.self || m.self == Dynamic.self {
+            fatalError("attempted to initialize DynamicMatrix without specifying rows/cols.")
         }
-        self.init(rows: n.value, cols: m.value, grid: grid)
+        self.init(rows: n.intValue, cols: m.intValue, grid: grid)
     }
     
     public init(_ gen: (Int, Int) -> R) {
-        if n.self == _TypeLooseSize.self || m.self == _TypeLooseSize.self {
-            fatalError("attempted to initialize TypeLooseMatrix without specifying rows/cols.")
+        if n.self == Dynamic.self || m.self == Dynamic.self {
+            fatalError("attempted to initialize DynamicMatrix without specifying rows/cols.")
         }
-        self.init(rows: n.value, cols: m.value, gen: gen)
+        self.init(rows: n.intValue, cols: m.intValue, gen: gen)
     }
     
     public static var zero: Matrix<R, n, m> {
@@ -308,7 +308,7 @@ public extension Matrix {
     }
     
     public static var symbol: String {
-        return "M(\((n.self == _TypeLooseSize.self ? "?" : "\(n.value)")), \((m.self == _TypeLooseSize.self ? "?" : "\(m.value)")); \(R.symbol))"
+        return "M(\((n.self == Dynamic.self ? "?" : "\(n.intValue)")), \((m.self == Dynamic.self ? "?" : "\(m.intValue)")); \(R.symbol))"
     }
 }
 
@@ -347,12 +347,11 @@ public struct MatrixIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
     }
 }
 
-// TypeLooseMatrix
+// DynamicMatrix
 
-public struct _TypeLooseSize : _Int { public static let value = 0 }
-public typealias TypeLooseMatrix<R: Ring> = Matrix<R, _TypeLooseSize, _TypeLooseSize>
+public typealias DynamicMatrix<R: Ring> = Matrix<R, Dynamic, Dynamic>
 
-public extension Matrix where n == _TypeLooseSize, m == _TypeLooseSize {
+public extension Matrix where n == Dynamic, m == Dynamic {
     public init(_ rows: Int, _ cols: Int, _ grid: [R]) {
         self.init(rows: rows, cols: cols, grid: grid)
     }

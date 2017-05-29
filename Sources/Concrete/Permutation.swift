@@ -1,14 +1,14 @@
 import Foundation
 
 public struct Permutation<n: _Int>: Group {
-    public var degree: Int { return n.value }
+    public var degree: Int { return n.intValue }
     fileprivate var elements: [Int] //
     
     private init(elements: [Int]) {
         let set = Set(elements)
         guard let min = set.min(),
               let max = set.max(),
-              set.count == n.value && min == 0 && max == n.value - 1 else {
+              set.count == n.intValue && min == 0 && max == n.intValue - 1 else {
                 fatalError("invalid input: \(elements)")
         }
         self.elements = elements
@@ -23,7 +23,7 @@ public struct Permutation<n: _Int>: Group {
     }
     
     public init(_ gen: ((Int) -> Int)) {
-        let elements = (0 ..< n.value).map(gen)
+        let elements = (0 ..< n.intValue).map(gen)
         self.init(elements: elements)
     }
     
@@ -45,7 +45,7 @@ public struct Permutation<n: _Int>: Group {
     }
     
     public static var all: [Permutation<n>] {
-        return rawPermutation(n.value).map{ Permutation(elements: $0) }
+        return rawPermutation(n.intValue).map{ Permutation(elements: $0) }
     }
 }
 
@@ -58,7 +58,7 @@ public func * <n: _Int>(a: Permutation<n>, b: Permutation<n>) -> Permutation<n> 
 }
 
 public func sgn<n: _Int>(_ s: Permutation<n>) -> Int {
-    switch n.value {
+    switch n.intValue {
     case 0, 1:
         return 1
     case let l:

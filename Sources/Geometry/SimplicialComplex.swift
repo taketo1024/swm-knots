@@ -46,7 +46,7 @@ public struct SimplicialComplex: GeometricComplex {
     public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Simplex, R> {
         let from = simplices(i)
         let to = (i > 0) ? simplices(i - 1) : []
-        let matrix: TypeLooseMatrix<R> = boundaryMapMatrix(from, to)
+        let matrix: DynamicMatrix<R> = boundaryMapMatrix(from, to)
         return FreeModuleHom<Simplex, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
     }
 
@@ -56,12 +56,12 @@ public struct SimplicialComplex: GeometricComplex {
         
         let from = simplices(i)
         let to = (i < dim) ? simplices(i + 1) : []
-        let matrix: TypeLooseMatrix<R> = boundaryMapMatrix(to, from).transposed
+        let matrix: DynamicMatrix<R> = boundaryMapMatrix(to, from).transposed
         return FreeModuleHom<Simplex, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
     }
     
-    private func boundaryMapMatrix<R: Ring>(_ from: [Simplex], _ to : [Simplex]) -> TypeLooseMatrix<R> {
-        var matrix = TypeLooseMatrix(rows: to.count, cols: from.count) { _ in R.zero }
+    private func boundaryMapMatrix<R: Ring>(_ from: [Simplex], _ to : [Simplex]) -> DynamicMatrix<R> {
+        var matrix = DynamicMatrix(rows: to.count, cols: from.count) { _ in R.zero }
         let toIndex = Dictionary(to.enumerated().map{($1, $0)})
         
         from.enumerated().forEach { (j, s) in

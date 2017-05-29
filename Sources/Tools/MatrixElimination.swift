@@ -108,7 +108,7 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
         return cols - rank
     }
     
-    public var kernelPart: Matrix<R, m, _TypeLooseSize> {
+    public var kernelPart: Matrix<R, m, Dynamic> {
         return right.submatrix(colsInRange: rank ..< cols)
     }
     
@@ -116,9 +116,9 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
         return kernelPart.toColVectors()
     }
     
-    public var imagePart: Matrix<R, n, _TypeLooseSize> {
+    public var imagePart: Matrix<R, n, Dynamic> {
         let d = diagonal
-        var a: Matrix<R, n, _TypeLooseSize> = leftInverse.submatrix(colsInRange: 0 ..< self.rank)
+        var a: Matrix<R, n, Dynamic> = leftInverse.submatrix(colsInRange: 0 ..< self.rank)
         (0 ..< min(d.count, a.cols)).forEach {
             a.multiplyCol(at: $0, by: d[$0])
         }

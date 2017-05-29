@@ -7,10 +7,10 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
     
     public let domainBasis: [A]
     public let codomainBasis: [A]
-    public let matrix: TypeLooseMatrix<R>
+    public let matrix: DynamicMatrix<R>
     
     // The root initializer
-    public init(domainBasis: [A], codomainBasis: [A], matrix: TypeLooseMatrix<R>) {
+    public init(domainBasis: [A], codomainBasis: [A], matrix: DynamicMatrix<R>) {
         self.domainBasis = domainBasis
         self.codomainBasis = codomainBasis
         self.matrix = matrix
@@ -19,7 +19,7 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
     public init(domainBasis: [A], codomainBasis: [A], mapping: [R]) {
         self.init(domainBasis: domainBasis,
                   codomainBasis: codomainBasis,
-                  matrix: TypeLooseMatrix(rows: codomainBasis.count, cols: domainBasis.count, grid: mapping))
+                  matrix: DynamicMatrix(rows: codomainBasis.count, cols: domainBasis.count, grid: mapping))
     }
     
     public static var zero: FreeModuleHom<A, R> {
@@ -35,8 +35,8 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
         return M(basis: codomainBasis, values: values)
     }
     
-    private static func map2matrix(_ domainBasis: [A], _ codomainBasis: [A], _ mapping: [A : M]) -> TypeLooseMatrix<R> {
-        return TypeLooseMatrix<R>(codomainBasis.count, domainBasis.count) { (i, j) -> R in
+    private static func map2matrix(_ domainBasis: [A], _ codomainBasis: [A], _ mapping: [A : M]) -> DynamicMatrix<R> {
+        return DynamicMatrix<R>(codomainBasis.count, domainBasis.count) { (i, j) -> R in
             let from = domainBasis[j]
             let to  = codomainBasis[i]
             return mapping[from]?.value(forBasisElement: to) ?? 0

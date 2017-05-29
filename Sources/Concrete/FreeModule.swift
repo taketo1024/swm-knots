@@ -87,7 +87,7 @@ public extension FreeModule {
         }
         
         let basis = elements.first!.basis
-        let P = Matrix<R, _TypeLooseSize, n>(rows: basis.count, cols: elements.count) { (i, j) in
+        let P = Matrix<R, Dynamic, n>(rows: basis.count, cols: elements.count) { (i, j) in
             elements[j].values[i]
         }
         let PQ = P * Q

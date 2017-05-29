@@ -11,15 +11,15 @@ public struct IntQuotientRing<n: _Int>: IntQuotientType {
     
     // root initializer
     public init(_ value: R) {
-        self.value = (value % n.value)
+        self.value = (value % n.intValue)
     }
     
     public var mod: Int {
-        return n.value
+        return n.intValue
     }
     
     public static var symbol: String {
-        return "Z/\(n.value)"
+        return "Z/\(n.intValue)"
     }
 }
 
@@ -35,7 +35,7 @@ public struct IntQuotientField<p: _Int>: IntQuotientType, EuclideanQuotientField
     }
     
     public var mod: Int {
-        return p.value
+        return p.intValue
     }
     
     public var inverse: IntQuotientField<p> {
@@ -44,6 +44,6 @@ public struct IntQuotientField<p: _Int>: IntQuotientType, EuclideanQuotientField
     }
     
     public static var symbol: String {
-        return "Z/\(p.value)"
+        return "Z/\(p.intValue)"
     }
 }
