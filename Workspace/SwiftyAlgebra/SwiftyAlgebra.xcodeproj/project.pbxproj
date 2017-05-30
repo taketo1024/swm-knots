@@ -49,6 +49,7 @@
 		14A85FF11ED9C8C300A754EA /* Vertex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A85FF01ED9C8C300A754EA /* Vertex.swift */; };
 		14A85FF31ED9D63E00A754EA /* GeometricComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */; };
 		14A85FF71EDBED9C00A754EA /* Dynamic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A85FF61EDBED9C00A754EA /* Dynamic.swift */; };
+		14A85FFE1EDC46D500A754EA /* FiniteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A85FFD1EDC46D500A754EA /* FiniteType.swift */; };
 		14B2FB8C1ED8FBA000C182EB /* MatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */; };
 		14E7BECB1ED84B3400BBA72A /* EigenLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 14E7BEC91ED84B3400BBA72A /* EigenLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		14E7BECC1ED84B3400BBA72A /* EigenLib.mm in Sources */ = {isa = PBXBuildFile; fileRef = 14E7BECA1ED84B3400BBA72A /* EigenLib.mm */; };
@@ -118,6 +119,7 @@
 		14A85FF01ED9C8C300A754EA /* Vertex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vertex.swift; sourceTree = "<group>"; };
 		14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeometricComplex.swift; sourceTree = "<group>"; };
 		14A85FF61EDBED9C00A754EA /* Dynamic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dynamic.swift; sourceTree = "<group>"; };
+		14A85FFD1EDC46D500A754EA /* FiniteType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FiniteType.swift; sourceTree = "<group>"; };
 		14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixTests.swift; sourceTree = "<group>"; };
 		14E7BEC91ED84B3400BBA72A /* EigenLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EigenLib.h; path = EigenWrapper/EigenLib.h; sourceTree = "<group>"; };
 		14E7BECA1ED84B3400BBA72A /* EigenLib.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = EigenLib.mm; path = EigenWrapper/EigenLib.mm; sourceTree = "<group>"; };
@@ -216,6 +218,7 @@
 				1424F4DC1EB997780052581F /* Module.swift */,
 				1424F4E01EB997780052581F /* FreeModule.swift */,
 				1473F1111EC76715003B1D55 /* FreeModuleQuotient.swift */,
+				14A85FFD1EDC46D500A754EA /* FiniteType.swift */,
 			);
 			path = Abstract;
 			sourceTree = "<group>";
@@ -256,9 +259,9 @@
 			isa = PBXGroup;
 			children = (
 				140E809F1ECDEA8E00B89719 /* combinations.swift */,
+				147D98021EB9B06900C736AC /* IntegerFactorization.swift */,
 				1424F4F01EB997780052581F /* MatrixElimination.swift */,
 				1424F4F11EB997780052581F /* PolynomialFactorization.swift */,
-				147D98021EB9B06900C736AC /* IntegerFactorization.swift */,
 			);
 			path = Tools;
 			sourceTree = "<group>";
@@ -459,6 +462,7 @@
 				1424F50E1EB997780052581F /* TPInt.swift in Sources */,
 				1424F5091EB997780052581F /* QuotientRing.swift in Sources */,
 				1473F1121EC76715003B1D55 /* FreeModuleQuotient.swift in Sources */,
+				14A85FFE1EDC46D500A754EA /* FiniteType.swift in Sources */,
 				1424F4FF1EB997780052581F /* Ring.swift in Sources */,
 				14A85FF11ED9C8C300A754EA /* Vertex.swift in Sources */,
 				DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */,
