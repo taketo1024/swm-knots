@@ -14,7 +14,7 @@ typealias R = RealNumber
 typealias S_5 = Permutation<_5>
 
 do {
-    let σ = S_5(0, 1, 2) // cyclic notation
+    let σ = S_5(cyclic: 0, 1, 2) // cyclic notation
     let τ = S_5([0: 2, 1: 3, 2: 4, 3: 0, 4: 1]) // two-line notation
     
     σ[1]

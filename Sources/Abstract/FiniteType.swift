@@ -10,5 +10,5 @@ import Foundation
 
 public protocol FiniteType: Hashable {
     static var allElements: [Self] { get }
-    static var count: Int { get }
+    static var countElements: Int { get }
 }

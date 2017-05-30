@@ -10,41 +10,6 @@ import Foundation
 
 private var primes: [IntegerNumber] = []
 
-public func divisors(of n: IntegerNumber) -> [IntegerNumber] {
-    if n == 0 {
-        return []
-    }
-    
-    var result: [IntegerNumber] = []
-    
-    let a = abs(n)
-    let m = Int(sqrt(Double(a)))
-    
-    for d in 1...m {
-        if a % d == 0 {
-            result.append(d)
-            result.append(a/d)
-        }
-    }
-    
-    return result.sorted()
-}
-
-public func primeFactors(of n: IntegerNumber) -> [IntegerNumber] {
-    var result: [IntegerNumber] = []
-    var q = n
-    
-    let ps = primes(upTo: n)
-    for p in ps {
-        while q % p == 0 {
-            q /= p
-            result.append(p)
-        }
-    }
-    
-    return result
-}
-
 public func primes(upTo n: IntegerNumber) -> [IntegerNumber] {
     if let last = primes.last, n <= last {
         return primes.filter{ $0 <= n }
@@ -60,4 +25,41 @@ public func primes(upTo n: IntegerNumber) -> [IntegerNumber] {
     
     primes = result
     return result
+}
+
+public extension IntegerNumber {
+    public var divisors: [IntegerNumber] {
+        if self == 0 {
+            return []
+        }
+        
+        var result: [IntegerNumber] = []
+        
+        let a = abs(self)
+        let m = Int(sqrt(Double(a)))
+        
+        for d in 1...m {
+            if a % d == 0 {
+                result.append(d)
+                result.append(a/d)
+            }
+        }
+        
+        return result.sorted()
+    }
+    
+    public var primeFactors: [IntegerNumber] {
+        var result: [IntegerNumber] = []
+        var q = self
+        
+        let ps = primes(upTo: self)
+        for p in ps {
+            while q % p == 0 {
+                q /= p
+                result.append(p)
+            }
+        }
+        
+        return result
+    }
 }

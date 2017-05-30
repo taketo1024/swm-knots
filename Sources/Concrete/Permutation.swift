@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Permutation<n: _Int>: Group, CustomStringConvertible {
+public struct Permutation<n: _Int>: Group, FiniteType, CustomStringConvertible {
     public var degree: Int { return n.intValue }
     fileprivate var elements: [Int] //
     
@@ -18,7 +18,11 @@ public struct Permutation<n: _Int>: Group, CustomStringConvertible {
         self.init({ dict[$0] ?? $0 })
     }
     
-    public init(_ cyclic: Int...) {
+    public init(cyclic: Int...) {
+        self.init(cyclic: cyclic)
+    }
+    
+    internal init(cyclic: [Int]) {
         self.init({ cyclic.index(of: $0).flatMap({ i in cyclic[(i + 1) % cyclic.count]}) ?? $0 })
     }
     
@@ -40,7 +44,7 @@ public struct Permutation<n: _Int>: Group, CustomStringConvertible {
         return Permutation(elements: inv)
     }
     
-    public func apply(i: Int) -> Int {
+    public func apply(_ i: Int) -> Int {
         return self[i]
     }
     
@@ -59,8 +63,39 @@ public struct Permutation<n: _Int>: Group, CustomStringConvertible {
         }
     }
     
-    public static var all: [Permutation<n>] {
-        return rawPermutation(n.intValue).map{ Permutation(elements: $0) }
+    private var rawCyclicDecomposition: [[Int]] {
+        var list = Array(0 ..< n.intValue)
+        var result: [[Int]] = []
+        
+        while !list.isEmpty {
+            let a = list.first!
+            var cyclic: [Int] = []
+            var x = a
+            
+            while !cyclic.contains(x) {
+                list.remove(at: list.index(of: x)!)
+                cyclic.append(x)
+                x = apply(x)
+            }
+            
+            if cyclic.count > 1 {
+                result.append(cyclic)
+            }
+        }
+        
+        return result
+    }
+    
+    public var cyclicDecomposition: [Permutation<n>] {
+        return rawCyclicDecomposition.map{ Permutation<n>(cyclic: $0) }
+    }
+    
+    public static var allElements: [Permutation<n>] {
+        return n.intValue.permutations.map{ Permutation(elements: $0) }
+    }
+    
+    public static var countElements: Int {
+        return n.intValue.factorial
     }
     
     public static func == (a: Permutation<n>, b: Permutation<n>) -> Bool {
@@ -72,26 +107,11 @@ public struct Permutation<n: _Int>: Group, CustomStringConvertible {
     }
     
     public var description: String {
-        return "(" + (0 ..< degree).map({ i in
-            return "\(i): \(self[i])"
-        }).joined(separator: ", ") + ")"
+        let desc = rawCyclicDecomposition.map{"(\($0.map{"\($0)"}.joined(separator:",")))"}.joined()
+        return desc.isEmpty ? "id" : desc
     }
     
     public var hashValue: Int {
         return elements.count > 0 ? elements[0].hashValue + 1 : 0
-    }
-}
-
-internal func rawPermutation(_ n: Int) -> [[Int]] {
-    switch n {
-    case 0:
-        return [[]]
-    default:
-        let prev = rawPermutation(n - 1)
-        return (0 ..< n).flatMap({ (i: Int) -> [[Int]] in
-            prev.map({ (s: [Int]) -> [Int] in
-                [i] + s.map{ $0 < i ? $0 : $0 + 1 }
-            })
-        })
     }
 }

@@ -133,8 +133,8 @@ public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
     let indexPairs: [[(Int, Int)]] = simplexPairs.flatMap{(s, t) -> [[(Int, Int)]] in
         (0 ... s.dim + t.dim).flatMap{ k -> [[(Int, Int)]] in
             // list of ordered indices [(i0 <= i1 <= ... <= ik), ... ]
-            let Is: [[Int]] = multicombi(s.dim + 1, k + 1)
-            let Js: [[Int]]  = multicombi(t.dim + 1, k + 1)
+            let Is: [[Int]] = (s.dim + 1).multichoose(k + 1)
+            let Js: [[Int]]  = (t.dim + 1).multichoose(k + 1)
             
             // list of pairs of ordered indices [(I, J), ...]
             let allPairs: [([Int], [Int])]  = Is.flatMap{ I in Js.map{ J in (I, J) } }

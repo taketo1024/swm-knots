@@ -81,7 +81,7 @@ public struct ProductGroup<G1: Group, G2: Group>: Group {
 }
 
 public struct QuotientGroup<G: Group, H: Subgroup>: Group where G == H.Super {
-    private let g: G
+    internal let g: G
     
     public init(_ g: G) {
         self.g = g
@@ -207,7 +207,7 @@ public struct DynamicFiniteSubgroup<G: Group>: Subgroup, CustomStringConvertible
         }
         
         // check *-closed
-        let combis = combi(n, 2)
+        let combis = n.choose(2)
         for c in combis {
             let (g, h) = (list[c[0]], list[c[1]])
             if !elements.contains(g * h) {
@@ -246,7 +246,7 @@ public extension Group where Self: FiniteType {
     }
     
     public static var allSubgroups: [DynamicFiniteSubgroupType<Self>] {
-        let n = count
+        let n = countElements
         if n == 1 {
             return [cyclicSubgroup(generator: identity)]
         }
@@ -256,7 +256,7 @@ public extension Group where Self: FiniteType {
         unions.insert(Set([identity]))
         
         for k in 2...cyclics.count {
-            combi(n, k).forEach { c in
+            n.choose(k).forEach { c in
                 let union: Set<Self> = c.map{ cyclics[$0] }.reduce(Set()){ $0.union($1.allElementsAsSuper) }
                 
                 // TODO improve algorithm
