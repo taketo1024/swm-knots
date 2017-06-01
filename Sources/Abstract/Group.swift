@@ -310,11 +310,15 @@ public struct DynamicQuotientGroup<G: Group, H: DynamicSubgroup>: Group where G 
     internal let g: G
     internal let subgroupFactory: DynamicSubgroupFactory<G, H>?
     
+    public static func factory(subgroupFactory: DynamicSubgroupFactory<G, H>) -> ((_ g: G) -> DynamicQuotientGroup<G, H>) {
+        return {(g: G) in DynamicQuotientGroup(g, subgroupFactory: subgroupFactory)}
+    }
+    
     public init(_ g: G) {
         self.init(g, subgroupFactory: nil)
     }
     
-    public init(_ g: G, subgroupFactory: DynamicSubgroupFactory<G, H>?) {
+    internal init(_ g: G, subgroupFactory: DynamicSubgroupFactory<G, H>?) {
         self.g = g
         self.subgroupFactory = subgroupFactory
     }
@@ -353,7 +357,7 @@ public struct DynamicQuotientGroup<G: Group, H: DynamicSubgroup>: Group where G 
     }
     
     public var hashValue: Int {
-        return (g == G.identity) ? 0 : 1 // TODO think...
+        return (self == DynamicQuotientGroup<G, H>.identity) ? 0 : 1 // TODO think...
     }
     
     public var description: String {
