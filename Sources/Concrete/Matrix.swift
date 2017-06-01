@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence, CustomStringConvertible {
+public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public typealias R = _R
     public let rows: Int
     public let cols: Int

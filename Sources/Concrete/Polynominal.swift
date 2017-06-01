@@ -2,7 +2,7 @@ import Foundation
 
 // concrete Polynomial-type over a field
 
-public struct Polynomial<K: Field>: EuclideanRing, Module, CustomStringConvertible {
+public struct Polynomial<K: Field>: EuclideanRing, Module {
     public typealias R = K
     public let coeffs: [K]
     

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Permutation<n: _Int>: Group, FiniteType, CustomStringConvertible {
+public struct Permutation<n: _Int>: Group, FiniteType {
     public var degree: Int { return n.intValue }
     fileprivate var elements: [Int] //
     

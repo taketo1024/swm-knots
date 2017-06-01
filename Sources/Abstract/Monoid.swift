@@ -7,7 +7,7 @@ precedencegroup ExponentiativePrecedence {
 
 infix operator **: ExponentiativePrecedence
 
-public protocol Monoid: Equatable, Hashable {
+public protocol Monoid: Equatable, Hashable, CustomStringConvertible {
     static func * (a: Self, b: Self) -> Self
     static var identity: Self { get }
     static var symbol: String { get }

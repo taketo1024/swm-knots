@@ -2,7 +2,7 @@ import Foundation
 
 public typealias FreeModuleBase = Hashable
 
-public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, CustomStringConvertible {
+public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module {
     public typealias R = _R
     
     public let basis: [A]

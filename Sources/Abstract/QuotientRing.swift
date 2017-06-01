@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol QuotientRing: Ring, CustomStringConvertible {
+public protocol QuotientRing: Ring {
     associatedtype R: Ring
     
     var value: R { get }
