@@ -87,7 +87,7 @@ public struct EuclideanQuotientField<R: EuclideanRing, I: EuclideanIdeal>: Field
     }
     
     public init(_ r: R) {
-        self.r = r
+        self.r = (r % I.generator)
     }
     
     public var representative: R {

@@ -203,7 +203,7 @@ public struct QuotientRing<R: Ring, I: Ideal>: Ring where R == I.Super {
     }
     
     public var hashValue: Int {
-        return r.hashValue
+        return (r == R.zero) ? 0 : 1
     }
     
     public var description: String {
