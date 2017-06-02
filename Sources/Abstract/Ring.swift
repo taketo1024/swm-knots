@@ -4,6 +4,7 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
     associatedtype IntegerLiteralType = Int
     init(_ intValue: Int)
     var isUnit: Bool { get }
+    var unitInverse: Self { get }
     static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m>
 }
 
@@ -13,10 +14,18 @@ public extension Ring {
         self.init(value)
     }
     
+    // TODO must implement properly for each conforming struct.
     public var isUnit: Bool {
         return (self == Self.identity) || (self == -Self.identity)
     }
 
+    var unitInverse: Self {
+        if !isUnit {
+            fatalError("\(self) is not a unit.")
+        }
+        return (self == Self.identity) ? self : -self
+    }
+    
     public static var zero: Self {
         return Self.init(0)
     }
@@ -150,8 +159,7 @@ public struct ProductRing<R1: Ring, R2: Ring>: Ring {
     }
 }
 
-// TODO conforms `Field` when `I: MaximalIdeal`
-public struct _QuotientRing<R: Ring, I: Ideal>: Ring where R == I.Super {
+public struct QuotientRing<R: Ring, I: Ideal>: Ring where R == I.Super {
     internal let r: R
     
     public init(_ intValue: Int) {
@@ -166,28 +174,28 @@ public struct _QuotientRing<R: Ring, I: Ideal>: Ring where R == I.Super {
         return r
     }
     
-    public static var zero: _QuotientRing<R, I> {
-        return _QuotientRing<R, I>(R.zero)
+    public static var zero: QuotientRing<R, I> {
+        return QuotientRing<R, I>(R.zero)
     }
     
-    public static var identity: _QuotientRing<R, I> {
-        return _QuotientRing<R, I>(R.identity)
+    public static var identity: QuotientRing<R, I> {
+        return QuotientRing<R, I>(R.identity)
     }
     
-    public static func == (a: _QuotientRing<R, I>, b: _QuotientRing<R, I>) -> Bool {
+    public static func == (a: QuotientRing<R, I>, b: QuotientRing<R, I>) -> Bool {
         return I.contains( a.r - b.r )
     }
     
-    public static func + (a: _QuotientRing<R, I>, b: _QuotientRing<R, I>) -> _QuotientRing<R, I> {
-        return _QuotientRing<R, I>.init(a.r + b.r)
+    public static func + (a: QuotientRing<R, I>, b: QuotientRing<R, I>) -> QuotientRing<R, I> {
+        return QuotientRing<R, I>.init(a.r + b.r)
     }
     
-    public static prefix func - (a: _QuotientRing<R, I>) -> _QuotientRing<R, I> {
-        return _QuotientRing<R, I>.init(-a.r)
+    public static prefix func - (a: QuotientRing<R, I>) -> QuotientRing<R, I> {
+        return QuotientRing<R, I>.init(-a.r)
     }
     
-    public static func * (a: _QuotientRing<R, I>, b: _QuotientRing<R, I>) -> _QuotientRing<R, I> {
-        return _QuotientRing<R, I>.init(a.r * b.r)
+    public static func * (a: QuotientRing<R, I>, b: QuotientRing<R, I>) -> QuotientRing<R, I> {
+        return QuotientRing<R, I>.init(a.r * b.r)
     }
     
     public static var symbol: String {

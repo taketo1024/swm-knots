@@ -36,6 +36,17 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
         return 0
     }
     
+    public var isUnit: Bool {
+        return (degree == 0)
+    }
+    
+    public var unitInverse: Polynomial<K> {
+        if !isUnit {
+            fatalError("\(self) is not a unit.")
+        }
+        return Polynomial<K>(coeff(0).inverse)
+    }
+    
     public var leadCoeff: K {
         return coeffs[degree]
     }
@@ -182,4 +193,8 @@ public struct PolynomialIdeal<K: Field, p: _Polynomial>: EuclideanIdeal where K 
     }
 }
 
-public typealias PolynomialQuotientRing<K: Field, p: _Polynomial> = _QuotientRing<Polynomial<K>, PolynomialIdeal<K, p>> where K == p.K
+public typealias PolynomialQuotientRing<K: Field, p: _Polynomial>
+    = EuclideanQuotientRing<Polynomial<K>, PolynomialIdeal<K, p>> where K == p.K
+
+public typealias PolynomialQuotientField<K: Field, p: _Polynomial>
+    = EuclideanQuotientField<Polynomial<K>, PolynomialIdeal<K, p>> where K == p.K // p must be irrational.

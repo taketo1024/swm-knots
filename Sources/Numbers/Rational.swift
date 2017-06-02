@@ -57,7 +57,7 @@ public struct RationalNumber: Field {
     }
     
     public var description: String {
-        switch self {
+        switch q {
         case 1:  return "\(p)"
         default: return "\(p)/\(q)"
         }

@@ -76,3 +76,64 @@ public extension EuclideanIdeal {
     }
 }
 
+public typealias EuclideanQuotientRing<R: EuclideanRing, I: EuclideanIdeal> = QuotientRing<R, I> where R == I.Super
+
+// TODO merge with `QuotientRing` after conditional conformance is impled in Swift4.
+public struct EuclideanQuotientField<R: EuclideanRing, I: EuclideanIdeal>: Field where R == I.Super {
+    internal let r: R
+    
+    public init(_ intValue: Int) {
+        self.init(R(intValue))
+    }
+    
+    public init(_ r: R) {
+        self.r = r
+    }
+    
+    public var representative: R {
+        return r
+    }
+    
+    public static var zero: EuclideanQuotientField<R, I> {
+        return EuclideanQuotientField<R, I>(R.zero)
+    }
+    
+    public static var identity: EuclideanQuotientField<R, I> {
+        return EuclideanQuotientField<R, I>(R.identity)
+    }
+    
+    public var inverse: EuclideanQuotientField<R, I> {
+        // find: a * r + b * m = u (u: unit)
+        // then: r^-1 = u^-1 * a (mod m)
+        let (a, _, u) = bezout(r, I.generator)
+        return EuclideanQuotientField(u.unitInverse * a)
+    }
+    
+    public static func == (a: EuclideanQuotientField<R, I>, b: EuclideanQuotientField<R, I>) -> Bool {
+        return I.contains( a.r - b.r )
+    }
+    
+    public static func + (a: EuclideanQuotientField<R, I>, b: EuclideanQuotientField<R, I>) -> EuclideanQuotientField<R, I> {
+        return EuclideanQuotientField<R, I>.init(a.r + b.r)
+    }
+    
+    public static prefix func - (a: EuclideanQuotientField<R, I>) -> EuclideanQuotientField<R, I> {
+        return EuclideanQuotientField<R, I>.init(-a.r)
+    }
+    
+    public static func * (a: EuclideanQuotientField<R, I>, b: EuclideanQuotientField<R, I>) -> EuclideanQuotientField<R, I> {
+        return EuclideanQuotientField<R, I>.init(a.r * b.r)
+    }
+    
+    public static var symbol: String {
+        return "\(R.symbol)/\(I.symbol)"
+    }
+    
+    public var hashValue: Int {
+        return r.hashValue
+    }
+    
+    public var description: String {
+        return "[\(r)]"
+    }
+}
