@@ -20,6 +20,10 @@ public extension EuclideanRing {
     public static func /% (_ a: Self, b: Self) -> (q: Self, r: Self) {
         return Self.eucDiv(a, b)
     }
+    
+    static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m> {
+        return EuclideanMatrixElimination<Self, n, m>(A, mode: mode)
+    }
 }
 
 public func gcd<R: EuclideanRing>(_ a: R, _ b: R) -> R {
@@ -57,8 +61,18 @@ public func bezout<R: EuclideanRing>(_ a: R, _ b: R) -> (x: R, y: R, r: R) {
     return (x: m[0, 0], y: m[0, 1], r: r)
 }
 
-public extension EuclideanRing {
-    static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m> {
-        return EuclideanMatrixElimination<Self, n, m>(A, mode: mode)
+public protocol EuclideanIdeal: Ideal {
+    associatedtype Super: EuclideanRing
+    static var generator: Super { get }
+}
+
+public extension EuclideanIdeal {
+    static func contains(_ a: Super) -> Bool {
+        return a % generator == Super.zero
+    }
+    
+    static var symbol: String {
+        return "\(Super.symbol)(\(generator))"
     }
 }
+

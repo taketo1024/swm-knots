@@ -1,5 +1,6 @@
 import Foundation
 
+// TODO replace by _QuotientRing<R, I> defined in Ring.swift
 public protocol QuotientRing: Ring {
     associatedtype R: Ring
     
