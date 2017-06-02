@@ -1,35 +1,5 @@
 import Foundation
 
-public struct PolynomialQuotientRing<K: Field, P: _Polynomial>: EuclideanQuotientRing where K == P.K {
-    public typealias R = Polynomial<K>
-    public let value: R
-    
-    // root initializer
-    public init(_ value: R) {
-        self.value = (value % P.value)
-    }
-    
-    public init(_ value: Int) {
-        self.init(R(value))
-    }
-    
-    public init(_ coeffs: K...) {
-        self.init(R(coeffs))
-    }
-    
-    public var mod: R {
-        return P.value
-    }
-    
-    public static var symbol: String {
-        return "\(R.symbol)[x]/\(P.value)"
-    }
-    
-    public var hashValue: Int {
-        return value.hashValue
-    }
-}
-
 public struct PolynomialQuotientField<K: Field, P: _Polynomial>: EuclideanQuotientField where K == P.K {
     public typealias R = Polynomial<K>
     public let value: R

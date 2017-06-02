@@ -2,6 +2,8 @@ import Foundation
 
 // concrete Polynomial-type over a field
 
+// TODO after Swift4,
+// make `K: Ring`, and conform to `EuclideanRing` only when `K: Field`
 public struct Polynomial<K: Field>: EuclideanRing, Module {
     public typealias R = K
     public let coeffs: [K]
@@ -153,3 +155,31 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
 public func Monomial<K>(degree d: Int, coeff a: K) -> Polynomial<K> {
     return Polynomial(degree: d) { $0 == d ? a : 0 }
 }
+
+public struct PolynomialIdeal<K: Field, p: _Polynomial>: EuclideanIdeal where K == p.K {
+    public typealias Super = Polynomial<K>
+    
+    public static var generator: Polynomial<K> {
+        return p.value
+    }
+    
+    public let a: Polynomial<K>
+    
+    public init(_ a: Polynomial<K>) {
+        self.a = a
+    }
+    
+    public init(_ coeffs: K...) {
+        self.init(Super.init(coeffs))
+    }
+    
+    public var asSuper: Polynomial<K> {
+        return a
+    }
+    
+    public static var symbol: String {
+        return "\(K.symbol)[x]/\(p.value)"
+    }
+}
+
+public typealias PolynomialQuotientRing<K: Field, p: _Polynomial> = _QuotientRing<Polynomial<K>, PolynomialIdeal<K, p>> where K == p.K
