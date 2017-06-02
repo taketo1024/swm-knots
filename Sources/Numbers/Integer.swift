@@ -20,3 +20,24 @@ extension IntegerNumber: EuclideanRing {
         return (self % 2 == 0) ? 1 : -1
     }
 }
+
+public struct IntegerIdeal<n: _Int>: EuclideanIdeal {
+    public typealias Super = IntegerNumber
+    
+    public static var generator: IntegerNumber {
+        return n.intValue
+    }
+    
+    public let a: IntegerNumber
+    
+    public init(_ a: IntegerNumber) {
+        self.a = a
+    }
+    
+    public var asSuper: IntegerNumber {
+        return a
+    }
+}
+
+public typealias IntegerQuotientRing<n: _Int> = _QuotientRing<IntegerNumber, IntegerIdeal<n>>
+
