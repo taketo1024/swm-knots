@@ -82,8 +82,8 @@ public typealias EuclideanQuotientRing<R: EuclideanRing, I: EuclideanIdeal> = Qu
 public struct EuclideanQuotientField<R: EuclideanRing, I: EuclideanIdeal>: Field where R == I.Super {
     internal let r: R
     
-    public init(_ intValue: Int) {
-        self.init(R(intValue))
+    public init(intValue n: Int) {
+        self.init(R(intValue: n))
     }
     
     public init(_ r: R) {

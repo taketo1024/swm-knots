@@ -8,8 +8,8 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
     public typealias R = K
     public let coeffs: [K]
     
-    public init(_ value: Int) {
-        let a = K(value)
+    public init(intValue n: Int) {
+        let a = K(intValue: n)
         self.init([a])
     }
     
@@ -67,7 +67,7 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
     
     public var derivative: Polynomial<K> {
         return Polynomial<K>.init(degree: degree - 1) {
-            K($0 + 1) * coeff($0 + 1)
+            K(intValue: $0 + 1) * coeff($0 + 1)
         }
     }
     

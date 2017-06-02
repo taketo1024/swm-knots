@@ -3,6 +3,10 @@ import Foundation
 public typealias IntegerNumber = Int
 
 extension IntegerNumber: EuclideanRing {
+    public init(intValue n: IntegerNumber) {
+        self.init(n)
+    }
+    
     public var degree: Int {
         return abs(self)
     }

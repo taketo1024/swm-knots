@@ -1,8 +1,8 @@
 import Foundation
 
 public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
-    associatedtype IntegerLiteralType = Int
-    init(_ intValue: Int)
+    associatedtype IntegerLiteralType = IntegerNumber
+    init(intValue: IntegerNumber)
     var isUnit: Bool { get }
     var unitInverse: Self { get }
     static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m>
@@ -10,8 +10,8 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
 
 public extension Ring {
     // required init from `ExpressibleByIntegerLiteral`
-    public init(integerLiteral value: Int) {
-        self.init(value)
+    public init(integerLiteral value: IntegerNumber) {
+        self.init(intValue: value)
     }
     
     // TODO must implement properly for each conforming struct.
@@ -27,11 +27,11 @@ public extension Ring {
     }
     
     public static var zero: Self {
-        return Self.init(0)
+        return Self.init(intValue: 0)
     }
     
     public static var identity: Self {
-        return Self.init(1)
+        return Self.init(intValue: 1)
     }
     
     public static func **(a: Self, n: Int) -> Self {
@@ -72,7 +72,7 @@ public protocol Ideal: AdditiveGroup {
 
 public extension Ideal {
     public static var zero: Self {
-        return Self.init(0)
+        return Self.init(Super.zero)
     }
     
     public static func + (a: Self, b: Self) -> Self {
@@ -112,9 +112,9 @@ public struct ProductRing<R1: Ring, R2: Ring>: Ring {
     public let _1: R1
     public let _2: R2
     
-    public init(_ a: Int) {
-        self._1 = R1(a)
-        self._2 = R2(a)
+    public init(intValue a: Int) {
+        self._1 = R1(intValue: a)
+        self._2 = R2(intValue: a)
     }
     
     public init(_ g1: R1, _ g2: R2) {
@@ -162,8 +162,8 @@ public struct ProductRing<R1: Ring, R2: Ring>: Ring {
 public struct QuotientRing<R: Ring, I: Ideal>: Ring where R == I.Super {
     internal let r: R
     
-    public init(_ intValue: Int) {
-        self.init(R(intValue))
+    public init(intValue n: Int) {
+        self.init(R(intValue: n))
     }
     
     public init(_ r: R) {

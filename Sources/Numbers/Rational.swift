@@ -16,8 +16,12 @@ public struct RationalNumber: Field {
         }
     }
     
-    public init(_ n: IntegerNumber) {
+    public init(intValue n: IntegerNumber) {
         self.init(n, 1)
+    }
+    
+    public init(_ n: IntegerNumber) {
+        self.init(intValue: n)
     }
     
     public var inverse: RationalNumber {

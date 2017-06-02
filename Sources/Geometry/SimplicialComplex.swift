@@ -67,7 +67,7 @@ public struct SimplicialComplex: GeometricComplex {
         from.enumerated().forEach { (j, s) in
             s.faces().enumerated().forEach { (k, t) in
                 let i = toIndex[t]!
-                matrix[i, j] = R(k.evenOddSign)
+                matrix[i, j] = (k % 2 == 0) ? 1 : -1
             }
         }
         
