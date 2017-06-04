@@ -41,6 +41,10 @@ public extension Group {
         
         return true
     }
+    
+    public static func quotient<H: DynamicSubgroup>(by subgroupFactory: DynamicSubgroupFactory<H>) -> DynamicQuotientGroupFactory<Self, H> {
+        return DynamicQuotientGroupFactory<Self, H>(subtypeFactory: subgroupFactory)
+    }
 }
 
 public extension Group where Self: FiniteType {
@@ -241,27 +245,21 @@ public final class DynamicFiniteSubgroupFactory<G: Group>: DynamicSubgroupFactor
     }
 }
 
-public struct DynamicQuotientGroup<G: Group, H: DynamicSubgroup>: Group, QuotientAlgebraicType where G == H.Super {
+public final class DynamicQuotientGroupFactory<G: Group, H: DynamicSubgroup>: DynamicQuotientTypeFactory<DynamicQuotientGroup<G, H>> where G == H.Super {
+    public override func isEquivalent(_ a: Base, _ b: Base) -> Bool {
+        return subtypeFactory.contains( a * b.inverse )
+    }
+}
+
+public struct DynamicQuotientGroup<G: Group, H: DynamicSubgroup>: Group, DynamicQuotientType where G == H.Super {
     public typealias Sub = H
     
     internal let g: G
-    internal let subgroupFactory: DynamicSubgroupFactory<H>?
+    public let factory: DynamicTypeFactory<DynamicQuotientGroup<G, H>>?
     
-    public static func factory(subgroupFactory: DynamicSubgroupFactory<H>) -> ((_ g: G) -> DynamicQuotientGroup<G, H>) {
-        return {(g: G) in DynamicQuotientGroup(g, subgroupFactory: subgroupFactory)}
-    }
-    
-    public init(_ g: G) {
-        self.init(g, subgroupFactory: nil)
-    }
-    
-    internal init(_ g: G, subgroupFactory: DynamicSubgroupFactory<H>?) {
+    public init(_ g: G, factory: DynamicTypeFactory<DynamicQuotientGroup<G, H>>?) {
         self.g = g
-        self.subgroupFactory = subgroupFactory
-    }
-    
-    public static var identity: DynamicQuotientGroup<G, H> {
-        return DynamicQuotientGroup<G, H>(G.identity)
+        self.factory = factory
     }
     
     public var representative: G {
@@ -269,24 +267,23 @@ public struct DynamicQuotientGroup<G: Group, H: DynamicSubgroup>: Group, Quotien
     }
     
     public var inverse: DynamicQuotientGroup<G, H> {
-        return DynamicQuotientGroup<G, H>(g.inverse, subgroupFactory: subgroupFactory)
+        return DynamicQuotientGroup<G, H>(g.inverse, factory: factory)
     }
     
-    private static func typeMatches(_ a: DynamicQuotientGroup, _ b: DynamicQuotientGroup<G, H>) -> Bool {
-        return (a.subgroupFactory == b.subgroupFactory || a.subgroupFactory == nil || b.subgroupFactory == nil)
+    public static var identity: DynamicQuotientGroup<G, H> {
+        return DynamicQuotientGroup<G, H>(G.identity)
     }
-
+    
     public static func == (a: DynamicQuotientGroup<G, H>, b: DynamicQuotientGroup<G, H>) -> Bool {
         if !typeMatches(a, b) {
             fatalError("cannot compare \(type(of: a)) with \(type(of: b))")
         }
         
-        let g = a.g * b.g.inverse
-        return g == G.identity || (a.subgroupFactory ?? b.subgroupFactory).flatMap{f in f.contains(g)} ?? false
+        return (a.g == b.g) || (a.quotientFactory ?? b.quotientFactory).flatMap{f in f.isEquivalent(a.g, b.g)} ?? false
     }
     
     public static func * (a: DynamicQuotientGroup<G, H>, b: DynamicQuotientGroup<G, H>) -> DynamicQuotientGroup<G, H> {
-        return DynamicQuotientGroup<G, H>.init(a.g * b.g, subgroupFactory: a.subgroupFactory ?? b.subgroupFactory)
+        return DynamicQuotientGroup<G, H>.init(a.g * b.g, factory: a.factory ?? b.factory)
     }
     
     public var hashValue: Int {

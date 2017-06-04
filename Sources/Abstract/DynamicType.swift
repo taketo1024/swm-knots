@@ -13,10 +13,6 @@ public protocol DynamicType: AlgebraicType {
 }
 
 public class DynamicTypeFactory<Type: DynamicType>: Equatable, CustomStringConvertible {
-    public func contains(_ g: Type) -> Bool {
-        fatalError("implement in subclass.")
-    }
-    
     public static func == (t1: DynamicTypeFactory<Type>, t2: DynamicTypeFactory<Type>) -> Bool {
         return type(of: t1) == type(of: t2)
     }
@@ -43,14 +39,6 @@ public extension DynamicSubtype {
     public static func == (a: Self, b: Self) -> Bool {
         return a.asSuper == b.asSuper && typeMatches(a, b)
     }
-    
-    public var hashValue: Int {
-        return asSuper.hashValue
-    }
-    
-    public var description: String {
-        return "\(asSuper)"
-    }
 }
 
 public class DynamicSubtypeFactory<Sub: DynamicSubtype>: DynamicTypeFactory<Sub> {
@@ -65,5 +53,47 @@ public class DynamicSubtypeFactory<Sub: DynamicSubtype>: DynamicTypeFactory<Sub>
     
     public func contains(_ g: Super) -> Bool {
         fatalError("implement in subclass.")
+    }
+}
+
+public protocol DynamicQuotientType: DynamicType, QuotientAlgebraicType {
+    associatedtype Sub: DynamicSubtype
+    init(_ g: Self.Base, factory: DynamicTypeFactory<Self>?)
+    var quotientFactory: DynamicQuotientTypeFactory<Self>? { get }
+}
+
+public extension DynamicQuotientType {
+    public init(_ g: Self.Base) {
+        self.init(g, factory: nil)
+    }
+    
+    public var quotientFactory: DynamicQuotientTypeFactory<Self>? {
+        if let f = factory as? DynamicQuotientTypeFactory<Self> {
+            return f
+        }
+        return nil
+    }
+    
+    internal static func typeMatches(_ a: Self, _ b: Self) -> Bool {
+        return (a.factory == b.factory || a.factory == nil || b.factory == nil)
+    }
+}
+
+public class DynamicQuotientTypeFactory<Quot: DynamicQuotientType>: DynamicTypeFactory<Quot> {
+    public typealias Base = Quot.Base
+    public typealias Sub = Quot.Sub
+    
+    public let subtypeFactory: DynamicSubtypeFactory<Sub>
+    
+    public init(subtypeFactory: DynamicSubtypeFactory<Sub>) {
+        self.subtypeFactory = subtypeFactory
+    }
+    
+    public func asQuotient(_ g: Base) -> Quot {
+        return Quot.init(g, factory: self)
+    }
+    
+    public func isEquivalent(_ a: Base, _ b: Base) -> Bool {
+        fatalError("override in subclass.")
     }
 }
