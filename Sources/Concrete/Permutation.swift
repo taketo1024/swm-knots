@@ -49,18 +49,8 @@ public struct Permutation<n: _Int>: Group, FiniteType {
     }
     
     public var signature: Int {
-        switch n.intValue {
-        case 0, 1:
-            return 1
-        case let l:
-            let r = (0 ..< l - 1)
-                .flatMap{ i in (i + 1 ..< l).map{ j in (i, j) } }
-                .reduce((1, 1)) {
-                    (r: (Int, Int), pair: (Int, Int)) -> (Int, Int) in
-                    return (r.0 * (pair.0 - pair.1) , r.1 * (self[pair.0] - self[pair.1]))
-            }
-            return r.0 / r.1
-        }
+        let decomp = rawCyclicDecomposition
+        return decomp.reduce(1){ $0 * ( $1.count % 2 == 0 ? -1 : 1) }
     }
     
     private var rawCyclicDecomposition: [[Int]] {
@@ -106,9 +96,17 @@ public struct Permutation<n: _Int>: Group, FiniteType {
         return Permutation{ a[b[$0]] }
     }
     
+    public static var alternatingSubgroup: DynamicFiniteSubgroupFactory<Permutation<n>> {
+        return DynamicFiniteSubgroupFactory( allElements.filter{$0.signature == 1} )
+    }
+    
     public var description: String {
         let desc = rawCyclicDecomposition.map{"(\($0.map{"\($0)"}.joined(separator:",")))"}.joined()
         return desc.isEmpty ? "id" : desc
+    }
+    
+    public static var symbol: String {
+        return "S_\(n.intValue)"
     }
     
     public var hashValue: Int {
