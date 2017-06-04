@@ -85,11 +85,8 @@ public extension Group where Self: FiniteType {
     }
 }
 
-public protocol Subgroup: Group {
+public protocol Subgroup: Group, SubAlgebraicType {
     associatedtype Super: Group
-    init(_ g: Super)
-    var asSuper: Super { get }
-    static func contains(_ g: Super) -> Bool
 }
 
 public extension Subgroup {
@@ -101,20 +98,12 @@ public extension Subgroup {
         return Self.init(Super.identity)
     }
     
-    public static var symbol: String {
-        return "\(Self.self)"
-    }
-    
     public static func * (a: Self, b: Self) -> Self {
         return Self.init(a.asSuper * b.asSuper)
     }
-    
-    public var hashValue: Int {
-        return asSuper.hashValue
-    }
 }
 
-public struct ProductGroup<G1: Group, G2: Group>: Group {
+public struct ProductGroup<G1: Group, G2: Group>: Group, ProductAlgebraicType {
     public let _1: G1
     public let _2: G2
     
@@ -131,28 +120,13 @@ public struct ProductGroup<G1: Group, G2: Group>: Group {
         return ProductGroup<G1, G2>(G1.identity, G2.identity)
     }
     
-    public static var symbol: String {
-        return "\(G1.symbol)×\(G2.symbol)"
-    }
-    
-    public static func == (a: ProductGroup<G1, G2>, b: ProductGroup<G1, G2>) -> Bool {
-        return (a._1 == b._1) && (a._2 == b._2)
-    }
-    
     public static func * (a: ProductGroup<G1, G2>, b: ProductGroup<G1, G2>) -> ProductGroup<G1, G2> {
         return ProductGroup<G1, G2>(a._1 * b._1, a._2 * b._2)
     }
-    
-    public var hashValue: Int {
-        return (_1.hashValue &* 31) &+ _2.hashValue
-    }
-    
-    public var description: String {
-        return "(\(_1), \(_2))"
-    }
 }
 
-public struct QuotientGroup<G: Group, H: Subgroup>: Group where G == H.Super {
+public struct QuotientGroup<G: Group, H: Subgroup>: Group, QuotientAlgebraicType where G == H.Super {
+    public typealias Sub = H
     internal let g: G
     
     public init(_ g: G) {
@@ -171,10 +145,6 @@ public struct QuotientGroup<G: Group, H: Subgroup>: Group where G == H.Super {
         return QuotientGroup<G, H>(g.inverse)
     }
     
-    public static var symbol: String {
-        return "\(G.symbol)/\(H.symbol)"
-    }
-    
     public static func == (a: QuotientGroup<G, H>, b: QuotientGroup<G, H>) -> Bool {
         return H.contains( a.g * b.g.inverse )
     }
@@ -186,49 +156,59 @@ public struct QuotientGroup<G: Group, H: Subgroup>: Group where G == H.Super {
     public var hashValue: Int {
         return g.hashValue
     }
-    
-    public var description: String {
-        return "[\(g)]"
-    }
 }
 
-// abstract class
-public class DynamicSubgroupFactory<G: Group, H: DynamicSubgroup>: Equatable, CustomStringConvertible where G == H.Super {
-    public func asSub(_ g: G) -> H {
-        if !self.contains(g) {
-            fatalError("\(H.self) does not contain element: \(g)")
+public protocol DynamicSubgroup: Subgroup, DynamicSubtype {
+    associatedtype Super: Group
+}
+
+public extension DynamicSubgroup {
+    public var inverse: Self {
+        return Self.init(asSuper.inverse, factory: factory)
+    }
+    
+    public static func * (a: Self, b: Self) -> Self {
+        if !typeMatches(a, b) {
+            fatalError("unmatching type")
         }
-        return H.init(g, factory: self)
-    }
-    
-    public func contains(_ g: G) -> Bool {
-        fatalError("implement in subclass.")
-    }
-    
-    public static func == (t1: DynamicSubgroupFactory<G, H>, t2: DynamicSubgroupFactory<G, H>) -> Bool {
-        return type(of: t1) == type(of: t2)
-    }
-    
-    public var description: String {
-        return "\(type(of: self))"
-    }
-    
-}
-
-public protocol DynamicSubgroup: Subgroup {
-    init(_ g: Super, factory: DynamicSubgroupFactory<Super, Self>?)
-    var factory: DynamicSubgroupFactory<Super, Self>? { get }
-}
-
-internal extension DynamicSubgroup {
-    func typeMatches(with b: Self) -> Bool {
-        return (self.factory == b.factory || self.factory == nil || self.factory == nil)
+        return Self.init(a.asSuper * b.asSuper, factory: a.factory ?? b.factory)
     }
 }
 
-public final class DynamicFiniteSubgroupFactory<G: Group>: DynamicSubgroupFactory<G, DynamicFiniteSubgroup<G>> {
+public class DynamicSubgroupFactory<H: DynamicSubgroup>: DynamicSubtypeFactory<H> {
+}
+
+public struct DynamicFiniteSubgroup<G: Group>: DynamicSubgroup {
     public typealias Super = G
     
+    private let g: G
+    public var factory: DynamicTypeFactory<DynamicFiniteSubgroup<G>>?
+    
+    // root initializer
+    public init(_ g: G, factory: DynamicTypeFactory<DynamicFiniteSubgroup<G>>?) {
+        self.g = g
+        self.factory = factory
+    }
+    
+    public var asSuper: G {
+        return g
+    }
+    
+    public static func contains(_ g: G) -> Bool {
+        print("[warn] DynamicFiniteSubgroup.contains will only return true for identity.")
+        return g == G.identity
+    }
+    
+    public var hashValue: Int {
+        return g.hashValue
+    }
+    
+    public static var symbol: String {
+        return "DF<\(G.symbol)>"
+    }
+}
+
+public final class DynamicFiniteSubgroupFactory<G: Group>: DynamicSubgroupFactory<DynamicFiniteSubgroup<G>> {
     public  let allElementsAsSuper: Set<G>
     private var _allElements: Set<DynamicFiniteSubgroup<G>>! = nil
     
@@ -261,56 +241,13 @@ public final class DynamicFiniteSubgroupFactory<G: Group>: DynamicSubgroupFactor
     }
 }
 
-public struct DynamicFiniteSubgroup<G: Group>: DynamicSubgroup {
-    public typealias Super = G
+public struct DynamicQuotientGroup<G: Group, H: DynamicSubgroup>: Group, QuotientAlgebraicType where G == H.Super {
+    public typealias Sub = H
     
-    private let g: G
-    public var factory: DynamicSubgroupFactory<G, DynamicFiniteSubgroup<G>>?
-    
-    // root initializer
-    public init(_ g: G, factory: DynamicSubgroupFactory<G, DynamicFiniteSubgroup<G>>?) {
-        self.g = g
-        self.factory = factory
-    }
-    
-    public init(_ g: G) {
-        self.init(g, factory: nil)
-    }
-    
-    public var asSuper: G {
-        return g
-    }
-    
-    public static func contains(_ g: G) -> Bool {
-        print("[warn] DynamicFiniteSubgroup.contains will only return true for identity.")
-        return g == G.identity
-    }
-    
-    public static func == (a: DynamicFiniteSubgroup<G>, b: DynamicFiniteSubgroup<G>) -> Bool {
-        return a.g == b.g && a.typeMatches(with: b)
-    }
-    
-    public static func * (a: DynamicFiniteSubgroup<G>, b: DynamicFiniteSubgroup<G>) -> DynamicFiniteSubgroup<G> {
-        if !a.typeMatches(with: b) {
-            fatalError("unmatching type")
-        }
-        return DynamicFiniteSubgroup(a.asSuper * b.asSuper, factory: a.factory ?? b.factory)
-    }
-    
-    public var hashValue: Int {
-        return asSuper.hashValue
-    }
-    
-    public var description: String {
-        return "\(asSuper)"
-    }
-}
-
-public struct DynamicQuotientGroup<G: Group, H: DynamicSubgroup>: Group where G == H.Super {
     internal let g: G
-    internal let subgroupFactory: DynamicSubgroupFactory<G, H>?
+    internal let subgroupFactory: DynamicSubgroupFactory<H>?
     
-    public static func factory(subgroupFactory: DynamicSubgroupFactory<G, H>) -> ((_ g: G) -> DynamicQuotientGroup<G, H>) {
+    public static func factory(subgroupFactory: DynamicSubgroupFactory<H>) -> ((_ g: G) -> DynamicQuotientGroup<G, H>) {
         return {(g: G) in DynamicQuotientGroup(g, subgroupFactory: subgroupFactory)}
     }
     
@@ -318,7 +255,7 @@ public struct DynamicQuotientGroup<G: Group, H: DynamicSubgroup>: Group where G 
         self.init(g, subgroupFactory: nil)
     }
     
-    internal init(_ g: G, subgroupFactory: DynamicSubgroupFactory<G, H>?) {
+    internal init(_ g: G, subgroupFactory: DynamicSubgroupFactory<H>?) {
         self.g = g
         self.subgroupFactory = subgroupFactory
     }
@@ -333,10 +270,6 @@ public struct DynamicQuotientGroup<G: Group, H: DynamicSubgroup>: Group where G 
     
     public var inverse: DynamicQuotientGroup<G, H> {
         return DynamicQuotientGroup<G, H>(g.inverse, subgroupFactory: subgroupFactory)
-    }
-    
-    public static var symbol: String {
-        return "\(G.symbol)/\(H.symbol)"
     }
     
     private static func typeMatches(_ a: DynamicQuotientGroup, _ b: DynamicQuotientGroup<G, H>) -> Bool {
@@ -358,9 +291,5 @@ public struct DynamicQuotientGroup<G: Group, H: DynamicSubgroup>: Group where G 
     
     public var hashValue: Int {
         return (self == DynamicQuotientGroup<G, H>.identity) ? 0 : 1 // TODO think...
-    }
-    
-    public var description: String {
-        return "[\(g)]"
     }
 }
