@@ -8,6 +8,10 @@ public extension Field {
         return self != 0
     }
     
+    public var unitInverse: Self? {
+        return isUnit ? inverse : nil
+    }
+    
     public var degree: Int {
         return self == Self.zero ? 0 : 1
     }

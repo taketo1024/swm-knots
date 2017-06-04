@@ -94,19 +94,27 @@ public struct EuclideanQuotientField<R: EuclideanRing, I: EuclideanIdeal>: Field
         return r
     }
     
-    public static var zero: EuclideanQuotientField<R, I> {
-        return EuclideanQuotientField<R, I>(R.zero)
+    public var isUnit: Bool {
+        return r != 0
     }
     
-    public static var identity: EuclideanQuotientField<R, I> {
-        return EuclideanQuotientField<R, I>(R.identity)
+    public var unitInverse: EuclideanQuotientField<R, I>? {
+        return isUnit ? inverse : nil
     }
     
     public var inverse: EuclideanQuotientField<R, I> {
         // find: a * r + b * m = u (u: unit)
         // then: r^-1 = u^-1 * a (mod m)
         let (a, _, u) = bezout(r, I.generator)
-        return EuclideanQuotientField(u.unitInverse * a)
+        return EuclideanQuotientField(u.unitInverse! * a)
+    }
+    
+    public static var zero: EuclideanQuotientField<R, I> {
+        return EuclideanQuotientField<R, I>(R.zero)
+    }
+    
+    public static var identity: EuclideanQuotientField<R, I> {
+        return EuclideanQuotientField<R, I>(R.identity)
     }
     
     public static func == (a: EuclideanQuotientField<R, I>, b: EuclideanQuotientField<R, I>) -> Bool {

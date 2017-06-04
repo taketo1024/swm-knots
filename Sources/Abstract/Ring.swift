@@ -4,7 +4,7 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
     associatedtype IntegerLiteralType = IntegerNumber
     init(intValue: IntegerNumber)
     var isUnit: Bool { get }
-    var unitInverse: Self { get }
+    var unitInverse: Self? { get }
     static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m>
 }
 
@@ -12,18 +12,6 @@ public extension Ring {
     // required init from `ExpressibleByIntegerLiteral`
     public init(integerLiteral value: IntegerNumber) {
         self.init(intValue: value)
-    }
-    
-    // TODO must implement properly for each conforming struct.
-    public var isUnit: Bool {
-        return (self == Self.identity) || (self == -Self.identity)
-    }
-
-    var unitInverse: Self {
-        if !isUnit {
-            fatalError("\(self) is not a unit.")
-        }
-        return (self == Self.identity) ? self : -self
     }
     
     public static var zero: Self {
@@ -122,6 +110,14 @@ public struct ProductRing<R1: Ring, R2: Ring>: Ring {
         self._2 = g2
     }
     
+    public var isUnit: Bool {
+        return _1.isUnit && _2.isUnit
+    }
+    
+    public var unitInverse: ProductRing<R1, R2>? {
+        return isUnit ? ProductRing<R1, R2>(_1.unitInverse!, _2.unitInverse!) : nil
+    }
+    
     public static var zero: ProductRing<R1, R2> {
         return ProductRing<R1, R2>(R1.zero, R2.zero)
     }
@@ -172,6 +168,14 @@ public struct QuotientRing<R: Ring, I: Ideal>: Ring where R == I.Super {
     
     public var representative: R {
         return r
+    }
+    
+    public var isUnit: Bool {
+        return r.isUnit // FIXME: this is wrong. e.g. R = Z[x,y], I = (xy - 1)
+    }
+    
+    public var unitInverse: QuotientRing<R, I>? {
+        return isUnit ? QuotientRing<R, I>(r.unitInverse!) : nil
     }
     
     public static var zero: QuotientRing<R, I> {

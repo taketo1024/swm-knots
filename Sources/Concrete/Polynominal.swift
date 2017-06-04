@@ -40,11 +40,8 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
         return (degree == 0)
     }
     
-    public var unitInverse: Polynomial<K> {
-        if !isUnit {
-            fatalError("\(self) is not a unit.")
-        }
-        return Polynomial<K>(coeff(0).inverse)
+    public var unitInverse: Polynomial<K>? {
+        return isUnit ? Polynomial<K>(coeff(0).inverse) : nil
     }
     
     public var leadCoeff: K {

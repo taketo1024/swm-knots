@@ -11,6 +11,14 @@ extension IntegerNumber: EuclideanRing {
         return abs(self)
     }
     
+    public var isUnit: Bool {
+        return abs(self) == 1
+    }
+    
+    public var unitInverse: IntegerNumber? {
+        return isUnit ? self : nil
+    }
+    
     public static func eucDiv(_ a: IntegerNumber, _ b: IntegerNumber) -> (q: IntegerNumber, r: IntegerNumber) {
         let q = a / b
         return (q: q, r: a - q * b)
