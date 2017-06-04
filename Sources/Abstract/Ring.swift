@@ -53,6 +53,7 @@ public protocol Ideal: AdditiveGroup {
     associatedtype Super: Ring
     init(_ a: Super)
     var asSuper: Super { get }
+    static func reduced(_ a: Super) -> Super
     static func contains(_ a: Super) -> Bool
     static func * (r: Super, a: Self) -> Self
     static func * (m: Self, r: Super) -> Self
@@ -163,7 +164,7 @@ public struct QuotientRing<R: Ring, I: Ideal>: Ring where R == I.Super {
     }
     
     public init(_ r: R) {
-        self.r = r
+        self.r = I.reduced(r)
     }
     
     public var representative: R {

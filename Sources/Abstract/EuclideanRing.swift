@@ -67,6 +67,10 @@ public protocol EuclideanIdeal: Ideal {
 }
 
 public extension EuclideanIdeal {
+    static func reduced(_ a: Super) -> Super {
+        return a % generator
+    }
+    
     static func contains(_ a: Super) -> Bool {
         return a % generator == Super.zero
     }
