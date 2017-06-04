@@ -12,7 +12,7 @@ import XCTest
 internal typealias Z = IntegerNumber
 internal typealias Q = RationalNumber
 internal typealias R = RealNumber
-internal typealias Z_2 = IntQuotientField<_2>
+internal typealias Z_2 = IntegerQuotientField<_2>
 
 class SwiftyAlgebraTests: XCTestCase {
     
@@ -27,9 +27,6 @@ class SwiftyAlgebraTests: XCTestCase {
     }
     
     func testExample() {
-        let C = SimplicialComplex.torus(dim: 4)
-        let H = Homology(C, Z.self)
-        print("H(T^2; Z) =", H.detailDescription, "\n")
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
