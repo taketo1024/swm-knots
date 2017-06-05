@@ -8,19 +8,19 @@
 
 import Foundation
 
-public class DynamicSubgroupInfo<G: Group>: DynamicSubtypeInfo {
+public class SubgroupInfo<G: Group>: TypeInfo {
     public typealias Base = G
     
     public func contains(_ g: G) -> Bool {
         fatalError("implement in subclass")
     }
     
-    public static func defaultInfo() -> Self {
-        fatalError("implement in subclass")
+    public var description: String {
+        return "\(type(of: self))"
     }
 }
 
-public final class DynamicFiniteSubgroupInfo<G: Group>: DynamicSubgroupInfo<G> {
+public final class FiniteSubgroupInfo<G: Group>: SubgroupInfo<G> {
     public let allElements: Set<G>
     
     public init<S: Sequence>(allElements: S) where S.Iterator.Element == G {
@@ -36,73 +36,31 @@ public final class DynamicFiniteSubgroupInfo<G: Group>: DynamicSubgroupInfo<G> {
         return allElements.contains(g)
     }
     
-    public var description: String {
+    public override var description: String {
         return "{\(Array(allElements).map{"\($0)"}.joined(separator: ", "))}"
     }
 }
 
-public final class DynamicQuotientGroupInfo<G: Group>: DynamicQuotientTypeInfo {
-    public typealias Base = G
-    public typealias SubtypeInfo = DynamicSubgroupInfo<G>
+public struct DynamicSubgroup<G: Group, _ID: _Int>: DynamicType, Subgroup {
+    public typealias Super = G
+    public typealias Info = SubgroupInfo<G>
+    public typealias ID = _ID
     
-    public let subtypeInfo: DynamicSubgroupInfo<G>?
+    public let g: G
     
-    public init(subtypeInfo: SubtypeInfo?) {
-        self.subtypeInfo = subtypeInfo
-    }
-    
-    public func image(of g: Base) -> DynamicQuotientGroup<G> {
-        return DynamicQuotientGroup(g, info: self)
-    }
-    
-    public func isEquivalent(_ a: G, _ b: G) -> Bool {
-        return subtypeInfo?.contains(a * b.inverse) ?? (a == b)
-    }
-    
-    public func hashValue(of a: G) -> Int {
-        return 0 // TODO
-    }
-    
-    public static func defaultInfo() -> DynamicQuotientGroupInfo<G> {
-        return DynamicQuotientGroupInfo<G>(subtypeInfo: nil) 
-    }
-}
-
-public struct DynamicQuotientGroup<G: Group>: Group, DynamicQuotientType {
-
-    public typealias Info = DynamicQuotientGroupInfo<G>
-    
-    private let g: G
-    public let info: Info
-    
-    public init(_ g: G, info: Info) {
+    public init(_ g: G) {
         self.g = g
-        self.info = info
     }
     
-    public var representative: G {
+    public var asSuper: G {
         return g
     }
     
-    public static var identity: DynamicQuotientGroup<G> {
-        return DynamicQuotientGroup(G.identity, info: Info.defaultInfo())
+    public static func contains(_ g: G) -> Bool {
+        return info.contains(g)
     }
     
-    public var inverse: DynamicQuotientGroup<G> {
-        return DynamicQuotientGroup(representative.inverse, info: info)
-    }
-    
-    public static func * (_ a: DynamicQuotientGroup<G>, _ b: DynamicQuotientGroup<G>) -> DynamicQuotientGroup<G> {
-        return DynamicQuotientGroup(a.representative * b.representative, info: chooseInfo(a, b))
-    }
-}
-
-public extension Group {
-    public static func quotient(by subgroup: DynamicSubgroupInfo<Self>) -> DynamicQuotientGroupInfo<Self> {
-        return DynamicQuotientGroupInfo(subtypeInfo: subgroup)
-    }
-    
-    public func asQuotient(_ quotient: DynamicQuotientGroupInfo<Self>) -> DynamicQuotientGroup<Self> {
-        return DynamicQuotientGroup(self, info: quotient)
+    public static var symbol: String {
+        return info.description
     }
 }
