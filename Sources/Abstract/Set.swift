@@ -8,18 +8,18 @@
 
 import Foundation
 
-public protocol AlgebraicType: Equatable, Hashable, CustomStringConvertible {
+public protocol SetType: Equatable, Hashable, CustomStringConvertible {
     static var symbol: String { get }
 }
 
-public protocol SubAlgebraicType: AlgebraicType {
-    associatedtype Super: AlgebraicType
+public protocol SubsetType: SetType {
+    associatedtype Super: SetType
     init(_ g: Super)
     var asSuper: Super { get }
     static func contains(_ g: Super) -> Bool
 }
 
-public extension SubAlgebraicType {
+public extension SubsetType {
     public static func == (a: Self, b: Self) -> Bool {
         return a.asSuper == b.asSuper
     }
@@ -33,14 +33,15 @@ public extension SubAlgebraicType {
     }
 }
 
-public protocol ProductAlgebraicType: AlgebraicType {
-    associatedtype Left: AlgebraicType
-    associatedtype Right: AlgebraicType
+public protocol ProductSetType: SetType {
+    associatedtype Left: SetType
+    associatedtype Right: SetType
     var _1: Left  { get }
     var _2: Right { get }
+    init(_ a1: Left, _ a2: Right)
 }
 
-public extension ProductAlgebraicType {
+public extension ProductSetType {
     public static func == (a: Self, b: Self) -> Bool {
         return (a._1 == b._1) && (a._2 == b._2)
     }
@@ -58,17 +59,22 @@ public extension ProductAlgebraicType {
     }
 }
 
-public protocol QuotientAlgebraicType: AlgebraicType {
-    associatedtype Sub: SubAlgebraicType
+public protocol QuotientSetType: SetType {
+    associatedtype Sub: SubsetType
     typealias Base = Sub.Super
     
     init(_ g: Base)
     var representative: Base { get }
+    static func isEquivalent(_ a: Base, _ b: Base) -> Bool
 }
 
-public extension QuotientAlgebraicType {
+public extension QuotientSetType {
+    public static func == (a: Self, b: Self) -> Bool {
+        return isEquivalent(a.representative, b.representative)
+    }
+
     public static var symbol: String {
-        return "\(Base.symbol)/\(Sub.symbol)"
+        return "\(Base.symbol)/~"
     }
     
     public var description: String {
@@ -76,7 +82,7 @@ public extension QuotientAlgebraicType {
     }
 }
 
-public protocol FiniteType: AlgebraicType {
+public protocol FiniteSetType: SetType {
     static var allElements: [Self] { get }
     static var countElements: Int { get }
 }

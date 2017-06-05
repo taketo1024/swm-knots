@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Permutation<n: _Int>: Group, FiniteType {
+public struct Permutation<n: _Int>: Group, FiniteSetType {
     public var degree: Int { return n.intValue }
     fileprivate var elements: [Int] //
     
@@ -113,3 +113,4 @@ public struct Permutation<n: _Int>: Group, FiniteType {
         return elements.count > 0 ? elements[0].hashValue + 1 : 0
     }
 }
+

@@ -51,7 +51,7 @@ public struct IntegerIdeal<n: _Int>: EuclideanIdeal {
     }
 }
 
-// TODO conform to `FiniteType` when conditional conformance is supported in Swift4. 
+// TODO conform to `FiniteSetType` when conditional conformance is supported in Swift4. 
 
 public typealias IntegerQuotientRing<n: _Int> = EuclideanQuotientRing<IntegerNumber, IntegerIdeal<n>>
 public typealias IntegerQuotientField<n: _Int> = EuclideanQuotientField<IntegerNumber, IntegerIdeal<n>> // n must be prime.

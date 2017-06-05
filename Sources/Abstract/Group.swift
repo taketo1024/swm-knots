@@ -47,7 +47,7 @@ public extension Group {
     }
 }
 
-public extension Group where Self: FiniteType {
+public extension Group where Self: FiniteSetType {
     public static func cyclicSubgroup(generator: Self) -> DynamicFiniteSubgroupFactory<Self> {
         var g = generator
         var set = Set([identity])
@@ -89,7 +89,7 @@ public extension Group where Self: FiniteType {
     }
 }
 
-public protocol Subgroup: Group, SubAlgebraicType {
+public protocol Subgroup: Submonoid, SubsetType {
     associatedtype Super: Group
 }
 
@@ -97,17 +97,24 @@ public extension Subgroup {
     public var inverse: Self {
         return Self.init(self.asSuper.inverse)
     }
-    
-    static var identity: Self {
-        return Self.init(Super.identity)
-    }
-    
-    public static func * (a: Self, b: Self) -> Self {
-        return Self.init(a.asSuper * b.asSuper)
+}
+
+public protocol ProductGroupType: Group, ProductMonoidType {
+    associatedtype Left: Group
+    associatedtype Right: Group
+}
+
+public extension ProductGroupType {
+    public var inverse: Self {
+        return Self.init(_1.inverse, _2.inverse)
     }
 }
 
-public struct ProductGroup<G1: Group, G2: Group>: Group, ProductAlgebraicType {
+// concrete class
+public struct ProductGroup<G1: Group, G2: Group>: ProductGroupType {
+    public typealias Left = G1
+    public typealias Right = G2
+    
     public let _1: G1
     public let _2: G2
     
@@ -115,50 +122,48 @@ public struct ProductGroup<G1: Group, G2: Group>: Group, ProductAlgebraicType {
         self._1 = g1
         self._2 = g2
     }
+}
+
+public protocol QuotientGroupType: Group, QuotientSetType {
+    associatedtype Sub: Subgroup
+}
+
+public extension QuotientGroupType {
     
-    public var inverse: ProductGroup<G1, G2> {
-        return ProductGroup<G1, G2>(_1.inverse, _2.inverse)
+    public static var identity: Self {
+        return Self(Base.identity)
     }
     
-    public static var identity: ProductGroup<G1, G2> {
-        return ProductGroup<G1, G2>(G1.identity, G2.identity)
+    public var inverse: Self {
+        return Self(representative.inverse)
     }
     
-    public static func * (a: ProductGroup<G1, G2>, b: ProductGroup<G1, G2>) -> ProductGroup<G1, G2> {
-        return ProductGroup<G1, G2>(a._1 * b._1, a._2 * b._2)
+    public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
+        return Sub.contains(a * b.inverse)
+    }
+    
+    public static func * (a: Self, b: Self) -> Self {
+        return Self.init(a.representative * b.representative)
+    }
+    
+    public var hashValue: Int {
+        return 0 // Sub.contains(representative) ? 0 : 1 // better override in subclass
     }
 }
 
-public struct QuotientGroup<G: Group, H: Subgroup>: Group, QuotientAlgebraicType where G == H.Super {
+// concrete class
+public struct QuotientGroup<G: Group, H: Subgroup>: QuotientGroupType where G == H.Super {
+    public typealias Base = G
     public typealias Sub = H
+    
     internal let g: G
     
     public init(_ g: G) {
         self.g = g
     }
     
-    public static var identity: QuotientGroup<G, H> {
-        return QuotientGroup<G, H>(G.identity)
-    }
-    
     public var representative: G {
         return g
-    }
-    
-    public var inverse: QuotientGroup<G, H> {
-        return QuotientGroup<G, H>(g.inverse)
-    }
-    
-    public static func == (a: QuotientGroup<G, H>, b: QuotientGroup<G, H>) -> Bool {
-        return H.contains( a.g * b.g.inverse )
-    }
-    
-    public static func * (a: QuotientGroup<G, H>, b: QuotientGroup<G, H>) -> QuotientGroup<G, H> {
-        return QuotientGroup<G, H>.init(a.g * b.g)
-    }
-    
-    public var hashValue: Int {
-        return g.hashValue
     }
 }
 
@@ -288,5 +293,9 @@ public struct DynamicQuotientGroup<G: Group, H: DynamicSubgroup>: Group, Dynamic
     
     public var hashValue: Int {
         return (self == DynamicQuotientGroup<G, H>.identity) ? 0 : 1 // TODO think...
+    }
+    
+    public static func isEquivalent(_ a: G, _ b: G) -> Bool {
+        fatalError("DynamicQuotientType cannot statically determine `isEquivalent`")
     }
 }

@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol DynamicType: AlgebraicType {
+public protocol DynamicType: SetType {
     var factory: DynamicTypeFactory<Self>? { get }
 }
 
@@ -22,7 +22,7 @@ public class DynamicTypeFactory<Type: DynamicType>: Equatable, CustomStringConve
     }
 }
 
-public protocol DynamicSubtype: DynamicType, SubAlgebraicType {
+public protocol DynamicSubtype: DynamicType, SubsetType {
     init(_ g: Self.Super, factory: DynamicTypeFactory<Self>?)
     var asSuper: Super { get }
 }
@@ -56,14 +56,14 @@ public class DynamicSubtypeFactory<Sub: DynamicSubtype>: DynamicTypeFactory<Sub>
     }
 }
 
-public protocol DynamicQuotientType: DynamicType, QuotientAlgebraicType {
+public protocol DynamicQuotientType: DynamicType, QuotientSetType {
     associatedtype Sub: DynamicSubtype
-    init(_ g: Self.Base, factory: DynamicTypeFactory<Self>?)
+    init(_ g: Base, factory: DynamicTypeFactory<Self>?)
     var quotientFactory: DynamicQuotientTypeFactory<Self>? { get }
 }
 
 public extension DynamicQuotientType {
-    public init(_ g: Self.Base) {
+    public init(_ g: Base) {
         self.init(g, factory: nil)
     }
     

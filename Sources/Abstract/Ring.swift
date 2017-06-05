@@ -32,11 +32,8 @@ public extension Ring {
     }
 }
 
-public protocol Subring: Ring, Subgroup {
+public protocol Subring: Ring, SubsetType {
     associatedtype Super: Ring
-    init(_ r: Super)
-    var asSuper: Super { get }
-    static func contains(_ r: Super) -> Bool
 }
 
 public extension Subring {
@@ -49,12 +46,9 @@ public extension Subring {
     }
 }
 
-public protocol Ideal: AdditiveGroup {
+public protocol Ideal: AdditiveGroup, SubsetType {
     associatedtype Super: Ring
-    init(_ a: Super)
-    var asSuper: Super { get }
     static func reduced(_ a: Super) -> Super
-    static func contains(_ a: Super) -> Bool
     static func * (r: Super, a: Self) -> Self
     static func * (m: Self, r: Super) -> Self
 }
@@ -66,10 +60,6 @@ public extension Ideal {
     
     public static func + (a: Self, b: Self) -> Self {
         return Self.init(a.asSuper + b.asSuper)
-    }
-    
-    public static func == (a: Self, b: Self) -> Bool {
-        return a.asSuper == b.asSuper
     }
     
     prefix static func - (a: Self) -> Self {
@@ -87,17 +77,9 @@ public extension Ideal {
     public static func * (a: Self, r: Super) -> Self {
         return Self.init(a.asSuper * r)
     }
-    
-    public var hashValue: Int {
-        return asSuper.hashValue
-    }
-    
-    public var description: String {
-        return "[\(asSuper)]"
-    }
 }
 
-public struct ProductRing<R1: Ring, R2: Ring>: Ring {
+public struct ProductRing<R1: Ring, R2: Ring>: Ring, ProductSetType {
     public let _1: R1
     public let _2: R2
     
@@ -127,14 +109,6 @@ public struct ProductRing<R1: Ring, R2: Ring>: Ring {
         return ProductRing<R1, R2>(R1.identity, R2.identity)
     }
     
-    public static var symbol: String {
-        return "\(R1.symbol)×\(R2.symbol)"
-    }
-    
-    public static func == (a: ProductRing<R1, R2>, b: ProductRing<R1, R2>) -> Bool {
-        return (a._1 == b._1) && (a._2 == b._2)
-    }
-    
     public static func + (a: ProductRing<R1, R2>, b: ProductRing<R1, R2>) -> ProductRing<R1, R2> {
         return ProductRing<R1, R2>(a._1 + b._1, a._2 + b._2)
     }
@@ -146,17 +120,11 @@ public struct ProductRing<R1: Ring, R2: Ring>: Ring {
     public static func * (a: ProductRing<R1, R2>, b: ProductRing<R1, R2>) -> ProductRing<R1, R2> {
         return ProductRing<R1, R2>(a._1 * b._1, a._2 * b._2)
     }
-    
-    public var hashValue: Int {
-        return (_1.hashValue &* 31) &+ _2.hashValue
-    }
-    
-    public var description: String {
-        return "(\(_1), \(_2))"
-    }
 }
 
-public struct QuotientRing<R: Ring, I: Ideal>: Ring where R == I.Super {
+public struct QuotientRing<R: Ring, I: Ideal>: Ring, QuotientSetType where R == I.Super {
+    public typealias Sub = I
+    
     internal let r: R
     
     public init(intValue n: Int) {
@@ -203,15 +171,11 @@ public struct QuotientRing<R: Ring, I: Ideal>: Ring where R == I.Super {
         return QuotientRing<R, I>.init(a.r * b.r)
     }
     
-    public static var symbol: String {
-        return "\(R.symbol)/\(I.symbol)"
-    }
-    
     public var hashValue: Int {
-        return (r == R.zero) ? 0 : 1
+        return r.hashValue
     }
     
-    public var description: String {
-        return "[\(r)]"
+    public static func isEquivalent(_ a: R, _ b: R) -> Bool {
+        return I.contains( a - b )
     }
 }
