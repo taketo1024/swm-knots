@@ -41,28 +41,24 @@ public extension Group {
         
         return true
     }
-    
-    public static func quotient<H: DynamicSubgroup>(by subgroupFactory: DynamicSubgroupFactory<H>) -> DynamicQuotientGroupFactory<Self, H> {
-        return DynamicQuotientGroupFactory<Self, H>(subtypeFactory: subgroupFactory)
-    }
 }
 
 public extension Group where Self: FiniteSetType {
-    public static func cyclicSubgroup(generator: Self) -> DynamicFiniteSubgroupFactory<Self> {
+    public static func cyclicSubgroup(generator: Self) -> DynamicFiniteSubgroupInfo<Self> {
         var g = generator
         var set = Set([identity])
         while !set.contains(g) {
             set.insert(g)
             g = g * g
         }
-        return DynamicFiniteSubgroupFactory(set)
+        return DynamicFiniteSubgroupInfo(allElements: set)
     }
     
-    public static var allCyclicSubgroups: [DynamicFiniteSubgroupFactory<Self>] {
+    public static var allCyclicSubgroups: [DynamicFiniteSubgroupInfo<Self>] {
         return allElements.map{ cyclicSubgroup(generator: $0) }.sorted{ $0.countElements < $1.countElements }
     }
     
-    public static var allSubgroups: [DynamicFiniteSubgroupFactory<Self>] {
+    public static var allSubgroups: [DynamicFiniteSubgroupInfo<Self>] {
         let n = countElements
         if n == 1 {
             return [cyclicSubgroup(generator: identity)]
@@ -74,7 +70,7 @@ public extension Group where Self: FiniteSetType {
         
         for k in 2...cyclics.count {
             n.choose(k).forEach { c in
-                let union: Set<Self> = c.map{ cyclics[$0] }.reduce(Set()){ $0.union($1.allElementsAsSuper) }
+                let union: Set<Self> = c.map{ cyclics[$0] }.reduce(Set()){ $0.union($1.allElements) }
                 
                 // TODO improve algorithm
                 if !unions.contains(union) && (n % union.count == 0) && formsSubgroup(union) {
@@ -85,7 +81,7 @@ public extension Group where Self: FiniteSetType {
         
         return unions
             .sorted{ $0.count < $1.count }
-            .map{ DynamicFiniteSubgroupFactory($0) }
+            .map{ DynamicFiniteSubgroupInfo(allElements: $0) }
     }
 }
 
@@ -164,138 +160,5 @@ public struct QuotientGroup<G: Group, H: Subgroup>: QuotientGroupType where G ==
     
     public var representative: G {
         return g
-    }
-}
-
-public protocol DynamicSubgroup: Subgroup, DynamicSubtype {
-    associatedtype Super: Group
-}
-
-public extension DynamicSubgroup {
-    public var inverse: Self {
-        return Self.init(asSuper.inverse, factory: factory)
-    }
-    
-    public static func * (a: Self, b: Self) -> Self {
-        if !typeMatches(a, b) {
-            fatalError("unmatching type")
-        }
-        return Self.init(a.asSuper * b.asSuper, factory: a.factory ?? b.factory)
-    }
-}
-
-public class DynamicSubgroupFactory<H: DynamicSubgroup>: DynamicSubtypeFactory<H> {
-}
-
-public struct DynamicFiniteSubgroup<G: Group>: DynamicSubgroup {
-    public typealias Super = G
-    
-    private let g: G
-    public var factory: DynamicTypeFactory<DynamicFiniteSubgroup<G>>?
-    
-    // root initializer
-    public init(_ g: G, factory: DynamicTypeFactory<DynamicFiniteSubgroup<G>>?) {
-        self.g = g
-        self.factory = factory
-    }
-    
-    public var asSuper: G {
-        return g
-    }
-    
-    public static func contains(_ g: G) -> Bool {
-        print("[warn] DynamicFiniteSubgroup.contains will only return true for identity.")
-        return g == G.identity
-    }
-    
-    public var hashValue: Int {
-        return g.hashValue
-    }
-    
-    public static var symbol: String {
-        return "DF<\(G.symbol)>"
-    }
-}
-
-public final class DynamicFiniteSubgroupFactory<G: Group>: DynamicSubgroupFactory<DynamicFiniteSubgroup<G>> {
-    public  let allElementsAsSuper: Set<G>
-    private var _allElements: Set<DynamicFiniteSubgroup<G>>! = nil
-    
-    public init<S: Sequence>(_ allElements: S) where S.Iterator.Element == G {
-        self.allElementsAsSuper = Set(allElements)
-        self._allElements = nil
-        super.init()
-        
-        self._allElements = Set(allElements.map{DynamicFiniteSubgroup<G>($0, factory: self)})
-    }
-    
-    public var allElements: Set<DynamicFiniteSubgroup<G>> {
-        return _allElements!
-    }
-    
-    public var countElements: Int {
-        return allElements.count
-    }
-    
-    public override func contains(_ g: G) -> Bool {
-        return allElementsAsSuper.contains(g)
-    }
-    
-    public static func == (t1: DynamicFiniteSubgroupFactory<G>, t2: DynamicFiniteSubgroupFactory<G>) -> Bool {
-        return t1.allElementsAsSuper == t2.allElementsAsSuper
-    }
-    
-    public override var description: String {
-        return "{\(Array(allElementsAsSuper).map{"\($0)"}.joined(separator: ", "))}"
-    }
-}
-
-public final class DynamicQuotientGroupFactory<G: Group, H: DynamicSubgroup>: DynamicQuotientTypeFactory<DynamicQuotientGroup<G, H>> where G == H.Super {
-    public override func isEquivalent(_ a: Base, _ b: Base) -> Bool {
-        return subtypeFactory.contains( a * b.inverse )
-    }
-}
-
-public struct DynamicQuotientGroup<G: Group, H: DynamicSubgroup>: Group, DynamicQuotientType where G == H.Super {
-    public typealias Sub = H
-    
-    internal let g: G
-    public let factory: DynamicTypeFactory<DynamicQuotientGroup<G, H>>?
-    
-    public init(_ g: G, factory: DynamicTypeFactory<DynamicQuotientGroup<G, H>>?) {
-        self.g = g
-        self.factory = factory
-    }
-    
-    public var representative: G {
-        return g
-    }
-    
-    public var inverse: DynamicQuotientGroup<G, H> {
-        return DynamicQuotientGroup<G, H>(g.inverse, factory: factory)
-    }
-    
-    public static var identity: DynamicQuotientGroup<G, H> {
-        return DynamicQuotientGroup<G, H>(G.identity)
-    }
-    
-    public static func == (a: DynamicQuotientGroup<G, H>, b: DynamicQuotientGroup<G, H>) -> Bool {
-        if !typeMatches(a, b) {
-            fatalError("cannot compare \(type(of: a)) with \(type(of: b))")
-        }
-        
-        return (a.g == b.g) || (a.quotientFactory ?? b.quotientFactory).flatMap{f in f.isEquivalent(a.g, b.g)} ?? false
-    }
-    
-    public static func * (a: DynamicQuotientGroup<G, H>, b: DynamicQuotientGroup<G, H>) -> DynamicQuotientGroup<G, H> {
-        return DynamicQuotientGroup<G, H>.init(a.g * b.g, factory: a.factory ?? b.factory)
-    }
-    
-    public var hashValue: Int {
-        return (self == DynamicQuotientGroup<G, H>.identity) ? 0 : 1 // TODO think...
-    }
-    
-    public static func isEquivalent(_ a: G, _ b: G) -> Bool {
-        fatalError("DynamicQuotientType cannot statically determine `isEquivalent`")
     }
 }

@@ -74,11 +74,11 @@ public extension QuotientSetType {
     }
 
     public static var symbol: String {
-        return "\(Base.symbol)/~"
+        return "\(Base.symbol)/\(Sub.symbol)"
     }
     
     public var description: String {
-        return "[\(representative)]"
+        return "\(representative)"
     }
 }
 
