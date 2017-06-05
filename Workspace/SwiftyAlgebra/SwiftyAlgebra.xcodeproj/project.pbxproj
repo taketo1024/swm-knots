@@ -48,7 +48,7 @@
 		14A85FF71EDBED9C00A754EA /* Dynamic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A85FF61EDBED9C00A754EA /* Dynamic.swift */; };
 		14B2FB8C1ED8FBA000C182EB /* MatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */; };
 		14D261321EE44DB4006775E2 /* DynamicType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261311EE44DB4006775E2 /* DynamicType.swift */; };
-		14D261341EE4614E006775E2 /* BasicTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* BasicTypes.swift */; };
+		14D261341EE4614E006775E2 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* Set.swift */; };
 		14E7BECB1ED84B3400BBA72A /* EigenLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 14E7BEC91ED84B3400BBA72A /* EigenLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		14E7BECC1ED84B3400BBA72A /* EigenLib.mm in Sources */ = {isa = PBXBuildFile; fileRef = 14E7BECA1ED84B3400BBA72A /* EigenLib.mm */; };
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
@@ -116,7 +116,7 @@
 		14A85FF61EDBED9C00A754EA /* Dynamic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dynamic.swift; sourceTree = "<group>"; };
 		14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixTests.swift; sourceTree = "<group>"; };
 		14D261311EE44DB4006775E2 /* DynamicType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DynamicType.swift; sourceTree = "<group>"; };
-		14D261331EE4614E006775E2 /* BasicTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicTypes.swift; sourceTree = "<group>"; };
+		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
 		14E7BEC91ED84B3400BBA72A /* EigenLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EigenLib.h; path = EigenWrapper/EigenLib.h; sourceTree = "<group>"; };
 		14E7BECA1ED84B3400BBA72A /* EigenLib.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = EigenLib.mm; path = EigenWrapper/EigenLib.mm; sourceTree = "<group>"; };
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
@@ -204,6 +204,7 @@
 		1424F4D71EB997780052581F /* Abstract */ = {
 			isa = PBXGroup;
 			children = (
+				14D261331EE4614E006775E2 /* Set.swift */,
 				1424F4DD1EB997780052581F /* Monoid.swift */,
 				1424F4DB1EB997780052581F /* Group.swift */,
 				1424F4D81EB997780052581F /* AdditiveGroup.swift */,
@@ -213,7 +214,6 @@
 				1424F4DC1EB997780052581F /* Module.swift */,
 				1424F4E01EB997780052581F /* FreeModule.swift */,
 				1473F1111EC76715003B1D55 /* FreeModuleQuotient.swift */,
-				14D261331EE4614E006775E2 /* BasicTypes.swift */,
 				14D261311EE44DB4006775E2 /* DynamicType.swift */,
 			);
 			path = Abstract;
@@ -302,11 +302,11 @@
 			isa = PBXGroup;
 			children = (
 				14929C991ED9BFE5006ACAC5 /* Numbers.playground */,
-				1414D8551EE0F927001A1D42 /* Polynomials.playground */,
+				14929C951ED9BFE5006ACAC5 /* FreeModules.playground */,
 				14929C981ED9BFE5006ACAC5 /* Matrices.playground */,
 				14929C9A1ED9BFE5006ACAC5 /* Permutations.playground */,
+				1414D8551EE0F927001A1D42 /* Polynomials.playground */,
 				14929C941ED9BFE5006ACAC5 /* AlgebraicExtensions.playground */,
-				14929C951ED9BFE5006ACAC5 /* FreeModules.playground */,
 				14929C961ED9BFE5006ACAC5 /* Homology.playground */,
 			);
 			path = Playgrounds;
@@ -449,7 +449,7 @@
 				144AD2911EC21A4500E23890 /* Homology.swift in Sources */,
 				1424F4F91EB997780052581F /* AdditiveGroup.swift in Sources */,
 				1424F5071EB997780052581F /* Rational.swift in Sources */,
-				14D261341EE4614E006775E2 /* BasicTypes.swift in Sources */,
+				14D261341EE4614E006775E2 /* Set.swift in Sources */,
 				140BCD511EBA3F8A00D7CE74 /* ChainComplex.swift in Sources */,
 				1424F5011EB997780052581F /* Matrix.swift in Sources */,
 				147D98061EB9B26200C736AC /* Dictionary.swift in Sources */,

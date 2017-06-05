@@ -190,8 +190,32 @@ public struct PolynomialIdeal<K: Field, p: _Polynomial>: EuclideanIdeal where K 
     }
 }
 
-public typealias PolynomialQuotientRing<K: Field, p: _Polynomial>
-    = EuclideanQuotientRing<Polynomial<K>, PolynomialIdeal<K, p>> where K == p.K
+public struct PolynomialQuotientRing<K: Field, p: _Polynomial>: EuclideanQuotientRingType where K == p.K {
+    public typealias Sub = PolynomialIdeal<K, p>
+    
+    private let a: Base
+    
+    public init(_ a: Base) {
+        self.a = Sub.reduced(a)
+    }
+    
+    public var representative: Base {
+        return a
+    }
+}
 
-public typealias PolynomialQuotientField<K: Field, p: _Polynomial>
-    = EuclideanQuotientField<Polynomial<K>, PolynomialIdeal<K, p>> where K == p.K // p must be irrational.
+public struct PolynomialQuotientField<K: Field, p: _IrreduciblePolynomial>: EuclideanQuotientFieldType where K == p.K {
+    public typealias Sub = PolynomialIdeal<K, p>
+    
+    private let a: Base
+    
+    public init(_ a: Base) {
+        self.a = Sub.reduced(a)
+    }
+    
+    public var representative: Base {
+        return a
+    }
+}
+
+public typealias AlgebraicExtension<K: Field, p: _IrreduciblePolynomial> = PolynomialQuotientField<K, p> where K == p.K

@@ -51,7 +51,46 @@ public struct IntegerIdeal<n: _Int>: EuclideanIdeal {
     }
 }
 
-// TODO conform to `FiniteSetType` when conditional conformance is supported in Swift4. 
+public struct IntegerQuotientRing<n: _Int>: EuclideanQuotientRingType, FiniteSetType {
+    public typealias Sub = IntegerIdeal<n>
+    
+    private let a: Base
+    
+    public init(_ a: Base) {
+        self.a = Sub.reduced(a)
+    }
+    
+    public var representative: IntegerNumber {
+        return a
+    }
+    
+    public static var allElements: [IntegerQuotientRing<n>] {
+        return (0 ..< n.intValue).map{ IntegerQuotientRing<n>($0) }
+    }
+    
+    public static var countElements: Int {
+        return n.intValue
+    }
+}
 
-public typealias IntegerQuotientRing<n: _Int> = EuclideanQuotientRing<IntegerNumber, IntegerIdeal<n>>
-public typealias IntegerQuotientField<n: _Int> = EuclideanQuotientField<IntegerNumber, IntegerIdeal<n>> // n must be prime.
+public struct IntegerQuotientField<n: _Prime>: EuclideanQuotientFieldType, FiniteSetType {
+    public typealias Sub = IntegerIdeal<n>
+    
+    private let a: Base
+    
+    public init(_ a: Base) {
+        self.a = Sub.reduced(a)
+    }
+    
+    public var representative: IntegerNumber {
+        return a
+    }
+    
+    public static var allElements: [IntegerQuotientField<n>] {
+        return (0 ..< n.intValue).map{ IntegerQuotientField<n>($0) }
+    }
+    
+    public static var countElements: Int {
+        return n.intValue
+    }
+}

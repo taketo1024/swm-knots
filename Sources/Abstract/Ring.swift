@@ -32,7 +32,7 @@ public extension Ring {
     }
 }
 
-public protocol Subring: Ring, SubsetType {
+public protocol Subring: Ring, Submonoid {
     associatedtype Super: Ring
 }
 
@@ -79,57 +79,108 @@ public extension Ideal {
     }
 }
 
-public struct ProductRing<R1: Ring, R2: Ring>: Ring, ProductSetType {
-    public let _1: R1
-    public let _2: R2
-    
+public protocol ProductRingType: Ring, ProductMonoidType {
+    associatedtype Left: Ring
+    associatedtype Right: Ring
+}
+
+public extension ProductRingType {
     public init(intValue a: Int) {
-        self._1 = R1(intValue: a)
-        self._2 = R2(intValue: a)
-    }
-    
-    public init(_ g1: R1, _ g2: R2) {
-        self._1 = g1
-        self._2 = g2
+        self.init(Left(intValue: a), Right(intValue: a))
     }
     
     public var isUnit: Bool {
         return _1.isUnit && _2.isUnit
     }
     
-    public var unitInverse: ProductRing<R1, R2>? {
-        return isUnit ? ProductRing<R1, R2>(_1.unitInverse!, _2.unitInverse!) : nil
+    public var unitInverse: Self? {
+        return isUnit ? Self.init(_1.unitInverse!, _2.unitInverse!) : nil
     }
     
-    public static var zero: ProductRing<R1, R2> {
-        return ProductRing<R1, R2>(R1.zero, R2.zero)
+    public static var zero: Self {
+        return Self(Left.zero, Right.zero)
     }
     
-    public static var identity: ProductRing<R1, R2> {
-        return ProductRing<R1, R2>(R1.identity, R2.identity)
+    public static var identity: Self {
+        return Self(Left.identity, Right.identity)
     }
     
-    public static func + (a: ProductRing<R1, R2>, b: ProductRing<R1, R2>) -> ProductRing<R1, R2> {
-        return ProductRing<R1, R2>(a._1 + b._1, a._2 + b._2)
+    public static func + (a: Self, b: Self) -> Self {
+        return Self(a._1 + b._1, a._2 + b._2)
     }
     
-    public static prefix func - (a: ProductRing<R1, R2>) -> ProductRing<R1, R2> {
-        return ProductRing<R1, R2>(-a._1, -a._2)
+    public static prefix func - (a: Self) -> Self {
+        return Self(-a._1, -a._2)
     }
     
-    public static func * (a: ProductRing<R1, R2>, b: ProductRing<R1, R2>) -> ProductRing<R1, R2> {
-        return ProductRing<R1, R2>(a._1 * b._1, a._2 * b._2)
+    public static func * (a: Self, b: Self) -> Self {
+        return Self(a._1 * b._1, a._2 * b._2)
     }
 }
 
-public struct QuotientRing<R: Ring, I: Ideal>: Ring, QuotientSetType where R == I.Super {
+public struct ProductRing<R1: Ring, R2: Ring>: ProductRingType {
+    public typealias Left = R1
+    public typealias Right = R2
+    
+    public let _1: R1
+    public let _2: R2
+    
+    public init(_ r1: R1, _ r2: R2) {
+        self._1 = r1
+        self._2 = r2
+    }
+}
+
+public protocol QuotientRingType: Ring, QuotientSetType {
+    associatedtype Sub: Ideal
+}
+
+public extension QuotientRingType {
+    public init(intValue n: Int) {
+        self.init(Base(intValue: n))
+    }
+    
+    public var isUnit: Bool {
+        return representative.isUnit // FIXME: this is wrong. e.g. R = Z[x,y], I = (xy - 1)
+    }
+    
+    public var unitInverse: Self? {
+        return isUnit ? Self(representative.unitInverse!) : nil
+    }
+    
+    public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
+        return Sub.contains( a - b )
+    }
+    
+    public static var zero: Self {
+        return Self.init(Base.zero)
+    }
+    
+    public static var identity: Self {
+        return Self.init(Base.identity)
+    }
+    
+    public static func + (a: Self, b: Self) -> Self {
+        return Self.init(a.representative + b.representative)
+    }
+    
+    public static prefix func - (a: Self) -> Self {
+        return Self.init(-a.representative)
+    }
+    
+    public static func * (a: Self, b: Self) -> Self {
+        return Self.init(a.representative * b.representative)
+    }
+    
+    public var hashValue: Int {
+        return representative.hashValue
+    }
+}
+
+public struct QuotientRing<R: Ring, I: Ideal>: QuotientRingType where R == I.Super {
     public typealias Sub = I
     
     internal let r: R
-    
-    public init(intValue n: Int) {
-        self.init(R(intValue: n))
-    }
     
     public init(_ r: R) {
         self.r = I.reduced(r)
@@ -138,44 +189,8 @@ public struct QuotientRing<R: Ring, I: Ideal>: Ring, QuotientSetType where R == 
     public var representative: R {
         return r
     }
-    
-    public var isUnit: Bool {
-        return r.isUnit // FIXME: this is wrong. e.g. R = Z[x,y], I = (xy - 1)
-    }
-    
-    public var unitInverse: QuotientRing<R, I>? {
-        return isUnit ? QuotientRing<R, I>(r.unitInverse!) : nil
-    }
-    
-    public static var zero: QuotientRing<R, I> {
-        return QuotientRing<R, I>(R.zero)
-    }
-    
-    public static var identity: QuotientRing<R, I> {
-        return QuotientRing<R, I>(R.identity)
-    }
-    
-    public static func == (a: QuotientRing<R, I>, b: QuotientRing<R, I>) -> Bool {
-        return I.contains( a.r - b.r )
-    }
-    
-    public static func + (a: QuotientRing<R, I>, b: QuotientRing<R, I>) -> QuotientRing<R, I> {
-        return QuotientRing<R, I>.init(a.r + b.r)
-    }
-    
-    public static prefix func - (a: QuotientRing<R, I>) -> QuotientRing<R, I> {
-        return QuotientRing<R, I>.init(-a.r)
-    }
-    
-    public static func * (a: QuotientRing<R, I>, b: QuotientRing<R, I>) -> QuotientRing<R, I> {
-        return QuotientRing<R, I>.init(a.r * b.r)
-    }
-    
-    public var hashValue: Int {
-        return r.hashValue
-    }
-    
-    public static func isEquivalent(_ a: R, _ b: R) -> Bool {
-        return I.contains( a - b )
-    }
+}
+
+public protocol QuotientFieldType: Field, QuotientRingType {
+    // `I` must be a Maximal Ideal
 }

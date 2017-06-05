@@ -13,27 +13,27 @@ typealias R = RealNumber
 
 typealias Qx = Polynomial<Q>
 
-struct g: _Polynomial {
+struct p1: _IrreduciblePolynomial {
     typealias K = Q
     static let value = Qx(-2, 0, 1)
 }
 
-typealias L = PolynomialQuotientField<Q, g>
-typealias Lx = Polynomial<L>
+typealias K1 = AlgebraicExtension<Q, p1>
+typealias K1x = Polynomial<K1>
 
-struct h: _Polynomial {
-    typealias K = L
-    static let value = Lx(-3, 0, 1)
+struct p2: _IrreduciblePolynomial {
+    typealias K = K1
+    static let value = K1x(-3, 0, 1)
 }
 
-typealias M = PolynomialQuotientField<L, h>
+typealias K2 = AlgebraicExtension<K1, p2>
 
 do {
-    let a = L(Qx(0, 1))
+    let a = K1(Qx(0, 1))
     a * a == 2
     
-    let b = M(Lx(a, 0))
-    let c = M(Lx(0, 1))
+    let b = K2(K1x(a, 0))
+    let c = K2(K1x(0, 1))
     
     b * b == 2
     c * c == 3
