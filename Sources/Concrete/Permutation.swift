@@ -96,10 +96,6 @@ public struct Permutation<n: _Int>: Group, FiniteSetType {
         return Permutation{ a[b[$0]] }
     }
     
-    public static var alternatingSubgroup: DynamicFiniteSubgroupFactory<Permutation<n>> {
-        return DynamicFiniteSubgroupFactory( allElements.filter{$0.signature == 1} )
-    }
-    
     public var description: String {
         let desc = rawCyclicDecomposition.map{"(\($0.map{"\($0)"}.joined(separator:",")))"}.joined()
         return desc.isEmpty ? "id" : desc
@@ -114,3 +110,40 @@ public struct Permutation<n: _Int>: Group, FiniteSetType {
     }
 }
 
+public struct AlternatingGroup<n: _Int>: Subgroup, FiniteSetType {
+    public typealias Super = Permutation<n>
+    
+    private let g: Super
+    
+    public init(_ g: Super) {
+        self.g = g
+    }
+    
+    public init(_ dict: [Int: Int]) {
+        self.init( Super{ dict[$0] ?? $0 })
+    }
+    
+    public init(cyclic: Int...) {
+        self.init( Super(cyclic: cyclic) )
+    }
+    
+    public var asSuper: Super {
+        return g
+    }
+    
+    public static func contains(_ g: Super) -> Bool {
+        return g.signature == 1
+    }
+    
+    public static var allElements: [AlternatingGroup<n>] {
+        return Super.allElements.filter{ $0.signature == 1 }.map{ AlternatingGroup($0) }
+    }
+    
+    public static var countElements: Int {
+        return n.intValue.factorial / 2
+    }
+
+    public static var symbol: String {
+        return "A_\(n.intValue)"
+    }
+}
