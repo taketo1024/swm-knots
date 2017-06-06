@@ -32,21 +32,11 @@ public extension Ring {
     }
 }
 
-public protocol Subring: Ring, Submonoid {
+public protocol Subring: Ring, AdditiveSubgroup, Submonoid {
     associatedtype Super: Ring
 }
 
-public extension Subring {
-    static func + (a: Self, b: Self) -> Self {
-        return Self.init(a.asSuper + b.asSuper)
-    }
-    
-    prefix static func - (a: Self) -> Self {
-        return Self.init(a.asSuper)
-    }
-}
-
-public protocol Ideal: AdditiveGroup, SubsetType {
+public protocol Ideal: AdditiveGroup, AdditiveSubgroup {
     associatedtype Super: Ring
     static func * (r: Super, a: Self) -> Self
     static func * (m: Self, r: Super) -> Self
@@ -57,18 +47,6 @@ public protocol Ideal: AdditiveGroup, SubsetType {
 }
 
 public extension Ideal {
-    public static var zero: Self {
-        return Self.init(Super.zero)
-    }
-    
-    public static func + (a: Self, b: Self) -> Self {
-        return Self.init(a.asSuper + b.asSuper)
-    }
-    
-    prefix static func - (a: Self) -> Self {
-        return Self.init(a.asSuper)
-    }
-    
     public static func * (a: Self, b: Self) -> Self {
         return Self.init(a.asSuper * b.asSuper)
     }
@@ -82,7 +60,7 @@ public extension Ideal {
     }
 }
 
-public protocol ProductRingType: Ring, ProductMonoidType {
+public protocol ProductRingType: Ring, AdditiveProductGroup {
     associatedtype Left: Ring
     associatedtype Right: Ring
 }
@@ -103,17 +81,8 @@ public extension ProductRingType {
     public static var zero: Self {
         return Self(Left.zero, Right.zero)
     }
-    
     public static var identity: Self {
         return Self(Left.identity, Right.identity)
-    }
-    
-    public static func + (a: Self, b: Self) -> Self {
-        return Self(a._1 + b._1, a._2 + b._2)
-    }
-    
-    public static prefix func - (a: Self) -> Self {
-        return Self(-a._1, -a._2)
     }
     
     public static func * (a: Self, b: Self) -> Self {
@@ -134,7 +103,7 @@ public struct ProductRing<R1: Ring, R2: Ring>: ProductRingType {
     }
 }
 
-public protocol QuotientRingType: Ring, QuotientSetType {
+public protocol QuotientRingType: Ring, AdditiveQuotientGroup {
     associatedtype Sub: Ideal
 }
 
@@ -151,10 +120,6 @@ public extension QuotientRingType {
         return Sub.inverseInQuotient(representative).map{ Self.init($0) }
     }
     
-    public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
-        return Sub.contains( a - b )
-    }
-    
     public static var zero: Self {
         return Self.init(Base.zero)
     }
@@ -163,20 +128,12 @@ public extension QuotientRingType {
         return Self.init(Base.identity)
     }
     
-    public static func + (a: Self, b: Self) -> Self {
-        return Self.init(a.representative + b.representative)
-    }
-    
-    public static prefix func - (a: Self) -> Self {
-        return Self.init(-a.representative)
-    }
-    
     public static func * (a: Self, b: Self) -> Self {
         return Self.init(a.representative * b.representative)
     }
     
     public var hashValue: Int {
-        return representative.hashValue
+        return representative.hashValue // must assure `representative` is unique.
     }
 }
 

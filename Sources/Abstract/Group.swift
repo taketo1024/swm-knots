@@ -141,10 +141,6 @@ public extension QuotientGroupType {
     public static func * (a: Self, b: Self) -> Self {
         return Self.init(a.representative * b.representative)
     }
-    
-    public var hashValue: Int {
-        return 0 // Sub.contains(representative) ? 0 : 1 // better override in subclass
-    }
 }
 
 // concrete class
@@ -160,5 +156,9 @@ public struct QuotientGroup<G: Group, H: Subgroup>: QuotientGroupType where G ==
     
     public var representative: G {
         return g
+    }
+    
+    public var hashValue: Int {
+        return Sub.contains(representative) ? 0 : 1 // might have efficiency issues.
     }
 }
