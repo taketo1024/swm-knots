@@ -56,19 +56,18 @@ public extension FreeModuleQuotient where R: EuclideanRing {
     // e.g. basis = (a, b, c), P = [1, 0; 0, 2; 1, 0]
     //      ==> G = <a, b, c | a + c = 2b = 0>
     
-    public init<k:_Int, l:_Int>(basis: [FreeModule<A, R>], relation P: Matrix<R, k, l>) {
+    public init<n: _Int, k:_Int, l:_Int>(basis: [A], generator S: Matrix<R, n, k>, relation P: Matrix<R, k, l>) {
         
-        // Eliminate P -> QPR = [D; 0].
+        // Eliminate P as QPR = [D; 0].
         // By taking basis * Q^-1 as a new basis, the relation becomes D.
         //
         // e.g. P' = [ diag(1, 2); 0, 0 ]
         //      ==> G ~= 0 + Z/2 + Z.
         
-        let (k, l) = (basis.count, P.cols)
+        let (k, l) = (S.cols, P.cols)
         let E = P.eliminate()
-        let Q: Matrix<R, k, k> = E.leftInverse
         
-        let newBasis = M.transform(elements: basis, matrix: Q)
+        let newBasis = basis.generateElements(by: S * E.leftInverse)
         let diag: [R] = E.diagonal
         
         let torPart: [FreeModuleQuotientGenerator]  = diag.enumerated()

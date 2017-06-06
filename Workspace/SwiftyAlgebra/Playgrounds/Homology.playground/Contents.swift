@@ -8,7 +8,7 @@ import SwiftyAlgebra
 typealias Z = IntegerNumber
 typealias Q = RationalNumber
 typealias R = RealNumber
-typealias Z_2 = IntQuotientField<_2>
+typealias Z_2 = IntegerQuotientField<_2>
 
 let V = VertexSet(number: 10)
 

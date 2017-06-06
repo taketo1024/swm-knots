@@ -84,18 +84,9 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module {
 
 // Operations
 
-public extension FreeModule {
-    public static func transform<n:_Int, m:_Int>(elements: [FreeModule<A, R>], matrix Q: Matrix<R, n, m>) -> [FreeModule<A, R>] {
-        if elements.isEmpty {
-            return []
-        }
-        
-        let basis = elements.first!.basis
-        let P = Matrix<R, Dynamic, n>(rows: basis.count, cols: elements.count) { (i, j) in
-            elements[j].values[i]
-        }
-        let PQ = P * Q
-        
-        return (0 ..< Q.cols).map{ j in FreeModule<A, R>(basis: basis, values: PQ.colArray(j)) }
+public extension Array where Iterator.Element: FreeModuleBase {
+    public func generateElements<R: Ring, n:_Int, m:_Int>(by A: Matrix<R, n, m>) -> [FreeModule<Iterator.Element, R>] {
+        typealias M = FreeModule<Iterator.Element, R>
+        return (0 ..< A.cols).map { M(basis: self, values: A.colArray($0)) }
     }
 }
