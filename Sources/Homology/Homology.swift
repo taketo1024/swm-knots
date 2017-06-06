@@ -13,11 +13,15 @@ public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = BaseHomology<
 
 public struct BaseHomology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: CustomStringConvertible {
     public let chainComplex: BaseChainComplex<chainType, A, R>
-    public let groups: [HomologyGroupInfo<chainType, A, R>]
+    internal let groupInfos: [HomologyGroupInfo<chainType, A, R>]
+    
+    public subscript(i: Int) -> HomologyGroupInfo<chainType, A, R> {
+        return groupInfos[i]
+    }
     
     public init(chainComplex: BaseChainComplex<chainType, A, R>, groups: [HomologyGroupInfo<chainType, A, R>]) {
         self.chainComplex = chainComplex
-        self.groups = groups
+        self.groupInfos = groups
     }
     
     public init(_ chainComplex: BaseChainComplex<chainType, A, R>) {
@@ -44,26 +48,26 @@ public struct BaseHomology<chainType: ChainType, A: FreeModuleBase, R: Euclidean
             let Qinv = A.rightInverse  // Q^-1 * Z = [O; I_k]
             let T: DynamicMatrix<R> = Qinv.submatrix(rowsInRange: n - k ..< n) // T * Z = I_k
             
-            return HomologyGroupInfo(basis: basis, cycleMatrix: Z, boundaryMatrix: B, chain2cycleMatrix: T)
+            return HomologyGroupInfo(dim: i, basis: basis, cycleMatrix: Z, boundaryMatrix: B, chain2cycleMatrix: T)
         }
         
         self.init(chainComplex: chainComplex, groups: groups)
     }
     
     public var description: String {
-        return "{" + groups.enumerated().map{"\($0):\($1)"}.joined(separator: ", ") + "}"
+        return "{" + groupInfos.enumerated().map{"\($0):\($1)"}.joined(separator: ", ") + "}"
     }
     
     public var detailDescription: String {
         return "{\n"
-            + groups.enumerated().map{"\t\($0) : \($1),\t\($1.generators.map{$0.generator})"}.joined(separator: ",\n")
+            + groupInfos.enumerated().map{"\t\($0) : \($1),\t\($1.summands.map{$0.generator})"}.joined(separator: ",\n")
             + "\n}"
     }
 }
 
 public extension BaseHomology where chainType == DescendingChainType, R == IntegerNumber {
     public func bettiNumer(i: Int) -> Int {
-        return groups[i].generators.filter{ $0.isFree }.count
+        return groupInfos[i].summands.filter{ $0.isFree }.count
     }
     
     public var eulerCharacteristic: Int {
@@ -72,7 +76,7 @@ public extension BaseHomology where chainType == DescendingChainType, R == Integ
 }
 
 public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: TypeInfo {
-    public enum Generator: CustomStringConvertible {
+    public enum Summand: CustomStringConvertible {
         case Free(generator: FreeModule<A, R>)
         case Tor(factor: R, generator: FreeModule<A, R>)
         
@@ -98,31 +102,33 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
         }
     }
     
+    public let dim: Int
     public let rank: Int
     public let torsions: Int
     
-    public let generators: [Generator]
+    public let summands: [Summand]
     public let chainBasis: [A]
     public let transitionMatrix: DynamicMatrix<R> // chain -> cycle
     
     private typealias M = FreeModule<A, R>
     
-    public init(basis: [A], cycleMatrix Z: DynamicMatrix<R>, boundaryMatrix B: DynamicMatrix<R>, chain2cycleMatrix T: DynamicMatrix<R>) {
+    public init(dim: Int, basis: [A], cycleMatrix Z: DynamicMatrix<R>, boundaryMatrix B: DynamicMatrix<R>, chain2cycleMatrix T: DynamicMatrix<R>) {
         let (k, l) = (Z.cols, B.cols)
         let (newBasis, newTrans, diagonal) = HomologyGroupInfo.calculate(basis, Z, B, T)
         
-        let torPart: [Generator]  = diagonal.enumerated()
+        let torPart: [Summand]  = diagonal.enumerated()
             .filter{ (j, a) in a != R.identity }
             .map { (j, a) in .Tor(factor: a, generator: newBasis[j]) }
         
-        let freePart: [Generator] = (l ..< k).map { j in
+        let freePart: [Summand] = (l ..< k).map { j in
             .Free(generator: newBasis[j])
         }
         
+        self.dim = dim
         self.rank = freePart.count
         self.torsions = torPart.count
         
-        self.generators = (freePart + torPart)
+        self.summands = (freePart + torPart)
         self.chainBasis = basis
         self.transitionMatrix = newTrans
     }
@@ -151,6 +157,10 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
         return (newBasis, newTrans, diagonal)
     }
     
+    public func generator(_ i: Int) -> FreeModule<A, R> {
+        return summands[i].generator
+    }
+    
     public func components(_ z: FreeModule<A, R>) -> [R] {
         let chainComps = z.components(forBasis: chainBasis)
         let cycleComps = (transitionMatrix * DynamicMatrix(chainComps.count, 1, chainComps)).colArray(0)
@@ -159,7 +169,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
         
         let freeVals = (0 ..< rank).map{ i in cycleComps[(k - rank) + i] }
         let torVals  = (0 ..< torsions).map{ (i) -> R in
-            if case .Tor(let r, _) = generators[rank + i] {
+            if case .Tor(let r, _) = summands[rank + i] {
                 return cycleComps[(k - rank - torsions) + i] % r
             } else {
                 fatalError("something is wrong.")
@@ -177,7 +187,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
     }
     
     public var description: String {
-        let desc = generators.map{$0.description}.joined(separator: "⊕")
+        let desc = summands.map{$0.description}.joined(separator: "⊕")
         return desc.isEmpty ? "0" : desc
     }
 }
@@ -190,10 +200,20 @@ public protocol _HomologyGroup: _QuotientModule {
     var representative: FreeModule<A, R> { get }
     init(_ z: FreeModule<A, R>)
     
+    static var dim: Int { get }
+    static func generator(_ i: Int) -> Self
     static var info: HomologyGroupInfo<chainType, A, R> { get }
 }
 
-public extension _HomologyGroup where Base == FreeModule<A, R>{
+public extension _HomologyGroup where Base == FreeModule<A, R> {
+    public static var dim: Int {
+        return info.dim
+    }
+    
+    public static func generator(_ i: Int) -> Self {
+        return Self.init(info.generator(i))
+    }
+    
     public static func isEquivalent (a: Base, b: Base) -> Bool {
         return info.isHomologue(a, b)
     }
@@ -204,6 +224,20 @@ public extension _HomologyGroup where Base == FreeModule<A, R>{
     
     public static var symbol: String {
         return info.description
+    }
+}
+
+public extension _HomologyGroup where Base == FreeModule<A, R>, chainType == AscendingChainType {
+    public static func * <H: _HomologyGroup>(a: Self, b: H) -> R where Self.A == H.A, Self.R == H.R, H.chainType == DescendingChainType {
+        assert(Self.info.dim == H.info.dim)
+        let x = a.representative
+        let y = b.representative
+        let basis = (x.basis + y.basis).unique()
+        return basis.reduce(R.zero) { (sum, e) in sum + x.component(forBasisElement: e) * y.component(forBasisElement: e) }
+    }
+    
+    public static func * <H: _HomologyGroup>(b: H, a: Self) -> R where Self.A == H.A, Self.R == H.R, H.chainType == DescendingChainType {
+        return a * b
     }
 }
 
