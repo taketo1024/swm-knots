@@ -38,6 +38,10 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module {
         return table[a] ?? R.zero
     }
     
+    public func values(forBasis basis: [A]) -> [R] {
+        return basis.map{ value(forBasisElement: $0) }
+    }
+    
     public static func == (a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
         return a.table == b.table // bases need not be in same order.
     }
@@ -80,13 +84,8 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module {
     public var hashValue: Int {
         return values.count > 0 ? values[0].hashValue : 0
     }
-}
-
-// Operations
-
-public extension Array where Iterator.Element: FreeModuleBase {
-    public func generateElements<R: Ring, n:_Int, m:_Int>(by A: Matrix<R, n, m>) -> [FreeModule<Iterator.Element, R>] {
-        typealias M = FreeModule<Iterator.Element, R>
-        return (0 ..< A.cols).map { M(basis: self, values: A.colArray($0)) }
+    
+    public static func generateElements<n:_Int, m:_Int>(basis: [A], matrix A: Matrix<R, n, m>) -> [FreeModule<A, R>] {
+        return (0 ..< A.cols).map { FreeModule<A, R>(basis: basis, values: A.colArray($0)) }
     }
 }
