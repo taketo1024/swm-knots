@@ -184,38 +184,6 @@ public struct PolynomialIdeal<K: Field, p: _Polynomial>: EuclideanIdeal where K 
     public var asSuper: Polynomial<K> {
         return a
     }
-    
-    public static var symbol: String {
-        return "\(K.symbol)[x]/\(p.value)"
-    }
 }
 
-public struct PolynomialQuotientRing<K: Field, p: _Polynomial>: EuclideanQuotientRingType where K == p.K {
-    public typealias Sub = PolynomialIdeal<K, p>
-    
-    private let a: Base
-    
-    public init(_ a: Base) {
-        self.a = Sub.reduced(a)
-    }
-    
-    public var representative: Base {
-        return a
-    }
-}
-
-public struct PolynomialQuotientField<K: Field, p: _IrreduciblePolynomial>: EuclideanQuotientFieldType where K == p.K {
-    public typealias Sub = PolynomialIdeal<K, p>
-    
-    private let a: Base
-    
-    public init(_ a: Base) {
-        self.a = Sub.reduced(a)
-    }
-    
-    public var representative: Base {
-        return a
-    }
-}
-
-public typealias AlgebraicExtension<K: Field, p: _IrreduciblePolynomial> = PolynomialQuotientField<K, p> where K == p.K
+public typealias AlgebraicExtension<K: Field, I: EuclideanIdeal> = QuotientField<Polynomial<K>, I> where I.Super == Polynomial<K>

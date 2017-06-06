@@ -48,6 +48,7 @@
 		14A85FF31ED9D63E00A754EA /* GeometricComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */; };
 		14A85FF71EDBED9C00A754EA /* Dynamic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A85FF61EDBED9C00A754EA /* Dynamic.swift */; };
 		14B2FB8C1ED8FBA000C182EB /* MatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */; };
+		14B42A981EE6264300D99997 /* DynamicRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B42A971EE6264300D99997 /* DynamicRing.swift */; };
 		14D261321EE44DB4006775E2 /* DynamicType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261311EE44DB4006775E2 /* DynamicType.swift */; };
 		14D261341EE4614E006775E2 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* Set.swift */; };
 		14E7BECB1ED84B3400BBA72A /* EigenLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 14E7BEC91ED84B3400BBA72A /* EigenLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -117,6 +118,7 @@
 		14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeometricComplex.swift; sourceTree = "<group>"; };
 		14A85FF61EDBED9C00A754EA /* Dynamic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dynamic.swift; sourceTree = "<group>"; };
 		14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixTests.swift; sourceTree = "<group>"; };
+		14B42A971EE6264300D99997 /* DynamicRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DynamicRing.swift; path = Dynamic/DynamicRing.swift; sourceTree = "<group>"; };
 		14D261311EE44DB4006775E2 /* DynamicType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DynamicType.swift; path = Dynamic/DynamicType.swift; sourceTree = "<group>"; };
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
 		14E7BEC91ED84B3400BBA72A /* EigenLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EigenLib.h; path = EigenWrapper/EigenLib.h; sourceTree = "<group>"; };
@@ -287,6 +289,7 @@
 			children = (
 				14D261311EE44DB4006775E2 /* DynamicType.swift */,
 				146905B11EE4F4F100153686 /* DynamicGroup.swift */,
+				14B42A971EE6264300D99997 /* DynamicRing.swift */,
 			);
 			name = Dynamic;
 			sourceTree = "<group>";
@@ -464,6 +467,7 @@
 				140BCD511EBA3F8A00D7CE74 /* ChainComplex.swift in Sources */,
 				146905B21EE4F4F100153686 /* DynamicGroup.swift in Sources */,
 				1424F5011EB997780052581F /* Matrix.swift in Sources */,
+				14B42A981EE6264300D99997 /* DynamicRing.swift in Sources */,
 				147D98061EB9B26200C736AC /* Dictionary.swift in Sources */,
 				1424F50E1EB997780052581F /* TPInt.swift in Sources */,
 				1473F1121EC76715003B1D55 /* FreeModuleQuotient.swift in Sources */,

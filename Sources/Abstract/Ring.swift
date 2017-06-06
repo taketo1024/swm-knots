@@ -48,9 +48,12 @@ public extension Subring {
 
 public protocol Ideal: AdditiveGroup, SubsetType {
     associatedtype Super: Ring
-    static func reduced(_ a: Super) -> Super
     static func * (r: Super, a: Self) -> Self
     static func * (m: Self, r: Super) -> Self
+    
+    static func reduced(_ a: Super) -> Super
+    static func isUnitInQuotient(_ r: Super) -> Bool
+    static func inverseInQuotient(_ r: Super) -> Super?
 }
 
 public extension Ideal {
@@ -141,11 +144,11 @@ public extension QuotientRingType {
     }
     
     public var isUnit: Bool {
-        return representative.isUnit // FIXME: this is wrong. e.g. R = Z[x,y], I = (xy - 1)
+        return Sub.isUnitInQuotient(representative)
     }
     
     public var unitInverse: Self? {
-        return isUnit ? Self(representative.unitInverse!) : nil
+        return Sub.inverseInQuotient(representative).map{ Self.init($0) }
     }
     
     public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
@@ -191,6 +194,33 @@ public struct QuotientRing<R: Ring, I: Ideal>: QuotientRingType where R == I.Sup
     }
 }
 
-public protocol QuotientFieldType: Field, QuotientRingType {
-    // `I` must be a Maximal Ideal
+public protocol QuotientFieldType: Field, QuotientRingType { }
+
+public extension QuotientFieldType {
+    public var isUnit: Bool {
+        return Sub.isUnitInQuotient(representative)
+    }
+    
+    public var unitInverse: Self? {
+        return Sub.inverseInQuotient(representative).map{ Self.init($0) }
+    }
+    
+    public var inverse: Self {
+        return unitInverse!
+    }
+}
+
+// TODO merge with QuotientRing after conditional conformance is supported.
+public struct QuotientField<R: Ring, I: Ideal>: QuotientFieldType where R == I.Super {
+    public typealias Sub = I
+    
+    internal let r: R
+    
+    public init(_ r: R) {
+        self.r = I.reduced(r)
+    }
+    
+    public var representative: R {
+        return r
+    }
 }

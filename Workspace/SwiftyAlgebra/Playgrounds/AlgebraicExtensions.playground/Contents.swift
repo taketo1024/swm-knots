@@ -9,36 +9,29 @@ typealias Z = IntegerNumber
 typealias Q = RationalNumber
 typealias R = RealNumber
 
-// Algebraic Extension Example
-
-typealias Qx = Polynomial<Q>
-
-struct p1: _IrreduciblePolynomial {
-    typealias K = Q
-    static let value = Qx(-2, 0, 1)
-}
-
-typealias K1 = AlgebraicExtension<Q, p1>
-typealias K1x = Polynomial<K1>
-
-struct p2: _IrreduciblePolynomial {
-    typealias K = K1
-    static let value = K1x(-3, 0, 1)
-}
-
-typealias K2 = AlgebraicExtension<K1, p2>
-
+// Static AlgebraicExtension (need to define a struct)
+// K = Q[x]/(x^2 + 1) = Q(i)
 do {
-    let a = K1(Qx(0, 1))
+    struct p: _Polynomial {
+        typealias K = Q
+        static let value = Polynomial<Q>(1, 0, 1)
+    }
+    
+    typealias I = PolynomialIdeal<Q, p>
+    typealias K = AlgebraicExtension<Q, I>
+    
+    let i = K(Polynomial<Q>(0, 1))
+    i * i == -1
+}
+
+// Dynamic AlgebraicExtension
+// K = Q[x]/(x^2 - 2) = Q(√2)
+do {
+    typealias I = DynamicIdeal<Polynomial<Q>, _0>
+    I.register(Polynomial<Q>(-2, 0, 1).asIdeal)
+    
+    typealias K = AlgebraicExtension<Q, I>
+    
+    let a = K(Polynomial<Q>(0, 1))
     a * a == 2
-    
-    let b = K2(K1x(a, 0))
-    let c = K2(K1x(0, 1))
-    
-    b * b == 2
-    c * c == 3
-    
-    let d = b * c
-    let x = b + c
-    x * x == 5 + 2 * d
 }

@@ -24,6 +24,10 @@ public extension EuclideanRing {
     static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m> {
         return EuclideanMatrixElimination<Self, n, m>(A, mode: mode)
     }
+    
+    public var asIdeal: EuclideanIdealInfo<Self> {
+        return EuclideanIdealInfo(generator: self)
+    }
 }
 
 public func gcd<R: EuclideanRing>(_ a: R, _ b: R) -> R {
@@ -75,31 +79,19 @@ public extension EuclideanIdeal {
         return a % generator == Super.zero
     }
     
-    static var symbol: String {
-        return "\(Super.symbol)(\(generator))"
-    }
-}
-
-public protocol EuclideanQuotientRingType: QuotientRingType {
-    associatedtype Sub: EuclideanIdeal
-}
-
-public protocol EuclideanQuotientFieldType: QuotientFieldType, EuclideanQuotientRingType {
-}
-
-public extension EuclideanQuotientFieldType {
-    public var isUnit: Bool {
-        return representative != 0
+    static func isUnitInQuotient(_ r: Super) -> Bool {
+        let (_, _, u) = bezout(r, generator)
+        return u.isUnit
     }
     
-    public var unitInverse: Self? {
-        return isUnit ? inverse : nil
-    }
-    
-    public var inverse: Self {
+    static func inverseInQuotient(_ r: Super) -> Super? {
         // find: a * r + b * m = u (u: unit)
         // then: r^-1 = u^-1 * a (mod m)
-        let (a, _, u) = bezout(representative, Sub.generator)
-        return Self.init(u.unitInverse! * a)
+        let (a, _, u) = bezout(r, generator)
+        return u.unitInverse.map{ uinv in uinv * a }
+    }
+    
+    static var symbol: String {
+        return "\(Super.symbol)(\(generator))"
     }
 }
