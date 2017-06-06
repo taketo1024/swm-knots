@@ -92,6 +92,6 @@ public extension EuclideanIdeal {
     }
     
     static var symbol: String {
-        return "\(Super.symbol)(\(generator))"
+        return "(\(generator))"
     }
 }

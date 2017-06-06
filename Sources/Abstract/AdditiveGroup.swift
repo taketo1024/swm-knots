@@ -70,4 +70,8 @@ public extension AdditiveQuotientGroup where Base == Sub.Super {
     public static prefix func - (a: Self) -> Self {
         return Self.init(-a.representative)
     }
+    
+    public static var symbol: String {
+        return "\(Base.symbol)/\(Sub.symbol)"
+    }
 }

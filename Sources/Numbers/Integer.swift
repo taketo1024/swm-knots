@@ -71,6 +71,10 @@ public struct IntegerQuotientRing<n: _Int>: _QuotientRing, FiniteSetType {
     public static var countElements: Int {
         return n.intValue
     }
+    
+    public static var symbol: String {
+        return "\(Base.symbol)/\(n.intValue)"
+    }
 }
 
 // TODO merge with IntegerQuotientRing after conditional conformance is supported.
@@ -93,5 +97,9 @@ public struct IntegerQuotientField<n: _Prime>: _QuotientField, FiniteSetType {
     
     public static var countElements: Int {
         return n.intValue
+    }
+    
+    public static var symbol: String {
+        return "\(Base.symbol)/\(n.intValue)"
     }
 }
