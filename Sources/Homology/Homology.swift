@@ -151,15 +151,15 @@ public struct HomologyGroupInfo<A: FreeModuleBase, R: EuclideanRing>: CustomStri
     }
     
     public func components(_ z: FreeModule<A, R>) -> [R] {
-        let values = z.values(forBasis: chainBasis)
-        let current = (transitionMatrix * DynamicMatrix(values.count, 1, values)).colArray(0)
+        let chainComps = z.components(forBasis: chainBasis)
+        let cycleComps = (transitionMatrix * DynamicMatrix(chainComps.count, 1, chainComps)).colArray(0)
         
-        let k = current.count // k = (null-part) + (tor-part) + (free-part)
+        let k = cycleComps.count // k = (null-part) + (tor-part) + (free-part)
         
-        let freeVals = (0 ..< rank).map{ i in current[(k - rank) + i] }
+        let freeVals = (0 ..< rank).map{ i in cycleComps[(k - rank) + i] }
         let torVals  = (0 ..< torsions).map{ (i) -> R in
             if case .Tor(let r, _) = generators[rank + i] {
-                return current[(k - rank - torsions) + i] % r
+                return cycleComps[(k - rank - torsions) + i] % r
             } else {
                 fatalError("something is wrong.")
             }
