@@ -89,3 +89,22 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module {
         return (0 ..< A.cols).map { FreeModule<A, R>(basis: basis, components: A.colArray($0)) }
     }
 }
+
+public struct FreeZeroModule<A: FreeModuleBase, _R: Ring>: Submodule {
+    public typealias Super = FreeModule<A, R>
+    public typealias R = _R
+    
+    public init(_ m: Super) {}
+    
+    public var asSuper: Super {
+        return Super.zero
+    }
+    
+    public static func contains(_ g: FreeModule<A, _R>) -> Bool {
+        return g == Super.zero
+    }
+    
+    public static var symbol: String {
+        return "{0}"
+    }
+}

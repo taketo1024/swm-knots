@@ -4,7 +4,6 @@ public protocol AdditiveGroup: SetType {
     static func + (a: Self, b: Self) -> Self
     prefix static func - (x: Self) -> Self
     static var zero: Self { get }
-    static var symbol: String { get }
 }
 
 public extension AdditiveGroup {

@@ -13,9 +13,9 @@ public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = BaseHomology<
 
 public struct BaseHomology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: CustomStringConvertible {
     public let chainComplex: BaseChainComplex<chainType, A, R>
-    public let groups: [HomologyGroupInfo<A, R>]
+    public let groups: [HomologyGroupInfo<chainType, A, R>]
     
-    public init(chainComplex: BaseChainComplex<chainType, A, R>, groups: [HomologyGroupInfo<A, R>]) {
+    public init(chainComplex: BaseChainComplex<chainType, A, R>, groups: [HomologyGroupInfo<chainType, A, R>]) {
         self.chainComplex = chainComplex
         self.groups = groups
     }
@@ -27,7 +27,7 @@ public struct BaseHomology<chainType: ChainType, A: FreeModuleBase, R: Euclidean
         let dim = chainComplex.dim
         let elims = chainComplex.boundaryMaps.map { $0.matrix.eliminate() }
         
-        let groups: [HomologyGroupInfo<A, R>] = (0 ... dim).map { i in
+        let groups = (0 ... dim).map { (i) -> HomologyGroupInfo<chainType, A, R> in
             // Basis of C_i : the i-th Chain group
             let basis = chainComplex.boundaryMaps[i].domainBasis
             
@@ -71,7 +71,7 @@ public extension BaseHomology where chainType == DescendingChainType, R == Integ
     }
 }
 
-public struct HomologyGroupInfo<A: FreeModuleBase, R: EuclideanRing>: CustomStringConvertible {
+public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: TypeInfo {
     public enum Generator: CustomStringConvertible {
         case Free(generator: FreeModule<A, R>)
         case Tor(factor: R, generator: FreeModule<A, R>)
@@ -100,6 +100,7 @@ public struct HomologyGroupInfo<A: FreeModuleBase, R: EuclideanRing>: CustomStri
     
     public let rank: Int
     public let torsions: Int
+    
     public let generators: [Generator]
     public let chainBasis: [A]
     public let transitionMatrix: DynamicMatrix<R> // chain -> cycle
@@ -178,5 +179,50 @@ public struct HomologyGroupInfo<A: FreeModuleBase, R: EuclideanRing>: CustomStri
     public var description: String {
         let desc = generators.map{$0.description}.joined(separator: "⊕")
         return desc.isEmpty ? "0" : desc
+    }
+}
+
+public protocol _HomologyGroup: _QuotientModule {
+    associatedtype chainType: ChainType
+    associatedtype A: FreeModuleBase
+    associatedtype R: EuclideanRing
+    
+    var representative: FreeModule<A, R> { get }
+    init(_ z: FreeModule<A, R>)
+    
+    static var info: HomologyGroupInfo<chainType, A, R> { get }
+}
+
+public extension _HomologyGroup where Base == FreeModule<A, R>{
+    public static func isEquivalent (a: Base, b: Base) -> Bool {
+        return info.isHomologue(a, b)
+    }
+    
+    public var hashValue: Int {
+        return (Self.info.isNullHomologue(representative)) ? 0 : 1
+    }
+    
+    public static var symbol: String {
+        return info.description
+    }
+}
+
+public struct DynamicHomologyGroup<_chainType: ChainType, _A: FreeModuleBase, _R: EuclideanRing, _ID: _Int>: DynamicType, _HomologyGroup {
+    public typealias chainType = _chainType
+    public typealias A = _A
+    public typealias R = _R
+    public typealias Base = FreeModule<A, R>
+    public typealias Sub  = FreeZeroModule<A, R> // used as stub
+    public typealias Info = HomologyGroupInfo<chainType, A, R>
+    public typealias ID = _ID
+    
+    private let z: FreeModule<A, R>
+    public init(_ z: FreeModule<A, R>) {
+        // TODO check if z is a cycle.
+        self.z = z
+    }
+    
+    public var representative: FreeModule<A, R> {
+        return z
     }
 }
