@@ -20,7 +20,7 @@ do {
     typealias I = PolynomialIdeal<Q, p>
     typealias K = AlgebraicExtension<Q, I>
     
-    let i = K(Polynomial<Q>(0, 1))
+    let i = Polynomial<Q>(0, 1).asQuotient(in: K.self)
     i * i == -1
 }
 
@@ -32,6 +32,6 @@ do {
     
     typealias K = AlgebraicExtension<Q, I>
     
-    let a = K(Polynomial<Q>(0, 1))
+    let a = Polynomial<Q>(0, 1).asQuotient(in: K.self)
     a * a == 2
 }

@@ -12,6 +12,17 @@ public protocol SetType: Equatable, Hashable, CustomStringConvertible {
     static var symbol: String { get }
 }
 
+public extension SetType {
+    public func asSubset<S: SubsetType>(of: S.Type) -> S where S.Super == Self {
+        assert(S.contains(self), "\(S.self) does not contain \(self).")
+        return S.init(self)
+    }
+    
+    public func asQuotient<Q: QuotientSetType>(in: Q.Type) -> Q where Q.Base == Self {
+        return Q.init(self)
+    }
+}
+
 public protocol FiniteSetType: SetType {
     static var allElements: [Self] { get }
     static var countElements: Int { get }

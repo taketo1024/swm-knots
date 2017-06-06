@@ -33,6 +33,10 @@ public extension _ProductModule where Left.R == R, Right.R == R {
     static func * (a: Self, r: R) -> Self {
         return Self.init(a._1 * r, a._2 * r)
     }
+    
+    public static var symbol: String {
+        return "\(Left.symbol)⊕\(Right.symbol)"
+    }
 }
 
 public struct ProductModule<M1: Module, M2: Module>: _ProductModule where M1.R == M2.R {
