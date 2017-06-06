@@ -60,12 +60,12 @@ public extension Ideal {
     }
 }
 
-public protocol ProductRingType: Ring, AdditiveProductGroup {
+public protocol _ProductRing: Ring, AdditiveProductGroup {
     associatedtype Left: Ring
     associatedtype Right: Ring
 }
 
-public extension ProductRingType {
+public extension _ProductRing {
     public init(intValue a: Int) {
         self.init(Left(intValue: a), Right(intValue: a))
     }
@@ -90,7 +90,7 @@ public extension ProductRingType {
     }
 }
 
-public struct ProductRing<R1: Ring, R2: Ring>: ProductRingType {
+public struct ProductRing<R1: Ring, R2: Ring>: _ProductRing {
     public typealias Left = R1
     public typealias Right = R2
     
@@ -103,11 +103,11 @@ public struct ProductRing<R1: Ring, R2: Ring>: ProductRingType {
     }
 }
 
-public protocol QuotientRingType: Ring, AdditiveQuotientGroup {
+public protocol _QuotientRing: Ring, AdditiveQuotientGroup {
     associatedtype Sub: Ideal
 }
 
-public extension QuotientRingType {
+public extension _QuotientRing where Base == Sub.Super {
     public init(intValue n: Int) {
         self.init(Base(intValue: n))
     }
@@ -137,7 +137,7 @@ public extension QuotientRingType {
     }
 }
 
-public struct QuotientRing<R: Ring, I: Ideal>: QuotientRingType where R == I.Super {
+public struct QuotientRing<R: Ring, I: Ideal>: _QuotientRing where R == I.Super {
     public typealias Sub = I
     
     internal let r: R
@@ -151,9 +151,9 @@ public struct QuotientRing<R: Ring, I: Ideal>: QuotientRingType where R == I.Sup
     }
 }
 
-public protocol QuotientFieldType: Field, QuotientRingType { }
+public protocol _QuotientField: Field, _QuotientRing { }
 
-public extension QuotientFieldType {
+public extension _QuotientField where Base == Sub.Super {
     public var isUnit: Bool {
         return Sub.isUnitInQuotient(representative)
     }
@@ -168,7 +168,7 @@ public extension QuotientFieldType {
 }
 
 // TODO merge with QuotientRing after conditional conformance is supported.
-public struct QuotientField<R: Ring, I: Ideal>: QuotientFieldType where R == I.Super {
+public struct QuotientField<R: Ring, I: Ideal>: _QuotientField where R == I.Super {
     public typealias Sub = I
     
     internal let r: R

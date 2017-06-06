@@ -20,12 +20,12 @@ public extension Submodule where R == Super.R {
     }
 }
 
-public protocol ProductModuleType: Module, AdditiveProductGroup {
+public protocol _ProductModule: Module, AdditiveProductGroup {
     associatedtype Left: Module
     associatedtype Right: Module
 }
 
-public extension ProductModuleType where Left.R == R, Right.R == R {
+public extension _ProductModule where Left.R == R, Right.R == R {
     static func * (r: R, a: Self) -> Self {
         return Self.init(r * a._1, r * a._2)
     }
@@ -35,7 +35,7 @@ public extension ProductModuleType where Left.R == R, Right.R == R {
     }
 }
 
-public struct ProductModule<M1: Module, M2: Module>: ProductModuleType where M1.R == M2.R {
+public struct ProductModule<M1: Module, M2: Module>: _ProductModule where M1.R == M2.R {
     public typealias Left = M1
     public typealias Right = M2
     public typealias R = M1.R
@@ -49,11 +49,11 @@ public struct ProductModule<M1: Module, M2: Module>: ProductModuleType where M1.
     }
 }
 
-public protocol QuotientModuleType: Module, AdditiveQuotientGroup {
+public protocol _QuotientModule: Module, AdditiveQuotientGroup {
     associatedtype Sub: Submodule
 }
 
-public extension QuotientModuleType where R == Sub.R, R == Sub.Super.R {
+public extension _QuotientModule where Base == Sub.Super, R == Sub.R, R == Sub.Super.R {
     public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
         return Sub.contains( a - b )
     }
@@ -71,7 +71,7 @@ public extension QuotientModuleType where R == Sub.R, R == Sub.Super.R {
     }
 }
 
-public struct QuotientModule<M: Module, S: Submodule>: QuotientModuleType where M == S.Super, M.R == S.R {
+public struct QuotientModule<M: Module, S: Submodule>: _QuotientModule where M == S.Super, M.R == S.R {
     public typealias R = M.R
     public typealias Sub = S
     

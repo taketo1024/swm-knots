@@ -51,7 +51,7 @@ public struct IntegerIdeal<n: _Int>: EuclideanIdeal {
     }
 }
 
-public struct IntegerQuotientRing<n: _Int>: QuotientRingType, FiniteSetType {
+public struct IntegerQuotientRing<n: _Int>: _QuotientRing, FiniteSetType {
     public typealias Sub = IntegerIdeal<n>
     
     private let a: Base
@@ -74,7 +74,7 @@ public struct IntegerQuotientRing<n: _Int>: QuotientRingType, FiniteSetType {
 }
 
 // TODO merge with IntegerQuotientRing after conditional conformance is supported.
-public struct IntegerQuotientField<n: _Prime>: QuotientFieldType, FiniteSetType {
+public struct IntegerQuotientField<n: _Prime>: _QuotientField, FiniteSetType {
     public typealias Sub = IntegerIdeal<n>
     
     private let a: Base

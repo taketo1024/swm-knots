@@ -95,19 +95,20 @@ public extension Subgroup {
     }
 }
 
-public protocol ProductGroupType: Group, ProductMonoidType {
+// abstract protocol
+public protocol _ProductGroup: Group, _ProductMonoid {
     associatedtype Left: Group
     associatedtype Right: Group
 }
 
-public extension ProductGroupType {
+public extension _ProductGroup {
     public var inverse: Self {
         return Self.init(_1.inverse, _2.inverse)
     }
 }
 
-// concrete class
-public struct ProductGroup<G1: Group, G2: Group>: ProductGroupType {
+// concrete struct
+public struct ProductGroup<G1: Group, G2: Group>: _ProductGroup {
     public typealias Left = G1
     public typealias Right = G2
     
@@ -120,11 +121,12 @@ public struct ProductGroup<G1: Group, G2: Group>: ProductGroupType {
     }
 }
 
-public protocol QuotientGroupType: Group, QuotientSetType {
+// abstract protocol
+public protocol _QuotientGroup: Group, QuotientSetType {
     associatedtype Sub: Subgroup
 }
 
-public extension QuotientGroupType {
+public extension _QuotientGroup where Base == Sub.Super {
     
     public static var identity: Self {
         return Self(Base.identity)
@@ -141,10 +143,14 @@ public extension QuotientGroupType {
     public static func * (a: Self, b: Self) -> Self {
         return Self.init(a.representative * b.representative)
     }
+
+    public static var symbol: String {
+        return "\(Base.symbol)/\(Sub.symbol)"
+    }
 }
 
-// concrete class
-public struct QuotientGroup<G: Group, H: Subgroup>: QuotientGroupType where G == H.Super {
+// concrete struct
+public struct QuotientGroup<G: Group, H: Subgroup>: _QuotientGroup where G == H.Super {
     public typealias Base = G
     public typealias Sub = H
     

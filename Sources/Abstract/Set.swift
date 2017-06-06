@@ -12,6 +12,11 @@ public protocol SetType: Equatable, Hashable, CustomStringConvertible {
     static var symbol: String { get }
 }
 
+public protocol FiniteSetType: SetType {
+    static var allElements: [Self] { get }
+    static var countElements: Int { get }
+}
+
 public protocol SubsetType: SetType {
     associatedtype Super: SetType
     init(_ g: Super)
@@ -59,9 +64,21 @@ public extension ProductSetType {
     }
 }
 
+public struct ProductSet<S1: SetType, S2: SetType>: ProductSetType {
+    public typealias Left = S1
+    public typealias Right = S2
+    
+    public let _1: S1
+    public let _2: S2
+    
+    public init(_ s1: S1, _ s2: S2) {
+        self._1 = s1
+        self._2 = s2
+    }
+}
+
 public protocol QuotientSetType: SetType {
-    associatedtype Sub: SubsetType
-    typealias Base = Sub.Super
+    associatedtype Base: SetType
     
     init(_ g: Base)
     var representative: Base { get }
@@ -73,16 +90,11 @@ public extension QuotientSetType {
         return isEquivalent(a.representative, b.representative)
     }
 
-    public static var symbol: String {
-        return "\(Base.symbol)/\(Sub.symbol)"
-    }
-    
     public var description: String {
         return "\(representative)"
     }
-}
-
-public protocol FiniteSetType: SetType {
-    static var allElements: [Self] { get }
-    static var countElements: Int { get }
+    
+    public static var symbol: String {
+        return "\(Base.symbol)/~"
+    }
 }

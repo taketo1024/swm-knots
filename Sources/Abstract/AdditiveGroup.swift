@@ -54,7 +54,7 @@ public protocol AdditiveQuotientGroup: AdditiveGroup, QuotientSetType {
     associatedtype Sub: AdditiveSubgroup
 }
 
-public extension AdditiveQuotientGroup {
+public extension AdditiveQuotientGroup where Base == Sub.Super {
     public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
         return Sub.contains( a - b )
     }
