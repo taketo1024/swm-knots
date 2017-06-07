@@ -3,8 +3,8 @@ import Foundation
 public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
     associatedtype IntegerLiteralType = IntegerNumber
     init(intValue: IntegerNumber)
+    var inverse: Self? { get }
     var isUnit: Bool { get }
-    var unitInverse: Self? { get }
     static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m>
 }
 
@@ -12,6 +12,10 @@ public extension Ring {
     // required init from `ExpressibleByIntegerLiteral`
     public init(integerLiteral value: IntegerNumber) {
         self.init(intValue: value)
+    }
+    
+    public var isUnit: Bool {
+        return (inverse != nil)
     }
     
     public static var zero: Self {
@@ -42,7 +46,6 @@ public protocol Ideal: AdditiveGroup, AdditiveSubgroup {
     static func * (m: Self, r: Super) -> Self
     
     static func reduced(_ a: Super) -> Super
-    static func isUnitInQuotient(_ r: Super) -> Bool
     static func inverseInQuotient(_ r: Super) -> Super?
 }
 
@@ -70,12 +73,8 @@ public extension _ProductRing {
         self.init(Left(intValue: a), Right(intValue: a))
     }
     
-    public var isUnit: Bool {
-        return _1.isUnit && _2.isUnit
-    }
-    
-    public var unitInverse: Self? {
-        return isUnit ? Self.init(_1.unitInverse!, _2.unitInverse!) : nil
+    public var inverse: Self? {
+        return _1.inverse.flatMap{ r1 in _2.inverse.flatMap{ r2 in Self(r1, r2) }  }
     }
     
     public static var zero: Self {
@@ -112,12 +111,8 @@ public extension _QuotientRing where Base == Sub.Super {
         self.init(Base(intValue: n))
     }
     
-    public var isUnit: Bool {
-        return Sub.isUnitInQuotient(representative)
-    }
-    
-    public var unitInverse: Self? {
-        return Sub.inverseInQuotient(representative).map{ Self.init($0) }
+    public var inverse: Self? {
+        return Sub.inverseInQuotient(representative).map{ Self($0) }
     }
     
     public static var zero: Self {
@@ -151,24 +146,8 @@ public struct QuotientRing<R: Ring, I: Ideal>: _QuotientRing where R == I.Super 
     }
 }
 
-public protocol _QuotientField: Field, _QuotientRing { }
-
-public extension _QuotientField where Base == Sub.Super {
-    public var isUnit: Bool {
-        return Sub.isUnitInQuotient(representative)
-    }
-    
-    public var unitInverse: Self? {
-        return Sub.inverseInQuotient(representative).map{ Self.init($0) }
-    }
-    
-    public var inverse: Self {
-        return unitInverse!
-    }
-}
-
 // TODO merge with QuotientRing after conditional conformance is supported.
-public struct QuotientField<R: Ring, I: Ideal>: _QuotientField where R == I.Super {
+public struct QuotientField<R: Ring, I: Ideal>: Field, _QuotientRing where R == I.Super {
     public typealias Sub = I
     
     internal let r: R

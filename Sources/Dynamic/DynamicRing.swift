@@ -19,10 +19,6 @@ public class IdealInfo<R: Ring>: TypeInfo {
         fatalError("implement in subclass")
     }
     
-    public func isUnitInQuotient(_ r: R) -> Bool {
-        fatalError("implement in subclass")
-    }
-    
     public func inverseInQuotient(_ r: R) -> R? {
         fatalError("implement in subclass")
     }
@@ -48,15 +44,10 @@ public final class EuclideanIdealInfo<R: EuclideanRing>: IdealInfo<R> {
         return r % generator == R.zero
     }
     
-    public override func isUnitInQuotient(_ r: R) -> Bool {
-        let (_, _, u) = bezout(r, generator)
-        return u.isUnit
-    }
-    
     public override func inverseInQuotient(_ r: R) -> R? {
         // same implementation as in `EuclideanIdeal`
         let (a, _, u) = bezout(r, generator)
-        return u.unitInverse.map{ uinv in uinv * a }
+        return u.inverse.map{ inv in inv * a }
     }
     
     public override var description: String {
@@ -85,10 +76,6 @@ public struct DynamicIdeal<R: Ring, _ID: _Int>: DynamicType, Ideal {
     
     public static func contains(_ r: R) -> Bool {
         return info.contains(r)
-    }
-    
-    public static func isUnitInQuotient(_ r: R) -> Bool {
-        return info.isUnitInQuotient(r)
     }
     
     public static func inverseInQuotient(_ r: R) -> R? {

@@ -9,10 +9,6 @@ public protocol EuclideanRing: Ring {
 }
 
 public extension EuclideanRing {
-    public var isUnit: Bool {
-        return (self != 0) && (1 % self == 0)
-    }
-    
     public static func % (_ a: Self, b: Self) -> Self {
         return Self.eucDiv(a, b).r
     }
@@ -79,16 +75,11 @@ public extension EuclideanIdeal {
         return a % generator == Super.zero
     }
     
-    static func isUnitInQuotient(_ r: Super) -> Bool {
-        let (_, _, u) = bezout(r, generator)
-        return u.isUnit
-    }
-    
     static func inverseInQuotient(_ r: Super) -> Super? {
         // find: a * r + b * m = u (u: unit)
         // then: r^-1 = u^-1 * a (mod m)
         let (a, _, u) = bezout(r, generator)
-        return u.unitInverse.map{ uinv in uinv * a }
+        return u.inverse.map{ inv in inv * a }
     }
     
     static var symbol: String {

@@ -7,8 +7,8 @@ extension RealNumber: Field {
         self.init(n)
     }
     
-    public var inverse: RealNumber {
-        return 1 / self
+    public var inverse: RealNumber? {
+        return (self != 0) ? 1 / self : nil
     }
     
     public static var symbol: String {

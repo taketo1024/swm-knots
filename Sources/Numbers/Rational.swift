@@ -24,8 +24,8 @@ public struct RationalNumber: Field {
         self.init(intValue: n)
     }
     
-    public var inverse: RationalNumber {
-        return RationalNumber(q, p)
+    public var inverse: RationalNumber? {
+        return (p != 0) ? RationalNumber(q, p) : nil
     }
     
     public var numerator: IntegerNumber {

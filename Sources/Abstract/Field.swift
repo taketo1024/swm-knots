@@ -1,23 +1,15 @@
 import Foundation
 
-public protocol Field: Group, EuclideanRing {
+public protocol Field: EuclideanRing {
 }
 
 public extension Field {
-    public var isUnit: Bool {
-        return self != 0
-    }
-    
-    public var unitInverse: Self? {
-        return isUnit ? inverse : nil
-    }
-    
     public var degree: Int {
         return self == Self.zero ? 0 : 1
     }
     
     public static func / (a: Self, b: Self) -> Self {
-        return a * b.inverse
+        return a * b.inverse!
     }
     
     public static func ** (a: Self, b: Int) -> Self {
@@ -25,7 +17,7 @@ public extension Field {
         case let n where n > 0:
             return a * (a ** (n - 1))
         case let n where n < 0:
-            return a.inverse * (a ** (n + 1))
+            return a.inverse! * (a ** (n + 1))
         default:
             return Self.identity
         }

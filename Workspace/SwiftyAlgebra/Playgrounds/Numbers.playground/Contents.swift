@@ -35,8 +35,8 @@ typealias F_5 = IntegerQuotientField<_5>
 
 do {
     let x: F_5 = 2
-    x.inverse
-    x * x.inverse == 1
+    x.inverse!
+    x * x.inverse! == 1
     
     F_5.printAddTable()
     F_5.printMulTable()

@@ -157,9 +157,9 @@ public class FieldMatrixElimination<R: Field, n: _Int, m: _Int>: BaseMatrixElimi
     fileprivate override func invert(_ s: EliminationStep<R>) -> EliminationStep<R> {
         switch s {
         case let .MulRow(at: i, by: r):
-            return .MulRow(at: i, by: r.inverse)
+            return .MulRow(at: i, by: r.inverse!)
         case let .MulCol(at: i, by: r):
-            return .MulCol(at: i, by: r.inverse)
+            return .MulCol(at: i, by: r.inverse!)
         default:
             return super.invert(s)
         }
@@ -522,7 +522,7 @@ fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEli
     private func eliminateRow(_ i0: Int, _ j0: Int) {
         let a = result[i0, j0]
         if a != R.identity {
-            apply(.MulRow(at: i0, by: a.inverse))
+            apply(.MulRow(at: i0, by: a.inverse!))
         }
         
         for i in 0 ..< rows {
@@ -537,7 +537,7 @@ fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEli
     private func eliminateCol(_ i0: Int, _ j0: Int) {
         let a = result[i0, j0]
         if a != R.identity {
-            apply(.MulCol(at: i0, by: a.inverse))
+            apply(.MulCol(at: i0, by: a.inverse!))
         }
         
         for j in 0 ..< cols {

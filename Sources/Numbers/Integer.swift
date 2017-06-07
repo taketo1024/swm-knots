@@ -11,12 +11,8 @@ extension IntegerNumber: EuclideanRing {
         return abs(self)
     }
     
-    public var isUnit: Bool {
-        return abs(self) == 1
-    }
-    
-    public var unitInverse: IntegerNumber? {
-        return isUnit ? self : nil
+    public var inverse: IntegerNumber? {
+        return (abs(self) == 1) ? self : nil
     }
     
     public static func eucDiv(_ a: IntegerNumber, _ b: IntegerNumber) -> (q: IntegerNumber, r: IntegerNumber) {
@@ -78,7 +74,7 @@ public struct IntegerQuotientRing<n: _Int>: _QuotientRing, FiniteSetType {
 }
 
 // TODO merge with IntegerQuotientRing after conditional conformance is supported.
-public struct IntegerQuotientField<n: _Prime>: _QuotientField, FiniteSetType {
+public struct IntegerQuotientField<n: _Prime>: Field, _QuotientRing, FiniteSetType {
     public typealias Sub = IntegerIdeal<n>
     
     private let a: Base
