@@ -1,48 +1,125 @@
 import Foundation
 
-public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
+private let Auto = -1
+
+public typealias ColVector<R: Ring, n: _Int> = Matrix<R, n, _1>
+public typealias RowVector<R: Ring, m: _Int> = Matrix<R, _1, m>
+public typealias SquareMatrix<R: Ring, n: _Int> = Matrix<R, n, n>
+public typealias DynamicMatrix<R: Ring> = Matrix<R, Dynamic, Dynamic>
+
+public struct Matrix<_R: Ring, n: _Int, m: _Int>: _Matrix {
     public typealias R = _R
+    public typealias Rows = n
+    public typealias Cols = m
+    
     public let rows: Int
     public let cols: Int
-    
-    internal var grid: [R]
+    public var grid: [R]
     
     // root initializer
-    internal init(rows: Int, cols: Int, grid: [R]) {
-        guard rows >= 0 && cols >= 0 else {
-            fatalError("illegal matrix size (\(rows), \(cols))")
-        }
-        self.rows = rows
-        self.cols = cols
+    public init(rows: Int, cols: Int, grid: [R]) {
+        assert(!(rows == Auto && n.self == Dynamic.self) && !(cols == Auto && m.self == Dynamic.self),
+               "Must specify rows/cols for DynamicMatrix.")
+        
+        self.rows = (rows != Auto) ? rows : n.intValue
+        self.cols = (cols != Auto) ? cols : m.intValue
         self.grid = grid
     }
-
-    internal init(rows: Int, cols: Int, gen: (Int, Int) -> R) {
-        let grid = (0 ..< rows * cols).map { (index: Int) -> R in
-            let (i, j) = index /% cols
+    
+    public init(rows: Int = Auto, cols: Int = Auto, gen: (Int, Int) -> R) {
+        assert(!(rows == Auto && n.self == Dynamic.self) && !(cols == Auto && m.self == Dynamic.self),
+               "Must specify rows/cols for DynamicMatrix.")
+        
+        let _rows = (rows != Auto) ? rows : n.intValue
+        let _cols = (cols != Auto) ? cols : m.intValue
+        
+        let grid = (0 ..< _rows * _cols).map { (index: Int) -> R in
+            let (i, j) = index /% _cols
             return gen(i, j)
         }
-        self.init(rows: rows, cols: cols, grid: grid)
+        self.init(rows: _rows, cols: _cols, grid: grid)
     }
 
     public init(_ grid: R...) {
-        if n.self == Dynamic.self || m.self == Dynamic.self {
-            fatalError("attempted to initialize DynamicMatrix without specifying rows/cols.")
-        }
-        self.init(rows: n.intValue, cols: m.intValue, grid: grid)
-    }
-    
-    public init(_ gen: (Int, Int) -> R) {
-        if n.self == Dynamic.self || m.self == Dynamic.self {
-            fatalError("attempted to initialize DynamicMatrix without specifying rows/cols.")
-        }
-        self.init(rows: n.intValue, cols: m.intValue, gen: gen)
-    }
-    
-    public static var zero: Matrix<R, n, m> {
-        return self.init { _ in 0 }
+        self.init(rows: Auto, cols: Auto, grid: grid)
     }
 }
+
+public protocol _Matrix: Module, Sequence {
+    associatedtype Rows: _Int
+    associatedtype Cols: _Int
+    
+    var rows: Int { get }
+    var cols: Int { get }
+    var grid: [R] { get set }
+    
+    init(rows: Int, cols: Int, grid: [R])
+    init(rows: Int, cols: Int, gen: (Int, Int) -> R)
+    
+    subscript(i: Int, j: Int) -> R { get set }
+}
+
+public extension _Matrix {
+    public static var zero: Self {
+        return Self(rows: Auto, cols: Auto) { _ in 0 }
+    }
+    
+    public static func == (a: Self, b: Self) -> Bool {
+        return a.grid == b.grid
+    }
+    
+    public static func + (a: Self, b: Self) -> Self {
+        return Self(rows: a.rows, cols: a.cols) { (i, j) -> R in
+            return a[i, j] + b[i, j]
+        }
+    }
+    
+    public static prefix func - (a: Self) -> Self {
+        return Self(rows: a.rows, cols: a.cols) { (i, j) -> R in
+            return -a[i, j]
+        }
+    }
+    
+    public static func - (a: Self, b: Self) -> Self {
+        return Self(rows: a.rows, cols: a.cols) { (i, j) -> R in
+            return a[i, j] - b[i, j]
+        }
+    }
+    
+    public static func * (r: R, a: Self) -> Self {
+        return Self(rows: a.rows, cols: a.cols) { (i, j) -> R in
+            return r * a[i, j]
+        }
+    }
+    
+    public static func * (a: Self, r: R) -> Self {
+        return Self(rows: a.rows, cols: a.cols) { (i, j) -> R in
+            return a[i, j] * r
+        }
+    }
+    
+    public static func mul<B: _Matrix, C: _Matrix>(_ a: Self, _ b: B) -> C
+        where Self.Rows == C.Rows, Self.Cols == B.Rows, B.Cols == C.Cols, Self.R == B.R, B.R == C.R {
+            
+        return C(rows: a.rows, cols: b.cols) { (i, k) -> R in
+            return (0 ..< a.cols)
+                .map({j in a[i, j] * b[j, k]})
+                .reduce(0) {$0 + $1}
+        }
+    }
+}
+
+#if USE_EIGEN
+public extension _Matrix where R == IntegerNumber {
+    public static func mul<B: _Matrix, C: _Matrix>(_ a: Self, _ b: B) -> C
+        where Self.Rows == C.Rows, Self.Cols == B.Rows, B.Cols == C.Cols, Self.R == B.R, B.R == C.R {
+            
+        var result = Array(repeating: 0, count: a.rows * b.cols)
+        EigenLib.multiple(&result, a.rows, a.cols, b.cols, a.grid, b.grid)
+        return C(rows: a.rows, cols: b.cols, grid: result)
+    }
+}
+#endif
 
 // Matrix Operations
 
@@ -51,71 +128,11 @@ public extension Matrix {
         return (i * cols) + j
     }
     
-    public subscript(index: Int) -> R {
-        get { return grid[index] }
-        set { grid[index] = newValue }
-    }
-    
     public subscript(i: Int, j: Int) -> R {
         get { return grid[gridIndex(i, j)] }
         set { grid[gridIndex(i, j)] = newValue }
     }
     
-    public static func == (a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Bool {
-        return a.grid == b.grid
-    }
-    
-    public static func + (a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
-        return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-            return a[i, j] + b[i, j]
-        }
-    }
-    
-    public static prefix func - (a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-        return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-            return -a[i, j]
-        }
-    }
-    
-    public static func - (a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
-        return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-            return a[i, j] - b[i, j]
-        }
-    }
-    
-    public static func * (r: R, a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-        return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-            return r * a[i, j]
-        }
-    }
-    
-    public static func * (a: Matrix<R, n, m>, r: R) -> Matrix<R, n, m> {
-        return Matrix<R, n, m>(rows: a.rows, cols: a.cols) { (i, j) -> R in
-            return a[i, j] * r
-        }
-    }
-    
-    public static func * <p: _Int>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
-        #if USE_EIGEN
-            if R.self == IntegerNumber.self, let aGrid = a.grid as? [IntegerNumber], let bGrid = b.grid as? [IntegerNumber] {
-                var result = Array(repeating: 0, count: a.rows * b.cols)
-                EigenLib.multiple(&result, a.rows, a.cols, b.cols, aGrid, bGrid)
-                return Matrix<R, n, p>(rows: a.rows, cols: b.cols, grid: result.map{ $0 as! R })
-            }
-        #endif
-        
-        return Matrix<R, n, p>(rows: a.rows, cols: b.cols) { (i, k) -> R in
-            return (0 ..< a.cols)
-                .map({j in a[i, j] * b[j, k]})
-                .reduce(0) {$0 + $1}
-        }
-    }
-}
-
-public typealias ColVector<R: Ring, n: _Int> = Matrix<R, n, _1>
-public typealias RowVector<R: Ring, m: _Int> = Matrix<R, _1, m>
-
-public extension Matrix {
     public func rowArray(_ i: Int) -> [R] {
         return (0 ..< cols).map{ j in self[i, j] }
     }
@@ -173,6 +190,10 @@ public extension Matrix {
     
     public var transposed: Matrix<R, m, n> {
         return Matrix<R, m, n>(rows: cols, cols: rows) { self[$1, $0] }
+    }
+    
+    public static func * <p: _Int>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
+        return Matrix<R, n, m>.mul(a, b)
     }
 }
 
@@ -262,15 +283,46 @@ public extension Matrix {
 
 // Matrix Elimination
 
+// TODO use protocol extension
 public extension Matrix where R: EuclideanRing {
     public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<R, n, m> {
         return R.matrixElimination(self, mode: mode)
     }
 }
 
-// SquareMatrix
+// Convenient Initializers
 
-public typealias SquareMatrix<R: Ring, n: _Int> = Matrix<R, n, n>
+public extension ColVector where Cols == _1 {
+    public init(size: Int, elements: [R]) {
+        self.init(rows: size, cols: 1, grid: elements)
+    }
+    
+    public init(_ elements: R...) {
+        self.init(size: elements.count, elements: elements)
+    }
+    
+    public subscript(index: Int) -> R {
+        get { return grid[index] }
+        set { grid[index] = newValue }
+    }
+}
+
+public extension RowVector where Rows == _1 {
+    public init(size: Int, elements: [R]) {
+        self.init(rows: 1, cols: size, grid: elements)
+    }
+    
+    public init(_ elements: R...) {
+        self.init(size: elements.count, elements: elements)
+    }
+    
+    public subscript(index: Int) -> R {
+        get { return grid[index] }
+        set { grid[index] = newValue }
+    }
+}
+
+// SquareMatrix
 
 public extension Matrix where n == m {
     public static var identity: Matrix<R, n, n> {
@@ -348,19 +400,5 @@ public struct MatrixIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
         }
         
         return (value[current.0, current.1], current.0, current.1)
-    }
-}
-
-// DynamicMatrix
-
-public typealias DynamicMatrix<R: Ring> = Matrix<R, Dynamic, Dynamic>
-
-public extension Matrix where n == Dynamic, m == Dynamic {
-    public init(_ rows: Int, _ cols: Int, _ grid: [R]) {
-        self.init(rows: rows, cols: cols, grid: grid)
-    }
-    
-    public init(_ rows: Int, _ cols: Int, _ gen: (Int, Int) -> R) {
-        self.init(rows: rows, cols: cols, gen: gen)
     }
 }

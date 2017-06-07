@@ -36,7 +36,7 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
     }
     
     private static func map2matrix(_ domainBasis: [A], _ codomainBasis: [A], _ mapping: [A : M]) -> DynamicMatrix<R> {
-        return DynamicMatrix<R>(codomainBasis.count, domainBasis.count) { (i, j) -> R in
+        return DynamicMatrix<R>(rows: codomainBasis.count, cols: domainBasis.count) { (i, j) -> R in
             let from = domainBasis[j]
             let to  = codomainBasis[i]
             return mapping[from]?.component(forBasisElement: to) ?? 0
