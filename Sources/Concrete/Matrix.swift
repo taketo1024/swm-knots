@@ -2,10 +2,12 @@ import Foundation
 
 private let Auto = -1
 
-public typealias ColVector<R: Ring, n: _Int> = Matrix<R, n, _1>
-public typealias RowVector<R: Ring, m: _Int> = Matrix<R, _1, m>
+public typealias ColVector<R: Ring, n: _Int>    = Matrix<R, n, _1>
+public typealias RowVector<R: Ring, m: _Int>    = Matrix<R, _1, m>
 public typealias SquareMatrix<R: Ring, n: _Int> = Matrix<R, n, n>
-public typealias DynamicMatrix<R: Ring> = Matrix<R, Dynamic, Dynamic>
+public typealias DynamicMatrix<R: Ring>         = Matrix<R, Dynamic, Dynamic>
+public typealias DynamicColVector<R: Ring>      = Matrix<R, Dynamic, _1>
+public typealias DynamicRowVector<R: Ring>      = Matrix<R, _1, Dynamic>
 
 public struct Matrix<_R: Ring, n: _Int, m: _Int>: _Matrix {
     public typealias R = _R
@@ -17,31 +19,90 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: _Matrix {
     public var grid: [R]
     
     // root initializer
-    public init(rows: Int, cols: Int, grid: [R]) {
-        assert(!(rows == Auto && n.self == Dynamic.self) && !(cols == Auto && m.self == Dynamic.self),
-               "Must specify rows/cols for DynamicMatrix.")
+    public init(rows r: Int = Auto, cols c: Int = Auto, grid: [R]) {
+        let (rows, cols) = Matrix.determineSize(r, c, grid)
         
-        self.rows = (rows != Auto) ? rows : n.intValue
-        self.cols = (cols != Auto) ? cols : m.intValue
-        self.grid = grid
+        self.rows = rows
+        self.cols = cols
+        
+        let (l, required) = (grid.count, rows * cols)
+        self.grid = (l == required) ? grid :
+                    (l >  required) ? Array(grid[0 ..< required]) :
+                                      (grid + Array(repeating: R.zero, count: required - l))
     }
     
-    public init(rows: Int = Auto, cols: Int = Auto, gen: (Int, Int) -> R) {
-        assert(!(rows == Auto && n.self == Dynamic.self) && !(cols == Auto && m.self == Dynamic.self),
-               "Must specify rows/cols for DynamicMatrix.")
+    public init(rows r: Int = Auto, cols c: Int = Auto, gridGenerator g: (Int, Int) -> R) {
+        let (rows, cols) = Matrix.determineSize(r, c, nil)
         
-        let _rows = (rows != Auto) ? rows : n.intValue
-        let _cols = (cols != Auto) ? cols : m.intValue
-        
-        let grid = (0 ..< _rows * _cols).map { (index: Int) -> R in
-            let (i, j) = index /% _cols
-            return gen(i, j)
+        let grid = (0 ..< rows * cols).map { (index: Int) -> R in
+            let (i, j) = index /% cols
+            return g(i, j)
         }
-        self.init(rows: _rows, cols: _cols, grid: grid)
+        
+        self.rows = rows
+        self.cols = cols
+        self.grid = grid
     }
 
     public init(_ grid: R...) {
         self.init(rows: Auto, cols: Auto, grid: grid)
+    }
+    
+    private static func determineSize(_ rows: Int, _ cols: Int, _ grid: [R]?) -> (rows: Int, cols: Int) {
+        func ceilDiv(_ a: Int, _ b: Int) -> Int {
+            return (a + b - 1) / b
+        }
+        
+        switch(Rows.self, Cols.self) {
+            
+        // completely determined by type.
+        case let (R, C) where !(R is Dynamic.Type) && !(C is Dynamic.Type):
+            assert(rows == Auto || rows == R.intValue, "rows mismatch with type-parameter: \(rows) != \(R.intValue)")
+            assert(cols == Auto || cols == C.intValue, "cols mismatch with type-parameter: \(cols) != \(C.intValue)")
+            return (R.intValue, C.intValue)
+            
+        // rows is determined by type.
+        case let (R, C) where !(R is Dynamic.Type) && (C is Dynamic.Type):
+            assert(rows == Auto || rows == R.intValue, "rows mismatch with type-parameter: \(rows) != \(R.intValue)")
+            let r = R.intValue
+            switch (cols, grid) {
+            case let (c, _) where c != Auto:
+                return (r, c)
+            case let (c, g?) where r > 0 && c == Auto:
+                return (r, ceilDiv(g.count, r))
+            default:
+                fatalError("Matrix size indeterminable.")
+            }
+            
+        // cols is determined by type.
+        case let (R, C) where (R is Dynamic.Type) && !(C is Dynamic.Type):
+            assert(cols == Auto || cols == C.intValue, "cols mismatch with type-parameter: \(cols) != \(C.intValue)")
+            let c = C.intValue
+            switch (rows, grid) {
+            case let (r, _) where r != Auto:
+                return (r, c)
+            case let (r, g?) where r == Auto && c > 0:
+                return (ceilDiv(g.count, c), c)
+            default:
+                fatalError("Matrix size indeterminable.")
+            }
+            
+        // rows, cols are dynamic.
+        case let (R, C) where  (R is Dynamic.Type) &&  (C is Dynamic.Type):
+            switch (rows, cols, grid) {
+            case let (r, c, _) where r != Auto && c != Auto:
+                return (r, c)
+            case let (r, _, g?) where r != Auto && r > 0:
+                return (r, ceilDiv(g.count, r))
+            case let (_, c, g?) where c != Auto && c > 0:
+                return (ceilDiv(g.count, c), c)
+            default:
+                fatalError("Matrix size indeterminable.")
+            }
+            
+        default:
+            fatalError()
+        }
     }
 }
 
@@ -103,10 +164,12 @@ public extension _Matrix {
     }
     
     public static func == (a: Self, b: Self) -> Bool {
+        assert((a.rows, a.cols) == (b.rows, b.cols), "Mismatching matrix size.")
         return a.grid == b.grid
     }
     
     public static func + (a: Self, b: Self) -> Self {
+        assert((a.rows, a.cols) == (b.rows, b.cols), "Mismatching matrix size.")
         return Self(rows: a.rows, cols: a.cols) { (i, j) -> R in
             return a[i, j] + b[i, j]
         }
@@ -115,12 +178,6 @@ public extension _Matrix {
     public static prefix func - (a: Self) -> Self {
         return Self(rows: a.rows, cols: a.cols) { (i, j) -> R in
             return -a[i, j]
-        }
-    }
-    
-    public static func - (a: Self, b: Self) -> Self {
-        return Self(rows: a.rows, cols: a.cols) { (i, j) -> R in
-            return a[i, j] - b[i, j]
         }
     }
     
@@ -137,6 +194,7 @@ public extension _Matrix {
     }
     
     public static func * <n: _Int, m: _Int>(_ a: Self, _ b: Matrix<R, n, m>) -> Matrix<R, Self.Rows, m> where Self.Cols == n {
+        assert(a.cols == b.rows, "Mismatching matrix size.")
         return Matrix<R, Self.Rows, m> (rows: a.rows, cols: b.cols) { (i, k) -> R in
             return (0 ..< a.cols)
                 .map({j in a[i, j] * b[j, k]})
