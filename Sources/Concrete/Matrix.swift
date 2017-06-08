@@ -143,6 +143,8 @@ public protocol _Matrix: Module, Sequence {
     mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R)
     mutating func swapRows(_ i0: Int, _ i1: Int)
     mutating func swapCols(_ j0: Int, _ j1: Int)
+    
+    func eliminate(mode: MatrixEliminationMode) -> BaseMatrixElimination<Self>
 }
 
 public extension _Matrix {
@@ -193,9 +195,9 @@ public extension _Matrix {
         }
     }
     
-    public static func * <n: _Int, m: _Int>(_ a: Self, _ b: Matrix<R, n, m>) -> Matrix<R, Self.Rows, m> where Self.Cols == n {
+    public static func * <bRows: _Int, bCols: _Int>(_ a: Self, _ b: Matrix<R, bRows, bCols>) -> Matrix<R, Self.Rows, bCols> where Self.Cols == bRows {
         assert(a.cols == b.rows, "Mismatching matrix size.")
-        return Matrix<R, Self.Rows, m> (rows: a.rows, cols: b.cols) { (i, k) -> R in
+        return Matrix<R, Self.Rows, bCols> (rows: a.rows, cols: b.cols) { (i, k) -> R in
             return (0 ..< a.cols)
                 .map({j in a[i, j] * b[j, k]})
                 .reduce(0) {$0 + $1}
@@ -341,6 +343,10 @@ public extension _Matrix {
         }
     }
     
+    public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<Self> {
+        fatalError("MatrixElimination is not impled for \(R.self).")
+    }
+    
     public var hashValue: Int {
         return grid.count > 0 ? grid[0].hashValue : 0
     }
@@ -366,6 +372,18 @@ public extension _Matrix {
     }
 }
 
+public extension _Matrix where R: EuclideanRing {
+    public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<Self> {
+        return EuclideanMatrixElimination(self, mode: mode)
+    }
+}
+
+public extension _Matrix where R: Field {
+    public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<Self> {
+        return FieldMatrixElimination(self, mode: mode)
+    }
+}
+
 public extension _Matrix where Cols == _1 {
     public subscript(index: Int) -> R {
         get { return grid[index] }
@@ -381,7 +399,6 @@ public extension _Matrix where Rows == _1 {
 }
 
 // TODO: conform to Ring after conditional conformance is supported.
-
 public extension _Matrix where Rows == Cols {
     public static var identity: Self {
         return Self(rows: Auto, cols: Auto) { $0 == $1 ? 1 : 0 }
@@ -392,15 +409,7 @@ public extension _Matrix where Rows == Cols {
     }
 }
 
-// TODO use protocol extension
-
-public extension Matrix where R: EuclideanRing {
-    public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<R, n, m> {
-        return R.matrixElimination(self, mode: mode)
-    }
-}
-
-public extension Matrix where R: EuclideanRing, n == m {
+public extension _Matrix where R: EuclideanRing, Rows == Cols {
     public var determinant: R {
         return self.eliminate().diagonal.reduce(R.identity) { $0 * $1 }
     }
@@ -408,10 +417,11 @@ public extension Matrix where R: EuclideanRing, n == m {
 
 #if USE_EIGEN
 public extension _Matrix where R == IntegerNumber {
-    public static func * <n: _Int, m: _Int>(_ a: Self, _ b: Matrix<R, n, m>) -> Matrix<R, Self.Rows, m> where Self.Cols == n {
+    public static func * <bRows: _Int, bCols: _Int>(_ a: Self, _ b: Matrix<R, bRows, bCols>) -> Matrix<R, Self.Rows, bCols> where Self.Cols == bRows {
+        assert(a.cols == b.rows, "Mismatching matrix size.")
         var result = Array(repeating: 0, count: a.rows * b.cols)
         EigLib.multiple(&result, a.rows, a.cols, b.cols, a.grid, b.grid)
-        return Matrix<R, Rows, m>(rows: a.rows, cols: b.cols, grid: result)
+        return Matrix<R, Rows, bCols>(rows: a.rows, cols: b.cols, grid: result)
     }
 }
 #endif

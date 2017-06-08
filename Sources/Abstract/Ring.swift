@@ -5,7 +5,6 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
     init(intValue: IntegerNumber)
     var inverse: Self? { get }
     var isUnit: Bool { get }
-    static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m>
 }
 
 public extension Ring {
@@ -28,11 +27,6 @@ public extension Ring {
     
     public static func **(a: Self, n: Int) -> Self {
         return (0 ..< n).reduce(Self.identity){ (res, _) in res * a }
-    }
-    
-    // must override in subclass
-    public static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m> {
-        return BaseMatrixElimination<Self, n, m>(A, mode: mode)
     }
 }
 

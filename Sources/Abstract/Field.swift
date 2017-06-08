@@ -26,8 +26,4 @@ public extension Field {
     public static func eucDiv(_ a: Self, _ b: Self) -> (q: Self, r: Self) {
         return (a/b, 0)
     }
-    
-    public static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m> {
-        return FieldMatrixElimination<Self, n, m>(A, mode: mode)
-    }
 }

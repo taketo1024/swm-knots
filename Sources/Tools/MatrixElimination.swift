@@ -7,13 +7,13 @@ public enum MatrixEliminationMode {
 }
 
 // an abstract class
-public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
-    public let target: Matrix<R, n, m>
+public class BaseMatrixElimination<M: _Matrix> {
+    public let target: M
     public let mode: MatrixEliminationMode
     public let rows: Int
     public let cols: Int
     
-    public init(_ matrix: Matrix<R, n, m>, mode: MatrixEliminationMode = .Both) {
+    public init(_ matrix: M, mode: MatrixEliminationMode = .Both) {
         self.target = matrix
         self.mode = mode
         self.rows = matrix.rows
@@ -21,12 +21,12 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
     }
     
     // override point
-    fileprivate func processor() -> BaseEliminationProcessor<R, n, m> {
-        fatalError("MatrixElimination is not impled for Ring \(R.self).")
+    fileprivate func processor() -> BaseEliminationProcessor<M> {
+        fatalError("MatrixElimination is not impled for Ring \(M.R.self).")
     }
     
-    fileprivate var resultStorage: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>])?
-    fileprivate var result: (matrix: Matrix<R, n, m>, process: [EliminationStep<R>]) {
+    fileprivate var resultStorage: (matrix: M, process: [EliminationStep<M.R>])?
+    fileprivate var result: (matrix: M, process: [EliminationStep<M.R>]) {
         switch resultStorage {
         case let r?:
             return r
@@ -40,15 +40,15 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
         }
     }
     
-    public var rankNormalForm: Matrix<R, n, m> {
+    public var rankNormalForm: M {
         return result.matrix
     }
     
-    private var eliminationProcess: [EliminationStep<R>] {
+    private var eliminationProcess: [EliminationStep<M.R>] {
         return result.process
     }
     
-    public var left: Matrix<R, n, n> {
+    public var left: Matrix<M.R, M.Rows, M.Rows> {
         var Q = target.leftIdentity
         
         eliminationProcess
@@ -58,7 +58,7 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
         return Q
     }
     
-    public var leftInverse: Matrix<R, n, n> {
+    public var leftInverse: Matrix<M.R, M.Rows, M.Rows> {
         var Q = target.leftIdentity
         
         eliminationProcess
@@ -70,7 +70,7 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
         return Q
     }
     
-    public var right: Matrix<R, m, m> {
+    public var right: Matrix<M.R, M.Cols, M.Cols> {
         var P = target.rightIdentity
         
         eliminationProcess
@@ -80,7 +80,7 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
         return P
     }
     
-    public var rightInverse: Matrix<R, m, m> {
+    public var rightInverse: Matrix<M.R, M.Cols, M.Cols> {
         var P = target.rightIdentity
         
         eliminationProcess
@@ -92,7 +92,7 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
         return P
     }
     
-    public var diagonal: [R] {
+    public var diagonal: [M.R] {
         let B = rankNormalForm
         let r = min(self.rows, self.cols)
         return (0 ..< r).map{ B[$0, $0] }
@@ -101,35 +101,35 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
     public var rank: Int {
         let B = rankNormalForm
         let r = min(self.rows, self.cols)
-        return (0 ..< r).filter{ B[$0, $0] != R.zero }.count
+        return (0 ..< r).filter{ B[$0, $0] != M.R.zero }.count
     }
     
     public var nullity: Int {
         return cols - rank
     }
     
-    public var kernelPart: Matrix<R, m, Dynamic> {
+    public var kernelPart: Matrix<M.R, M.Cols, Dynamic> {
         return right.submatrix(colsInRange: rank ..< cols)
     }
     
-    public var kernelVectors: [ColVector<R, m>] {
+    public var kernelVectors: [ColVector<M.R, M.Cols>] {
         return kernelPart.toColVectors()
     }
     
-    public var imagePart: Matrix<R, n, Dynamic> {
+    public var imagePart: Matrix<M.R, M.Rows, Dynamic> {
         let d = diagonal
-        var a: Matrix<R, n, Dynamic> = leftInverse.submatrix(colsInRange: 0 ..< self.rank)
+        var a: Matrix<M.R, M.Rows, Dynamic> = leftInverse.submatrix(colsInRange: 0 ..< self.rank)
         (0 ..< min(d.count, a.cols)).forEach {
             a.multiplyCol(at: $0, by: d[$0])
         }
         return a
     }
     
-    public var imageVectors: [ColVector<R, n>] {
+    public var imageVectors: [ColVector<M.R, M.Rows>] {
         return imagePart.toColVectors()
     }
     
-    fileprivate func invert(_ s: EliminationStep<R>) -> EliminationStep<R> {
+    fileprivate func invert(_ s: EliminationStep<M.R>) -> EliminationStep<M.R> {
         switch s {
         case let .AddRow(i, j, r):
             return .AddRow(at: i, to: j, mul: -r)
@@ -143,18 +143,18 @@ public class BaseMatrixElimination<R: Ring, n: _Int, m: _Int> {
     }
 }
 
-public class EuclideanMatrixElimination<R: EuclideanRing, n: _Int, m: _Int>: BaseMatrixElimination<R, n, m> {
-    fileprivate override func processor() -> BaseEliminationProcessor<R, n, m> {
+public class EuclideanMatrixElimination<M: _Matrix>: BaseMatrixElimination<M> where M.R: EuclideanRing {
+    fileprivate override func processor() -> BaseEliminationProcessor<M> {
         return EuclideanEliminationProcessor(target, mode)
     }
 }
 
-public class FieldMatrixElimination<R: Field, n: _Int, m: _Int>: BaseMatrixElimination<R, n, m> {
-    fileprivate override func processor() -> BaseEliminationProcessor<R, n, m> {
+public class FieldMatrixElimination<M: _Matrix>: BaseMatrixElimination<M> where M.R: Field {
+    fileprivate override func processor() -> BaseEliminationProcessor<M> {
         return FieldEliminationProcessor(target, mode)
     }
 
-    fileprivate override func invert(_ s: EliminationStep<R>) -> EliminationStep<R> {
+    fileprivate override func invert(_ s: EliminationStep<M.R>) -> EliminationStep<M.R> {
         switch s {
         case let .MulRow(at: i, by: r):
             return .MulRow(at: i, by: r.inverse!)
@@ -191,7 +191,7 @@ fileprivate enum EliminationStep<R: Ring> {
     }
 }
 
-fileprivate extension Matrix {
+fileprivate extension _Matrix {
     mutating func apply(_ s: EliminationStep<R>) {
         switch s {
         case let .AddRow(i, j, r):
@@ -214,13 +214,13 @@ fileprivate extension Matrix {
 
 // base abstract class
 
-fileprivate struct EliminationIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
+fileprivate struct EliminationIterator<M: _Matrix> : IteratorProtocol {
     typealias Element = (Int, Int)
     
-    private weak var p: BaseEliminationProcessor<R, n, m>!
+    private weak var p: BaseEliminationProcessor<M>!
     private var current: (Int, Int)
     
-    init(_ processor: BaseEliminationProcessor<R, n, m>) {
+    init(_ processor: BaseEliminationProcessor<M>) {
         self.p = processor
         self.current = (p.itr, p.itr)
     }
@@ -249,20 +249,20 @@ fileprivate struct EliminationIterator<R: Ring, n: _Int, m: _Int> : IteratorProt
     }
 }
 
-fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
+fileprivate class BaseEliminationProcessor<M: _Matrix> {
     let mode: MatrixEliminationMode
     let rows: Int
     let cols: Int
     
-    var result: Matrix<R, n, m>
-    var process: [EliminationStep<R>]
+    var result: M
+    var process: [EliminationStep<M.R>]
     
     let maxItr: Int
     private(set) var itr = 0
     
     var debug: Bool = false
     
-    init(_ target: Matrix<R, n, m>, _ mode: MatrixEliminationMode = .Both) {
+    init(_ target: M, _ mode: MatrixEliminationMode = .Both) {
         self.mode = mode
         self.rows = target.rows
         self.cols = target.cols
@@ -296,7 +296,7 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
         fatalError()
     }
     
-    func apply(_ s: EliminationStep<R>) {
+    func apply(_ s: EliminationStep<M.R>) {
         result.apply(s)
         process.append(s)
         
@@ -314,7 +314,7 @@ fileprivate class BaseEliminationProcessor<R: Ring, n: _Int, m: _Int> {
     }
 }
 
-fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _Int>: BaseEliminationProcessor<R, n, m> {
+fileprivate class EuclideanEliminationProcessor<M: _Matrix>: BaseEliminationProcessor<M> where M.R: EuclideanRing {
     
     override func iteration() -> Bool {
         let doRows = (mode != .Cols)
@@ -356,7 +356,7 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
         }
         
         // TODO maybe implement NumberType or Comparable
-        if R.self == IntegerNumber.self && (result[i0, j0] as! IntegerNumber) < 0 {
+        if M.R.self == IntegerNumber.self && (result[i0, j0] as! IntegerNumber) < 0 {
             if doRows {
                 self.apply(.MulRow(at: i0, by: -1))
             } else {
@@ -376,7 +376,7 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
     }
     
     private func next() -> (Int, Int)? {
-        var min = R.zero
+        var min = M.R.zero
         var (i0, j0) = (0, 0)
         
         for (i, j) in indexIterator() {
@@ -474,7 +474,7 @@ fileprivate class EuclideanEliminationProcessor<R: EuclideanRing, n: _Int, m: _I
     }
 }
 
-fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEliminationProcessor<R, n, m> {
+fileprivate class FieldEliminationProcessor<M: _Matrix>: BaseEliminationProcessor<M> where M.R: Field {
     
     override func iteration() -> Bool {
         let doRows = (mode != .Cols)
@@ -521,7 +521,7 @@ fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEli
     
     private func eliminateRow(_ i0: Int, _ j0: Int) {
         let a = result[i0, j0]
-        if a != R.identity {
+        if a != 1 {
             apply(.MulRow(at: i0, by: a.inverse!))
         }
         
@@ -536,7 +536,7 @@ fileprivate class FieldEliminationProcessor<R: Field, n: _Int, m: _Int>: BaseEli
     
     private func eliminateCol(_ i0: Int, _ j0: Int) {
         let a = result[i0, j0]
-        if a != R.identity {
+        if a != 1 {
             apply(.MulCol(at: i0, by: a.inverse!))
         }
         

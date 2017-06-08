@@ -17,10 +17,6 @@ public extension EuclideanRing {
         return Self.eucDiv(a, b)
     }
     
-    static func matrixElimination<n:_Int, m:_Int>(_ A: Matrix<Self, n, m>, mode: MatrixEliminationMode) -> BaseMatrixElimination<Self, n, m> {
-        return EuclideanMatrixElimination<Self, n, m>(A, mode: mode)
-    }
-    
     public var asIdeal: EuclideanIdealInfo<Self> {
         return EuclideanIdealInfo(generator: self)
     }
