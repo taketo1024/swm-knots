@@ -29,7 +29,7 @@ do {
     typealias M = Matrix<Z,_3,_3>
     
     let A = M(1, -2, -6, 2, 4, 12, 1, -4, -12)
-    let E = EuclideanMatrixElimination(A)
+    let E = A.eliminate()
     let (B, P, Q) = (E.rankNormalForm, E.left, E.right)
     
     B == P * A * Q

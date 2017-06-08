@@ -123,6 +123,8 @@ public protocol _Matrix: Module, Sequence {
     subscript(i: Int, j: Int) -> R { get set }
     func gridIndex(_ i: Int, _ j: Int) -> Int
     
+    static func * <ResultCols: _Int>(_ a: Self, _ b: Matrix<R, Cols, ResultCols>) -> Matrix<R, Rows, ResultCols>
+    
     var transposed:    Matrix<R, Cols, Rows> { get }
     var leftIdentity:  Matrix<R, Rows, Rows> { get }
     var rightIdentity: Matrix<R, Cols, Cols> { get }
@@ -195,9 +197,9 @@ public extension _Matrix {
         }
     }
     
-    public static func * <bRows: _Int, bCols: _Int>(_ a: Self, _ b: Matrix<R, bRows, bCols>) -> Matrix<R, Self.Rows, bCols> where Self.Cols == bRows {
+    public static func * <ResultCols: _Int>(_ a: Self, _ b: Matrix<R, Cols, ResultCols>) -> Matrix<R, Rows, ResultCols> {
         assert(a.cols == b.rows, "Mismatching matrix size.")
-        return Matrix<R, Self.Rows, bCols> (rows: a.rows, cols: b.cols) { (i, k) -> R in
+        return Matrix<R, Rows, ResultCols>(rows: a.rows, cols: b.cols) { (i, k) -> R in
             return (0 ..< a.cols)
                 .map({j in a[i, j] * b[j, k]})
                 .reduce(0) {$0 + $1}
@@ -414,17 +416,6 @@ public extension _Matrix where R: EuclideanRing, Rows == Cols {
         return self.eliminate().diagonal.reduce(R.identity) { $0 * $1 }
     }
 }
-
-#if USE_EIGEN
-public extension _Matrix where R == IntegerNumber {
-    public static func * <bRows: _Int, bCols: _Int>(_ a: Self, _ b: Matrix<R, bRows, bCols>) -> Matrix<R, Self.Rows, bCols> where Self.Cols == bRows {
-        assert(a.cols == b.rows, "Mismatching matrix size.")
-        var result = Array(repeating: 0, count: a.rows * b.cols)
-        EigLib.multiple(&result, a.rows, a.cols, b.cols, a.grid, b.grid)
-        return Matrix<R, Rows, bCols>(rows: a.rows, cols: b.cols, grid: result)
-    }
-}
-#endif
 
 // MatrixIterator
 
