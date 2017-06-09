@@ -12,7 +12,7 @@ public typealias DynamicRowVector<R: Ring>      = Matrix<R, _1, Dynamic>
 public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
     public typealias R = _R
     
-    internal let impl: _MatrixImpl<R>
+    internal var impl: _MatrixImpl<R>
     
     // root initializer
     private init(_ impl: _MatrixImpl<R>) {
@@ -103,9 +103,19 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
     public var rows: Int { return impl.rows }
     public var cols: Int { return impl.cols }
     
+    private mutating func copyIfNecessary() {
+        if !isKnownUniquelyReferenced(&impl) {
+            print("copied!")
+            impl = impl.copy()
+        }
+    }
+    
     public subscript(i: Int, j: Int) -> R {
         get { return impl[i, j] }
-        set { impl[i, j] = newValue }
+        set {
+            copyIfNecessary()
+            impl[i, j] = newValue
+        }
     }
     
     public static var zero: Matrix<_R, n, m> {
@@ -185,26 +195,32 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
     }
     
     public mutating func multiplyRow(at i0: Int, by r: R) {
+        copyIfNecessary()
         impl.multiplyRow(at: i0, by: r)
     }
     
     public mutating func multiplyCol(at j0: Int, by r: R) {
+        copyIfNecessary()
         impl.multiplyCol(at: j0, by: r)
     }
     
     public mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R = 1) {
+        copyIfNecessary()
         impl.addRow(at: i0, to: i1, multipliedBy: r)
     }
     
     public mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R = 1) {
+        copyIfNecessary()
         impl.addCol(at: j0, to: j1, multipliedBy: r)
     }
     
     public mutating func swapRows(_ i0: Int, _ i1: Int) {
+        copyIfNecessary()
         impl.swapRows(i0, i1)
     }
     
     public mutating func swapCols(_ j0: Int, _ j1: Int) {
+        copyIfNecessary()
         impl.swapCols(j0, j1)
     }
     

@@ -41,6 +41,10 @@ public class _MatrixImpl<_R: Ring> {
         return createInstance(rows, cols, g)
     }
     
+    public func copy() -> Self {
+        return createInstance(grid)
+    }
+    
     internal func gridIndex(_ i: Int, _ j: Int) -> Int {
         return (i * cols) + j
     }
