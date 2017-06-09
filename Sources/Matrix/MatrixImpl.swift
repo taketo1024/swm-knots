@@ -8,9 +8,9 @@
 
 import Foundation
 
-public class _MatrixImpl<_R: Ring> {
-    public typealias R = _R
-    
+// Default Implementation for general Rings
+
+public class _MatrixImpl<R: Ring> {
     public final let rows: Int
     public final let cols: Int
     public final var grid: [R]
@@ -224,9 +224,60 @@ public class _MatrixImpl<_R: Ring> {
         }
     }
     
-    /*
-    public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<_MatrixImpl<R>> {
-        fatalError("MatrixElimination is not impled for \(R.self).")
+    public func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<R, n, m> {
+        fatalError("MatrixElimination is not supported for a general Ring.")
     }
- */
+    
+    public func determinant() -> R {
+        fatalError("determinant not yet impled for a general Ring.")
+    }
+    
+    public final var description: String {
+        return "[" + (0 ..< rows).map({ i in
+            return (0 ..< cols).map({ j in
+                return "\(self[i, j])"
+            }).joined(separator: ", ")
+        }).joined(separator: "; ") + "]"
+    }
+    
+    public final var alignedDescription: String {
+        return "[\t" + (0 ..< rows).map({ i in
+            return (0 ..< cols).map({ j in
+                return "\(self[i, j])"
+            }).joined(separator: ",\t")
+        }).joined(separator: "\n\t") + "]"
+    }
+}
+
+// Implementation for EuclideanRings
+
+public extension EuclideanRing {
+    public static var matrixImplType: _MatrixImpl<Self>.Type {
+        return _EucMatrixImpl<Self>.self
+    }
+}
+
+public class _EucMatrixImpl<R: EuclideanRing>: _MatrixImpl<R> {
+    public override func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<R, n, m> {
+        return MatrixElimination(self, mode, EucMatrixEliminationProcessor<R>.self)
+    }
+    
+    public override func determinant() -> R {
+        let e: MatrixElimination<R, Dynamic, Dynamic> = self.eliminate(mode: .Both)
+        return e.determinant
+    }
+}
+
+// Implementation for Fields
+
+public extension Field {
+    public static var matrixImplType: _MatrixImpl<Self>.Type {
+        return _FieldMatrixImpl<Self>.self
+    }
+}
+
+public class _FieldMatrixImpl<K: Field>: _EucMatrixImpl<K> {
+    public override func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<K, n, m> {
+        return MatrixElimination(self, mode, FieldMatrixEliminationProcessor<K>.self)
+    }
 }

@@ -9,13 +9,14 @@ public typealias DynamicMatrix<R: Ring>         = Matrix<R, Dynamic, Dynamic>
 public typealias DynamicColVector<R: Ring>      = Matrix<R, Dynamic, _1>
 public typealias DynamicRowVector<R: Ring>      = Matrix<R, _1, Dynamic>
 
-public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
+public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public typealias R = _R
+    public typealias Iterator = MatrixIterator<R, n, m>
     
     internal var impl: _MatrixImpl<R>
     
     // root initializer
-    private init(_ impl: _MatrixImpl<R>) {
+    internal init(_ impl: _MatrixImpl<R>) {
         self.impl = impl
     }
     
@@ -118,32 +119,36 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
         }
     }
     
-    public static var zero: Matrix<_R, n, m> {
+    public func makeIterator() -> MatrixIterator<R, n, m> {
+        return MatrixIterator(self)
+    }
+    
+    public static var zero: Matrix<R, n, m> {
         return Matrix<R, n, m> { _,_ in 0 }
     }
     
-    public static func ==(a: Matrix<_R, n, m>, b: Matrix<_R, n, m>) -> Bool {
+    public static func ==(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Bool {
         return a.impl.equals(b.impl)
     }
     
-    public static func +(a: Matrix<_R, n, m>, b: Matrix<_R, n, m>) -> Matrix<_R, n, m> {
+    public static func +(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
         return Matrix(a.impl.add(b.impl))
     }
     
-    public prefix static func -(a: Matrix<_R, n, m>) -> Matrix<_R, n, m> {
+    public prefix static func -(a: Matrix<R, n, m>) -> Matrix<R, n, m> {
         return Matrix(a.impl.negate())
     }
     
-    public static func *(r: _R, a: Matrix<_R, n, m>) -> Matrix<_R, n, m> {
+    public static func *(r: R, a: Matrix<R, n, m>) -> Matrix<R, n, m> {
         return Matrix(a.impl.leftMul(r))
     }
     
-    public static func *(a: Matrix<_R, n, m>, r: _R) -> Matrix<_R, n, m> {
+    public static func *(a: Matrix<R, n, m>, r: R) -> Matrix<R, n, m> {
         return Matrix(a.impl.rightMul(r))
     }
     
-    public static func * <p: _Int>(a: Matrix<_R, n, m>, b: Matrix<_R, m, p>) -> Matrix<_R, n, p> {
-        return Matrix<_R, n, p>(a.impl.mul(b.impl))
+    public static func * <p: _Int>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
+        return Matrix<R, n, p>(a.impl.mul(b.impl))
     }
     
     public var transposed: Matrix<R, m, n> {
@@ -175,11 +180,11 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
     }
     
     public func toRowVectors() -> [RowVector<R, m>] {
-        return (0 ..< cols).map{ rowVector($0) }
+        return (0 ..< rows).map{ rowVector($0) }
     }
     
     public func toColVectors() -> [ColVector<R, n>] {
-        return (0 ..< rows).map{ colVector($0) }
+        return (0 ..< cols).map{ colVector($0) }
     }
     
     public func submatrix<k: _Int>(colsInRange c: CountableRange<Int>) -> Matrix<R, n, k> {
@@ -224,32 +229,26 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
         impl.swapCols(j0, j1)
     }
     
-    public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<R, n, m> {
-        fatalError("MatrixElimination is not impled for \(R.self).")
-    }
-    
     public var hashValue: Int {
         return 0 // TODO
     }
     
     public var description: String {
-        return "[" + (0 ..< rows).map({ i in
-            return (0 ..< cols).map({ j in
-                return "\(self[i, j])"
-            }).joined(separator: ", ")
-        }).joined(separator: "; ") + "]"
+        return impl.description
     }
     
     public var alignedDescription: String {
-        return "[\t" + (0 ..< rows).map({ i in
-            return (0 ..< cols).map({ j in
-                return "\(self[i, j])"
-            }).joined(separator: ",\t")
-        }).joined(separator: "\n\t") + "]"
+        return impl.alignedDescription
     }
     
     public static var symbol: String {
         return "M(\((n.self == Dynamic.self ? "?" : "\(n.intValue)")), \((m.self == Dynamic.self ? "?" : "\(m.intValue)")); \(R.symbol))"
+    }
+}
+
+public extension Matrix where R: EuclideanRing {
+    public func eliminate(mode: MatrixEliminationMode = .Both) -> MatrixElimination<R, n, m> {
+        return impl.eliminate(mode: mode)
     }
 }
 
@@ -269,6 +268,10 @@ public extension Matrix where n == _1 {
 
 // TODO: conform to Ring after conditional conformance is supported.
 public extension Matrix where n == m {
+    public var determinant: R {
+        return impl.determinant()
+    }
+    
     public static var identity: Matrix<R, n, n> {
         return Matrix<R, n, n>(rows: Auto, cols: Auto) { $0 == $1 ? 1 : 0 }
     }
@@ -279,16 +282,15 @@ public extension Matrix where n == m {
 }
 
 // MatrixIterator
-/*
-public struct MatrixIterator<M: _Matrix> : IteratorProtocol {
-    private let value: M
+public struct MatrixIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
+    private let value: Matrix<R, n, m>
     private var current = (0, 0)
     
-    public init(_ value: M) {
+    public init(_ value: Matrix<R, n, m>) {
         self.value = value
     }
     
-    mutating public func next() -> (value: M.R, row: Int, col: Int)? {
+    mutating public func next() -> (value: R, row: Int, col: Int)? {
         guard current.0 < value.rows && current.1 < value.cols else {
             return nil
         }
@@ -305,4 +307,3 @@ public struct MatrixIterator<M: _Matrix> : IteratorProtocol {
         return (value[current.0, current.1], current.0, current.1)
     }
 }
-*/
