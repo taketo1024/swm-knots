@@ -27,6 +27,13 @@ extension IntegerNumber: EuclideanRing {
     public var evenOddSign: Int {
         return (self % 2 == 0) ? 1 : -1
     }
+    
+    #if USE_EIGEN
+    public static var matrixImplType: _MatrixImpl<Int>.Type {
+        // TODO return _IntMatrixImpl
+        return _MatrixImpl<Int>.self
+    }
+    #endif
 }
 
 public struct IntegerIdeal<n: _Int>: EuclideanIdeal {

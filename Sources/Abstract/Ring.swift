@@ -5,6 +5,7 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
     init(intValue: IntegerNumber)
     var inverse: Self? { get }
     var isUnit: Bool { get }
+    static var matrixImplType: _MatrixImpl<Self>.Type { get }
 }
 
 public extension Ring {
@@ -27,6 +28,10 @@ public extension Ring {
     
     public static func **(a: Self, n: Int) -> Self {
         return (0 ..< n).reduce(Self.identity){ (res, _) in res * a }
+    }
+    
+    public static var matrixImplType: _MatrixImpl<Self>.Type {
+        return _MatrixImpl<Self>.self
     }
 }
 

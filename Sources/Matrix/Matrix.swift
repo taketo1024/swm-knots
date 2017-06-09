@@ -9,20 +9,14 @@ public typealias DynamicMatrix<R: Ring>         = Matrix<R, Dynamic, Dynamic>
 public typealias DynamicColVector<R: Ring>      = Matrix<R, Dynamic, _1>
 public typealias DynamicRowVector<R: Ring>      = Matrix<R, _1, Dynamic>
 
-public struct Matrix<_R: Ring, n: _Int, m: _Int>: _Matrix {
+public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
     public typealias R = _R
-    public typealias Rows = n
-    public typealias Cols = m
     
-    public let rows: Int
-    public let cols: Int
-    public var grid: [R]
+    internal let impl: _MatrixImpl<R>
     
     // root initializer
-    private init(_ rows: Int, _ cols: Int, _ grid: [R]) {
-        self.rows = rows
-        self.cols = cols
-        self.grid = grid
+    private init(_ impl: _MatrixImpl<R>) {
+        self.impl = impl
     }
     
     public init(rows r: Int = Auto, cols c: Int = Auto, grid: [R]) {
@@ -32,7 +26,7 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: _Matrix {
                    (l >  required) ? Array(grid[0 ..< required]) :
                                      grid + Array(repeating: R.zero, count: required - l)
         
-        self.init(rows, cols, grid)
+        self.init(R.matrixImplType.init(rows, cols, grid))
     }
     
     public init(rows r: Int = Auto, cols c: Int = Auto, gridGenerator g: (Int, Int) -> R) {
@@ -42,7 +36,7 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: _Matrix {
             return g(i, j)
         }
         
-        self.init(rows, cols, grid)
+        self.init(R.matrixImplType.init(rows, cols, grid))
     }
 
     public init(_ grid: R...) {
@@ -54,7 +48,7 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: _Matrix {
             return (a + b - 1) / b
         }
         
-        switch(Rows.self, Cols.self) {
+        switch(n.self, m.self) {
             
         // completely determined by type.
         case let (R, C) where !(R is Dynamic.Type) && !(C is Dynamic.Type):
@@ -105,253 +99,121 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: _Matrix {
             fatalError()
         }
     }
-}
-
-// Details implemented by protocol extension to enable polymorphism.
-
-public protocol _Matrix: Module, Sequence {
-    associatedtype Rows: _Int
-    associatedtype Cols: _Int
-    typealias Iterator = MatrixIterator<Self>
     
-    var rows: Int { get }
-    var cols: Int { get }
-    var grid: [R] { get set }
-    
-    init(rows: Int, cols: Int, grid: [R])
-    init(rows: Int, cols: Int, gridGenerator g: (Int, Int) -> R)
-    
-    subscript(i: Int, j: Int) -> R { get set }
-    func gridIndex(_ i: Int, _ j: Int) -> Int
-    
-    static func * <ResultCols: _Int>(_ a: Self, _ b: Matrix<R, Cols, ResultCols>) -> Matrix<R, Rows, ResultCols>
-    
-    var transposed:    Matrix<R, Cols, Rows> { get }
-    var leftIdentity:  Matrix<R, Rows, Rows> { get }
-    var rightIdentity: Matrix<R, Cols, Cols> { get }
-    
-    func rowArray(_ i: Int) -> [R]
-    func colArray(_ j: Int) -> [R]
-    func rowVector(_ i: Int) -> RowVector<R, Cols>
-    func colVector(_ j: Int) -> ColVector<R, Rows>
-    func toRowVectors() -> [RowVector<R, Cols>]
-    func toColVectors() -> [ColVector<R, Rows>]
-    func submatrix<SubCols: _Int>(colsInRange c: CountableRange<Int>) -> Matrix<R, Rows, SubCols>
-    func submatrix<SubRows: _Int>(rowsInRange r: CountableRange<Int>) -> Matrix<R, SubRows, Cols>
-    func submatrix<SubRows: _Int, SubCols: _Int>(inRange: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> Matrix<R, SubRows, SubCols>
-    
-    mutating func multiplyRow(at i0: Int, by r: R)
-    mutating func multiplyCol(at j0: Int, by r: R)
-    mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R)
-    mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R)
-    mutating func swapRows(_ i0: Int, _ i1: Int)
-    mutating func swapCols(_ j0: Int, _ j1: Int)
-    
-    func eliminate(mode: MatrixEliminationMode) -> BaseMatrixElimination<Self>
-}
-
-public extension _Matrix {
-    public func gridIndex(_ i: Int, _ j: Int) -> Int {
-        return (i * cols) + j
-    }
+    public var rows: Int { return impl.rows }
+    public var cols: Int { return impl.cols }
     
     public subscript(i: Int, j: Int) -> R {
-        get { return grid[gridIndex(i, j)] }
-        set { grid[gridIndex(i, j)] = newValue }
+        get { return impl[i, j] }
+        set { impl[i, j] = newValue }
     }
     
-    public func makeIterator() -> MatrixIterator<Self> {
-        return MatrixIterator(self)
+    public static var zero: Matrix<_R, n, m> {
+        return Matrix<R, n, m> { _,_ in 0 }
     }
     
-    public static var zero: Self {
-        return Self(rows: Auto, cols: Auto) { _ in 0 }
+    public static func ==(a: Matrix<_R, n, m>, b: Matrix<_R, n, m>) -> Bool {
+        return a.impl.equals(b.impl)
     }
     
-    public static func == (a: Self, b: Self) -> Bool {
-        assert((a.rows, a.cols) == (b.rows, b.cols), "Mismatching matrix size.")
-        return a.grid == b.grid
+    public static func +(a: Matrix<_R, n, m>, b: Matrix<_R, n, m>) -> Matrix<_R, n, m> {
+        return Matrix<_R, n, m>(a.impl.add(b.impl))
     }
     
-    public static func + (a: Self, b: Self) -> Self {
-        assert((a.rows, a.cols) == (b.rows, b.cols), "Mismatching matrix size.")
-        return Self(rows: a.rows, cols: a.cols) { (i, j) -> R in
-            return a[i, j] + b[i, j]
-        }
+    public prefix static func -(a: Matrix<_R, n, m>) -> Matrix<_R, n, m> {
+        return Matrix<_R, n, m>(a.impl.negate())
     }
     
-    public static prefix func - (a: Self) -> Self {
-        return Self(rows: a.rows, cols: a.cols) { (i, j) -> R in
-            return -a[i, j]
-        }
+    public static func *(r: _R, a: Matrix<_R, n, m>) -> Matrix<_R, n, m> {
+        return Matrix<_R, n, m>(a.impl.leftMul(r))
     }
     
-    public static func * (r: R, a: Self) -> Self {
-        return Self(rows: a.rows, cols: a.cols) { (i, j) -> R in
-            return r * a[i, j]
-        }
+    public static func *(a: Matrix<_R, n, m>, r: _R) -> Matrix<_R, n, m> {
+        return Matrix<_R, n, m>(a.impl.rightMul(r))
     }
     
-    public static func * (a: Self, r: R) -> Self {
-        return Self(rows: a.rows, cols: a.cols) { (i, j) -> R in
-            return a[i, j] * r
-        }
+    public static func * <p: _Int>(a: Matrix<_R, n, m>, b: Matrix<_R, m, p>) -> Matrix<_R, n, p> {
+        return Matrix<_R, n, p>(a.impl.mul(b.impl))
     }
     
-    public static func * <ResultCols: _Int>(_ a: Self, _ b: Matrix<R, Cols, ResultCols>) -> Matrix<R, Rows, ResultCols> {
-        assert(a.cols == b.rows, "Mismatching matrix size.")
-        return Matrix<R, Rows, ResultCols>(rows: a.rows, cols: b.cols) { (i, k) -> R in
-            return (0 ..< a.cols)
-                .map({j in a[i, j] * b[j, k]})
-                .reduce(0) {$0 + $1}
-        }
+    public var transposed: Matrix<R, m, n> {
+        return Matrix<R, m, n>(impl.transpose())
     }
     
-    public var transposed: Matrix<R, Cols, Rows> {
-        return Matrix<R, Cols, Rows>(rows: cols, cols: rows) { self[$1, $0] }
+    public var leftIdentity: Matrix<R, n, n> {
+        fatalError()
     }
     
-    public var leftIdentity: Matrix<R, Rows, Rows> {
-        return Matrix<R, Rows, Rows>(rows: rows, cols: rows) { $0 == $1 ? 1 : 0 }
-    }
-    
-    public var rightIdentity: Matrix<R, Cols, Cols> {
-        return Matrix<R, Cols, Cols>(rows: cols, cols: cols) { $0 == $1 ? 1 : 0 }
+    public var rightIdentity: Matrix<R, m, m> {
+        fatalError()
     }
     
     public func rowArray(_ i: Int) -> [R] {
-        return (0 ..< cols).map{ j in self[i, j] }
+        fatalError()
     }
     
     public func colArray(_ j: Int) -> [R] {
-        return (0 ..< rows).map{ i in self[i, j] }
+        fatalError()
     }
     
-    public func rowVector(_ i: Int) -> RowVector<R, Cols> {
-        return RowVector<R, Cols>(rows: 1, cols: cols){(_, j) -> R in
-            return self[i, j]
-        }
+    public func rowVector(_ i: Int) -> RowVector<R, m> {
+        fatalError()
     }
     
-    public func colVector(_ j: Int) -> ColVector<R, Rows> {
-        return ColVector<R, Rows>(rows: rows, cols: 1){(i, _) -> R in
-            return self[i, j]
-        }
+    public func colVector(_ j: Int) -> ColVector<R, n> {
+        fatalError()
     }
     
-    public func toRowVectors() -> [RowVector<R, Cols>] {
-        return (0 ..< rows).map { rowVector($0) }
+    public func toRowVectors() -> [RowVector<R, m>] {
+        fatalError()
     }
     
-    public func toColVectors() -> [ColVector<R, Rows>] {
-        return (0 ..< cols).map { colVector($0) }
+    public func toColVectors() -> [ColVector<R, n>] {
+        fatalError()
     }
     
-    public func submatrix<SubCols: _Int>(colsInRange c: CountableRange<Int>) -> Matrix<R, Rows, SubCols> {
-        return Matrix<R, Rows, SubCols>(rows: self.rows, cols: c.upperBound - c.lowerBound) {
-            self[$0, $1 + c.lowerBound]
-        }
+    public func submatrix<k: _Int>(colsInRange c: CountableRange<Int>) -> Matrix<R, n, k> {
+        fatalError()
     }
     
-    public func submatrix<SubRows: _Int>(rowsInRange r: CountableRange<Int>) -> Matrix<R, SubRows, Cols> {
-        return Matrix<R, SubRows, Cols>(rows: r.upperBound - r.lowerBound, cols: self.cols) {
-            self[$0 + r.lowerBound, $1]
-        }
+    public func submatrix<k: _Int>(rowsInRange r: CountableRange<Int>) -> Matrix<R, k, m> {
+        fatalError()
     }
     
-    public func submatrix<SubRows: _Int, SubCols: _Int>(inRange: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> Matrix<R, SubRows, SubCols> {
-        let (r, c) = inRange
-        return Matrix<R, SubRows, SubCols>(rows: r.upperBound - r.lowerBound, cols: c.upperBound - c.lowerBound) {
-            self[$0 + r.lowerBound, $1 + c.lowerBound]
-        }
+    public func submatrix<k: _Int, l: _Int>(inRange: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> Matrix<R, k, l> {
+        fatalError()
     }
     
     public mutating func multiplyRow(at i0: Int, by r: R) {
-        var p = UnsafeMutablePointer(&grid)
-        p += gridIndex(i0, 0)
-        
-        for _ in 0 ..< cols {
-            p.pointee = r * p.pointee
-            p += 1
-        }
+        fatalError()
     }
     
     public mutating func multiplyCol(at j0: Int, by r: R) {
-        var p = UnsafeMutablePointer(&grid)
-        p += gridIndex(0, j0)
-        
-        for _ in 0 ..< rows {
-            p.pointee = r * p.pointee
-            p += cols
-        }
+        fatalError()
     }
     
     public mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R = 1) {
-        var p0 = UnsafeMutablePointer(&grid)
-        p0 += gridIndex(i0, 0)
-        
-        var p1 = UnsafeMutablePointer(&grid)
-        p1 += gridIndex(i1, 0)
-        
-        for _ in 0 ..< cols {
-            p1.pointee = p1.pointee + r * p0.pointee
-            p0 += 1
-            p1 += 1
-        }
+        fatalError()
     }
     
     public mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R = 1) {
-        var p0 = UnsafeMutablePointer(&grid)
-        p0 += gridIndex(0, j0)
-        
-        var p1 = UnsafeMutablePointer(&grid)
-        p1 += gridIndex(0, j1)
-        
-        for _ in 0 ..< rows {
-            p1.pointee = p1.pointee + r * p0.pointee
-            p0 += cols
-            p1 += cols
-        }
+        fatalError()
     }
     
     public mutating func swapRows(_ i0: Int, _ i1: Int) {
-        var p0 = UnsafeMutablePointer(&grid)
-        p0 += gridIndex(i0, 0)
-        
-        var p1 = UnsafeMutablePointer(&grid)
-        p1 += gridIndex(i1, 0)
-        
-        for _ in 0 ..< cols {
-            let a = p0.pointee
-            p0.pointee = p1.pointee
-            p1.pointee = a
-            p0 += 1
-            p1 += 1
-        }
+        fatalError()
     }
     
     public mutating func swapCols(_ j0: Int, _ j1: Int) {
-        var p0 = UnsafeMutablePointer(&grid)
-        p0 += gridIndex(0, j0)
-        
-        var p1 = UnsafeMutablePointer(&grid)
-        p1 += gridIndex(0, j1)
-        
-        for _ in 0 ..< rows {
-            let a = p0.pointee
-            p0.pointee = p1.pointee
-            p1.pointee = a
-            p0 += cols
-            p1 += cols
-        }
+        fatalError()
     }
     
-    public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<Self> {
+    public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<R, n, m> {
         fatalError("MatrixElimination is not impled for \(R.self).")
     }
     
     public var hashValue: Int {
-        return grid.count > 0 ? grid[0].hashValue : 0
+        return 0 // TODO
     }
     
     public var description: String {
@@ -371,55 +233,37 @@ public extension _Matrix {
     }
     
     public static var symbol: String {
-        return "M(\((Rows.self == Dynamic.self ? "?" : "\(Rows.intValue)")), \((Cols.self == Dynamic.self ? "?" : "\(Cols.intValue)")); \(R.symbol))"
+        return "M(\((n.self == Dynamic.self ? "?" : "\(n.intValue)")), \((m.self == Dynamic.self ? "?" : "\(m.intValue)")); \(R.symbol))"
     }
 }
 
-public extension _Matrix where R: EuclideanRing {
-    public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<Self> {
-        return EuclideanMatrixElimination(self, mode: mode)
-    }
-}
-
-public extension _Matrix where R: Field {
-    public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<Self> {
-        return FieldMatrixElimination(self, mode: mode)
-    }
-}
-
-public extension _Matrix where Cols == _1 {
+public extension Matrix where m == _1 {
     public subscript(index: Int) -> R {
-        get { return grid[index] }
-        set { grid[index] = newValue }
+        get { return self[index, 0] }
+        set { self[index, 0] = newValue }
     }
 }
 
-public extension _Matrix where Rows == _1 {
+public extension Matrix where n == _1 {
     public subscript(index: Int) -> R {
-        get { return grid[index] }
-        set { grid[index] = newValue }
+        get { return self[0, index] }
+        set { self[0, index] = newValue }
     }
 }
 
 // TODO: conform to Ring after conditional conformance is supported.
-public extension _Matrix where Rows == Cols {
-    public static var identity: Self {
-        return Self(rows: Auto, cols: Auto) { $0 == $1 ? 1 : 0 }
+public extension Matrix where n == m {
+    public static var identity: Matrix<R, n, n> {
+        return Matrix<R, n, n>(rows: Auto, cols: Auto) { $0 == $1 ? 1 : 0 }
     }
     
-    public static func ** (a: Self, k: Int) -> Matrix<R, Rows, Rows> {
+    public static func ** (a: Matrix<R, n, n>, k: Int) -> Matrix<R, n, n> {
         return k == 0 ? a.leftIdentity : a * (a ** (k - 1))
     }
 }
 
-public extension _Matrix where R: EuclideanRing, Rows == Cols {
-    public var determinant: R {
-        return self.eliminate().diagonal.reduce(R.identity) { $0 * $1 }
-    }
-}
-
 // MatrixIterator
-
+/*
 public struct MatrixIterator<M: _Matrix> : IteratorProtocol {
     private let value: M
     private var current = (0, 0)
@@ -445,3 +289,4 @@ public struct MatrixIterator<M: _Matrix> : IteratorProtocol {
         return (value[current.0, current.1], current.0, current.1)
     }
 }
+*/

@@ -49,6 +49,7 @@
 		14A85FF71EDBED9C00A754EA /* Dynamic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A85FF61EDBED9C00A754EA /* Dynamic.swift */; };
 		14B2FB8C1ED8FBA000C182EB /* MatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */; };
 		14B42A981EE6264300D99997 /* DynamicRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B42A971EE6264300D99997 /* DynamicRing.swift */; };
+		14C908881EEA8AD7002C657B /* MatrixImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C908871EEA8AD7002C657B /* MatrixImpl.swift */; };
 		14D261321EE44DB4006775E2 /* DynamicType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261311EE44DB4006775E2 /* DynamicType.swift */; };
 		14D261341EE4614E006775E2 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* Set.swift */; };
 		14E7BECB1ED84B3400BBA72A /* EigenLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 14E7BEC91ED84B3400BBA72A /* EigenLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -119,6 +120,7 @@
 		14A85FF61EDBED9C00A754EA /* Dynamic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dynamic.swift; sourceTree = "<group>"; };
 		14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixTests.swift; sourceTree = "<group>"; };
 		14B42A971EE6264300D99997 /* DynamicRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DynamicRing.swift; path = Dynamic/DynamicRing.swift; sourceTree = "<group>"; };
+		14C908871EEA8AD7002C657B /* MatrixImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixImpl.swift; sourceTree = "<group>"; };
 		14D261311EE44DB4006775E2 /* DynamicType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DynamicType.swift; path = Dynamic/DynamicType.swift; sourceTree = "<group>"; };
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
 		14E7BEC91ED84B3400BBA72A /* EigenLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EigenLib.h; sourceTree = "<group>"; };
@@ -286,8 +288,9 @@
 			isa = PBXGroup;
 			children = (
 				1424F4E11EB997780052581F /* Matrix.swift */,
-				1482E05C1EE96BA700B0CEFA /* Matrix+Eigen.swift */,
+				14C908871EEA8AD7002C657B /* MatrixImpl.swift */,
 				1424F4F01EB997780052581F /* MatrixElimination.swift */,
+				1482E05C1EE96BA700B0CEFA /* Matrix+Eigen.swift */,
 				14E7BEC91ED84B3400BBA72A /* EigenLib.h */,
 				14E7BECA1ED84B3400BBA72A /* EigenLib.mm */,
 			);
@@ -468,6 +471,7 @@
 			files = (
 				14A85FF71EDBED9C00A754EA /* Dynamic.swift in Sources */,
 				1424F4FA1EB997780052581F /* EuclideanRing.swift in Sources */,
+				14C908881EEA8AD7002C657B /* MatrixImpl.swift in Sources */,
 				144AD2911EC21A4500E23890 /* Homology.swift in Sources */,
 				1424F4F91EB997780052581F /* AdditiveGroup.swift in Sources */,
 				1424F5071EB997780052581F /* Rational.swift in Sources */,
