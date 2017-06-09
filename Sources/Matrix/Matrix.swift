@@ -117,19 +117,19 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
     }
     
     public static func +(a: Matrix<_R, n, m>, b: Matrix<_R, n, m>) -> Matrix<_R, n, m> {
-        return Matrix<_R, n, m>(a.impl.add(b.impl))
+        return Matrix(a.impl.add(b.impl))
     }
     
     public prefix static func -(a: Matrix<_R, n, m>) -> Matrix<_R, n, m> {
-        return Matrix<_R, n, m>(a.impl.negate())
+        return Matrix(a.impl.negate())
     }
     
     public static func *(r: _R, a: Matrix<_R, n, m>) -> Matrix<_R, n, m> {
-        return Matrix<_R, n, m>(a.impl.leftMul(r))
+        return Matrix(a.impl.leftMul(r))
     }
     
     public static func *(a: Matrix<_R, n, m>, r: _R) -> Matrix<_R, n, m> {
-        return Matrix<_R, n, m>(a.impl.rightMul(r))
+        return Matrix(a.impl.rightMul(r))
     }
     
     public static func * <p: _Int>(a: Matrix<_R, n, m>, b: Matrix<_R, m, p>) -> Matrix<_R, n, p> {
@@ -141,71 +141,71 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module {
     }
     
     public var leftIdentity: Matrix<R, n, n> {
-        fatalError()
+        return Matrix<R, n, n>(impl.leftIdentity())
     }
     
     public var rightIdentity: Matrix<R, m, m> {
-        fatalError()
+        return Matrix<R, m, m>(impl.rightIdentity())
     }
     
     public func rowArray(_ i: Int) -> [R] {
-        fatalError()
+        return impl.rowArray(i)
     }
     
     public func colArray(_ j: Int) -> [R] {
-        fatalError()
+        return impl.colArray(j)
     }
     
     public func rowVector(_ i: Int) -> RowVector<R, m> {
-        fatalError()
+        return RowVector(impl.rowVector(i))
     }
     
     public func colVector(_ j: Int) -> ColVector<R, n> {
-        fatalError()
+        return ColVector(impl.colVector(j))
     }
     
     public func toRowVectors() -> [RowVector<R, m>] {
-        fatalError()
+        return (0 ..< cols).map{ rowVector($0) }
     }
     
     public func toColVectors() -> [ColVector<R, n>] {
-        fatalError()
+        return (0 ..< rows).map{ colVector($0) }
     }
     
     public func submatrix<k: _Int>(colsInRange c: CountableRange<Int>) -> Matrix<R, n, k> {
-        fatalError()
+        return Matrix<R, n, k>(impl.submatrix(colsInRange: c))
     }
     
     public func submatrix<k: _Int>(rowsInRange r: CountableRange<Int>) -> Matrix<R, k, m> {
-        fatalError()
+        return Matrix<R, k, m>(impl.submatrix(rowsInRange: r))
     }
     
-    public func submatrix<k: _Int, l: _Int>(inRange: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> Matrix<R, k, l> {
-        fatalError()
+    public func submatrix<k: _Int, l: _Int>(inRange range: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> Matrix<R, k, l> {
+        return Matrix<R, k, l>(impl.submatrix(inRange: range))
     }
     
     public mutating func multiplyRow(at i0: Int, by r: R) {
-        fatalError()
+        impl.multiplyRow(at: i0, by: r)
     }
     
     public mutating func multiplyCol(at j0: Int, by r: R) {
-        fatalError()
+        impl.multiplyCol(at: j0, by: r)
     }
     
     public mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R = 1) {
-        fatalError()
+        impl.addRow(at: i0, to: i1, multipliedBy: r)
     }
     
     public mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R = 1) {
-        fatalError()
+        impl.addCol(at: j0, to: j1, multipliedBy: r)
     }
     
     public mutating func swapRows(_ i0: Int, _ i1: Int) {
-        fatalError()
+        impl.swapRows(i0, i1)
     }
     
     public mutating func swapCols(_ j0: Int, _ j1: Int) {
-        fatalError()
+        impl.swapCols(j0, j1)
     }
     
     public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<R, n, m> {

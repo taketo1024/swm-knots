@@ -93,13 +93,12 @@ public class _MatrixImpl<_R: Ring> {
         return createInstance(cols, rows) { self[$1, $0] }
     }
     
-    /*
-    public var leftIdentity: Matrix<R, Rows, Rows> {
-        return Matrix<R, Rows, Rows>(rows, rows) { $0 == $1 ? 1 : 0 }
+    public func leftIdentity() -> Self {
+        return createInstance(rows, rows) { $0 == $1 ? 1 : 0 }
     }
     
-    public var rightIdentity: Matrix<R, Cols, Cols> {
-        return Matrix<R, Cols, Cols>(cols, cols) { $0 == $1 ? 1 : 0 }
+    public func rightIdentity() -> Self {
+        return createInstance(cols, cols) { $0 == $1 ? 1 : 0 }
     }
     
     public func rowArray(_ i: Int) -> [R] {
@@ -110,46 +109,38 @@ public class _MatrixImpl<_R: Ring> {
         return (0 ..< rows).map{ i in self[i, j] }
     }
     
-    public func rowVector(_ i: Int) -> RowVector<R, Cols> {
-        return RowVector<R, Cols>(1, cols){(_, j) -> R in
+    public func rowVector(_ i: Int) -> Self {
+        return createInstance(1, cols){(_, j) -> R in
             return self[i, j]
         }
     }
     
-    public func colVector(_ j: Int) -> ColVector<R, Rows> {
-        return ColVector<R, Rows>(rows, 1){(i, _) -> R in
+    public func colVector(_ j: Int) -> Self {
+        return createInstance(rows, 1){(i, _) -> R in
             return self[i, j]
         }
     }
     
-    public func toRowVectors() -> [RowVector<R, Cols>] {
-        return (0 ..< rows).map { rowVector($0) }
-    }
-    
-    public func toColVectors() -> [ColVector<R, Rows>] {
-        return (0 ..< cols).map { colVector($0) }
-    }
-    
-    public func submatrix<SubCols: _Int>(colsInRange c: CountableRange<Int>) -> Matrix<R, Rows, SubCols> {
-        return Matrix<R, Rows, SubCols>(self.rows, c.upperBound - c.lowerBound) {
+    public func submatrix(colsInRange c: CountableRange<Int>) -> Self {
+        return createInstance(self.rows, c.upperBound - c.lowerBound) {
             self[$0, $1 + c.lowerBound]
         }
     }
     
-    public func submatrix<SubRows: _Int>(rowsInRange r: CountableRange<Int>) -> Matrix<R, SubRows, Cols> {
-        return Matrix<R, SubRows, Cols>(r.upperBound - r.lowerBound, self.cols) {
+    public func submatrix(rowsInRange r: CountableRange<Int>) -> Self {
+        return createInstance(r.upperBound - r.lowerBound, self.cols) {
             self[$0 + r.lowerBound, $1]
         }
     }
     
-    public func submatrix<SubRows: _Int, SubCols: _Int>(inRange: (CountableRange<Int>, CountableRange<Int>)) -> Matrix<R, SubRows, SubCols> {
+    public func submatrix(inRange: (CountableRange<Int>, CountableRange<Int>)) -> Self {
         let (r, c) = inRange
-        return Matrix<R, SubRows, SubCols>(r.upperBound - r.lowerBound, c.upperBound - c.lowerBound) {
+        return createInstance(r.upperBound - r.lowerBound, c.upperBound - c.lowerBound) {
             self[$0 + r.lowerBound, $1 + c.lowerBound]
         }
     }
     
-    public mutating func multiplyRow(at i0: Int, by r: R) {
+    public func multiplyRow(at i0: Int, by r: R) {
         var p = UnsafeMutablePointer(&grid)
         p += gridIndex(i0, 0)
         
@@ -159,7 +150,7 @@ public class _MatrixImpl<_R: Ring> {
         }
     }
     
-    public mutating func multiplyCol(at j0: Int, by r: R) {
+    public func multiplyCol(at j0: Int, by r: R) {
         var p = UnsafeMutablePointer(&grid)
         p += gridIndex(0, j0)
         
@@ -169,7 +160,7 @@ public class _MatrixImpl<_R: Ring> {
         }
     }
     
-    public mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R = 1) {
+    public func addRow(at i0: Int, to i1: Int, multipliedBy r: R) {
         var p0 = UnsafeMutablePointer(&grid)
         p0 += gridIndex(i0, 0)
         
@@ -183,7 +174,7 @@ public class _MatrixImpl<_R: Ring> {
         }
     }
     
-    public mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R = 1) {
+    public func addCol(at j0: Int, to j1: Int, multipliedBy r: R) {
         var p0 = UnsafeMutablePointer(&grid)
         p0 += gridIndex(0, j0)
         
@@ -197,7 +188,7 @@ public class _MatrixImpl<_R: Ring> {
         }
     }
     
-    public mutating func swapRows(_ i0: Int, _ i1: Int) {
+    public func swapRows(_ i0: Int, _ i1: Int) {
         var p0 = UnsafeMutablePointer(&grid)
         p0 += gridIndex(i0, 0)
         
@@ -213,7 +204,7 @@ public class _MatrixImpl<_R: Ring> {
         }
     }
     
-    public mutating func swapCols(_ j0: Int, _ j1: Int) {
+    public func swapCols(_ j0: Int, _ j1: Int) {
         var p0 = UnsafeMutablePointer(&grid)
         p0 += gridIndex(0, j0)
         
@@ -229,20 +220,9 @@ public class _MatrixImpl<_R: Ring> {
         }
     }
     
+    /*
     public func eliminate(mode: MatrixEliminationMode = .Both) -> BaseMatrixElimination<_MatrixImpl<R>> {
         fatalError("MatrixElimination is not impled for \(R.self).")
     }
  */
-    
-    public var hashValue: Int {
-        return 0
-    }
-    
-    public var description: String {
-        return ""
-    }
-    
-    public static var symbol: String {
-        return ""
-    }
 }
