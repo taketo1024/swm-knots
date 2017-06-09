@@ -19,29 +19,30 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: _Matrix {
     public var grid: [R]
     
     // root initializer
-    public init(rows r: Int = Auto, cols c: Int = Auto, grid: [R]) {
-        let (rows, cols) = Matrix.determineSize(r, c, grid)
-        
+    private init(_ rows: Int, _ cols: Int, _ grid: [R]) {
         self.rows = rows
         self.cols = cols
-        
+        self.grid = grid
+    }
+    
+    public init(rows r: Int = Auto, cols c: Int = Auto, grid: [R]) {
+        let (rows, cols) = Matrix.determineSize(r, c, grid)
         let (l, required) = (grid.count, rows * cols)
-        self.grid = (l == required) ? grid :
-                    (l >  required) ? Array(grid[0 ..< required]) :
-                                      (grid + Array(repeating: R.zero, count: required - l))
+        let grid = (l == required) ? grid :
+                   (l >  required) ? Array(grid[0 ..< required]) :
+                                     grid + Array(repeating: R.zero, count: required - l)
+        
+        self.init(rows, cols, grid)
     }
     
     public init(rows r: Int = Auto, cols c: Int = Auto, gridGenerator g: (Int, Int) -> R) {
         let (rows, cols) = Matrix.determineSize(r, c, nil)
-        
         let grid = (0 ..< rows * cols).map { (index: Int) -> R in
             let (i, j) = index /% cols
             return g(i, j)
         }
         
-        self.rows = rows
-        self.cols = cols
-        self.grid = grid
+        self.init(rows, cols, grid)
     }
 
     public init(_ grid: R...) {
