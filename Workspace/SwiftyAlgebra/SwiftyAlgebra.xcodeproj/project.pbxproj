@@ -85,7 +85,7 @@
 		1424F4DC1EB997780052581F /* Module.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Module.swift; sourceTree = "<group>"; };
 		1424F4DD1EB997780052581F /* Monoid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Monoid.swift; sourceTree = "<group>"; };
 		1424F4DE1EB997780052581F /* Ring.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Ring.swift; sourceTree = "<group>"; };
-		1424F4E01EB997780052581F /* FreeModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FreeModule.swift; path = ../Concrete/FreeModule.swift; sourceTree = "<group>"; };
+		1424F4E01EB997780052581F /* FreeModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreeModule.swift; sourceTree = "<group>"; };
 		1424F4E11EB997780052581F /* Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Matrix.swift; sourceTree = "<group>"; };
 		1424F4E21EB997780052581F /* Permutation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Permutation.swift; sourceTree = "<group>"; };
 		1424F4E31EB997780052581F /* Polynominal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Polynominal.swift; sourceTree = "<group>"; };
@@ -121,8 +121,8 @@
 		14B42A971EE6264300D99997 /* DynamicRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DynamicRing.swift; path = Dynamic/DynamicRing.swift; sourceTree = "<group>"; };
 		14D261311EE44DB4006775E2 /* DynamicType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DynamicType.swift; path = Dynamic/DynamicType.swift; sourceTree = "<group>"; };
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
-		14E7BEC91ED84B3400BBA72A /* EigenLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EigenLib.h; path = EigenWrapper/EigenLib.h; sourceTree = "<group>"; };
-		14E7BECA1ED84B3400BBA72A /* EigenLib.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = EigenLib.mm; path = EigenWrapper/EigenLib.mm; sourceTree = "<group>"; };
+		14E7BEC91ED84B3400BBA72A /* EigenLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EigenLib.h; sourceTree = "<group>"; };
+		14E7BECA1ED84B3400BBA72A /* EigenLib.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = EigenLib.mm; sourceTree = "<group>"; };
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -192,6 +192,7 @@
 				1424F4D71EB997780052581F /* Abstract */,
 				146905B01EE4F37400153686 /* Dynamic */,
 				1424F4E71EB997780052581F /* Numbers */,
+				144CFE481EEA88F20023E6EC /* Matrix */,
 				1424F4DF1EB997780052581F /* Concrete */,
 				1424F4E41EB997780052581F /* Morphisms */,
 				14929C9B1ED9C798006ACAC5 /* Geometry */,
@@ -217,7 +218,6 @@
 				1424F4D91EB997780052581F /* EuclideanRing.swift */,
 				1424F4DA1EB997780052581F /* Field.swift */,
 				1424F4DC1EB997780052581F /* Module.swift */,
-				1424F4E01EB997780052581F /* FreeModule.swift */,
 			);
 			path = Abstract;
 			sourceTree = "<group>";
@@ -225,9 +225,9 @@
 		1424F4DF1EB997780052581F /* Concrete */ = {
 			isa = PBXGroup;
 			children = (
-				1424F4E11EB997780052581F /* Matrix.swift */,
 				1424F4E21EB997780052581F /* Permutation.swift */,
 				1424F4E31EB997780052581F /* Polynominal.swift */,
+				1424F4E01EB997780052581F /* FreeModule.swift */,
 			);
 			path = Concrete;
 			sourceTree = "<group>";
@@ -257,7 +257,6 @@
 			children = (
 				140E809F1ECDEA8E00B89719 /* combinations.swift */,
 				147D98021EB9B06900C736AC /* IntegerFactorization.swift */,
-				1424F4F01EB997780052581F /* MatrixElimination.swift */,
 				1424F4F11EB997780052581F /* PolynomialFactorization.swift */,
 			);
 			path = Tools;
@@ -281,6 +280,18 @@
 				145339BF1EC7D67100F014F4 /* Box.swift */,
 			);
 			path = Util;
+			sourceTree = "<group>";
+		};
+		144CFE481EEA88F20023E6EC /* Matrix */ = {
+			isa = PBXGroup;
+			children = (
+				1424F4E11EB997780052581F /* Matrix.swift */,
+				1482E05C1EE96BA700B0CEFA /* Matrix+Eigen.swift */,
+				1424F4F01EB997780052581F /* MatrixElimination.swift */,
+				14E7BEC91ED84B3400BBA72A /* EigenLib.h */,
+				14E7BECA1ED84B3400BBA72A /* EigenLib.mm */,
+			);
+			path = Matrix;
 			sourceTree = "<group>";
 		};
 		146905B01EE4F37400153686 /* Dynamic */ = {
@@ -339,9 +350,6 @@
 		14E7BEC71ED84A8700BBA72A /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				1482E05C1EE96BA700B0CEFA /* Matrix+Eigen.swift */,
-				14E7BEC91ED84B3400BBA72A /* EigenLib.h */,
-				14E7BECA1ED84B3400BBA72A /* EigenLib.mm */,
 			);
 			path = Libraries;
 			sourceTree = "<group>";
