@@ -257,7 +257,7 @@ public extension EuclideanRing {
     }
 }
 
-public class _EucMatrixImpl<R: EuclideanRing>: _MatrixImpl<R> {
+public final class _EucMatrixImpl<R: EuclideanRing>: _MatrixImpl<R> {
     public override func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<R, n, m> {
         return MatrixElimination(self, mode, EucMatrixEliminationProcessor<R>.self)
     }
@@ -276,8 +276,13 @@ public extension Field {
     }
 }
 
-public class _FieldMatrixImpl<K: Field>: _EucMatrixImpl<K> {
+public final class _FieldMatrixImpl<K: Field>: _MatrixImpl<K> {
     public override func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<K, n, m> {
         return MatrixElimination(self, mode, FieldMatrixEliminationProcessor<K>.self)
+    }
+    
+    public override func determinant() -> K {
+        let e: MatrixElimination<K, Dynamic, Dynamic> = self.eliminate(mode: .Both)
+        return e.determinant
     }
 }
