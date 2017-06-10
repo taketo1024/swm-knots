@@ -20,10 +20,17 @@ public extension IntegerNumber {
     }
 }
 
-public final class _EigenIntMatrixImpl: _MatrixImpl<IntegerNumber> {
+// TODO do not inherit from _GridMatrixImpl.
+// hold an instance of EigenIntMatrix.
+
+public final class _EigenIntMatrixImpl: _GridMatrixImpl<IntegerNumber> {
     
+    public required init(_ rows: Int, _ cols: Int, _ g: (Int, Int) -> IntegerNumber) {
+        super.init(rows, cols, g)
+    }
+    
+    // TODO remove
     public required init(_ rows: Int, _ cols: Int, _ grid: [IntegerNumber]) {
-        // TODO use _EigenIntMatrix instance.
         super.init(rows, cols, grid)
     }
     
@@ -31,11 +38,10 @@ public final class _EigenIntMatrixImpl: _MatrixImpl<IntegerNumber> {
         return MatrixElimination(self, mode, EucMatrixEliminationProcessor<IntegerNumber>.self)
     }
     
+    // TODO impl instance method: EigenIntMatrix.mul
     public override func mul(_ b: _MatrixImpl<IntegerNumber>) -> _EigenIntMatrixImpl {
         assert(cols == b.rows, "Mismatching matrix size.")
         guard let b = b as? _EigenIntMatrixImpl else { fatalError() }
-        
-        // TODO impl instance method: EigenIntMatrix.mul
         
         var result = Array(repeating: 0, count: rows * b.cols)
         EigenIntMatrix.multiple(&result, rows, cols, b.cols, grid, b.grid)

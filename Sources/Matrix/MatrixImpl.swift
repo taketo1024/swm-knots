@@ -8,33 +8,20 @@
 
 import Foundation
 
-// Default Implementation for general Rings
+// Abstract class.
+// Concretized by _GridMatrixImpl, _SparceMatrixImpl.
 
 public class _MatrixImpl<R: Ring> {
     public final let rows: Int
     public final let cols: Int
-    public final var grid: [R]
     
-    public required init(_ rows: Int, _ cols: Int, _ grid: [R]) {
+    public required init(_ rows: Int, _ cols: Int, _ g: (Int, Int) -> R) {
         self.rows = rows
         self.cols = cols
-        self.grid = grid
-    }
-    
-    internal func createInstance(_ rows: Int, _ cols: Int, _ grid: [R]) -> Self {
-        return type(of: self).init(rows, cols, grid)
-    }
-    
-    internal func createInstance(_ grid: [R]) -> Self {
-        return createInstance(rows, cols, grid)
     }
     
     internal func createInstance(_ rows: Int, _ cols: Int, _ g: (Int, Int) -> R) -> Self {
-        let grid = (0 ..< rows * cols).map { (index: Int) -> R in
-            let (i, j) = index /% cols
-            return g(i, j)
-        }
-        return createInstance(rows, cols, grid)
+        return type(of: self).init(rows, cols, g)
     }
     
     internal func createInstance(_ g: (Int, Int) -> R) -> Self {
@@ -42,21 +29,16 @@ public class _MatrixImpl<R: Ring> {
     }
     
     public func copy() -> Self {
-        return createInstance(grid)
-    }
-    
-    internal func gridIndex(_ i: Int, _ j: Int) -> Int {
-        return (i * cols) + j
+        fatalError("implement in subclass.")
     }
     
     public subscript(i: Int, j: Int) -> R {
-        get { return grid[gridIndex(i, j)] }
-        set { grid[gridIndex(i, j)] = newValue }
+        get { fatalError("implement in subclass.") }
+        set { fatalError("implement in subclass.") }
     }
     
     public func equals(_ b: _MatrixImpl<R>) -> Bool {
-        assert((rows, cols) == (b.rows, b.cols), "Mismatching matrix size.")
-        return grid == b.grid
+        fatalError("implement in subclass.")
     }
     
     public func add(_ b: _MatrixImpl<R>) -> Self {
@@ -145,83 +127,27 @@ public class _MatrixImpl<R: Ring> {
     }
     
     public func multiplyRow(at i0: Int, by r: R) {
-        var p = UnsafeMutablePointer(&grid)
-        p += gridIndex(i0, 0)
-        
-        for _ in 0 ..< cols {
-            p.pointee = r * p.pointee
-            p += 1
-        }
+        fatalError("implement in subclass.")
     }
     
     public func multiplyCol(at j0: Int, by r: R) {
-        var p = UnsafeMutablePointer(&grid)
-        p += gridIndex(0, j0)
-        
-        for _ in 0 ..< rows {
-            p.pointee = r * p.pointee
-            p += cols
-        }
+        fatalError("implement in subclass.")
     }
     
     public func addRow(at i0: Int, to i1: Int, multipliedBy r: R) {
-        var p0 = UnsafeMutablePointer(&grid)
-        p0 += gridIndex(i0, 0)
-        
-        var p1 = UnsafeMutablePointer(&grid)
-        p1 += gridIndex(i1, 0)
-        
-        for _ in 0 ..< cols {
-            p1.pointee = p1.pointee + r * p0.pointee
-            p0 += 1
-            p1 += 1
-        }
+        fatalError("implement in subclass.")
     }
     
     public func addCol(at j0: Int, to j1: Int, multipliedBy r: R) {
-        var p0 = UnsafeMutablePointer(&grid)
-        p0 += gridIndex(0, j0)
-        
-        var p1 = UnsafeMutablePointer(&grid)
-        p1 += gridIndex(0, j1)
-        
-        for _ in 0 ..< rows {
-            p1.pointee = p1.pointee + r * p0.pointee
-            p0 += cols
-            p1 += cols
-        }
+        fatalError("implement in subclass.")
     }
     
     public func swapRows(_ i0: Int, _ i1: Int) {
-        var p0 = UnsafeMutablePointer(&grid)
-        p0 += gridIndex(i0, 0)
-        
-        var p1 = UnsafeMutablePointer(&grid)
-        p1 += gridIndex(i1, 0)
-        
-        for _ in 0 ..< cols {
-            let a = p0.pointee
-            p0.pointee = p1.pointee
-            p1.pointee = a
-            p0 += 1
-            p1 += 1
-        }
+        fatalError("implement in subclass.")
     }
     
     public func swapCols(_ j0: Int, _ j1: Int) {
-        var p0 = UnsafeMutablePointer(&grid)
-        p0 += gridIndex(0, j0)
-        
-        var p1 = UnsafeMutablePointer(&grid)
-        p1 += gridIndex(0, j1)
-        
-        for _ in 0 ..< rows {
-            let a = p0.pointee
-            p0.pointee = p1.pointee
-            p1.pointee = a
-            p0 += cols
-            p1 += cols
-        }
+        fatalError("implement in subclass.")
     }
     
     public func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<R, n, m> {
@@ -246,43 +172,5 @@ public class _MatrixImpl<R: Ring> {
                 return "\(self[i, j])"
             }).joined(separator: ",\t")
         }).joined(separator: "\n\t") + "]"
-    }
-}
-
-// Implementation for EuclideanRings
-
-public extension EuclideanRing {
-    public static var matrixImplType: _MatrixImpl<Self>.Type {
-        return _EucMatrixImpl<Self>.self
-    }
-}
-
-public final class _EucMatrixImpl<R: EuclideanRing>: _MatrixImpl<R> {
-    public override func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<R, n, m> {
-        return MatrixElimination(self, mode, EucMatrixEliminationProcessor<R>.self)
-    }
-    
-    public override func determinant() -> R {
-        let e: MatrixElimination<R, Dynamic, Dynamic> = self.eliminate(mode: .Both)
-        return e.determinant
-    }
-}
-
-// Implementation for Fields
-
-public extension Field {
-    public static var matrixImplType: _MatrixImpl<Self>.Type {
-        return _FieldMatrixImpl<Self>.self
-    }
-}
-
-public final class _FieldMatrixImpl<K: Field>: _MatrixImpl<K> {
-    public override func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<K, n, m> {
-        return MatrixElimination(self, mode, FieldMatrixEliminationProcessor<K>.self)
-    }
-    
-    public override func determinant() -> K {
-        let e: MatrixElimination<K, Dynamic, Dynamic> = self.eliminate(mode: .Both)
-        return e.determinant
     }
 }

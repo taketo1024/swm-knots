@@ -15,31 +15,31 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     
     internal var impl: _MatrixImpl<R>
     
-    // root initializer
+    // internal root initializer
     internal init(_ impl: _MatrixImpl<R>) {
         self.impl = impl
     }
     
-    public init(rows r: Int = Auto, cols c: Int = Auto, grid: [R]) {
-        let (rows, cols) = Matrix.determineSize(r, c, grid)
-        let (l, required) = (grid.count, rows * cols)
-        let grid = (l == required) ? grid :
-                   (l >  required) ? Array(grid[0 ..< required]) :
-                                     grid + Array(repeating: R.zero, count: required - l)
-        
-        self.init(R.matrixImplType.init(rows, cols, grid))
+    // public root initializer
+    public init(rows r: Int = Auto, cols c: Int = Auto, generator g: (Int, Int) -> R) {
+        let (rows, cols) = Matrix.determineSize(r, c, nil)
+        self.init(R.matrixImplType.init(rows, cols, g))
     }
     
-    public init(rows r: Int = Auto, cols c: Int = Auto, gridGenerator g: (Int, Int) -> R) {
-        let (rows, cols) = Matrix.determineSize(r, c, nil)
-        let grid = (0 ..< rows * cols).map { (index: Int) -> R in
-            let (i, j) = index /% cols
-            return g(i, j)
+    // convenience initializer. ineffective for a large matrix.
+    public init(rows r: Int = Auto, cols c: Int = Auto, grid: [R]) {
+        let (rows, cols) = Matrix.determineSize(r, c, grid)
+        
+        let n = grid.count
+        let g: (Int, Int) -> R = { (i, j) -> R in
+            let index = i * cols + j
+            return (index < n) ? grid[index] : R.zero
         }
         
-        self.init(R.matrixImplType.init(rows, cols, grid))
+        self.init(rows: rows, cols: cols, generator: g)
     }
-
+    
+    // convenience initializer. ineffective for a large matrix.
     public init(_ grid: R...) {
         self.init(rows: Auto, cols: Auto, grid: grid)
     }
