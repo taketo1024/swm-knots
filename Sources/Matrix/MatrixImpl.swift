@@ -136,28 +136,44 @@ public class _MatrixImpl<R: Ring> {
         }
     }
     
-    public func multiplyRow(at i0: Int, by r: R) {
-        fatalError("implement in subclass.")
+    public func multiplyRow(at i: Int, by r: R) {
+        for j in 0 ..< self.cols {
+            self[i, j] = r * self[i, j]
+        }
     }
     
-    public func multiplyCol(at j0: Int, by r: R) {
-        fatalError("implement in subclass.")
+    public func multiplyCol(at j: Int, by r: R) {
+        for i in 0 ..< self.rows {
+            self[i, j] = r * self[i, j]
+        }
     }
     
-    public func addRow(at i0: Int, to i1: Int, multipliedBy r: R) {
-        fatalError("implement in subclass.")
+    public func addRow(at i0: Int, to i1: Int, multipliedBy r: R = 1) {
+        for j in 0 ..< self.cols {
+            self[i1, j] = self[i1, j] + (self[i0, j] * r)
+        }
     }
     
-    public func addCol(at j0: Int, to j1: Int, multipliedBy r: R) {
-        fatalError("implement in subclass.")
+    public func addCol(at j0: Int, to j1: Int, multipliedBy r: R = 1) {
+        for i in 0 ..< self.rows {
+            self[i, j1] = self[i, j1] + (self[i, j0] * r)
+        }
     }
     
     public func swapRows(_ i0: Int, _ i1: Int) {
-        fatalError("implement in subclass.")
+        for j in 0 ..< self.cols {
+            let a = self[i0, j]
+            self[i0, j] = self[i1, j]
+            self[i1, j] = a
+        }
     }
     
     public func swapCols(_ j0: Int, _ j1: Int) {
-        fatalError("implement in subclass.")
+        for i in 0 ..< self.rows {
+            let a = self[i, j0]
+            self[i, j0] = self[i, j1]
+            self[i, j1] = a
+        }
     }
     
     public func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<R, n, m> {

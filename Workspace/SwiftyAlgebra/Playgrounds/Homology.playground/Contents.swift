@@ -76,4 +76,3 @@ do {
     let cH = Cohomology(C, Z.self)
     print("cH(RP^2; Z) =", cH.detailDescription, "\n")
 }
-
