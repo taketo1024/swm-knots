@@ -134,7 +134,7 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     
     public override func mul(_ b: _MatrixImpl<R>) -> _MatrixImpl<R> {
         assert(self.cols == b.rows, "Mismatching matrix size.")
-        guard let _b = b as? _SparseMatrixImpl<R> else { return super.add(b) }
+        guard let _b = b as? _SparseMatrixImpl<R> else { return super.mul(b) }
         
         func prod(_ rowComps: [Component], _ colComps: [Component]) -> R {
             let (n1, n2) = (rowComps.count, colComps.count)
@@ -144,6 +144,7 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
             while i1 < n1 && i2 < n2 {
                 let (c1, c2) = (rowComps[i1], colComps[i2])
                 if c1.col == c2.row {
+                    print("\t\t(\(c1.col) \(c1.value) * \(c2.value))")
                     result = result + c1.value * c2.value
                     (i1, i2) = (i1 + 1, i2 + 1)
                 } else if c1.col < c2.row {
@@ -158,14 +159,19 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         
         let aRows = self.list.group { $0.row }
         let bCols =   _b.list.group { $0.col }
+        
         var result = [Component]()
         
-        for (i, rowComps) in aRows {
-            for (j, colComps) in bCols {
-                let comp = (i, j, prod(rowComps, colComps))
-                result.append(comp)
+        for i in aRows.keys.sorted() {
+            for j in bCols.keys.sorted() {
+                let (rowComps, colComps) = (aRows[i]!, bCols[j]!)
+                let val = prod(rowComps, colComps)
+                if val != 0 {
+                    result.append( (i, j, val) )
+                }
             }
         }
+        print("result: \(result)")
         
         return type(of: self).init(rows, b.cols, sortedArray(result))
     }
