@@ -262,7 +262,7 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
 
 public extension Matrix where R: EuclideanRing {
     public func eliminate(mode: MatrixEliminationMode = .Both) -> MatrixElimination<R, n, m> {
-        return impl.eliminate(mode: mode)
+        return MatrixElimination(self.impl, mode, R.matrixEliminationProcessorType())
     }
 }
 

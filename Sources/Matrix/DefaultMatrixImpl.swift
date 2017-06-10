@@ -8,7 +8,7 @@
 
 import Foundation
 
-// General Rings
+// General Ring
 
 public extension Ring {
     public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type {
@@ -19,52 +19,24 @@ public extension Ring {
             return _SparseMatrixImpl<Self>.self
         }
     }
+    
+    public static func matrixEliminationProcessorType() -> MatrixEliminationProcessor<Self>.Type {
+        fatalError("Matrix elimination not supported for a general Ring.")
+    }
 }
 
-// EuclideanRings
+// EuclideanRing
 
 public extension EuclideanRing {
-    public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type {
-        switch type {
-        case .Default:
-            return _EucMatrixImpl<Self>.self
-        case .Sparse:
-            return _SparseMatrixImpl<Self>.self
-        }
+    public static func matrixEliminationProcessorType() -> MatrixEliminationProcessor<Self>.Type {
+        return EucMatrixEliminationProcessor<Self>.self
     }
 }
 
-public final class _EucMatrixImpl<R: EuclideanRing>: _GridMatrixImpl<R> {
-    public override func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<R, n, m> {
-        return MatrixElimination(self, mode, EucMatrixEliminationProcessor<R>.self)
-    }
-    
-    public override func determinant() -> R {
-        let e: MatrixElimination<R, Dynamic, Dynamic> = self.eliminate(mode: .Both)
-        return e.determinant
-    }
-}
-
-// Fields
+// Field
 
 public extension Field {
-    public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type {
-        switch type {
-        case .Default:
-            return _FieldMatrixImpl<Self>.self
-        case .Sparse:
-            return _SparseMatrixImpl<Self>.self
-        }
-    }
-}
-
-public final class _FieldMatrixImpl<K: Field>: _GridMatrixImpl<K> {
-    public override func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<K, n, m> {
-        return MatrixElimination(self, mode, FieldMatrixEliminationProcessor<K>.self)
-    }
-    
-    public override func determinant() -> K {
-        let e: MatrixElimination<K, Dynamic, Dynamic> = self.eliminate(mode: .Both)
-        return e.determinant
+    public static func matrixEliminationProcessorType() -> MatrixEliminationProcessor<Self>.Type {
+        return FieldMatrixEliminationProcessor<Self>.self
     }
 }

@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal class MatrixEliminationProcessor<R: Ring> {
+public class MatrixEliminationProcessor<R: Ring> {
     let mode: MatrixEliminationMode
     let rows: Int
     let cols: Int
@@ -21,7 +21,7 @@ internal class MatrixEliminationProcessor<R: Ring> {
     
     var debug: Bool = false
     
-    required init(_ target: _MatrixImpl<R>, _ mode: MatrixEliminationMode, debug: Bool = false) {
+    public required init(_ target: _MatrixImpl<R>, _ mode: MatrixEliminationMode, debug: Bool = false) {
         self.mode = mode
         self.rows = target.rows
         self.cols = target.cols
@@ -76,7 +76,7 @@ internal class MatrixEliminationProcessor<R: Ring> {
     }
 }
 
-internal class EucMatrixEliminationProcessor<R: EuclideanRing>: MatrixEliminationProcessor<R> {
+public class EucMatrixEliminationProcessor<R: EuclideanRing>: MatrixEliminationProcessor<R> {
     override func iteration() -> Bool {
         let doRows = (mode != .Cols)
         let doCols = (mode != .Rows)
@@ -235,7 +235,7 @@ internal class EucMatrixEliminationProcessor<R: EuclideanRing>: MatrixEliminatio
     }
 }
 
-internal class FieldMatrixEliminationProcessor<K: Field>: MatrixEliminationProcessor<K> {
+public class FieldMatrixEliminationProcessor<K: Field>: MatrixEliminationProcessor<K> {
     override func iteration() -> Bool {
         let doRows = (mode != .Cols)
         let doCols = (mode != .Rows)

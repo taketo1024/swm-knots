@@ -18,7 +18,7 @@ public extension IntegerNumber {
     public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<IntegerNumber>.Type {
         switch type {
         case .Default:
-            return EigenAcceleration.enabled() ? _EigenIntMatrixImpl.self : _EucMatrixImpl<IntegerNumber>.self
+            return EigenAcceleration.enabled() ? _EigenIntMatrixImpl.self : _GridMatrixImpl<IntegerNumber>.self
         case .Sparse:
             return _SparseMatrixImpl<IntegerNumber>.self
         }
@@ -29,20 +29,6 @@ public extension IntegerNumber {
 // hold an instance of EigenIntMatrix.
 
 public final class _EigenIntMatrixImpl: _GridMatrixImpl<IntegerNumber> {
-    
-    public required init(_ rows: Int, _ cols: Int, _ g: (Int, Int) -> IntegerNumber) {
-        super.init(rows, cols, g)
-    }
-    
-    // TODO remove
-    public required init(_ rows: Int, _ cols: Int, _ grid: [IntegerNumber]) {
-        super.init(rows, cols, grid)
-    }
-    
-    public override func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<IntegerNumber, n, m> {
-        return MatrixElimination(self, mode, EucMatrixEliminationProcessor<IntegerNumber>.self)
-    }
-    
     // TODO impl instance method: EigenIntMatrix.mul
     public override func mul(_ b: _MatrixImpl<IntegerNumber>) -> _EigenIntMatrixImpl {
         assert(cols == b.rows, "Mismatching matrix size.")

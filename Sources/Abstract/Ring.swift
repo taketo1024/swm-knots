@@ -5,7 +5,9 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
     init(intValue: IntegerNumber)
     var inverse: Self? { get }
     var isUnit: Bool { get }
+    
     static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type
+    static func matrixEliminationProcessorType() -> MatrixEliminationProcessor<Self>.Type
 }
 
 public extension Ring {

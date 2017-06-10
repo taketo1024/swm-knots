@@ -173,10 +173,6 @@ public class _MatrixImpl<R: Ring> {
         }
     }
     
-    public func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<R, n, m> {
-        fatalError("MatrixElimination is not supported for a general Ring.")
-    }
-    
     public func determinant() -> R {
         fatalError("determinant not yet impled for a general Ring.")
     }
