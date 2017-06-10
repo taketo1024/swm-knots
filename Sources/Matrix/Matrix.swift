@@ -120,7 +120,6 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     
     private mutating func copyIfNecessary() {
         if !isKnownUniquelyReferenced(&impl) {
-            print("copied!")
             impl = impl.copy()
         }
     }

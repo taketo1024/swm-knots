@@ -144,7 +144,6 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
             while i1 < n1 && i2 < n2 {
                 let (c1, c2) = (rowComps[i1], colComps[i2])
                 if c1.col == c2.row {
-                    print("\t\t(\(c1.col) \(c1.value) * \(c2.value))")
                     result = result + c1.value * c2.value
                     (i1, i2) = (i1 + 1, i2 + 1)
                 } else if c1.col < c2.row {
@@ -171,7 +170,6 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
                 }
             }
         }
-        print("result: \(result)")
         
         return type(of: self).init(rows, b.cols, sortedArray(result))
     }
