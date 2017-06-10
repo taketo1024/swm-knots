@@ -21,7 +21,7 @@ static BOOL enabled = false;
     std::cout << (flag ? "EigenAcceleration enabled!" : "EigenAcceleration disabled.") << std::endl;
     enabled = flag;
 #else
-    std::cout << "[Error] Eigen not available!\nMust include library by `git submodule update --init`" << std::endl;
+    std::cout << "[Error] Eigen not available! Must include library by `git submodule update --init`" << std::endl;
 #endif
 }
 
