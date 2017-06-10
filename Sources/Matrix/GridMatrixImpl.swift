@@ -43,6 +43,91 @@ public class _GridMatrixImpl<R: Ring>: _MatrixImpl<R> {
         return grid == b.grid
     }
     
+    public override func add(_ b: _MatrixImpl<R>) -> Self {
+        assert((rows, cols) == (b.rows, b.cols), "Mismatching matrix size.")
+        return createInstance() { (i, j) -> R in
+            return self[i, j] + b[i, j]
+        }
+    }
+    
+    public override func negate() -> Self {
+        return createInstance() { (i, j) -> R in
+            return -self[i, j]
+        }
+    }
+    
+    public override func leftMul(_ r: R) -> Self {
+        return createInstance() { (i, j) -> R in
+            return r * self[i, j]
+        }
+    }
+    
+    public override func rightMul(_ r: R) -> Self {
+        return createInstance() { (i, j) -> R in
+            return self[i, j] * r
+        }
+    }
+    
+    public override func mul(_ b: _MatrixImpl<R>) -> Self {
+        assert(self.cols == b.rows, "Mismatching matrix size.")
+        return createInstance(rows, b.cols) { (i, k) -> R in
+            return (0 ..< cols)
+                .map({j in self[i, j] * b[j, k]})
+                .reduce(0) {$0 + $1}
+        }
+    }
+    
+    public override func transpose() -> Self {
+        return createInstance(cols, rows) { self[$1, $0] }
+    }
+    
+    public override func leftIdentity() -> Self {
+        return createInstance(rows, rows) { $0 == $1 ? 1 : 0 }
+    }
+    
+    public override func rightIdentity() -> Self {
+        return createInstance(cols, cols) { $0 == $1 ? 1 : 0 }
+    }
+    
+    public override func rowArray(_ i: Int) -> [R] {
+        return (0 ..< cols).map{ j in self[i, j] }
+    }
+    
+    public override func colArray(_ j: Int) -> [R] {
+        return (0 ..< rows).map{ i in self[i, j] }
+    }
+    
+    public override func rowVector(_ i: Int) -> Self {
+        return createInstance(1, cols){(_, j) -> R in
+            return self[i, j]
+        }
+    }
+    
+    public override func colVector(_ j: Int) -> Self {
+        return createInstance(rows, 1){(i, _) -> R in
+            return self[i, j]
+        }
+    }
+    
+    public override func submatrix(colsInRange c: CountableRange<Int>) -> Self {
+        return createInstance(self.rows, c.upperBound - c.lowerBound) {
+            self[$0, $1 + c.lowerBound]
+        }
+    }
+    
+    public override func submatrix(rowsInRange r: CountableRange<Int>) -> Self {
+        return createInstance(r.upperBound - r.lowerBound, self.cols) {
+            self[$0 + r.lowerBound, $1]
+        }
+    }
+    
+    public override func submatrix(inRange: (CountableRange<Int>, CountableRange<Int>)) -> Self {
+        let (r, c) = inRange
+        return createInstance(r.upperBound - r.lowerBound, c.upperBound - c.lowerBound) {
+            self[$0 + r.lowerBound, $1 + c.lowerBound]
+        }
+    }
+    
     public override func multiplyRow(at i0: Int, by r: R) {
         var p = UnsafeMutablePointer(&grid)
         p += gridIndex(i0, 0)
