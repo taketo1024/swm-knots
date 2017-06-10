@@ -24,10 +24,6 @@ public class _MatrixImpl<R: Ring> {
         return type(of: self).init(rows, cols, g)
     }
     
-    internal func createInstance(_ g: (Int, Int) -> R) -> Self {
-        return createInstance(rows, cols, g)
-    }
-    
     public func copy() -> Self {
         fatalError("implement in subclass.")
     }
@@ -51,32 +47,32 @@ public class _MatrixImpl<R: Ring> {
         return true
     }
     
-    public func add(_ b: _MatrixImpl<R>) -> Self {
+    public func add(_ b: _MatrixImpl<R>) -> _MatrixImpl<R> {
         assert((rows, cols) == (b.rows, b.cols), "Mismatching matrix size.")
-        return createInstance() { (i, j) -> R in
+        return createInstance(rows, cols) { (i, j) -> R in
             return self[i, j] + b[i, j]
         }
     }
     
-    public func negate() -> Self {
-        return createInstance() { (i, j) -> R in
+    public func negate() -> _MatrixImpl<R> {
+        return createInstance(rows, cols) { (i, j) -> R in
             return -self[i, j]
         }
     }
     
-    public func leftMul(_ r: R) -> Self {
-        return createInstance() { (i, j) -> R in
+    public func leftMul(_ r: R) -> _MatrixImpl<R> {
+        return createInstance(rows, cols) { (i, j) -> R in
             return r * self[i, j]
         }
     }
     
-    public  func rightMul(_ r: R) -> Self {
-        return createInstance() { (i, j) -> R in
+    public  func rightMul(_ r: R) -> _MatrixImpl<R> {
+        return createInstance(rows, cols) { (i, j) -> R in
             return self[i, j] * r
         }
     }
     
-    public func mul(_ b: _MatrixImpl<R>) -> Self {
+    public func mul(_ b: _MatrixImpl<R>) -> _MatrixImpl<R> {
         assert(self.cols == b.rows, "Mismatching matrix size.")
         return createInstance(rows, b.cols) { (i, k) -> R in
             return (0 ..< cols)
@@ -85,51 +81,43 @@ public class _MatrixImpl<R: Ring> {
         }
     }
     
-    public func transpose() -> Self {
+    public func transpose() -> _MatrixImpl<R> {
         return createInstance(cols, rows) { self[$1, $0] }
     }
     
-    public func leftIdentity() -> Self {
+    public func leftIdentity() -> _MatrixImpl<R> {
         return createInstance(rows, rows) { $0 == $1 ? 1 : 0 }
     }
     
-    public func rightIdentity() -> Self {
+    public func rightIdentity() -> _MatrixImpl<R> {
         return createInstance(cols, cols) { $0 == $1 ? 1 : 0 }
     }
     
-    public func rowArray(_ i: Int) -> [R] {
-        return (0 ..< cols).map{ j in self[i, j] }
-    }
-    
-    public func colArray(_ j: Int) -> [R] {
-        return (0 ..< rows).map{ i in self[i, j] }
-    }
-    
-    public func rowVector(_ i: Int) -> Self {
+    public func rowVector(_ i: Int) -> _MatrixImpl<R> {
         return createInstance(1, cols){(_, j) -> R in
             return self[i, j]
         }
     }
     
-    public func colVector(_ j: Int) -> Self {
+    public func colVector(_ j: Int) -> _MatrixImpl<R> {
         return createInstance(rows, 1){(i, _) -> R in
             return self[i, j]
         }
     }
     
-    public func submatrix(colsInRange c: CountableRange<Int>) -> Self {
-        return createInstance(self.rows, c.upperBound - c.lowerBound) {
-            self[$0, $1 + c.lowerBound]
-        }
-    }
-    
-    public func submatrix(rowsInRange r: CountableRange<Int>) -> Self {
+    public func submatrix(rowsInRange r: CountableRange<Int>) -> _MatrixImpl<R> {
         return createInstance(r.upperBound - r.lowerBound, self.cols) {
             self[$0 + r.lowerBound, $1]
         }
     }
     
-    public func submatrix(inRange: (CountableRange<Int>, CountableRange<Int>)) -> Self {
+    public func submatrix(colsInRange c: CountableRange<Int>) -> _MatrixImpl<R> {
+        return createInstance(self.rows, c.upperBound - c.lowerBound) {
+            self[$0, $1 + c.lowerBound]
+        }
+    }
+    
+    public func submatrix(inRange: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> _MatrixImpl<R> {
         let (r, c) = inRange
         return createInstance(r.upperBound - r.lowerBound, c.upperBound - c.lowerBound) {
             self[$0 + r.lowerBound, $1 + c.lowerBound]

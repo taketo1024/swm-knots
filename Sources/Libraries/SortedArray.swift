@@ -95,7 +95,15 @@ extension SortedArray: RandomAccessCollection {
     }
 
     public subscript(position: Index) -> Element {
-        return _elements[position]
+//        return _elements[position]
+        
+        // MEMO modified by T.Sano
+        get {
+            return _elements[position]
+        } set {
+            _elements[position] = newValue
+        }
+        // --MEMO
     }
 
     /// Like `Sequence.filter(_:)`, but returns a `SortedArray` instead of an `Array`.

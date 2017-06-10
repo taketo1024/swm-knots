@@ -11,10 +11,13 @@ import Foundation
 
 public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     public typealias Component = (row: Int, col: Int, value: R)
-    private var list: SortedArray<Component> // Sorted Coordinate List in strict order.
     
-    private let comparator = {(a: Component, b: Component) -> Bool in a.row < b.row || (a.row == b.row && a.col < b.col) }
-
+    internal static var lexLEQ: ((Component, Component) -> Bool) {
+        return {(a: Component, b: Component) -> Bool in a.row < b.row || (a.row == b.row && a.col < b.col) }
+    }
+    
+    private var list: SortedArray<Component> // Sorted Coordinate List
+    
     public required init(_ rows: Int, _ cols: Int, _ g: (Int, Int) -> R) {
         var sorted = Array<Component>()
         for i in 0 ..< rows {
@@ -26,7 +29,7 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
             }
         }
         
-        list = SortedArray(sorted: sorted, areInIncreasingOrder: comparator)
+        list = _SparseMatrixImpl<R>.sortedArray(sorted)
         super.init(rows, cols, g)
     }
     
@@ -35,34 +38,44 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         super.init(rows, cols, {_,_ in R.zero})
     }
     
-    public override func copy() -> Self {
+    internal func createInstance(_ rows: Int, _ cols: Int, _ list: SortedArray<Component>) -> Self {
         return type(of: self).init(rows, cols, list)
+    }
+    
+    public override func copy() -> Self {
+        return createInstance(rows, cols, list)
     }
     
     public override subscript(i: Int, j: Int) -> R {
         get {
-            if let i = list.index(of: (i, j, R.zero)) {
-                return list[i].value
+            if let index = list.index(of: (i, j, 0)) {
+                return list[index].value
             } else {
                 return R.zero
             }
         } set {
-            list.insert((i, j, newValue))
+            if newValue == R.zero {
+                list.remove((i, j, 0))
+            } else if let index = list.index(of: (i, j, 0)){
+                list[index] = (i, j, newValue)
+            } else {
+                list.insert((i, j, newValue))
+            }
         }
     }
     
     public override func equals(_ b: _MatrixImpl<R>) -> Bool {
         assert((rows, cols) == (b.rows, b.cols), "Mismatching matrix size.")
-        guard let b = b as? _SparseMatrixImpl<R> else { fatalError() }
+        guard let _b = b as? _SparseMatrixImpl<R> else { return super.equals(b) }
         
         // this is just `list == b.list` if (Int, Int, R) could be Equatable...
         
-        if list.count != b.list.count {
+        if list.count != _b.list.count {
             return false
         }
         
         for i in 0 ..< list.count {
-            if list[i] != b.list[i] {
+            if list[i] != _b.list[i] {
                 return false
             }
         }
@@ -70,87 +83,173 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         return true
     }
     
-    public override func add(_ b: _MatrixImpl<R>) -> Self {
+    public override func add(_ b: _MatrixImpl<R>) -> _MatrixImpl<R> {
+        assert((rows, cols) == (b.rows, b.cols), "Mismatching matrix size.")
+        guard let _b = b as? _SparseMatrixImpl<R> else { return super.add(b) }
+        
+        var result = Array<Component>()
+        
+        let (n1, n2) = (list.count, _b.list.count)
+        var (i1, i2) = (0, 0)
+        
+        while i1 < n1 && i2 < n2 {
+            let (c1, c2) = (list[i1], _b.list[i2])
+            if (c1.row, c1.col) == (c2.row, c2.col) {
+                result.append((c1.row, c1.col, c1.value + c2.value))
+                (i1, i2) = (i1 + 1, i2 + 1)
+            } else if lexLEQ(c1, c2) {
+                result.append(c1)
+                i1 += 1
+            } else {
+                result.append(c2)
+                i2 += 1
+            }
+        }
+        
+        // at this point, either i1 == n1 or i2 == n2
+        
+        while i1 < n1 {
+            result.append(list[i1])
+            i1 += 1
+        }
+        
+        while i2 < n2 {
+            result.append(_b.list[i2])
+            i2 += 1
+        }
+        
+        return createInstance(rows, cols, sortedArray(result))
+    }
+    
+    public override func negate() -> _MatrixImpl<R> {
+        let result = list.map{ c -> Component in (c.row, c.col, -c.value)}
+        return createInstance(rows, cols, sortedArray(result))
+    }
+    
+    public override func leftMul(_ r: R) -> _MatrixImpl<R> {
+        let result = list.map{ c -> Component in (c.row, c.col, r * c.value)}
+        return createInstance(rows, cols, sortedArray(result))
+    }
+    
+    public override func rightMul(_ r: R) -> _MatrixImpl<R> {
+        let result = list.map{ c -> Component in (c.row, c.col, c.value * r)}
+        return createInstance(rows, cols, sortedArray(result))
+    }
+    
+    public override func mul(_ b: _MatrixImpl<R>) -> _MatrixImpl<R> {
+        assert(self.cols == b.rows, "Mismatching matrix size.")
         fatalError()
     }
     
-    public override func negate() -> Self {
-        fatalError()
+    public override func transpose() -> _MatrixImpl<R> {
+        let result = list.map{ c -> Component in (c.col, c.row, c.value)}
+        return createInstance(rows, cols, sortedArray(result, sort: true))
     }
     
-    public override func leftMul(_ r: R) -> Self {
-        fatalError()
+    public override func leftIdentity() -> _MatrixImpl<R> {
+        let result = (0 ..< rows).map{ (i) -> Component in (i, i, R.identity) }
+        return createInstance(rows, cols, sortedArray(result))
     }
     
-    public override func rightMul(_ r: R) -> Self {
-        fatalError()
+    public override func rightIdentity() -> _MatrixImpl<R> {
+        let result = (0 ..< cols).map{ (i) -> Component in (i, i, R.identity) }
+        return createInstance(rows, cols, sortedArray(result))
     }
     
-    public override func mul(_ b: _MatrixImpl<R>) -> Self {
-        fatalError()
+    public override func rowVector(_ i: Int) -> _MatrixImpl<R> {
+        let result = list.filter{ c in c.row == i }
+        return createInstance(rows, cols, result)
     }
     
-    public override func transpose() -> Self {
-        fatalError()
+    public override func colVector(_ j: Int) -> _MatrixImpl<R> {
+        let result = list.filter{ c in c.row == j }
+        return createInstance(rows, cols, result)
     }
     
-    public override func leftIdentity() -> Self {
-        fatalError()
+    public override func submatrix(colsInRange colRange: CountableRange<Int>) -> _MatrixImpl<R> {
+        let result = list.filter{ c in colRange.contains(c.col) }
+        return createInstance(rows, cols, result)
     }
     
-    public override func rightIdentity() -> Self {
-        fatalError()
+    public override func submatrix(rowsInRange rowRange: CountableRange<Int>) -> _MatrixImpl<R> {
+        let result = list.filter{ c in rowRange.contains(c.row) }
+        return createInstance(rows, cols, result)
     }
     
-    public override func rowArray(_ i: Int) -> [R] {
-        fatalError()
-    }
-    
-    public override func colArray(_ j: Int) -> [R] {
-        fatalError()
-    }
-    
-    public override func rowVector(_ i: Int) -> Self {
-        fatalError()
-    }
-    
-    public override func colVector(_ j: Int) -> Self {
-        fatalError()
-    }
-    
-    public override func submatrix(colsInRange c: CountableRange<Int>) -> Self {
-        fatalError()
-    }
-    
-    public override func submatrix(rowsInRange r: CountableRange<Int>) -> Self {
-        fatalError()
-    }
-    
-    public override func submatrix(inRange: (CountableRange<Int>, CountableRange<Int>)) -> Self {
-        fatalError()
+    public override func submatrix(inRange range: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> _MatrixImpl<R> {
+        let (rowRange, colRange) = range
+        let result = list.filter{ c in rowRange.contains(c.row) && colRange.contains(c.col) }
+        return createInstance(rows, cols, result)
     }
     
     public override func multiplyRow(at i0: Int, by r: R) {
-        fatalError()
+        for index in 0 ..< list.count {
+            let (i, j, value) = list[index]
+            if i == i0 {
+                list[index] = (i, j, r * value)
+            } else if i > i0 {
+                break
+            }
+        }
     }
     
     public override func multiplyCol(at j0: Int, by r: R) {
-        fatalError()
+        for index in 0 ..< list.count {
+            let (i, j, value) = list[index]
+            if j == j0 {
+                list[index] = (i, j, r * value)
+            }
+        }
     }
     
     public override func addRow(at i0: Int, to i1: Int, multipliedBy r: R) {
-        fatalError()
+        let row = list.filter { c in c.row == i0 }
+        for (_, j, a) in row {
+            self[i1, j] = self[i1, j] + r * a
+        }
     }
     
     public override func addCol(at j0: Int, to j1: Int, multipliedBy r: R) {
-        fatalError()
+        let col = list.filter { c in c.col == j0 }
+        for (i, _, a) in col {
+            self[i, j1] = self[i, j1] + r * a
+        }
     }
     
     public override func swapRows(_ i0: Int, _ i1: Int) {
-        fatalError()
+        let result = list.map{ c -> Component in
+            switch c.row {
+            case i0: return (i1, c.col, c.value)
+            case i1: return (i0, c.col, c.value)
+            default: return c
+            }
+        }
+        self.list = sortedArray(result, sort: true)
     }
     
     public override func swapCols(_ j0: Int, _ j1: Int) {
-        fatalError()
+        let result = list.map{ c -> Component in
+            switch c.col {
+            case j0: return (c.row, j1, c.value)
+            case j1: return (c.row, j0, c.value)
+            default: return c
+            }
+        }
+        self.list = sortedArray(result, sort: true)
+    }
+    
+    // convenience funcs 
+    
+    internal var lexLEQ: ((Component, Component) -> Bool) {
+        return _SparseMatrixImpl<R>.lexLEQ
+    }
+
+    internal static func sortedArray(_ array: Array<Component>, sort: Bool = false) -> SortedArray<Component> {
+        return sort ? SortedArray<Component>(unsorted: array, areInIncreasingOrder: lexLEQ)
+                    : SortedArray<Component>(  sorted: array, areInIncreasingOrder: lexLEQ)
+    }
+    
+    internal func sortedArray(_ array: Array<Component>, sort: Bool = false) -> SortedArray<Component> {
+        return _SparseMatrixImpl<R>.sortedArray(array, sort: sort)
     }
 }

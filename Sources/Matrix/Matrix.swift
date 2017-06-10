@@ -43,8 +43,8 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     }
     
     // convenience initializer. ineffective for a large matrix.
-    public init(_ grid: R...) {
-        self.init(grid: grid)
+    public init(type t: MatrixType = .Default, _ grid: R...) {
+        self.init(type: t, grid: grid)
     }
     
     private static func determineSize(_ rows: Int?, _ cols: Int?, _ grid: [R]?) -> (rows: Int, cols: Int) {
@@ -166,13 +166,15 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
         return Matrix<R, m, m>(impl.rightIdentity())
     }
     
+    // TODO delete if possible
     public func rowArray(_ i: Int) -> [R] {
-        return impl.rowArray(i)
+        return rowVector(i).map{ c in c.value }
     }
     
     public func colArray(_ j: Int) -> [R] {
-        return impl.colArray(j)
+        return colVector(j).map{ c in c.value }
     }
+    // --TODO
     
     public func rowVector(_ i: Int) -> RowVector<R, m> {
         return RowVector(impl.rowVector(i))
@@ -190,12 +192,12 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
         return (0 ..< cols).map{ colVector($0) }
     }
     
-    public func submatrix<k: _Int>(colsInRange c: CountableRange<Int>) -> Matrix<R, n, k> {
-        return Matrix<R, n, k>(impl.submatrix(colsInRange: c))
-    }
-    
     public func submatrix<k: _Int>(rowsInRange r: CountableRange<Int>) -> Matrix<R, k, m> {
         return Matrix<R, k, m>(impl.submatrix(rowsInRange: r))
+    }
+    
+    public func submatrix<k: _Int>(colsInRange c: CountableRange<Int>) -> Matrix<R, n, k> {
+        return Matrix<R, n, k>(impl.submatrix(colsInRange: c))
     }
     
     public func submatrix<k: _Int, l: _Int>(inRange range: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> Matrix<R, k, l> {
