@@ -21,7 +21,7 @@ internal class MatrixEliminationProcessor<R: Ring> {
     
     var debug: Bool = false
     
-    required init(_ target: _MatrixImpl<R>, _ mode: MatrixEliminationMode) {
+    required init(_ target: _MatrixImpl<R>, _ mode: MatrixEliminationMode, debug: Bool = false) {
         self.mode = mode
         self.rows = target.rows
         self.cols = target.cols
@@ -71,7 +71,7 @@ internal class MatrixEliminationProcessor<R: Ring> {
     
     private func log(_ msg: @autoclosure () -> String) {
         if debug {
-            print(msg)
+            print(msg())
         }
     }
 }
