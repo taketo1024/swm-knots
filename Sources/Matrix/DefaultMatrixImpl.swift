@@ -12,7 +12,12 @@ import Foundation
 
 public extension Ring {
     public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type {
-        return _GridMatrixImpl<Self>.self
+        switch type {
+        case .Default:
+            return _GridMatrixImpl<Self>.self
+        case .Sparse:
+            return _SparseMatrixImpl<Self>.self
+        }
     }
 }
 
@@ -20,11 +25,16 @@ public extension Ring {
 
 public extension EuclideanRing {
     public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type {
-        return _EucMatrixImpl<Self>.self
+        switch type {
+        case .Default:
+            return _EucMatrixImpl<Self>.self
+        case .Sparse:
+            return _SparseMatrixImpl<Self>.self
+        }
     }
 }
 
-public final class _EucMatrixImpl<R: EuclideanRing>: _GridMatrixImpl<R> {
+public final class _EucMatrixImpl<R: EuclideanRing>: _SparseMatrixImpl<R> {
     public override func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<R, n, m> {
         return MatrixElimination(self, mode, EucMatrixEliminationProcessor<R>.self)
     }
@@ -39,7 +49,12 @@ public final class _EucMatrixImpl<R: EuclideanRing>: _GridMatrixImpl<R> {
 
 public extension Field {
     public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type {
-        return _FieldMatrixImpl<Self>.self
+        switch type {
+        case .Default:
+            return _FieldMatrixImpl<Self>.self
+        case .Sparse:
+            return _SparseMatrixImpl<Self>.self
+        }
     }
 }
 
