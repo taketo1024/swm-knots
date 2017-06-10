@@ -11,8 +11,6 @@ typealias R = RealNumber
 
 // Matrix Example
 
-EigenAcceleration.enable(true)
-
 do {
     typealias M = Matrix<Z,_2,_2>
     

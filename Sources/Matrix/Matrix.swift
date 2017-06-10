@@ -1,7 +1,5 @@
 import Foundation
 
-private let Auto = -1
-
 public typealias ColVector<R: Ring, n: _Int>    = Matrix<R, n, _1>
 public typealias RowVector<R: Ring, m: _Int>    = Matrix<R, _1, m>
 public typealias SquareMatrix<R: Ring, n: _Int> = Matrix<R, n, n>
@@ -21,13 +19,13 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     }
     
     // public root initializer
-    public init(rows r: Int = Auto, cols c: Int = Auto, generator g: (Int, Int) -> R) {
+    public init(rows r: Int? = nil, cols c: Int? = nil, generator g: (Int, Int) -> R) {
         let (rows, cols) = Matrix.determineSize(r, c, nil)
         self.init(R.matrixImplType.init(rows, cols, g))
     }
     
     // convenience initializer. ineffective for a large matrix.
-    public init(rows r: Int = Auto, cols c: Int = Auto, grid: [R]) {
+    public init(rows r: Int? = nil, cols c: Int? = nil, grid: [R]) {
         let (rows, cols) = Matrix.determineSize(r, c, grid)
         
         let n = grid.count
@@ -41,10 +39,10 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     
     // convenience initializer. ineffective for a large matrix.
     public init(_ grid: R...) {
-        self.init(rows: Auto, cols: Auto, grid: grid)
+        self.init(grid: grid)
     }
     
-    private static func determineSize(_ rows: Int, _ cols: Int, _ grid: [R]?) -> (rows: Int, cols: Int) {
+    private static func determineSize(_ rows: Int?, _ cols: Int?, _ grid: [R]?) -> (rows: Int, cols: Int) {
         func ceilDiv(_ a: Int, _ b: Int) -> Int {
             return (a + b - 1) / b
         }
@@ -53,18 +51,18 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
             
         // completely determined by type.
         case let (R, C) where !(R is Dynamic.Type) && !(C is Dynamic.Type):
-            assert(rows == Auto || rows == R.intValue, "rows mismatch with type-parameter: \(rows) != \(R.intValue)")
-            assert(cols == Auto || cols == C.intValue, "cols mismatch with type-parameter: \(cols) != \(C.intValue)")
+            assert(rows == nil || rows! == R.intValue, "rows mismatch with type-parameter: \(String(describing: rows)) != \(R.intValue)")
+            assert(cols == nil || cols! == C.intValue, "cols mismatch with type-parameter: \(String(describing: cols)) != \(C.intValue)")
             return (R.intValue, C.intValue)
             
         // rows is determined by type.
         case let (R, C) where !(R is Dynamic.Type) && (C is Dynamic.Type):
-            assert(rows == Auto || rows == R.intValue, "rows mismatch with type-parameter: \(rows) != \(R.intValue)")
+            assert(rows == nil || rows! == R.intValue, "rows mismatch with type-parameter: \(String(describing: rows)) != \(R.intValue)")
             let r = R.intValue
             switch (cols, grid) {
-            case let (c, _) where c != Auto:
+            case let (c?, _):
                 return (r, c)
-            case let (c, g?) where r > 0 && c == Auto:
+            case let (nil, g?) where r > 0:
                 return (r, ceilDiv(g.count, r))
             default:
                 fatalError("Matrix size indeterminable.")
@@ -72,12 +70,12 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
             
         // cols is determined by type.
         case let (R, C) where (R is Dynamic.Type) && !(C is Dynamic.Type):
-            assert(cols == Auto || cols == C.intValue, "cols mismatch with type-parameter: \(cols) != \(C.intValue)")
+            assert(cols == nil || cols == C.intValue, "cols mismatch with type-parameter: \(String(describing: cols)) != \(C.intValue)")
             let c = C.intValue
             switch (rows, grid) {
-            case let (r, _) where r != Auto:
+            case let (r?, _):
                 return (r, c)
-            case let (r, g?) where r == Auto && c > 0:
+            case let (nil, g?) where c > 0:
                 return (ceilDiv(g.count, c), c)
             default:
                 fatalError("Matrix size indeterminable.")
@@ -86,11 +84,11 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
         // rows, cols are dynamic.
         case let (R, C) where  (R is Dynamic.Type) &&  (C is Dynamic.Type):
             switch (rows, cols, grid) {
-            case let (r, c, _) where r != Auto && c != Auto:
+            case let (r?, c?, _):
                 return (r, c)
-            case let (r, _, g?) where r != Auto && r > 0:
+            case let (r?, _, g?) where r > 0:
                 return (r, ceilDiv(g.count, r))
-            case let (_, c, g?) where c != Auto && c > 0:
+            case let (_, c?, g?) where c > 0:
                 return (ceilDiv(g.count, c), c)
             default:
                 fatalError("Matrix size indeterminable.")
@@ -273,7 +271,7 @@ public extension Matrix where n == m {
     }
     
     public static var identity: Matrix<R, n, n> {
-        return Matrix<R, n, n>(rows: Auto, cols: Auto) { $0 == $1 ? 1 : 0 }
+        return Matrix<R, n, n> { $0 == $1 ? 1 : 0 }
     }
     
     public static func ** (a: Matrix<R, n, n>, k: Int) -> Matrix<R, n, n> {
