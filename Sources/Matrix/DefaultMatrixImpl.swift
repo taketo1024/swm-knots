@@ -34,7 +34,7 @@ public extension EuclideanRing {
     }
 }
 
-public final class _EucMatrixImpl<R: EuclideanRing>: _SparseMatrixImpl<R> {
+public final class _EucMatrixImpl<R: EuclideanRing>: _GridMatrixImpl<R> {
     public override func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode) -> MatrixElimination<R, n, m> {
         return MatrixElimination(self, mode, EucMatrixEliminationProcessor<R>.self)
     }
