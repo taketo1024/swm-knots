@@ -8,7 +8,6 @@ import SwiftyAlgebra
 typealias Z = IntegerNumber
 typealias Q = RationalNumber
 typealias R = RealNumber
-typealias Z_2 = IntegerQuotientField<_2>
 
 let V = VertexSet(number: 10)
 
@@ -77,3 +76,4 @@ do {
     let cH = Cohomology(C, Z.self)
     print("cH(RP^2; Z) =", cH.detailDescription, "\n")
 }
+

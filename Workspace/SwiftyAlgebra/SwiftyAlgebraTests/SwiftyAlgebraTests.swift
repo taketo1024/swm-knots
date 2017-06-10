@@ -12,7 +12,6 @@ import XCTest
 internal typealias Z = IntegerNumber
 internal typealias Q = RationalNumber
 internal typealias R = RealNumber
-internal typealias Z_2 = IntegerQuotientField<_2>
 
 class SwiftyAlgebraTests: XCTestCase {
     
