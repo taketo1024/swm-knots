@@ -15,13 +15,22 @@ public class _MatrixImpl<R: Ring> {
     public final let rows: Int
     public final let cols: Int
     
-    public required init(_ rows: Int, _ cols: Int, _ g: (Int, Int) -> R) {
+    // 1. Initialize by Grid (simple but ineffective).
+    public required init(_ rows: Int, _ cols: Int, _ grid: [R]) {
         self.rows = rows
         self.cols = cols
     }
     
-    internal func createInstance(_ rows: Int, _ cols: Int, _ g: (Int, Int) -> R) -> Self {
-        return type(of: self).init(rows, cols, g)
+    // 2. Initialize by Generator.
+    public required init(_ rows: Int, _ cols: Int, _ generator: (Int, Int) -> R) {
+        self.rows = rows
+        self.cols = cols
+    }
+    
+    // 3. Initialize by Components (good for Sparce Matrix).
+    public required init(_ rows: Int, _ cols: Int, _ components: [MatrixComponent<R>]) {
+        self.rows = rows
+        self.cols = cols
     }
     
     public func copy() -> Self {
@@ -49,32 +58,32 @@ public class _MatrixImpl<R: Ring> {
     
     public func add(_ b: _MatrixImpl<R>) -> _MatrixImpl<R> {
         assert((rows, cols) == (b.rows, b.cols), "Mismatching matrix size.")
-        return createInstance(rows, cols) { (i, j) -> R in
+        return type(of: self).init(rows, cols) { (i, j) -> R in
             return self[i, j] + b[i, j]
         }
     }
     
     public func negate() -> _MatrixImpl<R> {
-        return createInstance(rows, cols) { (i, j) -> R in
+        return type(of: self).init(rows, cols) { (i, j) -> R in
             return -self[i, j]
         }
     }
     
     public func leftMul(_ r: R) -> _MatrixImpl<R> {
-        return createInstance(rows, cols) { (i, j) -> R in
+        return type(of: self).init(rows, cols) { (i, j) -> R in
             return r * self[i, j]
         }
     }
     
     public  func rightMul(_ r: R) -> _MatrixImpl<R> {
-        return createInstance(rows, cols) { (i, j) -> R in
+        return type(of: self).init(rows, cols) { (i, j) -> R in
             return self[i, j] * r
         }
     }
     
     public func mul(_ b: _MatrixImpl<R>) -> _MatrixImpl<R> {
         assert(self.cols == b.rows, "Mismatching matrix size.")
-        return createInstance(rows, b.cols) { (i, k) -> R in
+        return type(of: self).init(rows, b.cols) { (i, k) -> R in
             return (0 ..< cols)
                 .map({j in self[i, j] * b[j, k]})
                 .reduce(0) {$0 + $1}
@@ -82,44 +91,44 @@ public class _MatrixImpl<R: Ring> {
     }
     
     public func transpose() -> _MatrixImpl<R> {
-        return createInstance(cols, rows) { self[$1, $0] }
+        return type(of: self).init(cols, rows) { self[$1, $0] }
     }
     
     public func leftIdentity() -> _MatrixImpl<R> {
-        return createInstance(rows, rows) { $0 == $1 ? 1 : 0 }
+        return type(of: self).init(rows, rows) { $0 == $1 ? 1 : 0 }
     }
     
     public func rightIdentity() -> _MatrixImpl<R> {
-        return createInstance(cols, cols) { $0 == $1 ? 1 : 0 }
+        return type(of: self).init(cols, cols) { $0 == $1 ? 1 : 0 }
     }
     
     public func rowVector(_ i: Int) -> _MatrixImpl<R> {
-        return createInstance(1, cols){(_, j) -> R in
+        return type(of: self).init(1, cols){(_, j) -> R in
             return self[i, j]
         }
     }
     
     public func colVector(_ j: Int) -> _MatrixImpl<R> {
-        return createInstance(rows, 1){(i, _) -> R in
+        return type(of: self).init(rows, 1){(i, _) -> R in
             return self[i, j]
         }
     }
     
     public func submatrix(rowsInRange r: CountableRange<Int>) -> _MatrixImpl<R> {
-        return createInstance(r.upperBound - r.lowerBound, self.cols) {
+        return type(of: self).init(r.upperBound - r.lowerBound, self.cols) {
             self[$0 + r.lowerBound, $1]
         }
     }
     
     public func submatrix(colsInRange c: CountableRange<Int>) -> _MatrixImpl<R> {
-        return createInstance(self.rows, c.upperBound - c.lowerBound) {
+        return type(of: self).init(self.rows, c.upperBound - c.lowerBound) {
             self[$0, $1 + c.lowerBound]
         }
     }
     
     public func submatrix(inRange: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> _MatrixImpl<R> {
         let (r, c) = inRange
-        return createInstance(r.upperBound - r.lowerBound, c.upperBound - c.lowerBound) {
+        return type(of: self).init(r.upperBound - r.lowerBound, c.upperBound - c.lowerBound) {
             self[$0 + r.lowerBound, $1 + c.lowerBound]
         }
     }

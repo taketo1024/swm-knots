@@ -12,6 +12,8 @@ public enum MatrixType {
     case Sparse
 }
 
+public typealias MatrixComponent<R> = (row: Int, col: Int, value: R)
+
 public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public typealias R = _R
     public typealias Iterator = MatrixIterator<R, n, m>
@@ -23,26 +25,33 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
         self.impl = impl
     }
     
-    // public root initializer
-    public init(rows r: Int? = nil, cols c: Int? = nil, type t: MatrixType = .Default, generator g: (Int, Int) -> R) {
-        let (rows, cols) = Matrix.determineSize(r, c, nil)
-        self.init(R.matrixImplType(t).init(rows, cols, g))
-    }
-    
-    // convenience initializer. ineffective for a large matrix.
+    // 1. Initialize by Grid (simple but ineffective).
     public init(rows r: Int? = nil, cols c: Int? = nil, type t: MatrixType = .Default, grid: [R]) {
         let (rows, cols) = Matrix.determineSize(r, c, grid)
+        self.init(R.matrixImplType(t).init(rows, cols, grid))
         
+        /*
         let n = grid.count
         let g: (Int, Int) -> R = { (i, j) -> R in
             let index = i * cols + j
             return (index < n) ? grid[index] : R.zero
         }
-        
-        self.init(rows: rows, cols: cols, type: t, generator: g)
+        */
     }
     
-    // convenience initializer. ineffective for a large matrix.
+    // 2. Initialize by Generator.
+    public init(rows r: Int? = nil, cols c: Int? = nil, type t: MatrixType = .Default, generator g: (Int, Int) -> R) {
+        let (rows, cols) = Matrix.determineSize(r, c, nil)
+        self.init(R.matrixImplType(t).init(rows, cols, g))
+    }
+    
+    // 3. Initialize by Components (good for Sparce Matrix).
+    public init(rows r: Int? = nil, cols c: Int? = nil, type t: MatrixType = .Default, components: [MatrixComponent<R>]) {
+        let (rows, cols) = Matrix.determineSize(r, c, nil)
+        self.init(R.matrixImplType(t).init(rows, cols, components))
+    }
+    
+    // Convenience initializer of 1.
     public init(type t: MatrixType = .Default, _ grid: R...) {
         self.init(type: t, grid: grid)
     }

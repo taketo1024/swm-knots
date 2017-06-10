@@ -11,6 +11,11 @@ import Foundation
 public class _GridMatrixImpl<R: Ring>: _MatrixImpl<R> {
     final var grid: [R]
     
+    public required init(_ rows: Int, _ cols: Int, _ grid: [R]) {
+        self.grid = grid
+        super.init(rows, cols, grid)
+    }
+    
     public required init(_ rows: Int, _ cols: Int, _ g: (Int, Int) -> R) {
         self.grid = (0 ..< rows * cols).map { (index: Int) -> R in
             let (i, j) = index /% cols
@@ -19,9 +24,13 @@ public class _GridMatrixImpl<R: Ring>: _MatrixImpl<R> {
         super.init(rows, cols, g)
     }
     
-    public required init(_ rows: Int, _ cols: Int, _ grid: [R]) {
+    public required init(_ rows: Int, _ cols: Int, _ components: [MatrixComponent<R>]) {
+        var grid = Array(repeating: R.zero, count: rows * cols)
+        for (i, j, a) in components {
+            grid[(i * cols) + j] = a
+        }
         self.grid = grid
-        super.init(rows, cols, {_,_ in R.zero})
+        super.init(rows, cols, components)
     }
     
     public override func copy() -> Self {
