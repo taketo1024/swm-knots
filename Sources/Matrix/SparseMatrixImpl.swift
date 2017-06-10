@@ -138,7 +138,40 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     
     public override func mul(_ b: _MatrixImpl<R>) -> _MatrixImpl<R> {
         assert(self.cols == b.rows, "Mismatching matrix size.")
-        fatalError()
+        guard let _b = b as? _SparseMatrixImpl<R> else { return super.add(b) }
+        
+        func prod(_ rowComps: [Component], _ colComps: [Component]) -> R {
+            let (n1, n2) = (rowComps.count, colComps.count)
+            var (i1, i2) = (0, 0)
+            var result = R.zero
+            
+            while i1 < n1 && i2 < n2 {
+                let (c1, c2) = (rowComps[i1], colComps[i2])
+                if c1.col == c2.row {
+                    result = result + c1.value * c2.value
+                    (i1, i2) = (i1 + 1, i2 + 1)
+                } else if c1.col < c2.row {
+                    i1 += 1
+                } else {
+                    i2 += 1
+                }
+            }
+            
+            return result
+        }
+        
+        let aRows = self.list.group { $0.row }
+        let bCols =   _b.list.group { $0.col }
+        var result = [Component]()
+        
+        for (i, rowComps) in aRows {
+            for (j, colComps) in bCols {
+                let comp = (i, j, prod(rowComps, colComps))
+                result.append(comp)
+            }
+        }
+        
+        return createInstance(rows, cols, sortedArray(result))
     }
     
     public override func transpose() -> _MatrixImpl<R> {

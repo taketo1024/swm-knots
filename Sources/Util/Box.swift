@@ -8,6 +8,9 @@
 
 import Foundation
 
-public class Box<Content> {
+public final class Box<Content> {
     public var content: Content?
+    public init(_ content: Content?) {
+        self.content = content
+    }
 }
