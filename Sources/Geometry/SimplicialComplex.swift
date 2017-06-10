@@ -61,17 +61,16 @@ public struct SimplicialComplex: GeometricComplex {
     }
     
     private func boundaryMapMatrix<R: Ring>(_ from: [Simplex], _ to : [Simplex]) -> DynamicMatrix<R> {
-        var matrix = DynamicMatrix(rows: to.count, cols: from.count) { _ in R.zero }
         let toIndex = Dictionary(to.enumerated().map{($1, $0)})
-        
-        from.enumerated().forEach { (j, s) in
-            s.faces().enumerated().forEach { (k, t) in
+        let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
+            return s.faces().enumerated().map { (k, t) -> MatrixComponent<R> in
                 let i = toIndex[t]!
-                matrix[i, j] = (k % 2 == 0) ? 1 : -1
+                let value: R = (k % 2 == 0) ? 1 : -1
+                return (i, j, value)
             }
         }
         
-        return matrix
+        return DynamicMatrix(rows: to.count, cols: from.count, type: .Sparse, components: components)
     }
 }
 

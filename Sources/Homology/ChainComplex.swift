@@ -46,10 +46,6 @@ public struct BaseChainComplex<chainType: ChainType, A: Hashable, R: Ring>: Cust
         self.init(chainBases: chainBases, boundaryMaps: boundaryMaps)
     }
     
-    public init(_ pairs: ([A], F)...) {
-        self.init(chainBases: pairs.map{$0.0}, boundaryMaps: pairs.map{$0.1})
-    }
-    
     public var dim: Int {
         return self.chainBases.count - 1
     }
