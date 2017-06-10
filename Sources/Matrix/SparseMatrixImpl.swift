@@ -189,29 +189,10 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         return type(of: self).init(cols, cols, sortedArray(result))
     }
     
-    public override func rowVector(_ i: Int) -> _MatrixImpl<R> {
-        let result = list.filter{ c in c.row == i }
-        return type(of: self).init(1, cols, result)
-    }
-    
-    public override func colVector(_ j: Int) -> _MatrixImpl<R> {
-        let result = list.filter{ c in c.row == j }
-        return type(of: self).init(rows, 1, result)
-    }
-    
-    public override func submatrix(rowsInRange rowRange: CountableRange<Int>) -> _MatrixImpl<R> {
-        let result = list.filter{ c in rowRange.contains(c.row) }
-        return type(of: self).init(rowRange.upperBound - rowRange.lowerBound, cols, result)
-    }
-    
-    public override func submatrix(colsInRange colRange: CountableRange<Int>) -> _MatrixImpl<R> {
-        let result = list.filter{ c in colRange.contains(c.col) }
-        return type(of: self).init(rows, colRange.upperBound - colRange.lowerBound, result)
-    }
-    
     public override func submatrix(inRange range: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> _MatrixImpl<R> {
         let (rowRange, colRange) = range
         let result = list.filter{ c in rowRange.contains(c.row) && colRange.contains(c.col) }
+                         .map{ c in (c.row - rowRange.lowerBound, c.col - colRange.lowerBound, c.value)}
         return type(of: self).init(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound, result)
     }
     

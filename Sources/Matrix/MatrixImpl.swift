@@ -102,30 +102,6 @@ public class _MatrixImpl<R: Ring> {
         return type(of: self).init(cols, cols) { $0 == $1 ? 1 : 0 }
     }
     
-    public func rowVector(_ i: Int) -> _MatrixImpl<R> {
-        return type(of: self).init(1, cols){(_, j) -> R in
-            return self[i, j]
-        }
-    }
-    
-    public func colVector(_ j: Int) -> _MatrixImpl<R> {
-        return type(of: self).init(rows, 1){(i, _) -> R in
-            return self[i, j]
-        }
-    }
-    
-    public func submatrix(rowsInRange r: CountableRange<Int>) -> _MatrixImpl<R> {
-        return type(of: self).init(r.upperBound - r.lowerBound, self.cols) {
-            self[$0 + r.lowerBound, $1]
-        }
-    }
-    
-    public func submatrix(colsInRange c: CountableRange<Int>) -> _MatrixImpl<R> {
-        return type(of: self).init(self.rows, c.upperBound - c.lowerBound) {
-            self[$0, $1 + c.lowerBound]
-        }
-    }
-    
     public func submatrix(inRange: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> _MatrixImpl<R> {
         let (r, c) = inRange
         return type(of: self).init(r.upperBound - r.lowerBound, c.upperBound - c.lowerBound) {

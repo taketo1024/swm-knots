@@ -187,11 +187,11 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     // --TODO
     
     public func rowVector(_ i: Int) -> RowVector<R, m> {
-        return RowVector(type, impl.rowVector(i))
+        return submatrix(inRange: (i ..< i + 1, 0 ..< cols))
     }
     
     public func colVector(_ j: Int) -> ColVector<R, n> {
-        return ColVector(type, impl.colVector(j))
+        return submatrix(inRange: (0 ..< rows, j ..< j + 1))
     }
     
     public func toRowVectors() -> [RowVector<R, m>] {
@@ -203,11 +203,11 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     }
     
     public func submatrix<k: _Int>(rowsInRange r: CountableRange<Int>) -> Matrix<R, k, m> {
-        return Matrix<R, k, m>(type, impl.submatrix(rowsInRange: r))
+        return submatrix(inRange: (r, 0 ..< cols))
     }
     
     public func submatrix<k: _Int>(colsInRange c: CountableRange<Int>) -> Matrix<R, n, k> {
-        return Matrix<R, n, k>(type, impl.submatrix(colsInRange: c))
+        return submatrix(inRange: (0 ..< rows, c))
     }
     
     public func submatrix<k: _Int, l: _Int>(inRange range: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> Matrix<R, k, l> {
