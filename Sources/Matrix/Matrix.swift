@@ -18,17 +18,19 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public typealias R = _R
     public typealias Iterator = MatrixIterator<R, n, m>
     
+    public let type: MatrixType
     internal var impl: _MatrixImpl<R>
     
     // internal root initializer
-    internal init(_ impl: _MatrixImpl<R>) {
+    internal init(_ type: MatrixType, _ impl: _MatrixImpl<R>) {
+        self.type = type
         self.impl = impl
     }
     
     // 1. Initialize by Grid (simple but ineffective).
     public init(rows r: Int? = nil, cols c: Int? = nil, type t: MatrixType = .Default, grid: [R]) {
         let (rows, cols) = Matrix.determineSize(r, c, grid)
-        self.init(R.matrixImplType(t).init(rows, cols, grid))
+        self.init(t, R.matrixImplType(t).init(rows, cols, grid))
         
         /*
         let n = grid.count
@@ -42,18 +44,18 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     // 2. Initialize by Generator.
     public init(rows r: Int? = nil, cols c: Int? = nil, type t: MatrixType = .Default, generator g: (Int, Int) -> R) {
         let (rows, cols) = Matrix.determineSize(r, c, nil)
-        self.init(R.matrixImplType(t).init(rows, cols, g))
+        self.init(t, R.matrixImplType(t).init(rows, cols, g))
     }
     
     // 3. Initialize by Components (good for Sparce Matrix).
     public init(rows r: Int? = nil, cols c: Int? = nil, type t: MatrixType = .Default, components: [MatrixComponent<R>]) {
         let (rows, cols) = Matrix.determineSize(r, c, nil)
-        self.init(R.matrixImplType(t).init(rows, cols, components))
+        self.init(t, R.matrixImplType(t).init(rows, cols, components))
     }
     
     // Convenience initializer of 1.
-    public init(type t: MatrixType = .Default, _ grid: R...) {
-        self.init(type: t, grid: grid)
+    public init(_ grid: R...) {
+        self.init(grid: grid)
     }
     
     private static func determineSize(_ rows: Int?, _ cols: Int?, _ grid: [R]?) -> (rows: Int, cols: Int) {
@@ -144,35 +146,35 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     }
     
     public static func +(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
-        return Matrix(a.impl.add(b.impl))
+        return Matrix(a.type, a.impl.add(b.impl))
     }
     
     public prefix static func -(a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-        return Matrix(a.impl.negate())
+        return Matrix(a.type, a.impl.negate())
     }
     
     public static func *(r: R, a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-        return Matrix(a.impl.leftMul(r))
+        return Matrix(a.type, a.impl.leftMul(r))
     }
     
     public static func *(a: Matrix<R, n, m>, r: R) -> Matrix<R, n, m> {
-        return Matrix(a.impl.rightMul(r))
+        return Matrix(a.type, a.impl.rightMul(r))
     }
     
     public static func * <p: _Int>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
-        return Matrix<R, n, p>(a.impl.mul(b.impl))
+        return Matrix<R, n, p>(a.type, a.impl.mul(b.impl))
     }
     
     public var transposed: Matrix<R, m, n> {
-        return Matrix<R, m, n>(impl.transpose())
+        return Matrix<R, m, n>(type, impl.transpose())
     }
     
     public var leftIdentity: Matrix<R, n, n> {
-        return Matrix<R, n, n>(impl.leftIdentity())
+        return Matrix<R, n, n>(type, impl.leftIdentity())
     }
     
     public var rightIdentity: Matrix<R, m, m> {
-        return Matrix<R, m, m>(impl.rightIdentity())
+        return Matrix<R, m, m>(type, impl.rightIdentity())
     }
     
     // TODO delete if possible
@@ -186,11 +188,11 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     // --TODO
     
     public func rowVector(_ i: Int) -> RowVector<R, m> {
-        return RowVector(impl.rowVector(i))
+        return RowVector(type, impl.rowVector(i))
     }
     
     public func colVector(_ j: Int) -> ColVector<R, n> {
-        return ColVector(impl.colVector(j))
+        return ColVector(type, impl.colVector(j))
     }
     
     public func toRowVectors() -> [RowVector<R, m>] {
@@ -202,15 +204,15 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     }
     
     public func submatrix<k: _Int>(rowsInRange r: CountableRange<Int>) -> Matrix<R, k, m> {
-        return Matrix<R, k, m>(impl.submatrix(rowsInRange: r))
+        return Matrix<R, k, m>(type, impl.submatrix(rowsInRange: r))
     }
     
     public func submatrix<k: _Int>(colsInRange c: CountableRange<Int>) -> Matrix<R, n, k> {
-        return Matrix<R, n, k>(impl.submatrix(colsInRange: c))
+        return Matrix<R, n, k>(type, impl.submatrix(colsInRange: c))
     }
     
     public func submatrix<k: _Int, l: _Int>(inRange range: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> Matrix<R, k, l> {
-        return Matrix<R, k, l>(impl.submatrix(inRange: range))
+        return Matrix<R, k, l>(type, impl.submatrix(inRange: range))
     }
     
     public mutating func multiplyRow(at i0: Int, by r: R) {
@@ -262,7 +264,7 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
 
 public extension Matrix where R: EuclideanRing {
     public func eliminate(mode: MatrixEliminationMode = .Both) -> MatrixElimination<R, n, m> {
-        return MatrixElimination(self.impl, mode, R.matrixEliminationProcessorType())
+        return MatrixElimination(self, mode, R.matrixEliminationProcessorType())
     }
 }
 
