@@ -28,6 +28,7 @@ public class MatrixEliminationProcessor<R: Ring> {
         
         self.result = target.copy()
         self.process = []
+        self.debug = debug
         
         self.maxItr = {
             switch mode {

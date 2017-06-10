@@ -15,8 +15,8 @@ public class MatrixElimination<R: Ring, n: _Int, m: _Int> {
         return (p.result, p.process)
     }()
     
-    internal init(_ matrix: _MatrixImpl<R>, _ mode: MatrixEliminationMode, _ processorType: MatrixEliminationProcessor<R>.Type) {
-        self.processor = processorType.init(matrix, mode)
+    internal init(_ matrix: _MatrixImpl<R>, _ mode: MatrixEliminationMode, _ processorType: MatrixEliminationProcessor<R>.Type, debug: Bool = false) {
+        self.processor = processorType.init(matrix, mode, debug: debug)
     }
     
     public var rankNormalForm: Matrix<R, n, m> {
