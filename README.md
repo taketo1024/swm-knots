@@ -141,27 +141,6 @@ let z = 3 + 2 * i    // z = 3 + 2i
 z * z == 5 + 12 * i  // true
 ```
 
-## Project Structure
-* Abstract
-  * [Monoid](Algebra.playground/Sources/Abstract/Monoid.swift)
-  * [Group](Algebra.playground/Sources/Abstract/Group.swift)
-  * [AdditiveGroup](Algebra.playground/Sources/Abstract/AdditiveGroup.swift)
-  * [Ring](Algebra.playground/Sources/Abstract/Ring.swift)
-  * [EuclideanRing](Algebra.playground/Sources/Abstract/EuclideanRing.swift)
-  * [Field](Algebra.playground/Sources/Abstract/Field.swift)
-* Concrete
-  * Numbers
-    * [Integer](Algebra.playground/Sources/Concrete/Numbers/Integer.swift)
-    * [Rational](Algebra.playground/Sources/Concrete/Numbers/Rational.swift)
-    * [Real](Algebra.playground/Sources/Concrete/Numbers/Real.swift)
-  * [Permutation](Algebra.playground/Sources/Concrete/Permutation.swift)
-  * [Matrix](Algebra.playground/Sources/Concrete/Matrix.swift)
-  * [Polynominal](Algebra.playground/Sources/Concrete/Polynominal.swift)
-* Quotient
-  * [QuotientRing](Algebra.playground/Sources/Quotient/QuotientRing.swift)
-  * [IntQuotientRing](Algebra.playground/Sources/Quotient/IntQuotientRing.swift)
-  * [PolynominalQuotientRing](Algebra.playground/Sources/Quotient/PolynominalQuotientRing.swift)
-
 ## Guide to Abstract Algebra
 
 1. [数とは何か？](http://qiita.com/taketo1024/items/bd356c59dc0559ee9a0b) 
@@ -171,6 +150,11 @@ z * z == 5 + 12 * i  // true
 5. [小さな「体」を作ろう](http://qiita.com/taketo1024/items/f5cd40bf669fa8511f9b)
 6. [多項式は整数によく似てる](http://qiita.com/taketo1024/items/83be0ad7d2f2e4f3f44d)
 7. [代数拡大で数を作ろう！](http://qiita.com/taketo1024/items/ccf7ece3dfeb98b38946)
+
+## Used Libraries
+
+1. [Eigen](http://eigen.tuxfamily.org/) 
+2. [ole/SortedArray](https://github.com/ole/SortedArray)
 
 ## License
 **Swifty Algebra** is licensed under [CC0 1.0 Universal](LICENSE).
