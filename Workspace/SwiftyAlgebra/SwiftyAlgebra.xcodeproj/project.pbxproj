@@ -54,6 +54,7 @@
 		14B2FB8C1ED8FBA000C182EB /* MatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */; };
 		14B42A981EE6264300D99997 /* DynamicRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B42A971EE6264300D99997 /* DynamicRing.swift */; };
 		14B8E1621EEBA0390024EB2A /* SortedArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B8E1611EEBA0390024EB2A /* SortedArray.swift */; };
+		14B8E1641EEBA0B20024EB2A /* SparseMatrixImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B8E1631EEBA0B20024EB2A /* SparseMatrixImpl.swift */; };
 		14C908881EEA8AD7002C657B /* MatrixImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C908871EEA8AD7002C657B /* MatrixImpl.swift */; };
 		14D261321EE44DB4006775E2 /* DynamicType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261311EE44DB4006775E2 /* DynamicType.swift */; };
 		14D261341EE4614E006775E2 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* Set.swift */; };
@@ -130,6 +131,7 @@
 		14B2FB8B1ED8FBA000C182EB /* MatrixTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixTests.swift; sourceTree = "<group>"; };
 		14B42A971EE6264300D99997 /* DynamicRing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DynamicRing.swift; path = Dynamic/DynamicRing.swift; sourceTree = "<group>"; };
 		14B8E1611EEBA0390024EB2A /* SortedArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SortedArray.swift; sourceTree = "<group>"; };
+		14B8E1631EEBA0B20024EB2A /* SparseMatrixImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SparseMatrixImpl.swift; sourceTree = "<group>"; };
 		14C908871EEA8AD7002C657B /* MatrixImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixImpl.swift; sourceTree = "<group>"; };
 		14D261311EE44DB4006775E2 /* DynamicType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DynamicType.swift; path = Dynamic/DynamicType.swift; sourceTree = "<group>"; };
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
@@ -301,6 +303,7 @@
 				1424F4E11EB997780052581F /* Matrix.swift */,
 				14C908871EEA8AD7002C657B /* MatrixImpl.swift */,
 				14207CB11EEB90A90007BE8F /* GridMatrixImpl.swift */,
+				14B8E1631EEBA0B20024EB2A /* SparseMatrixImpl.swift */,
 				14207CB31EEB90E80007BE8F /* DefaultMatrixImpl.swift */,
 				1482E05C1EE96BA700B0CEFA /* IntMatrixImpl+Eigen.swift */,
 				1424F4F01EB997780052581F /* MatrixElimination.swift */,
@@ -520,6 +523,7 @@
 				1424F4FE1EB997780052581F /* Monoid.swift in Sources */,
 				1424F50F1EB997780052581F /* TPPolynomial.swift in Sources */,
 				1424F50C1EB997780052581F /* MatrixElimination.swift in Sources */,
+				14B8E1641EEBA0B20024EB2A /* SparseMatrixImpl.swift in Sources */,
 				147D98031EB9B06900C736AC /* IntegerFactorization.swift in Sources */,
 				1424F50D1EB997780052581F /* PolynomialFactorization.swift in Sources */,
 				1424F5031EB997780052581F /* Polynominal.swift in Sources */,
