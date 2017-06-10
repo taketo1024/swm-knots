@@ -15,8 +15,8 @@
 import Foundation
 
 public extension IntegerNumber {
-    public static var matrixImplType: _MatrixImpl<Int>.Type {
-        return EigenAcceleration.enabled() ? _EigenIntMatrixImpl.self : _EucMatrixImpl<Int>.self
+    public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<IntegerNumber>.Type {
+        return EigenAcceleration.enabled() ? _EigenIntMatrixImpl.self : _EucMatrixImpl<IntegerNumber>.self
     }
 }
 

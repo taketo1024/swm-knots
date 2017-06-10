@@ -7,6 +7,11 @@ public typealias DynamicMatrix<R: Ring>         = Matrix<R, Dynamic, Dynamic>
 public typealias DynamicColVector<R: Ring>      = Matrix<R, Dynamic, _1>
 public typealias DynamicRowVector<R: Ring>      = Matrix<R, _1, Dynamic>
 
+public enum MatrixType {
+    case Default
+    case Sparse
+}
+
 public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public typealias R = _R
     public typealias Iterator = MatrixIterator<R, n, m>
@@ -19,13 +24,13 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     }
     
     // public root initializer
-    public init(rows r: Int? = nil, cols c: Int? = nil, generator g: (Int, Int) -> R) {
+    public init(rows r: Int? = nil, cols c: Int? = nil, type t: MatrixType = .Default, generator g: (Int, Int) -> R) {
         let (rows, cols) = Matrix.determineSize(r, c, nil)
-        self.init(R.matrixImplType.init(rows, cols, g))
+        self.init(R.matrixImplType(t).init(rows, cols, g))
     }
     
     // convenience initializer. ineffective for a large matrix.
-    public init(rows r: Int? = nil, cols c: Int? = nil, grid: [R]) {
+    public init(rows r: Int? = nil, cols c: Int? = nil, type t: MatrixType = .Default, grid: [R]) {
         let (rows, cols) = Matrix.determineSize(r, c, grid)
         
         let n = grid.count
@@ -34,7 +39,7 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
             return (index < n) ? grid[index] : R.zero
         }
         
-        self.init(rows: rows, cols: cols, generator: g)
+        self.init(rows: rows, cols: cols, type: t, generator: g)
     }
     
     // convenience initializer. ineffective for a large matrix.

@@ -5,7 +5,7 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
     init(intValue: IntegerNumber)
     var inverse: Self? { get }
     var isUnit: Bool { get }
-    static var matrixImplType: _MatrixImpl<Self>.Type { get }
+    static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type
 }
 
 public extension Ring {

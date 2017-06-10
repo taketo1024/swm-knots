@@ -11,7 +11,7 @@ import Foundation
 // General Rings
 
 public extension Ring {
-    public static var matrixImplType: _MatrixImpl<Self>.Type {
+    public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type {
         return _GridMatrixImpl<Self>.self
     }
 }
@@ -19,7 +19,7 @@ public extension Ring {
 // EuclideanRings
 
 public extension EuclideanRing {
-    public static var matrixImplType: _MatrixImpl<Self>.Type {
+    public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type {
         return _EucMatrixImpl<Self>.self
     }
 }
@@ -38,7 +38,7 @@ public final class _EucMatrixImpl<R: EuclideanRing>: _GridMatrixImpl<R> {
 // Fields
 
 public extension Field {
-    public static var matrixImplType: _MatrixImpl<Self>.Type {
+    public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type {
         return _FieldMatrixImpl<Self>.self
     }
 }
