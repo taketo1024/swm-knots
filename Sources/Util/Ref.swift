@@ -8,9 +8,9 @@
 
 import Foundation
 
-public final class Box<Content> {
-    public var content: Content?
-    public init(_ content: Content?) {
-        self.content = content
+public final class Ref<Value> {
+    public var value: Value
+    public init(_ value: Value) {
+        self.value = value
     }
 }
