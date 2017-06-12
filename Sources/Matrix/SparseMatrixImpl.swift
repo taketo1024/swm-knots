@@ -10,7 +10,22 @@
 import Foundation
 
 public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
-    public typealias Component = MatrixComponent<R>
+    public class Component: Equatable {    // a reference type.
+        var row, col: Int
+        var value: R
+        init(_ i: Int, _ j: Int, _ a: R) {
+            (row, col, value) = (i, j, a)
+        }
+        init(_ t: (Int, Int, R)) {
+            (row, col, value) = t
+        }
+        func copy() -> Component {
+            return Component(row, col, value)
+        }
+        static public func == (a: Component, b: Component) -> Bool {
+            return (a.row, a.col, a.value) == (b.row, b.col, b.value)
+        }
+    }
     
     internal static var rowFirst: ((Component, Component) -> Bool) {
         return {(a: Component, b: Component) -> Bool in a.row < b.row || (a.row == b.row && a.col < b.col) }
@@ -18,7 +33,7 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     
     public struct ComponentList: Sequence {
         public typealias Iterator = IndexingIterator<[Component]>
-        var list: SortedArray<Component>
+        private var list: SortedArray<Component>
         
         init(_ components: [Component], sorted: Bool = true) {
             list = sorted ? SortedArray(  sorted: components, orderedBy: rowFirst)
@@ -31,7 +46,7 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
                 for j in 0 ..< cols {
                     let a = g(i, j)
                     if a != R.zero {
-                        sorted.append((i, j, a))
+                        sorted.append(Component(i, j, a))
                     }
                 }
             }
@@ -50,34 +65,45 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
             return list.elements
         }
         
-        func value(_ i: Int, _ j: Int) -> R {
-            if let index = list.index(of: (i, j, R.zero)) {
+        func get(_ i: Int, _ j: Int) -> R {
+            if let index = list.index(of: Component(i, j, R.zero)) {
                 return list[index].value
             } else {
                 return R.zero
             }
         }
         
-        mutating func update(_ i: Int, _ j: Int, _ newValue: R) {
+        mutating func set(_ i: Int, _ j: Int, _ newValue: R) {
             if newValue == R.zero {
-                let c: Component = (i, j, R.zero)
-                return list.remove(c)
+                return remove(i, j)
             } else {
-                let c: Component = (i, j, newValue)
+                let c = Component(i, j, newValue)
                 if let index = list.index(of: c) {
-                    list[index] = (i, j, newValue)
+                    list[index].value = newValue
                 } else {
                     list.insert(c)
                 }
             }
         }
         
-        func map(_ g: (Int, Int, R) -> (Int, Int, R)) -> ComponentList {
-            return ComponentList( list.map{ (c) -> Component in g(c.row, c.col, c.value) }, sorted: false )
+        mutating func remove(_ i: Int, _ j: Int) {
+            list.remove(Component(i, j, R.zero))
         }
         
-        func mapValues(_ g: (R) -> R) -> ComponentList {
-            return ComponentList( list.map{ (c) -> Component in (c.row, c.col, g(c.value))} )
+        mutating func resort() {
+            list.resort()
+        }
+        
+        func copy() -> ComponentList {
+            return ComponentList( list.map{ $0.copy() } )
+        }
+        
+        func copy(mapping g: (Int, Int, R) -> (Int, Int, R)) -> ComponentList {
+            return ComponentList( list.map{ c in Component( g(c.row, c.col, c.value) ) }, sorted: false )
+        }
+        
+        func copy(mappingValues g: (R) -> R) -> ComponentList {
+            return ComponentList( list.map{ c in Component(c.row, c.col, g(c.value))} )
         }
         
         func filter(_ g: (Int, Int, R) -> Bool) -> ComponentList {
@@ -116,7 +142,7 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     }
     
     public required init(_ rows: Int, _ cols: Int, _ components: [MatrixComponent<R>]) {
-        self.list = ComponentList(components, sorted: false)
+        self.list = ComponentList(components.map{ Component($0.0, $0.1, $0.2) }, sorted: false)
         super.init(rows, cols, components)
     }
     
@@ -126,12 +152,12 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     }
     
     public override func copy() -> Self {
-        return type(of: self).init(rows, cols, list.components)
+        return type(of: self).init(rows, cols, list.copy())
     }
     
     public override subscript(i: Int, j: Int) -> R {
-        get { return list.value(i, j) }
-        set { list.update(i, j, newValue) }
+        get { return list.get(i, j) }
+        set { list.set(i, j, newValue) }
     }
     
     public override func equals(_ b: _MatrixImpl<R>) -> Bool {
@@ -152,7 +178,7 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         while i1 < n1 && i2 < n2 {
             let (c1, c2) = (list[i1], _b.list[i2])
             if (c1.row, c1.col) == (c2.row, c2.col) {
-                array.append((c1.row, c1.col, c1.value + c2.value))
+                array.append(Component(c1.row, c1.col, c1.value + c2.value))
                 (i1, i2) = (i1 + 1, i2 + 1)
             } else if _SparseMatrixImpl.rowFirst(c1, c2) {
                 array.append(c1)
@@ -180,17 +206,17 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     }
     
     public override func negate() -> _MatrixImpl<R> {
-        let result = list.mapValues{ -$0 }
+        let result = list.copy{ -$0 }
         return type(of: self).init(rows, cols, result)
     }
     
     public override func leftMul(_ r: R) -> _MatrixImpl<R> {
-        let result = list.mapValues{ r * $0 }
+        let result = list.copy{ r * $0 }
         return type(of: self).init(rows, cols, result)
     }
     
     public override func rightMul(_ r: R) -> _MatrixImpl<R> {
-        let result = list.mapValues{ $0 * r}
+        let result = list.copy{ $0 * r }
         return type(of: self).init(rows, cols, result)
     }
     
@@ -228,7 +254,7 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
                 let (rowComps, colComps) = (aRows[i]!, bCols[j]!)
                 let val = prod(rowComps, colComps)
                 if val != 0 {
-                    array.append( (i, j, val) )
+                    array.append( Component(i, j, val) )
                 }
             }
         }
@@ -238,17 +264,17 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     }
     
     public override func transpose() -> _MatrixImpl<R> {
-        let result = list.map{ ($1, $0, $2) }
+        let result = list.copy{ ($1, $0, $2) }
         return type(of: self).init(rows, cols, result)
     }
     
     public override func leftIdentity() -> _MatrixImpl<R> {
-        let result = ComponentList( (0 ..< rows).map{ (i) -> Component in (i, i, R.identity) } )
+        let result = ComponentList( (0 ..< rows).map{ i in Component(i, i, R.identity) } )
         return type(of: self).init(rows, rows, result)
     }
     
     public override func rightIdentity() -> _MatrixImpl<R> {
-        let result = ComponentList( (0 ..< cols).map{ (i) -> Component in (i, i, R.identity) } )
+        let result = ComponentList( (0 ..< cols).map{ i in Component(i, i, R.identity) } )
         return type(of: self).init(cols, cols, result)
     }
     
@@ -258,16 +284,16 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         let (c0, c1) = (colRange.lowerBound, colRange.upperBound)
         
         let result = list.filter{ (i, j, _) in rowRange.contains(i) && colRange.contains(j) }
-                         .map{ (i, j, a) in (i - r0, j - c0, a)}
+                         .copy  { (i, j, a) in (i - r0, j - c0, a)}
         
         return type(of: self).init(r1 - r0, c1 - c0, result)
     }
     
     public override func multiplyRow(at i0: Int, by r: R) {
         for c in list {
-            let (i, j, value) = c
+            let (i, j, value) = (c.row, c.col, c.value)
             if i == i0 {
-                list.update(i, j, r * value)
+                list.set(i, j, r * value)
             } else if i > i0 {
                 break
             }
@@ -276,46 +302,48 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     
     public override func multiplyCol(at j0: Int, by r: R) {
         for c in list {
-            let (i, j, value) = c
+            let (i, j, value) = (c.row, c.col, c.value)
             if j == j0 {
-                list.update(i, j, r * value)
+                list.set(i, j, r * value)
             }
         }
     }
     
     public override func addRow(at i0: Int, to i1: Int, multipliedBy r: R) {
         let row = list.filter { (i, _, _) in i == i0 }
-        for (_, j, a) in row {
+        for c in row {
+            let (j, a) = (c.col, c.value)
             self[i1, j] = self[i1, j] + r * a
         }
     }
     
     public override func addCol(at j0: Int, to j1: Int, multipliedBy r: R) {
         let col = list.filter { c in c.col == j0 }
-        for (i, _, a) in col {
+        for c in col {
+            let (i, a) = (c.row, c.value)
             self[i, j1] = self[i, j1] + r * a
         }
     }
     
     public override func swapRows(_ i0: Int, _ i1: Int) {
-        let result = list.map{ (i, j, a) -> Component in
-            switch i {
-            case i0: return (i1, j, a)
-            case i1: return (i0, j, a)
-            default: return ( i, j, a)
+        for c in list {
+            switch c.row {
+            case i0: c.row = i1
+            case i1: c.row = i0
+            default: break
             }
         }
-        self.list = result
+        list.resort()
     }
     
     public override func swapCols(_ j0: Int, _ j1: Int) {
-        let result = list.map{ (i, j, a) -> Component in
-            switch j {
-            case j0: return (i, j1, a)
-            case j1: return (i, j0, a)
-            default: return (i,  j, a)
+        for c in list {
+            switch c.col {
+            case j0: c.col = j1
+            case j1: c.col = j0
+            default: break
             }
         }
-        self.list = result
+        list.resort()
     }
 }

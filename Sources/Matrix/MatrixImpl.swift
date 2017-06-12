@@ -11,7 +11,7 @@ import Foundation
 // Abstract class.
 // Concretized by _GridMatrixImpl, _SparceMatrixImpl.
 
-public class _MatrixImpl<R: Ring> {
+public class _MatrixImpl<R: Ring>: CustomStringConvertible {
     public final let rows: Int
     public final let cols: Int
     
