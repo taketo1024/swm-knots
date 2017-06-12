@@ -37,14 +37,18 @@ extension Sequence where Iterator.Element: Hashable {
 
 extension Sequence {
     func group<U: Hashable>(by keyGenerator: (Iterator.Element) -> U) -> [U: [Iterator.Element]] {
-        var groups: [U: Ref<[Iterator.Element]>] = [:]
+        return groupMap(by: { e in (keyGenerator(e), e)})
+    }
+    
+    func groupMap<U: Hashable, T>(by generator: (Iterator.Element) -> (key: U, value: T)) -> [U: [T]] {
+        var groups: [U: Ref<[T]>] = [:]
         for element in self {
-            let key = keyGenerator(element)
-            if case nil = groups[key]?.value.append(element) {
-                groups[key] = Ref([element])
+            let (key, val) = generator(element)
+            if case nil = groups[key]?.value.append(val) {
+                groups[key] = Ref([val])
             }
         }
-        var result: [U: [Iterator.Element]] = Dictionary(minimumCapacity: groups.count)
+        var result: [U: [T]] = Dictionary(minimumCapacity: groups.count)
         for (key,valRef) in groups {
             result[key] = valRef.value
         }
