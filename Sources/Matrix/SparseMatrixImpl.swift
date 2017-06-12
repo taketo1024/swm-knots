@@ -10,9 +10,11 @@
 import Foundation
 
 public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
-    public class Component: Equatable {    // a reference type.
+    public class Component: Equatable, CustomStringConvertible {    // a reference type.
         var row, col: Int
-        var value: R
+        var value: R {
+            willSet { assert(newValue != R.zero) } // for debug
+        }
         init(_ i: Int, _ j: Int, _ a: R) {
             (row, col, value) = (i, j, a)
         }
@@ -25,19 +27,31 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         static public func == (a: Component, b: Component) -> Bool {
             return (a.row, a.col, a.value) == (b.row, b.col, b.value)
         }
+        public var description: String {
+            return "(\(row), \(col); \(value)"
+        }
     }
     
     internal static var rowFirst: ((Component, Component) -> Bool) {
         return {(a: Component, b: Component) -> Bool in a.row < b.row || (a.row == b.row && a.col < b.col) }
     }
     
+    internal static var colFirst: ((Component, Component) -> Bool) {
+        return {(a: Component, b: Component) -> Bool in a.col < b.col || (a.col == b.col && a.row < b.row) }
+    }
+    
     public struct ComponentList: Sequence {
         public typealias Iterator = IndexingIterator<[Component]>
         private var list: SortedArray<Component>
+        private var rowTable: [Int: SortedArray<Component>]
+        private var colTable: [Int: SortedArray<Component>]
         
         init(_ components: [Component], sorted: Bool = true) {
             list = sorted ? SortedArray(  sorted: components, orderedBy: rowFirst)
                           : SortedArray(unsorted: components, orderedBy: rowFirst)
+            
+            rowTable = list.groupMap{ c in (c.row, c)}.mapValues{ SortedArray(sorted: $0, orderedBy: rowFirst) }
+            colTable = list.groupMap{ c in (c.col, c)}.mapValues{ SortedArray(sorted: $0, orderedBy: colFirst) }
         }
         
         init(_ rows: Int, _ cols: Int, _ g: (Int, Int) -> R) {
@@ -75,23 +89,41 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         
         mutating func set(_ i: Int, _ j: Int, _ newValue: R) {
             if newValue == R.zero {
-                return remove(i, j)
+                let c = Component(i, j, R.zero)
+                if let index = list.index(of: c) {
+                    list.remove(at: index)
+                    rowTable[i]!.remove(c)
+                    colTable[j]!.remove(c)
+                }
+                
             } else {
                 let c = Component(i, j, newValue)
                 if let index = list.index(of: c) {
                     list[index].value = newValue
+                    
+                    let i0 = rowTable[i]!.index(of: c)!
+                    rowTable[i]![i0].value = newValue
+                    
+                    let j0 = colTable[j]!.index(of: c)!
+                    colTable[j]![j0].value = newValue
+                    
                 } else {
                     list.insert(c)
+                    
+                    if case nil = rowTable[i]?.insert(c) {
+                        rowTable[i] = SortedArray(sorted: [c], orderedBy: _SparseMatrixImpl.rowFirst)
+                    }
+                    if case nil = colTable[j]?.insert(c) {
+                        colTable[j] = SortedArray(sorted: [c], orderedBy: _SparseMatrixImpl.colFirst)
+                    }
                 }
             }
         }
         
-        mutating func remove(_ i: Int, _ j: Int) {
-            list.remove(Component(i, j, R.zero))
-        }
-        
         mutating func resort() {
             list.resort()
+            rowTable = list.groupMap{ c in (c.row, c)}.mapValues{ SortedArray(sorted: $0, orderedBy: rowFirst) }
+            colTable = list.groupMap{ c in (c.col, c)}.mapValues{ SortedArray(sorted: $0, orderedBy: rowFirst) }
         }
         
         func copy() -> ComponentList {
@@ -108,6 +140,22 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         
         func filter(_ g: (Int, Int, R) -> Bool) -> ComponentList {
             return ComponentList( list.filter{ c in g(c.row, c.col, c.value) } )
+        }
+        
+        func rowComponents(in i: Int) -> [Component] {
+            return rowTable[i].flatMap{ Array($0) } ?? []
+        }
+        
+        func allRowComponents() -> [(Int, [Component])] {
+            return rowTable.keys.sorted().map{ i in (i, rowComponents(in: i))}
+        }
+        
+        func colComponents(in j: Int) -> [Component] {
+            return colTable[j].flatMap{ Array($0) } ?? []
+        }
+        
+        func allColComponents() -> [(Int, [Component])] {
+            return colTable.keys.sorted().map{ j in (j, colComponents(in: j))}
         }
         
         public func makeIterator() -> IndexingIterator<[Component]> {
@@ -163,6 +211,11 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     public override func equals(_ b: _MatrixImpl<R>) -> Bool {
         assert((rows, cols) == (b.rows, b.cols), "Mismatching matrix size.")
         guard let _b = b as? _SparseMatrixImpl<R> else { return super.equals(b) }
+        if !(list == _b.list) {
+            print("a", list)
+            print("b", _b.list)
+        }
+        
         return list == _b.list
     }
     
@@ -244,14 +297,10 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
             return result
         }
         
-        let aRows = self.list.components.group { $0.row }
-        let bCols =   _b.list.components.group { $0.col }
-        
         var array = [Component]()
         
-        for i in aRows.keys.sorted() {
-            for j in bCols.keys.sorted() {
-                let (rowComps, colComps) = (aRows[i]!, bCols[j]!)
+        for (i, rowComps) in self.list.allRowComponents() {
+            for (j, colComps) in _b.list.allColComponents() {
                 let val = prod(rowComps, colComps)
                 if val != 0 {
                     array.append( Component(i, j, val) )
@@ -265,7 +314,7 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     
     public override func transpose() -> _MatrixImpl<R> {
         let result = list.copy{ ($1, $0, $2) }
-        return type(of: self).init(rows, cols, result)
+        return type(of: self).init(cols, rows, result)
     }
     
     public override func leftIdentity() -> _MatrixImpl<R> {
@@ -278,6 +327,7 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         return type(of: self).init(cols, cols, result)
     }
     
+    // TODO
     public override func submatrix(inRange range: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> _MatrixImpl<R> {
         let (rowRange, colRange) = range
         let (r0, r1) = (rowRange.lowerBound, rowRange.upperBound)
@@ -290,60 +340,49 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     }
     
     public override func multiplyRow(at i0: Int, by r: R) {
-        for c in list {
-            let (i, j, value) = (c.row, c.col, c.value)
-            if i == i0 {
-                list.set(i, j, r * value)
-            } else if i > i0 {
-                break
-            }
+        for c in list.rowComponents(in: i0) {
+            self[c.row, c.col] = r * c.value
         }
     }
     
     public override func multiplyCol(at j0: Int, by r: R) {
-        for c in list {
-            let (i, j, value) = (c.row, c.col, c.value)
-            if j == j0 {
-                list.set(i, j, r * value)
-            }
+        for c in list.colComponents(in: j0) {
+            self[c.row, c.col] = r * c.value
         }
     }
     
     public override func addRow(at i0: Int, to i1: Int, multipliedBy r: R) {
-        let row = list.filter { (i, _, _) in i == i0 }
-        for c in row {
+        for c in list.rowComponents(in: i0) {
             let (j, a) = (c.col, c.value)
             self[i1, j] = self[i1, j] + r * a
         }
     }
     
     public override func addCol(at j0: Int, to j1: Int, multipliedBy r: R) {
-        let col = list.filter { c in c.col == j0 }
-        for c in col {
+        for c in list.colComponents(in: j0) {
             let (i, a) = (c.row, c.value)
             self[i, j1] = self[i, j1] + r * a
         }
     }
     
     public override func swapRows(_ i0: Int, _ i1: Int) {
-        for c in list {
-            switch c.row {
-            case i0: c.row = i1
-            case i1: c.row = i0
-            default: break
-            }
+        for c in list.rowComponents(in: i0) {
+            c.row = i1
+        }
+        for c in list.rowComponents(in: i1) {
+            c.row = i0
         }
         list.resort()
     }
     
     public override func swapCols(_ j0: Int, _ j1: Int) {
-        for c in list {
-            switch c.col {
-            case j0: c.col = j1
-            case j1: c.col = j0
-            default: break
-            }
+        for c in list.colComponents(in: j0) {
+            c.col = j1
+        }
+        for c in list.colComponents(in: j1) {
+            c.col = j0
         }
         list.resort()
     }
 }
+
