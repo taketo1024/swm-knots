@@ -1,36 +1,36 @@
 /// An array that keeps its elements sorted at all times.
 public struct SortedArray<Element> {
     /// The backing store
-    fileprivate var _elements: [Element]
+    public fileprivate(set) var elements: [Element]
 
     public typealias Comparator<A> = (A, A) -> Bool
 
     /// The predicate that determines the array's sort order.
-    fileprivate let areInIncreasingOrder: Comparator<Element>
+    fileprivate let orderedBy: Comparator<Element>
 
     /// Initializes an empty array.
     ///
-    /// - Parameter areInIncreasingOrder: The comparison predicate the array should use to sort its elements.
-    public init(areInIncreasingOrder: @escaping Comparator<Element>) {
-        self._elements = []
-        self.areInIncreasingOrder = areInIncreasingOrder
+    /// - Parameter orderedBy: The comparison predicate the array should use to sort its elements.
+    public init(orderedBy: @escaping Comparator<Element>) {
+        self.elements = []
+        self.orderedBy = orderedBy
     }
 
     /// Initializes the array with a sequence of unsorted elements and a comparison predicate.
-    public init<S: Sequence>(unsorted: S, areInIncreasingOrder: @escaping Comparator<Element>) where S.Iterator.Element == Element {
-        let sorted = unsorted.sorted(by: areInIncreasingOrder)
-        self._elements = sorted
-        self.areInIncreasingOrder = areInIncreasingOrder
+    public init<S: Sequence>(unsorted: S, orderedBy: @escaping Comparator<Element>) where S.Iterator.Element == Element {
+        let sorted = unsorted.sorted(by: orderedBy)
+        self.elements = sorted
+        self.orderedBy = orderedBy
     }
 
     /// Initializes the array with a sequence that is already sorted according to the given comparison predicate.
     ///
-    /// This is faster than `init(unsorted:areInIncreasingOrder:)` because the elements don't have to sorted again.
+    /// This is faster than `init(unsorted:orderedBy:)` because the elements don't have to sorted again.
     ///
     /// - Precondition: `sorted` is sorted according to the given comparison predicate. If you violate this condition, the behavior is undefined.
-    public init<S: Sequence>(sorted: S, areInIncreasingOrder: @escaping Comparator<Element>) where S.Iterator.Element == Element {
-        self._elements = Array(sorted)
-        self.areInIncreasingOrder = areInIncreasingOrder
+    public init<S: Sequence>(sorted: S, orderedBy: @escaping Comparator<Element>) where S.Iterator.Element == Element {
+        self.elements = Array(sorted)
+        self.orderedBy = orderedBy
     }
 
     /// Inserts a new element into the array, preserving the sort order.
@@ -43,7 +43,7 @@ public struct SortedArray<Element> {
         let index = insertionIndex(for: newElement)
         // This should be O(1) if the element is to be inserted at the end,
         // O(_n) in the worst case (inserted at the front).
-        _elements.insert(newElement, at: index)
+        elements.insert(newElement, at: index)
         return index
     }
 
@@ -54,20 +54,20 @@ public struct SortedArray<Element> {
     ///
     /// - Complexity: O(_n * log(n)_) where _n_ is the size of the resulting array.
     public mutating func insert<S: Sequence>(contentsOf newElements: S) where S.Iterator.Element == Element {
-        _elements.append(contentsOf: newElements)
-        _elements.sort(by: areInIncreasingOrder)
+        elements.append(contentsOf: newElements)
+        elements.sort(by: orderedBy)
     }
 }
 
 extension SortedArray where Element: Comparable {
     /// Initializes an empty sorted array. Uses `<` as the comparison predicate.
     public init() {
-        self.init(areInIncreasingOrder: <)
+        self.init(orderedBy: <)
     }
 
     /// Initializes the array with a sequence of unsorted elements. Uses `<` as the comparison predicate.
     public init<S: Sequence>(unsorted: S) where S.Iterator.Element == Element {
-        self.init(unsorted: unsorted, areInIncreasingOrder: <)
+        self.init(unsorted: unsorted, orderedBy: <)
     }
 
     /// Initializes the array with a sequence that is already sorted according to the `<` comparison predicate. Uses `<` as the comparison predicate.
@@ -76,51 +76,47 @@ extension SortedArray where Element: Comparable {
     ///
     /// - Precondition: `sorted` is sorted according to the `<` predicate. If you violate this condition, the behavior is undefined.
     public init<S: Sequence>(sorted: S) where S.Iterator.Element == Element {
-        self.init(sorted: sorted, areInIncreasingOrder: <)
+        self.init(sorted: sorted, orderedBy: <)
     }
 }
 
 extension SortedArray: RandomAccessCollection {
     public typealias Index = Int
 
-    public var startIndex: Index { return _elements.startIndex }
-    public var endIndex: Index { return _elements.endIndex }
+    public var startIndex: Index { return elements.startIndex }
+    public var endIndex: Index { return elements.endIndex }
 
     public func index(after i: Index) -> Index {
-        return _elements.index(after: i)
+        return elements.index(after: i)
     }
 
     public func index(before i: Index) -> Index {
-        return _elements.index(before: i)
+        return elements.index(before: i)
     }
 
     public subscript(position: Index) -> Element {
-//        return _elements[position]
-        
-        // MEMO modified by T.Sano
         get {
-            return _elements[position]
+            return elements[position]
         } set {
-            _elements[position] = newValue
+            elements[position] = newValue
         }
-        // --MEMO
     }
 
     /// Like `Sequence.filter(_:)`, but returns a `SortedArray` instead of an `Array`.
     /// We can do this efficiently because filtering doesn't change the sort order.
     public func filter(_ isIncluded: (Element) throws -> Bool) rethrows -> SortedArray<Element> {
-        let newElements = try _elements.filter(isIncluded)
-        return SortedArray(sorted: newElements, areInIncreasingOrder: areInIncreasingOrder)
+        let newElements = try elements.filter(isIncluded)
+        return SortedArray(sorted: newElements, orderedBy: orderedBy)
     }
 }
 
 extension SortedArray: CustomStringConvertible, CustomDebugStringConvertible {
     public var description: String {
-        return "\(String(describing: _elements)) (sorted)"
+        return "\(String(describing: elements)) (sorted)"
     }
 
     public var debugDescription: String {
-        return "<SortedArray> \(String(reflecting: _elements))"
+        return "<SortedArray> \(String(reflecting: elements))"
     }
 }
 
@@ -133,7 +129,7 @@ extension SortedArray {
     /// - Complexity: O(_n_), where _n_ is the length of the array.
     @discardableResult
     public mutating func remove(at index: Int) -> Element {
-        return _elements.remove(at: index)
+        return elements.remove(at: index)
     }
 
     /// Removes the elements in the specified subrange from the array.
@@ -143,7 +139,7 @@ extension SortedArray {
     ///
     /// - Complexity: O(_n_), where _n_ is the length of the array.
     public mutating func removeSubrange(_ bounds: Range<Int>) {
-        _elements.removeSubrange(bounds)
+        elements.removeSubrange(bounds)
     }
 
     /// Removes the elements in the specified subrange from the array.
@@ -153,7 +149,7 @@ extension SortedArray {
     ///
     /// - Complexity: O(_n_), where _n_ is the length of the array.
     public mutating func removeSubrange(_ bounds: ClosedRange<Int>) {
-        _elements.removeSubrange(bounds)
+        elements.removeSubrange(bounds)
     }
 
     /// Removes the elements in the specified subrange from the array.
@@ -163,7 +159,7 @@ extension SortedArray {
     ///
     /// - Complexity: O(_n_), where _n_ is the length of the array.
     public mutating func removeSubrange(_ bounds: CountableRange<Int>) {
-        _elements.removeSubrange(bounds)
+        elements.removeSubrange(bounds)
     }
 
     /// Removes the elements in the specified subrange from the array.
@@ -173,7 +169,7 @@ extension SortedArray {
     ///
     /// - Complexity: O(_n_), where _n_ is the length of the array.
     public mutating func removeSubrange(_ bounds: CountableClosedRange<Int>) {
-        _elements.removeSubrange(bounds)
+        elements.removeSubrange(bounds)
     }
 
     /// Removes the specified number of elements from the beginning of the
@@ -185,7 +181,7 @@ extension SortedArray {
     ///
     /// - Complexity: O(_n_), where _n_ is the length of the array.
     public mutating func removeFirst(_ n: Int) {
-        _elements.removeFirst(n)
+        elements.removeFirst(n)
     }
 
     /// Removes and returns the first element of the array.
@@ -195,7 +191,7 @@ extension SortedArray {
     /// - Complexity: O(_n_), where _n_ is the length of the collection.
     @discardableResult
     public mutating func removeFirst() -> Element {
-        return _elements.removeFirst()
+        return elements.removeFirst()
     }
 
     /// Removes and returns the last element of the array.
@@ -205,7 +201,7 @@ extension SortedArray {
     /// - Complexity: O(1)
     @discardableResult
     public mutating func removeLast() -> Element {
-        return _elements.removeLast()
+        return elements.removeLast()
     }
 
     /// Removes the given number of elements from the end of the array.
@@ -215,7 +211,7 @@ extension SortedArray {
     ///   elements in the array.
     /// - Complexity: O(1).
     public mutating func removeLast(_ n: Int) {
-        _elements.removeLast(n)
+        elements.removeLast(n)
     }
 
     /// Removes all elements from the array.
@@ -224,7 +220,7 @@ extension SortedArray {
     ///
     /// - Complexity: O(_n_), where _n_ is the length of the array.
     public mutating func removeAll(keepingCapacity keepCapacity: Bool = true) {
-        _elements.removeAll(keepingCapacity: keepCapacity)
+        elements.removeAll(keepingCapacity: keepCapacity)
     }
 
     /// Removes an element from the array. If the array contains multiple instances of `element`, this method only removes the first one.
@@ -232,7 +228,7 @@ extension SortedArray {
     /// - Complexity: O(_n_), where _n_ is the size of the array.
     public mutating func remove(_ element: Element) {
         guard let index = index(of: element) else { return }
-        _elements.remove(at: index)
+        elements.remove(at: index)
     }
 }
 
@@ -310,13 +306,13 @@ extension SortedArray {
             let mid = index(left, offsetBy: dist/2)
             let candidate = self[mid]
 
-            if areInIncreasingOrder(candidate, newElement) {
+            if orderedBy(candidate, newElement) {
                 left = index(after: mid)
-            } else if areInIncreasingOrder(newElement, candidate) {
+            } else if orderedBy(newElement, candidate) {
                 right = index(before: mid)
             } else {
                 // If neither element comes before the other, they _must_ be
-                // equal, per the strict ordering requirement of `areInIncreasingOrder`.
+                // equal, per the strict ordering requirement of `orderedBy`.
                 return .found(at: mid)
             }
         }
@@ -326,9 +322,9 @@ extension SortedArray {
 }
 
 public func ==<Element: Equatable> (lhs: SortedArray<Element>, rhs: SortedArray<Element>) -> Bool {
-    return lhs._elements == rhs._elements
+    return lhs.elements == rhs.elements
 }
 
 public func !=<Element: Equatable> (lhs: SortedArray<Element>, rhs: SortedArray<Element>) -> Bool {
-    return lhs._elements != rhs._elements
+    return lhs.elements != rhs.elements
 }
