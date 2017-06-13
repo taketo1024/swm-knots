@@ -60,7 +60,7 @@ public struct BaseHomology<chainType: ChainType, A: FreeModuleBase, R: Euclidean
     
     public var detailDescription: String {
         return "{\n"
-            + groupInfos.enumerated().map{"\t\($0) : \($1),\t\($1.summands.map{$0.generator})"}.joined(separator: ",\n")
+            + groupInfos.enumerated().map{"\t\($0) : \($1.detailDescription)"}.joined(separator: ",\n")
             + "\n}"
     }
 }
@@ -189,6 +189,10 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
     public var description: String {
         let desc = summands.map{$0.description}.joined(separator: "⊕")
         return desc.isEmpty ? "0" : desc
+    }
+    
+    public var detailDescription: String {
+        return "\(self),\t\(summands.map{ $0.generator })"
     }
 }
 
