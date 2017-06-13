@@ -40,3 +40,17 @@ public extension Field {
         return FieldMatrixEliminationProcessor<Self>.self
     }
 }
+
+// Integer
+
+public extension IntegerNumber {
+    public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<IntegerNumber>.Type {
+        switch type {
+        case .Default:
+            return EigenAcceleration.enabled() ? _EigenIntMatrixImpl.self : _GridMatrixImpl<IntegerNumber>.self
+        case .Sparse:
+            return _SparseMatrixImpl<IntegerNumber>.self
+        }
+    }
+}
+
