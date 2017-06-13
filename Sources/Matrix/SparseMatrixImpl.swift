@@ -87,27 +87,27 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
             }
         }
         
-        mutating func set(_ i: Int, _ j: Int, _ newValue: R) {
-            if newValue == R.zero {
-                let c = Component(i, j, R.zero)
-                if let index = list.index(of: c) {
-                    list.remove(at: index)
-                    rowTable[i]!.remove(c)
-                    colTable[j]!.remove(c)
-                }
-                
+        mutating func set(_ i: Int, _ j: Int, _ value: R) {
+            let c = Component(i, j, value)
+            set(c)
+        }
+        
+        mutating func set(_ c: Component) {
+            if c.value == R.zero {
+                remove(c)
             } else {
-                let c = Component(i, j, newValue)
                 if let index = list.index(of: c) {
-                    list[index].value = newValue
+                    let (i, j, value) = (c.row, c.col, c.value)
+                    list[index].value = value
                     
                     let i0 = rowTable[i]!.index(of: c)!
-                    rowTable[i]![i0].value = newValue
+                    rowTable[i]![i0].value = value
                     
                     let j0 = colTable[j]!.index(of: c)!
-                    colTable[j]![j0].value = newValue
+                    colTable[j]![j0].value = value
                     
                 } else {
+                    let (i, j) = (c.row, c.col)
                     list.insert(c)
                     
                     if case nil = rowTable[i]?.insert(c) {
@@ -120,10 +120,17 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
             }
         }
         
-        mutating func resort() {
-            list.resort()
-            rowTable = list.groupMap{ c in (c.row, c)}.mapValues{ SortedArray(sorted: $0, orderedBy: rowFirst) }
-            colTable = list.groupMap{ c in (c.col, c)}.mapValues{ SortedArray(sorted: $0, orderedBy: rowFirst) }
+        mutating func remove(_ i: Int, _ j: Int) {
+            let c = Component(i, j, R.zero)
+            remove(c)
+        }
+        
+        mutating func remove(_ c: Component) {
+            if let index = list.index(of: c) {
+                list.remove(at: index)
+                rowTable[c.row]!.remove(c)
+                colTable[c.col]!.remove(c)
+            }
         }
         
         func copy() -> ComponentList {
@@ -366,23 +373,39 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     }
     
     public override func swapRows(_ i0: Int, _ i1: Int) {
-        for c in list.rowComponents(in: i0) {
+        let row0 = list.rowComponents(in: i0)
+        let row1 = list.rowComponents(in: i1)
+        
+        for c in (row0 + row1) {
+            list.remove(c)
+        }
+        
+        for c in row0 {
             c.row = i1
+            list.set(c)
         }
-        for c in list.rowComponents(in: i1) {
+        for c in row1 {
             c.row = i0
+            list.set(c)
         }
-        list.resort()
     }
     
     public override func swapCols(_ j0: Int, _ j1: Int) {
-        for c in list.colComponents(in: j0) {
+        let col0 = list.colComponents(in: j0)
+        let col1 = list.colComponents(in: j1)
+        
+        for c in (col0 + col1) {
+            list.remove(c)
+        }
+        
+        for c in col0 {
             c.col = j1
+            list.set(c)
         }
-        for c in list.colComponents(in: j1) {
+        for c in col1 {
             c.col = j0
+            list.set(c)
         }
-        list.resort()
     }
 }
 

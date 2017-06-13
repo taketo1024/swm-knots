@@ -57,10 +57,6 @@ public struct SortedArray<Element> {
         elements.append(contentsOf: newElements)
         elements.sort(by: orderedBy)
     }
-    
-    public mutating func resort() {
-        elements.sort(by: orderedBy)
-    }
 }
 
 extension SortedArray where Element: Comparable {
