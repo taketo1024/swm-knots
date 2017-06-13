@@ -8,6 +8,8 @@
 
 import Foundation
 
+private let precision = 1000.0
+
 public func measure<T>(_ f: (Void) -> T) -> T {
     return measure("", f)
 }
@@ -16,7 +18,11 @@ public func measure<T>(_ label: String, _ f: (Void) -> T) -> T {
     let date = Date()
     defer {
         let intv = -date.timeIntervalSinceNow
-        print(label, "\(intv) sec.")
+        if intv < 1 {
+            print(label, ":\t\(round(intv * precision * 1000) / precision) msec.")
+        } else {
+            print(label, ":\t\(round(intv * precision) / precision) sec.")
+        }
     }
     return f()
 }
