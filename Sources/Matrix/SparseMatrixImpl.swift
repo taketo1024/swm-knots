@@ -9,6 +9,8 @@
 
 import Foundation
 
+// MEMO currently not in use, since performs worse than GridMatrix. 
+
 public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     public class Component: Equatable, CustomStringConvertible {    // a reference type.
         var row, col: Int

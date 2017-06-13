@@ -16,7 +16,7 @@ public extension Ring {
         case .Default:
             return _GridMatrixImpl<Self>.self
         case .Sparse:
-            return _SparseMatrixImpl<Self>.self
+            return _GridMatrixImpl<Self>.self // MEMO _SparseMatrixImpl is not in use.
         }
     }
     
@@ -45,12 +45,7 @@ public extension Field {
 
 public extension IntegerNumber {
     public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<IntegerNumber>.Type {
-        switch type {
-        case .Default:
-            return EigenAcceleration.enabled() ? _EigenIntMatrixImpl.self : _GridMatrixImpl<IntegerNumber>.self
-        case .Sparse:
-            return _SparseMatrixImpl<IntegerNumber>.self
-        }
+        return EigenAcceleration.enabled() ? _EigenIntMatrixImpl.self : _GridMatrixImpl<IntegerNumber>.self
     }
 }
 
