@@ -26,8 +26,19 @@ class SwiftyAlgebraTests: XCTestCase {
     }
     
     func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        typealias M = Matrix<Z,_2,_2>
+        let A = M(1, 2,
+                  0, 3)
+        
+        var I = MatrixIterator(A, direction: .Cols, nonZeroOnly: true)
+        while let a = I.next() {
+            print(a)
+        }
+        
+
+//        let C = SimplicialComplex.torus(dim: 4)
+//        let H = Homology(C, Z.self)
+//        print("H(T^4; Z) =", H.detailDescription, "\n")
     }
     
     func testPerformanceExample() {

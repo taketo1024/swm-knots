@@ -149,6 +149,62 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
         }
     }
     
+    public func next(from: (Int, Int), direction: MatrixIterationDirection, rowRange: CountableRange<Int>, colRange: CountableRange<Int>, proceedLines: Bool, nonZeroOnly: Bool) -> MatrixComponent<R>? {
+        
+        let cand: (Int, Int)? = { () -> (Int, Int)? in
+            switch direction {
+            case .Rows:
+                switch (from.0 + 1, from.1 + 1, rowRange.upperBound, colRange.upperBound, proceedLines) {
+                // within col-range
+                case let (_, j, _, c, _) where j < c:
+                    return (from.0, j)
+                    
+                // end of row, no proceeding lines
+                case (_, _, _, _, false):
+                    return nil
+                    
+                // can proceed line
+                case let (i, _, r, _, _) where i < r:
+                    return (i, colRange.lowerBound)
+                    
+                // end of range
+                default:
+                    return nil
+                }
+            case .Cols:
+                switch (from.0 + 1, from.1 + 1, rowRange.upperBound, colRange.upperBound, proceedLines) {
+                // within row-range
+                case let (i, _, r, _, _) where i < r:
+                    return (i, from.1)
+                    
+                // end of row, no proceeding lines
+                case (_, _, _, _, false):
+                    return nil
+                    
+                // can proceed line
+                case let (_, j, _, c, _) where j < c:
+                    return (rowRange.lowerBound, j)
+                    
+                // end of range
+                default:
+                    return nil
+                }
+            }
+        }()
+        
+        guard let (i, j) = cand else {
+            return nil
+        }
+        
+        let a = self[i, j]
+        
+        if !nonZeroOnly || a != R.zero {
+            return (i, j, a)
+        } else {
+            return next(from: (i, j), direction: direction, rowRange: rowRange, colRange: colRange, proceedLines: proceedLines, nonZeroOnly: nonZeroOnly)
+        }
+    }
+    
     public func determinant() -> R {
         fatalError("determinant not yet impled for a general Ring.")
     }

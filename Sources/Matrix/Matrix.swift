@@ -16,7 +16,7 @@ public typealias MatrixComponent<R> = (row: Int, col: Int, value: R)
 
 public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public typealias R = _R
-    public typealias Iterator = MatrixIterator<R, n, m>
+    public typealias Iterator = MatrixIterator<R>
     
     public let type: MatrixType
     internal var impl: _MatrixImpl<R>
@@ -132,7 +132,7 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
         }
     }
     
-    public func makeIterator() -> MatrixIterator<R, n, m> {
+    public func makeIterator() -> MatrixIterator<R> {
         return MatrixIterator(self)
     }
     
@@ -297,28 +297,53 @@ public extension Matrix where n == m {
 }
 
 // MatrixIterator
-public struct MatrixIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
-    private let value: Matrix<R, n, m>
-    private var current = (0, 0)
+
+public enum MatrixIterationDirection {
+    case Rows
+    case Cols
+}
+
+public struct MatrixIterator<R: Ring> : IteratorProtocol {
+    private let impl: _MatrixImpl<R>
+    private let direction: MatrixIterationDirection
+    private let rowRange: CountableRange<Int>
+    private let colRange: CountableRange<Int>
+    private let proceedLines: Bool
+    private let nonZeroOnly: Bool
     
-    public init(_ value: Matrix<R, n, m>) {
-        self.value = value
+    private var current: (Int, Int)
+    private var initial = true
+    
+    public init<n: _Int, m: _Int>(_ matrix: Matrix<R, n, m>, from: (Int, Int)? = nil, direction: MatrixIterationDirection = .Rows, rowRange: CountableRange<Int>? = nil, colRange: CountableRange<Int>? = nil, proceedLines: Bool = true, nonZeroOnly: Bool = false) {
+        self.init(matrix.impl, from: from, direction: direction, rowRange: rowRange, colRange: colRange, proceedLines: proceedLines, nonZeroOnly: nonZeroOnly)
     }
     
-    mutating public func next() -> (value: R, row: Int, col: Int)? {
-        guard current.0 < value.rows && current.1 < value.cols else {
-            return nil
-        }
-        
-        defer {
-            switch current {
-            case let c where c.1 + 1 >= value.cols:
-                current = (c.0 + 1, 0)
-            case let c:
-                current = (c.0, c.1 + 1)
+    internal init(_ impl: _MatrixImpl<R>, from: (Int, Int)? = nil, direction: MatrixIterationDirection = .Rows, rowRange: CountableRange<Int>? = nil, colRange: CountableRange<Int>? = nil, proceedLines: Bool = true, nonZeroOnly: Bool = false) {
+        self.impl = impl
+        self.current = from ?? (rowRange?.lowerBound ?? 0, colRange?.lowerBound ?? 0)
+        self.direction = direction
+        self.rowRange = rowRange ?? (0 ..< impl.rows)
+        self.colRange = colRange ?? (0 ..< impl.cols)
+        self.proceedLines = proceedLines
+        self.nonZeroOnly = nonZeroOnly
+    }
+    
+    mutating public func next() -> MatrixComponent<R>? {
+        if initial {
+            initial = false
+            
+            let a = impl[current.0, current.1]
+            if !nonZeroOnly || a != R.zero {
+                return (current.0, current.1, a)
             }
         }
         
-        return (value[current.0, current.1], current.0, current.1)
+        let c = impl.next(from: current, direction: direction, rowRange: rowRange, colRange: colRange, proceedLines: proceedLines, nonZeroOnly: nonZeroOnly)
+        
+        if let next = c {
+            current = (next.0, next.1)
+        }
+        
+        return c
     }
 }
