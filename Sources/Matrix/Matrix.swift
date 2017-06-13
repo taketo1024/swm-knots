@@ -329,16 +329,11 @@ public struct MatrixIterator<R: Ring> : IteratorProtocol {
     }
     
     mutating public func next() -> MatrixComponent<R>? {
+        let c = impl.next(from: current, includeFirst:initial, direction: direction, rowRange: rowRange, colRange: colRange, proceedLines: proceedLines, nonZeroOnly: nonZeroOnly)
+        
         if initial {
             initial = false
-            
-            let a = impl[current.0, current.1]
-            if !nonZeroOnly || a != R.zero {
-                return (current.0, current.1, a)
-            }
         }
-        
-        let c = impl.next(from: current, direction: direction, rowRange: rowRange, colRange: colRange, proceedLines: proceedLines, nonZeroOnly: nonZeroOnly)
         
         if let next = c {
             current = (next.0, next.1)

@@ -66,10 +66,6 @@ public class MatrixEliminationProcessor<R: Ring> {
         log("\(itr)/\(maxItr): \(s) \n\n\(result.alignedDescription)\n")
     }
     
-    final func indexIterator() -> AnySequence<(Int, Int)> {
-        return AnySequence({ return EliminationIterator(self) })
-    }
-    
     private func log(_ msg: @autoclosure () -> String) {
         if debug {
             print(msg())
@@ -82,7 +78,7 @@ public class EucMatrixEliminationProcessor<R: EuclideanRing>: MatrixEliminationP
         let doRows = (mode != .Cols)
         let doCols = (mode != .Rows)
         
-        guard var (i0, j0) = next() else {
+        guard var (i0, j0, _) = next() else {
             if mode == .Both { // The area left is O. Exit iteration.
                 return false
             } else {           // The target row/col is O. Continue iteration.
@@ -137,25 +133,29 @@ public class EucMatrixEliminationProcessor<R: EuclideanRing>: MatrixEliminationP
         return true
     }
     
-    private func next() -> (Int, Int)? {
-        var min = R.zero
-        var (i0, j0) = (0, 0)
+    private func next() -> MatrixComponent<R>? {
+        var (i0, j0, a0) = (0, 0, R.zero)
         
-        for (i, j) in indexIterator() {
-            let a = result[i, j]
-            
+        var iterator = MatrixIterator(result,
+                                      direction: (mode != .Cols) ? .Cols : .Rows,
+                                      rowRange: itr ..< result.rows,
+                                      colRange: itr ..< result.cols,
+                                      proceedLines: (mode == .Both),
+                                      nonZeroOnly: true)
+        
+        while let c = iterator.next() {
+            let a = c.value
             if a.isUnit {
-                return (i, j)
+                return c
             }
             
-            if a != 0 && (min == 0 || a.degree < min.degree) {
-                min = a
-                (i0, j0) = (i, j)
+            if a0 == 0 || a.degree < a0.degree {
+                (i0, j0, a0) = c
             }
         }
         
-        if min != 0 {
-            return (i0, j0)
+        if a0 != 0 {
+            return (i0, j0, a0)
         } else {
             return nil
         }
@@ -241,7 +241,7 @@ public class FieldMatrixEliminationProcessor<K: Field>: MatrixEliminationProcess
         let doRows = (mode != .Cols)
         let doCols = (mode != .Rows)
         
-        guard var (i0, j0) = next() else {
+        guard var (i0, j0, _) = next() else {
             if mode == .Both { // The area left is O. Exit iteration.
                 return false
             } else {           // The target row/col is O. Continue iteration.
@@ -270,14 +270,14 @@ public class FieldMatrixEliminationProcessor<K: Field>: MatrixEliminationProcess
         return true
     }
     
-    private func next() -> (row: Int, col: Int)? {
-        for (i, j) in indexIterator() {
-            let a = result[i, j]
-            if a != 0 {
-                return (i, j)
-            }
-        }
-        return nil
+    private func next() -> MatrixComponent<K>? {
+        return result.next(from: (itr, itr),
+                           includeFirst: true,
+                           direction: (mode != .Cols) ? .Cols : .Rows,
+                           rowRange: itr ..< result.rows,
+                           colRange: itr ..< result.cols,
+                           proceedLines: (mode == .Both),
+                           nonZeroOnly: true)
     }
     
     private func eliminateRow(_ i0: Int, _ j0: Int) {
@@ -363,40 +363,5 @@ internal enum EliminationStep<R: Ring> {
         case let .SwapCols(i, j):
             A.swapCols(i, j)
         }
-    }
-}
-
-private struct EliminationIterator<R: Ring> : IteratorProtocol {
-    typealias Element = (Int, Int)
-    
-    private weak var p: MatrixEliminationProcessor<R>!
-    private var current: (Int, Int)
-    
-    init(_ processor: MatrixEliminationProcessor<R>) {
-        self.p = processor
-        self.current = (p.itr, p.itr)
-    }
-    
-    mutating func next() -> (Int, Int)? {
-        guard current.0 < p.rows && current.1 < p.cols else {
-            return nil
-        }
-        
-        defer {
-            switch p.mode {
-            case .Both:
-                if current.0 + 1 >= p.rows {
-                    current = (p.itr, current.1 + 1)
-                } else {
-                    current = (current.0 + 1, current.1)
-                }
-            case .Rows:
-                current = (current.0 + 1, current.1)
-            case .Cols:
-                current = (current.0, current.1 + 1)
-            }
-        }
-        
-        return (current.0, current.1)
     }
 }
