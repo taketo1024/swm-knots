@@ -9,24 +9,24 @@
 import Foundation
 
 public struct Vertex: Equatable, Comparable, Hashable, CustomStringConvertible {
-    public let id: String
-    internal let index: Int
+    public let index: Int
+    public let label: String
     
-    internal init(_ id: String, _ index: Int) {
-        self.id = id
+    internal init(_ index: Int, _ label: String) {
         self.index = index
+        self.label = label
     }
     
     public var hashValue: Int {
-        return id.hashValue
+        return index
     }
     
     public var description: String {
-        return id
+        return label
     }
     
     public static func ==(a: Vertex, b: Vertex) -> Bool {
-        return a.id == b.id
+        return a.index == b.index
     }
     
     public static func <(a: Vertex, b: Vertex) -> Bool {
@@ -35,9 +35,10 @@ public struct Vertex: Equatable, Comparable, Hashable, CustomStringConvertible {
 }
 
 public struct VertexSet: CustomStringConvertible {
-    public let vertices: [Vertex]
+    public private(set) var vertices: [Vertex]
+    
     public init(number: Int, prefix: String = "v") {
-        self.vertices = (0 ..< number).map { Vertex("\(prefix)\($0)", $0) }
+        self.vertices = (0 ..< number).map { Vertex($0, "\(prefix)\($0)") }
     }
     
     public func simplex(_ indices: Int...) -> Simplex {
@@ -47,6 +48,13 @@ public struct VertexSet: CustomStringConvertible {
     public func simplex(indices: [Int]) -> Simplex {
         let vs = indices.map { vertices[$0] }
         return Simplex(vs)
+    }
+    
+    mutating func add(label: String? = nil) -> Vertex {
+        let index = vertices.count
+        let v = Vertex(index, label ?? "v\(index)")
+        vertices.append(v)
+        return v
     }
     
     public var description: String {

@@ -43,6 +43,22 @@ public struct SimplicialComplex: GeometricComplex {
         return (0...dim).contains(i) ? simplicesList[i] : []
     }
     
+    public var facets: [Simplex] { // set of maximal simplices
+        var list = Array(simplicesList.reversed().joined())
+        var i = 0
+        while i < list.count {
+            let s = list[i]
+            let subs = s.allSubsimplices().dropFirst()
+            for t in subs {
+                if let j = list.index(of: t) {
+                    list.remove(at: j)
+                }
+            }
+            i += 1
+        }
+        return list
+    }
+    
     public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Simplex, R> {
         let from = simplices(i)
         let to = (i > 0) ? simplices(i - 1) : []
@@ -120,13 +136,7 @@ public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
     let (n1, n2) = (K1.vertexSet.vertices.count, K2.vertexSet.vertices.count)
     let V = VertexSet(number: n1 * n2)
     
-    // discard simplices that are faces of others.
-    func distinctSimplices(_ K: SimplicialComplex) -> Set<Simplex> {
-        let set = Set(K.simplicesList.joined())
-        return Set( set.filter{ s in set.forAll{ t in t == s || !t.contains(s) } } )
-    }
-    
-    let (S1, S2) = (distinctSimplices(K1), distinctSimplices(K2))
+    let (S1, S2) = (K1.facets, K2.facets)
     let simplexPairs: [(Simplex, Simplex)] = S1.flatMap{ s in S2.map{ t in (s, t) } }
     
     let indexPairs: [[(Int, Int)]] = simplexPairs.flatMap{(s, t) -> [[(Int, Int)]] in
@@ -158,4 +168,32 @@ public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
     }.unique()
     
     return SimplicialComplex(V, simplices)
+}
+
+public extension SimplicialComplex {
+    public func barycentricSubdivision() -> SimplicialComplex {
+        var V = self.vertexSet
+        var S = Set<Simplex>()
+        
+        func generate(simplices: [Simplex], barycenters: [Vertex]) {
+            let s = simplices.last!
+            if s.dim > 0 {
+                let b = V.add(label: "b\(s.vertices.map{String($0.index)}.joined())") // barycenter of s
+                for t in s.faces() {
+                    generate(simplices: simplices + [t], barycenters: barycenters + [b])
+                }
+            } else {
+                let v = s.vertices.first!
+                let bs = Simplex(barycenters + [v])
+                S.insert(bs)
+            }
+        }
+        
+        let facets = self.facets
+        for s in facets {
+            generate(simplices: [s], barycenters: [])
+        }
+        
+        return SimplicialComplex(V, S, generate: true)
+    }
 }
