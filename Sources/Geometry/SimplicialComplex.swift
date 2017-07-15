@@ -39,6 +39,11 @@ public struct SimplicialComplex: GeometricComplex {
         return SimplicialComplex(vertexSet, sub)
     }
     
+    public func cells(_ i: Int) -> [Simplex] {
+        return simplices(i)
+    }
+    
+    // TODO remove
     public func simplices(_ i: Int) -> [Simplex] {
         return (0...dim).contains(i) ? simplicesList[i] : []
     }
@@ -59,24 +64,7 @@ public struct SimplicialComplex: GeometricComplex {
         return list
     }
     
-    public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Simplex, R> {
-        let from = simplices(i)
-        let to = (i > 0) ? simplices(i - 1) : []
-        let matrix: DynamicMatrix<R> = boundaryMapMatrix(from, to)
-        return FreeModuleHom<Simplex, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
-    }
-
-    public func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Simplex, R> {
-        // Regard the basis of C_i as the dual basis of C^i.
-        // Since <δf, c> = <f, ∂c>, the matrix is given by the transpose.
-        
-        let from = simplices(i)
-        let to = (i < dim) ? simplices(i + 1) : []
-        let matrix: DynamicMatrix<R> = boundaryMapMatrix(to, from).transposed
-        return FreeModuleHom<Simplex, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
-    }
-    
-    private func boundaryMapMatrix<R: Ring>(_ from: [Simplex], _ to : [Simplex]) -> DynamicMatrix<R> {
+    public func boundaryMapMatrix<R: Ring>(_ from: [Simplex], _ to : [Simplex]) -> DynamicMatrix<R> {
         let toIndex = Dictionary(to.enumerated().map{($1, $0)})
         let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
             return s.faces().enumerated().map { (k, t) -> MatrixComponent<R> in
@@ -172,18 +160,21 @@ public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
 
 public extension SimplicialComplex {
     public func barycentricSubdivision() -> SimplicialComplex {
-        var V = self.vertexSet
+        var V = VertexSet()
         var S = Set<Simplex>()
         
         func generate(simplices: [Simplex], barycenters: [Vertex]) {
             let s = simplices.last!
+            let v = V.barycenterOf(s) ?? {
+                let label = (s.dim > 0) ? "b\(s.vertices.map{String($0.index)}.joined())" : s.vertices.first!.label
+                return V.add(label: label, barycenterOf: s)
+            }()
+            
             if s.dim > 0 {
-                let b = V.add(label: "b\(s.vertices.map{String($0.index)}.joined())") // barycenter of s
                 for t in s.faces() {
-                    generate(simplices: simplices + [t], barycenters: barycenters + [b])
+                    generate(simplices: simplices + [t], barycenters: barycenters + [v])
                 }
             } else {
-                let v = s.vertices.first!
                 let bs = Simplex(barycenters + [v])
                 S.insert(bs)
             }

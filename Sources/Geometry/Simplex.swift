@@ -11,9 +11,9 @@ import Foundation
 // MEMO: 'un'ordered set of vertices
 
 public struct Simplex: FreeModuleBase, CustomStringConvertible {
-    public let vertices: [Vertex]
-    private let verticesSet: Set<Vertex>
-    private let id: String
+    public   let vertices: [Vertex]
+    internal let verticesSet: Set<Vertex>
+    internal let id: String
     
     public var dim: Int {
         return vertices.count - 1
@@ -37,6 +37,10 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
         } else {
             return (0 ... dim).map{ face($0) }
         }
+    }
+    
+    public func contains(_ v: Vertex) -> Bool {
+        return verticesSet.contains(v)
     }
     
     public func contains(_ s: Simplex) -> Bool {
