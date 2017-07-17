@@ -27,29 +27,19 @@ public struct BaseHomology<chainType: ChainType, A: FreeModuleBase, R: Euclidean
     public init(_ chainComplex: BaseChainComplex<chainType, A, R>) {
         typealias M = FreeModule<A, R>
         
-        let descending = chainComplex.descending
-        let dim = chainComplex.dim
+        let offset = chainComplex.offset
+        let dim    = chainComplex.dim
         
-        let elims = (-1 ... dim + 1).map{ chainComplex.boundaryMap($0).matrix.eliminate() }
+        let elims = { () -> (Int) -> MatrixElimination<R, Dynamic, Dynamic> in
+            let res = (offset - 1 ... dim + 1).map { chainComplex.boundaryMap($0).matrix.eliminate() }
+            return { (i: Int) -> MatrixElimination<R, Dynamic, Dynamic> in
+                return res[i - offset + 1]
+            }
+        }()
         
-        let groups = (0 ... dim).map { (i) -> HomologyGroupInfo<chainType, A, R> in
-            // Basis of C_i : the i-th Chain group
+        let groups = (offset ... dim).map { (i) -> HomologyGroupInfo<chainType, A, R> in
             let basis = chainComplex.chainBasis(i)
-            
-            // Z_i : the i-th Cycle group
-            let A = elims[i + 1]
-            let Z = A.kernelPart       // PAQ = [D; O_k]  =>  Z = Q * [O; I_k]
-            
-            // B_i : the i-th Boundary group
-            let j = (descending) ? (i + 2) : i
-            let B = elims[j].imagePart
-            
-            // C_i -> Z_i transition matrix
-            let (n, k) = (Z.rows, Z.cols)
-            let Qinv = A.rightInverse  // Q^-1 * Z = [O; I_k]
-            let T: DynamicMatrix<R> = Qinv.submatrix(rowsInRange: n - k ..< n) // T * Z = I_k
-            
-            return HomologyGroupInfo(dim: i, basis: basis, cycleMatrix: Z, boundaryMatrix: B, chain2cycleMatrix: T)
+            return HomologyGroupInfo(dim: i, basis: basis, elim1: elims(i), elim2: chainComplex.descending ? elims(i + 1) : elims(i - 1))
         }
         
         self.init(chainComplex: chainComplex, groups: groups)
@@ -113,8 +103,31 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
     
     private typealias M = FreeModule<A, R>
     
-    public init(dim: Int, basis: [A], cycleMatrix Z: DynamicMatrix<R>, boundaryMatrix B: DynamicMatrix<R>, chain2cycleMatrix T: DynamicMatrix<R>) {
-        let (k, l) = (Z.cols, B.cols)
+    public convenience init(dim: Int, boundaryMap: FreeModuleHom<A, R>, preboundaryMap: FreeModuleHom<A, R>) {
+        assert(boundaryMap.domainBasis == preboundaryMap.codomainBasis)
+        
+        let basis = boundaryMap.domainBasis
+        let E1 = boundaryMap.matrix.eliminate()
+        let E2 = preboundaryMap.matrix.eliminate()
+        
+        self.init(dim: dim, basis: basis, elim1: E1, elim2: E2)
+    }
+    
+    internal init<n0: _Int, n1: _Int, n2: _Int>(dim: Int, basis: [A], elim1 E1: MatrixElimination<R, n0, n1>, elim2 E2: MatrixElimination<R, n1, n2>) {
+        // Z_i : the i-th Cycle group
+        let Z = E1.kernelPart
+        let (n, k) = (Z.rows, Z.cols)
+        
+        // B_i : the i-th Boundary group
+        let B = E2.imagePart
+        let l = B.cols
+        
+        // C_i -> Z_i transition matrix
+        //   PAQ = [D; O_k]  =>  Z = Q * [O; I_k]
+        //   Q^-1 * Z = [O; I_k]
+        let Qinv = E1.rightInverse
+        let T: Matrix<R, Dynamic, n1> = Qinv.submatrix(rowsInRange: n - k ..< n) // T * Z = I_k
+        
         let (newBasis, newTrans, diagonal) = HomologyGroupInfo.calculate(basis, Z, B, T)
         
         let torPart: [Summand]  = diagonal.enumerated()
@@ -131,7 +144,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
         
         self.summands = (freePart + torPart)
         self.chainBasis = basis
-        self.transitionMatrix = newTrans
+        self.transitionMatrix = newTrans.asDynamic
     }
     
     // Calculate with size-typed matrices.

@@ -244,6 +244,14 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
         impl.swapCols(j0, j1)
     }
     
+    public var asDynamic: DynamicMatrix<R> {
+        if let A = self as? DynamicMatrix<R> {
+            return A
+        } else {
+            return DynamicMatrix<R>(type, impl)
+        }
+    }
+    
     public var hashValue: Int {
         return 0 // TODO
     }
