@@ -18,7 +18,7 @@ public protocol GeometricComplex {
     
     func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<A, R>
     func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<A, R>
-    func boundaryMapMatrix<R: Ring>(_ from: [A], _ to : [A]) -> DynamicMatrix<R>
+    func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [A], _ to : [A]) -> DynamicMatrix<R>
     
     func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<A, R>
     func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<A, R>
@@ -28,7 +28,7 @@ public extension GeometricComplex {
     public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<A, R> {
         let from = allCells(ofDim: i)
         let to = (i > 0) ? allCells(ofDim: i - 1) : []
-        let matrix: DynamicMatrix<R> = boundaryMapMatrix(from, to)
+        let matrix: DynamicMatrix<R> = boundaryMapMatrix(i, from, to)
         return FreeModuleHom<A, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
     }
     
@@ -38,26 +38,18 @@ public extension GeometricComplex {
         
         let from = allCells(ofDim: i)
         let to = (i < dim) ? allCells(ofDim: i + 1) : []
-        let matrix: DynamicMatrix<R> = boundaryMapMatrix(to, from).transposed
+        let matrix: DynamicMatrix<R> = boundaryMapMatrix(i + 1, to, from).transposed
         return FreeModuleHom<A, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
     }
     
     public func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<A, R> {
-        typealias F = FreeModuleHom<A, R>
-        
-        let chns: [[A]] = (0 ... dim).map { allCells(ofDim: $0) }
-        let bmaps: [F]  = (0 ... dim).map { boundaryMap($0) }
-        
-        return ChainComplex<A, R>(chainBases: chns, boundaryMaps: bmaps)
+        let chain = (0 ... dim).map{ (i) -> ([A], FreeModuleHom<A, R>) in (allCells(ofDim: i), boundaryMap(i)) }
+        return ChainComplex<A, R>(chain)
     }
     
     public func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<A, R> {
-        typealias F = FreeModuleHom<A, R>
-        
-        let chns: [[A]] = (0 ... dim).map { allCells(ofDim: $0) }
-        let bmaps: [F] =  (0 ... dim).map { coboundaryMap($0) }
-        
-        return CochainComplex<A, R>(chainBases: chns, boundaryMaps: bmaps)
+        let chain = (0 ... dim).map{ (i) -> ([A], FreeModuleHom<A, R>) in (allCells(ofDim: i), coboundaryMap(i)) }
+        return CochainComplex<A, R>(chain)
     }
 }
 

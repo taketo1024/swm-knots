@@ -77,7 +77,7 @@ public struct DualComplex: GeometricComplex, CustomStringConvertible, CustomDebu
         return (0...dim).contains(i) ? cellList[i] : []
     }
     
-    public func boundaryMapMatrix<R: Ring>(_ from: [DualCell], _ to : [DualCell]) -> DynamicMatrix<R> {
+    public func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [DualCell], _ to : [DualCell]) -> DynamicMatrix<R> {
         fatalError() // TODO
     }
     

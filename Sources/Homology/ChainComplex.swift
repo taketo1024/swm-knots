@@ -19,38 +19,50 @@ public struct BaseChainComplex<chainType: ChainType, A: Hashable, R: Ring>: Cust
     public typealias M = FreeModule<A, R>
     public typealias F = FreeModuleHom<A, R>
     
-    public let chainBases: [[A]] // [[0-chain], [1-chain], ..., [n-chain]]
-    public let boundaryMaps: [F] // [(d_0 = 0), (d_1 = C_1 -> C_0), ..., (d_n: C_n -> C_{n-1}), (d_{n+1} = 0)]
+    private let chain: [([A], F)]
+    public  let offset: Int
     
     // root initializer
-    public init(chainBases: [[A]], boundaryMaps: [F]) {
-        self.chainBases = chainBases
-        self.boundaryMaps = boundaryMaps
+    public init(_ chain: [([A], F)], offset: Int = 0) {
+        self.chain = chain
+        self.offset = offset
     }
     
-    public init(_ pairs: ([A], table: [R])...) {
-        let descending = (chainType.self == DescendingChainType.self)
-        
-        let chainBases = pairs.map{$0.0}
-        let boundaryMaps = pairs.map{$0.1}.enumerated().map { (i, table) -> FreeModuleHom<A, R> in
-            let domainBasis  = chainBases[i]
-            
-            let j = (descending) ? (i - 1) : (i + 1)
-            let codomainBasis = (0 <= j && j < chainBases.count) ? chainBases[j] : []
-            
-            let matrix = DynamicMatrix<R>(rows: codomainBasis.count, cols: domainBasis.count, grid: table)
-            return FreeModuleHom(domainBasis: domainBasis,
-                                 codomainBasis: codomainBasis,
-                                 matrix: matrix)
-        }
-        self.init(chainBases: chainBases, boundaryMaps: boundaryMaps)
+    public var descending: Bool {
+        return (chainType.self == DescendingChainType.self)
     }
     
     public var dim: Int {
-        return self.chainBases.count - 1
+        return chain.count + offset - 1
+    }
+    
+    public func chainBasis(_ i: Int) -> [A] {
+        return (offset ... dim).contains(i) ? chain[i - offset].0 : []
+    }
+    
+    public func boundaryMap(_ i: Int) -> FreeModuleHom<A, R> {
+        switch i {
+        case (offset ... dim):
+            return chain[i - offset].1
+            
+        case dim + 1 where descending:
+            let basis = chainBasis(dim)
+            return FreeModuleHom(domainBasis: [],
+                                 codomainBasis: basis,
+                                 matrix: DynamicMatrix<R>(rows: basis.count, cols: 0, grid: []))
+            
+        case offset - 1 where !descending:
+            let basis = chainBasis(offset)
+            return FreeModuleHom(domainBasis: [],
+                                 codomainBasis: basis,
+                                 matrix: DynamicMatrix<R>(rows: basis.count, cols: 0, grid: []))
+            
+        default:
+            return FreeModuleHom.zero
+        }
     }
     
     public var description: String {
-        return chainBases.description
+        return chain.description
     }
 }

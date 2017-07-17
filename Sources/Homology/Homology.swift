@@ -25,23 +25,24 @@ public struct BaseHomology<chainType: ChainType, A: FreeModuleBase, R: Euclidean
     }
     
     public init(_ chainComplex: BaseChainComplex<chainType, A, R>) {
-        typealias  M = FreeModule<A, R>
+        typealias M = FreeModule<A, R>
         
-        let descending = (chainType.self == DescendingChainType.self)
+        let descending = chainComplex.descending
         let dim = chainComplex.dim
-        let elims = chainComplex.boundaryMaps.map { $0.matrix.eliminate() }
+        
+        let elims = (-1 ... dim + 1).map{ chainComplex.boundaryMap($0).matrix.eliminate() }
         
         let groups = (0 ... dim).map { (i) -> HomologyGroupInfo<chainType, A, R> in
             // Basis of C_i : the i-th Chain group
-            let basis = chainComplex.boundaryMaps[i].domainBasis
+            let basis = chainComplex.chainBasis(i)
             
             // Z_i : the i-th Cycle group
-            let A = elims[i]
+            let A = elims[i + 1]
             let Z = A.kernelPart       // PAQ = [D; O_k]  =>  Z = Q * [O; I_k]
             
             // B_i : the i-th Boundary group
-            let j = (descending) ? (i + 1) : (i - 1)
-            let B = (0 <= j && j < elims.count) ? elims[j].imagePart : DynamicMatrix(rows: basis.count, cols: 0, grid:[])
+            let j = (descending) ? (i + 2) : i
+            let B = elims[j].imagePart
             
             // C_i -> Z_i transition matrix
             let (n, k) = (Z.rows, Z.cols)
@@ -55,12 +56,12 @@ public struct BaseHomology<chainType: ChainType, A: FreeModuleBase, R: Euclidean
     }
     
     public var description: String {
-        return "{" + groupInfos.enumerated().map{"\($0):\($1)"}.joined(separator: ", ") + "}"
+        return "{" + groupInfos.map{"\($0.dim):\($0)"}.joined(separator: ", ") + "}"
     }
     
     public var detailDescription: String {
         return "{\n"
-            + groupInfos.enumerated().map{"\t\($0) : \($1.detailDescription)"}.joined(separator: ",\n")
+            + groupInfos.map{"\t\($0.dim) : \($0.detailDescription)"}.joined(separator: ",\n")
             + "\n}"
     }
 }
