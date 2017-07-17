@@ -51,8 +51,8 @@ public struct DualComplex: GeometricComplex, CustomStringConvertible, CustomDebu
         let SdK = K.barycentricSubdivision()
         
         let cells = (0 ... K.dim).reversed().map { (i) -> [DualCell] in
-            let bcells = SdK.cells(K.dim - i) // comps of dual-cells, codim: i
-            return K.simplices(i).map { (s: Simplex) -> DualCell in
+            let bcells = SdK.allCells(ofDim: K.dim - i) // comps of dual-cells, codim: i
+            return K.allCells(ofDim: i).map { (s: Simplex) -> DualCell in
                 let v0 = SdK.vertexSet.barycenterOf(s)!
                 let tops = K.facets.filter{ $0.contains(s) }
                 
@@ -73,7 +73,7 @@ public struct DualComplex: GeometricComplex, CustomStringConvertible, CustomDebu
         return DualComplex(baseComplex, sub)
     }
     
-    public func cells(_ i: Int) -> [DualCell] {
+    public func allCells(ofDim i: Int) -> [DualCell] {
         return (0...dim).contains(i) ? cellList[i] : []
     }
     

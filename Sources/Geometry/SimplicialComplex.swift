@@ -39,12 +39,7 @@ public struct SimplicialComplex: GeometricComplex {
         return SimplicialComplex(vertexSet, sub)
     }
     
-    public func cells(_ i: Int) -> [Simplex] {
-        return simplices(i)
-    }
-    
-    // TODO remove
-    public func simplices(_ i: Int) -> [Simplex] {
+    public func allCells(ofDim i: Int) -> [Simplex] {
         return (0...dim).contains(i) ? simplicesList[i] : []
     }
     
@@ -113,8 +108,8 @@ public func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
     let dim = max(K1.dim, K2.dim)
     
     let simplices = (0 ... dim).map{ i in
-        K1.simplices(i).map{ s in V.simplex(indices: s.vertices.map{$0.index}) } +
-            K2.simplices(i).map{ s in V.simplex(indices: s.vertices.map{$0.index + n1}) }
+        K1.allCells(ofDim: i).map{ s in V.simplex(indices: s.vertices.map{$0.index}) } +
+            K2.allCells(ofDim: i).map{ s in V.simplex(indices: s.vertices.map{$0.index + n1}) }
     }
     return SimplicialComplex(V, simplices)
 }
