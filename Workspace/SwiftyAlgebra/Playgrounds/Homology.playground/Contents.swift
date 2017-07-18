@@ -10,6 +10,7 @@ typealias Q = RationalNumber
 typealias R = RealNumber
 
 let V = VertexSet(number: 10)
+let s = { (indices: Int...) -> Simplex in Simplex(V, indices) }
 
 // Δ^3 = D^3
 do {
@@ -34,7 +35,6 @@ do {
 
 // RP^2
 do {
-    let s = V.simplex(_:)
     let faces = [s(0,1,3),s(1,4,3),s(1,2,4),s(4,2,0),s(4,0,5),s(0,1,5),s(1,2,5),s(2,3,5),s(0,3,2),s(3,4,5)]
     let C = SimplicialComplex(V, faces, generate: true)
     let H = Homology(C, Z.self)
@@ -43,7 +43,6 @@ do {
 
 // Mobius band
 do {
-    let s = V.simplex(_:)
     let faces = [s(0,1,3), s(1,3,4),s(1,2,4),s(2,4,5),s(2,3,5),s(3,5,0)]
     let C = SimplicialComplex(V, faces, generate: true)
     let H = Homology(C, Z.self)
@@ -52,7 +51,6 @@ do {
 
 // other coeffs
 do {
-    let s = V.simplex(_:)
     let faces = [s(0,1,3),s(1,4,3),s(1,2,4),s(4,2,0),s(4,0,5),s(0,1,5),s(1,2,5),s(2,3,5),s(0,3,2),s(3,4,5)]
     let C = SimplicialComplex(V, faces, generate: true)
     

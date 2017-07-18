@@ -88,7 +88,7 @@ public extension SimplicialComplex {
     
     static func ball(dim: Int) -> SimplicialComplex {
         let V = VertexSet(number: dim + 1)
-        let s = V.simplex(indices: Array(0...dim))
+        let s = Simplex(V, Array(0...dim))
         return SimplicialComplex(V, [s], generate: true)
     }
     
@@ -108,8 +108,8 @@ public func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
     let dim = max(K1.dim, K2.dim)
     
     let simplices = (0 ... dim).map{ i in
-        K1.allCells(ofDim: i).map{ s in V.simplex(indices: s.vertices.map{$0.index}) } +
-            K2.allCells(ofDim: i).map{ s in V.simplex(indices: s.vertices.map{$0.index + n1}) }
+        K1.allCells(ofDim: i).map{ s in Simplex(V, s.vertices.map{$0.index}) } +
+            K2.allCells(ofDim: i).map{ s in Simplex(V, s.vertices.map{$0.index + n1}) }
     }
     return SimplicialComplex(V, simplices)
 }
@@ -147,7 +147,7 @@ public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
     
     let simplices = indexPairs.map { (list: [(Int, Int)]) -> Simplex in
         let indices = list.map{ (i, j) in i * n2 + j }
-        return V.simplex(indices: indices)
+        return Simplex(V, indices)
     }.unique()
     
     return SimplicialComplex(V, simplices)

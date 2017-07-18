@@ -46,6 +46,7 @@
 		146905B21EE4F4F100153686 /* DynamicGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146905B11EE4F4F100153686 /* DynamicGroup.swift */; };
 		146A296E1F1DA32400531AA2 /* HomologyGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146A296D1F1DA32400531AA2 /* HomologyGroup.swift */; };
 		146A29701F1DA35600531AA2 /* HomologyGroupInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146A296F1F1DA35600531AA2 /* HomologyGroupInfo.swift */; };
+		146A29721F1DA91C00531AA2 /* VertexSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146A29711F1DA91B00531AA2 /* VertexSet.swift */; };
 		147D98031EB9B06900C736AC /* IntegerFactorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98021EB9B06900C736AC /* IntegerFactorization.swift */; };
 		147D98061EB9B26200C736AC /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98051EB9B26200C736AC /* Dictionary.swift */; };
 		1482E05D1EE96BA700B0CEFA /* IntMatrixImpl+Eigen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1482E05C1EE96BA700B0CEFA /* IntMatrixImpl+Eigen.swift */; };
@@ -120,6 +121,7 @@
 		146905B11EE4F4F100153686 /* DynamicGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DynamicGroup.swift; path = Dynamic/DynamicGroup.swift; sourceTree = "<group>"; };
 		146A296D1F1DA32400531AA2 /* HomologyGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomologyGroup.swift; sourceTree = "<group>"; };
 		146A296F1F1DA35600531AA2 /* HomologyGroupInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomologyGroupInfo.swift; sourceTree = "<group>"; };
+		146A29711F1DA91B00531AA2 /* VertexSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VertexSet.swift; sourceTree = "<group>"; };
 		147D98021EB9B06900C736AC /* IntegerFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntegerFactorization.swift; sourceTree = "<group>"; };
 		147D98051EB9B26200C736AC /* Dictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dictionary.swift; sourceTree = "<group>"; };
 		1482E05C1EE96BA700B0CEFA /* IntMatrixImpl+Eigen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "IntMatrixImpl+Eigen.swift"; sourceTree = "<group>"; };
@@ -368,6 +370,7 @@
 			isa = PBXGroup;
 			children = (
 				14A85FF01ED9C8C300A754EA /* Vertex.swift */,
+				146A29711F1DA91B00531AA2 /* VertexSet.swift */,
 				14929C9C1ED9C798006ACAC5 /* Simplex.swift */,
 				14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */,
 				14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */,
@@ -545,6 +548,7 @@
 				146A296E1F1DA32400531AA2 /* HomologyGroup.swift in Sources */,
 				1482E05D1EE96BA700B0CEFA /* IntMatrixImpl+Eigen.swift in Sources */,
 				14A85FF31ED9D63E00A754EA /* GeometricComplex.swift in Sources */,
+				146A29721F1DA91C00531AA2 /* VertexSet.swift in Sources */,
 				14929C9F1ED9C798006ACAC5 /* SimplicialComplex.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

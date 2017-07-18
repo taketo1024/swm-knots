@@ -8,22 +8,24 @@
 
 import Foundation
 
-// MEMO: 'un'ordered set of vertices
-
 public struct Simplex: FreeModuleBase, CustomStringConvertible {
-    public   let vertices: [Vertex]
-    internal let verticesSet: Set<Vertex>
+    public   let vertices: [Vertex] // ordered list of vertices.
+    internal let vSet: Set<Vertex>  // unordered set of vertices.
     internal let id: String
+    
+    public init(_ V: VertexSet, _ indices: [Int]) {
+        let vertices = indices.map{ V.vertex(at: $0) }
+        self.init(vertices)
+    }
+    
+    public init<S: Sequence>(_ vertices: S) where S.Iterator.Element == Vertex {
+        self.vertices = vertices.sorted().unique()
+        self.vSet = Set(self.vertices)
+        self.id = "(\(self.vertices.map{$0.description}.joined(separator: ", ")))"
+    }
     
     public var dim: Int {
         return vertices.count - 1
-    }
-    
-    internal init<S: Sequence>(_ vertices: S) where S.Iterator.Element == Vertex {
-        self.vertices = vertices.sorted().unique()
-        self.verticesSet = Set(self.vertices)
-        
-        self.id = "(\(self.vertices.map{$0.description}.joined(separator: ", ")))"
     }
     
     public func face(_ index: Int) -> Simplex {
@@ -40,11 +42,11 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
     }
     
     public func contains(_ v: Vertex) -> Bool {
-        return verticesSet.contains(v)
+        return vSet.contains(v)
     }
     
     public func contains(_ s: Simplex) -> Bool {
-        return s.verticesSet.isSubset(of: self.verticesSet)
+        return s.vSet.isSubset(of: self.vSet)
     }
     
     public func allSubsimplices() -> [Simplex] {
