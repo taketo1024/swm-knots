@@ -5,18 +5,20 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
     public typealias Dom = M
     public typealias Codom = M
     
-    public let domainBasis: [A]
-    public let codomainBasis: [A]
+    public typealias Basis = [A]
+    
+    public let domainBasis: Basis
+    public let codomainBasis: Basis
     public let matrix: DynamicMatrix<R>
     
     // The root initializer
-    public init(domainBasis: [A], codomainBasis: [A], matrix: DynamicMatrix<R>) {
+    public init(domainBasis: Basis, codomainBasis: Basis, matrix: DynamicMatrix<R>) {
         self.domainBasis = domainBasis
         self.codomainBasis = codomainBasis
         self.matrix = matrix
     }
     
-    public init(domainBasis: [A], codomainBasis: [A], mapping: [R]) {
+    public init(domainBasis: Basis, codomainBasis: Basis, mapping: [R]) {
         self.init(domainBasis: domainBasis,
                   codomainBasis: codomainBasis,
                   matrix: DynamicMatrix(rows: codomainBasis.count, cols: domainBasis.count, grid: mapping))
@@ -35,7 +37,7 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
         return M(basis: codomainBasis, components: comps)
     }
     
-    private static func map2matrix(_ domainBasis: [A], _ codomainBasis: [A], _ mapping: [A : M]) -> DynamicMatrix<R> {
+    private static func map2matrix(_ domainBasis: Basis, _ codomainBasis: Basis, _ mapping: [A : M]) -> DynamicMatrix<R> {
         return DynamicMatrix<R>(rows: codomainBasis.count, cols: domainBasis.count) { (i, j) -> R in
             let from = domainBasis[j]
             let to  = codomainBasis[i]

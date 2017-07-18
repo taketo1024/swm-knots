@@ -38,8 +38,10 @@ public struct BaseHomology<chainType: ChainType, A: FreeModuleBase, R: Euclidean
         }()
         
         let groups = (offset ... dim).map { (i) -> HomologyGroupInfo<chainType, A, R> in
-            let basis = chainComplex.chainBasis(i)
-            return HomologyGroupInfo(dim: i, basis: basis, elim1: elims(i), elim2: chainComplex.descending ? elims(i + 1) : elims(i - 1))
+            HomologyGroupInfo(dim: i,
+                              basis: chainComplex.chainBasis(i),
+                              elim1: elims(i),
+                              elim2: chainComplex.descending ? elims(i + 1) : elims(i - 1))
         }
         
         self.init(chainComplex: chainComplex, groups: groups)
@@ -67,6 +69,8 @@ public extension BaseHomology where chainType == DescendingChainType, R == Integ
 }
 
 public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: TypeInfo {
+    public typealias ChainBasis = [A]
+    
     public enum Summand: CustomStringConvertible {
         case Free(generator: FreeModule<A, R>)
         case Tor(factor: R, generator: FreeModule<A, R>)
@@ -94,11 +98,12 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
     }
     
     public let dim: Int
+    public let chainBasis: ChainBasis
+    
     public let rank: Int
     public let torsions: Int
     
     public let summands: [Summand]
-    public let chainBasis: [A]
     public let transitionMatrix: DynamicMatrix<R> // chain -> cycle
     
     private typealias M = FreeModule<A, R>
@@ -113,7 +118,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
         self.init(dim: dim, basis: basis, elim1: E1, elim2: E2)
     }
     
-    internal init<n0: _Int, n1: _Int, n2: _Int>(dim: Int, basis: [A], elim1 E1: MatrixElimination<R, n0, n1>, elim2 E2: MatrixElimination<R, n1, n2>) {
+    internal init<n0: _Int, n1: _Int, n2: _Int>(dim: Int, basis: ChainBasis, elim1 E1: MatrixElimination<R, n0, n1>, elim2 E2: MatrixElimination<R, n1, n2>) {
         // Z_i : the i-th Cycle group
         let Z = E1.kernelPart
         let (n, k) = (Z.rows, Z.cols)
@@ -139,16 +144,17 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
         }
         
         self.dim = dim
+        self.chainBasis = basis
+        
         self.rank = freePart.count
         self.torsions = torPart.count
         
         self.summands = (freePart + torPart)
-        self.chainBasis = basis
         self.transitionMatrix = newTrans.asDynamic
     }
     
     // Calculate with size-typed matrices.
-    private static func calculate<n:_Int, k:_Int, l:_Int>(_ basis: [A], _ Z: Matrix<R, n, k>, _ B: Matrix<R, n, l>, _ T: Matrix<R, k, n>) -> (newBasis: [M],  transitionMatrix: Matrix<R, k, n>, diagonal: [R]) {
+    private static func calculate<n:_Int, k:_Int, l:_Int>(_ basis: ChainBasis, _ Z: Matrix<R, n, k>, _ B: Matrix<R, n, l>, _ T: Matrix<R, k, n>) -> (newBasis: [M],  transitionMatrix: Matrix<R, k, n>, diagonal: [R]) {
         
         // Find R such that B = Z * P.
         // Since T * Z = I_k,  T * B = P.
