@@ -58,9 +58,8 @@ public final class DualSimplicialComplex: GeometricComplex, CustomStringConverti
                 let v0 = SdK.vertexSet.barycenterOf(s)!
                 
                 // take all cells in SdK that contain both bcenters of s and t.
-                let tops = K.maximalCells.filter{ $0.contains(s) }
-                let comps = tops.flatMap{ (top: Simplex) -> [Simplex] in
-                    let v1 = SdK.vertexSet.barycenterOf(top)!
+                let comps = K.star(s).flatMap{ (t: Simplex) -> [Simplex] in
+                    let v1 = SdK.vertexSet.barycenterOf(t)!
                     return bcells.filter{ $0.contains(v0) && $0.contains(v1) }
                 }
 

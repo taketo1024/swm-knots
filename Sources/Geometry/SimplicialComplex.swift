@@ -61,6 +61,22 @@ public final class SimplicialComplex: GeometricComplex {
         return list
     }()
     
+    public func star(_ v: Vertex) -> [Simplex] { // returns only maximal cells
+        return maximalCells.filter{ $0.contains(v) }
+    }
+    
+    public func star(_ s: Simplex) -> [Simplex] { // returns only maximal cells
+        return maximalCells.filter{ $0.contains(s) }
+    }
+    
+    public func link(_ v: Vertex) -> [Simplex] { // returns only maximal cells
+        return star(v).map{ Simplex($0.vSet.subtracting([v])) }.filter{ $0.dim >= 0 }
+    }
+    
+    public func link(_ s: Simplex) -> [Simplex] { // returns only maximal cells
+        return star(s).map{ Simplex($0.vSet.subtracting(s.vSet)) }.filter{ $0.dim >= 0 }
+    }
+    
     public func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [Simplex], _ to : [Simplex]) -> DynamicMatrix<R> {
         let toIndex = Dictionary(to.enumerated().map{($1, $0)})
         let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in

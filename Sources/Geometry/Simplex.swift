@@ -29,7 +29,8 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
     }
     
     public func face(_ index: Int) -> Simplex {
-        let vs = (0 ... dim).filter({$0 != index}).map{vertices[$0]}
+        var vs = vertices
+        vs.remove(at: index)
         return Simplex(vs)
     }
     
