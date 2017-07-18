@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct DualCell: Hashable, CustomStringConvertible, CustomDebugStringConvertible {
+public struct DualSimplicialCell: Hashable, CustomStringConvertible, CustomDebugStringConvertible {
     public let base: Simplex
     public let components: [Simplex]
     
@@ -29,55 +29,57 @@ public struct DualCell: Hashable, CustomStringConvertible, CustomDebugStringConv
         return "d\(base) : \(components)"
     }
     
-    public static func ==(a: DualCell, b: DualCell) -> Bool {
-        return a.base.id == b.base.id
+    public static func ==(a: DualSimplicialCell, b: DualSimplicialCell) -> Bool {
+        return a.base == b.base
     }
 }
 
-public struct DualComplex: GeometricComplex, CustomStringConvertible, CustomDebugStringConvertible {
+public final class DualSimplicialComplex: GeometricComplex, CustomStringConvertible, CustomDebugStringConvertible {
+    public typealias Cell = DualSimplicialCell
+    
     public let dim: Int
     public let baseComplex: SimplicialComplex
-    public let cellList: [[DualCell]] // [0: [0-dim blocks], 1: [1-dim-blocks], ...]
+    internal let cellList: [[Cell]] // [0: [0-dim cells], 1: [1-dim cells], ...]
     
     // root initializer
-    public init(_ baseComplex: SimplicialComplex, _ cells: [[DualCell]]) {
+    public init(_ baseComplex: SimplicialComplex, _ cells: [[Cell]]) {
         self.dim = cells.count - 1
         self.baseComplex = baseComplex
         self.cellList = cells
     }
     
-    public init(_ baseComplex: SimplicialComplex) {
+    public convenience init(_ baseComplex: SimplicialComplex) {
         let K = baseComplex
         let SdK = K.barycentricSubdivision()
         
-        let cells = (0 ... K.dim).reversed().map { (i) -> [DualCell] in
+        let cells = (0 ... K.dim).reversed().map { (i) -> [DualSimplicialCell] in
             let bcells = SdK.allCells(ofDim: K.dim - i) // comps of dual-cells, codim: i
-            return K.allCells(ofDim: i).map { (s: Simplex) -> DualCell in
+            return K.allCells(ofDim: i).map { (s: Simplex) -> DualSimplicialCell in
                 let v0 = SdK.vertexSet.barycenterOf(s)!
-                let tops = K.facets.filter{ $0.contains(s) }
                 
                 // take all cells in SdK that contain both bcenters of s and t.
+                let tops = K.maximalCells.filter{ $0.contains(s) }
                 let comps = tops.flatMap{ (top: Simplex) -> [Simplex] in
                     let v1 = SdK.vertexSet.barycenterOf(top)!
                     return bcells.filter{ $0.contains(v0) && $0.contains(v1) }
                 }
 
-                return DualCell(s, comps)
+                return DualSimplicialCell(s, comps)
             }
         }
         self.init(baseComplex, cells)
     }
     
-    public func skeleton(_ dim: Int) -> DualComplex {
+    public func skeleton(_ dim: Int) -> DualSimplicialComplex {
         let sub = Array(cellList[0 ... dim])
-        return DualComplex(baseComplex, sub)
+        return DualSimplicialComplex(baseComplex, sub)
     }
     
-    public func allCells(ofDim i: Int) -> [DualCell] {
+    public func allCells(ofDim i: Int) -> [DualSimplicialCell] {
         return (0...dim).contains(i) ? cellList[i] : []
     }
     
-    public func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [DualCell], _ to : [DualCell]) -> DynamicMatrix<R> {
+    public func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [DualSimplicialCell], _ to : [DualSimplicialCell]) -> DynamicMatrix<R> {
         fatalError() // TODO
     }
     

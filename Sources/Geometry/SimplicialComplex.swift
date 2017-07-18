@@ -8,43 +8,45 @@
 
 import Foundation
 
-public struct SimplicialComplex: GeometricComplex {
+public final class SimplicialComplex: GeometricComplex {
+    public typealias Cell = Simplex
+    
     public let dim: Int
     public let vertexSet: VertexSet
-    internal let simplicesList: [[Simplex]]
+    internal let cellsList: [[Simplex]]
     
     // root initializer
-    public init(_ vertexSet: VertexSet, _ simplices: [[Simplex]]) {
-        self.dim = simplices.count - 1
+    public init(_ vertexSet: VertexSet, _ cells: [[Simplex]]) {
+        self.dim = cells.count - 1
         self.vertexSet = vertexSet
-        self.simplicesList = simplices
+        self.cellsList = cells
     }
     
-    public init<S: Sequence>(_ vertexSet: VertexSet, _ simplices: S, generate: Bool = false) where S.Iterator.Element == Simplex {
-        let simplices = { () -> [[Simplex]] in
-            let dim = simplices.reduce(0) { max($0, $1.dim) }
-            let set = generate ? simplices.reduce(Set<Simplex>()){$0.union($1.allSubsimplices()) } : Set(simplices)
+    public convenience init<S: Sequence>(_ vertexSet: VertexSet, _ cells: S, generate: Bool = false) where S.Iterator.Element == Simplex {
+        let cells = { () -> [[Simplex]] in
+            let dim = cells.reduce(0) { max($0, $1.dim) }
+            let set = generate ? cells.reduce(Set<Simplex>()){$0.union($1.allSubsimplices()) } : Set(cells)
             
-            var simplices: [[Simplex]] = (0 ... dim).map{_ in []}
+            var cells: [[Simplex]] = (0 ... dim).map{_ in []}
             for s in set {
-                simplices[s.dim].append(s)
+                cells[s.dim].append(s)
             }
-            return simplices
+            return cells
         }()
-        self.init(vertexSet, simplices)
+        self.init(vertexSet, cells)
     }
     
     public func skeleton(_ dim: Int) -> SimplicialComplex {
-        let sub = Array(simplicesList[0 ... dim])
+        let sub = Array(cellsList[0 ... dim])
         return SimplicialComplex(vertexSet, sub)
     }
     
     public func allCells(ofDim i: Int) -> [Simplex] {
-        return (0...dim).contains(i) ? simplicesList[i] : []
+        return (0...dim).contains(i) ? cellsList[i] : []
     }
     
-    public var facets: [Simplex] { // set of maximal simplices
-        var list = Array(simplicesList.reversed().joined())
+    public lazy var maximalCells: [Simplex] = { () -> [Simplex] in
+        var list = Array(self.cellsList.reversed().joined())
         var i = 0
         while i < list.count {
             let s = list[i]
@@ -57,7 +59,7 @@ public struct SimplicialComplex: GeometricComplex {
             i += 1
         }
         return list
-    }
+    }()
     
     public func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [Simplex], _ to : [Simplex]) -> DynamicMatrix<R> {
         let toIndex = Dictionary(to.enumerated().map{($1, $0)})
@@ -107,11 +109,11 @@ public func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
     let V = VertexSet(number: n1 + n2)
     let dim = max(K1.dim, K2.dim)
     
-    let simplices = (0 ... dim).map{ i in
+    let cells = (0 ... dim).map{ i in
         K1.allCells(ofDim: i).map{ s in Simplex(V, s.vertices.map{$0.index}) } +
             K2.allCells(ofDim: i).map{ s in Simplex(V, s.vertices.map{$0.index + n1}) }
     }
-    return SimplicialComplex(V, simplices)
+    return SimplicialComplex(V, cells)
 }
 
 // product complex
@@ -119,7 +121,7 @@ public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
     let (n1, n2) = (K1.vertexSet.vertices.count, K2.vertexSet.vertices.count)
     let V = VertexSet(number: n1 * n2)
     
-    let (S1, S2) = (K1.facets, K2.facets)
+    let (S1, S2) = (K1.maximalCells, K2.maximalCells)
     let simplexPairs: [(Simplex, Simplex)] = S1.flatMap{ s in S2.map{ t in (s, t) } }
     
     let indexPairs: [[(Int, Int)]] = simplexPairs.flatMap{(s, t) -> [[(Int, Int)]] in
@@ -145,12 +147,12 @@ public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
         }
     }
     
-    let simplices = indexPairs.map { (list: [(Int, Int)]) -> Simplex in
+    let cells = indexPairs.map { (list: [(Int, Int)]) -> Simplex in
         let indices = list.map{ (i, j) in i * n2 + j }
         return Simplex(V, indices)
     }.unique()
     
-    return SimplicialComplex(V, simplices)
+    return SimplicialComplex(V, cells)
 }
 
 public extension SimplicialComplex {
@@ -158,8 +160,8 @@ public extension SimplicialComplex {
         var V = VertexSet()
         var S = Set<Simplex>()
         
-        func generate(simplices: [Simplex], barycenters: [Vertex]) {
-            let s = simplices.last!
+        func generate(cells: [Simplex], barycenters: [Vertex]) {
+            let s = cells.last!
             let v = V.barycenterOf(s) ?? {
                 let label = (s.dim > 0) ? "b\(s.vertices.map{String($0.index)}.joined())" : s.vertices.first!.label
                 return V.add(label: label, barycenterOf: s)
@@ -167,7 +169,7 @@ public extension SimplicialComplex {
             
             if s.dim > 0 {
                 for t in s.faces() {
-                    generate(simplices: simplices + [t], barycenters: barycenters + [v])
+                    generate(cells: cells + [t], barycenters: barycenters + [v])
                 }
             } else {
                 let bs = Simplex(barycenters + [v])
@@ -175,9 +177,8 @@ public extension SimplicialComplex {
             }
         }
         
-        let facets = self.facets
-        for s in facets {
-            generate(simplices: [s], barycenters: [])
+        for s in maximalCells {
+            generate(cells: [s], barycenters: [])
         }
         
         return SimplicialComplex(V, S, generate: true)

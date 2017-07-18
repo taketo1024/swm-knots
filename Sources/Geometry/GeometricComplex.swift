@@ -9,59 +9,59 @@
 import Foundation
 
 public protocol GeometricComplex {
-    associatedtype A: FreeModuleBase
+    associatedtype Cell: FreeModuleBase
     
     var dim: Int {get}
     
-    func allCells(ofDim: Int) -> [A]
+    func allCells(ofDim: Int) -> [Cell]
     func skeleton(_ dim: Int) -> Self
     
-    func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<A, R>
-    func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<A, R>
-    func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [A], _ to : [A]) -> DynamicMatrix<R>
+    func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, R>
+    func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, R>
+    func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [Cell], _ to : [Cell]) -> DynamicMatrix<R>
     
-    func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<A, R>
-    func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<A, R>
+    func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<Cell, R>
+    func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<Cell, R>
 }
 
 public extension GeometricComplex {
-    public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<A, R> {
+    public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, R> {
         let from = allCells(ofDim: i)
         let to = (i > 0) ? allCells(ofDim: i - 1) : []
         let matrix: DynamicMatrix<R> = boundaryMapMatrix(i, from, to)
-        return FreeModuleHom<A, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
+        return FreeModuleHom<Cell, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
     }
     
-    public func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<A, R> {
+    public func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, R> {
         // Regard the basis of C_i as the dual basis of C^i.
         // Since <δf, c> = <f, ∂c>, the matrix is given by the transpose.
         
         let from = allCells(ofDim: i)
         let to = (i < dim) ? allCells(ofDim: i + 1) : []
         let matrix: DynamicMatrix<R> = boundaryMapMatrix(i + 1, to, from).transposed
-        return FreeModuleHom<A, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
+        return FreeModuleHom<Cell, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
     }
     
-    public func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<A, R> {
-        let chain = (0 ... dim).map{ (i) -> ([A], FreeModuleHom<A, R>) in (allCells(ofDim: i), boundaryMap(i)) }
-        return ChainComplex<A, R>(chain)
+    public func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<Cell, R> {
+        let chain = (0 ... dim).map{ (i) -> ([Cell], FreeModuleHom<Cell, R>) in (allCells(ofDim: i), boundaryMap(i)) }
+        return ChainComplex<Cell, R>(chain)
     }
     
-    public func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<A, R> {
-        let chain = (0 ... dim).map{ (i) -> ([A], FreeModuleHom<A, R>) in (allCells(ofDim: i), coboundaryMap(i)) }
-        return CochainComplex<A, R>(chain)
+    public func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<Cell, R> {
+        let chain = (0 ... dim).map{ (i) -> ([Cell], FreeModuleHom<Cell, R>) in (allCells(ofDim: i), coboundaryMap(i)) }
+        return CochainComplex<Cell, R>(chain)
     }
 }
 
 public extension Homology where chainType == DescendingChainType, R: EuclideanRing {
-    public init<C: GeometricComplex>(_ s: C, _ type: R.Type) where C.A == A {
+    public init<C: GeometricComplex>(_ s: C, _ type: R.Type) where C.Cell == A {
         let c: ChainComplex<A, R> = s.chainComplex(type: R.self)
         self.init(c)
     }
 }
 
 public extension Cohomology where chainType == AscendingChainType, R: EuclideanRing {
-    public init<C: GeometricComplex>(_ s: C, _ type: R.Type) where C.A == A {
+    public init<C: GeometricComplex>(_ s: C, _ type: R.Type) where C.Cell == A {
         let c: CochainComplex<A, R> = s.cochainComplex(type: R.self)
         self.init(c)
     }
