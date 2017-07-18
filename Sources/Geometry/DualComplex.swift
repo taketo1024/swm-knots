@@ -78,8 +78,8 @@ public final class DualSimplicialComplex: GeometricComplex, CustomStringConverti
         return (0...dim).contains(i) ? cellList[i] : []
     }
     
-    public func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [DualSimplicialCell], _ to : [DualSimplicialCell]) -> DynamicMatrix<R> {
-        fatalError() // TODO
+    public func boundary<R: Ring>(ofCell s: Cell) -> [(Cell, R)] {
+        fatalError()
     }
     
     public var description: String {

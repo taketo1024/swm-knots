@@ -77,17 +77,11 @@ public final class SimplicialComplex: GeometricComplex {
         return star(s).map{ Simplex($0.vSet.subtracting(s.vSet)) }.filter{ $0.dim >= 0 }
     }
     
-    public func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [Simplex], _ to : [Simplex]) -> DynamicMatrix<R> {
-        let toIndex = Dictionary(to.enumerated().map{($1, $0)})
-        let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
-            return s.faces().enumerated().map { (k, t) -> MatrixComponent<R> in
-                let i = toIndex[t]!
-                let value: R = (k % 2 == 0) ? 1 : -1
-                return (i, j, value)
-            }
+    public func boundary<R: Ring>(ofCell s: Cell) -> [(Cell, R)] {
+        return s.faces().enumerated().map { (k, t) -> (Cell, R) in
+            let value: R = (k % 2 == 0) ? 1 : -1
+            return (t, value)
         }
-        
-        return DynamicMatrix(rows: to.count, cols: from.count, type: .Sparse, components: components)
     }
 }
 

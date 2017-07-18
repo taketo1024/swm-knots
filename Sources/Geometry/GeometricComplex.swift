@@ -16,9 +16,9 @@ public protocol GeometricComplex {
     func allCells(ofDim: Int) -> [Cell]
     func skeleton(_ dim: Int) -> Self
     
+    func boundary<R: Ring>(ofCell: Cell) -> [(Cell, R)] // override point
     func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, R>
     func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, R>
-    func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [Cell], _ to : [Cell]) -> DynamicMatrix<R>
     
     func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<Cell, R>
     func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<Cell, R>
@@ -40,6 +40,20 @@ public extension GeometricComplex {
         let to = (i < dim) ? allCells(ofDim: i + 1) : []
         let matrix: DynamicMatrix<R> = boundaryMapMatrix(i + 1, to, from).transposed
         return FreeModuleHom<Cell, R>(domainBasis: from, codomainBasis: to, matrix: matrix)
+    }
+    
+    private func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [Cell], _ to : [Cell]) -> DynamicMatrix<R> {
+        let toIndex = Dictionary(to.enumerated().map{($1, $0)}) // [toCell: toIndex]
+        
+        let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
+            return boundary(ofCell: s).map{ (e: (Cell, R)) -> MatrixComponent<R> in
+                let (t, value) = e
+                let i = toIndex[t]!
+                return (i, j, value)
+            }
+        }
+        
+        return DynamicMatrix(rows: to.count, cols: from.count, type: .Sparse, components: components)
     }
     
     public func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<Cell, R> {
