@@ -41,17 +41,6 @@ do {
     print("H(RP^2; Z) =", H.detailDescription, "\n")
 }
 
-// Klein-Bottle cellular
-do {
-    let C = ChainComplex(
-        (["e0"], [0]),
-        (["e10", "e11"], [0, 0]),
-        (["e2"], [2, 0])
-    )
-    let H = Homology(C)
-    print("H(Kl; Z) =", H.detailDescription, "\n")
-}
-
 // Mobius band
 do {
     let s = V.simplex(_:)
