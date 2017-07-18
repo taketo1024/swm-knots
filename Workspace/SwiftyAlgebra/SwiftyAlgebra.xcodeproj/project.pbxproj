@@ -44,6 +44,8 @@
 		145F46011EEAF0CC0045CDB2 /* Z_2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F46001EEAF0CC0045CDB2 /* Z_2.swift */; };
 		146399741F191AD500A34CEE /* DualComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146399731F191AD500A34CEE /* DualComplex.swift */; };
 		146905B21EE4F4F100153686 /* DynamicGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146905B11EE4F4F100153686 /* DynamicGroup.swift */; };
+		146A296E1F1DA32400531AA2 /* HomologyGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146A296D1F1DA32400531AA2 /* HomologyGroup.swift */; };
+		146A29701F1DA35600531AA2 /* HomologyGroupInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146A296F1F1DA35600531AA2 /* HomologyGroupInfo.swift */; };
 		147D98031EB9B06900C736AC /* IntegerFactorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98021EB9B06900C736AC /* IntegerFactorization.swift */; };
 		147D98061EB9B26200C736AC /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98051EB9B26200C736AC /* Dictionary.swift */; };
 		1482E05D1EE96BA700B0CEFA /* IntMatrixImpl+Eigen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1482E05C1EE96BA700B0CEFA /* IntMatrixImpl+Eigen.swift */; };
@@ -116,6 +118,8 @@
 		145F46001EEAF0CC0045CDB2 /* Z_2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Z_2.swift; sourceTree = "<group>"; };
 		146399731F191AD500A34CEE /* DualComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DualComplex.swift; sourceTree = "<group>"; };
 		146905B11EE4F4F100153686 /* DynamicGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DynamicGroup.swift; path = Dynamic/DynamicGroup.swift; sourceTree = "<group>"; };
+		146A296D1F1DA32400531AA2 /* HomologyGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomologyGroup.swift; sourceTree = "<group>"; };
+		146A296F1F1DA35600531AA2 /* HomologyGroupInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomologyGroupInfo.swift; sourceTree = "<group>"; };
 		147D98021EB9B06900C736AC /* IntegerFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntegerFactorization.swift; sourceTree = "<group>"; };
 		147D98051EB9B26200C736AC /* Dictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dictionary.swift; sourceTree = "<group>"; };
 		1482E05C1EE96BA700B0CEFA /* IntMatrixImpl+Eigen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "IntMatrixImpl+Eigen.swift"; sourceTree = "<group>"; };
@@ -340,6 +344,8 @@
 			children = (
 				140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */,
 				144AD2901EC21A4500E23890 /* Homology.swift */,
+				146A296F1F1DA35600531AA2 /* HomologyGroupInfo.swift */,
+				146A296D1F1DA32400531AA2 /* HomologyGroup.swift */,
 			);
 			path = Homology;
 			sourceTree = "<group>";
@@ -507,6 +513,7 @@
 				147D98061EB9B26200C736AC /* Dictionary.swift in Sources */,
 				1424F50E1EB997780052581F /* TPInt.swift in Sources */,
 				14207CB41EEB90E80007BE8F /* MatrixConfig.swift in Sources */,
+				146A29701F1DA35600531AA2 /* HomologyGroupInfo.swift in Sources */,
 				1424F4FF1EB997780052581F /* Ring.swift in Sources */,
 				14A85FF11ED9C8C300A754EA /* Vertex.swift in Sources */,
 				DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */,
@@ -535,6 +542,7 @@
 				1424F5111EB997780052581F /* optable.swift in Sources */,
 				1424F5021EB997780052581F /* Permutation.swift in Sources */,
 				1424F4FC1EB997780052581F /* Group.swift in Sources */,
+				146A296E1F1DA32400531AA2 /* HomologyGroup.swift in Sources */,
 				1482E05D1EE96BA700B0CEFA /* IntMatrixImpl+Eigen.swift in Sources */,
 				14A85FF31ED9D63E00A754EA /* GeometricComplex.swift in Sources */,
 				14929C9F1ED9C798006ACAC5 /* SimplicialComplex.swift in Sources */,
