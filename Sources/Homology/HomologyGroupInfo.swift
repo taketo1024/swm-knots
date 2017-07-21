@@ -48,12 +48,12 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
     
     private typealias M = FreeModule<A, R>
     
-    public convenience init(dim: Int, boundaryMap: FreeModuleHom<A, R>, preboundaryMap: FreeModuleHom<A, R>) {
-        assert(boundaryMap.domainBasis == preboundaryMap.codomainBasis)
-        
-        let basis = boundaryMap.domainBasis
-        let E1 = boundaryMap.matrix.eliminate()
-        let E2 = preboundaryMap.matrix.eliminate()
+    public convenience init(_ chainComplex: BaseChainComplex<chainType, A, R>, dim: Int) {
+        let d1 = chainComplex.boundaryMap(dim)
+        let d2 = chainComplex.boundaryMap(chainComplex.descending ? dim + 1 : dim - 1)
+        let basis = d1.domainBasis
+        let E1 = d1.matrix.eliminate()
+        let E2 = d2.matrix.eliminate()
         
         self.init(dim: dim, basis: basis, elim1: E1, elim2: E2)
     }

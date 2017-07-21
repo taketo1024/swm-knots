@@ -14,6 +14,7 @@ public protocol GeometricComplex {
     var dim: Int {get}
     
     func allCells(ofDim: Int) -> [Cell]
+    func allCells(ascending: Bool) -> [Cell]
     func skeleton(_ dim: Int) -> Self
     
     func boundary<R: Ring>(ofCell: Cell) -> [(Cell, R)] // override point
@@ -25,6 +26,11 @@ public protocol GeometricComplex {
 }
 
 public extension GeometricComplex {
+    public func allCells(ascending: Bool = true) -> [Cell] {
+        let l = (ascending) ? Array(0 ... dim) : Array((0 ... dim).reversed())
+        return l.flatMap{ allCells(ofDim: $0) }
+    }
+    
     public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, R> {
         let from = allCells(ofDim: i)
         let to = (i > 0) ? allCells(ofDim: i - 1) : []
