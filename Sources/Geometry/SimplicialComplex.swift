@@ -70,11 +70,11 @@ public final class SimplicialComplex: GeometricComplex {
     }
     
     public func link(_ v: Vertex) -> [Simplex] { // returns only maximal cells
-        return star(v).map{ Simplex($0.vSet.subtracting([v])) }.filter{ $0.dim >= 0 }
+        return star(v).map{ $0.subtract(v) }.filter{ $0.dim >= 0 }
     }
     
     public func link(_ s: Simplex) -> [Simplex] { // returns only maximal cells
-        return star(s).map{ Simplex($0.vSet.subtracting(s.vSet)) }.filter{ $0.dim >= 0 }
+        return star(s).map{ $0.subtract(s) }.filter{ $0.dim >= 0 }
     }
     
     public func boundary<R: Ring>(ofCell s: Cell) -> [(Cell, R)] {

@@ -28,6 +28,10 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
         return vertices.count - 1
     }
     
+    public func index(ofVertex v: Vertex) -> Int? {
+        return vertices.index(of: v)
+    }
+    
     public func face(_ index: Int) -> Simplex {
         var vs = vertices
         vs.remove(at: index)
@@ -63,6 +67,18 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
         return queue.unique()
     }
     
+    public func join(_ s: Simplex) -> Simplex {
+        return Simplex(self.vSet.union(s.vSet))
+    }
+    
+    public func subtract(_ s: Simplex) -> Simplex {
+        return Simplex(self.vSet.subtracting(s.vSet))
+    }
+    
+    public func subtract(_ v: Vertex) -> Simplex {
+        return Simplex(self.vSet.subtracting([v]))
+    }
+    
     public var hashValue: Int {
         return id.hashValue
     }
@@ -73,5 +89,21 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
     
     public static func ==(a: Simplex, b: Simplex) -> Bool {
         return a.id == b.id // should be `a.verticesSet == b.verticesSet` but for performance.
+    }
+}
+
+public typealias SimplicialChain<R: Ring> = FreeModule<Simplex, R>
+
+public extension Vertex {
+    public func join(_ s: Simplex) -> Simplex {
+        return Simplex([self] + s.vertices)
+    }
+    
+    public func join<R: Ring>(_ chain: SimplicialChain<R>) -> SimplicialChain<R> {
+        return SimplicialChain(chain.table.mapPairs { (s, r) -> (Simplex, R) in
+            let t = self.join(s)
+            let sgn = (t.vertices.index(of: self)! % 2 == 0) ? R.identity : -R.identity
+            return (t, sgn * r)
+        })
     }
 }
