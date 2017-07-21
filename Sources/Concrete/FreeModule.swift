@@ -120,3 +120,31 @@ public struct FreeZeroModule<A: FreeModuleBase, _R: Ring>: Submodule {
         return "{0}"
     }
 }
+
+public struct Dual<A: FreeModuleBase>: FreeModuleBase, CustomStringConvertible {
+    public let base: A
+    public init(_ a: A) {
+        base = a
+    }
+    
+    public var hashValue: Int {
+        return base.hashValue
+    }
+    
+    public static func ==(a: Dual<A>, b: Dual<A>) -> Bool {
+        return a.base == b.base
+    }
+    
+    public var description: String {
+        return "\(base)*"
+    }
+}
+
+public extension FreeModule {
+    public func evaluate(_ f: FreeModule<Dual<A>, R>) -> R {
+        return self.reduce(R.zero) { (res, next) -> R in
+            let (a, r) = next
+            return res + f.component(forBasisElement: Dual(a)) * r
+        }
+    }
+}
