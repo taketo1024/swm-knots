@@ -2,7 +2,7 @@ import Foundation
 
 public typealias FreeModuleBase = Hashable
 
-public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module {
+public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, Sequence {
     public typealias R = _R
     
     public let basis: [A]
@@ -33,6 +33,11 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module {
     public static var zero: FreeModule<A, R> {
         return FreeModule<A, R>.init(basis: [], components: [])
     }
+    
+    public func makeIterator() -> DictionaryIterator<A, R> {
+        return table.makeIterator()
+    }
+
     
     public func component(forBasisElement a: A) -> R {
         return table[a] ?? R.zero
