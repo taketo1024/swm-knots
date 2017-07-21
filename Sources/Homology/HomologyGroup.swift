@@ -43,8 +43,8 @@ public extension _HomologyGroup where Base == FreeModule<A, R> {
     }
 }
 
-public extension _HomologyGroup where Base == FreeModule<A, R>, chainType == AscendingChainType {
-    public static func * <H: _HomologyGroup>(a: Self, b: H) -> R where Self.A == H.A, Self.R == H.R, H.chainType == DescendingChainType {
+public extension _HomologyGroup where Base == FreeModule<A, R>, chainType == Ascending {
+    public static func * <H: _HomologyGroup>(a: Self, b: H) -> R where Self.A == H.A, Self.R == H.R, H.chainType == Descending {
         assert(Self.info.dim == H.info.dim)
         let x = a.representative
         let y = b.representative
@@ -52,12 +52,15 @@ public extension _HomologyGroup where Base == FreeModule<A, R>, chainType == Asc
         return basis.reduce(R.zero) { (sum, e) in sum + x.component(forBasisElement: e) * y.component(forBasisElement: e) }
     }
     
-    public static func * <H: _HomologyGroup>(b: H, a: Self) -> R where Self.A == H.A, Self.R == H.R, H.chainType == DescendingChainType {
+    public static func * <H: _HomologyGroup>(b: H, a: Self) -> R where Self.A == H.A, Self.R == H.R, H.chainType == Descending {
         return a * b
     }
 }
 
-public struct DynamicHomologyGroup<_chainType: ChainType, _A: FreeModuleBase, _R: EuclideanRing, _ID: _Int>: DynamicType, _HomologyGroup {
+public typealias   DynamicHomologyGroup<A: FreeModuleBase, R: EuclideanRing, ID: _Int> = _DynamicHomologyGroup<Descending, A, R, ID>
+public typealias DynamicCohomologyGroup<A: FreeModuleBase, R: EuclideanRing, ID: _Int> = _DynamicHomologyGroup<Ascending,  A, R, ID>
+
+public struct _DynamicHomologyGroup<_chainType: ChainType, _A: FreeModuleBase, _R: EuclideanRing, _ID: _Int>: DynamicType, _HomologyGroup {
     public typealias chainType = _chainType
     public typealias A = _A
     public typealias R = _R

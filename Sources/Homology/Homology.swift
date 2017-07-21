@@ -8,23 +8,23 @@
 
 import Foundation
 
-public typealias Homology<A: FreeModuleBase, R: EuclideanRing> = BaseHomology<DescendingChainType, A, R>
-public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = BaseHomology<AscendingChainType, A, R>
+public typealias   Homology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Descending, A, R>
+public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Ascending, A, R>
 
-public struct BaseHomology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: CustomStringConvertible {
-    public let chainComplex: BaseChainComplex<chainType, A, R>
+public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: CustomStringConvertible {
+    public let chainComplex: _ChainComplex<chainType, A, R>
     internal let groupInfos: [HomologyGroupInfo<chainType, A, R>]
     
     public subscript(i: Int) -> HomologyGroupInfo<chainType, A, R> {
         return groupInfos[i]
     }
     
-    public init(chainComplex: BaseChainComplex<chainType, A, R>, groups: [HomologyGroupInfo<chainType, A, R>]) {
+    public init(chainComplex: _ChainComplex<chainType, A, R>, groups: [HomologyGroupInfo<chainType, A, R>]) {
         self.chainComplex = chainComplex
         self.groupInfos = groups
     }
     
-    public init(_ chainComplex: BaseChainComplex<chainType, A, R>) {
+    public convenience init(_ chainComplex: _ChainComplex<chainType, A, R>) {
         typealias M = FreeModule<A, R>
         
         let offset = chainComplex.offset
@@ -58,7 +58,7 @@ public struct BaseHomology<chainType: ChainType, A: FreeModuleBase, R: Euclidean
     }
 }
 
-public extension BaseHomology where chainType == DescendingChainType, R == IntegerNumber {
+public extension _Homology where chainType == Descending, R == IntegerNumber {
     public func bettiNumer(i: Int) -> Int {
         return groupInfos[i].summands.filter{ $0.isFree }.count
     }

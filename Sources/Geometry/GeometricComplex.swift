@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol GeometricComplex: CustomStringConvertible, CustomDebugStringConvertible {
+public protocol GeometricComplex: class, CustomStringConvertible, CustomDebugStringConvertible {
     associatedtype Cell: FreeModuleBase
     
     var dim: Int {get}
@@ -86,15 +86,15 @@ public extension GeometricComplex {
     }
 }
 
-public extension Homology where chainType == DescendingChainType, R: EuclideanRing {
-    public init<C: GeometricComplex>(_ s: C, _ type: R.Type) where C.Cell == A {
+public extension Homology where chainType == Descending, R: EuclideanRing {
+    public convenience init<C: GeometricComplex>(_ s: C, _ type: R.Type) where C.Cell == A {
         let c: ChainComplex<A, R> = s.chainComplex(type: R.self)
         self.init(c)
     }
 }
 
-public extension Cohomology where chainType == AscendingChainType, R: EuclideanRing {
-    public init<C: GeometricComplex>(_ s: C, _ type: R.Type) where C.Cell == A {
+public extension Cohomology where chainType == Ascending, R: EuclideanRing {
+    public convenience init<C: GeometricComplex>(_ s: C, _ type: R.Type) where C.Cell == A {
         let c: CochainComplex<A, R> = s.cochainComplex(type: R.self)
         self.init(c)
     }

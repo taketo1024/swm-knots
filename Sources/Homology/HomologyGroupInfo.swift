@@ -48,7 +48,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
     
     private typealias M = FreeModule<A, R>
     
-    public convenience init(_ chainComplex: BaseChainComplex<chainType, A, R>, dim: Int) {
+    public convenience init(_ chainComplex: _ChainComplex<chainType, A, R>, dim: Int) {
         let d1 = chainComplex.boundaryMap(dim)
         let d2 = chainComplex.boundaryMap(chainComplex.descending ? dim + 1 : dim - 1)
         let basis = d1.domainBasis

@@ -9,13 +9,13 @@
 import Foundation
 
 public protocol ChainType {}
-public struct DescendingChainType: ChainType {} // for ChainComplexes
-public struct AscendingChainType : ChainType {} // for CochainComplexes
+public struct   Descending : ChainType {}  // for ChainComplex   / Homology
+public struct   Ascending  : ChainType {}  // for CochainComplex / Cohomology
 
-public typealias ChainComplex<A: Hashable, R: Ring> = BaseChainComplex<DescendingChainType, A, R>
-public typealias CochainComplex<A: Hashable, R: Ring> = BaseChainComplex<AscendingChainType, A, R>
+public typealias   ChainComplex<A: Hashable, R: Ring> = _ChainComplex<Descending, A, R>
+public typealias CochainComplex<A: Hashable, R: Ring> = _ChainComplex<Ascending,  A, R>
 
-public struct BaseChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: CustomStringConvertible {
+public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: CustomStringConvertible {
     public typealias ChainBasis = [A]
     public typealias BoundaryMap = FreeModuleHom<A, R>
     
@@ -29,7 +29,7 @@ public struct BaseChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>
     }
     
     public var descending: Bool {
-        return (chainType.self == DescendingChainType.self)
+        return (chainType.self == Descending.self)
     }
     
     public var dim: Int {
