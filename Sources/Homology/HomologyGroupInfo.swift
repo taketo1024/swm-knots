@@ -37,7 +37,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
         }
     }
     
-    public let dim: Int
+    public let degree: Int
     public let chainBasis: ChainBasis
     
     public let rank: Int
@@ -48,17 +48,17 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
     
     private typealias M = FreeModule<A, R>
     
-    public convenience init(_ chainComplex: _ChainComplex<chainType, A, R>, dim: Int) {
-        let d1 = chainComplex.boundaryMap(dim)
-        let d2 = chainComplex.boundaryMap(chainComplex.descending ? dim + 1 : dim - 1)
+    public convenience init(_ chainComplex: _ChainComplex<chainType, A, R>, degree: Int) {
+        let d1 = chainComplex.boundaryMap(degree)
+        let d2 = chainComplex.boundaryMap(chainComplex.descending ? degree + 1 : degree - 1)
         let basis = d1.domainBasis
         let E1 = d1.matrix.eliminate()
         let E2 = d2.matrix.eliminate()
         
-        self.init(dim: dim, basis: basis, elim1: E1, elim2: E2)
+        self.init(degree: degree, basis: basis, elim1: E1, elim2: E2)
     }
     
-    internal init<n0: _Int, n1: _Int, n2: _Int>(dim: Int, basis: ChainBasis, elim1 E1: MatrixElimination<R, n0, n1>, elim2 E2: MatrixElimination<R, n1, n2>) {
+    internal init<n0: _Int, n1: _Int, n2: _Int>(degree: Int, basis: ChainBasis, elim1 E1: MatrixElimination<R, n0, n1>, elim2 E2: MatrixElimination<R, n1, n2>) {
         // Z_i : the i-th Cycle group
         let Z = E1.kernelPart
         let (n, k) = (Z.rows, Z.cols)
@@ -83,7 +83,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
             .Free(generator: newBasis[j])
         }
         
-        self.dim = dim
+        self.degree = degree
         self.chainBasis = basis
         
         self.rank = freePart.count

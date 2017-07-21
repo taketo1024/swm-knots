@@ -16,14 +16,14 @@ public protocol _HomologyGroup: _QuotientModule {
     var representative: FreeModule<A, R> { get }
     init(_ z: FreeModule<A, R>)
     
-    static var dim: Int { get }
+    static var degree: Int { get }
     static func generator(_ i: Int) -> Self
     static var info: HomologyGroupInfo<chainType, A, R> { get }
 }
 
 public extension _HomologyGroup where Base == FreeModule<A, R> {
-    public static var dim: Int {
-        return info.dim
+    public static var degree: Int {
+        return info.degree
     }
     
     public static func generator(_ i: Int) -> Self {
@@ -43,17 +43,9 @@ public extension _HomologyGroup where Base == FreeModule<A, R> {
     }
 }
 
-public extension _HomologyGroup where Base == FreeModule<A, R>, chainType == Ascending {
-    public static func * <H: _HomologyGroup>(a: Self, b: H) -> R where Self.A == H.A, Self.R == H.R, H.chainType == Descending {
-        assert(Self.info.dim == H.info.dim)
-        let x = a.representative
-        let y = b.representative
-        let basis = (x.basis + y.basis).unique()
-        return basis.reduce(R.zero) { (sum, e) in sum + x.component(forBasisElement: e) * y.component(forBasisElement: e) }
-    }
-    
-    public static func * <H: _HomologyGroup>(b: H, a: Self) -> R where Self.A == H.A, Self.R == H.R, H.chainType == Descending {
-        return a * b
+public extension _HomologyGroup where Base == FreeModule<A, R>, chainType == Descending {
+    public func evaluate<CH: _HomologyGroup>(_ f: CH) -> R where CH.A == Dual<A>, CH.R == R, CH.chainType == Ascending {
+        return self.representative.evaluate(f.representative)
     }
 }
 

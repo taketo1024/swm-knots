@@ -29,7 +29,7 @@ public struct DualSimplicialCell: Hashable, CustomStringConvertible, CustomDebug
                 let Lk = SimplicialComplex(V, St.link(center), generate: true) // TODO no need to generate all
                 
                 // Lk ~ S^{dim - 1}
-                let H  = HomologyGroupInfo(Lk.chainComplex(type: IntegerNumber.self), dim: Lk.dim)
+                let H  = HomologyGroupInfo(Lk.chainComplex(type: IntegerNumber.self), degree: Lk.dim)
                 guard H.rank == 1 else {
                     fatalError("invalid dual-cell. center: \(center), components: \(components)")
                 }

@@ -28,17 +28,17 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
         typealias M = FreeModule<A, R>
         
         let offset = chainComplex.offset
-        let dim    = chainComplex.dim
+        let degree = chainComplex.degree
         
         let elims = { () -> (Int) -> MatrixElimination<R, Dynamic, Dynamic> in
-            let res = (offset - 1 ... dim + 1).map { chainComplex.boundaryMap($0).matrix.eliminate() }
+            let res = (offset - 1 ... degree + 1).map { chainComplex.boundaryMap($0).matrix.eliminate() }
             return { (i: Int) -> MatrixElimination<R, Dynamic, Dynamic> in
                 return res[i - offset + 1]
             }
         }()
         
-        let groups = (offset ... dim).map { (i) -> HomologyGroupInfo<chainType, A, R> in
-            HomologyGroupInfo(dim: i,
+        let groups = (offset ... degree).map { (i) -> HomologyGroupInfo<chainType, A, R> in
+            HomologyGroupInfo(degree: i,
                               basis: chainComplex.chainBasis(i),
                               elim1: elims(i),
                               elim2: chainComplex.descending ? elims(i + 1) : elims(i - 1))
@@ -48,12 +48,12 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
     }
     
     public var description: String {
-        return "{" + groupInfos.map{"\($0.dim):\($0)"}.joined(separator: ", ") + "}"
+        return "{" + groupInfos.map{"\($0.degree):\($0)"}.joined(separator: ", ") + "}"
     }
     
     public var detailDescription: String {
         return "{\n"
-            + groupInfos.map{"\t\($0.dim) : \($0.detailDescription)"}.joined(separator: ",\n")
+            + groupInfos.map{"\t\($0.degree) : \($0.detailDescription)"}.joined(separator: ",\n")
             + "\n}"
     }
 }
@@ -64,6 +64,6 @@ public extension _Homology where chainType == Descending, R == IntegerNumber {
     }
     
     public var eulerCharacteristic: Int {
-        return (0 ... chainComplex.dim).reduce(0){ $0 + (($1 % 2 == 0) ? 1 : -1) * bettiNumer(i: $1) }
+        return (0 ... chainComplex.degree).reduce(0){ $0 + (($1 % 2 == 0) ? 1 : -1) * bettiNumer(i: $1) }
     }
 }

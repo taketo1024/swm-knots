@@ -32,21 +32,21 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
         return (chainType.self == Descending.self)
     }
     
-    public var dim: Int {
+    public var degree: Int {
         return chain.count + offset - 1
     }
     
     public func chainBasis(_ i: Int) -> ChainBasis {
-        return (offset ... dim).contains(i) ? chain[i - offset].0 : []
+        return (offset ... degree).contains(i) ? chain[i - offset].0 : []
     }
     
     public func boundaryMap(_ i: Int) -> BoundaryMap {
         switch i {
-        case (offset ... dim):
+        case (offset ... degree):
             return chain[i - offset].1
             
-        case dim + 1 where descending:
-            let basis = chainBasis(dim)
+        case degree + 1 where descending:
+            let basis = chainBasis(degree)
             return BoundaryMap(domainBasis: [],
                                codomainBasis: basis,
                                matrix: DynamicMatrix<R>(rows: basis.count, cols: 0, grid: []))
@@ -66,4 +66,3 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
         return chain.description
     }
 }
-
