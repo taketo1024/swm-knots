@@ -43,7 +43,7 @@ public extension GeometricComplex {
     }
     
     private func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [Cell], _ to : [Cell]) -> DynamicMatrix<R> {
-        let toIndex = Dictionary(to.enumerated().map{($1, $0)}) // [toCell: toIndex]
+        let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toCell: toIndex]
         
         let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
             return boundary(ofCell: s).map{ (e: (Cell, R)) -> MatrixComponent<R> in

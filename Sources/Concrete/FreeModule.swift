@@ -16,7 +16,7 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module {
         }
         self.basis = basis
         self.comps = components
-        self.table = Dictionary(Array(zip(basis, components)))
+        self.table = Dictionary(pairs: zip(basis, components))
     }
     
     public init(_ table: [A : R]) {
