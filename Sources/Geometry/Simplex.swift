@@ -114,8 +114,8 @@ public extension Vertex {
     }
 }
 
-public typealias SimplicialChain<R: Ring>     = FreeModule<Simplex, R>
-public typealias DualSimplicialChain<R: Ring> = FreeModule<Dual<Simplex>, R>
+public typealias SimplicialChain<R: Ring>   = FreeModule<Simplex, R>
+public typealias SimplicialCochain<R: Ring> = FreeModule<Dual<Simplex>, R>
 
 public extension SimplicialChain where A == Simplex {
     public func boundary() -> SimplicialChain<R> {
@@ -124,5 +124,43 @@ public extension SimplicialChain where A == Simplex {
             return res + r * s.boundary()
         }
     }
+    
+    public func cap(_ d: SimplicialCochain<R>) -> SimplicialChain<R> {
+        typealias C = SimplicialChain<R>
+        
+        return self.reduce(C.zero) { (res, next) -> C in
+            let (s, r1) = next
+            let eval = d.reduce(C.zero) { (res, next) -> C in
+                let (f, r2) = next
+                let (i, j) = (s.dim, f.base.dim)
+                assert(i >= j)
+                
+                let (s1, s2) = (Simplex(s.vertices[0 ... j]), Simplex(s.vertices[j ... i]))
+                return (s1 == f.base) ? res + r2 * SimplicialChain<R>(s2) : res
+            }
+            return res + r1 * eval
+        }
+    }
 }
 
+public extension SimplicialCochain where A == Dual<Simplex> {
+    public func cup(_ f: SimplicialCochain<R>) -> SimplicialCochain<R> {
+        typealias D = Dual<Simplex>
+        let pairs = self.flatMap{ (d1: D, r1: R) -> [(D, R)] in
+            f.flatMap{ (d2: D, r2: R) -> (D, R)? in
+                let (s1, s2) = (d1.base, d2.base)
+                let s = Simplex(s1.vSet.union(s2.vSet))
+                if (s1.vertices.last! == s2.vertices.first!) && (s.vertices == s1.vertices + s2.vertices.dropFirst()) {
+                    return (Dual(s), r1 * r2)
+                } else {
+                    return nil
+                }
+            }
+        }
+        return SimplicialCochain<R>(Dictionary(pairs: pairs))
+    }
+    
+    public func cap(_ z: SimplicialChain<R>) -> SimplicialChain<R> {
+        return z.cap(self)
+    }
+}

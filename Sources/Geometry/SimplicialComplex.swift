@@ -159,7 +159,7 @@ public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
     }
     
     let cells = indexPairs.map { (list: [(Int, Int)]) -> Simplex in
-        let indices = list.map{ (i, j) in i * n2 + j }
+        let indices = list.map{ (i, j) in i + j * n1 }
         return Simplex(V, indices)
     }.unique()
     

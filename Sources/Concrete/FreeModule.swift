@@ -144,7 +144,14 @@ public extension FreeModule {
     public func evaluate(_ f: FreeModule<Dual<A>, R>) -> R {
         return self.reduce(R.zero) { (res, next) -> R in
             let (a, r) = next
-            return res + f.component(forBasisElement: Dual(a)) * r
+            return res + r * f.component(forBasisElement: Dual(a))
+        }
+    }
+    
+    public func evaluate<B: FreeModuleBase>(_ b: FreeModule<B, R>) -> R where A == Dual<B> {
+        return b.reduce(R.zero) { (res, next) -> R in
+            let (a, r) = next
+            return res + r * self.component(forBasisElement: Dual(a))
         }
     }
 }
