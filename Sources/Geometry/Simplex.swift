@@ -100,17 +100,6 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
     }
 }
 
-public typealias SimplicialChain<R: Ring> = FreeModule<Simplex, R>
-
-public extension SimplicialChain where A == Simplex {
-    public func boundary() -> SimplicialChain<R> {
-        return self.reduce(SimplicialChain<R>.zero) { (res, next) -> SimplicialChain<R> in
-            let (s, r) = next
-            return res + r * s.boundary()
-        }
-    }
-}
-
 public extension Vertex {
     public func join(_ s: Simplex) -> Simplex {
         return Simplex([self] + s.vertices)
@@ -124,3 +113,16 @@ public extension Vertex {
         })
     }
 }
+
+public typealias SimplicialChain<R: Ring>     = FreeModule<Simplex, R>
+public typealias DualSimplicialChain<R: Ring> = FreeModule<Dual<Simplex>, R>
+
+public extension SimplicialChain where A == Simplex {
+    public func boundary() -> SimplicialChain<R> {
+        return self.reduce(SimplicialChain<R>.zero) { (res, next) -> SimplicialChain<R> in
+            let (s, r) = next
+            return res + r * s.boundary()
+        }
+    }
+}
+
