@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol GeometricComplex {
+public protocol GeometricComplex: CustomStringConvertible, CustomDebugStringConvertible {
     associatedtype Cell: FreeModuleBase
     
     var dim: Int {get}
@@ -70,6 +70,19 @@ public extension GeometricComplex {
     public func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<Cell, R> {
         let chain = (0 ... dim).map{ (i) -> ([Cell], FreeModuleHom<Cell, R>) in (allCells(ofDim: i), coboundaryMap(i)) }
         return CochainComplex<Cell, R>(chain)
+    }
+    
+    public var description: String {
+        return "\(type(of: self))(dim: \(dim))"
+    }
+    
+    public var debugDescription: String {
+        return "\(description) {\n" +
+            (0 ... dim)
+                .map{ (i) -> (Int, [Cell]) in (i, allCells(ofDim: i)) }
+                .map{ (i, cells) -> String in "\t\(i): " + cells.map{"\($0)"}.joined(separator: ", ")}
+                .joined(separator: "\n")
+            + "\n}"
     }
 }
 

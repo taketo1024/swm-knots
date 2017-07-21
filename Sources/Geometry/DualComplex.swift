@@ -14,12 +14,15 @@ public struct DualSimplicialCell: Hashable, CustomStringConvertible, CustomDebug
     public let center: Vertex
     public let chain: SimplicialChain<IntegerNumber> // chain of SdK
     
-    public init(dim: Int, base: Simplex, center: Vertex, components: [Simplex]) {
+    public init(dim: Int, base: Simplex, center: Vertex, chain: SimplicialChain<IntegerNumber>) {
         self.dim = dim
         self.base = base
         self.center = center
-        
-        self.chain = { () -> SimplicialChain<IntegerNumber> in
+        self.chain = chain
+    }
+    
+    public init(dim: Int, base: Simplex, center: Vertex, components: [Simplex]) {
+        let chain = { () -> SimplicialChain<IntegerNumber> in
             if dim > 1 {
                 let V  = center.vertexSet // VSet of SdK
                 let St = SimplicialComplex(V, components)
@@ -28,7 +31,7 @@ public struct DualSimplicialCell: Hashable, CustomStringConvertible, CustomDebug
                 // Lk ~ S^{dim - 1}
                 let H  = HomologyGroupInfo(Lk.chainComplex(type: IntegerNumber.self), dim: Lk.dim)
                 guard H.rank == 1 else {
-                    fatalError("invalid star \(center) : \(components)")
+                    fatalError("invalid dual-cell. center: \(center), components: \(components)")
                 }
                 
                 let z = H.summands[0].generator
@@ -36,7 +39,7 @@ public struct DualSimplicialCell: Hashable, CustomStringConvertible, CustomDebug
                 
             } else if dim == 1 {
                 guard components.count == 2 else {
-                    fatalError("invalid star \(center) : \(components)")
+                    fatalError("invalid dual-cell. center: \(center), components: \(components)")
                 }
                 
                 let pts = components.map{ $0.subtract(center) } // two boundary pts
@@ -47,6 +50,8 @@ public struct DualSimplicialCell: Hashable, CustomStringConvertible, CustomDebug
                 return FreeModule(components[0])
             }
         }()
+        
+        self.init(dim: dim, base: base, center: center, chain: chain)
     }
     
     public var hashValue: Int {
@@ -66,7 +71,7 @@ public struct DualSimplicialCell: Hashable, CustomStringConvertible, CustomDebug
     }
 }
 
-public final class DualSimplicialComplex: GeometricComplex, CustomStringConvertible, CustomDebugStringConvertible {
+public final class DualSimplicialComplex: GeometricComplex {
     public typealias Cell = DualSimplicialCell
     
     public let dim: Int
@@ -84,23 +89,21 @@ public final class DualSimplicialComplex: GeometricComplex, CustomStringConverti
     
     public convenience init(_ baseComplex: SimplicialComplex) {
         let K = baseComplex
-        let SdK = K.barycentricSubdivision()
         let n = K.dim
         
+        let SdK = K.barycentricSubdivision()
+        let SdV = SdK.vertexSet
+        
         let cells = (0 ... n).reversed().map { (i) -> [DualSimplicialCell] in
-            return K.allCells(ofDim: i).map { (s0: Simplex) -> DualSimplicialCell in
-                let b0 = SdK.vertexSet.barycenterOf(s0)!
-                
-                let star   = K.star(s0)
-                let bcells = SdK.allCells(ofDim: n - i) // comps of dual-cells, codim: i
-                
-                // take all cells in SdK that contain both bcenters of s and t.
-                let comps = star.flatMap{ (s1: Simplex) -> [Simplex] in
-                    let b1 = SdK.vertexSet.barycenterOf(s1)!
-                    return bcells.filter{ $0.contains(b0) && $0.contains(b1) }
+            let bcells = SdK.allCells(ofDim: n - i) // comps of dual-cells, codim: i
+            
+            return K.allCells(ofDim: i).map { (s: Simplex) -> DualSimplicialCell in
+                let b = SdV.barycenterOf(s)!
+                let comps = bcells.filter{ (bcell) in
+                    bcell.contains(b)
+                        && bcell.vertices.forAll{ SdV.simplex(forBarycenter: $0)!.contains(s) }
                 }
-                
-                return DualSimplicialCell(dim: n - i, base: s0, center: b0, components: comps)
+                return DualSimplicialCell(dim: n - i, base: s, center: b, components: comps)
             }
         }
         self.init(K, SdK, cells)
@@ -115,16 +118,21 @@ public final class DualSimplicialComplex: GeometricComplex, CustomStringConverti
         return (0...dim).contains(i) ? cellList[i] : []
     }
     
-    public func boundary<R: Ring>(ofCell s: Cell) -> [(Cell, R)] {
-        fatalError()
-    }
-    
-    public var description: String {
-        return "DualComplex"
-    }
-    
-    public var debugDescription: String {
-        return "DualComplex:{\n\t" + cellList.map{ (cells) in cells.map{$0.debugDescription}.joined(separator: ",\n\t")}.joined(separator: ",\n\n\t") + "\n}"
+    public func boundary<R: Ring>(ofCell s: DualSimplicialCell) -> FreeModule<DualSimplicialCell, R> {
+        let z = s.chain.boundary()
+        let dCells = allCells(ofDim: s.dim - 1)
+        
+        let pairs = baseComplex.cofaces(ofCell: s.base).map{ (t: Simplex) -> (DualSimplicialCell, R) in
+            let b = barycentricSubdivision.vertexSet.barycenterOf(t)!
+            let dCell = dCells.first{ $0.center == b}!
+            
+            let t0 = dCell.chain.basis[0] // take any simplex to detect orientation
+            let e = (dCell.chain.component(forBasisElement: t0) == z.component(forBasisElement: t0)) ? 1 : -1
+            
+            return (dCell, R(intValue: e))
+        }
+        
+        return FreeModule(Dictionary(pairs: pairs))
     }
 }
 
