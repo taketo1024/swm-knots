@@ -17,7 +17,7 @@ public protocol GeometricComplex {
     func allCells(ascending: Bool) -> [Cell]
     func skeleton(_ dim: Int) -> Self
     
-    func boundary<R: Ring>(ofCell: Cell) -> [(Cell, R)] // override point
+    func boundary<R: Ring>(ofCell: Cell) -> FreeModule<Cell, R> // override point
     func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, R>
     func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, R>
     

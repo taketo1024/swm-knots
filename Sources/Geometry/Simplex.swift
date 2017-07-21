@@ -79,6 +79,14 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
         return Simplex(self.vSet.subtracting([v]))
     }
     
+    public func boundary<R: Ring>() -> SimplicialChain<R> {
+        let values = faces().enumerated().map { (i, t) -> (Simplex, R) in
+            let value: R = (i % 2 == 0) ? 1 : -1
+            return (t, value)
+        }
+        return SimplicialChain(Dictionary(pairs: values))
+    }
+    
     public var hashValue: Int {
         return id.hashValue
     }
@@ -93,6 +101,15 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
 }
 
 public typealias SimplicialChain<R: Ring> = FreeModule<Simplex, R>
+
+public extension SimplicialChain where A == Simplex {
+    public func boundary() -> SimplicialChain<R> {
+        return self.reduce(SimplicialChain<R>.zero) { (res, next) -> SimplicialChain<R> in
+            let (s, r) = next
+            return res + r * s.boundary()
+        }
+    }
+}
 
 public extension Vertex {
     public func join(_ s: Simplex) -> Simplex {

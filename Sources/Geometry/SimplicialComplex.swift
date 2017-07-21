@@ -77,11 +77,12 @@ public final class SimplicialComplex: GeometricComplex {
         return star(s).map{ $0.subtract(s) }.filter{ $0.dim >= 0 }
     }
     
-    public func boundary<R: Ring>(ofCell s: Cell) -> [(Cell, R)] {
-        return s.faces().enumerated().map { (k, t) -> (Cell, R) in
-            let value: R = (k % 2 == 0) ? 1 : -1
-            return (t, value)
-        }
+    public func boundary<R: Ring>(ofCell s: Simplex) -> FreeModule<Simplex, R> {
+        return s.boundary()
+    }
+    
+    public func cofaces(ofCell s: Simplex) -> [Simplex] {
+        return allCells(ofDim: s.dim + 1).filter{ $0.contains(s) }
     }
 }
 

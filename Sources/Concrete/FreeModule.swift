@@ -37,7 +37,6 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, Sequence {
     public func makeIterator() -> DictionaryIterator<A, R> {
         return table.makeIterator()
     }
-
     
     public func component(forBasisElement a: A) -> R {
         return table[a] ?? R.zero
@@ -45,6 +44,14 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, Sequence {
     
     public func components(forBasis basis: [A]) -> [R] {
         return basis.map{ component(forBasisElement: $0) }
+    }
+    
+    public func map<A2: FreeModuleBase, R2: Ring>(_ f: (A, R) -> (A2, R2)) -> FreeModule<A2, R2> {
+        return FreeModule<A2, R2>(table.mapPairs(transform: f))
+    }
+    
+    public func mapComponents<R2: Ring>(_ f: (R) -> R2) -> FreeModule<A, R2> {
+        return map{ ($0.0, f($0.1)) }
     }
     
     public static func == (a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
