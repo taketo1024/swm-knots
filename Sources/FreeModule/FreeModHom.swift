@@ -19,14 +19,11 @@ public struct FreeModuleHom<A: FreeModuleBase, _R: Ring>: ModuleHom {
         self.matrix = matrix.asDynamic
     }
     
-    // TODO very slow
     public func appliedTo(_ m: M) -> M {
-        let comps = (0 ..< codomainBasis.count).map{ i -> R in
-            (0 ..< domainBasis.count).reduce(R.zero){ (res, j) -> R in
-                res + m[domainBasis[j]] * matrix[i, j]
-            }
+        let v: ColVector<R, Dynamic> = ColVector(rows: domainBasis.count) {(i, _) -> R in
+            m[domainBasis[i]]
         }
-        return M(basis: codomainBasis, components: comps)
+        return M(basis: codomainBasis, components: (matrix * v).colArray(0))
     }
     
     public static var zero: FreeModuleHom<A, R> {
@@ -44,15 +41,54 @@ public struct FreeModuleHom<A: FreeModuleBase, _R: Ring>: ModuleHom {
     }
     
     public static func +(f: FreeModuleHom<A, R>, g: FreeModuleHom<A, R>) -> FreeModuleHom<A, R> {
+        // case: the dom/codom of f and g are same.
+        if f.domainBasis == g.domainBasis && f.codomainBasis == g.codomainBasis {
+            return FreeModuleHom(domainBasis: f.domainBasis, codomainBasis: f.codomainBasis, matrix: f.matrix + g.matrix)
+        }
+        
+        // case: the dom/codom of f and g are disjoint (direct sum)
+        if Set(f.domainBasis).isDisjoint(with: g.domainBasis) && Set(f.codomainBasis).isDisjoint(with: g.codomainBasis) {
+            let (n1, m1) = (f.codomainBasis.count, f.domainBasis.count)
+            let (n2, m2) = (g.codomainBasis.count, g.domainBasis.count)
+            let matrix = DynamicMatrix<R>(rows: n1 + n2, cols: m1 + m2) { (i, j) -> R in
+                if i < n1 && j < m1 {
+                    return f.matrix[i, j]
+                } else if i >= n1 && j >= m1 {
+                    return g.matrix[i - n1, j - m1]
+                } else {
+                    return R.zero
+                }
+            }
+            
+            return FreeModuleHom(domainBasis: f.domainBasis + g.domainBasis,
+                                 codomainBasis: f.codomainBasis + g.codomainBasis,
+                                 matrix: matrix)
+        }
+        
+        // general case.
         let domain =   (f.domainBasis   + g.domainBasis  ).unique()
         let codomain = (f.codomainBasis + g.codomainBasis).unique()
         
-        // TODO very inefficient
+        let valMap = {(f: FreeModuleHom<A, R>) -> ((A, A) -> R) in
+            let domainIndex:   [A: Int] = Dictionary(pairs: f.domainBasis  .enumerated().map{ ($1, $0) })
+            let codomainIndex: [A: Int] = Dictionary(pairs: f.codomainBasis.enumerated().map{ ($1, $0) })
+            return {(from: A, to: A) -> R in
+                if let i = codomainIndex[to], let j = domainIndex[from] {
+                    return f.matrix[i, j]
+                } else {
+                    return R.zero
+                }
+            }
+        }
+        
+        let fValMap = valMap(f)
+        let gValMap = valMap(g)
+        
         let matrix = DynamicMatrix<R>(rows: codomain.count, cols: domain.count) { (i, j) -> R in
             let (from, to) = (domain[j], codomain[i])
-            let x = M(from)
-            return (f.appliedTo(x) + g.appliedTo(x))[to]
+            return fValMap(from, to) + gValMap(from, to)
         }
+        
         return FreeModuleHom(domainBasis: domain, codomainBasis: codomain, matrix: matrix)
     }
     
