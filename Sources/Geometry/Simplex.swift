@@ -80,11 +80,11 @@ public struct Simplex: FreeModuleBase, CustomStringConvertible {
     }
     
     public func boundary<R: Ring>() -> SimplicialChain<R> {
-        let values = faces().enumerated().map { (i, t) -> (Simplex, R) in
+        let values: [(Simplex, R)] = faces().enumerated().map { (i, t) -> (Simplex, R) in
             let value: R = (i % 2 == 0) ? 1 : -1
             return (t, value)
         }
-        return SimplicialChain(Dictionary(pairs: values))
+        return SimplicialChain(values)
     }
     
     public var hashValue: Int {
@@ -106,10 +106,10 @@ public extension Vertex {
     }
     
     public func join<R: Ring>(_ chain: SimplicialChain<R>) -> SimplicialChain<R> {
-        return SimplicialChain(chain.table.mapPairs { (s, r) -> (Simplex, R) in
+        return SimplicialChain(chain.basis.map{ (s) -> (Simplex, R) in
             let t = self.join(s)
             let sgn = (t.vertices.index(of: self)! % 2 == 0) ? R.identity : -R.identity
-            return (t, sgn * r)
+            return (t, sgn * chain[s])
         })
     }
 }
@@ -163,7 +163,7 @@ public extension SimplicialCochain where A == Dual<Simplex> {
                 }
             }
         }
-        return SimplicialCochain<R>(Dictionary(pairs: pairs))
+        return SimplicialCochain<R>(pairs)
     }
     
     public func cap(_ z: SimplicialChain<R>) -> SimplicialChain<R> {

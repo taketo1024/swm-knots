@@ -31,7 +31,7 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
     public func appliedTo(_ m: M) -> M {
         let comps = (0 ..< codomainBasis.count).map{ i -> R in
             (0 ..< domainBasis.count).reduce(R.zero){ (res, j) -> R in
-                res + m.component(forBasisElement: domainBasis[j]) * matrix[i, j]
+                res + m[domainBasis[j]] * matrix[i, j]
             }
         }
         return M(basis: codomainBasis, components: comps)
@@ -41,7 +41,7 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
         return DynamicMatrix<R>(rows: codomainBasis.count, cols: domainBasis.count) { (i, j) -> R in
             let from = domainBasis[j]
             let to  = codomainBasis[i]
-            return mapping[from]?.component(forBasisElement: to) ?? 0
+            return mapping[from]?[to] ?? 0
         }
     }
 }

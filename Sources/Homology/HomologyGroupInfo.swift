@@ -122,7 +122,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
     }
     
     public func components(_ z: FreeModule<A, R>) -> [R] {
-        let chainComps = z.components(forBasis: chainBasis)
+        let chainComps = z.components(correspondingTo: chainBasis)
         let cycleComps = (transitionMatrix * ColVector(rows: chainComps.count, grid: chainComps)).colArray(0)
         
         let k = cycleComps.count // k = (null-part) + (tor-part) + (free-part)

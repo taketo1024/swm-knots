@@ -127,12 +127,12 @@ public final class DualSimplicialComplex: GeometricComplex {
             let dCell = dCells.first{ $0.center == b}!
             
             let t0 = dCell.chain.basis[0] // take any simplex to detect orientation
-            let e = (dCell.chain.component(forBasisElement: t0) == z.component(forBasisElement: t0)) ? 1 : -1
+            let e = (dCell.chain[t0] == z[t0]) ? 1 : -1
             
             return (dCell, R(intValue: e))
         }
         
-        return FreeModule(Dictionary(pairs: pairs))
+        return FreeModule(pairs)
     }
 }
 
