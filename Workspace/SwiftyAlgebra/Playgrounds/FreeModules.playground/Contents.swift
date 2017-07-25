@@ -13,13 +13,13 @@ typealias M = FreeModule<String, Z>
 
 let domain   = ["a", "b", "c", "d"]
 let codomain = ["x", "y", "z"]
-let map = [
+let matrix = Matrix<Z, _3, _4>(
     1, 2, 1,  1,
     2, 0, 2, -1,
     1, 3, 3,  2
-]
+)
 
-let f = FreeModuleHom(domainBasis: domain, codomainBasis: codomain, mapping: map)
+let f = FreeModuleHom(domainBasis: domain, codomainBasis: codomain, matrix: matrix)
 
 let a = M("a")
 let b = M("b")

@@ -1,6 +1,7 @@
 import Foundation
 
-public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
+public struct FreeModuleHom<A: FreeModuleBase, _R: Ring>: ModuleHom {
+    public typealias R = _R
     public typealias M = FreeModule<A, R>
     public typealias Dom = M
     public typealias Codom = M
@@ -12,22 +13,17 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
     public let matrix: DynamicMatrix<R>
     
     // The root initializer
-    public init(domainBasis: Basis, codomainBasis: Basis, matrix: DynamicMatrix<R>) {
+    public init<n: _Int, m: _Int>(domainBasis: Basis, codomainBasis: Basis, matrix: Matrix<R, n, m>) {
         self.domainBasis = domainBasis
         self.codomainBasis = codomainBasis
-        self.matrix = matrix
-    }
-    
-    public init(domainBasis: Basis, codomainBasis: Basis, mapping: [R]) {
-        self.init(domainBasis: domainBasis,
-                  codomainBasis: codomainBasis,
-                  matrix: DynamicMatrix(rows: codomainBasis.count, cols: domainBasis.count, grid: mapping))
+        self.matrix = matrix.asDynamic
     }
     
     public static var zero: FreeModuleHom<A, R> {
-        return FreeModuleHom(domainBasis: [], codomainBasis: [], mapping: [])
+        return FreeModuleHom(domainBasis: [], codomainBasis: [], matrix: Matrix<R, _0, _0>.zero)
     }
     
+    // TODO very slow
     public func appliedTo(_ m: M) -> M {
         let comps = (0 ..< codomainBasis.count).map{ i -> R in
             (0 ..< domainBasis.count).reduce(R.zero){ (res, j) -> R in
@@ -37,11 +33,45 @@ public struct FreeModuleHom<A: FreeModuleBase, R: Ring>: ModuleHom {
         return M(basis: codomainBasis, components: comps)
     }
     
-    private static func map2matrix(_ domainBasis: Basis, _ codomainBasis: Basis, _ mapping: [A : M]) -> DynamicMatrix<R> {
-        return DynamicMatrix<R>(rows: codomainBasis.count, cols: domainBasis.count) { (i, j) -> R in
-            let from = domainBasis[j]
-            let to  = codomainBasis[i]
-            return mapping[from]?[to] ?? 0
+    public static func ==(lhs: FreeModuleHom<A, R>, rhs: FreeModuleHom<A, R>) -> Bool {
+         // TODO this is incomplete. should not regard order of bases.
+        return lhs.domainBasis == rhs.domainBasis && lhs.codomainBasis == rhs.codomainBasis && lhs.matrix == rhs.matrix
+    }
+    
+    public static func +(f: FreeModuleHom<A, R>, g: FreeModuleHom<A, R>) -> FreeModuleHom<A, R> {
+        let domain =   (f.domainBasis   + g.domainBasis  ).unique()
+        let codomain = (f.codomainBasis + g.codomainBasis).unique()
+        
+        // TODO very inefficient
+        let matrix = DynamicMatrix<R>(rows: codomain.count, cols: domain.count) { (i, j) -> R in
+            let (from, to) = (domain[j], codomain[i])
+            let x = M(from)
+            return (f.appliedTo(x) + g.appliedTo(x))[to]
         }
+        return FreeModuleHom(domainBasis: domain, codomainBasis: codomain, matrix: matrix)
+    }
+    
+    public prefix static func -(f: FreeModuleHom<A, R>) -> FreeModuleHom<A, R> {
+        return FreeModuleHom(domainBasis: f.domainBasis, codomainBasis: f.codomainBasis, matrix: -f.matrix)
+    }
+    
+    public static func *(r: R, f: FreeModuleHom<A, R>) -> FreeModuleHom<A, R> {
+        return FreeModuleHom(domainBasis: f.domainBasis, codomainBasis: f.codomainBasis, matrix: r * f.matrix)
+    }
+    
+    public static func *(f: FreeModuleHom<A, R>, r: R) -> FreeModuleHom<A, R> {
+        return FreeModuleHom(domainBasis: f.domainBasis, codomainBasis: f.codomainBasis, matrix: f.matrix * r)
+    }
+    
+    public var hashValue: Int {
+        return 0 // TODO
+    }
+    
+    public var description: String {
+        return "FreeModuleHom"
+    }
+    
+    public static var symbol: String {
+        return "Hom_{\(R.symbol)}"
     }
 }

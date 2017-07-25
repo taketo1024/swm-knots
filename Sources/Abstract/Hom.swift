@@ -7,7 +7,7 @@ public protocol Hom {
     func appliedTo(_ x: Dom) -> Codom
 }
 
-public protocol ModuleHom {
+public protocol ModuleHom: Hom, Module {
     associatedtype Dom : Module
     associatedtype Codom : Module
 }
