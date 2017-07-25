@@ -54,4 +54,12 @@ extension Sequence {
         }
         return result
     }
+    
+    func pairs<S: Sequence>(with s2: S) -> [(Self.Iterator.Element, S.Iterator.Element)] {
+        typealias X = Self.Iterator.Element
+        typealias Y = S.Iterator.Element
+        return self.flatMap{ (x) -> [(X, Y)] in
+            s2.map{ (y) -> (X, Y) in (x, y) }
+        }
+    }
 }
