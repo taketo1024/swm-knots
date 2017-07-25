@@ -151,19 +151,20 @@ public extension SimplicialChain where A == Simplex {
 public extension SimplicialCochain where A == Dual<Simplex> {
     public func cup(_ f: SimplicialCochain<R>) -> SimplicialCochain<R> {
         typealias D = Dual<Simplex>
-        let pairs = self.flatMap{ (d1: D, r1: R) -> [(D, R)] in
-            f.flatMap{ (d2: D, r2: R) -> (D, R)? in
-                let (s1, s2) = (d1.base, d2.base)
-                let s = Simplex(s1.vSet.union(s2.vSet))
-                if (s1.vertices.last! == s2.vertices.first!) && (s.vertices == s1.vertices + s2.vertices.dropFirst()) {
-                    let e = R(intValue: -1.pow(d1.base.dim * d2.base.dim))
-                    return (Dual(s), e * r1 * r2)
-                } else {
-                    return nil
-                }
+        let pairs = self.basis.pairs(with: f.basis)
+        let elements: [(D, R)] = pairs.flatMap{ (d1, d2) -> (D, R)? in
+            let (s1, s2) = (d1.base, d2.base)
+            let (n1, n2) = (s1.dim, s2.dim)
+            
+            let s = Simplex(s1.vSet.union(s2.vSet))
+            if (s1.vertices.last! == s2.vertices.first!) && (s.vertices == s1.vertices + s2.vertices.dropFirst()) {
+                let e = R(intValue: -1.pow(n1 * n2))
+                return (Dual(s), e * self[d1] * f[d2])
+            } else {
+                return nil
             }
         }
-        return SimplicialCochain<R>(pairs)
+        return SimplicialCochain<R>(elements)
     }
     
     public func cap(_ z: SimplicialChain<R>) -> SimplicialChain<R> {

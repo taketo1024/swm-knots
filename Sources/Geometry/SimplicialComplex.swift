@@ -132,9 +132,7 @@ public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
     let (n1, n2) = (K1.vertexSet.vertices.count, K2.vertexSet.vertices.count)
     let V = VertexSet(number: n1 * n2)
     
-    let (S1, S2) = (K1.maximalCells, K2.maximalCells)
-    let simplexPairs: [(Simplex, Simplex)] = S1.flatMap{ s in S2.map{ t in (s, t) } }
-    
+    let simplexPairs = K1.maximalCells.pairs(with: K2.maximalCells)
     let indexPairs: [[(Int, Int)]] = simplexPairs.flatMap{(s, t) -> [[(Int, Int)]] in
         (0 ... s.dim + t.dim).flatMap{ k -> [[(Int, Int)]] in
             // list of ordered indices [(i0 <= i1 <= ... <= ik), ... ]
