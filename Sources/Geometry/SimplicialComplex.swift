@@ -110,7 +110,7 @@ public extension SimplicialComplex {
     }
     
     static func torus(dim: Int) -> SimplicialComplex {
-        return (1 ..< dim).reduce(SimplicialComplex.circle()) { (r, _) in r * SimplicialComplex.circle() }
+        return (1 ..< dim).reduce(SimplicialComplex.circle()) { (r, _) in r ⨯ SimplicialComplex.circle() }
     }
 }
 
@@ -128,7 +128,7 @@ public func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
 }
 
 // product complex
-public func *(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
+public func ⨯(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
     let (n1, n2) = (K1.vertexSet.vertices.count, K2.vertexSet.vertices.count)
     let V = VertexSet(number: n1 * n2)
     
