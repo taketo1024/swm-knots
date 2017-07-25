@@ -147,3 +147,35 @@ public extension FreeModule {
         }
     }
 }
+
+public struct Tensor<A: FreeModuleBase, B: FreeModuleBase>: FreeModuleBase, CustomStringConvertible {
+    public let _1: A
+    public let _2: B
+    public init(_ a: A, _ b: B) {
+        _1 = a
+        _2 = b
+    }
+    
+    public var hashValue: Int {
+        return _1.hashValue &* 31 &+ _2.hashValue % 31
+    }
+    
+    public static func ==(t1: Tensor<A, B>, t2: Tensor<A, B>) -> Bool {
+        return t1._1 == t2._1 && t1._2 == t2._2
+    }
+    
+    public var description: String {
+        return "\(_1)⊗\(_2)"
+    }
+}
+
+public func ⊗<A: FreeModuleBase, B: FreeModuleBase>(a: A, b: B) -> Tensor<A, B> {
+    return Tensor(a, b)
+}
+
+public func ⊗<A: FreeModuleBase, B: FreeModuleBase, R: Ring>(x: FreeModule<A, R>, y: FreeModule<B, R>) -> FreeModule<Tensor<A, B>, R> {
+    let elements = x.basis.pairs(with: y.basis).map{ (a, b) -> (Tensor<A, B>, R) in
+        return (a⊗b, x[a] * y[b])
+    }
+    return FreeModule(elements)
+}

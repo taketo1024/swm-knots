@@ -6,6 +6,8 @@
 //  Copyright © 2017年 Taketo Sano. All rights reserved.
 //
 
+// https://en.wikipedia.org/wiki/Mathematical_operators_and_symbols_in_Unicode
+
 import Foundation
 
 precedencegroup ExponentiativePrecedence {
@@ -18,3 +20,4 @@ infix operator **: ExponentiativePrecedence
 infix operator ∩: MultiplicationPrecedence
 infix operator ∪: MultiplicationPrecedence
 infix operator ⨯: MultiplicationPrecedence
+infix operator ⊗: MultiplicationPrecedence
