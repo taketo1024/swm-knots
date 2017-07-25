@@ -74,3 +74,13 @@ public extension AdditiveQuotientGroup where Base == Sub.Super {
         return "\(Base.symbol)/\(Sub.symbol)"
     }
 }
+
+
+public extension Sequence where Iterator.Element: AdditiveGroup {
+    public func sumAll() -> Iterator.Element {
+        typealias G = Iterator.Element
+        return self.reduce(G.zero) {
+            return $0 + $1
+        }
+    }
+}

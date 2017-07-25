@@ -66,3 +66,23 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
         return chain.description
     }
 }
+
+public func ⊗<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: Ring>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Tensor<A, B>, R> {
+    typealias NewChainBasis = [Tensor<A, B>]
+    typealias NewBoundaryMap = FreeModuleHom<Tensor<A, B>, R>
+    
+    let offset = C1.offset + C2.offset
+    let degree = C1.degree + C2.degree
+    let chain = (offset ... degree).map{ (k) -> NewBoundaryMap in
+        (offset ... k).map { (i) -> NewBoundaryMap in
+            let (d1, d2) = (C1.boundaryMap(i), C2.boundaryMap(k - i))
+            let (I1, I2) = (FreeModuleHom<A, R>.identity(basis: d1.domainBasis), FreeModuleHom<B, R>.identity(basis: d2.domainBasis))
+            let e = R(intValue: (-1).pow(i))
+            return d1 ⊗ I2 + e * I1 ⊗ d2
+        }.sumAll()
+    }
+    
+    return _ChainComplex<chainType, Tensor<A, B>, R>(chain.map{($0.domainBasis, $0)})
+}
+
+
