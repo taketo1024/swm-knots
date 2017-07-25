@@ -157,7 +157,7 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
             }
         }
         
-        let cand: (Int, Int)? = { () -> (Int, Int)? in
+        func nextPos(_ from: (Int, Int)) -> (Int, Int)? {
             switch direction {
             case .Rows:
                 switch (from.0 + 1, from.1 + 1, rowRange.upperBound, colRange.upperBound, proceedLines) {
@@ -196,19 +196,22 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
                     return nil
                 }
             }
-        }()
-        
-        guard let (i, j) = cand else {
-            return nil
         }
         
-        let a = self[i, j]
+        // MEMO: Tail Recursion Optimization doen't seem to work when return-type is optional.
         
-        if !nonZeroOnly || a != R.zero {
-            return (i, j, a)
-        } else {
-            return next(from: (i, j), includeFirst: false, direction: direction, rowRange: rowRange, colRange: colRange, proceedLines: proceedLines, nonZeroOnly: nonZeroOnly)
+        var next: (Int, Int) = from
+        while let (i, j) = nextPos(next) {
+            let a = self[i, j]
+            
+            if !nonZeroOnly || a != R.zero {
+                return (i, j, a)
+            } else {
+                next = (i, j)
+            }
         }
+        
+        return nil
     }
     
     public func determinant() -> R {
