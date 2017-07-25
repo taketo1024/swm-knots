@@ -217,8 +217,9 @@
 				146905B01EE4F37400153686 /* Dynamic */,
 				1424F4E71EB997780052581F /* Numbers */,
 				144CFE481EEA88F20023E6EC /* Matrix */,
-				1424F4DF1EB997780052581F /* Concrete */,
-				1424F4E41EB997780052581F /* Morphisms */,
+				14A365721F27636600D23C87 /* FreeModule */,
+				14A365731F27638300D23C87 /* Polynomial */,
+				1424F4DF1EB997780052581F /* Permutation */,
 				14929C9B1ED9C798006ACAC5 /* Geometry */,
 				147D98071EBA0C0C00C736AC /* Homology */,
 				1424F4EF1EB997780052581F /* Tools */,
@@ -242,28 +243,17 @@
 				1424F4D91EB997780052581F /* EuclideanRing.swift */,
 				1424F4DA1EB997780052581F /* Field.swift */,
 				1424F4DC1EB997780052581F /* Module.swift */,
+				1424F4E61EB997780052581F /* Hom.swift */,
 			);
 			path = Abstract;
 			sourceTree = "<group>";
 		};
-		1424F4DF1EB997780052581F /* Concrete */ = {
+		1424F4DF1EB997780052581F /* Permutation */ = {
 			isa = PBXGroup;
 			children = (
 				1424F4E21EB997780052581F /* Permutation.swift */,
-				1424F4E31EB997780052581F /* Polynominal.swift */,
-				1424F4E01EB997780052581F /* FreeModule.swift */,
 			);
-			path = Concrete;
-			sourceTree = "<group>";
-		};
-		1424F4E41EB997780052581F /* Morphisms */ = {
-			isa = PBXGroup;
-			children = (
-				1424F4E61EB997780052581F /* Hom.swift */,
-				1424F4E51EB997780052581F /* FreeModHom.swift */,
-			);
-			name = Morphisms;
-			path = Hom;
+			path = Permutation;
 			sourceTree = "<group>";
 		};
 		1424F4E71EB997780052581F /* Numbers */ = {
@@ -380,6 +370,23 @@
 				146399731F191AD500A34CEE /* DualComplex.swift */,
 			);
 			path = Geometry;
+			sourceTree = "<group>";
+		};
+		14A365721F27636600D23C87 /* FreeModule */ = {
+			isa = PBXGroup;
+			children = (
+				1424F4E01EB997780052581F /* FreeModule.swift */,
+				1424F4E51EB997780052581F /* FreeModHom.swift */,
+			);
+			path = FreeModule;
+			sourceTree = "<group>";
+		};
+		14A365731F27638300D23C87 /* Polynomial */ = {
+			isa = PBXGroup;
+			children = (
+				1424F4E31EB997780052581F /* Polynominal.swift */,
+			);
+			path = Polynomial;
 			sourceTree = "<group>";
 		};
 		14B8E1601EEB9FBA0024EB2A /* Libraries */ = {
