@@ -44,7 +44,7 @@ public extension _HomologyGroup where Base == FreeModule<A, R> {
 }
 
 public extension _HomologyGroup where Base == FreeModule<A, R>, chainType == Descending {
-    public func evaluate<CH: _HomologyGroup>(_ f: CH) -> R where CH.A == Dual<A>, CH.R == R, CH.chainType == Ascending {
+    public func evaluate<CH: _HomologyGroup>(_ f: CH) -> R where CH.chainType == Ascending, CH.A == Dual<A>, CH.R == R {
         return self.representative.evaluate(f.representative)
     }
 }

@@ -136,7 +136,12 @@ public extension SimplicialChain where A == Simplex {
                 assert(i >= j)
                 
                 let (s1, s2) = (Simplex(s.vertices[0 ... j]), Simplex(s.vertices[j ... i]))
-                return (s1 == f.base) ? res + r2 * SimplicialChain<R>(s2) : res
+                if s1 == f.base {
+                    let e = R(intValue: -1.pow(s1.dim * s2.dim))
+                    return res + e * r2 * SimplicialChain<R>(s2)
+                } else {
+                    return res
+                }
             }
             return res + r1 * eval
         }
@@ -151,7 +156,8 @@ public extension SimplicialCochain where A == Dual<Simplex> {
                 let (s1, s2) = (d1.base, d2.base)
                 let s = Simplex(s1.vSet.union(s2.vSet))
                 if (s1.vertices.last! == s2.vertices.first!) && (s.vertices == s1.vertices + s2.vertices.dropFirst()) {
-                    return (Dual(s), r1 * r2)
+                    let e = R(intValue: -1.pow(d1.base.dim * d2.base.dim))
+                    return (Dual(s), e * r1 * r2)
                 } else {
                     return nil
                 }
@@ -164,3 +170,16 @@ public extension SimplicialCochain where A == Dual<Simplex> {
         return z.cap(self)
     }
 }
+
+public func ∩<R: Ring>(a: SimplicialChain<R>, b: SimplicialCochain<R>) -> SimplicialChain<R> {
+    return a.cap(b)
+}
+
+public func ∩<R: Ring>(a: SimplicialCochain<R>, b: SimplicialChain<R>) -> SimplicialChain<R> {
+    return a.cap(b)
+}
+
+public func ∪<R: Ring>(a: SimplicialCochain<R>, b: SimplicialCochain<R>) -> SimplicialCochain<R> {
+    return a.cup(b)
+}
+

@@ -1,12 +1,5 @@
 import Foundation
 
-precedencegroup ExponentiativePrecedence {
-    associativity: right
-    higherThan: MultiplicationPrecedence
-}
-
-infix operator **: ExponentiativePrecedence
-
 public protocol Monoid: SetType {
     static func * (a: Self, b: Self) -> Self
     static var identity: Self { get }
