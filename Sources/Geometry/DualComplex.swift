@@ -122,7 +122,7 @@ public final class DualSimplicialComplex: GeometricComplex {
         let z = s.chain.boundary()
         let dCells = allCells(ofDim: s.dim - 1)
         
-        let pairs = baseComplex.cofaces(ofCell: s.base).map{ (t: Simplex) -> (DualSimplicialCell, R) in
+        let elements = baseComplex.cofaces(ofCell: s.base).map{ (t: Simplex) -> (DualSimplicialCell, R) in
             let b = barycentricSubdivision.vertexSet.barycenterOf(t)!
             let dCell = dCells.first{ $0.center == b}!
             
@@ -132,7 +132,7 @@ public final class DualSimplicialComplex: GeometricComplex {
             return (dCell, R(intValue: e))
         }
         
-        return FreeModule(pairs)
+        return FreeModule(elements)
     }
 }
 

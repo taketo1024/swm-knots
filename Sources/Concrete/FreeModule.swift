@@ -6,32 +6,32 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, Sequence {
     public typealias R = _R
     
     public let basis: [A]
-    internal let components: [A: R]
+    internal let elements: [A: R]
     
     // root initializer
-    public init(basis: [A], components: [A : R]) {
+    public init(basis: [A], elements: [A : R]) {
         self.basis = basis
-        self.components = components
+        self.elements = elements
     }
     
     public init(basis: [A], components: [R]) {
         guard basis.count == components.count else {
             fatalError("#basis (\(basis.count)) != #components (\(components.count))")
         }
-        self.init(basis: basis, components: Dictionary(pairs: zip(basis, components)))
+        self.init(basis: basis, elements: Dictionary(pairs: zip(basis, components)))
     }
     
-    public init(_ pairs: [(A, R)]) {
-        self.init(basis: pairs.map{$0.0}, components: Dictionary(pairs: pairs))
+    public init(_ elements: [(A, R)]) {
+        self.init(basis: elements.map{$0.0}, elements: Dictionary(pairs: elements))
     }
     
     // generates a basis element
     public init(_ a: A) {
-        self.init(basis: [a], components: [1])
+        self.init([(a, 1)])
     }
     
     public subscript(a: A) -> R {
-        return components[a] ?? R.zero
+        return elements[a] ?? R.zero
     }
     
     public func components(correspondingTo list: [A]) -> [R] {
@@ -39,37 +39,37 @@ public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, Sequence {
     }
     
     public static var zero: FreeModule<A, R> {
-        return FreeModule<A, R>.init(basis: [], components: [])
+        return FreeModule<A, R>.init([])
     }
     
     public func mapComponents<R2: Ring>(_ f: (R) -> R2) -> FreeModule<A, R2> {
-        return FreeModule<A, R2>(basis: basis, components: components.mapValues(transform: f))
+        return FreeModule<A, R2>(basis: basis, elements: elements.mapValues(transform: f))
     }
     
     public func makeIterator() -> DictionaryIterator<A, R> {
-        return components.makeIterator()
+        return elements.makeIterator()
     }
     
     public static func == (a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
-        return a.components == b.components // bases need not be in same order.
+        return a.elements == b.elements // bases need not be in same order.
     }
     
     public static func + (a: FreeModule<A, R>, b: FreeModule<A, R>) -> FreeModule<A, R> {
         let basis = (a.basis + b.basis).unique()
-        let comps = Dictionary(keys: basis) { a[$0] + b[$0] }
-        return FreeModule<A, R>(basis: basis, components: comps)
+        let elements = Dictionary(keys: basis) { a[$0] + b[$0] }
+        return FreeModule<A, R>(basis: basis, elements: elements)
     }
     
     public static prefix func - (a: FreeModule<A, R>) -> FreeModule<A, R> {
-        return FreeModule<A, R>(basis: a.basis, components: a.components.mapValues{ -$0 })
+        return FreeModule<A, R>(basis: a.basis, elements: a.elements.mapValues{ -$0 })
     }
     
     public static func * (r: R, a: FreeModule<A, R>) -> FreeModule<A, R> {
-        return FreeModule<A, R>(basis: a.basis, components: a.components.mapValues{ r * $0 })
+        return FreeModule<A, R>(basis: a.basis, elements: a.elements.mapValues{ r * $0 })
     }
     
     public static func * (a: FreeModule<A, R>, r: R) -> FreeModule<A, R> {
-        return FreeModule<A, R>(basis: a.basis, components: a.components.mapValues{ $0 * r })
+        return FreeModule<A, R>(basis: a.basis, elements: a.elements.mapValues{ $0 * r })
     }
     
     public var description: String {
