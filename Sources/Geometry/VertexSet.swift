@@ -10,8 +10,6 @@ import Foundation
 
 public final class VertexSet: CustomStringConvertible {
     public private(set) var vertices: [Vertex]
-    private var bcenter2simplex: [Vertex : Simplex] = [:]
-    private var simplex2bcenter: [Simplex: Vertex ] = [:]
     
     public init() {
         self.vertices = []
@@ -22,29 +20,15 @@ public final class VertexSet: CustomStringConvertible {
         self.vertices = (0 ..< number).map { Vertex($0, "\(prefix)\($0)", self) }
     }
     
-    public func add(label: String? = nil, barycenterOf s: Simplex? = nil) -> Vertex {
+    public func add(label: String? = nil) -> Vertex {
         let index = vertices.count
         let v = Vertex(index, label ?? "v\(index)", self)
         vertices.append(v)
-        
-        if let s = s {
-            bcenter2simplex[v] = s
-            simplex2bcenter[s] = v
-        }
-        
         return v
     }
     
     public func vertex(at i: Int) -> Vertex {
         return vertices[i]
-    }
-    
-    public func barycenterOf(_ s: Simplex) -> Vertex? {
-        return simplex2bcenter[s]
-    }
-    
-    public func simplex(forBarycenter v: Vertex) -> Simplex? {
-        return bcenter2simplex[v]
     }
     
     public var description: String {

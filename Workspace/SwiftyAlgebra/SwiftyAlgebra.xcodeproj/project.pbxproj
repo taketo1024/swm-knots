@@ -41,6 +41,7 @@
 		1424F50F1EB997780052581F /* TPPolynomial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F41EB997780052581F /* TPPolynomial.swift */; };
 		1424F5111EB997780052581F /* optable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F71EB997780052581F /* optable.swift */; };
 		144AD2911EC21A4500E23890 /* Homology.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144AD2901EC21A4500E23890 /* Homology.swift */; };
+		144EC9EE1F286A93001BC4BC /* BarycentricSubdivision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144EC9ED1F286A93001BC4BC /* BarycentricSubdivision.swift */; };
 		145339C01EC7D67100F014F4 /* Ref.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145339BF1EC7D67100F014F4 /* Ref.swift */; };
 		145F46011EEAF0CC0045CDB2 /* Z_2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F46001EEAF0CC0045CDB2 /* Z_2.swift */; };
 		146399741F191AD500A34CEE /* DualComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146399731F191AD500A34CEE /* DualComplex.swift */; };
@@ -118,6 +119,7 @@
 		1424F4F71EB997780052581F /* optable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = optable.swift; sourceTree = "<group>"; };
 		144AD28E1EC13D9E00E23890 /* IntMatrixEliminationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntMatrixEliminationTests.swift; sourceTree = "<group>"; };
 		144AD2901EC21A4500E23890 /* Homology.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Homology.swift; sourceTree = "<group>"; };
+		144EC9ED1F286A93001BC4BC /* BarycentricSubdivision.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarycentricSubdivision.swift; sourceTree = "<group>"; };
 		145339BF1EC7D67100F014F4 /* Ref.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Ref.swift; sourceTree = "<group>"; };
 		145F46001EEAF0CC0045CDB2 /* Z_2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Z_2.swift; sourceTree = "<group>"; };
 		146399731F191AD500A34CEE /* DualComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DualComplex.swift; sourceTree = "<group>"; };
@@ -369,6 +371,7 @@
 				14929C9C1ED9C798006ACAC5 /* Simplex.swift */,
 				14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */,
 				14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */,
+				144EC9ED1F286A93001BC4BC /* BarycentricSubdivision.swift */,
 				146399731F191AD500A34CEE /* DualComplex.swift */,
 				141C0CDE1F28232F00D9BDDE /* CWComplex.swift */,
 			);
@@ -518,6 +521,7 @@
 				14C908881EEA8AD7002C657B /* MatrixImpl.swift in Sources */,
 				144AD2911EC21A4500E23890 /* Homology.swift in Sources */,
 				1424F4F91EB997780052581F /* AdditiveGroup.swift in Sources */,
+				144EC9EE1F286A93001BC4BC /* BarycentricSubdivision.swift in Sources */,
 				14B8E1621EEBA0390024EB2A /* SortedArray.swift in Sources */,
 				1424F5071EB997780052581F /* Rational.swift in Sources */,
 				14D261341EE4614E006775E2 /* Set.swift in Sources */,

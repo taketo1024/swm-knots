@@ -8,7 +8,7 @@
 
 import Foundation
 
-public final class SimplicialComplex: GeometricComplex {
+public class SimplicialComplex: GeometricComplex {
     public typealias Cell = Simplex
     
     public let dim: Int
@@ -16,7 +16,7 @@ public final class SimplicialComplex: GeometricComplex {
     internal let cellsList: [[Simplex]]
     
     // root initializer
-    public init(_ vertexSet: VertexSet, _ cells: [[Simplex]]) {
+    public required init(_ vertexSet: VertexSet, _ cells: [[Simplex]]) {
         self.dim = cells.count - 1
         self.vertexSet = vertexSet
         self.cellsList = cells
@@ -36,9 +36,9 @@ public final class SimplicialComplex: GeometricComplex {
         self.init(vertexSet, cells)
     }
     
-    public func skeleton(_ dim: Int) -> SimplicialComplex {
+    public func skeleton(_ dim: Int) -> Self {
         let sub = Array(cellsList[0 ... dim])
-        return SimplicialComplex(vertexSet, sub)
+        return type(of: self).init(vertexSet, sub)
     }
     
     public func allCells(ofDim i: Int) -> [Simplex] {
@@ -162,34 +162,4 @@ public func ⨯(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialCompl
     }.unique()
     
     return SimplicialComplex(V, cells)
-}
-
-public extension SimplicialComplex {
-    public func barycentricSubdivision() -> SimplicialComplex {
-        var V = VertexSet()
-        var S = Set<Simplex>()
-        
-        func generate(cells: [Simplex], barycenters: [Vertex]) {
-            let s = cells.last!
-            let v = V.barycenterOf(s) ?? {
-                let label = (s.dim > 0) ? "b\(s.vertices.map{String($0.index)}.joined())" : s.vertices.first!.label
-                return V.add(label: label, barycenterOf: s)
-            }()
-            
-            if s.dim > 0 {
-                for t in s.faces() {
-                    generate(cells: cells + [t], barycenters: barycenters + [v])
-                }
-            } else {
-                let bs = Simplex(barycenters + [v])
-                S.insert(bs)
-            }
-        }
-        
-        for s in maximalCells {
-            generate(cells: [s], barycenters: [])
-        }
-        
-        return SimplicialComplex(V, S, generate: true)
-    }
 }
