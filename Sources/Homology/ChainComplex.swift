@@ -71,8 +71,6 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
             assert(d1.codomainBasis == d2.domainBasis, "Bases of adjacent chains differ at: \(i1) -> \(i2)")
             
             let matrix = d2.matrix * d1.matrix
-            print("d\(i1)", d1.debugDescription)
-            print("d\(i2)", d2.debugDescription)
             assert(matrix.forAll { (_, _, a) in a == 0 } , "d\(i2)∘d\(i1) = \(matrix)")
             
             return true
