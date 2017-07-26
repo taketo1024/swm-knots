@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct Vertex: Equatable, Comparable, Hashable, CustomStringConvertible {
+public struct Vertex: SetType, Comparable {
     public let index: Int
     public let label: String
     public let vertexSet: VertexSet

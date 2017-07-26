@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct Simplex: FreeModuleBase, CustomStringConvertible {
+public struct Simplex: GeometricCell {
     public   let vertices: [Vertex] // ordered list of vertices.
     internal let vSet: Set<Vertex>  // unordered set of vertices.
     internal let id: String

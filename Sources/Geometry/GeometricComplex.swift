@@ -8,8 +8,12 @@
 
 import Foundation
 
+public protocol GeometricCell: FreeModuleBase {
+    var dim: Int {get}
+}
+
 public protocol GeometricComplex: class, CustomStringConvertible, CustomDebugStringConvertible {
-    associatedtype Cell: FreeModuleBase
+    associatedtype Cell: GeometricCell
     
     var dim: Int {get}
     

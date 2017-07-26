@@ -12,8 +12,8 @@ public protocol ChainType {}
 public struct   Descending : ChainType {}  // for ChainComplex   / Homology
 public struct   Ascending  : ChainType {}  // for CochainComplex / Cohomology
 
-public typealias   ChainComplex<A: Hashable, R: Ring> = _ChainComplex<Descending, A, R>
-public typealias CochainComplex<A: Hashable, R: Ring> = _ChainComplex<Ascending,  A, R>
+public typealias   ChainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Descending, A, R>
+public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Ascending,  A, R>
 
 public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: CustomStringConvertible {
     public typealias ChainBasis = [A]

@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct DualSimplicialCell: Hashable, CustomStringConvertible, CustomDebugStringConvertible {
+public struct DualSimplicialCell: GeometricCell {
     public let dim: Int
     public let base: Simplex
     public let center: Vertex

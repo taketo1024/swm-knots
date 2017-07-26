@@ -25,6 +25,10 @@ public extension SetType {
     public var debugDescription: String {
         return description
     }
+    
+    public static var symbol: String {
+        return String(describing: self)
+    }
 }
 
 public protocol FiniteSetType: SetType {

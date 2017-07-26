@@ -1,6 +1,6 @@
 import Foundation
 
-public typealias FreeModuleBase = Hashable
+public protocol FreeModuleBase: SetType {}
 
 public struct FreeModule<A: FreeModuleBase, _R: Ring>: Module, Sequence {
     public typealias R = _R
@@ -113,7 +113,7 @@ public struct FreeZeroModule<A: FreeModuleBase, _R: Ring>: Submodule {
     }
 }
 
-public struct Dual<A: FreeModuleBase>: FreeModuleBase, CustomStringConvertible {
+public struct Dual<A: FreeModuleBase>: FreeModuleBase {
     public let base: A
     public init(_ a: A) {
         base = a
@@ -148,7 +148,7 @@ public extension FreeModule {
     }
 }
 
-public struct Tensor<A: FreeModuleBase, B: FreeModuleBase>: FreeModuleBase, CustomStringConvertible {
+public struct Tensor<A: FreeModuleBase, B: FreeModuleBase>: FreeModuleBase {
     public let _1: A
     public let _2: B
     public init(_ a: A, _ b: B) {

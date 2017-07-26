@@ -10,7 +10,7 @@ import Foundation
 
 public typealias CWCellChain = FreeModule<CWCell, IntegerNumber>
 
-public struct CWCell: FreeModuleBase, CustomStringConvertible {
+public struct CWCell: GeometricCell {
     public let id: Int
     public let dim: Int
     internal let boundary: CWCellChain
