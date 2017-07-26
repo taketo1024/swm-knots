@@ -150,7 +150,7 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
     }
     
     public func next(from: (Int, Int), includeFirst: Bool, direction: MatrixIterationDirection, rowRange: CountableRange<Int>, colRange: CountableRange<Int>, proceedLines: Bool, nonZeroOnly: Bool) -> MatrixComponent<R>? {
-        if includeFirst {
+        if includeFirst && rows * cols > 0 {
             let a = self[from.0, from.1]
             if !nonZeroOnly || a != R.zero {
                 return (from.0, from.1, a)
@@ -158,6 +158,10 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
         }
         
         func nextPos(_ from: (Int, Int)) -> (Int, Int)? {
+            if !rowRange.contains(from.0) || !colRange.contains(from.1) {
+                return nil
+            }
+            
             switch direction {
             case .Rows:
                 switch (from.0 + 1, from.1 + 1, rowRange.upperBound, colRange.upperBound, proceedLines) {

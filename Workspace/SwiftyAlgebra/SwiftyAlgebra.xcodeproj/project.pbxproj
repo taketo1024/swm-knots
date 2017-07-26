@@ -10,6 +10,7 @@
 		140BCD511EBA3F8A00D7CE74 /* ChainComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */; };
 		140E80A01ECDEA8E00B89719 /* combinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140E809F1ECDEA8E00B89719 /* combinations.swift */; };
 		141417311ECE984800B167CB /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141417301ECE984800B167CB /* Sequence.swift */; };
+		141C0CDF1F28232F00D9BDDE /* CWComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141C0CDE1F28232F00D9BDDE /* CWComplex.swift */; };
 		14207CB21EEB90A90007BE8F /* GridMatrixImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14207CB11EEB90A90007BE8F /* GridMatrixImpl.swift */; };
 		14207CB41EEB90E80007BE8F /* MatrixConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14207CB31EEB90E80007BE8F /* MatrixConfig.swift */; };
 		1420EAE61EEAC46300336620 /* IntMatrixEliminationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144AD28E1EC13D9E00E23890 /* IntMatrixEliminationTests.swift */; };
@@ -83,6 +84,7 @@
 		140E809F1ECDEA8E00B89719 /* combinations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = combinations.swift; path = ../Util/combinations.swift; sourceTree = "<group>"; };
 		141417301ECE984800B167CB /* Sequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
 		1414D8551EE0F927001A1D42 /* Polynomials.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Polynomials.playground; sourceTree = "<group>"; };
+		141C0CDE1F28232F00D9BDDE /* CWComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CWComplex.swift; sourceTree = "<group>"; };
 		141CA4651ECBF67B00776A02 /* RationalMatrixEliminationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RationalMatrixEliminationTests.swift; sourceTree = "<group>"; };
 		14207CB11EEB90A90007BE8F /* GridMatrixImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GridMatrixImpl.swift; sourceTree = "<group>"; };
 		14207CB31EEB90E80007BE8F /* MatrixConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixConfig.swift; sourceTree = "<group>"; };
@@ -368,6 +370,7 @@
 				14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */,
 				14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */,
 				146399731F191AD500A34CEE /* DualComplex.swift */,
+				141C0CDE1F28232F00D9BDDE /* CWComplex.swift */,
 			);
 			path = Geometry;
 			sourceTree = "<group>";
@@ -555,6 +558,7 @@
 				1424F4FD1EB997780052581F /* Module.swift in Sources */,
 				1424F5111EB997780052581F /* optable.swift in Sources */,
 				1424F5021EB997780052581F /* Permutation.swift in Sources */,
+				141C0CDF1F28232F00D9BDDE /* CWComplex.swift in Sources */,
 				1424F4FC1EB997780052581F /* Group.swift in Sources */,
 				146A296E1F1DA32400531AA2 /* HomologyGroup.swift in Sources */,
 				1482E05D1EE96BA700B0CEFA /* IntMatrixImpl+Eigen.swift in Sources */,

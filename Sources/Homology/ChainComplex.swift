@@ -62,6 +62,23 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
         }
     }
     
+    @discardableResult
+    public func assertComplex() -> Bool {
+        return (offset ... degree).forAll { i1 -> Bool in
+            let i2 = descending ? i1 - 1 : i1 + 1
+            let d1 = boundaryMap(i1)
+            let d2 = boundaryMap(i2)
+            assert(d1.codomainBasis == d2.domainBasis, "Bases of adjacent chains differ at: \(i1) -> \(i2)")
+            
+            let matrix = d2.matrix * d1.matrix
+            print("d\(i1)", d1.debugDescription)
+            print("d\(i2)", d2.debugDescription)
+            assert(matrix.forAll { (_, _, a) in a == 0 } , "d\(i2)∘d\(i1) = \(matrix)")
+            
+            return true
+        }
+    }
+    
     public var description: String {
         return chain.description
     }
