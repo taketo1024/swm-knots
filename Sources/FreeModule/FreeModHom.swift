@@ -26,6 +26,18 @@ public struct FreeModuleHom<A: FreeModuleBase, _R: Ring>: ModuleHom {
         return M(basis: codomainBasis, components: (matrix * v).colArray(0))
     }
     
+    public func restrictedTo(domainBasis d: Basis) -> FreeModuleHom<A, R> {
+        return restrictedTo(domainBasis: d, codomainBasis: codomainBasis)
+    }
+    
+    public func restrictedTo(domainBasis d1: Basis, codomainBasis d2: Basis) -> FreeModuleHom<A, R> {
+        let map = FreeModuleHom<A, R>.matrixMap(self)
+        let matrix = DynamicMatrix<R>(rows: d2.count, cols: d1.count) { (i, j) -> R in
+            map(d1[j], d2[i])
+        }
+        return FreeModuleHom(domainBasis: d1, codomainBasis: d2, matrix: matrix)
+    }
+    
     public static var zero: FreeModuleHom<A, R> {
         return FreeModuleHom(domainBasis: [], codomainBasis: [], matrix: Matrix<R, _0, _0>.zero)
     }
@@ -69,24 +81,12 @@ public struct FreeModuleHom<A: FreeModuleBase, _R: Ring>: ModuleHom {
         let domain =   (f.domainBasis   + g.domainBasis  ).unique()
         let codomain = (f.codomainBasis + g.codomainBasis).unique()
         
-        let valMap = {(f: FreeModuleHom<A, R>) -> ((A, A) -> R) in
-            let domainIndex:   [A: Int] = Dictionary(pairs: f.domainBasis  .enumerated().map{ ($1, $0) })
-            let codomainIndex: [A: Int] = Dictionary(pairs: f.codomainBasis.enumerated().map{ ($1, $0) })
-            return {(from: A, to: A) -> R in
-                if let i = codomainIndex[to], let j = domainIndex[from] {
-                    return f.matrix[i, j]
-                } else {
-                    return R.zero
-                }
-            }
-        }
-        
-        let fValMap = valMap(f)
-        let gValMap = valMap(g)
+        let fMap = matrixMap(f)
+        let gMap = matrixMap(g)
         
         let matrix = DynamicMatrix<R>(rows: codomain.count, cols: domain.count) { (i, j) -> R in
             let (from, to) = (domain[j], codomain[i])
-            return fValMap(from, to) + gValMap(from, to)
+            return fMap(from, to) + gMap(from, to)
         }
         
         return FreeModuleHom(domainBasis: domain, codomainBasis: codomain, matrix: matrix)
@@ -125,5 +125,17 @@ public struct FreeModuleHom<A: FreeModuleBase, _R: Ring>: ModuleHom {
     
     public static var symbol: String {
         return "Hom_{\(R.symbol)}"
+    }
+    
+    private static func matrixMap(_ f: FreeModuleHom) -> ((A, A) -> R) {
+        let domainIndex:   [A: Int] = Dictionary(pairs: f.domainBasis  .enumerated().map{ ($1, $0) })
+        let codomainIndex: [A: Int] = Dictionary(pairs: f.codomainBasis.enumerated().map{ ($1, $0) })
+        return {(from: A, to: A) -> R in
+            if let i = codomainIndex[to], let j = domainIndex[from] {
+                return f.matrix[i, j]
+            } else {
+                return R.zero
+            }
+        }
     }
 }
