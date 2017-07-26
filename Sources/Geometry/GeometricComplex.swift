@@ -62,16 +62,6 @@ public extension GeometricComplex {
         return DynamicMatrix(rows: to.count, cols: from.count, type: .Sparse, components: components)
     }
     
-    public func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<Cell, R> {
-        let chain = (0 ... dim).map{ (i) -> ([Cell], FreeModuleHom<Cell, R>) in (allCells(ofDim: i), boundaryMap(i)) }
-        return ChainComplex(chain)
-    }
-    
-    public func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<Dual<Cell>, R> {
-        let cochain = (0 ... dim).map{ (i) -> ([Dual<Cell>], FreeModuleHom<Dual<Cell>, R>) in (allCells(ofDim: i).map{ Dual($0) }, coboundaryMap(i)) }
-        return CochainComplex(cochain)
-    }
-    
     public var description: String {
         return "\(type(of: self))(dim: \(dim))"
     }
@@ -83,6 +73,20 @@ public extension GeometricComplex {
                 .map{ (i, cells) -> String in "\t\(i): " + cells.map{"\($0)"}.joined(separator: ", ")}
                 .joined(separator: "\n")
             + "\n}"
+    }
+}
+
+public extension GeometricComplex {
+    public func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<Cell, R> {
+        typealias BoundaryMap = ChainComplex<Cell, R>.BoundaryMap
+        let chain = (0 ... dim).map{ (i) -> BoundaryMap in boundaryMap(i) }
+        return ChainComplex(chain)
+    }
+    
+    public func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<Dual<Cell>, R> {
+        typealias CoboundaryMap = CochainComplex<Dual<Cell>, R>.BoundaryMap
+        let cochain = (0 ... dim).map{ (i) -> CoboundaryMap in coboundaryMap(i) }
+        return CochainComplex(cochain)
     }
 }
 

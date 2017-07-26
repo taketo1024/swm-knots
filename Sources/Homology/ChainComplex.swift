@@ -19,11 +19,11 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
     public typealias ChainBasis = [A]
     public typealias BoundaryMap = FreeModuleHom<A, R>
     
-    private let chain: [(ChainBasis, BoundaryMap)]
+    private let chain: [BoundaryMap]
     public  let offset: Int
     
     // root initializer
-    public init(_ chain: [(ChainBasis, BoundaryMap)], offset: Int = 0) {
+    public init(_ chain: [BoundaryMap], offset: Int = 0) {
         self.chain = chain
         self.offset = offset
     }
@@ -37,13 +37,13 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
     }
     
     public func chainBasis(_ i: Int) -> ChainBasis {
-        return (offset ... degree).contains(i) ? chain[i - offset].0 : []
+        return (offset ... degree).contains(i) ? chain[i - offset].domainBasis : []
     }
     
     public func boundaryMap(_ i: Int) -> BoundaryMap {
         switch i {
         case (offset ... degree):
-            return chain[i - offset].1
+            return chain[i - offset]
             
         case degree + 1 where descending:
             let basis = chainBasis(degree)
@@ -82,7 +82,7 @@ public func ⊗<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: R
         }.sumAll()
     }
     
-    return _ChainComplex<chainType, Tensor<A, B>, R>(chain.map{($0.domainBasis, $0)})
+    return _ChainComplex<chainType, Tensor<A, B>, R>(chain)
 }
 
 
