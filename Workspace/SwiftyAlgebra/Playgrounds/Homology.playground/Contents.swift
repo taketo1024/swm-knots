@@ -26,6 +26,14 @@ do {
     print("H(S^2; Z) =", H.detailDescription, "\n")
 }
 
+// (D^3, S^2) relative
+do {
+    let K = SimplicialComplex.ball(dim: 3)
+    let L = K.skeleton(2)
+    let H = Homology(K, L, Z.self)
+    print("H(D^3, S^2; Z) =", H.detailDescription, "\n")
+}
+
 // T^2 = S^1 x S^1
 do {
     let C = SimplicialComplex.torus(dim: 2)

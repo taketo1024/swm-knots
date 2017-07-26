@@ -33,6 +33,11 @@ extension Sequence where Iterator.Element: Hashable {
         var alreadyAdded = Set<Iterator.Element>()
         return self.filter { alreadyAdded.insert($0).inserted }
     }
+    
+    func subtract(_ b: Self) -> [Iterator.Element] {
+        let set = Set(b)
+        return self.filter{ !set.contains($0) }
+    }
 }
 
 extension Sequence {

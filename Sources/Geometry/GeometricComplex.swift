@@ -88,11 +88,26 @@ public extension GeometricComplex {
         let cochain = (0 ... dim).map{ (i) -> CoboundaryMap in coboundaryMap(i) }
         return CochainComplex(cochain)
     }
+    
+    public func chainComplex<R: Ring>(relativeTo sub: Self, type: R.Type) -> ChainComplex<Cell, R> {
+        typealias BoundaryMap = ChainComplex<Cell, R>.BoundaryMap
+        let chain = (0 ... dim).map{ (i) -> BoundaryMap in
+            let d: BoundaryMap = boundaryMap(i)
+            return d.restrictedTo(domainBasis:   allCells(ofDim: i).subtract(sub.allCells(ofDim: i)),
+                                  codomainBasis: allCells(ofDim: i - 1).subtract(sub.allCells(ofDim: i - 1)))
+        }
+        return ChainComplex(chain)
+    }
 }
 
 public extension Homology where chainType == Descending, R: EuclideanRing {
-    public convenience init<C: GeometricComplex>(_ s: C, _ type: R.Type) where C.Cell == A {
-        let c: ChainComplex<A, R> = s.chainComplex(type: R.self)
+    public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where C.Cell == A {
+        let c: ChainComplex<A, R> = K.chainComplex(type: R.self)
+        self.init(c)
+    }
+
+    public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where C.Cell == A {
+        let c: ChainComplex<A, R> = K.chainComplex(relativeTo: L, type: R.self)
         self.init(c)
     }
 }
