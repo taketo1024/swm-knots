@@ -120,7 +120,11 @@ public struct FreeModuleHom<A: FreeModuleBase, _R: Ring>: ModuleHom {
     }
     
     public var description: String {
-        return "FreeModuleHom"
+        return "(\(domainBasis) -> \(codomainBasis))"
+    }
+    
+    public var debugDescription: String {
+        return description + "\n" + matrix.debugDescription + "\n"
     }
     
     public static var symbol: String {

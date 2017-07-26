@@ -230,7 +230,7 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
         }).joined(separator: "; ") + "]"
     }
     
-    public final var alignedDescription: String {
+    public final var debugDescription: String {
         return "[\t" + (0 ..< rows).map({ i in
             return (0 ..< cols).map({ j in
                 return "\(self[i, j])"

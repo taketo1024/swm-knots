@@ -8,7 +8,12 @@
 
 import Foundation
 
-public protocol TypeInfo: class, CustomStringConvertible {
+public protocol TypeInfo: class, CustomStringConvertible, CustomDebugStringConvertible { }
+
+public extension TypeInfo {
+    public var debugDescription: String {
+        return description
+    }
 }
 
 public protocol DynamicType {

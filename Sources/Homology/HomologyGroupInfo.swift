@@ -151,7 +151,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
         return desc.isEmpty ? "0" : desc
     }
     
-    public var detailDescription: String {
+    public var debugDescription: String {
         return "\(self),\t\(summands.map{ $0.generator })"
     }
 }

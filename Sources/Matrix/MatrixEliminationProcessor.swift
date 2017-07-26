@@ -40,9 +40,9 @@ public class MatrixEliminationProcessor<R: Ring> {
     }
     
     final func run() {
-        log("-----Start (mode: \(mode))-----\n\n\(result.alignedDescription)\n")
+        log("-----Start (mode: \(mode))-----\n\n\(result.debugDescription)\n")
         iterations()
-        log("-----Done (\(process.count) steps)-----\n\nResult:\n\(result.alignedDescription)\n")
+        log("-----Done (\(process.count) steps)-----\n\nResult:\n\(result.debugDescription)\n")
     }
     
     func iterations() {
@@ -63,7 +63,7 @@ public class MatrixEliminationProcessor<R: Ring> {
         s.apply(to: result)
         process.append(s)
         
-        log("\(itr)/\(maxItr): \(s) \n\n\(result.alignedDescription)\n")
+        log("\(itr)/\(maxItr): \(s) \n\n\(result.debugDescription)\n")
     }
     
     private func log(_ msg: @autoclosure () -> String) {

@@ -260,8 +260,8 @@ public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
         return impl.description
     }
     
-    public var alignedDescription: String {
-        return impl.alignedDescription
+    public var debugDescription: String {
+        return impl.debugDescription
     }
     
     public static var symbol: String {

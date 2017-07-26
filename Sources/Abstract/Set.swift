@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol SetType: Equatable, Hashable, CustomStringConvertible {
+public protocol SetType: Equatable, Hashable, CustomStringConvertible, CustomDebugStringConvertible {
     static var symbol: String { get }
 }
 
@@ -20,6 +20,10 @@ public extension SetType {
     
     public func asQuotient<Q: QuotientSetType>(in: Q.Type) -> Q where Q.Base == Self {
         return Q.init(self)
+    }
+    
+    public var debugDescription: String {
+        return description
     }
 }
 
