@@ -112,6 +112,21 @@ public extension SimplicialComplex {
     static func torus(dim: Int) -> SimplicialComplex {
         return (1 ..< dim).reduce(SimplicialComplex.circle()) { (r, _) in r ⨯ SimplicialComplex.circle() }
     }
+    
+    static func realProjectiveSpace(dim: Int) -> SimplicialComplex {
+        switch dim {
+        case 1:
+            return circle()
+        case 2:
+            let V = VertexSet(number: 6)
+            let faces = [(0,1,3),(1,4,3),(1,2,4),(4,2,0),(4,0,5),(0,1,5),(1,2,5),(2,3,5),(0,3,2),(3,4,5)].map {
+                v in Simplex(V, [v.0, v.1, v.2])
+            }
+            return SimplicialComplex(V, faces, generate: true)
+        default:
+            fatalError("RP^n (n >= 3) not yet supported.")
+        }
+    }
 }
 
 // disjoint union
