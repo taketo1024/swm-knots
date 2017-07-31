@@ -27,4 +27,8 @@ internal extension Dictionary {
     internal func mapValues<OutValue>(transform: (Value) -> OutValue) -> [Key: OutValue] {
         return Dictionary<Key, OutValue>(pairs: map{($0, transform($1))} )
     }
+    
+    internal func filterElements(_ isIncluded: ((key: Key, value: Value)) -> Bool) -> Dictionary<Key, Value> {
+        return Dictionary( pairs: self.filter(isIncluded).map{ ($0.key, $0.value) } )
+    }
 }

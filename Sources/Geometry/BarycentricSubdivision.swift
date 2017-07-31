@@ -8,24 +8,36 @@
 
 import Foundation
 
-public final class BarycentricSubdivision: SimplicialComplex {
-    private var bcenter2simplex: [Vertex : Simplex] = [:]
-    private var simplex2bcenter: [Simplex: Vertex ] = [:]
+public final class BarycentricSubdivision: GeometricComplex {
+    public typealias Cell = Simplex
+    
+    public let vertexSet: VertexSet
+    internal let cells: [[Simplex]]
+    
+    private var b2s: [Vertex: Simplex] = [:]
+    private var s2b: [Simplex: Vertex] = [:]
+    
+    private init(_ vertexSet: VertexSet, _ cells: [[Simplex]], _ b2s: [Vertex: Simplex], _ s2b: [Simplex: Vertex]) {
+        self.vertexSet = vertexSet
+        self.cells = cells
+        self.b2s = b2s
+        self.s2b = s2b
+    }
     
     public convenience init(_ K: SimplicialComplex) {
         var V = VertexSet()
-        var S = Set<Simplex>()
+        var bcells = Set<Simplex>()
         
-        var bcenter2simplex: [Vertex : Simplex] = [:]
-        var simplex2bcenter: [Simplex: Vertex ] = [:]
+        var b2s: [Vertex: Simplex] = [:]
+        var s2b: [Simplex: Vertex] = [:]
         
         func generate(cells: [Simplex], barycenters: [Vertex]) {
             let s = cells.last!
-            let v = simplex2bcenter[s] ?? {
+            let v = s2b[s] ?? {
                 let label = (s.dim > 0) ? "b\(s.vertices.map{String($0.index)}.joined())" : s.vertices.first!.label
                 let v = V.add(label: label)
-                bcenter2simplex[v] = s
-                simplex2bcenter[s] = v
+                b2s[v] = s
+                s2b[s] = v
                 return v
                 }()
             
@@ -34,8 +46,8 @@ public final class BarycentricSubdivision: SimplicialComplex {
                     generate(cells: cells + [t], barycenters: barycenters + [v])
                 }
             } else {
-                let bs = Simplex(barycenters + [v])
-                S.insert(bs)
+                let bcell = Simplex(barycenters + [v])
+                bcells.insert(bcell)
             }
         }
         
@@ -43,15 +55,40 @@ public final class BarycentricSubdivision: SimplicialComplex {
             generate(cells: [s], barycenters: [])
         }
         
-        self.init(V, S, generate: true)
+        self.init(V, SimplicialComplex.generateCells(bcells), b2s, s2b)
     }
     
     public func barycenterOf(_ s: Simplex) -> Vertex? {
-        return simplex2bcenter[s]
+        return s2b[s]
     }
     
     public func simplex(forBarycenter v: Vertex) -> Simplex? {
-        return bcenter2simplex[v]
+        return b2s[v]
+    }
+    
+    public var dim: Int {
+        return cells.count - 1
+    }
+    
+    public func skeleton(_ dim: Int) -> BarycentricSubdivision {
+        let sub = Array(cells[0 ... dim])
+        return BarycentricSubdivision(
+            vertexSet, sub,
+            b2s.filterElements{ (_, s) in s.dim <= dim},
+            s2b.filterElements{ (s, _) in s.dim <= dim}
+        )
+    }
+    
+    public func allCells(ofDim i: Int) -> [Simplex] {
+        return (0...dim).contains(i) ? cells[i] : []
+    }
+    
+    public func boundary<R: Ring>(ofCell s: Simplex) -> FreeModule<Simplex, R> {
+        return s.boundary()
+    }
+    
+    public func asSimplicialComplex() -> SimplicialComplex {
+        return SimplicialComplex(vertexSet, cells)
     }
 }
 

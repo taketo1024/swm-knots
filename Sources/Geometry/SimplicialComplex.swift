@@ -8,37 +8,29 @@
 
 import Foundation
 
-public class SimplicialComplex: GeometricComplex {
+public final class SimplicialComplex: GeometricComplex {
     public typealias Cell = Simplex
     
-    public let dim: Int
     public let vertexSet: VertexSet
     internal let cellsList: [[Simplex]]
     
     // root initializer
-    public required init(_ vertexSet: VertexSet, _ cells: [[Simplex]]) {
-        self.dim = cells.count - 1
+    public init(_ vertexSet: VertexSet, _ cells: [[Simplex]]) {
         self.vertexSet = vertexSet
         self.cellsList = cells
     }
     
-    public convenience init<S: Sequence>(_ vertexSet: VertexSet, _ cells: S, generate: Bool = false) where S.Iterator.Element == Simplex {
-        let cells = { () -> [[Simplex]] in
-            let dim = cells.reduce(0) { max($0, $1.dim) }
-            let set = generate ? cells.reduce(Set<Simplex>()){$0.union($1.allSubsimplices()) } : Set(cells)
-            
-            var cells: [[Simplex]] = (0 ... dim).map{_ in []}
-            for s in set {
-                cells[s.dim].append(s)
-            }
-            return cells
-        }()
-        self.init(vertexSet, cells)
+    public convenience init<S: Sequence>(_ vertexSet: VertexSet, maximalCells: S, lowerBound b: Int = 0) where S.Iterator.Element == Simplex {
+        self.init(vertexSet, SimplicialComplex.generateCells(maximalCells, lowerBound: b))
     }
     
-    public func skeleton(_ dim: Int) -> Self {
+    public var dim: Int {
+        return cellsList.count - 1
+    }
+    
+    public func skeleton(_ dim: Int) -> SimplicialComplex {
         let sub = Array(cellsList[0 ... dim])
-        return type(of: self).init(vertexSet, sub)
+        return SimplicialComplex(vertexSet, sub)
     }
     
     public func allCells(ofDim i: Int) -> [Simplex] {
@@ -61,6 +53,10 @@ public class SimplicialComplex: GeometricComplex {
         return list
     }()
     
+    public func boundary<R: Ring>(ofCell s: Simplex) -> FreeModule<Simplex, R> {
+        return s.boundary() // FIXME crashes when `lowerBound` is specified.
+    }
+    
     public func star(_ v: Vertex) -> [Simplex] { // returns only maximal cells
         return maximalCells.filter{ $0.contains(v) }
     }
@@ -77,12 +73,20 @@ public class SimplicialComplex: GeometricComplex {
         return star(s).map{ $0.subtract(s) }.filter{ $0.dim >= 0 }
     }
     
-    public func boundary<R: Ring>(ofCell s: Simplex) -> FreeModule<Simplex, R> {
-        return s.boundary()
-    }
-    
     public func cofaces(ofCell s: Simplex) -> [Simplex] {
         return allCells(ofDim: s.dim + 1).filter{ $0.contains(s) }
+    }
+    
+    internal static func generateCells<S: Sequence>(_ cells: S, lowerBound b: Int = 0) -> [[Simplex]] where S.Iterator.Element == Simplex {
+        let dim = cells.reduce(0) { max($0, $1.dim) }
+        let set = cells.reduce( Set<Simplex>() ){ (set, cell) in set.union( cell.allSubsimplices(lowerBound: b) ) }
+        
+        var cells: [[Simplex]] = (0 ... dim).map{_ in []}
+        for s in set {
+            cells[s.dim].append(s)
+        }
+        
+        return cells
     }
 }
 
@@ -102,7 +106,7 @@ public extension SimplicialComplex {
     static func ball(dim: Int) -> SimplicialComplex {
         let V = VertexSet(number: dim + 1)
         let s = Simplex(V, Array(0...dim))
-        return SimplicialComplex(V, [s], generate: true)
+        return SimplicialComplex(V, maximalCells: [s])
     }
     
     static func sphere(dim: Int) -> SimplicialComplex {
@@ -122,12 +126,12 @@ public extension SimplicialComplex {
             let V = VertexSet(number: 6)
             let indices = [(0,1,3),(1,4,3),(1,2,4),(4,2,0),(4,0,5),(0,1,5),(1,2,5),(2,3,5),(0,3,2),(3,4,5)]
             let simplices = indices.map { v in Simplex(V, [v.0, v.1, v.2]) }
-            return SimplicialComplex(V, simplices, generate: true)
+            return SimplicialComplex(V, maximalCells: simplices)
         case 3:
             let V = VertexSet(number: 11)
             let indices = [(1,2,3,7), (1,2,3,0), (1,2,6,9), (1,2,6,0), (1,2,7,9), (1,3,5,10), (1,3,5,0), (1,3,7,10), (1,4,7,9), (1,4,7,10), (1,4,8,9), (1,4,8,10), (1,5,6,8), (1,5,6,0), (1,5,8,10), (1,6,8,9), (2,3,4,8), (2,3,4,0), (2,3,7,8), (2,4,6,10), (2,4,6,0), (2,4,8,10), (2,5,7,8), (2,5,7,9), (2,5,8,10), (2,5,9,10), (2,6,9,10), (3,4,5,9), (3,4,5,0), (3,4,8,9), (3,5,9,10), (3,6,7,8), (3,6,7,10), (3,6,8,9), (3,6,9,10), (4,5,6,7), (4,5,6,0), (4,5,7,9), (4,6,7,10), (5,6,7,8)]
             let simplices = indices.map { v in Simplex(V, [v.0, v.1, v.2, v.3]) }
-            return SimplicialComplex(V, simplices, generate: true)
+            return SimplicialComplex(V, maximalCells: simplices)
         default:
             fatalError("RP^n (n >= 4) not yet supported.")
         }
@@ -179,7 +183,30 @@ public func ⨯(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialCompl
     let cells = indexPairs.map { (list: [(Int, Int)]) -> Simplex in
         let indices = list.map{ (i, j) in i + j * n1 }
         return Simplex(V, indices)
-    }.unique()
+        }.unique()
     
-    return SimplicialComplex(V, cells)
+    return SimplicialComplex(V, maximalCells: cells)
+}
+
+public extension SimplicialComplex {
+    public func preferredOrientation() -> SimplicialChain<IntegerNumber>? {
+        return preferredOrientation(type: IntegerNumber.self)
+    }
+    
+    public func preferredOrientation<R: EuclideanRing>(type: R.Type) -> SimplicialChain<R>? {
+//        internal init<n0: _Int, n1: _Int, n2: _Int>(degree: Int, basis: ChainBasis, elim1 E1: MatrixElimination<R, n0, n1>, elim2 E2: MatrixElimination<R, n1, n2>) {
+
+        let H = HomologyGroupInfo<Descending, Simplex, R>(
+            degree: dim,
+            basis: allCells(ofDim: dim),
+            elim1: boundaryMap(dim).matrix.eliminate(),
+            elim2: boundaryMap(dim + 1).matrix.eliminate()
+        )
+        
+        if H.rank == 1 {
+            return H.summands[0].generator
+        } else {
+            return nil
+        }
+    }
 }

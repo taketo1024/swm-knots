@@ -25,16 +25,12 @@ public struct DualSimplicialCell: GeometricCell {
         let chain = { () -> SimplicialChain<IntegerNumber> in
             if dim > 1 {
                 let V  = center.vertexSet // VSet of SdK
-                let St = SimplicialComplex(V, components)
-                let Lk = SimplicialComplex(V, St.link(center), generate: true) // TODO no need to generate all
+                let Lk = SimplicialComplex(V, maximalCells: components.map{$0.subtract(center)}, lowerBound: dim - 2)
                 
-                // Lk ~ S^{dim - 1}
-                let H  = HomologyGroupInfo(Lk.chainComplex(type: IntegerNumber.self), degree: Lk.dim)
-                guard H.rank == 1 else {
+                guard let z = Lk.preferredOrientation() else {
                     fatalError("invalid dual-cell. center: \(center), components: \(components)")
                 }
                 
-                let z = H.summands[0].generator
                 return center.join(z)
                 
             } else if dim == 1 {

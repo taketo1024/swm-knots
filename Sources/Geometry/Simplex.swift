@@ -54,12 +54,12 @@ public struct Simplex: GeometricCell {
         return s.vSet.isSubset(of: self.vSet)
     }
     
-    public func allSubsimplices() -> [Simplex] {
+    public func allSubsimplices(lowerBound: Int = 0) -> [Simplex] {
         var queue = [self]
         var i = 0
         while(i < queue.count) {
             let s = queue[i]
-            if s.dim > 0 {
+            if s.dim > lowerBound {
                 queue += queue[i].faces()
             }
             i += 1
