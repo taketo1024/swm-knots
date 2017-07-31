@@ -113,18 +113,23 @@ public extension SimplicialComplex {
         return (1 ..< dim).reduce(SimplicialComplex.circle()) { (r, _) in r ⨯ SimplicialComplex.circle() }
     }
     
+    // ref: Minimal Triangulations of Manifolds https://arxiv.org/pdf/math/0701735.pdf
     static func realProjectiveSpace(dim: Int) -> SimplicialComplex {
         switch dim {
         case 1:
             return circle()
         case 2:
             let V = VertexSet(number: 6)
-            let faces = [(0,1,3),(1,4,3),(1,2,4),(4,2,0),(4,0,5),(0,1,5),(1,2,5),(2,3,5),(0,3,2),(3,4,5)].map {
-                v in Simplex(V, [v.0, v.1, v.2])
-            }
-            return SimplicialComplex(V, faces, generate: true)
+            let indices = [(0,1,3),(1,4,3),(1,2,4),(4,2,0),(4,0,5),(0,1,5),(1,2,5),(2,3,5),(0,3,2),(3,4,5)]
+            let simplices = indices.map { v in Simplex(V, [v.0, v.1, v.2]) }
+            return SimplicialComplex(V, simplices, generate: true)
+        case 3:
+            let V = VertexSet(number: 11)
+            let indices = [(1,2,3,7), (1,2,3,0), (1,2,6,9), (1,2,6,0), (1,2,7,9), (1,3,5,10), (1,3,5,0), (1,3,7,10), (1,4,7,9), (1,4,7,10), (1,4,8,9), (1,4,8,10), (1,5,6,8), (1,5,6,0), (1,5,8,10), (1,6,8,9), (2,3,4,8), (2,3,4,0), (2,3,7,8), (2,4,6,10), (2,4,6,0), (2,4,8,10), (2,5,7,8), (2,5,7,9), (2,5,8,10), (2,5,9,10), (2,6,9,10), (3,4,5,9), (3,4,5,0), (3,4,8,9), (3,5,9,10), (3,6,7,8), (3,6,7,10), (3,6,8,9), (3,6,9,10), (4,5,6,7), (4,5,6,0), (4,5,7,9), (4,6,7,10), (5,6,7,8)]
+            let simplices = indices.map { v in Simplex(V, [v.0, v.1, v.2, v.3]) }
+            return SimplicialComplex(V, simplices, generate: true)
         default:
-            fatalError("RP^n (n >= 3) not yet supported.")
+            fatalError("RP^n (n >= 4) not yet supported.")
         }
     }
 }
