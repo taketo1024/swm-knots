@@ -19,7 +19,7 @@ public final class _ChainComplex<chainType: ChainType, R: Ring, A: FreeModuleBas
     public typealias ChainBasis = [A]
     public typealias BoundaryMap = FreeModuleHom<R, A, A>
     
-    private let chain: [BoundaryMap]
+    internal let chain: [BoundaryMap]
     public  let offset: Int
     
     // root initializer
@@ -62,6 +62,10 @@ public final class _ChainComplex<chainType: ChainType, R: Ring, A: FreeModuleBas
         }
     }
     
+    public func shifted(_ d: Int) -> _ChainComplex<chainType, R, A> {
+        return _ChainComplex.init(chain, offset: offset + d)
+    }
+    
     @discardableResult
     public func assertComplex(debug: Bool = false) -> Bool {
         return (offset ... topDegree).forAll { i1 -> Bool in
@@ -102,6 +106,18 @@ public final class _ChainComplex<chainType: ChainType, R: Ring, A: FreeModuleBas
     
     public var description: String {
         return chain.description
+    }
+}
+
+public extension ChainComplex where chainType == Descending {
+    public var dual: CochainComplex<R, A> {
+        return CochainComplex(chain.reversed(), offset: offset)
+    }
+}
+
+public extension ChainComplex where chainType == Ascending {
+    public var dual: ChainComplex<R, A> {
+        return ChainComplex(chain.reversed(), offset: offset)
     }
 }
 
