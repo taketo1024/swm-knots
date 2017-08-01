@@ -28,16 +28,16 @@ public final class _Homology<chainType: ChainType, R: EuclideanRing, A: FreeModu
         typealias M = FreeModule<R, A>
         
         let offset = chainComplex.offset
-        let degree = chainComplex.degree
+        let top = chainComplex.topDegree
         
         let elims = { () -> (Int) -> MatrixElimination<R, Dynamic, Dynamic> in
-            let res = (offset - 1 ... degree + 1).map { chainComplex.boundaryMap($0).matrix.eliminate() }
+            let res = (offset - 1 ... top + 1).map { chainComplex.boundaryMap($0).matrix.eliminate() }
             return { (i: Int) -> MatrixElimination<R, Dynamic, Dynamic> in
                 return res[i - offset + 1]
             }
         }()
         
-        let groups = (offset ... degree).map { (i) -> HomologyGroupInfo<chainType, R, A> in
+        let groups = (offset ... top).map { (i) -> HomologyGroupInfo<chainType, R, A> in
             HomologyGroupInfo(degree: i,
                               basis: chainComplex.chainBasis(i),
                               elim1: elims(i),
@@ -64,6 +64,6 @@ public extension _Homology where chainType == Descending, R == IntegerNumber {
     }
     
     public var eulerCharacteristic: Int {
-        return (0 ... chainComplex.degree).reduce(0){ $0 + (($1 % 2 == 0) ? 1 : -1) * bettiNumer(i: $1) }
+        return (0 ... chainComplex.topDegree).reduce(0){ $0 + (($1 % 2 == 0) ? 1 : -1) * bettiNumer(i: $1) }
     }
 }

@@ -32,21 +32,21 @@ public final class _ChainComplex<chainType: ChainType, R: Ring, A: FreeModuleBas
         return (chainType.self == Descending.self)
     }
     
-    public var degree: Int {
+    public var topDegree: Int {
         return chain.count + offset - 1
     }
     
     public func chainBasis(_ i: Int) -> ChainBasis {
-        return (offset ... degree).contains(i) ? chain[i - offset].domainBasis : []
+        return (offset ... topDegree).contains(i) ? chain[i - offset].domainBasis : []
     }
     
     public func boundaryMap(_ i: Int) -> BoundaryMap {
         switch i {
-        case (offset ... degree):
+        case (offset ... topDegree):
             return chain[i - offset]
             
-        case degree + 1 where descending:
-            let basis = chainBasis(degree)
+        case topDegree + 1 where descending:
+            let basis = chainBasis(topDegree)
             return BoundaryMap(domainBasis: [],
                                codomainBasis: basis,
                                matrix: DynamicMatrix<R>(rows: basis.count, cols: 0, grid: []))
@@ -64,7 +64,7 @@ public final class _ChainComplex<chainType: ChainType, R: Ring, A: FreeModuleBas
     
     @discardableResult
     public func assertComplex(debug: Bool = false) -> Bool {
-        return (offset ... degree).forAll { i1 -> Bool in
+        return (offset ... topDegree).forAll { i1 -> Bool in
             let i2 = descending ? i1 - 1 : i1 + 1
             let d1 = boundaryMap(i1)
             let d2 = boundaryMap(i2)
@@ -96,7 +96,7 @@ public final class _ChainComplex<chainType: ChainType, R: Ring, A: FreeModuleBas
     
     public static func ==<chainType: ChainType, R: Ring, A: FreeModuleBase>(lhs: _ChainComplex<chainType, R, A>, rhs: _ChainComplex<chainType, R, A>) -> Bool {
         let offset = min(lhs.offset, rhs.offset)
-        let degree = max(lhs.degree, rhs.degree)
+        let degree = max(lhs.topDegree, rhs.topDegree)
         return (offset ... degree).forAll { i in lhs.boundaryMap(i) == rhs.boundaryMap(i) }
     }
     
@@ -110,7 +110,7 @@ public func ⊗<chainType: ChainType, R: Ring, A: FreeModuleBase, B: FreeModuleB
     typealias NewBoundaryMap = FreeModuleHom<R, Tensor<A, B>, Tensor<A, B>>
     
     let offset = C1.offset + C2.offset
-    let degree = C1.degree + C2.degree
+    let degree = C1.topDegree + C2.topDegree
     let chain = (offset ... degree).map{ (k) -> NewBoundaryMap in
         (offset ... k).map { (i) -> NewBoundaryMap in
             let (d1, d2) = (C1.boundaryMap(i), C2.boundaryMap(k - i))
