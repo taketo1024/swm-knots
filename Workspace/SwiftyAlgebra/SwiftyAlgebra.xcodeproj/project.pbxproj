@@ -40,6 +40,7 @@
 		1424F50E1EB997780052581F /* TPInt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F31EB997780052581F /* TPInt.swift */; };
 		1424F50F1EB997780052581F /* TPPolynomial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F41EB997780052581F /* TPPolynomial.swift */; };
 		1424F5111EB997780052581F /* optable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F71EB997780052581F /* optable.swift */; };
+		143735A71F30088B0042004F /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143735A61F30088B0042004F /* String.swift */; };
 		144AD2911EC21A4500E23890 /* Homology.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144AD2901EC21A4500E23890 /* Homology.swift */; };
 		144EC9EE1F286A93001BC4BC /* BarycentricSubdivision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144EC9ED1F286A93001BC4BC /* BarycentricSubdivision.swift */; };
 		145339C01EC7D67100F014F4 /* Ref.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145339BF1EC7D67100F014F4 /* Ref.swift */; };
@@ -117,6 +118,7 @@
 		1424F4F31EB997780052581F /* TPInt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TPInt.swift; sourceTree = "<group>"; };
 		1424F4F41EB997780052581F /* TPPolynomial.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TPPolynomial.swift; sourceTree = "<group>"; };
 		1424F4F71EB997780052581F /* optable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = optable.swift; sourceTree = "<group>"; };
+		143735A61F30088B0042004F /* String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		144AD28E1EC13D9E00E23890 /* IntMatrixEliminationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntMatrixEliminationTests.swift; sourceTree = "<group>"; };
 		144AD2901EC21A4500E23890 /* Homology.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Homology.swift; sourceTree = "<group>"; };
 		144EC9ED1F286A93001BC4BC /* BarycentricSubdivision.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarycentricSubdivision.swift; sourceTree = "<group>"; };
@@ -334,6 +336,7 @@
 			children = (
 				147D98051EB9B26200C736AC /* Dictionary.swift */,
 				141417301ECE984800B167CB /* Sequence.swift */,
+				143735A61F30088B0042004F /* String.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -560,6 +563,7 @@
 				1424F50D1EB997780052581F /* PolynomialFactorization.swift in Sources */,
 				1424F5031EB997780052581F /* Polynominal.swift in Sources */,
 				1424F4FD1EB997780052581F /* Module.swift in Sources */,
+				143735A71F30088B0042004F /* String.swift in Sources */,
 				1424F5111EB997780052581F /* optable.swift in Sources */,
 				1424F5021EB997780052581F /* Permutation.swift in Sources */,
 				141C0CDF1F28232F00D9BDDE /* CWComplex.swift in Sources */,
