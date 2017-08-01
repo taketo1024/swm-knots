@@ -21,13 +21,15 @@ public struct FreeModule<_R: Ring, A: FreeModuleBase>: Module, Sequence {
         self.init(basis: basis, elements: Dictionary(pairs: zip(basis, components)))
     }
     
-    public init(_ elements: [(A, R)]) {
-        self.init(basis: elements.map{$0.0}, elements: Dictionary(pairs: elements))
+    public init(_ elements: [(R, A)]) {
+        let basis = elements.map{$0.1}
+        let dict = Dictionary(pairs: elements.map{($0.1, $0.0)})
+        self.init(basis: basis, elements: dict)
     }
     
     // generates a basis element
     public init(_ a: A) {
-        self.init([(a, 1)])
+        self.init([(1, a)])
     }
     
     public subscript(a: A) -> R {
@@ -174,8 +176,8 @@ public func ⊗<A: FreeModuleBase, B: FreeModuleBase>(a: A, b: B) -> Tensor<A, B
 }
 
 public func ⊗<R: Ring, A: FreeModuleBase, B: FreeModuleBase>(x: FreeModule<R, A>, y: FreeModule<R, B>) -> FreeModule<R, Tensor<A, B>> {
-    let elements = x.basis.pairs(with: y.basis).map{ (a, b) -> (Tensor<A, B>, R) in
-        return (a⊗b, x[a] * y[b])
+    let elements = x.basis.pairs(with: y.basis).map{ (a, b) -> (R, Tensor<A, B>) in
+        return (x[a] * y[b], a⊗b)
     }
     return FreeModule(elements)
 }

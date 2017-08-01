@@ -80,9 +80,9 @@ public struct Simplex: GeometricCell {
     }
     
     public func boundary<R: Ring>() -> SimplicialChain<R> {
-        let values: [(Simplex, R)] = faces().enumerated().map { (i, t) -> (Simplex, R) in
-            let value: R = (i % 2 == 0) ? 1 : -1
-            return (t, value)
+        let values: [(R, Simplex)] = faces().enumerated().map { (i, t) -> (R, Simplex) in
+            let e = R(intValue: (-1).pow(i))
+            return (e, t)
         }
         return SimplicialChain(values)
     }
@@ -106,10 +106,10 @@ public extension Vertex {
     }
     
     public func join<R: Ring>(_ chain: SimplicialChain<R>) -> SimplicialChain<R> {
-        return SimplicialChain(chain.basis.map{ (s) -> (Simplex, R) in
+        return SimplicialChain(chain.basis.map{ (s) -> (R, Simplex) in
             let t = self.join(s)
-            let sgn = (t.vertices.index(of: self)! % 2 == 0) ? R.identity : -R.identity
-            return (t, sgn * chain[s])
+            let e = R(intValue: (-1).pow(t.vertices.index(of: self)!))
+            return (e * chain[s], t)
         })
     }
 }
@@ -137,7 +137,7 @@ public extension SimplicialChain where A == Simplex {
                 
                 let (s1, s2) = (Simplex(s.vertices[0 ... j]), Simplex(s.vertices[j ... i]))
                 if s1 == f.base {
-                    let e = R(intValue: -1.pow(s1.dim * s2.dim))
+                    let e = R(intValue: (-1).pow(s1.dim * s2.dim))
                     return res + e * r2 * SimplicialChain<R>(s2)
                 } else {
                     return res
@@ -152,14 +152,14 @@ public extension SimplicialCochain where A == Dual<Simplex> {
     public func cup(_ f: SimplicialCochain<R>) -> SimplicialCochain<R> {
         typealias D = Dual<Simplex>
         let pairs = self.basis.pairs(with: f.basis)
-        let elements: [(D, R)] = pairs.flatMap{ (d1, d2) -> (D, R)? in
+        let elements: [(R, D)] = pairs.flatMap{ (d1, d2) -> (R, D)? in
             let (s1, s2) = (d1.base, d2.base)
             let (n1, n2) = (s1.dim, s2.dim)
             
             let s = Simplex(s1.vSet.union(s2.vSet))
             if (s1.vertices.last! == s2.vertices.first!) && (s.vertices == s1.vertices + s2.vertices.dropFirst()) {
-                let e = R(intValue: -1.pow(n1 * n2))
-                return (Dual(s), e * self[d1] * f[d2])
+                let e = R(intValue: (-1).pow(n1 * n2))
+                return (e * self[d1] * f[d2], Dual(s))
             } else {
                 return nil
             }
