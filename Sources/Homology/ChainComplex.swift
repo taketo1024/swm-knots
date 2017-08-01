@@ -17,7 +17,7 @@ public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Asce
 
 public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
     public typealias ChainBasis = [A]
-    public typealias BoundaryMap = FreeModuleHom<A, R>
+    public typealias BoundaryMap = FreeModuleHom<R, A, A>
     
     private let chain: [BoundaryMap]
     public  let offset: Int
@@ -107,14 +107,15 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
 
 public func ⊗<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: Ring>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Tensor<A, B>, R> {
     typealias NewChainBasis = [Tensor<A, B>]
-    typealias NewBoundaryMap = FreeModuleHom<Tensor<A, B>, R>
+    typealias NewBoundaryMap = FreeModuleHom<R, Tensor<A, B>, Tensor<A, B>>
     
     let offset = C1.offset + C2.offset
     let degree = C1.degree + C2.degree
     let chain = (offset ... degree).map{ (k) -> NewBoundaryMap in
         (offset ... k).map { (i) -> NewBoundaryMap in
             let (d1, d2) = (C1.boundaryMap(i), C2.boundaryMap(k - i))
-            let (I1, I2) = (FreeModuleHom<A, R>.identity(basis: d1.domainBasis), FreeModuleHom<B, R>.identity(basis: d2.domainBasis))
+            let (I1, I2) = (FreeModuleHom<R, A, A>.identity(basis: d1.domainBasis),
+                            FreeModuleHom<R, B, B>.identity(basis: d2.domainBasis))
             let e = R(intValue: (-1).pow(i))
             return d1 ⊗ I2 + e * I1 ⊗ d2
         }.sumAll()

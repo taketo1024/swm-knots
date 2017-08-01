@@ -22,8 +22,8 @@ public protocol GeometricComplex: class, CustomStringConvertible, CustomDebugStr
     func skeleton(_ dim: Int) -> Self
     
     func boundary<R: Ring>(ofCell: Cell) -> FreeModule<Cell, R> // override point
-    func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, R>
-    func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Dual<Cell>, R>
+    func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<R, Cell, Cell>
+    func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<R, Dual<Cell>, Dual<Cell>>
     
     func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<Cell, R>
     func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<Dual<Cell>, R>
@@ -35,14 +35,14 @@ public extension GeometricComplex {
         return l.flatMap{ allCells(ofDim: $0) }
     }
     
-    public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, R> {
+    public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<R, Cell, Cell> {
         let from = allCells(ofDim: i)
         let to = (i > 0) ? allCells(ofDim: i - 1) : []
         let matrix: DynamicMatrix<R> = boundaryMapMatrix(i, from, to)
         return FreeModuleHom(domainBasis: from, codomainBasis: to, matrix: matrix)
     }
     
-    public func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Dual<Cell>, R> {
+    public func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<R, Dual<Cell>, Dual<Cell>> {
         // Regard the basis of C_i as the dual basis of C^i.
         // Since <δf, c> = <f, ∂c>, the matrix is given by the transpose.
         
