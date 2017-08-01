@@ -48,8 +48,18 @@ public struct FreeModuleHom<A: FreeModuleBase, _R: Ring>: ModuleHom {
     }
     
     public static func ==(lhs: FreeModuleHom<A, R>, rhs: FreeModuleHom<A, R>) -> Bool {
-         // TODO this is incomplete. should not regard order of bases.
-        return lhs.domainBasis == rhs.domainBasis && lhs.codomainBasis == rhs.codomainBasis && lhs.matrix == rhs.matrix
+        if (lhs.domainBasis == rhs.domainBasis) && (lhs.codomainBasis == rhs.codomainBasis) && (lhs.matrix == rhs.matrix) {
+            return true
+            
+        }
+        
+        if (Set(lhs.domainBasis) == Set(rhs.domainBasis)) && (Set(lhs.codomainBasis) == Set(rhs.codomainBasis)) {
+            let p1 = Permutation<Dynamic>(from: rhs.domainBasis, to: lhs.domainBasis).asMatrix(type: R.self)
+            let p2 = Permutation<Dynamic>(from: lhs.codomainBasis, to: rhs.codomainBasis).asMatrix(type: R.self)
+            return rhs.matrix == p2 * lhs.matrix * p1
+        }
+        
+        return false
     }
     
     public static func +(f: FreeModuleHom<A, R>, g: FreeModuleHom<A, R>) -> FreeModuleHom<A, R> {
