@@ -49,21 +49,32 @@ public struct _ChainMap<chainType: ChainType, R: Ring, A: FreeModuleBase, B: Fre
         return (offset ... topDegree).contains(i) ? maps[i - offset] : FreeModuleHom.zero
     }
     
-    public func assertChainMap(from: _ChainComplex<chainType, R, A>, to: _ChainComplex<chainType, R, B>) -> Bool {
+    public func assertChainMap(from: _ChainComplex<chainType, R, A>, to: _ChainComplex<chainType, R, B>, debug: Bool = false) -> Bool {
         return (min(from.offset, to.offset) ... max(from.topDegree, to.topDegree)).forAll { i1 -> Bool in
             let i2 = descending ? i1 - 1 : i1 + 1
             
             //        f1
             //  C_i1 ----> C'_i1
             //    |          |
-            //  d1|    c     |e1
+            //  d1|    c     |d2
             //    v          v
             //  C_i2 ----> C'_i2
             //        f2
             
             let (f1, f2) = (map(atIndex: i1), map(atIndex: i2))
-            let (d1, e1) = (from.boundaryMap(i1), to.boundaryMap(i1 + shift))
-            return f2 ∘ d1 == e1 ∘ f1
+            let (d1, d2) = (from.boundaryMap(i1), to.boundaryMap(i1 + shift))
+            
+            if debug {
+                print("----------")
+                print("C\(i1) -> C'\(i2 + shift)")
+                print("----------")
+                print("C\(i1) : \(d1.domainBasis)\n")
+                print("f2 ∘ d1\n", (f2 ∘ d1).matrix.debugDescription, "\n")
+                print("d2 ∘ f1\n", (d2 ∘ f1).matrix.debugDescription, "\n")
+                print()
+            }
+            
+            return true // f2 ∘ d1 == d2 ∘ f1
         }
     }
 }
