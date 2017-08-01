@@ -1,20 +1,26 @@
 import Foundation
 
 public struct Permutation<n: _Int>: Group, FiniteSetType {
-    public var degree: Int { return n.intValue }
+    
+    public let degree: Int
     fileprivate var elements: [Int] //
     
     private init(elements: [Int]) {
+        assert(n.self == Dynamic.self || n.intValue == elements.count)
+        let degree = elements.count
+        
         assert({
             let set = Set(elements)
-            let (num, min, max) = (n.intValue, set.min(), set.max())
+            let (num, min, max) = (degree, set.min(), set.max())
             return (set.count == num) && (min == 0) && (max == num - 1)
         }())
+        
+        self.degree = degree
         self.elements = elements
     }
     
     public init(_ dict: [Int: Int]) {
-        self.init({ dict[$0] ?? $0 })
+        self.init(generator: { dict[$0] ?? $0 })
     }
     
     public init(cyclic: Int...) {
@@ -22,11 +28,13 @@ public struct Permutation<n: _Int>: Group, FiniteSetType {
     }
     
     internal init(cyclic: [Int]) {
-        self.init({ cyclic.index(of: $0).flatMap({ i in cyclic[(i + 1) % cyclic.count]}) ?? $0 })
+        self.init(generator: { cyclic.index(of: $0).flatMap({ i in cyclic[(i + 1) % cyclic.count]}) ?? $0 })
     }
     
-    public init(_ gen: ((Int) -> Int)) {
-        let elements = (0 ..< n.intValue).map(gen)
+    public init(degree: Int? = nil, generator: ((Int) -> Int)) {
+        assert( degree != nil || n.self != Dynamic.self )
+        let d = degree ?? n.intValue
+        let elements = (0 ..< d).map(generator)
         self.init(elements: elements)
     }
     
@@ -83,6 +91,15 @@ public struct Permutation<n: _Int>: Group, FiniteSetType {
     
     public var cyclicDecomposition: [Permutation<n>] {
         return rawCyclicDecomposition.map{ Permutation<n>(cyclic: $0) }
+    }
+    
+    public func asMatrix() -> Matrix<IntegerNumber, n, n> {
+        return asMatrix(type: IntegerNumber.self)
+    }
+    
+    public func asMatrix<R: Ring>(type: R.Type) -> Matrix<R, n, n> {
+        let comps = (0 ..< degree).map{ i in (i, self[i], R.identity) }
+        return Matrix<R, n, n>(rows: degree, cols: degree, components: comps)
     }
     
     public static var allElements: [Permutation<n>] {
