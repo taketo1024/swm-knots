@@ -2,10 +2,10 @@ import Foundation
 
 public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: ModuleHom {
     public typealias CoeffRing = R
-    public typealias Domain   = FreeModule<R, A>
-    public typealias Codomain = FreeModule<R, B>
     
+    public typealias Domain = FreeModule<R, A>
     public typealias DomainBasis = [A]
+    public typealias Codomain = FreeModule<R, B>
     public typealias CodomainBasis = [B]
     
     public let domainBasis: DomainBasis
@@ -23,7 +23,7 @@ public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Modu
         let v: ColVector<R, Dynamic> = ColVector(rows: domainBasis.count) {(i, _) -> R in
             m[domainBasis[i]]
         }
-        return Codom(basis: codomainBasis, components: (matrix * v).colArray(0))
+        return FreeModule<R, B>(basis: codomainBasis, components: (matrix * v).colArray(0))
     }
     
     public func restrictedTo(domainBasis d: DomainBasis) -> FreeModuleHom<R, A, B> {
