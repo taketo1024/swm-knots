@@ -1,21 +1,21 @@
 import Foundation
 
 public protocol Module: AdditiveGroup {
-    associatedtype R: Ring
-    static func * (r: R, m: Self) -> Self
-    static func * (m: Self, r: R) -> Self
+    associatedtype CoeffRing: Ring
+    static func * (r: CoeffRing, m: Self) -> Self
+    static func * (m: Self, r: CoeffRing) -> Self
 }
 
 public protocol Submodule: Module, AdditiveSubgroup {
     associatedtype Super: Module
 }
 
-public extension Submodule where R == Super.R {
-    static func * (r: R, a: Self) -> Self {
+public extension Submodule where CoeffRing == Super.CoeffRing {
+    static func * (r: CoeffRing, a: Self) -> Self {
         return Self.init(r * a.asSuper)
     }
     
-    static func * (a: Self, r: R) -> Self {
+    static func * (a: Self, r: CoeffRing) -> Self {
         return Self.init(a.asSuper * r)
     }
 }
@@ -25,12 +25,12 @@ public protocol _ProductModule: Module, AdditiveProductGroup {
     associatedtype Right: Module
 }
 
-public extension _ProductModule where Left.R == R, Right.R == R {
-    static func * (r: R, a: Self) -> Self {
+public extension _ProductModule where Left.CoeffRing == CoeffRing, Right.CoeffRing == CoeffRing {
+    static func * (r: CoeffRing, a: Self) -> Self {
         return Self.init(r * a._1, r * a._2)
     }
     
-    static func * (a: Self, r: R) -> Self {
+    static func * (a: Self, r: CoeffRing) -> Self {
         return Self.init(a._1 * r, a._2 * r)
     }
     
@@ -39,10 +39,10 @@ public extension _ProductModule where Left.R == R, Right.R == R {
     }
 }
 
-public struct ProductModule<M1: Module, M2: Module>: _ProductModule where M1.R == M2.R {
+public struct ProductModule<M1: Module, M2: Module>: _ProductModule where M1.CoeffRing == M2.CoeffRing {
     public typealias Left = M1
     public typealias Right = M2
-    public typealias R = M1.R
+    public typealias CoeffRing = M1.CoeffRing
     
     public let _1: M1
     public let _2: M2
@@ -57,16 +57,16 @@ public protocol _QuotientModule: Module, AdditiveQuotientGroup {
     associatedtype Sub: Submodule
 }
 
-public extension _QuotientModule where Base == Sub.Super, R == Sub.R, R == Sub.Super.R {
+public extension _QuotientModule where Base == Sub.Super, CoeffRing == Sub.CoeffRing, CoeffRing == Sub.Super.CoeffRing {
     public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
         return Sub.contains( a - b )
     }
     
-    static func * (r: R, a: Self) -> Self {
+    static func * (r: CoeffRing, a: Self) -> Self {
         return Self.init(r * a.representative)
     }
     
-    static func * (a: Self, r: R) -> Self {
+    static func * (a: Self, r: CoeffRing) -> Self {
         return Self.init(a.representative * r)
     }
     
@@ -75,8 +75,8 @@ public extension _QuotientModule where Base == Sub.Super, R == Sub.R, R == Sub.S
     }
 }
 
-public struct QuotientModule<M: Module, S: Submodule>: _QuotientModule where M == S.Super, M.R == S.R {
-    public typealias R = M.R
+public struct QuotientModule<M: Module, S: Submodule>: _QuotientModule where M == S.Super, M.CoeffRing == S.CoeffRing {
+    public typealias CoeffRing = M.CoeffRing
     public typealias Sub = S
     
     internal let m: M

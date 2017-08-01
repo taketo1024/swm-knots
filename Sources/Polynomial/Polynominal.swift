@@ -5,7 +5,7 @@ import Foundation
 // TODO after Swift4,
 // make `K: Ring`, and conform to `EuclideanRing` only when `K: Field`
 public struct Polynomial<K: Field>: EuclideanRing, Module {
-    public typealias R = K
+    public typealias CoeffRing = K
     public let coeffs: [K]
     
     public init(intValue n: Int) {
@@ -148,7 +148,7 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
     }
     
     public static var symbol: String {
-        return "\(R.symbol)[x]"
+        return "\(K.symbol)[x]"
     }
     
     public var hashValue: Int {

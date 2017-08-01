@@ -1,7 +1,7 @@
 import Foundation
 
-public struct FreeModuleHom<_R: Ring, A: FreeModuleBase, B: FreeModuleBase>: ModuleHom {
-    public typealias R = _R
+public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: ModuleHom {
+    public typealias CoeffRing = R
     public typealias Dom = FreeModule<R, A>
     public typealias Codom = FreeModule<R, B>
     

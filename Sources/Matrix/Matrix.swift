@@ -14,8 +14,8 @@ public enum MatrixType {
 
 public typealias MatrixComponent<R> = (row: Int, col: Int, value: R)
 
-public struct Matrix<_R: Ring, n: _Int, m: _Int>: Module, Sequence {
-    public typealias R = _R
+public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
+    public typealias CoeffRing = R
     public typealias Iterator = MatrixIterator<R>
     
     public let type: MatrixType

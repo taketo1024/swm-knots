@@ -2,8 +2,8 @@ import Foundation
 
 public protocol FreeModuleBase: SetType {}
 
-public struct FreeModule<_R: Ring, A: FreeModuleBase>: Module, Sequence {
-    public typealias R = _R
+public struct FreeModule<R: Ring, A: FreeModuleBase>: Module, Sequence {
+    public typealias CoeffRing = R
     
     public let basis: [A]
     internal let elements: [A: R]
@@ -96,9 +96,9 @@ public struct FreeModule<_R: Ring, A: FreeModuleBase>: Module, Sequence {
     }
 }
 
-public struct FreeZeroModule<A: FreeModuleBase, _R: Ring>: Submodule {
+public struct FreeZeroModule<R: Ring, A: FreeModuleBase>: Submodule {
     public typealias Super = FreeModule<R, A>
-    public typealias R = _R
+    public typealias CoeffRing = R
     
     public init(_ m: Super) {}
     
