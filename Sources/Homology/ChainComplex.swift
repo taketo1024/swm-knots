@@ -15,7 +15,7 @@ public struct   Ascending  : ChainType {}  // for CochainComplex / Cohomology
 public typealias   ChainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Descending, A, R>
 public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Ascending,  A, R>
 
-public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: CustomStringConvertible {
+public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
     public typealias ChainBasis = [A]
     public typealias BoundaryMap = FreeModuleHom<A, R>
     
@@ -92,6 +92,12 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
             
             return true
         }
+    }
+    
+    public static func ==<chainType: ChainType, A: FreeModuleBase, R: Ring>(lhs: _ChainComplex<chainType, A, R>, rhs: _ChainComplex<chainType, A, R>) -> Bool {
+        let offset = min(lhs.offset, rhs.offset)
+        let degree = max(lhs.degree, rhs.degree)
+        return (offset ... degree).forAll { i in lhs.boundaryMap(i) == rhs.boundaryMap(i) }
     }
     
     public var description: String {
