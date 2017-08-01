@@ -114,8 +114,8 @@ public extension Vertex {
     }
 }
 
-public typealias SimplicialChain<R: Ring>   = FreeModule<Simplex, R>
-public typealias SimplicialCochain<R: Ring> = FreeModule<Dual<Simplex>, R>
+public typealias SimplicialChain<R: Ring>   = FreeModule<R, Simplex>
+public typealias SimplicialCochain<R: Ring> = FreeModule<R, Dual<Simplex>>
 
 public extension SimplicialChain where A == Simplex {
     public func boundary() -> SimplicialChain<R> {

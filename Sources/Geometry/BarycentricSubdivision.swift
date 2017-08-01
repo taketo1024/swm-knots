@@ -83,7 +83,7 @@ public final class BarycentricSubdivision: GeometricComplex {
         return (0...dim).contains(i) ? cells[i] : []
     }
     
-    public func boundary<R: Ring>(ofCell s: Simplex) -> FreeModule<Simplex, R> {
+    public func boundary<R: Ring>(ofCell s: Simplex) -> FreeModule<R, Simplex> {
         return s.boundary()
     }
     

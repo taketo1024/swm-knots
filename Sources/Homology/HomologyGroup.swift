@@ -13,15 +13,15 @@ public protocol _HomologyGroup: _QuotientModule {
     associatedtype A: FreeModuleBase
     associatedtype R: EuclideanRing
     
-    var representative: FreeModule<A, R> { get }
-    init(_ z: FreeModule<A, R>)
+    var representative: FreeModule<R, A> { get }
+    init(_ z: FreeModule<R, A>)
     
     static var degree: Int { get }
     static func generator(_ i: Int) -> Self
-    static var info: HomologyGroupInfo<chainType, A, R> { get }
+    static var info: HomologyGroupInfo<chainType, R, A> { get }
 }
 
-public extension _HomologyGroup where Base == FreeModule<A, R> {
+public extension _HomologyGroup where Base == FreeModule<R, A> {
     public static var degree: Int {
         return info.degree
     }
@@ -43,31 +43,31 @@ public extension _HomologyGroup where Base == FreeModule<A, R> {
     }
 }
 
-public extension _HomologyGroup where Base == FreeModule<A, R>, chainType == Descending {
+public extension _HomologyGroup where Base == FreeModule<R, A>, chainType == Descending {
     public func evaluate<CH: _HomologyGroup>(_ f: CH) -> R where CH.chainType == Ascending, CH.A == Dual<A>, CH.R == R {
         return self.representative.evaluate(f.representative)
     }
 }
 
-public typealias   DynamicHomologyGroup<A: FreeModuleBase, R: EuclideanRing, ID: _Int> = _DynamicHomologyGroup<Descending, A, R, ID>
-public typealias DynamicCohomologyGroup<A: FreeModuleBase, R: EuclideanRing, ID: _Int> = _DynamicHomologyGroup<Ascending,  A, R, ID>
+public typealias   DynamicHomologyGroup<R: EuclideanRing, A: FreeModuleBase, ID: _Int> = _DynamicHomologyGroup<Descending, R, A, ID>
+public typealias DynamicCohomologyGroup<R: EuclideanRing, A: FreeModuleBase, ID: _Int> = _DynamicHomologyGroup<Ascending,  R, A, ID>
 
-public struct _DynamicHomologyGroup<_chainType: ChainType, _A: FreeModuleBase, _R: EuclideanRing, _ID: _Int>: DynamicType, _HomologyGroup {
+public struct _DynamicHomologyGroup<_chainType: ChainType, _R: EuclideanRing, _A: FreeModuleBase, _ID: _Int>: DynamicType, _HomologyGroup {
     public typealias chainType = _chainType
     public typealias A = _A
     public typealias R = _R
-    public typealias Base = FreeModule<A, R>
+    public typealias Base = FreeModule<R, A>
     public typealias Sub  = FreeZeroModule<A, R> // used as stub
-    public typealias Info = HomologyGroupInfo<chainType, A, R>
+    public typealias Info = HomologyGroupInfo<chainType, R, A>
     public typealias ID = _ID
     
-    private let z: FreeModule<A, R>
-    public init(_ z: FreeModule<A, R>) {
+    private let z: FreeModule<R, A>
+    public init(_ z: FreeModule<R, A>) {
         // TODO check if z is a cycle.
         self.z = z
     }
     
-    public var representative: FreeModule<A, R> {
+    public var representative: FreeModule<R, A> {
         return z
     }
 }

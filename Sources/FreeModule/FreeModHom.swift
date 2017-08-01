@@ -2,8 +2,8 @@ import Foundation
 
 public struct FreeModuleHom<_R: Ring, A: FreeModuleBase, B: FreeModuleBase>: ModuleHom {
     public typealias R = _R
-    public typealias Dom = FreeModule<A, R>
-    public typealias Codom = FreeModule<B, R>
+    public typealias Dom = FreeModule<R, A>
+    public typealias Codom = FreeModule<R, B>
     
     public typealias DomainBasis = [A]
     public typealias CodomainBasis = [B]

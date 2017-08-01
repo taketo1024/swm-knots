@@ -8,24 +8,24 @@
 
 import Foundation
 
-public typealias   Homology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Descending, A, R>
-public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Ascending, A, R>
+public typealias   Homology<R: EuclideanRing, A: FreeModuleBase> = _Homology<Descending, R, A>
+public typealias Cohomology<R: EuclideanRing, A: FreeModuleBase> = _Homology<Ascending, R, A>
 
-public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: CustomStringConvertible, CustomDebugStringConvertible {
-    public let chainComplex: _ChainComplex<chainType, A, R>
-    internal let groupInfos: [HomologyGroupInfo<chainType, A, R>]
+public final class _Homology<chainType: ChainType, R: EuclideanRing, A: FreeModuleBase>: CustomStringConvertible, CustomDebugStringConvertible {
+    public let chainComplex: _ChainComplex<chainType, R, A>
+    internal let groupInfos: [HomologyGroupInfo<chainType, R, A>]
     
-    public subscript(i: Int) -> HomologyGroupInfo<chainType, A, R> {
+    public subscript(i: Int) -> HomologyGroupInfo<chainType, R, A> {
         return groupInfos[i]
     }
     
-    public init(chainComplex: _ChainComplex<chainType, A, R>, groups: [HomologyGroupInfo<chainType, A, R>]) {
+    public init(chainComplex: _ChainComplex<chainType, R, A>, groups: [HomologyGroupInfo<chainType, R, A>]) {
         self.chainComplex = chainComplex
         self.groupInfos = groups
     }
     
-    public convenience init(_ chainComplex: _ChainComplex<chainType, A, R>) {
-        typealias M = FreeModule<A, R>
+    public convenience init(_ chainComplex: _ChainComplex<chainType, R, A>) {
+        typealias M = FreeModule<R, A>
         
         let offset = chainComplex.offset
         let degree = chainComplex.degree
@@ -37,7 +37,7 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             }
         }()
         
-        let groups = (offset ... degree).map { (i) -> HomologyGroupInfo<chainType, A, R> in
+        let groups = (offset ... degree).map { (i) -> HomologyGroupInfo<chainType, R, A> in
             HomologyGroupInfo(degree: i,
                               basis: chainComplex.chainBasis(i),
                               elim1: elims(i),

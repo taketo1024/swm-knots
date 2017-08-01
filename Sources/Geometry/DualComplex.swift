@@ -113,7 +113,7 @@ public final class DualSimplicialComplex: GeometricComplex {
         return (0...dim).contains(i) ? cells[i] : []
     }
     
-    public func boundary<R: Ring>(ofCell s: DualSimplicialCell) -> FreeModule<DualSimplicialCell, R> {
+    public func boundary<R: Ring>(ofCell s: DualSimplicialCell) -> FreeModule<R, DualSimplicialCell> {
         let z = s.chain.boundary()
         let dCells = allCells(ofDim: s.dim - 1)
         
