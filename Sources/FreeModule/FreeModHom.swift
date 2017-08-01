@@ -2,8 +2,8 @@ import Foundation
 
 public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: ModuleHom {
     public typealias CoeffRing = R
-    public typealias Dom = FreeModule<R, A>
-    public typealias Codom = FreeModule<R, B>
+    public typealias Domain   = FreeModule<R, A>
+    public typealias Codomain = FreeModule<R, B>
     
     public typealias DomainBasis = [A]
     public typealias CodomainBasis = [B]
@@ -19,7 +19,7 @@ public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Modu
         self.matrix = matrix.asDynamic
     }
     
-    public func appliedTo(_ m: Dom) -> Codom {
+    public func appliedTo(_ m: Domain) -> Codomain {
         let v: ColVector<R, Dynamic> = ColVector(rows: domainBasis.count) {(i, _) -> R in
             m[domainBasis[i]]
         }

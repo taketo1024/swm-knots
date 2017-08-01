@@ -1,14 +1,14 @@
 import Foundation
 
 public protocol Map {
-    associatedtype Dom
-    associatedtype Codom
+    associatedtype Domain
+    associatedtype Codomain
     
-    func appliedTo(_ x: Dom) -> Codom
+    func appliedTo(_ x: Domain) -> Codomain
 }
 
 public protocol ModuleHom: Map, Module {
-    associatedtype Dom : Module
-    associatedtype Codom : Module
+    associatedtype Domain   : Module
+    associatedtype Codomain : Module
 }
 
