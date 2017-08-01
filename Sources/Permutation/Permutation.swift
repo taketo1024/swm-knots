@@ -5,12 +5,11 @@ public struct Permutation<n: _Int>: Group, FiniteSetType {
     fileprivate var elements: [Int] //
     
     private init(elements: [Int]) {
-        let set = Set(elements)
-        guard let min = set.min(),
-              let max = set.max(),
-              set.count == n.intValue && min == 0 && max == n.intValue - 1 else {
-                fatalError("invalid input: \(elements)")
-        }
+        assert({
+            let set = Set(elements)
+            let (num, min, max) = (n.intValue, set.min(), set.max())
+            return (set.count == num) && (min == 0) && (max == num - 1)
+        }())
         self.elements = elements
     }
     
@@ -29,6 +28,12 @@ public struct Permutation<n: _Int>: Group, FiniteSetType {
     public init(_ gen: ((Int) -> Int)) {
         let elements = (0 ..< n.intValue).map(gen)
         self.init(elements: elements)
+    }
+    
+    public init<X: Hashable>(from: [X], to: [X]) {
+        assert(Set(from) == Set(to))
+        let indexTable = Dictionary(pairs: to.enumerated().map { (i, a) in (a, i) })
+        self.init(elements: from.map{ indexTable[$0]! } )
     }
     
     public subscript(i: Int) -> Int {
