@@ -19,6 +19,17 @@ public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Modu
         self.matrix = matrix.asDynamic
     }
     
+    public init(domainBasis: DomainBasis, codomainBasis: CodomainBasis, mapping: (A) -> [(R, B)]) {
+        let components = domainBasis.enumerated().flatMap{ (j, a) -> [MatrixComponent<R>] in
+            mapping(a).map { (r, b) -> MatrixComponent<R> in
+                let i = codomainBasis.index(of: b)!
+                return (i, j, r)
+            }
+        }
+        let matrix = DynamicMatrix<R>(rows: codomainBasis.count, cols: domainBasis.count, components: components)
+        self.init(domainBasis: domainBasis, codomainBasis: codomainBasis, matrix: matrix)
+    }
+    
     public func appliedTo(_ m: Domain) -> Codomain {
         let v: ColVector<R, Dynamic> = ColVector(rows: domainBasis.count) {(i, _) -> R in
             m[domainBasis[i]]
