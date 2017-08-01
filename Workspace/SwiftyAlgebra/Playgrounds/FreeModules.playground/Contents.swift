@@ -9,7 +9,7 @@ typealias Z = IntegerNumber
 typealias Q = RationalNumber
 typealias R = RealNumber
 
-typealias M = FreeModule<String, Z>
+typealias M = FreeModule<Z, String>
 
 let domain   = ["a", "b", "c", "d"]
 let codomain = ["x", "y", "z"]
