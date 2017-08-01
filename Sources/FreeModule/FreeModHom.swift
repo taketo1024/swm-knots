@@ -114,6 +114,19 @@ public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Modu
         return FreeModuleHom(domainBasis: f.domainBasis, codomainBasis: f.codomainBasis, matrix: f.matrix * r)
     }
     
+    public static func ∘<C: FreeModuleBase>(g: FreeModuleHom<R, B, C>, f: FreeModuleHom<R, A, B>) -> FreeModuleHom<R, A, C> {
+        let p = DynamicMatrix<R>(rows: g.matrix.cols, cols: f.matrix.rows, components: f.codomainBasis.flatMap { (b: B) -> MatrixComponent<R>? in
+            
+            let j = f.codomainBasis.index(of: b)!
+            if let i = g.domainBasis.index(of: b) {
+                return (i, j, R.identity)
+            } else {
+                return nil
+            }
+        })
+        return FreeModuleHom<R, A, C>(domainBasis: f.domainBasis, codomainBasis: g.codomainBasis, matrix: g.matrix * p * f.matrix)
+    }
+    
     public static func ⊗<C: FreeModuleBase, D: FreeModuleBase>(f: FreeModuleHom<R, A, B>, g: FreeModuleHom<R, C, D>) -> FreeModuleHom<R, Tensor<A, C>, Tensor<B, D>> {
         let (k, l) = (g.codomainBasis.count, g.domainBasis.count)
         
