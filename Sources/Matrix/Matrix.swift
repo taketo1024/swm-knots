@@ -327,9 +327,12 @@ public extension Matrix where n == _1 {
 // TODO: conform to Ring after conditional conformance is supported.
 public extension Matrix where n == m {
     public var determinant: R {
-        // TODO implement efficient algorithm.
-        
-        return impl.determinant()
+        if impl.eliminatable(mode: .Both) {
+            let s = smithNormalForm
+            return s.processor.process.map{ $0.determinant.inverse! }.multiplyAll() * s.diagonal.multiplyAll()
+        } else {
+            return impl.determinant()
+        }
     }
     
     public var isInvertible: Bool {

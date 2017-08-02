@@ -9,7 +9,7 @@
 import Foundation
 
 public struct MatrixElimination<R: Ring, n: _Int, m: _Int> {
-    private let processor: MatrixEliminator<R>
+    internal let processor: MatrixEliminator<R>
     
     public init(_ processor: MatrixEliminator<R>) {
         self.processor = processor

@@ -151,6 +151,19 @@ internal enum EliminationStep<R: Ring> {
         }
     }
     
+    var determinant: R {
+        switch self {
+        case .AddRow(_, _, _), .AddCol(_, _, _):
+            return R.identity
+        case let .MulRow(at: _, by: r):
+            return r
+        case let .MulCol(at: _, by: r):
+            return r
+        case .SwapRows(_, _), .SwapCols(_, _):
+            return -R.identity
+        }
+    }
+    
     var inverse: EliminationStep<R> {
         switch self {
         case let .AddRow(i, j, r):
