@@ -19,7 +19,8 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public typealias Iterator = MatrixIterator<R>
     
     internal var impl: _MatrixImpl<R>
-    
+    internal var smithNormalFormCache: Cache<MatrixEliminationResult<R, n, m>> = Cache()
+
     // internal root initializer
     internal init(_ impl: _MatrixImpl<R>) {
         self.impl = impl
@@ -109,6 +110,11 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public var cols: Int { return impl.cols }
     public var type: MatrixType {return impl.type}
     
+    private mutating func willMutate() {
+        copyIfNecessary()
+        smithNormalFormCache.clear()
+    }
+    
     private mutating func copyIfNecessary() {
         if !isKnownUniquelyReferenced(&impl) {
             impl = impl.copy()
@@ -118,7 +124,7 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public subscript(i: Int, j: Int) -> R {
         get { return impl[i, j] }
         set {
-            copyIfNecessary()
+            willMutate()
             impl[i, j] = newValue
         }
     }
@@ -206,37 +212,79 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     }
     
     public mutating func multiplyRow(at i0: Int, by r: R) {
-        copyIfNecessary()
+        willMutate()
         impl.multiplyRow(at: i0, by: r)
     }
     
     public mutating func multiplyCol(at j0: Int, by r: R) {
-        copyIfNecessary()
+        willMutate()
         impl.multiplyCol(at: j0, by: r)
     }
     
     public mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R = 1) {
-        copyIfNecessary()
+        willMutate()
         impl.addRow(at: i0, to: i1, multipliedBy: r)
     }
     
     public mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R = 1) {
-        copyIfNecessary()
+        willMutate()
         impl.addCol(at: j0, to: j1, multipliedBy: r)
     }
     
     public mutating func swapRows(_ i0: Int, _ i1: Int) {
-        copyIfNecessary()
+        willMutate()
         impl.swapRows(i0, i1)
     }
     
     public mutating func swapCols(_ j0: Int, _ j1: Int) {
-        copyIfNecessary()
+        willMutate()
         impl.swapCols(j0, j1)
     }
     
+    // TODO remove
     public func eliminate(mode: MatrixEliminationMode = .Both, debug: Bool = false) -> MatrixElimination<R, n, m> {
         return impl.eliminate(mode: mode, debug: debug)
+    }
+    
+    public var smithNormalForm: MatrixEliminationResult<R, n, m> {
+        if let s = smithNormalFormCache.value {
+            return s
+        }
+        
+        let e = impl._eliminate(mode: .Both)
+        e.run()
+        
+        let s = MatrixEliminationResult<R, n, m>(e)
+        smithNormalFormCache.value = s
+        
+        return s
+    }
+    
+    public var rank: Int {
+        return smithNormalForm.diagonal.filter{ $0 != 0 }.count
+    }
+    
+    public var kernelMatrix: Matrix<R, m, Dynamic> {
+        return smithNormalForm.right.submatrix(colsInRange: rank ..< cols)
+    }
+    
+    public var kernelVectors: [ColVector<R, m>] {
+        return kernelMatrix.toColVectors()
+    }
+    
+    public var imageMatrix: Matrix<R, n, Dynamic> {
+        let d = smithNormalForm.diagonal
+        var a: Matrix<R, n, Dynamic> = smithNormalForm.leftInverse.submatrix(colsInRange: 0 ..< rank)
+        
+        (0 ..< Swift.min(d.count, cols)).forEach {
+            a.multiplyCol(at: $0, by: d[$0])
+        }
+        
+        return a
+    }
+    
+    public var imageVectors: [ColVector<R, n>] {
+        return imageMatrix.toColVectors()
     }
     
     public var asDynamic: DynamicMatrix<R> {

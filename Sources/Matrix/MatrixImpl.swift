@@ -222,11 +222,20 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
         return nil
     }
     
+    // TODO remove
     public func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode, debug: Bool) -> MatrixElimination<R, n, m> {
         guard let processor = R.matrixEliminationProcessorType()?.init(self, mode, debug) else {
             fatalError("MatrixElimination not available for ring: \(R.symbol)")
         }
         return MatrixElimination(processor)
+    }
+    
+    // TODO replace with above
+    public func _eliminate(mode: MatrixEliminationMode, debug: Bool = false) -> MatrixEliminationProcessor<R> {
+        guard let e = R.matrixEliminationProcessorType()?.init(self, mode, debug) else {
+            fatalError("MatrixElimination not available for ring: \(R.symbol)")
+        }
+        return e
     }
     
     public func determinant() -> R {
