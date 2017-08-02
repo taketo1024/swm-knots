@@ -157,8 +157,8 @@ public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Modu
         return "(\(domainBasis) -> \(codomainBasis))"
     }
     
-    public var debugDescription: String {
-        return description + "\n" + matrix.debugDescription + "\n"
+    public var detailDescription: String {
+        return description + "\n" + matrix.detailDescription + "\n"
     }
     
     public static var symbol: String {

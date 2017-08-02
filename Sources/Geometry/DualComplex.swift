@@ -58,7 +58,7 @@ public struct DualSimplicialCell: GeometricCell {
         return "d\(base)"
     }
     
-    public var debugDescription: String {
+    public var detailDescription: String {
         return "d\(base) : \(chain)"
     }
     

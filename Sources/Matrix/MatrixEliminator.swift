@@ -96,9 +96,9 @@ public class MatrixEliminator<R: Ring> {
     }()
     
     final func run() {
-        log("-----Start (mode: \(mode))-----\n\n\(result.debugDescription)\n")
+        log("-----Start (mode: \(mode))-----\n\n\(result.detailDescription)\n")
         iterations()
-        log("-----Done (\(process.count) steps)-----\n\nResult:\n\(result.debugDescription)\n")
+        log("-----Done (\(process.count) steps)-----\n\nResult:\n\(result.detailDescription)\n")
     }
     
     func iterations() {
@@ -119,7 +119,7 @@ public class MatrixEliminator<R: Ring> {
         s.apply(to: result)
         process.append(s)
         
-        log("\(itr)/\(maxItr): \(s) \n\n\(result.debugDescription)\n")
+        log("\(itr)/\(maxItr): \(s) \n\n\(result.detailDescription)\n")
     }
     
     private func log(_ msg: @autoclosure () -> String) {

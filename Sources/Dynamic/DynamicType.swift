@@ -8,10 +8,10 @@
 
 import Foundation
 
-public protocol TypeInfo: class, CustomStringConvertible, CustomDebugStringConvertible { }
+public protocol TypeInfo: class, CustomStringConvertible { }
 
 public extension TypeInfo {
-    public var debugDescription: String {
+    public var detailDescription: String {
         return description
     }
 }

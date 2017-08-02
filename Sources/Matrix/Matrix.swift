@@ -301,8 +301,8 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         return impl.description
     }
     
-    public var debugDescription: String {
-        return impl.debugDescription
+    public var detailDescription: String {
+        return impl.detailDescription
     }
     
     public static var symbol: String {

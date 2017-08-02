@@ -70,8 +70,8 @@ public struct _ChainMap<chainType: ChainType, R: Ring, A: FreeModuleBase, B: Fre
                 print("C\(i1) -> C'\(i2 + shift)")
                 print("----------")
                 print("C\(i1) : \(d1.domainBasis)\n")
-                print("f2 ∘ d1\n", (f2 ∘ d1).matrix.debugDescription, "\n")
-                print("d2 ∘ f1\n", (d2 ∘ f1).matrix.debugDescription, "\n")
+                print("f2 ∘ d1\n", (f2 ∘ d1).matrix.detailDescription, "\n")
+                print("d2 ∘ f1\n", (d2 ∘ f1).matrix.detailDescription, "\n")
                 print()
             }
             

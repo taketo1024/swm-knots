@@ -11,7 +11,7 @@ import Foundation
 public typealias   Homology<R: EuclideanRing, A: FreeModuleBase> = _Homology<Descending, R, A>
 public typealias Cohomology<R: EuclideanRing, A: FreeModuleBase> = _Homology<Ascending, R, A>
 
-public final class _Homology<chainType: ChainType, R: EuclideanRing, A: FreeModuleBase>: CustomStringConvertible, CustomDebugStringConvertible {
+public final class _Homology<chainType: ChainType, R: EuclideanRing, A: FreeModuleBase>: CustomStringConvertible {
     public let chainComplex: _ChainComplex<chainType, R, A>
     internal let groupInfos: [HomologyGroupInfo<chainType, R, A>]
     
@@ -39,9 +39,9 @@ public final class _Homology<chainType: ChainType, R: EuclideanRing, A: FreeModu
         return "{" + groupInfos.map{"\($0.degree):\($0)"}.joined(separator: ", ") + "}"
     }
     
-    public var debugDescription: String {
+    public var detailDescription: String {
         return "{\n"
-            + groupInfos.map{"\t\($0.degree) : \($0.debugDescription)"}.joined(separator: ",\n")
+            + groupInfos.map{"\t\($0.degree) : \($0.detailDescription)"}.joined(separator: ",\n")
             + "\n}"
     }
 }

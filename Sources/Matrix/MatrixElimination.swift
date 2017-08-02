@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct MatrixElimination<R: Ring, n: _Int, m: _Int> {
+public struct MatrixElimination<R: Ring, n: _Int, m: _Int>: CustomStringConvertible {
     internal let processor: MatrixEliminator<R>
     
     public init(_ processor: MatrixEliminator<R>) {
@@ -37,5 +37,9 @@ public struct MatrixElimination<R: Ring, n: _Int, m: _Int> {
     
     public var diagonal: [R] {
         return processor.diagonal
+    }
+    
+    public var description: String {
+        return result.description
     }
 }

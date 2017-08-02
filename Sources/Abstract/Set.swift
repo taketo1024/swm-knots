@@ -8,7 +8,8 @@
 
 import Foundation
 
-public protocol SetType: Equatable, Hashable, CustomStringConvertible, CustomDebugStringConvertible {
+public protocol SetType: Equatable, Hashable, CustomStringConvertible {
+    var detailDescription: String { get }
     static var symbol: String { get }
 }
 
@@ -22,7 +23,7 @@ public extension SetType {
         return Q.init(self)
     }
     
-    public var debugDescription: String {
+    public var detailDescription: String {
         return description
     }
     

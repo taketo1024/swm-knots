@@ -12,7 +12,7 @@ public protocol GeometricCell: FreeModuleBase {
     var dim: Int {get}
 }
 
-public protocol GeometricComplex: class, CustomStringConvertible, CustomDebugStringConvertible {
+public protocol GeometricComplex: class, CustomStringConvertible {
     associatedtype Cell: GeometricCell
     
     var dim: Int {get}
@@ -70,7 +70,7 @@ public extension GeometricComplex {
         return "\(type(of: self))(dim: \(dim))"
     }
     
-    public var debugDescription: String {
+    public var detailDescription: String {
         return "\(description) {\n" +
             (0 ... dim)
                 .map{ (i) -> (Int, [Cell]) in (i, allCells(ofDim: i)) }
