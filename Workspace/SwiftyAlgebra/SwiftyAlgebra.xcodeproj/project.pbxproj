@@ -72,6 +72,7 @@
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
 		DD6125921F31964E00FD5533 /* EucMatrixElimination.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125911F31964E00FD5533 /* EucMatrixElimination.swift */; };
 		DD6125941F31966D00FD5533 /* FieldMatrixElimination.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125931F31966D00FD5533 /* FieldMatrixElimination.swift */; };
+		DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125991F31AA2500FD5533 /* Cache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -160,6 +161,7 @@
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
 		DD6125911F31964E00FD5533 /* EucMatrixElimination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EucMatrixElimination.swift; sourceTree = "<group>"; };
 		DD6125931F31966D00FD5533 /* FieldMatrixElimination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FieldMatrixElimination.swift; sourceTree = "<group>"; };
+		DD6125991F31AA2500FD5533 /* Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -306,6 +308,7 @@
 				DD3B16EF1ECECC5500EC6C2A /* debug.swift */,
 				1424F4F71EB997780052581F /* optable.swift */,
 				145339BF1EC7D67100F014F4 /* Ref.swift */,
+				DD6125991F31AA2500FD5533 /* Cache.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -563,6 +566,7 @@
 				1424F5051EB997780052581F /* Map.swift in Sources */,
 				1424F5081EB997780052581F /* Real.swift in Sources */,
 				1424F4FB1EB997780052581F /* Field.swift in Sources */,
+				DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */,
 				14929C9E1ED9C798006ACAC5 /* Simplex.swift in Sources */,
 				141417311ECE984800B167CB /* Sequence.swift in Sources */,
 				1420EAE91EEAC64900336620 /* MatrixEliminationProcessor.swift in Sources */,
