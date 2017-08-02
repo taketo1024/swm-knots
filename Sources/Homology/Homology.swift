@@ -30,9 +30,9 @@ public final class _Homology<chainType: ChainType, R: EuclideanRing, A: FreeModu
         let offset = chainComplex.offset
         let top = chainComplex.topDegree
         
-        let elims = { () -> (Int) -> MatrixElimination<R, Dynamic, Dynamic> in
+        let elims = { () -> (Int) -> MatrixEliminationResult<R, Dynamic, Dynamic> in
             let res = (offset - 1 ... top + 1).map { chainComplex.boundaryMap($0).matrix.eliminate() }
-            return { (i: Int) -> MatrixElimination<R, Dynamic, Dynamic> in
+            return { (i: Int) -> MatrixEliminationResult<R, Dynamic, Dynamic> in
                 return res[i - offset + 1]
             }
         }()

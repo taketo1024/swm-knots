@@ -8,6 +8,12 @@
 
 import Foundation
 
+public enum MatrixEliminationMode {
+    case Both
+    case Rows
+    case Cols
+}
+
 public class MatrixEliminationProcessor<R: Ring> {
     let mode: MatrixEliminationMode
     let rows: Int
@@ -37,6 +43,8 @@ public class MatrixEliminationProcessor<R: Ring> {
             case .Cols: return target.cols
             }
         }()
+        
+        self.run()
     }
     
     public lazy var left: _MatrixImpl<R> = { [unowned self] in

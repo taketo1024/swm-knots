@@ -58,7 +58,7 @@ public class HomologyGroupInfo<chainType: ChainType, R: EuclideanRing, A: FreeMo
         self.init(degree: degree, basis: basis, elim1: E1, elim2: E2)
     }
     
-    internal init<n0: _Int, n1: _Int, n2: _Int>(degree: Int, basis: ChainBasis, elim1 E1: MatrixElimination<R, n0, n1>, elim2 E2: MatrixElimination<R, n1, n2>) {
+    internal init<n0: _Int, n1: _Int, n2: _Int>(degree: Int, basis: ChainBasis, elim1 E1: MatrixEliminationResult<R, n0, n1>, elim2 E2: MatrixEliminationResult<R, n1, n2>) {
         // Z_i : the i-th Cycle group
         let Z = E1.kernelPart
         let (n, k) = (Z.rows, Z.cols)

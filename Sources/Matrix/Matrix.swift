@@ -241,9 +241,8 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         impl.swapCols(j0, j1)
     }
     
-    // TODO remove
-    public func eliminate(mode: MatrixEliminationMode = .Both, debug: Bool = false) -> MatrixElimination<R, n, m> {
-        return impl.eliminate(mode: mode, debug: debug)
+    public func eliminate(mode: MatrixEliminationMode = .Both, debug: Bool = false) -> MatrixEliminationResult<R, n, m> {
+        return MatrixEliminationResult(impl.eliminate(mode: mode, debug: debug))
     }
     
     public var smithNormalForm: MatrixEliminationResult<R, n, m> {
@@ -251,7 +250,7 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
             return s
         }
         
-        let e = impl._eliminate(mode: .Both)
+        let e = impl.eliminate(mode: .Both)
         e.run()
         
         let s = MatrixEliminationResult<R, n, m>(e)
@@ -276,7 +275,7 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         let d = smithNormalForm.diagonal
         var a: Matrix<R, n, Dynamic> = smithNormalForm.leftInverse.submatrix(colsInRange: 0 ..< rank)
         
-        (0 ..< Swift.min(d.count, cols)).forEach {
+        (0 ..< Swift.min(d.count, a.cols)).forEach {
             a.multiplyCol(at: $0, by: d[$0])
         }
         

@@ -38,4 +38,38 @@ public struct MatrixEliminationResult<R: Ring, n: _Int, m: _Int> {
     public var diagonal: [R] {
         return processor.diagonal
     }
+    
+    // TODO remove below
+    
+    public var rank: Int {
+        let A = processor.result
+        let r = min(A.rows, A.cols)
+        return (0 ..< r).filter{ A[$0, $0] != R.zero }.count
+    }
+    
+    public var nullity: Int {
+        return processor.result.cols - rank
+    }
+    
+    public var kernelPart: Matrix<R, m, Dynamic> {
+        return right.submatrix(colsInRange: rank ..< processor.result.cols)
+    }
+    
+    public var kernelVectors: [ColVector<R, m>] {
+        return kernelPart.toColVectors()
+    }
+    
+    public var imagePart: Matrix<R, n, Dynamic> {
+        let d = diagonal
+        var a: Matrix<R, n, Dynamic> = leftInverse.submatrix(colsInRange: 0 ..< self.rank)
+        (0 ..< min(d.count, a.cols)).forEach {
+            a.multiplyCol(at: $0, by: d[$0])
+        }
+        return a
+    }
+    
+    public var imageVectors: [ColVector<R, n>] {
+        return imagePart.toColVectors()
+    }
+
 }
