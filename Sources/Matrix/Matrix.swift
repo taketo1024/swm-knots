@@ -111,13 +111,14 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public var type: MatrixType {return impl.type}
     
     private mutating func willMutate() {
-        smithNormalFormCache.clear()
         copyIfNecessary()
+        smithNormalFormCache.value = nil
     }
     
     private mutating func copyIfNecessary() {
         if !isKnownUniquelyReferenced(&impl) {
             impl = impl.copy()
+            smithNormalFormCache = Cache(nil)
         }
     }
     

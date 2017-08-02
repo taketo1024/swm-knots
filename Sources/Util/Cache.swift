@@ -16,4 +16,7 @@ public final class Cache<T> {
     public func clear() {
         self.value = nil
     }
+    public func copy() -> Cache<T> {
+        return Cache(value)
+    }
 }
