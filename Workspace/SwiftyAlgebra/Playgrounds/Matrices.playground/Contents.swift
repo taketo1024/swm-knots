@@ -22,9 +22,17 @@ do {
     a + b
     a * b
     
-    
     a + b == b + a  // commutative
     a * b != b * a  // noncommutative
+    
+    a.determinant
+    b.determinant
+
+    let c = Matrix<Z,_3,_3>(1,2,3,0,-4,1,0,3,-1)
+    
+    c.determinant
+    c.isInvertible
+    c * c.inverse! == Matrix.identity
 }
 
 // Matrix Elimination

@@ -29,7 +29,7 @@ public class EucMatrixEliminator<R: EuclideanRing>: MatrixEliminator<R> {
                 continue elimination
             }
             
-            if doRows && doCols && !result[i0, j0].isUnit {
+            if doRows && doCols && !result[i0, j0].isInvertible {
                 let a = result[i0, j0]
                 for i in itr ..< rows {
                     for j in itr ..< cols {
@@ -80,7 +80,7 @@ public class EucMatrixEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         
         while let c = iterator.next() {
             let a = c.value
-            if a.isUnit {
+            if a.isInvertible {
                 return c
             }
             

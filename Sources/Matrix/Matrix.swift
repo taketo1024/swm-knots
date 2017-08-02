@@ -327,7 +327,30 @@ public extension Matrix where n == _1 {
 // TODO: conform to Ring after conditional conformance is supported.
 public extension Matrix where n == m {
     public var determinant: R {
+        // TODO implement efficient algorithm.
+        
         return impl.determinant()
+    }
+    
+    public var isInvertible: Bool {
+        if impl.eliminatable(mode: .Both) {
+            return smithNormalForm.diagonal.multiplyAll().isInvertible
+        } else {
+            return determinant.isInvertible
+        }
+    }
+    
+    public var inverse: Matrix<R, n, n>? {
+        if impl.eliminatable(mode: .Both) {
+            let s = smithNormalForm
+            if s.result == self.leftIdentity {
+                return s.right * s.left
+            } else {
+                return nil
+            }
+        } else {
+            fatalError("matrix-inverse not yet impled for general coeff-rings.")
+        }
     }
     
     public static var identity: Matrix<R, n, n> {

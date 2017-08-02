@@ -222,6 +222,10 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
         return nil
     }
     
+    public func eliminatable(mode: MatrixEliminationMode) -> Bool {
+        return R.matrixEliminatiorType() != nil
+    }
+    
     public func eliminate(mode: MatrixEliminationMode, debug: Bool = false) -> MatrixEliminator<R> {
         guard let e = R.matrixEliminatiorType()?.init(self, mode, debug) else {
             fatalError("MatrixElimination not available for ring: \(R.symbol)")

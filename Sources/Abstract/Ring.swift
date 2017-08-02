@@ -4,7 +4,7 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
     associatedtype IntegerLiteralType = IntegerNumber
     init(intValue: IntegerNumber)
     var inverse: Self? { get }
-    var isUnit: Bool { get }
+    var isInvertible: Bool { get }
     
     static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type
     static func matrixEliminatiorType() -> MatrixEliminator<Self>.Type?
@@ -16,7 +16,7 @@ public extension Ring {
         self.init(intValue: value)
     }
     
-    public var isUnit: Bool {
+    public var isInvertible: Bool {
         return (inverse != nil)
     }
     
@@ -155,5 +155,14 @@ public struct QuotientField<R: Ring, I: Ideal>: Field, _QuotientRing where R == 
     
     public var representative: R {
         return r
+    }
+}
+
+public extension Array where Iterator.Element: Ring {
+    public func multiplyAll() -> Iterator.Element {
+        typealias R = Iterator.Element
+        return self.reduce(R.identity) {
+            return $0 * $1
+        }
     }
 }
