@@ -32,19 +32,19 @@ class IntMatrixEliminationTests: XCTestCase {
                     14, 14, 10, 6, 14,
                     8, 8, 11, 11, 7,
                     10, 14, 5, 14, 14)
-        let E = A.eliminate()
-        XCTAssertNoThrow(E.rankNormalForm == E.left * A * E.right)
+        let E = A.eliminate(mode: .Both)
+        XCTAssertNoThrow(E.result == E.left * A * E.right)
     }
      */
     
     func testEliminationRandomM55() {
         for _ in 0 ..< 10 {
             let A = randomM55()
-            let E = A.eliminate()
-            XCTAssertEqual(E.rankNormalForm, E.left * A * E.right, "B = LAR")
-            XCTAssertEqual(A, E.leftInverse * E.rankNormalForm * E.rightInverse, "A = L^-1 B R^-1")
-            XCTAssertTrue(E.rankNormalForm.reduce(true) { (res, itr) in
-                res && ( (itr.col == itr.row && itr.col < E.rank) || itr.value == 0)
+            let E = A.eliminate(mode: .Both)
+            XCTAssertEqual(E.result, E.left * A * E.right, "B = LAR")
+            XCTAssertEqual(A, E.leftInverse * E.result * E.rightInverse, "A = L^-1 B R^-1")
+            XCTAssertTrue(E.result.reduce(true) { (res, itr) in
+                res && ( (itr.col == itr.row && itr.col < A.rank) || itr.value == 0)
             }, "B is diagonal")
         }
     }
@@ -52,21 +52,21 @@ class IntMatrixEliminationTests: XCTestCase {
     func testEliminationRegularM55() {
         for _ in 0 ..< 10 {
             let A = randomRegularM55()
-            let E = A.eliminate()
-            XCTAssertEqual(E.rankNormalForm, M55.identity, "B = I")
-            XCTAssertEqual(E.rankNormalForm, E.left * A * E.right, "B = LAR")
-            XCTAssertEqual(A, E.leftInverse * E.rankNormalForm * E.rightInverse, "A = L^-1 B R^-1")
+            let E = A.eliminate(mode: .Both)
+            XCTAssertEqual(E.result, M55.identity, "B = I")
+            XCTAssertEqual(E.result, E.left * A * E.right, "B = LAR")
+            XCTAssertEqual(A, E.leftInverse * E.result * E.rightInverse, "A = L^-1 B R^-1")
         }
     }
     
     func testEliminationSingularM55() {
         for _ in 0 ..< 10 {
             let A = randomSingularM55()
-            let E = A.eliminate()
-            XCTAssertEqual(E.rankNormalForm, E.left * A * E.right, "B = LAR")
-            XCTAssertEqual(A, E.leftInverse * E.rankNormalForm * E.rightInverse, "A = L^-1 B R^-1")
-            XCTAssertTrue(E.rankNormalForm.reduce(true) { (res, itr) in
-                res && ( (itr.col == itr.row && itr.col < E.rank) || itr.value == 0)
+            let E = A.eliminate(mode: .Both)
+            XCTAssertEqual(E.result, E.left * A * E.right, "B = LAR")
+            XCTAssertEqual(A, E.leftInverse * E.result * E.rightInverse, "A = L^-1 B R^-1")
+            XCTAssertTrue(E.result.reduce(true) { (res, itr) in
+                res && ( (itr.col == itr.row && itr.col < A.rank) || itr.value == 0)
             }, "B is diagonal")
         }
     }
@@ -76,8 +76,8 @@ class IntMatrixEliminationTests: XCTestCase {
             let A = randomM55()
             let E = A.eliminate(mode: .Rows)
             XCTAssertEqual(E.right, M55.identity)
-            XCTAssertEqual(E.rankNormalForm, E.left * A)
-            XCTAssertEqual(A, E.leftInverse * E.rankNormalForm)
+            XCTAssertEqual(E.result, E.left * A)
+            XCTAssertEqual(A, E.leftInverse * E.result)
         }
     }
     
@@ -86,9 +86,9 @@ class IntMatrixEliminationTests: XCTestCase {
             let A = randomRegularM55()
             let E = A.eliminate(mode: .Rows)
             XCTAssertEqual(E.right, M55.identity)
-            XCTAssertEqual(E.rankNormalForm, E.left * A)
-            XCTAssertEqual(A, E.leftInverse * E.rankNormalForm)
-            XCTAssertEqual(E.rankNormalForm, M55.identity)
+            XCTAssertEqual(E.result, E.left * A)
+            XCTAssertEqual(A, E.leftInverse * E.result)
+            XCTAssertEqual(E.result, M55.identity)
         }
     }
     
@@ -97,8 +97,8 @@ class IntMatrixEliminationTests: XCTestCase {
             let A = randomSingularM55()
             let E = A.eliminate(mode: .Rows)
             XCTAssertEqual(E.right, M55.identity)
-            XCTAssertEqual(E.rankNormalForm, E.left * A)
-            XCTAssertEqual(A, E.leftInverse * E.rankNormalForm)
+            XCTAssertEqual(E.result, E.left * A)
+            XCTAssertEqual(A, E.leftInverse * E.result)
         }
     }
     
@@ -107,8 +107,8 @@ class IntMatrixEliminationTests: XCTestCase {
             let A = randomM55()
             let E = A.eliminate(mode: .Cols)
             XCTAssertEqual(E.left, M55.identity)
-            XCTAssertEqual(E.rankNormalForm, A * E.right)
-            XCTAssertEqual(A, E.rankNormalForm * E.rightInverse)
+            XCTAssertEqual(E.result, A * E.right)
+            XCTAssertEqual(A, E.result * E.rightInverse)
         }
     }
     
@@ -117,9 +117,9 @@ class IntMatrixEliminationTests: XCTestCase {
             let A = randomRegularM55()
             let E = A.eliminate(mode: .Cols)
             XCTAssertEqual(E.left, M55.identity)
-            XCTAssertEqual(E.rankNormalForm, A * E.right)
-            XCTAssertEqual(A, E.rankNormalForm * E.rightInverse)
-            XCTAssertEqual(E.rankNormalForm, M55.identity)
+            XCTAssertEqual(E.result, A * E.right)
+            XCTAssertEqual(A, E.result * E.rightInverse)
+            XCTAssertEqual(E.result, M55.identity)
         }
     }
     
@@ -128,8 +128,8 @@ class IntMatrixEliminationTests: XCTestCase {
             let A = randomSingularM55()
             let E = A.eliminate(mode: .Cols)
             XCTAssertEqual(E.left, M55.identity)
-            XCTAssertEqual(E.rankNormalForm, A * E.right)
-            XCTAssertEqual(A, E.rankNormalForm * E.rightInverse)
+            XCTAssertEqual(E.result, A * E.right)
+            XCTAssertEqual(A, E.result * E.rightInverse)
         }
     }
     
