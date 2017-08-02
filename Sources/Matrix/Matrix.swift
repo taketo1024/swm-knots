@@ -19,7 +19,7 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public typealias Iterator = MatrixIterator<R>
     
     internal var impl: _MatrixImpl<R>
-    internal var smithNormalFormCache: Cache<MatrixEliminationResult<R, n, m>> = Cache()
+    internal var smithNormalFormCache: Cache<MatrixElimination<R, n, m>> = Cache()
 
     // internal root initializer
     internal init(_ impl: _MatrixImpl<R>) {
@@ -241,17 +241,17 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         impl.swapCols(j0, j1)
     }
     
-    public func eliminate(mode: MatrixEliminationMode, debug: Bool = false) -> MatrixEliminationResult<R, n, m> {
-        return MatrixEliminationResult(impl.eliminate(mode: mode, debug: debug))
+    public func eliminate(mode: MatrixEliminationMode, debug: Bool = false) -> MatrixElimination<R, n, m> {
+        return MatrixElimination(impl.eliminate(mode: mode, debug: debug))
     }
     
-    public var smithNormalForm: MatrixEliminationResult<R, n, m> {
+    public var smithNormalForm: MatrixElimination<R, n, m> {
         if let s = smithNormalFormCache.value {
             return s
         }
         
         let e = impl.eliminate(mode: .Both)
-        let s = MatrixEliminationResult<R, n, m>(e)
+        let s = MatrixElimination<R, n, m>(e)
         smithNormalFormCache.value = s
         
         return s

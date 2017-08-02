@@ -1,5 +1,5 @@
 //
-//  MatrixEliminationResult.swift
+//  MatrixElimination.swift
 //  SwiftyAlgebra
 //
 //  Created by Taketo Sano on 2017/08/02.
@@ -8,10 +8,10 @@
 
 import Foundation
 
-public struct MatrixEliminationResult<R: Ring, n: _Int, m: _Int> {
-    private let processor: MatrixEliminationProcessor<R>
+public struct MatrixElimination<R: Ring, n: _Int, m: _Int> {
+    private let processor: MatrixEliminator<R>
     
-    public init(_ processor: MatrixEliminationProcessor<R>) {
+    public init(_ processor: MatrixEliminator<R>) {
         self.processor = processor
     }
     

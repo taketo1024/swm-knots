@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class FieldMatrixEliminationProcessor<K: Field>: MatrixEliminationProcessor<K> {
+public class FieldMatrixEliminator<K: Field>: MatrixEliminator<K> {
     override func iteration() -> Bool {
         let doRows = (mode != .Cols)
         let doCols = (mode != .Rows)

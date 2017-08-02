@@ -1,5 +1,5 @@
 //
-//  MatrixEliminationProcessor.swift
+//  MatrixEliminator.swift
 //  SwiftyAlgebra
 //
 //  Created by Taketo Sano on 2017/06/09.
@@ -14,7 +14,7 @@ public enum MatrixEliminationMode {
     case Cols
 }
 
-public class MatrixEliminationProcessor<R: Ring> {
+public class MatrixEliminator<R: Ring> {
     let mode: MatrixEliminationMode
     let rows: Int
     let cols: Int
