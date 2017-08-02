@@ -21,7 +21,7 @@ public class MatrixEliminationProcessor<R: Ring> {
     
     var debug: Bool = false
     
-    public required init(_ target: _MatrixImpl<R>, _ mode: MatrixEliminationMode, debug: Bool = false) {
+    public required init(_ target: _MatrixImpl<R>, _ mode: MatrixEliminationMode, _ debug: Bool = false) {
         self.mode = mode
         self.rows = target.rows
         self.cols = target.cols

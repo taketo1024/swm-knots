@@ -217,6 +217,10 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         set { list.set(i, j, newValue) }
     }
     
+    public override var type: MatrixType {
+        return .Sparse
+    }
+    
     public override func equals(_ b: _MatrixImpl<R>) -> Bool {
         assert((rows, cols) == (b.rows, b.cols), "Mismatching matrix size.")
         guard let _b = b as? _SparseMatrixImpl<R> else { return super.equals(b) }

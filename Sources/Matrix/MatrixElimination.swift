@@ -8,21 +8,19 @@ public enum MatrixEliminationMode {
 
 public class MatrixElimination<R: Ring, n: _Int, m: _Int> {
     internal let processor: MatrixEliminationProcessor<R>
-    private let matrixType: MatrixType
+    
+    public init(_ processor: MatrixEliminationProcessor<R>) {
+        self.processor = processor
+    }
     
     private lazy var result: (matrix: _MatrixImpl<R>, process: [EliminationStep<R>]) = {[unowned self] in
         let p = self.processor
         p.run()
         return (p.result, p.process)
-    }()
-    
-    internal init(_ matrix: Matrix<R, n, m>, _ mode: MatrixEliminationMode, _ processorType: MatrixEliminationProcessor<R>.Type, debug: Bool = false) {
-        self.processor = processorType.init(matrix.impl, mode, debug: debug)
-        self.matrixType = matrix.type
-    }
+        }()
     
     public var rankNormalForm: Matrix<R, n, m> {
-        return Matrix(matrixType, result.matrix)
+        return Matrix(result.matrix)
     }
     
     public var left: Matrix<R, n, n> {
@@ -32,7 +30,7 @@ public class MatrixElimination<R: Ring, n: _Int, m: _Int> {
             .filter{ $0.isRowOperation }
             .forEach { $0.apply(to: Q) }
         
-        return Matrix(matrixType, Q)
+        return Matrix(Q)
     }
     
     public var leftInverse: Matrix<R, n, n> {
@@ -43,7 +41,7 @@ public class MatrixElimination<R: Ring, n: _Int, m: _Int> {
             .reversed()
             .forEach{ $0.inverse.apply(to: Q) }
         
-        return Matrix(matrixType, Q)
+        return Matrix(Q)
     }
     
     public var right: Matrix<R, m, m> {
@@ -53,7 +51,7 @@ public class MatrixElimination<R: Ring, n: _Int, m: _Int> {
             .filter{ $0.isColOperation }
             .forEach { $0.apply(to: P) }
         
-        return Matrix(matrixType, P)
+        return Matrix(P)
     }
     
     public var rightInverse: Matrix<R, m, m> {
@@ -64,7 +62,7 @@ public class MatrixElimination<R: Ring, n: _Int, m: _Int> {
             .reversed()
             .forEach{ $0.inverse.apply(to: P) }
         
-        return Matrix(matrixType, P)
+        return Matrix(P)
     }
     
     public var diagonal: [R] {

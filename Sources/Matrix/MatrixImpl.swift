@@ -42,6 +42,10 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
         set { fatalError("implement in subclass.") }
     }
     
+    public var type: MatrixType {
+        return .Default
+    }
+    
     // MEMO: implemented like this since there might be a case that 
     //       a GridMatrix and a SparseMatrix are compared.
     public func equals(_ b: _MatrixImpl<R>) -> Bool {
@@ -216,6 +220,13 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
         }
         
         return nil
+    }
+    
+    public func eliminate<n: _Int, m: _Int>(mode: MatrixEliminationMode, debug: Bool) -> MatrixElimination<R, n, m> {
+        guard let processor = R.matrixEliminationProcessorType()?.init(self, mode, debug) else {
+            fatalError("MatrixElimination not available for ring: \(R.symbol)")
+        }
+        return MatrixElimination(processor)
     }
     
     public func determinant() -> R {

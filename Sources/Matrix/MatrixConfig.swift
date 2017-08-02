@@ -20,15 +20,15 @@ public extension Ring {
         }
     }
     
-    public static func matrixEliminationProcessorType() -> MatrixEliminationProcessor<Self>.Type {
-        fatalError("Matrix elimination not supported for a general Ring.")
+    public static func matrixEliminationProcessorType() -> MatrixEliminationProcessor<Self>.Type? {
+        return nil
     }
 }
 
 // EuclideanRing
 
 public extension EuclideanRing {
-    public static func matrixEliminationProcessorType() -> MatrixEliminationProcessor<Self>.Type {
+    public static func matrixEliminationProcessorType() -> MatrixEliminationProcessor<Self>.Type? {
         return EucMatrixEliminationProcessor<Self>.self
     }
 }
@@ -36,7 +36,7 @@ public extension EuclideanRing {
 // Field
 
 public extension Field {
-    public static func matrixEliminationProcessorType() -> MatrixEliminationProcessor<Self>.Type {
+    public static func matrixEliminationProcessorType() -> MatrixEliminationProcessor<Self>.Type? {
         return FieldMatrixEliminationProcessor<Self>.self
     }
 }
