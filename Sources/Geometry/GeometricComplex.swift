@@ -48,7 +48,7 @@ public extension GeometricComplex {
         
         let from = allCells(ofDim: i)
         let to = (i < dim) ? allCells(ofDim: i + 1) : []
-        let matrix: DynamicMatrix<R> = boundaryMapMatrix(i + 1, to, from).transposed
+        let matrix = R(intValue: (-1).pow(i + 1)) * boundaryMapMatrix(i + 1, to, from).transposed
         return FreeModuleHom(domainBasis: from.map{ Dual($0) }, codomainBasis: to.map{ Dual($0) }, matrix: matrix)
     }
     

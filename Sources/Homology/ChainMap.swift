@@ -49,6 +49,7 @@ public struct _ChainMap<chainType: ChainType, R: Ring, A: FreeModuleBase, B: Fre
         return (offset ... topDegree).contains(i) ? maps[i - offset] : FreeModuleHom.zero
     }
     
+    @discardableResult
     public func assertChainMap(from: _ChainComplex<chainType, R, A>, to: _ChainComplex<chainType, R, B>, debug: Bool = false) -> Bool {
         return (min(from.offset, to.offset) ... max(from.topDegree, to.topDegree)).forAll { i1 -> Bool in
             let i2 = descending ? i1 - 1 : i1 + 1
