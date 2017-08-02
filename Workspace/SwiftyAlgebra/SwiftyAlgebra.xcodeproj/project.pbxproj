@@ -73,6 +73,7 @@
 		DD6125921F31964E00FD5533 /* EucMatrixElimination.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125911F31964E00FD5533 /* EucMatrixElimination.swift */; };
 		DD6125941F31966D00FD5533 /* FieldMatrixElimination.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125931F31966D00FD5533 /* FieldMatrixElimination.swift */; };
 		DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125991F31AA2500FD5533 /* Cache.swift */; };
+		DDD865071F31ACA5009C343C /* MatrixEliminationResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD865061F31ACA5009C343C /* MatrixEliminationResult.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -162,6 +163,7 @@
 		DD6125911F31964E00FD5533 /* EucMatrixElimination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EucMatrixElimination.swift; sourceTree = "<group>"; };
 		DD6125931F31966D00FD5533 /* FieldMatrixElimination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FieldMatrixElimination.swift; sourceTree = "<group>"; };
 		DD6125991F31AA2500FD5533 /* Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
+		DDD865061F31ACA5009C343C /* MatrixEliminationResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixEliminationResult.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -322,6 +324,7 @@
 				14207CB11EEB90A90007BE8F /* GridMatrixImpl.swift */,
 				14B8E1631EEBA0B20024EB2A /* SparseMatrixImpl.swift */,
 				1482E05C1EE96BA700B0CEFA /* IntMatrixImpl+Eigen.swift */,
+				DDD865061F31ACA5009C343C /* MatrixEliminationResult.swift */,
 				1424F4F01EB997780052581F /* MatrixElimination.swift */,
 				1420EAE81EEAC64900336620 /* MatrixEliminationProcessor.swift */,
 				DD6125911F31964E00FD5533 /* EucMatrixElimination.swift */,
@@ -539,6 +542,7 @@
 				1424F4F91EB997780052581F /* AdditiveGroup.swift in Sources */,
 				144EC9EE1F286A93001BC4BC /* BarycentricSubdivision.swift in Sources */,
 				14B8E1621EEBA0390024EB2A /* SortedArray.swift in Sources */,
+				DDD865071F31ACA5009C343C /* MatrixEliminationResult.swift in Sources */,
 				1424F5071EB997780052581F /* Rational.swift in Sources */,
 				14D261341EE4614E006775E2 /* Set.swift in Sources */,
 				140BCD511EBA3F8A00D7CE74 /* ChainComplex.swift in Sources */,

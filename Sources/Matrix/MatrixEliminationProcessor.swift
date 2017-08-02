@@ -39,6 +39,54 @@ public class MatrixEliminationProcessor<R: Ring> {
         }()
     }
     
+    public lazy var left: _MatrixImpl<R> = { [unowned self] in
+        let Q = self.result.leftIdentity()
+        
+        self.process
+            .filter{ $0.isRowOperation }
+            .forEach { $0.apply(to: Q) }
+        
+        return Q
+    }()
+    
+    public lazy var leftInverse: _MatrixImpl<R> = { [unowned self] in
+        let Q = self.result.leftIdentity()
+        
+        self.process
+            .filter{ $0.isRowOperation }
+            .reversed()
+            .forEach{ $0.inverse.apply(to: Q) }
+        
+        return Q
+    }()
+    
+    public lazy var right: _MatrixImpl<R> = { [unowned self] in
+        let P = self.result.rightIdentity()
+        
+        self.process
+            .filter{ $0.isColOperation }
+            .forEach { $0.apply(to: P) }
+        
+        return P
+    }()
+    
+    public lazy var rightInverse: _MatrixImpl<R> = { [unowned self] in
+        let P = self.result.rightIdentity()
+        
+        self.process
+            .filter{ $0.isColOperation }
+            .reversed()
+            .forEach{ $0.inverse.apply(to: P) }
+        
+        return P
+    }()
+    
+    public lazy var diagonal: [R] = { [unowned self] in
+        let A = self.result
+        let r = min(A.rows, A.cols)
+        return (0 ..< r).map{ A[$0, $0] }
+    }()
+    
     final func run() {
         log("-----Start (mode: \(mode))-----\n\n\(result.debugDescription)\n")
         iterations()
