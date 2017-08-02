@@ -51,26 +51,26 @@ public class HomologyGroupInfo<chainType: ChainType, R: EuclideanRing, A: FreeMo
     public convenience init(_ chainComplex: _ChainComplex<chainType, R, A>, degree: Int) {
         let d1 = chainComplex.boundaryMap(degree)
         let d2 = chainComplex.boundaryMap(chainComplex.descending ? degree + 1 : degree - 1)
-        let basis = d1.domainBasis
-        let E1 = d1.matrix.eliminate()
-        let E2 = d2.matrix.eliminate()
-        
-        self.init(degree: degree, basis: basis, elim1: E1, elim2: E2)
+        self.init(degree: degree, boundaryMap1: d1, boundaryMap2: d2)
     }
     
-    internal init<n0: _Int, n1: _Int, n2: _Int>(degree: Int, basis: ChainBasis, elim1 E1: MatrixEliminationResult<R, n0, n1>, elim2 E2: MatrixEliminationResult<R, n1, n2>) {
+    public convenience init(degree: Int, boundaryMap1 d1: FreeModuleHom<R, A, A>, boundaryMap2 d2: FreeModuleHom<R, A, A>) {
+        self.init(degree: degree, basis: d1.domainBasis, matrix1: d1.matrix, matrix2: d2.matrix)
+    }
+    
+    internal init<n0: _Int, n1: _Int, n2: _Int>(degree: Int, basis: ChainBasis, matrix1 A1: Matrix<R, n0, n1>, matrix2 A2: Matrix<R, n1, n2>) {
         // Z_i : the i-th Cycle group
-        let Z = E1.kernelPart
+        let Z = A1.kernelMatrix
         let (n, k) = (Z.rows, Z.cols)
         
         // B_i : the i-th Boundary group
-        let B = E2.imagePart
+        let B = A2.imageMatrix
         let l = B.cols
         
         // C_i -> Z_i transition matrix
         //   PAQ = [D; O_k]  =>  Z = Q * [O; I_k]
         //   Q^-1 * Z = [O; I_k]
-        let Qinv = E1.rightInverse
+        let Qinv = A1.smithNormalForm.rightInverse
         let T: Matrix<R, Dynamic, n1> = Qinv.submatrix(rowsInRange: n - k ..< n) // T * Z = I_k
         
         let (newBasis, newTrans, diagonal) = HomologyGroupInfo.calculate(basis, Z, B, T)
@@ -108,7 +108,7 @@ public class HomologyGroupInfo<chainType: ChainType, R: EuclideanRing, A: FreeMo
         // e.g. P' = [ diag(1, 2); 0, 0 ]
         //      ==> G ~= 0 + Z/2 + Z.
         
-        let E = P.eliminate()
+        let E = P.smithNormalForm
         
         let newBasis = M.generateElements(basis: basis, matrix: Z * E.leftInverse)
         let newTrans: Matrix<R, k, n> = E.left * T

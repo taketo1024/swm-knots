@@ -25,23 +25,11 @@ public final class _Homology<chainType: ChainType, R: EuclideanRing, A: FreeModu
     }
     
     public convenience init(_ chainComplex: _ChainComplex<chainType, R, A>) {
-        typealias M = FreeModule<R, A>
-        
         let offset = chainComplex.offset
         let top = chainComplex.topDegree
         
-        let elims = { () -> (Int) -> MatrixEliminationResult<R, Dynamic, Dynamic> in
-            let res = (offset - 1 ... top + 1).map { chainComplex.boundaryMap($0).matrix.eliminate() }
-            return { (i: Int) -> MatrixEliminationResult<R, Dynamic, Dynamic> in
-                return res[i - offset + 1]
-            }
-        }()
-        
-        let groups = (offset ... top).map { (i) -> HomologyGroupInfo<chainType, R, A> in
-            HomologyGroupInfo(degree: i,
-                              basis: chainComplex.chainBasis(i),
-                              elim1: elims(i),
-                              elim2: chainComplex.descending ? elims(i + 1) : elims(i - 1))
+        let groups = (offset ... top).map {
+            HomologyGroupInfo(chainComplex, degree: $0)
         }
         
         self.init(chainComplex: chainComplex, groups: groups)

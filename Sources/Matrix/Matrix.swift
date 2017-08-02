@@ -111,8 +111,8 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public var type: MatrixType {return impl.type}
     
     private mutating func willMutate() {
-        copyIfNecessary()
         smithNormalFormCache.clear()
+        copyIfNecessary()
     }
     
     private mutating func copyIfNecessary() {
@@ -241,7 +241,7 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         impl.swapCols(j0, j1)
     }
     
-    public func eliminate(mode: MatrixEliminationMode = .Both, debug: Bool = false) -> MatrixEliminationResult<R, n, m> {
+    public func eliminate(mode: MatrixEliminationMode, debug: Bool = false) -> MatrixEliminationResult<R, n, m> {
         return MatrixEliminationResult(impl.eliminate(mode: mode, debug: debug))
     }
     
@@ -251,8 +251,6 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         }
         
         let e = impl.eliminate(mode: .Both)
-        e.run()
-        
         let s = MatrixEliminationResult<R, n, m>(e)
         smithNormalFormCache.value = s
         
