@@ -5,7 +5,7 @@ public struct Permutation<n: _Int>: Group, FiniteSetType {
     public let degree: Int
     fileprivate var elements: [Int] //
     
-    private init(elements: [Int]) {
+    internal init(elements: [Int]) {
         assert(n.self == Dynamic.self || n.intValue == elements.count)
         let degree = elements.count
         
@@ -67,7 +67,7 @@ public struct Permutation<n: _Int>: Group, FiniteSetType {
     }
     
     private var rawCyclicDecomposition: [[Int]] {
-        var list = Array(0 ..< n.intValue)
+        var list = Array(0 ..< degree)
         var result: [[Int]] = []
         
         while !list.isEmpty {

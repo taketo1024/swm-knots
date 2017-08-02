@@ -230,7 +230,16 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
     }
     
     public func determinant() -> R {
-        fatalError("determinant not yet impled for a general Ring.")
+        assert(rows == cols)
+        print("[warn] running inefficient determinant calculation.")
+        
+        let n = rows
+        
+        return n.permutations.map { (s: [Int]) -> R in
+            let e = Permutation<Dynamic>(elements: s).signature
+            let p = (0 ..< n).map { self[$0, s[$0]] }.multiplyAll()
+            return R(intValue: e) * p
+        }.sumAll()
     }
     
     public final var description: String {
