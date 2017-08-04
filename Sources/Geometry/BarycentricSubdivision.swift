@@ -10,15 +10,12 @@ import Foundation
 
 public struct BarycentricSubdivision: GeometricComplex {
     public typealias Cell = Simplex
-    
-    public let vertexSet: VertexSet
     internal let cells: [[Simplex]]
     
     private var b2s: [Vertex: Simplex] = [:]
     private var s2b: [Simplex: Vertex] = [:]
     
-    private init(_ vertexSet: VertexSet, _ cells: [[Simplex]], _ b2s: [Vertex: Simplex], _ s2b: [Simplex: Vertex]) {
-        self.vertexSet = vertexSet
+    private init(_ cells: [[Simplex]], _ b2s: [Vertex: Simplex], _ s2b: [Simplex: Vertex]) {
         self.cells = cells
         self.b2s = b2s
         self.s2b = s2b
@@ -55,7 +52,7 @@ public struct BarycentricSubdivision: GeometricComplex {
             generate(cells: [s], barycenters: [])
         }
         
-        self.init(V, SimplicialComplex.generateCells(bcells), b2s, s2b)
+        self.init(SimplicialComplex.generateCells(bcells), b2s, s2b)
     }
     
     public func barycenterOf(_ s: Simplex) -> Vertex? {
@@ -73,7 +70,7 @@ public struct BarycentricSubdivision: GeometricComplex {
     public func skeleton(_ dim: Int) -> BarycentricSubdivision {
         let sub = Array(cells[0 ... dim])
         return BarycentricSubdivision(
-            vertexSet, sub,
+            sub,
             b2s.filterElements{ (_, s) in s.dim <= dim},
             s2b.filterElements{ (s, _) in s.dim <= dim}
         )
@@ -88,7 +85,7 @@ public struct BarycentricSubdivision: GeometricComplex {
     }
     
     public func asSimplicialComplex() -> SimplicialComplex {
-        return SimplicialComplex(vertexSet, cells)
+        return SimplicialComplex(cells)
     }
 }
 

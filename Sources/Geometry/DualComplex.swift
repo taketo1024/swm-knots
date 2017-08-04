@@ -24,8 +24,7 @@ public struct DualSimplicialCell: GeometricCell {
     public init(dim: Int, base: Simplex, center: Vertex, components: [Simplex]) {
         let chain = { () -> SimplicialChain<IntegerNumber> in
             if dim > 1 {
-                let V  = center.vertexSet // VSet of SdK
-                let Lk = SimplicialComplex(V, maximalCells: components.map{$0.subtract(center)}, lowerBound: dim - 2)
+                let Lk = SimplicialComplex(maximalCells: components.map{$0.subtract(center)}, lowerBound: dim - 2)
                 
                 guard let z = Lk.preferredOrientation() else {
                     fatalError("invalid dual-cell. center: \(center), components: \(components)")
