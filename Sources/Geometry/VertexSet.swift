@@ -15,12 +15,16 @@ public struct VertexSet: CustomStringConvertible {
         self.vertices = []
     }
     
-    public init(number: Int, prefix: String = "v") {
+    public init(count n: Int, prefix: String = "v") {
         self.vertices = [] // MEMO must initialize before passing `self` as argument...
-        self.vertices = (0 ..< number).map { Vertex($0, "\(prefix)\($0)", self) }
+        self.vertices = (0 ..< n).map { Vertex($0, "\(prefix)\($0)", self) }
     }
     
     public subscript(i: Int) -> Vertex {
+        return vertices[i]
+    }
+    
+    public func vertex(at i: Int) -> Vertex {
         return vertices[i]
     }
     
@@ -29,10 +33,6 @@ public struct VertexSet: CustomStringConvertible {
         let v = Vertex(index, label ?? "v\(index)", self)
         vertices.append(v)
         return v
-    }
-    
-    public func vertex(at i: Int) -> Vertex {
-        return vertices[i]
     }
     
     public var description: String {
