@@ -30,7 +30,8 @@ public struct Vertex: SetType, Comparable {
     }
     
     public static func ==(a: Vertex, b: Vertex) -> Bool {
-        return (a.vertexSet === b.vertexSet) && (a.index == b.index)
+        // should check if the vertexSet is equal, but for performance...
+        return (a.index == b.index)
     }
     
     public static func <(a: Vertex, b: Vertex) -> Bool {

@@ -67,7 +67,7 @@ public struct DualSimplicialCell: GeometricCell {
     }
 }
 
-public final class DualSimplicialComplex: GeometricComplex {
+public struct DualSimplicialComplex: GeometricComplex {
     public typealias Cell = DualSimplicialCell
     
     internal let K: SimplicialComplex
@@ -81,7 +81,7 @@ public final class DualSimplicialComplex: GeometricComplex {
         self.cells = cells
     }
     
-    public convenience init(_ K: SimplicialComplex) {
+    public init(_ K: SimplicialComplex) {
         let n = K.dim
         let SdK = K.barycentricSubdivision()
         

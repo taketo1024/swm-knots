@@ -8,7 +8,7 @@
 
 import Foundation
 
-public final class SimplicialComplex: GeometricComplex {
+public struct SimplicialComplex: GeometricComplex {
     public typealias Cell = Simplex
     
     public let vertexSet: VertexSet
@@ -20,7 +20,7 @@ public final class SimplicialComplex: GeometricComplex {
         self.cellsList = cells
     }
     
-    public convenience init<S: Sequence>(_ vertexSet: VertexSet, maximalCells: S, lowerBound b: Int = 0) where S.Iterator.Element == Simplex {
+    public init<S: Sequence>(_ vertexSet: VertexSet, maximalCells: S, lowerBound b: Int = 0) where S.Iterator.Element == Simplex {
         self.init(vertexSet, SimplicialComplex.generateCells(maximalCells, lowerBound: b))
     }
     
@@ -37,21 +37,28 @@ public final class SimplicialComplex: GeometricComplex {
         return (0...dim).contains(i) ? cellsList[i] : []
     }
     
-    public lazy var maximalCells: [Simplex] = { () -> [Simplex] in
-        var list = Array(self.cellsList.reversed().joined())
+    private var _maximalCells: Cache<[Simplex]> = Cache()
+    public var maximalCells: [Simplex] {
+        if let cells = _maximalCells.value {
+            return cells
+        }
+        
+        var cells = Array(self.cellsList.reversed().joined())
         var i = 0
-        while i < list.count {
-            let s = list[i]
+        while i < cells.count {
+            let s = cells[i]
             let subs = s.allSubsimplices().dropFirst()
             for t in subs {
-                if let j = list.index(of: t) {
-                    list.remove(at: j)
+                if let j = cells.index(of: t) {
+                    cells.remove(at: j)
                 }
             }
             i += 1
         }
-        return list
-    }()
+        
+        _maximalCells.value = cells
+        return cells
+    }
     
     public func boundary<R: Ring>(ofCell s: Simplex) -> FreeModule<R, Simplex> {
         return s.boundary() // FIXME crashes when `lowerBound` is specified.

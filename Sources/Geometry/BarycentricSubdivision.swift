@@ -8,7 +8,7 @@
 
 import Foundation
 
-public final class BarycentricSubdivision: GeometricComplex {
+public struct BarycentricSubdivision: GeometricComplex {
     public typealias Cell = Simplex
     
     public let vertexSet: VertexSet
@@ -24,7 +24,7 @@ public final class BarycentricSubdivision: GeometricComplex {
         self.s2b = s2b
     }
     
-    public convenience init(_ K: SimplicialComplex) {
+    public init(_ K: SimplicialComplex) {
         var V = VertexSet()
         var bcells = Set<Simplex>()
         

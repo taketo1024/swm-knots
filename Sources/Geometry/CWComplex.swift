@@ -34,7 +34,7 @@ public struct CWCell: GeometricCell {
     }
 }
 
-public final class CWComplex: GeometricComplex {
+public struct CWComplex: GeometricComplex {
     public typealias Cell = CWCell
     
     internal var cells: [[CWCell]]
@@ -61,12 +61,12 @@ public final class CWComplex: GeometricComplex {
     }
     
     @discardableResult
-    public func appendVertex() -> CWCell {
+    public mutating func appendVertex() -> CWCell {
         return appendCell(ofDim: 0)
     }
     
     @discardableResult
-    public func appendCell(ofDim i: Int, attachedTo boundary: CWCellChain = CWCellChain.zero) -> CWCell {
+    public mutating func appendCell(ofDim i: Int, attachedTo boundary: CWCellChain = CWCellChain.zero) -> CWCell {
         assert(boundary.basis.forAll{ $0.dim == i - 1 }, "only attatching to 1-dim lower cells is supported.")
         
         while cells.count - 1 < i {
@@ -99,12 +99,12 @@ public extension CWComplex {
     
     static func sphere(dim i: Int) -> CWComplex {
         if i == 0 {
-            let C = CWComplex()
+            var C = CWComplex()
             C.appendVertex()
             C.appendVertex()
             return C
         } else {
-            let C = CWComplex.sphere(dim: i - 1)
+            var C = CWComplex.sphere(dim: i - 1)
             let (d1, d2) = (C.cells[i - 1][0], C.cells[i - 1][1])
             let cycle = (i == 1) ? CWCellChain([(-1, d1), (1, d2)])
                                  : CWCellChain([( 1, d1), (1, d2)])

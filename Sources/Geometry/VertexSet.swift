@@ -8,7 +8,7 @@
 
 import Foundation
 
-public final class VertexSet: CustomStringConvertible {
+public struct VertexSet: CustomStringConvertible {
     public private(set) var vertices: [Vertex]
     
     public init() {
@@ -20,7 +20,7 @@ public final class VertexSet: CustomStringConvertible {
         self.vertices = (0 ..< number).map { Vertex($0, "\(prefix)\($0)", self) }
     }
     
-    public func add(label: String? = nil) -> Vertex {
+    public mutating func add(label: String? = nil) -> Vertex {
         let index = vertices.count
         let v = Vertex(index, label ?? "v\(index)", self)
         vertices.append(v)

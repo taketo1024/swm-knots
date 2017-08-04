@@ -12,7 +12,7 @@ public protocol GeometricCell: FreeModuleBase {
     var dim: Int {get}
 }
 
-public protocol GeometricComplex: class, CustomStringConvertible {
+public protocol GeometricComplex: CustomStringConvertible {
     associatedtype Cell: GeometricCell
     
     var dim: Int {get}
