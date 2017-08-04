@@ -20,6 +20,10 @@ public struct VertexSet: CustomStringConvertible {
         self.vertices = (0 ..< number).map { Vertex($0, "\(prefix)\($0)", self) }
     }
     
+    public subscript(i: Int) -> Vertex {
+        return vertices[i]
+    }
+    
     public mutating func add(label: String? = nil) -> Vertex {
         let index = vertices.count
         let v = Vertex(index, label ?? "v\(index)", self)

@@ -9,6 +9,14 @@ typealias Z = IntegerNumber
 typealias Q = RationalNumber
 typealias R = RealNumber
 
+//let V = VertexSet(number: 10)
+//let C = SimplicialComplex(V, indices: [0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6])
+//print(Homology(C.chainComplex(type: Z.self)))
+//let C2 = C.identify(verticesAt: [5, 6], with: [0, 1])
+//print(C2.detailDescription)
+//print(Homology(C2.chainComplex(type: Z.self)))
+
+
 // D^3 = Δ^3
 do {
     let D3 = SimplicialComplex.ball(dim: 3)

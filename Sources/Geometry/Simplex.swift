@@ -13,15 +13,27 @@ public struct Simplex: GeometricCell {
     internal let vSet: Set<Vertex>  // unordered set of vertices.
     internal let id: String
     
-    public init(_ V: VertexSet, _ indices: [Int]) {
+    public init<S: Sequence>(_ vs: S) where S.Iterator.Element == Vertex {
+        let vertices = vs.sorted()
+        let vSet = Set(vertices)
+        assert(vertices.count == vSet.count)
+        
+        self.vertices = vertices
+        self.vSet = vSet
+        self.id = "(\(self.vertices.map{$0.description}.joined(separator: ", ")))"
+    }
+    
+    public init<S: Sequence>(_ V: VertexSet, indices: S) where S.Iterator.Element == Int {
         let vertices = indices.map{ V.vertex(at: $0) }
         self.init(vertices)
     }
     
-    public init<S: Sequence>(_ vertices: S) where S.Iterator.Element == Vertex {
-        self.vertices = vertices.sorted().unique()
-        self.vSet = Set(self.vertices)
-        self.id = "(\(self.vertices.map{$0.description}.joined(separator: ", ")))"
+    public init(_ vs: Vertex...) {
+        self.init(vs)
+    }
+    
+    public init(_ V: VertexSet, indices: Int...) {
+        self.init(V, indices: indices)
     }
     
     public var dim: Int {
