@@ -52,7 +52,7 @@ public struct BarycentricSubdivision: GeometricComplex {
             generate(cells: [s], barycenters: [])
         }
         
-        self.init(SimplicialComplex.generateCells(bcells), b2s, s2b)
+        self.init(SimplicialComplex.alignCells(bcells, generateFaces: false), b2s, s2b)
     }
     
     public func barycenterOf(_ s: Simplex) -> Vertex? {
