@@ -73,7 +73,7 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
         return Polynomial<K>(0, 1)
     }
     
-    public static func eucDiv<K: Field>(_ f: Polynomial<K>, _ g: Polynomial<K>) -> (q: Polynomial<K>, r: Polynomial<K>) {
+    public static func eucDiv<K>(_ f: Polynomial<K>, _ g: Polynomial<K>) -> (q: Polynomial<K>, r: Polynomial<K>) {
         if g == 0 {
             fatalError("divide by 0")
         }

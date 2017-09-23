@@ -91,7 +91,7 @@ public struct FreeModule<R: Ring, A: FreeModuleBase>: Module, Sequence {
         return basis.count > 0 ? self[basis.first!].hashValue : 0
     }
     
-    public static func generateElements<n:_Int, m:_Int>(basis: [A], matrix A: Matrix<R, n, m>) -> [FreeModule<R, A>] {
+    public static func generateElements<n, m>(basis: [A], matrix A: Matrix<R, n, m>) -> [FreeModule<R, A>] {
         return (0 ..< A.cols).map { FreeModule<R, A>(basis: basis, components: A.colArray($0)) }
     }
 }
@@ -142,7 +142,7 @@ public extension FreeModule {
         }
     }
     
-    public func evaluate<B: FreeModuleBase>(_ b: FreeModule<R, B>) -> R where A == Dual<B> {
+    public func evaluate<B>(_ b: FreeModule<R, B>) -> R where A == Dual<B> {
         return b.reduce(R.zero) { (res, next) -> R in
             let (a, r) = next
             return res + r * self[Dual(a)]
@@ -171,11 +171,11 @@ public struct Tensor<A: FreeModuleBase, B: FreeModuleBase>: FreeModuleBase {
     }
 }
 
-public func ⊗<A: FreeModuleBase, B: FreeModuleBase>(a: A, b: B) -> Tensor<A, B> {
+public func ⊗<A, B>(a: A, b: B) -> Tensor<A, B> {
     return Tensor(a, b)
 }
 
-public func ⊗<R: Ring, A: FreeModuleBase, B: FreeModuleBase>(x: FreeModule<R, A>, y: FreeModule<R, B>) -> FreeModule<R, Tensor<A, B>> {
+public func ⊗<R, A, B>(x: FreeModule<R, A>, y: FreeModule<R, B>) -> FreeModule<R, Tensor<A, B>> {
     let elements = x.basis.pairs(with: y.basis).map{ (a, b) -> (R, Tensor<A, B>) in
         return (x[a] * y[b], a⊗b)
     }

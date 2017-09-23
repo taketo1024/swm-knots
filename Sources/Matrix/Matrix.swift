@@ -158,7 +158,7 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         return Matrix(a.impl.rightMul(r))
     }
     
-    public static func * <p: _Int>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
+    public static func * <p>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
         return Matrix<R, n, p>(a.impl.mul(b.impl))
     }
     
@@ -383,7 +383,7 @@ public struct MatrixIterator<R: Ring> : IteratorProtocol {
     private var current: (Int, Int)
     private var initial = true
     
-    public init<n: _Int, m: _Int>(_ matrix: Matrix<R, n, m>, from: (Int, Int)? = nil, direction: MatrixIterationDirection = .Rows, rowRange: CountableRange<Int>? = nil, colRange: CountableRange<Int>? = nil, proceedLines: Bool = true, nonZeroOnly: Bool = false) {
+    public init<n, m>(_ matrix: Matrix<R, n, m>, from: (Int, Int)? = nil, direction: MatrixIterationDirection = .Rows, rowRange: CountableRange<Int>? = nil, colRange: CountableRange<Int>? = nil, proceedLines: Bool = true, nonZeroOnly: Bool = false) {
         self.init(matrix.impl, from: from, direction: direction, rowRange: rowRange, colRange: colRange, proceedLines: proceedLines, nonZeroOnly: nonZeroOnly)
     }
     

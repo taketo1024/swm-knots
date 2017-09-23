@@ -8,9 +8,8 @@
 
 import Foundation
 
-public protocol _HomologyGroup: _QuotientModule {
+public protocol _HomologyGroup: _QuotientModule where CoeffRing: EuclideanRing {
     associatedtype chainType: ChainType
-    associatedtype CoeffRing: EuclideanRing
     associatedtype BasisElement: FreeModuleBase
     
     var representative: FreeModule<CoeffRing, BasisElement> { get }

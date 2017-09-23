@@ -98,7 +98,7 @@ public final class _ChainComplex<chainType: ChainType, R: Ring, A: FreeModuleBas
         }
     }
     
-    public static func ==<chainType: ChainType, R: Ring, A: FreeModuleBase>(lhs: _ChainComplex<chainType, R, A>, rhs: _ChainComplex<chainType, R, A>) -> Bool {
+    public static func ==<chainType, R, A>(lhs: _ChainComplex<chainType, R, A>, rhs: _ChainComplex<chainType, R, A>) -> Bool {
         let offset = min(lhs.offset, rhs.offset)
         let degree = max(lhs.topDegree, rhs.topDegree)
         return (offset ... degree).forAll { i in lhs.boundaryMap(i) == rhs.boundaryMap(i) }
@@ -121,7 +121,7 @@ public extension ChainComplex where chainType == Ascending {
     }
 }
 
-public func ⊗<chainType: ChainType, R: Ring, A: FreeModuleBase, B: FreeModuleBase>(C1: _ChainComplex<chainType, R, A>, C2: _ChainComplex<chainType, R, B>) -> _ChainComplex<chainType, R, Tensor<A, B>> {
+public func ⊗<chainType, R, A, B>(C1: _ChainComplex<chainType, R, A>, C2: _ChainComplex<chainType, R, B>) -> _ChainComplex<chainType, R, Tensor<A, B>> {
     typealias NewChainBasis = [Tensor<A, B>]
     typealias NewBoundaryMap = FreeModuleHom<R, Tensor<A, B>, Tensor<A, B>>
     
