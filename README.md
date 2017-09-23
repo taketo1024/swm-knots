@@ -5,10 +5,7 @@ This project is intended to understand Abstract Algebra by implementing abstract
 
 ## How to Build / Run
 
-Open `SwiftyAlgebra.xcworkspace` and build the framework.  
-![ss1.png](doc/ss1.png)
-
-Run the playgrounds under the project.  
+Open `SwiftyAlgebra.xcworkspace` and build the framework, then you can run the playgrounds under the project.  
 ![ss2.png](doc/ss2.png)
 
 Or you can run on REPL by:
