@@ -74,8 +74,8 @@ public final class BarycentricSubdivision: GeometricComplex {
         let sub = Array(cells[0 ... dim])
         return BarycentricSubdivision(
             vertexSet, sub,
-            b2s.filterElements{ (_, s) in s.dim <= dim},
-            s2b.filterElements{ (s, _) in s.dim <= dim}
+            b2s.filter{ (_, s) in s.dim <= dim},
+            s2b.filter{ (s, _) in s.dim <= dim}
         )
     }
     

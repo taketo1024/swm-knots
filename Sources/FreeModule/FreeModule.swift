@@ -45,7 +45,7 @@ public struct FreeModule<R: Ring, A: FreeModuleBase>: Module, Sequence {
     }
     
     public func mapComponents<R2: Ring>(_ f: (R) -> R2) -> FreeModule<R2, A> {
-        return FreeModule<R2, A>(basis: basis, elements: elements.mapValues(transform: f))
+        return FreeModule<R2, A>(basis: basis, elements: elements.mapValues(f))
     }
     
     public func makeIterator() -> DictionaryIterator<A, R> {
