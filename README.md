@@ -5,18 +5,17 @@ This project is intended to understand Abstract Algebra by implementing abstract
 
 ## How to Build / Run
 
-Open `SwiftyAlgebra.xcworkspace` and build the framework.
-![doc/ss1.png](ss1)
+Open `SwiftyAlgebra.xcworkspace` and build the framework.  
+![ss1.png](doc/ss1.png)
 
-Run the playgrounds under the project.
-![doc/ss2.png](ss2)
+Run the playgrounds under the project.  
+![ss2.png](doc/ss2.png)
 
 Or you can run on REPL by:
 ```
 $ make repl
 ```
-
-![doc/ss3.png](ss3)
+![ss3.png](doc/ss3.png)
 
 ## Sample
 
