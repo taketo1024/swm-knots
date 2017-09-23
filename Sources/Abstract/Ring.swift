@@ -150,9 +150,9 @@ public struct QuotientField<R: Ring, I: Ideal>: Field, _QuotientRing where R == 
     }
 }
 
-public extension Array where Iterator.Element: Ring {
-    public func multiplyAll() -> Iterator.Element {
-        typealias R = Iterator.Element
+public extension Array where Element: Ring {
+    public func multiplyAll() -> Element {
+        typealias R = Element
         return self.reduce(R.identity) {
             return $0 * $1
         }

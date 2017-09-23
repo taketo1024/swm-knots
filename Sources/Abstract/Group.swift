@@ -16,7 +16,7 @@ public extension Group {
         }
     }
     
-    public static func formsSubgroup<S: Sequence>(_ elements: S) -> Bool where S.Iterator.Element == Self {
+    public static func formsSubgroup<S: Sequence>(_ elements: S) -> Bool where S.Element == Self {
         let list = Array(elements)
         let n = list.count
         

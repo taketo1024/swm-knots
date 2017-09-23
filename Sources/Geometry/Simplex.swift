@@ -18,7 +18,7 @@ public struct Simplex: GeometricCell {
         self.init(vertices)
     }
     
-    public init<S: Sequence>(_ vertices: S) where S.Iterator.Element == Vertex {
+    public init<S: Sequence>(_ vertices: S) where S.Element == Vertex {
         self.vertices = vertices.sorted().unique()
         self.vSet = Set(self.vertices)
         self.id = "(\(self.vertices.map{$0.description}.joined(separator: ", ")))"

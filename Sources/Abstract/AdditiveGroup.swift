@@ -71,9 +71,9 @@ public extension AdditiveQuotientGroup where Base == Sub.Super {
 }
 
 
-public extension Sequence where Iterator.Element: AdditiveGroup {
-    public func sumAll() -> Iterator.Element {
-        typealias G = Iterator.Element
+public extension Sequence where Element: AdditiveGroup {
+    public func sumAll() -> Element {
+        typealias G = Element
         return self.reduce(G.zero) {
             return $0 + $1
         }

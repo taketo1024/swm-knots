@@ -20,7 +20,7 @@ public final class SimplicialComplex: GeometricComplex {
         self.cellsList = cells
     }
     
-    public convenience init<S: Sequence>(_ vertexSet: VertexSet, maximalCells: S, lowerBound b: Int = 0) where S.Iterator.Element == Simplex {
+    public convenience init<S: Sequence>(_ vertexSet: VertexSet, maximalCells: S, lowerBound b: Int = 0) where S.Element == Simplex {
         self.init(vertexSet, SimplicialComplex.generateCells(maximalCells, lowerBound: b))
     }
     
@@ -77,7 +77,7 @@ public final class SimplicialComplex: GeometricComplex {
         return allCells(ofDim: s.dim + 1).filter{ $0.contains(s) }
     }
     
-    internal static func generateCells<S: Sequence>(_ cells: S, lowerBound b: Int = 0) -> [[Simplex]] where S.Iterator.Element == Simplex {
+    internal static func generateCells<S: Sequence>(_ cells: S, lowerBound b: Int = 0) -> [[Simplex]] where S.Element == Simplex {
         let dim = cells.reduce(0) { max($0, $1.dim) }
         let set = cells.reduce( Set<Simplex>() ){ (set, cell) in set.union( cell.allSubsimplices(lowerBound: b) ) }
         
