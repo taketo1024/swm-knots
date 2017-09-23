@@ -209,7 +209,7 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
     }
     
     public override func copy() -> Self {
-        return type(of: self).init(rows, cols, list.copy())
+        return Swift.type(of: self).init(rows, cols, list.copy())
     }
     
     public override subscript(i: Int, j: Int) -> R {
@@ -268,22 +268,22 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         }
         
         let result = ComponentList(array)
-        return type(of: self).init(rows, cols, result)
+        return Swift.type(of: self).init(rows, cols, result)
     }
     
     public override func negate() -> _MatrixImpl<R> {
         let result = list.copy{ -$0 }
-        return type(of: self).init(rows, cols, result)
+        return Swift.type(of: self).init(rows, cols, result)
     }
     
     public override func leftMul(_ r: R) -> _MatrixImpl<R> {
         let result = list.copy{ r * $0 }
-        return type(of: self).init(rows, cols, result)
+        return Swift.type(of: self).init(rows, cols, result)
     }
     
     public override func rightMul(_ r: R) -> _MatrixImpl<R> {
         let result = list.copy{ $0 * r }
-        return type(of: self).init(rows, cols, result)
+        return Swift.type(of: self).init(rows, cols, result)
     }
     
     public override func mul(_ b: _MatrixImpl<R>) -> _MatrixImpl<R> {
@@ -322,22 +322,22 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         }
         
         let result = ComponentList(array)
-        return type(of: self).init(rows, b.cols, result)
+        return Swift.type(of: self).init(rows, b.cols, result)
     }
     
     public override func transpose() -> _MatrixImpl<R> {
         let result = list.copy{ ($1, $0, $2) }
-        return type(of: self).init(cols, rows, result)
+        return Swift.type(of: self).init(cols, rows, result)
     }
     
     public override func leftIdentity() -> _MatrixImpl<R> {
         let result = ComponentList( (0 ..< rows).map{ i in Component(i, i, R.identity) } )
-        return type(of: self).init(rows, rows, result)
+        return Swift.type(of: self).init(rows, rows, result)
     }
     
     public override func rightIdentity() -> _MatrixImpl<R> {
         let result = ComponentList( (0 ..< cols).map{ i in Component(i, i, R.identity) } )
-        return type(of: self).init(cols, cols, result)
+        return Swift.type(of: self).init(cols, cols, result)
     }
     
     // TODO
@@ -349,7 +349,7 @@ public class _SparseMatrixImpl<R: Ring>: _MatrixImpl<R> {
         let result = list.filter{ (i, j, _) in rowRange.contains(i) && colRange.contains(j) }
                          .copy  { (i, j, a) in (i - r0, j - c0, a)}
         
-        return type(of: self).init(r1 - r0, c1 - c0, result)
+        return Swift.type(of: self).init(r1 - r0, c1 - c0, result)
     }
     
     public override func multiplyRow(at i0: Int, by r: R) {

@@ -62,32 +62,32 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
     
     public func add(_ b: _MatrixImpl<R>) -> _MatrixImpl<R> {
         assert((rows, cols) == (b.rows, b.cols), "Mismatching matrix size.")
-        return type(of: self).init(rows, cols) { (i, j) -> R in
+        return Swift.type(of: self).init(rows, cols) { (i, j) -> R in
             return self[i, j] + b[i, j]
         }
     }
     
     public func negate() -> _MatrixImpl<R> {
-        return type(of: self).init(rows, cols) { (i, j) -> R in
+        return Swift.type(of: self).init(rows, cols) { (i, j) -> R in
             return -self[i, j]
         }
     }
     
     public func leftMul(_ r: R) -> _MatrixImpl<R> {
-        return type(of: self).init(rows, cols) { (i, j) -> R in
+        return Swift.type(of: self).init(rows, cols) { (i, j) -> R in
             return r * self[i, j]
         }
     }
     
     public  func rightMul(_ r: R) -> _MatrixImpl<R> {
-        return type(of: self).init(rows, cols) { (i, j) -> R in
+        return Swift.type(of: self).init(rows, cols) { (i, j) -> R in
             return self[i, j] * r
         }
     }
     
     public func mul(_ b: _MatrixImpl<R>) -> _MatrixImpl<R> {
         assert(self.cols == b.rows, "Mismatching matrix size.")
-        return type(of: self).init(rows, b.cols) { (i, k) -> R in
+        return Swift.type(of: self).init(rows, b.cols) { (i, k) -> R in
             return (0 ..< cols)
                 .map({j in self[i, j] * b[j, k]})
                 .reduce(0) {$0 + $1}
@@ -95,20 +95,20 @@ public class _MatrixImpl<R: Ring>: CustomStringConvertible {
     }
     
     public func transpose() -> _MatrixImpl<R> {
-        return type(of: self).init(cols, rows) { self[$1, $0] }
+        return Swift.type(of: self).init(cols, rows) { self[$1, $0] }
     }
     
     public func leftIdentity() -> _MatrixImpl<R> {
-        return type(of: self).init(rows, rows) { $0 == $1 ? 1 : 0 }
+        return Swift.type(of: self).init(rows, rows) { $0 == $1 ? 1 : 0 }
     }
     
     public func rightIdentity() -> _MatrixImpl<R> {
-        return type(of: self).init(cols, cols) { $0 == $1 ? 1 : 0 }
+        return Swift.type(of: self).init(cols, cols) { $0 == $1 ? 1 : 0 }
     }
     
     public func submatrix(inRange: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> _MatrixImpl<R> {
         let (r, c) = inRange
-        return type(of: self).init(r.upperBound - r.lowerBound, c.upperBound - c.lowerBound) {
+        return Swift.type(of: self).init(r.upperBound - r.lowerBound, c.upperBound - c.lowerBound) {
             self[$0 + r.lowerBound, $1 + c.lowerBound]
         }
     }
