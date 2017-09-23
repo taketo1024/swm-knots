@@ -11,6 +11,13 @@ Open `SwiftyAlgebra.xcworkspace` and build the framework.
 Run the playgrounds under the project.
 ![doc/ss2.png](ss2)
 
+Or you can run on REPL by:
+```
+$ make repl
+```
+
+![doc/ss3.png](ss3)
+
 ## Sample
 
 ### Rational Numbers
