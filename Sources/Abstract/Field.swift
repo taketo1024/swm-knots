@@ -1,7 +1,6 @@
 import Foundation
 
-public protocol Field: EuclideanRing {
-}
+public protocol Field: EuclideanRing {}
 
 public extension Field {
     public var degree: Int {

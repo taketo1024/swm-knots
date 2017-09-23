@@ -85,9 +85,7 @@ public extension Group where Self: FiniteSetType {
     }
 }
 
-public protocol Subgroup: Submonoid, SubsetType {
-    associatedtype Super: Group
-}
+public protocol Subgroup: Submonoid where Super: Group {}
 
 public extension Subgroup {
     public var inverse: Self {
@@ -96,10 +94,7 @@ public extension Subgroup {
 }
 
 // abstract protocol
-public protocol _ProductGroup: Group, _ProductMonoid {
-    associatedtype Left: Group
-    associatedtype Right: Group
-}
+public protocol _ProductGroup: Group, _ProductMonoid where Left: Group, Right: Group {}
 
 public extension _ProductGroup {
     public var inverse: Self {

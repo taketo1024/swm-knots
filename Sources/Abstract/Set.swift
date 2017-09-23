@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol SetType: Equatable, Hashable, CustomStringConvertible {
+public protocol SetType: Hashable, CustomStringConvertible {
     var detailDescription: String { get }
     static var symbol: String { get }
 }
