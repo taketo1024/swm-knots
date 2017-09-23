@@ -12,12 +12,7 @@ import Foundation
 
 public extension Ring {
     public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type {
-        switch type {
-        case .Default:
-            return _GridMatrixImpl<Self>.self
-        case .Sparse:
-            return _GridMatrixImpl<Self>.self // MEMO _SparseMatrixImpl is not in use.
-        }
+        return _GridMatrixImpl<Self>.self
     }
     
     public static func matrixEliminatiorType() -> MatrixEliminator<Self>.Type? {
@@ -40,12 +35,3 @@ public extension Field {
         return FieldMatrixEliminator<Self>.self
     }
 }
-
-// Integer
-
-public extension IntegerNumber {
-    public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<IntegerNumber>.Type {
-        return EigenAcceleration.enabled() ? _EigenIntMatrixImpl.self : _GridMatrixImpl<IntegerNumber>.self
-    }
-}
-

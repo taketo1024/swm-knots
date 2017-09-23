@@ -1,25 +1,39 @@
 # Swifty Algebra
 
-Sample project to explain concepts of [Abstract Algebra](https://en.wikipedia.org/wiki/Abstract_algebra) by implementing in Swift.
+A playground for [Algebra](https://en.wikipedia.org/wiki/Abstract_algebra) in Mathematics.
+This project is intended to understand Abstract Algebra by implementing abstract concepts and playing with concrete objects.
+
+## How to Build / Run
+
+Open `SwiftyAlgebra.xcworkspace` and build the framework, then you can run the playgrounds under the project.  
+![ss2.png](doc/ss2.png)
+
+Or you can run on REPL by:
+```
+$ make repl
+```
+![ss3.png](doc/ss3.png)
 
 ## Sample
 
-### Rational Number
+### Rational Numbers
 
 ```swift
-let a = ℚ(4, 5)  // 4/5
-let b = ℚ(3, 2)  // 3/2
+typealias Q = RationalNumber
+
+let a = Q(4, 5)  // 4/5
+let b = Q(3, 2)  // 3/2
 
 a + b  // 23/10
 a * b  // 6/5
 b / a  // 15/8
 ```
 
-### Matrix (type safe)
+### Matrices (type safe)
 
 ```swift
-typealias n = TPInt_2
-typealias M = Matrix<ℤ, n, n>
+typealias Z = IntegerNumber
+typealias M = Matrix<Z, _2, _2>
 
 let a = M(1, 2, 3, 4)  // [1, 2; 3, 4]
 let b = M(2, 1, 1, 2)  // [2, 1; 1, 2]
@@ -34,27 +48,26 @@ a * b == b * a  // false: multiplication is noncommutative
 ### Permutation (Symmetric Group)
 
 ```swift
-typealias 𝔖_5 = Permutation<TPInt_5>
+typealias S_5 = Permutation<_5>
 
-let σ = 𝔖_5(0, 1, 2) // cyclic notation
-let τ = 𝔖_5([0: 2, 1: 3, 2: 4, 3: 0, 4: 1]) // two-line notation
+let s = S_5(cyclic: 0, 1, 2) // cyclic notation
+let t = S_5([0: 2, 1: 3, 2: 4, 3: 0, 4: 1]) // two-line notation
 
-σ[1]  // 2
-τ[2]  // 4
+s[1]  // 2
+t[2]  // 4
 
-(σ * τ)[3]  // 3 -> 0 -> 1 
-(τ * σ)[3]  // 3 -> 3 -> 0
-
-σ * τ == τ * σ   // false: noncommutative
+(s * t)[3]  // 3 -> 0 -> 1
+(t * s)[3]  // 3 -> 3 -> 0
 ```
 
-### Polynominal
+### Polynomials
 
 ```swift
-typealias ℚx = Polynominal<ℚ>
+typealias Q = RationalNumber
+typealias Qx = Polynominal<Q>
 
-let f = ℚx(0, 2, -3, 1) // f(x) = x^3 − 3x^2 + 2x
-let g = ℚx(6, -5, 1)    // g(x) = x^2 − 5x + 6
+let f = Qx(0, 2, -3, 1) // f(x) = x^3 − 3x^2 + 2x
+let g = Qx(6, -5, 1)    // g(x) = x^2 − 5x + 6
     
 f + g  // (f + g)(x) = x^3 - 2x^2 - 3x + 6
 f * g  // (f * g)(x) = x^5 - 8x^4 + 23x^3 - 28x^2 + 12x
@@ -63,98 +76,91 @@ f % g  // (f % g)(x) = 6x - 12
 gcd(f, g) // 6x - 12
 ```
 
-### Integer Quotient (Finite Field)
+### Finite Fields
 
 ```swift
-struct I: IntIdeal { static let generator = 5 }
-typealias ℤ_5 = IntQuotient<I>
-
-let a: ℤ_5 = 2  // 2 mod 5
-let b: ℤ_5 = 4  // 4 mod 5
-let c: ℤ_5 = 8  // 3 mod 5
-    
-a + b  // 1 mod 5
-a * b  // 3 mod 5
-    
-typealias 𝔽_5 = IntQuotientField<I>
-
-let x: 𝔽_5 = 2  // 2 mod 5
-let y = 1 / x   // 3 mod 5
-x * y == 1      // true
+typealias Z_4 = IntegerQuotientRing<_4>
+Z_4.printAddTable()
 ```
 
-### Polynominal Quotient (Field Extension)
-
-#### ℚ(√2),  ℚ(√2, √3)
+```
++    |    0    1    2    3
+----------------------
+0    |    0    1    2    3
+1    |    1    2    3    0
+2    |    2    3    0    1
+3    |    3    0    1    2
+```
 
 ```swift
-// g(x) = x^2 - 2 in ℚ[x]
-struct g: PolynominalIdeal {
-    typealias R = Polynominal<ℚ>
-    static let generator = Polynominal<ℚ>(-2, 0, 1)
-}
-
-// L = ℚ[x]/(g) = ℚ(√2)
-typealias L = PolynominalQuotientField<ℚ, g>  
-
-let α = L(0, 1) // α = √2 in L
-α * α == 2      // true
-
-(1 + α) * (1 + α) == 3 + 2 * α  // true: (1 + √2)^2   = 3 + 2√2
-1 / (1 + α)       == -1 + α     // true: 1 / (1 + √2) = -1 + √2
-
-// h(x) = x^2 - 3 in L[x]
-struct h: PolynominalIdeal {
-    typealias R = Polynominal<L>
-    static let generator = R(-3, 0, 1)
-}
-// M = L[x]/(h) = L(√3) = ℚ(√2, √3)
-typealias M = PolynominalQuotientField<L, h>  
-
-let β = M(α)      // β = √2 in M
-let γ = M(0, 1)   // γ = √3 in M
-let δ = β * γ     // δ = √6 in M
-
-β * β == 2        // true
-γ * γ == 3        // true
-δ * δ == 6        // true
-
-(β + γ) ** 2 == 5 + 2 * δ // true: (√2 + √3)^2 = 5 + 2√6
+typealias F_5 = IntegerQuotientField<_5>
+F_5.printMulTable()
 ```
 
-#### ℂ: Complex Number Field
+```
+^    |    0    1    2    3    4
+--------------------------
+0    |    1    0    0    0    0
+1    |    1    1    1    1    1
+2    |    1    2    4    3    1
+3    |    1    3    4    2    1
+4    |    1    4    1    4    1
+```
+
+### Algebraic Extension
 
 ```swift
-// g(x) = x^2 + 1 in ℝ[x]
-struct g: PolynominalIdeal {
-    typealias R = Polynominal<ℝ>
-    static let generator = Polynominal<ℝ>(1, 0, 1)
+// Construct an algebraic extension over Q:
+// K = Q(√2) = Q[x]/(x^2 - 2).
+
+typealias Q = RationalNumber
+
+struct p: _Polynomial {                            // p = x^2 - 2, as a struct
+    typealias K = Q
+    static let value = Polynomial<Q>(-2, 0, 1)
 }
 
-// ℂ = ℝ[x]/(x^2 + 1) = ℝ(i)
-typealias ℂ = PolynominalQuotient<g>  
+typealias I = PolynomialIdeal<p>                   // I = (x^2 - 2)
+typealias K = QuotientField<Polynomial<Q>, I>      // K = Q[x]/I
 
-let i = ℂ(0, 1)      // i = √-1
-i * i == -1          // true
- 
-let z = 3 + 2 * i    // z = 3 + 2i
-z * z == 5 + 12 * i  // true
+let a = Polynomial<Q>(0, 1).asQuotient(in: K.self) // a = x mod I
+a * a == 2                                         // true!
 ```
 
-## Guide to Abstract Algebra
+### Homology, Cohomology
 
-1. [数とは何か？](http://qiita.com/taketo1024/items/bd356c59dc0559ee9a0b) 
-2. [群・環・体の定義](http://qiita.com/taketo1024/items/733e0ecf12da359db729)
-3. [有理数を作ってみよう](http://qiita.com/taketo1024/items/222a6a418fb29a0684f8)
-4. [時計の世界の「環」](http://qiita.com/taketo1024/items/91fbc70136b0e5706c09)
-5. [小さな「体」を作ろう](http://qiita.com/taketo1024/items/f5cd40bf669fa8511f9b)
-6. [多項式は整数によく似てる](http://qiita.com/taketo1024/items/83be0ad7d2f2e4f3f44d)
-7. [代数拡大で数を作ろう！](http://qiita.com/taketo1024/items/ccf7ece3dfeb98b38946)
+```swift
+let S2 = SimplicialComplex.sphere(dim: 2)
+let H = Homology(S2, Z.self)
+print("H(S^2; Z) =", H.detailDescription, "\n")
+```
 
-## Used Libraries
+```
+H(S^2; Z) = {
+  0 : Z,    [(v1)],
+  1 : 0,    [],
+  2 : Z,    [-1(v0, v2, v3) + -1(v0, v1, v2) + (v1, v2, v3) + (v0, v1, v3)]
+}
+```
 
-1. [Eigen](http://eigen.tuxfamily.org/) 
-2. [ole/SortedArray](https://github.com/ole/SortedArray)
+```swift
+let RP2 = SimplicialComplex.realProjectiveSpace(dim: 2)
+let H = Homology(RP2, Z_2.self)
+print("H(RP^2; Z/2) =", H.detailDescription, "\n")
+```
+
+```
+H(RP^2; Z/2) = {
+  0 : Z/2,    [(v1)],
+  1 : Z/2,    [(v0, v1) + (v1, v2) + (v0, v3) + (v2, v3)],
+  2 : Z/2,    [(v0, v2, v3) + (v3, v4, v5) + (v2, v3, v5) + (v1, v2, v5) + (v0, v4, v5) + (v1, v3, v4) + (v0, v1, v5) + (v1, v2, v4) + (v0, v2, v4) + (v0, v1, v3)]
+}
+```
+
+## References
+
+1. [Swift で代数学入門](http://qiita.com/taketo1024/items/bd356c59dc0559ee9a0b)
+2. [Swift で数学のススメ](https://www.slideshare.net/taketo1024/swift-79828803)
 
 ## License
 **Swifty Algebra** is licensed under [CC0 1.0 Universal](LICENSE).

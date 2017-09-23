@@ -18,7 +18,7 @@ public struct Simplex: GeometricCell {
         self.init(vertices)
     }
     
-    public init<S: Sequence>(_ vertices: S) where S.Iterator.Element == Vertex {
+    public init<S: Sequence>(_ vertices: S) where S.Element == Vertex {
         self.vertices = vertices.sorted().unique()
         self.vSet = Set(self.vertices)
         self.id = "(\(self.vertices.map{$0.description}.joined(separator: ", ")))"
@@ -105,7 +105,7 @@ public extension Vertex {
         return Simplex([self] + s.vertices)
     }
     
-    public func join<R: Ring>(_ chain: SimplicialChain<R>) -> SimplicialChain<R> {
+    public func join<R>(_ chain: SimplicialChain<R>) -> SimplicialChain<R> {
         return SimplicialChain(chain.basis.map{ (s) -> (R, Simplex) in
             let t = self.join(s)
             let e = R(intValue: (-1).pow(t.vertices.index(of: self)!))
@@ -151,7 +151,7 @@ public extension SimplicialChain where A == Simplex {
 public extension SimplicialCochain where A == Dual<Simplex> {
     public func cup(_ f: SimplicialCochain<R>) -> SimplicialCochain<R> {
         typealias D = Dual<Simplex>
-        let pairs = self.basis.pairs(with: f.basis)
+        let pairs = self.basis.allCombinations(with: f.basis)
         let elements: [(R, D)] = pairs.flatMap{ (d1, d2) -> (R, D)? in
             let (s1, s2) = (d1.base, d2.base)
             let (n1, n2) = (s1.dim, s2.dim)
@@ -172,15 +172,15 @@ public extension SimplicialCochain where A == Dual<Simplex> {
     }
 }
 
-public func ∩<R: Ring>(a: SimplicialChain<R>, b: SimplicialCochain<R>) -> SimplicialChain<R> {
+public func ∩<R>(a: SimplicialChain<R>, b: SimplicialCochain<R>) -> SimplicialChain<R> {
     return a.cap(b)
 }
 
-public func ∩<R: Ring>(a: SimplicialCochain<R>, b: SimplicialChain<R>) -> SimplicialChain<R> {
+public func ∩<R>(a: SimplicialCochain<R>, b: SimplicialChain<R>) -> SimplicialChain<R> {
     return a.cap(b)
 }
 
-public func ∪<R: Ring>(a: SimplicialCochain<R>, b: SimplicialCochain<R>) -> SimplicialCochain<R> {
+public func ∪<R>(a: SimplicialCochain<R>, b: SimplicialCochain<R>) -> SimplicialCochain<R> {
     return a.cup(b)
 }
 

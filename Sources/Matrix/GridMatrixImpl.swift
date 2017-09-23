@@ -34,7 +34,7 @@ public class _GridMatrixImpl<R: Ring>: _MatrixImpl<R> {
     }
     
     public override func copy() -> Self {
-        return type(of: self).init(rows, cols, grid)
+        return Swift.type(of: self).init(rows, cols, grid)
     }
     
     internal func gridIndex(_ i: Int, _ j: Int) -> Int {

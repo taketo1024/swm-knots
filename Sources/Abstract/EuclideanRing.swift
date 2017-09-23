@@ -57,8 +57,7 @@ public func bezout<R: EuclideanRing>(_ a: R, _ b: R) -> (x: R, y: R, r: R) {
     return (x: m[0, 0], y: m[0, 1], r: r)
 }
 
-public protocol EuclideanIdeal: Ideal {
-    associatedtype Super: EuclideanRing
+public protocol EuclideanIdeal: Ideal where Super: EuclideanRing {
     static var generator: Super { get }
 }
 

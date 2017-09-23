@@ -23,7 +23,7 @@ public class SubgroupInfo<G: Group>: TypeInfo {
 public final class FiniteSubgroupInfo<G: Group>: SubgroupInfo<G> {
     public let allElements: Set<G>
     
-    public init<S: Sequence>(allElements: S) where S.Iterator.Element == G {
+    public init<S: Sequence>(allElements: S) where S.Element == G {
         self.allElements = Set(allElements)
         super.init()
     }
