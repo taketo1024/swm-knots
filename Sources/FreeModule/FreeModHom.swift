@@ -141,8 +141,8 @@ public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Modu
     public static func ⊗<C, D>(f: FreeModuleHom<R, A, B>, g: FreeModuleHom<R, C, D>) -> FreeModuleHom<R, Tensor<A, C>, Tensor<B, D>> {
         let (k, l) = (g.codomainBasis.count, g.domainBasis.count)
         
-        let domain = f.domainBasis.pairs(with: g.domainBasis).map{ (a, b) in a⊗b }
-        let codomain = f.codomainBasis.pairs(with: g.codomainBasis).map{ (a, b) in a⊗b }
+        let domain = f.domainBasis.allCombinations(with: g.domainBasis).map{ (a, b) in a⊗b }
+        let codomain = f.codomainBasis.allCombinations(with: g.codomainBasis).map{ (a, b) in a⊗b }
         let matrix = DynamicMatrix<R>(rows: codomain.count, cols: domain.count) { (i, j) -> R in
             f.matrix[i / k, j / l] * g.matrix[i % k, j % l]
         }

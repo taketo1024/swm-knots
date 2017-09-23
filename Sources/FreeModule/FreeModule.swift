@@ -176,7 +176,7 @@ public func ⊗<A, B>(a: A, b: B) -> Tensor<A, B> {
 }
 
 public func ⊗<R, A, B>(x: FreeModule<R, A>, y: FreeModule<R, B>) -> FreeModule<R, Tensor<A, B>> {
-    let elements = x.basis.pairs(with: y.basis).map{ (a, b) -> (R, Tensor<A, B>) in
+    let elements = x.basis.allCombinations(with: y.basis).map{ (a, b) -> (R, Tensor<A, B>) in
         return (x[a] * y[b], a⊗b)
     }
     return FreeModule(elements)

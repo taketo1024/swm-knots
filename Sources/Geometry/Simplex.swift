@@ -151,7 +151,7 @@ public extension SimplicialChain where A == Simplex {
 public extension SimplicialCochain where A == Dual<Simplex> {
     public func cup(_ f: SimplicialCochain<R>) -> SimplicialCochain<R> {
         typealias D = Dual<Simplex>
-        let pairs = self.basis.pairs(with: f.basis)
+        let pairs = self.basis.allCombinations(with: f.basis)
         let elements: [(R, D)] = pairs.flatMap{ (d1, d2) -> (R, D)? in
             let (s1, s2) = (d1.base, d2.base)
             let (n1, n2) = (s1.dim, s2.dim)

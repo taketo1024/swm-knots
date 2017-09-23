@@ -42,9 +42,18 @@ extension Sequence where Element: Hashable {
 
 extension Sequence {
     func group<U: Hashable>(by keyGenerator: (Element) -> U) -> [U: [Element]] {
-        return groupMap(by: { e in (keyGenerator(e), e)})
+        return Dictionary(grouping: self, by: keyGenerator)
     }
     
+    func allCombinations<S: Sequence>(with s2: S) -> [(Self.Element, S.Element)] {
+        typealias X = Self.Element
+        typealias Y = S.Element
+        return self.flatMap{ (x) -> [(X, Y)] in
+            s2.map{ (y) -> (X, Y) in (x, y) }
+        }
+    }
+    
+    // TODO remove
     func groupMap<U: Hashable, T>(by generator: (Element) -> (key: U, value: T)) -> [U: [T]] {
         var groups: [U: Ref<[T]>] = [:]
         for element in self {
@@ -58,13 +67,5 @@ extension Sequence {
             result[key] = valRef.value
         }
         return result
-    }
-    
-    func pairs<S: Sequence>(with s2: S) -> [(Self.Element, S.Element)] {
-        typealias X = Self.Element
-        typealias Y = S.Element
-        return self.flatMap{ (x) -> [(X, Y)] in
-            s2.map{ (y) -> (X, Y) in (x, y) }
-        }
     }
 }
