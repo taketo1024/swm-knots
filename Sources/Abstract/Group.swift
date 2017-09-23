@@ -145,7 +145,7 @@ public extension _QuotientGroup where Base == Sub.Super {
 }
 
 // concrete struct
-public struct QuotientGroup<G: Group, H: Subgroup>: _QuotientGroup where G == H.Super {
+public struct QuotientGroup<G, H>: _QuotientGroup where H: Subgroup, G == H.Super {
     public typealias Base = G
     public typealias Sub = H
     

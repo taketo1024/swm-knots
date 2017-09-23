@@ -121,7 +121,7 @@ public extension _QuotientRing where Base == Sub.Super {
     }
 }
 
-public struct QuotientRing<R: Ring, I: Ideal>: _QuotientRing where R == I.Super {
+public struct QuotientRing<R, I>: _QuotientRing where I: Ideal, R == I.Super {
     public typealias Sub = I
     
     internal let r: R
@@ -136,7 +136,7 @@ public struct QuotientRing<R: Ring, I: Ideal>: _QuotientRing where R == I.Super 
 }
 
 // TODO merge with QuotientRing after conditional conformance is supported.
-public struct QuotientField<R: Ring, I: Ideal>: Field, _QuotientRing where R == I.Super {
+public struct QuotientField<R, I>: Field, _QuotientRing where I: Ideal, R == I.Super {
     public typealias Sub = I
     
     internal let r: R

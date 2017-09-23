@@ -68,9 +68,9 @@ public extension _QuotientModule where Base == Sub.Super, CoeffRing == Sub.Coeff
     }
 }
 
-public struct QuotientModule<M: Module, S: Submodule>: _QuotientModule where M == S.Super, M.CoeffRing == S.CoeffRing {
+public struct QuotientModule<M, N>: _QuotientModule where N: Submodule, M == N.Super, M.CoeffRing == N.CoeffRing {
     public typealias CoeffRing = M.CoeffRing
-    public typealias Sub = S
+    public typealias Sub = N
     
     internal let m: M
     
