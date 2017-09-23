@@ -52,20 +52,4 @@ extension Sequence {
             s2.map{ (y) -> (X, Y) in (x, y) }
         }
     }
-    
-    // TODO remove
-    func groupMap<U: Hashable, T>(by generator: (Element) -> (key: U, value: T)) -> [U: [T]] {
-        var groups: [U: Ref<[T]>] = [:]
-        for element in self {
-            let (key, val) = generator(element)
-            if case nil = groups[key]?.value.append(val) {
-                groups[key] = Ref([val])
-            }
-        }
-        var result: [U: [T]] = Dictionary(minimumCapacity: groups.count)
-        for (key,valRef) in groups {
-            result[key] = valRef.value
-        }
-        return result
-    }
 }
