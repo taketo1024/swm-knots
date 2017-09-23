@@ -104,7 +104,7 @@ public extension GeometricComplex {
     }
 }
 
-public extension Homology where chainType == Descending, R: EuclideanRing {
+public extension Homology where chainType == Descending {
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where C.Cell == A {
         let c: ChainComplex<R, A> = K.chainComplex(type: R.self)
         self.init(c)
@@ -116,7 +116,7 @@ public extension Homology where chainType == Descending, R: EuclideanRing {
     }
 }
 
-public extension Cohomology where chainType == Ascending, R: EuclideanRing {
+public extension Cohomology where chainType == Ascending {
     public convenience init<C: GeometricComplex>(_ s: C, _ type: R.Type) where Dual<C.Cell> == A {
         let c: CochainComplex<R, A>  = s.cochainComplex(type: R.self)
         self.init(c)

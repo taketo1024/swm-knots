@@ -33,12 +33,9 @@ public extension Ring {
     }
 }
 
-public protocol Subring: Ring, AdditiveSubgroup, Submonoid {
-    associatedtype Super: Ring
-}
+public protocol Subring: Ring, AdditiveSubgroup, Submonoid where Super: Ring {}
 
-public protocol Ideal: AdditiveGroup, AdditiveSubgroup {
-    associatedtype Super: Ring
+public protocol Ideal: AdditiveSubgroup where Super: Ring {
     static func * (r: Super, a: Self) -> Self
     static func * (m: Self, r: Super) -> Self
     
@@ -60,10 +57,7 @@ public extension Ideal {
     }
 }
 
-public protocol _ProductRing: Ring, AdditiveProductGroup {
-    associatedtype Left: Ring
-    associatedtype Right: Ring
-}
+public protocol _ProductRing: Ring, AdditiveProductGroup where Left: Ring, Right: Ring {}
 
 public extension _ProductRing {
     public init(intValue a: Int) {
@@ -99,9 +93,7 @@ public struct ProductRing<R1: Ring, R2: Ring>: _ProductRing {
     }
 }
 
-public protocol _QuotientRing: Ring, AdditiveQuotientGroup {
-    associatedtype Sub: Ideal
-}
+public protocol _QuotientRing: Ring, AdditiveQuotientGroup where Sub: Ideal {}
 
 public extension _QuotientRing where Base == Sub.Super {
     public init(intValue n: Int) {
@@ -129,7 +121,7 @@ public extension _QuotientRing where Base == Sub.Super {
     }
 }
 
-public struct QuotientRing<R: Ring, I: Ideal>: _QuotientRing where R == I.Super {
+public struct QuotientRing<R, I>: _QuotientRing where I: Ideal, R == I.Super {
     public typealias Sub = I
     
     internal let r: R
@@ -144,7 +136,7 @@ public struct QuotientRing<R: Ring, I: Ideal>: _QuotientRing where R == I.Super 
 }
 
 // TODO merge with QuotientRing after conditional conformance is supported.
-public struct QuotientField<R: Ring, I: Ideal>: Field, _QuotientRing where R == I.Super {
+public struct QuotientField<R, I>: Field, _QuotientRing where I: Ideal, R == I.Super {
     public typealias Sub = I
     
     internal let r: R
@@ -158,9 +150,9 @@ public struct QuotientField<R: Ring, I: Ideal>: Field, _QuotientRing where R == 
     }
 }
 
-public extension Array where Iterator.Element: Ring {
-    public func multiplyAll() -> Iterator.Element {
-        typealias R = Iterator.Element
+public extension Array where Element: Ring {
+    public func multiplyAll() -> Element {
+        typealias R = Element
         return self.reduce(R.identity) {
             return $0 * $1
         }

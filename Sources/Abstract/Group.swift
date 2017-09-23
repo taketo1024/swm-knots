@@ -16,7 +16,7 @@ public extension Group {
         }
     }
     
-    public static func formsSubgroup<S: Sequence>(_ elements: S) -> Bool where S.Iterator.Element == Self {
+    public static func formsSubgroup<S: Sequence>(_ elements: S) -> Bool where S.Element == Self {
         let list = Array(elements)
         let n = list.count
         
@@ -85,9 +85,7 @@ public extension Group where Self: FiniteSetType {
     }
 }
 
-public protocol Subgroup: Submonoid, SubsetType {
-    associatedtype Super: Group
-}
+public protocol Subgroup: Submonoid where Super: Group {}
 
 public extension Subgroup {
     public var inverse: Self {
@@ -96,10 +94,7 @@ public extension Subgroup {
 }
 
 // abstract protocol
-public protocol _ProductGroup: Group, _ProductMonoid {
-    associatedtype Left: Group
-    associatedtype Right: Group
-}
+public protocol _ProductGroup: Group, _ProductMonoid where Left: Group, Right: Group {}
 
 public extension _ProductGroup {
     public var inverse: Self {
@@ -150,7 +145,7 @@ public extension _QuotientGroup where Base == Sub.Super {
 }
 
 // concrete struct
-public struct QuotientGroup<G: Group, H: Subgroup>: _QuotientGroup where G == H.Super {
+public struct QuotientGroup<G, H>: _QuotientGroup where H: Subgroup, G == H.Super {
     public typealias Base = G
     public typealias Sub = H
     

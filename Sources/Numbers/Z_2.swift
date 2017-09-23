@@ -16,7 +16,7 @@ public struct Z_2: Field {
     }
     
     public init(intValue value: Int) {
-        self.init(UInt8(truncatingBitPattern: value))
+        self.init(UInt8(truncatingIfNeeded: value))
     }
     
     public var inverse: Z_2? {

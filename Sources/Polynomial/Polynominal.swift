@@ -73,7 +73,7 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
         return Polynomial<K>(0, 1)
     }
     
-    public static func eucDiv<K: Field>(_ f: Polynomial<K>, _ g: Polynomial<K>) -> (q: Polynomial<K>, r: Polynomial<K>) {
+    public static func eucDiv<K>(_ f: Polynomial<K>, _ g: Polynomial<K>) -> (q: Polynomial<K>, r: Polynomial<K>) {
         if g == 0 {
             fatalError("divide by 0")
         }
@@ -159,27 +159,3 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
 public func Monomial<K>(degree d: Int, coeff a: K) -> Polynomial<K> {
     return Polynomial(degree: d) { $0 == d ? a : 0 }
 }
-
-public struct PolynomialIdeal<K: Field, p: _Polynomial>: EuclideanIdeal where K == p.K {
-    public typealias Super = Polynomial<K>
-    
-    public static var generator: Polynomial<K> {
-        return p.value
-    }
-    
-    public let a: Polynomial<K>
-    
-    public init(_ a: Polynomial<K>) {
-        self.a = a
-    }
-    
-    public init(_ coeffs: K...) {
-        self.init(Super.init(coeffs))
-    }
-    
-    public var asSuper: Polynomial<K> {
-        return a
-    }
-}
-
-public typealias AlgebraicExtension<K: Field, I: EuclideanIdeal> = QuotientField<Polynomial<K>, I> where I.Super == Polynomial<K>

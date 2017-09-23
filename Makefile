@@ -1,6 +1,6 @@
-MOD=SwiftyAlgebra
+NAME=SwiftyAlgebra
+MOD=$(NAME).swiftmodule $(NAME).swiftdoc
 SRC=Sources/**/*.swift
-BIN=$(MOD).swiftmodule $(MOD).swiftdoc
 
 SWIFTC=swiftc
 SWIFT=swift
@@ -13,10 +13,9 @@ ifeq ($(OS),Darwin)
 	SWIFTC=xcrun -sdk macosx swiftc
 endif
 
-module: $(BIN)
+$(MOD): $(SRC)
+	$(SWIFTC) -emit-library -emit-module $(SRC) -module-name $(NAME)
+repl: $(MOD)
+	$(SWIFT) -I. -L. -l$(NAME)
 clean:
-	-rm $(BIN) lib$(MOD).*
-$(BIN): $(SRC)
-	$(SWIFTC) -emit-library -emit-module $(SRC) -module-name $(MOD)
-repl: $(BIN)
-	$(SWIFT) -I. -L. -l$(MOD)
+	-rm $(MOD) lib$(NAME).*

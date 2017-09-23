@@ -6,9 +6,7 @@ public protocol Module: AdditiveGroup {
     static func * (m: Self, r: CoeffRing) -> Self
 }
 
-public protocol Submodule: Module, AdditiveSubgroup {
-    associatedtype Super: Module
-}
+public protocol Submodule: Module, AdditiveSubgroup where Super: Module {}
 
 public extension Submodule where CoeffRing == Super.CoeffRing {
     static func * (r: CoeffRing, a: Self) -> Self {
@@ -20,10 +18,7 @@ public extension Submodule where CoeffRing == Super.CoeffRing {
     }
 }
 
-public protocol _ProductModule: Module, AdditiveProductGroup {
-    associatedtype Left: Module
-    associatedtype Right: Module
-}
+public protocol _ProductModule: Module, AdditiveProductGroup where Left: Module, Right: Module {}
 
 public extension _ProductModule where Left.CoeffRing == CoeffRing, Right.CoeffRing == CoeffRing {
     static func * (r: CoeffRing, a: Self) -> Self {
@@ -53,9 +48,7 @@ public struct ProductModule<M1: Module, M2: Module>: _ProductModule where M1.Coe
     }
 }
 
-public protocol _QuotientModule: Module, AdditiveQuotientGroup {
-    associatedtype Sub: Submodule
-}
+public protocol _QuotientModule: Module, AdditiveQuotientGroup where Sub: Submodule {}
 
 public extension _QuotientModule where Base == Sub.Super, CoeffRing == Sub.CoeffRing, CoeffRing == Sub.Super.CoeffRing {
     public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
@@ -75,9 +68,9 @@ public extension _QuotientModule where Base == Sub.Super, CoeffRing == Sub.Coeff
     }
 }
 
-public struct QuotientModule<M: Module, S: Submodule>: _QuotientModule where M == S.Super, M.CoeffRing == S.CoeffRing {
+public struct QuotientModule<M, N>: _QuotientModule where N: Submodule, M == N.Super, M.CoeffRing == N.CoeffRing {
     public typealias CoeffRing = M.CoeffRing
-    public typealias Sub = S
+    public typealias Sub = N
     
     internal let m: M
     

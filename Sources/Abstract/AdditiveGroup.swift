@@ -12,9 +12,7 @@ public extension AdditiveGroup {
     }
 }
 
-public protocol AdditiveSubgroup: AdditiveGroup, SubsetType {
-    associatedtype Super: AdditiveGroup
-}
+public protocol AdditiveSubgroup: AdditiveGroup, SubsetType where Super: AdditiveGroup {}
 
 public extension AdditiveSubgroup {
     public static var zero: Self {
@@ -30,10 +28,7 @@ public extension AdditiveSubgroup {
     }
 }
 
-public protocol AdditiveProductGroup: AdditiveGroup, ProductSetType {
-    associatedtype Left: AdditiveGroup
-    associatedtype Right: AdditiveGroup
-}
+public protocol AdditiveProductGroup: AdditiveGroup, ProductSetType where Left: AdditiveGroup, Right: AdditiveGroup {}
 
 public extension AdditiveProductGroup {
     public static var zero: Self {
@@ -76,9 +71,9 @@ public extension AdditiveQuotientGroup where Base == Sub.Super {
 }
 
 
-public extension Sequence where Iterator.Element: AdditiveGroup {
-    public func sumAll() -> Iterator.Element {
-        typealias G = Iterator.Element
+public extension Sequence where Element: AdditiveGroup {
+    public func sumAll() -> Element {
+        typealias G = Element
         return self.reduce(G.zero) {
             return $0 + $1
         }

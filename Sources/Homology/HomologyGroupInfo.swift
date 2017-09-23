@@ -58,7 +58,7 @@ public class HomologyGroupInfo<chainType: ChainType, R: EuclideanRing, A: FreeMo
         self.init(degree: degree, basis: d1.domainBasis, matrix1: d1.matrix, matrix2: d2.matrix)
     }
     
-    internal init<n0: _Int, n1: _Int, n2: _Int>(degree: Int, basis: ChainBasis, matrix1 A1: Matrix<R, n0, n1>, matrix2 A2: Matrix<R, n1, n2>) {
+    internal init<n0, n1, n2>(degree: Int, basis: ChainBasis, matrix1 A1: Matrix<R, n0, n1>, matrix2 A2: Matrix<R, n1, n2>) {
         // Z_i : the i-th Cycle group
         let Z = A1.kernelMatrix
         let (n, k) = (Z.rows, Z.cols)
@@ -94,7 +94,7 @@ public class HomologyGroupInfo<chainType: ChainType, R: EuclideanRing, A: FreeMo
     }
     
     // Calculate with size-typed matrices.
-    private static func calculate<n:_Int, k:_Int, l:_Int>(_ basis: ChainBasis, _ Z: Matrix<R, n, k>, _ B: Matrix<R, n, l>, _ T: Matrix<R, k, n>) -> (newBasis: [M],  transitionMatrix: Matrix<R, k, n>, diagonal: [R]) {
+    private static func calculate<n, k, l>(_ basis: ChainBasis, _ Z: Matrix<R, n, k>, _ B: Matrix<R, n, l>, _ T: Matrix<R, k, n>) -> (newBasis: [M],  transitionMatrix: Matrix<R, k, n>, diagonal: [R]) {
         
         // Find R such that B = Z * P.
         // Since T * Z = I_k,  T * B = P.
