@@ -117,8 +117,8 @@ public extension SimplicialComplex {
     }
     
     static func ball(dim: Int) -> SimplicialComplex {
-        let V = VertexSet(number: dim + 1)
-        let s = Simplex(V, Array(0...dim))
+        let V = VertexSet(count: dim + 1)
+        let s = Simplex(V, indices: 0...dim)
         return SimplicialComplex([s])
     }
     
@@ -136,14 +136,14 @@ public extension SimplicialComplex {
         case 1:
             return circle()
         case 2:
-            let V = VertexSet(number: 6)
+            let V = VertexSet(count: 6)
             let indices = [(0,1,3),(1,4,3),(1,2,4),(4,2,0),(4,0,5),(0,1,5),(1,2,5),(2,3,5),(0,3,2),(3,4,5)]
-            let simplices = indices.map { v in Simplex(V, [v.0, v.1, v.2]) }
+            let simplices = indices.map { v in Simplex(V, indices: [v.0, v.1, v.2]) }
             return SimplicialComplex(simplices)
         case 3:
-            let V = VertexSet(number: 11)
+            let V = VertexSet(count: 11)
             let indices = [(1,2,3,7), (1,2,3,0), (1,2,6,9), (1,2,6,0), (1,2,7,9), (1,3,5,10), (1,3,5,0), (1,3,7,10), (1,4,7,9), (1,4,7,10), (1,4,8,9), (1,4,8,10), (1,5,6,8), (1,5,6,0), (1,5,8,10), (1,6,8,9), (2,3,4,8), (2,3,4,0), (2,3,7,8), (2,4,6,10), (2,4,6,0), (2,4,8,10), (2,5,7,8), (2,5,7,9), (2,5,8,10), (2,5,9,10), (2,6,9,10), (3,4,5,9), (3,4,5,0), (3,4,8,9), (3,5,9,10), (3,6,7,8), (3,6,7,10), (3,6,8,9), (3,6,9,10), (4,5,6,7), (4,5,6,0), (4,5,7,9), (4,6,7,10), (5,6,7,8)]
-            let simplices = indices.map { v in Simplex(V, [v.0, v.1, v.2, v.3]) }
+            let simplices = indices.map { v in Simplex(V, indices: [v.0, v.1, v.2, v.3]) }
             return SimplicialComplex(simplices)
         default:
             fatalError("RP^n (n >= 4) not yet supported.")
@@ -154,12 +154,12 @@ public extension SimplicialComplex {
 // disjoint union
 public func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
     let (n1, n2) = (K1.vertices.count, K2.vertices.count)
-    let V = VertexSet(number: n1 + n2)
+    let V = VertexSet(count: n1 + n2)
     let dim = max(K1.dim, K2.dim)
     
     let cells = (0 ... dim).map{ i in
-        K1.allCells(ofDim: i).map{ s in Simplex(V, s.vertices.map{$0.index}) } +
-            K2.allCells(ofDim: i).map{ s in Simplex(V, s.vertices.map{$0.index + n1}) }
+        K1.allCells(ofDim: i).map{ s in Simplex(V, indices: s.vertices.map{$0.index}) } +
+            K2.allCells(ofDim: i).map{ s in Simplex(V, indices: s.vertices.map{$0.index + n1}) }
     }
     return SimplicialComplex(cells)
 }
@@ -167,7 +167,7 @@ public func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex
 // product complex
 public func ⨯(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
     let (n1, n2) = (K1.vertices.count, K2.vertices.count)
-    let V = VertexSet(number: n1 * n2)
+    let V = VertexSet(count: n1 * n2)
     
     let simplexPairs = K1.maximalCells.allCombinations(with: K2.maximalCells)
     let indexPairs: [[(Int, Int)]] = simplexPairs.flatMap{(s, t) -> [[(Int, Int)]] in
@@ -195,7 +195,7 @@ public func ⨯(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialCompl
 
     let cells = indexPairs.map { (list: [(Int, Int)]) -> Simplex in
         let indices = list.map{ (i, j) in i + j * n1 }
-        return Simplex(V, indices)
+        return Simplex(V, indices: indices)
     }
     
     return SimplicialComplex(cells)
