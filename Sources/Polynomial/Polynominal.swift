@@ -182,4 +182,4 @@ public struct PolynomialIdeal<K: Field, p: _Polynomial>: EuclideanIdeal where K 
     }
 }
 
-public typealias AlgebraicExtension<K: Field, I: EuclideanIdeal> = QuotientField<Polynomial<K>, I> where I.Super == Polynomial<K>
+public typealias AlgebraicExtension<K: Field, I: Ideal> = QuotientField<Polynomial<K>, I> where I.Super == Polynomial<K>
