@@ -35,11 +35,3 @@ public extension Field {
         return FieldMatrixEliminator<Self>.self
     }
 }
-
-// Integer
-
-public extension IntegerNumber {
-    public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<IntegerNumber>.Type {
-        return EigenAcceleration.enabled() ? _EigenIntMatrixImpl.self : _GridMatrixImpl<IntegerNumber>.self
-    }
-}
