@@ -1,7 +1,7 @@
 # Swifty Algebra
 
-A playground for [Algebra](https://en.wikipedia.org/wiki/Abstract_algebra) in Mathematics.
-This project is intended to understand Abstract Algebra by implementing abstract concepts and playing with concrete objects.
+A Swift playground for [Abstract Algebra](https://en.wikipedia.org/wiki/Abstract_algebra).
+This project is intended to understand Algebra by implementing abstract concepts and playing with concrete objects such as Numbers, Matrices, Polynomials, etc.
 
 ## How to Build / Run
 
@@ -69,23 +69,22 @@ t[2]  // 4
 typealias Q = RationalNumber
 typealias Qx = Polynominal<Q>
 
-let f = Qx(0, 2, -3, 1) // f(x) = x^3 − 3x^2 + 2x
-let g = Qx(6, -5, 1)    // g(x) = x^2 − 5x + 6
+let f = Qx(0, 2, -3, 1) // x^3 − 3x^2 + 2x
+let g = Qx(6, -5, 1)    // x^2 − 5x + 6
     
-f + g  // (f + g)(x) = x^3 - 2x^2 - 3x + 6
-f * g  // (f * g)(x) = x^5 - 8x^4 + 23x^3 - 28x^2 + 12x
-f % g  // (f % g)(x) = 6x - 12
+f + g  // x^3 - 2x^2 - 3x + 6
+f * g  // x^5 - 8x^4 + 23x^3 - 28x^2 + 12x
+f % g  // 6x - 12
     
 gcd(f, g) // 6x - 12
 ```
 
-### Finite Fields
+### Integer Quotients, Finite Fields
 
 ```swift
 typealias Z_4 = IntegerQuotientRing<_4>
 Z_4.printAddTable()
 ```
-
 ```
 +	|	0	1	2	3
 ----------------------
@@ -99,7 +98,6 @@ Z_4.printAddTable()
 typealias F_5 = IntegerQuotientField<_5>
 F_5.printMulTable()
 ```
-
 ```
 *	|	0	1	2	3	4
 --------------------------
