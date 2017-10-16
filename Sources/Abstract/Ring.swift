@@ -6,8 +6,7 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
     var inverse: Self? { get }
     var isInvertible: Bool { get }
     
-    static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type
-    static func matrixEliminatiorType() -> MatrixEliminator<Self>.Type?
+    static func matrixEliminatiorType<n, m>() -> MatrixEliminator<Self, n, m>.Type?
 }
 
 public extension Ring {

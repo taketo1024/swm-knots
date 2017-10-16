@@ -14,12 +14,12 @@ public enum MatrixEliminationMode {
     case Cols
 }
 
-public class MatrixEliminator<R: Ring> {
+public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
     let mode: MatrixEliminationMode
     let rows: Int
     let cols: Int
     
-    var result: _MatrixImpl<R>
+    public var result: Matrix<R, n, m>
     var process: [EliminationStep<R>]
     
     let maxItr: Int
@@ -27,12 +27,12 @@ public class MatrixEliminator<R: Ring> {
     
     var debug: Bool = false
     
-    public required init(_ target: _MatrixImpl<R>, _ mode: MatrixEliminationMode, _ debug: Bool = false) {
+    public required init(_ target: Matrix<R, n, m>, _ mode: MatrixEliminationMode, _ debug: Bool = false) {
         self.mode = mode
         self.rows = target.rows
         self.cols = target.cols
         
-        self.result = target.copy()
+        self.result = target
         self.process = []
         self.debug = debug
         
@@ -47,50 +47,50 @@ public class MatrixEliminator<R: Ring> {
         self.run()
     }
     
-    public lazy var left: _MatrixImpl<R> = { [unowned self] in
-        let Q = self.result.leftIdentity()
+    public lazy var left: Matrix<R, n, n> = { [unowned self] in
+        var Q = result.leftIdentity
         
-        self.process
+        process
             .filter{ $0.isRowOperation }
-            .forEach { $0.apply(to: Q) }
+            .forEach { $0.apply(to: &Q) }
         
         return Q
     }()
     
-    public lazy var leftInverse: _MatrixImpl<R> = { [unowned self] in
-        let Q = self.result.leftIdentity()
+    public lazy var leftInverse: Matrix<R, n, n> = { [unowned self] in
+        var Q = result.leftIdentity
         
-        self.process
+        process
             .filter{ $0.isRowOperation }
             .reversed()
-            .forEach{ $0.inverse.apply(to: Q) }
+            .forEach{ $0.inverse.apply(to: &Q) }
         
         return Q
     }()
     
-    public lazy var right: _MatrixImpl<R> = { [unowned self] in
-        let P = self.result.rightIdentity()
+    public lazy var right: Matrix<R, m, m> = { [unowned self] in
+        var P = result.rightIdentity
         
-        self.process
+        process
             .filter{ $0.isColOperation }
-            .forEach { $0.apply(to: P) }
+            .forEach { $0.apply(to: &P) }
         
         return P
     }()
     
-    public lazy var rightInverse: _MatrixImpl<R> = { [unowned self] in
-        let P = self.result.rightIdentity()
+    public lazy var rightInverse: Matrix<R, m, m> = { [unowned self] in
+        var P = result.rightIdentity
         
-        self.process
+        process
             .filter{ $0.isColOperation }
             .reversed()
-            .forEach{ $0.inverse.apply(to: P) }
+            .forEach{ $0.inverse.apply(to: &P) }
         
         return P
     }()
     
     public lazy var diagonal: [R] = { [unowned self] in
-        let A = self.result
+        let A = result
         let r = min(A.rows, A.cols)
         return (0 ..< r).map{ A[$0, $0] }
     }()
@@ -116,7 +116,7 @@ public class MatrixEliminator<R: Ring> {
     }
     
     final func apply(_ s: EliminationStep<R>) {
-        s.apply(to: result)
+        s.apply(to: &result)
         process.append(s)
         
         log("\(itr)/\(maxItr): \(s) \n\n\(result.detailDescription)\n")
@@ -179,7 +179,7 @@ internal enum EliminationStep<R: Ring> {
         }
     }
     
-    func apply(to A: _MatrixImpl<R>) {
+    func apply<n, m>(to A: inout Matrix<R, n, m>) {
         switch self {
         case let .AddRow(i, j, r):
             A.addRow(at: i, to: j, multipliedBy: r)

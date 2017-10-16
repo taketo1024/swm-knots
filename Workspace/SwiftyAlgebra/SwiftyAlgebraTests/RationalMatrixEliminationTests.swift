@@ -153,8 +153,8 @@ class RationalMatrixEliminationTests: XCTestCase {
         var A = M55.identity
         
         for _ in 0 ..< s {
-            let i = rand(5)
-            let j = rand(5)
+            let i = rand(3)
+            let j = rand(3)
             if i == j {
                 continue
             }
@@ -178,8 +178,8 @@ class RationalMatrixEliminationTests: XCTestCase {
         var A = M55(){ $0 == $1 && $0 < r ? 1 : 0 }
         
         for _ in 0 ..< s {
-            let i = rand(5)
-            let j = rand(5)
+            let i = rand(3)
+            let j = rand(3)
             if i == j {
                 continue
             }

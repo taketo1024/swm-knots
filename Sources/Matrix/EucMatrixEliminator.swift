@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class EucMatrixEliminator<R: EuclideanRing>: MatrixEliminator<R> {
+public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEliminator<R, n, m> {
     override func iteration() -> Bool {
         let doRows = (mode != .Cols)
         let doCols = (mode != .Rows)

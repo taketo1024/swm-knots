@@ -16,32 +16,55 @@ public typealias MatrixComponent<R> = (row: Int, col: Int, value: R)
 
 public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public typealias CoeffRing = R
-    public typealias Iterator = MatrixIterator<R>
+    public typealias Iterator = MatrixIterator<R, n, m>
     
-    internal var impl: _MatrixImpl<R>
-    internal var smithNormalFormCache: Cache<MatrixElimination<R, n, m>> = Cache()
-
-    // internal root initializer
-    internal init(_ impl: _MatrixImpl<R>) {
-        self.impl = impl
+    public let rows: Int
+    public let cols: Int
+    public let type: MatrixType
+    
+    private var grid: [R] {
+        willSet {
+            clearCache()
+        }
     }
     
-    // 1. Initialize by Grid (simple but ineffective).
-    public init(rows r: Int? = nil, cols c: Int? = nil, type t: MatrixType = .Default, grid: [R]) {
+    internal var smithNormalFormCache: Cache<MatrixEliminator<R, n, m>> = Cache()
+    internal func clearCache() {
+        smithNormalFormCache.value = nil
+    }
+
+    // Root Initializer.
+    private init(_ rows: Int, _ cols: Int, _ type: MatrixType, _ grid: [R]) {
+        self.rows = rows
+        self.cols = cols
+        self.type = type
+        self.grid = grid
+    }
+    
+    // 1. Initialize by Grid.
+    public init(rows r: Int? = nil, cols c: Int? = nil, type: MatrixType = .Default, grid: [R]) {
         let (rows, cols) = Matrix.determineSize(r, c, grid)
-        self.init(R.matrixImplType(t).init(rows, cols, grid))
+        self.init(rows, cols, type, grid)
     }
     
     // 2. Initialize by Generator.
-    public init(rows r: Int? = nil, cols c: Int? = nil, type t: MatrixType = .Default, generator g: (Int, Int) -> R) {
+    public init(rows r: Int? = nil, cols c: Int? = nil, type: MatrixType = .Default, generator g: (Int, Int) -> R) {
         let (rows, cols) = Matrix.determineSize(r, c, nil)
-        self.init(R.matrixImplType(t).init(rows, cols, g))
+        let grid = (0 ..< rows * cols).map { (index: Int) -> R in
+            let (i, j) = index /% cols
+            return g(i, j)
+        }
+        self.init(rows, cols, type, grid)
     }
     
     // 3. Initialize by Components (good for Sparce Matrix).
-    public init(rows r: Int? = nil, cols c: Int? = nil, type t: MatrixType = .Default, components: [MatrixComponent<R>]) {
+    public init(rows r: Int? = nil, cols c: Int? = nil, type: MatrixType = .Default, components: [MatrixComponent<R>]) {
         let (rows, cols) = Matrix.determineSize(r, c, nil)
-        self.init(R.matrixImplType(t).init(rows, cols, components))
+        var grid = Array(repeating: R.zero, count: rows * cols)
+        for (i, j, a) in components {
+            grid[(i * cols) + j] = a
+        }
+        self.init(rows, cols, type, grid)
     }
     
     // Convenience initializer of 1.
@@ -106,31 +129,19 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         }
     }
     
-    public var rows: Int { return impl.rows }
-    public var cols: Int { return impl.cols }
-    public var type: MatrixType {return impl.type}
-    
-    private mutating func willMutate() {
-        copyIfNecessary()
-        smithNormalFormCache.value = nil
-    }
-    
-    private mutating func copyIfNecessary() {
-        if !isKnownUniquelyReferenced(&impl) {
-            impl = impl.copy()
-            smithNormalFormCache = Cache(nil)
-        }
+    internal func gridIndex(_ i: Int, _ j: Int) -> Int {
+        return (i * cols) + j
     }
     
     public subscript(i: Int, j: Int) -> R {
-        get { return impl[i, j] }
-        set {
-            willMutate()
-            impl[i, j] = newValue
+        get {
+            return grid[gridIndex(i, j)]
+        } set {
+            grid[gridIndex(i, j)] = newValue
         }
     }
     
-    public func makeIterator() -> MatrixIterator<R> {
+    public func makeIterator() -> MatrixIterator<R, n, m> {
         return MatrixIterator(self)
     }
     
@@ -139,39 +150,56 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     }
     
     public static func ==(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Bool {
-        return a.impl.equals(b.impl)
+        assert((a.rows, a.cols) == (b.rows, b.cols), "Mismatching matrix size.")
+        return a.grid == b.grid
     }
     
     public static func +(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
-        return Matrix(a.impl.add(b.impl))
+        assert((a.rows, a.cols) == (b.rows, b.cols), "Mismatching matrix size.")
+        return Matrix(rows: a.rows, cols: a.cols, type: (a.type == b.type) ? a.type : .Default) { (i, j) -> R in
+            return a[i, j] + b[i, j]
+        }
     }
     
     public prefix static func -(a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-        return Matrix(a.impl.negate())
+        return Matrix(rows: a.rows, cols: a.cols, type: a.type) { (i, j) -> R in
+            return -a[i, j]
+        }
     }
     
     public static func *(r: R, a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-        return Matrix(a.impl.leftMul(r))
+        return Matrix(rows: a.rows, cols: a.cols, type: a.type) { (i, j) -> R in
+            return r * a[i, j]
+        }
     }
     
     public static func *(a: Matrix<R, n, m>, r: R) -> Matrix<R, n, m> {
-        return Matrix(a.impl.rightMul(r))
+        return Matrix(rows: a.rows, cols: a.cols, type: a.type) { (i, j) -> R in
+            return a[i, j] * r
+        }
     }
     
     public static func * <p>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
-        return Matrix<R, n, p>(a.impl.mul(b.impl))
+        assert(a.cols == b.rows, "Mismatching matrix size.")
+        return Matrix<R, n, p>(rows: a.rows, cols: b.cols, type: (a.type == b.type) ? a.type : .Default) { (i, k) -> R in
+            return (0 ..< a.cols)
+                .map({j in a[i, j] * b[j, k]})
+                .reduce(0) {$0 + $1}
+        }
     }
     
     public var transposed: Matrix<R, m, n> {
-        return Matrix<R, m, n>(impl.transpose())
+        return Matrix<R, m, n>(rows: cols, cols: rows, type: type) { (i, j) -> R in
+            return self[j, i]
+        }
     }
     
     public var leftIdentity: Matrix<R, n, n> {
-        return Matrix<R, n, n>(impl.leftIdentity())
+        return Matrix<R, n, n>(rows: rows, cols: rows, type: type) { $0 == $1 ? 1 : 0 }
     }
     
     public var rightIdentity: Matrix<R, m, m> {
-        return Matrix<R, m, m>(impl.rightIdentity())
+        return Matrix<R, m, m>(rows: cols, cols: cols, type: type) { $0 == $1 ? 1 : 0 }
     }
     
     // TODO delete if possible
@@ -208,51 +236,112 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         return submatrix(inRange: (0 ..< rows, c))
     }
     
-    public func submatrix<k: _Int, l: _Int>(inRange range: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> Matrix<R, k, l> {
-        return Matrix<R, k, l>(impl.submatrix(inRange: range))
+    public func submatrix<k: _Int, l: _Int>(inRange ranges: (rows: CountableRange<Int>, cols: CountableRange<Int>)) -> Matrix<R, k, l> {
+        let (r, c) = ranges
+        return Matrix<R, k, l>(rows: r.upperBound - r.lowerBound, cols: c.upperBound - c.lowerBound, type: type) {
+            self[$0 + r.lowerBound, $1 + c.lowerBound]
+        }
     }
     
     public mutating func multiplyRow(at i0: Int, by r: R) {
-        willMutate()
-        impl.multiplyRow(at: i0, by: r)
+        var p = UnsafeMutablePointer(&grid)
+        p += gridIndex(i0, 0)
+        
+        for _ in 0 ..< cols {
+            p.pointee = r * p.pointee
+            p += 1
+        }
     }
     
     public mutating func multiplyCol(at j0: Int, by r: R) {
-        willMutate()
-        impl.multiplyCol(at: j0, by: r)
+        var p = UnsafeMutablePointer(&grid)
+        p += gridIndex(0, j0)
+        
+        for _ in 0 ..< rows {
+            p.pointee = r * p.pointee
+            p += cols
+        }
     }
     
     public mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R = 1) {
-        willMutate()
-        impl.addRow(at: i0, to: i1, multipliedBy: r)
+        var p0 = UnsafeMutablePointer(&grid)
+        p0 += gridIndex(i0, 0)
+        
+        var p1 = UnsafeMutablePointer(&grid)
+        p1 += gridIndex(i1, 0)
+        
+        for _ in 0 ..< cols {
+            p1.pointee = p1.pointee + r * p0.pointee
+            p0 += 1
+            p1 += 1
+        }
     }
     
     public mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R = 1) {
-        willMutate()
-        impl.addCol(at: j0, to: j1, multipliedBy: r)
+        var p0 = UnsafeMutablePointer(&grid)
+        p0 += gridIndex(0, j0)
+        
+        var p1 = UnsafeMutablePointer(&grid)
+        p1 += gridIndex(0, j1)
+        
+        for _ in 0 ..< rows {
+            p1.pointee = p1.pointee + r * p0.pointee
+            p0 += cols
+            p1 += cols
+        }
     }
     
     public mutating func swapRows(_ i0: Int, _ i1: Int) {
-        willMutate()
-        impl.swapRows(i0, i1)
+        var p0 = UnsafeMutablePointer(&grid)
+        let d = (gridIndex(i1, 0) - gridIndex(i0, 0))
+        
+        p0 += gridIndex(i0, 0)
+        
+        for _ in 0 ..< cols {
+            let a = p0.pointee
+            let p1 = p0 + d
+            
+            p0.pointee = p1.pointee
+            p1.pointee = a
+            
+            p0 += 1
+        }
     }
     
     public mutating func swapCols(_ j0: Int, _ j1: Int) {
-        willMutate()
-        impl.swapCols(j0, j1)
+        var p0 = UnsafeMutablePointer(&grid)
+        let d = (gridIndex(0, j1) - gridIndex(0, j0))
+        
+        p0 += gridIndex(0, j0)
+        
+        for _ in 0 ..< rows {
+            let a = p0.pointee
+            let p1 = p0 + d
+            
+            p0.pointee = p1.pointee
+            p1.pointee = a
+            
+            p0 += cols
+        }
     }
     
-    public func eliminate(mode: MatrixEliminationMode, debug: Bool = false) -> MatrixElimination<R, n, m> {
-        return MatrixElimination(impl.eliminate(mode: mode, debug: debug))
+    public var eliminatable: Bool {
+        return true // FIXME
     }
     
-    public var smithNormalForm: MatrixElimination<R, n, m> {
+    public func eliminate(mode: MatrixEliminationMode, debug: Bool = false) -> MatrixEliminator<R, n, m> {
+        guard let e = R.matrixEliminatiorType()?.init(self, mode, debug) else {
+            fatalError("MatrixElimination not available for ring: \(R.symbol)")
+        }
+        return e
+    }
+    
+    public var smithNormalForm: MatrixEliminator<R, n, m> {
         if let s = smithNormalFormCache.value {
             return s
         }
         
-        let e = impl.eliminate(mode: .Both)
-        let s = MatrixElimination<R, n, m>(e)
+        let s = self.eliminate(mode: .Both)
         smithNormalFormCache.value = s
         
         return s
@@ -289,7 +378,7 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         if let A = self as? DynamicMatrix<R> {
             return A
         } else {
-            return DynamicMatrix<R>(impl)
+            return DynamicMatrix<R>(rows, cols, type, grid)
         }
     }
     
@@ -298,11 +387,19 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     }
     
     public var description: String {
-        return impl.description
+        return "[" + (0 ..< rows).map({ i in
+            return (0 ..< cols).map({ j in
+                return "\(self[i, j])"
+            }).joined(separator: ", ")
+        }).joined(separator: "; ") + "]"
     }
     
     public var detailDescription: String {
-        return impl.detailDescription
+        return "[\t" + (0 ..< rows).map({ i in
+            return (0 ..< cols).map({ j in
+                return "\(self[i, j])"
+            }).joined(separator: ",\t")
+        }).joined(separator: "\n\t") + "]"
     }
     
     public static var symbol: String {
@@ -327,16 +424,24 @@ public extension Matrix where n == _1 {
 // TODO: conform to Ring after conditional conformance is supported.
 public extension Matrix where n == m {
     public var determinant: R {
-        if impl.eliminatable(mode: .Both) {
+        if eliminatable {
+            // FIXME this is wrong! (ignores sign)
             let s = smithNormalForm
-            return s.processor.process.map{ $0.determinant.inverse! }.multiplyAll() * s.diagonal.multiplyAll()
+            return s.process.map{ $0.determinant.inverse! }.multiplyAll() * s.diagonal.multiplyAll()
         } else {
-            return impl.determinant()
+            print("[warn] running inefficient determinant calculation.")
+            
+            let n = rows
+            return n.permutations.map { (s: [Int]) -> R in
+                let e = Permutation<Dynamic>(elements: s).signature
+                let p = (0 ..< n).map { self[$0, s[$0]] }.multiplyAll()
+                return R(intValue: e) * p
+                }.sumAll()
         }
     }
     
     public var isInvertible: Bool {
-        if impl.eliminatable(mode: .Both) {
+        if eliminatable {
             return smithNormalForm.diagonal.multiplyAll().isInvertible
         } else {
             return determinant.isInvertible
@@ -344,7 +449,7 @@ public extension Matrix where n == m {
     }
     
     public var inverse: Matrix<R, n, n>? {
-        if impl.eliminatable(mode: .Both) {
+        if eliminatable {
             let s = smithNormalForm
             if s.result == self.leftIdentity {
                 return s.right * s.left
@@ -372,8 +477,8 @@ public enum MatrixIterationDirection {
     case Cols
 }
 
-public struct MatrixIterator<R: Ring> : IteratorProtocol {
-    private let impl: _MatrixImpl<R>
+public struct MatrixIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
+    private let matrix: Matrix<R, n, m>
     private let direction: MatrixIterationDirection
     private let rowRange: CountableRange<Int>
     private let colRange: CountableRange<Int>
@@ -383,22 +488,18 @@ public struct MatrixIterator<R: Ring> : IteratorProtocol {
     private var current: (Int, Int)
     private var initial = true
     
-    public init<n, m>(_ matrix: Matrix<R, n, m>, from: (Int, Int)? = nil, direction: MatrixIterationDirection = .Rows, rowRange: CountableRange<Int>? = nil, colRange: CountableRange<Int>? = nil, proceedLines: Bool = true, nonZeroOnly: Bool = false) {
-        self.init(matrix.impl, from: from, direction: direction, rowRange: rowRange, colRange: colRange, proceedLines: proceedLines, nonZeroOnly: nonZeroOnly)
-    }
-    
-    internal init(_ impl: _MatrixImpl<R>, from: (Int, Int)? = nil, direction: MatrixIterationDirection = .Rows, rowRange: CountableRange<Int>? = nil, colRange: CountableRange<Int>? = nil, proceedLines: Bool = true, nonZeroOnly: Bool = false) {
-        self.impl = impl
+    public init(_ matrix: Matrix<R, n, m>, from: (Int, Int)? = nil, direction: MatrixIterationDirection = .Rows, rowRange: CountableRange<Int>? = nil, colRange: CountableRange<Int>? = nil, proceedLines: Bool = true, nonZeroOnly: Bool = false) {
+        self.matrix = matrix
         self.current = from ?? (rowRange?.lowerBound ?? 0, colRange?.lowerBound ?? 0)
         self.direction = direction
-        self.rowRange = rowRange ?? (0 ..< impl.rows)
-        self.colRange = colRange ?? (0 ..< impl.cols)
+        self.rowRange = rowRange ?? (0 ..< matrix.rows)
+        self.colRange = colRange ?? (0 ..< matrix.cols)
         self.proceedLines = proceedLines
         self.nonZeroOnly = nonZeroOnly
     }
     
     mutating public func next() -> MatrixComponent<R>? {
-        let c = impl.next(from: current, includeFirst:initial, direction: direction, rowRange: rowRange, colRange: colRange, proceedLines: proceedLines, nonZeroOnly: nonZeroOnly)
+        let c = matrix.findNext(from: current, includeFirst:initial, direction: direction, rowRange: rowRange, colRange: colRange, proceedLines: proceedLines, nonZeroOnly: nonZeroOnly)
         
         if initial {
             initial = false
@@ -409,5 +510,76 @@ public struct MatrixIterator<R: Ring> : IteratorProtocol {
         }
         
         return c
+    }
+}
+
+internal extension Matrix {
+    internal func findNext(from: (Int, Int), includeFirst: Bool, direction: MatrixIterationDirection, rowRange: CountableRange<Int>, colRange: CountableRange<Int>, proceedLines: Bool, nonZeroOnly: Bool) -> MatrixComponent<R>? {
+        if includeFirst && rows * cols > 0 {
+            let a = self[from.0, from.1]
+            if !nonZeroOnly || a != R.zero {
+                return (from.0, from.1, a)
+            }
+        }
+        
+        func nextPos(_ from: (Int, Int)) -> (Int, Int)? {
+            if !rowRange.contains(from.0) || !colRange.contains(from.1) {
+                return nil
+            }
+            
+            switch direction {
+            case .Rows:
+                switch (from.0 + 1, from.1 + 1, rowRange.upperBound, colRange.upperBound, proceedLines) {
+                // within col-range
+                case let (_, j, _, c, _) where j < c:
+                    return (from.0, j)
+                    
+                // end of row, no proceeding lines
+                case (_, _, _, _, false):
+                    return nil
+                    
+                // can proceed line
+                case let (i, _, r, _, _) where i < r:
+                    return (i, colRange.lowerBound)
+                    
+                // end of range
+                default:
+                    return nil
+                }
+            case .Cols:
+                switch (from.0 + 1, from.1 + 1, rowRange.upperBound, colRange.upperBound, proceedLines) {
+                // within row-range
+                case let (i, _, r, _, _) where i < r:
+                    return (i, from.1)
+                    
+                // end of row, no proceeding lines
+                case (_, _, _, _, false):
+                    return nil
+                    
+                // can proceed line
+                case let (_, j, _, c, _) where j < c:
+                    return (rowRange.lowerBound, j)
+                    
+                // end of range
+                default:
+                    return nil
+                }
+            }
+        }
+        
+        // MEMO: Tail Recursion Optimization doen't seem to work when return-type is optional.
+        
+        var next: (Int, Int) = from
+        while let (i, j) = nextPos(next) {
+            let a = self[i, j]
+            
+            if !nonZeroOnly || a != R.zero {
+                return (i, j, a)
+            } else {
+                next = (i, j)
+            }
+        }
+        
+        return nil
     }
 }

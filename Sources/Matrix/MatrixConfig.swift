@@ -11,11 +11,7 @@ import Foundation
 // General Ring
 
 public extension Ring {
-    public static func matrixImplType(_ type: MatrixType) -> _MatrixImpl<Self>.Type {
-        return _GridMatrixImpl<Self>.self
-    }
-    
-    public static func matrixEliminatiorType() -> MatrixEliminator<Self>.Type? {
+    public static func matrixEliminatiorType<n, m>() -> MatrixEliminator<Self, n, m>.Type? {
         return nil
     }
 }
@@ -23,15 +19,15 @@ public extension Ring {
 // EuclideanRing
 
 public extension EuclideanRing {
-    public static func matrixEliminatiorType() -> MatrixEliminator<Self>.Type? {
-        return EucMatrixEliminator<Self>.self
+    public static func matrixEliminatiorType<n, m>() -> MatrixEliminator<Self, n, m>.Type? {
+        return EucMatrixEliminator<Self, n, m>.self
     }
 }
 
 // Field
 
 public extension Field {
-    public static func matrixEliminatiorType() -> MatrixEliminator<Self>.Type? {
-        return FieldMatrixEliminator<Self>.self
+    public static func matrixEliminatiorType<n, m>() -> MatrixEliminator<Self, n, m>.Type? {
+        return FieldMatrixEliminator<Self, n, m>.self
     }
 }

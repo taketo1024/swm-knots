@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class FieldMatrixEliminator<K: Field>: MatrixEliminator<K> {
+public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator<K, n, m> {
     override func iteration() -> Bool {
         let doRows = (mode != .Cols)
         let doCols = (mode != .Rows)
@@ -43,7 +43,7 @@ public class FieldMatrixEliminator<K: Field>: MatrixEliminator<K> {
     }
     
     private func next() -> MatrixComponent<K>? {
-        return result.next(from: (itr, itr),
+        return result.findNext(from: (itr, itr),
                            includeFirst: true,
                            direction: (mode != .Cols) ? .Cols : .Rows,
                            rowRange: itr ..< result.rows,
