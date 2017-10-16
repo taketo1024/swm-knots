@@ -43,13 +43,13 @@ public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator
     }
     
     private func next() -> MatrixComponent<K>? {
-        return result.findNext(from: (itr, itr),
-                           includeFirst: true,
-                           direction: (mode != .Cols) ? .Cols : .Rows,
-                           rowRange: itr ..< result.rows,
-                           colRange: itr ..< result.cols,
-                           proceedLines: (mode == .Both),
-                           nonZeroOnly: true)
+        var iterator = MatrixIterator(result,
+                              direction: (mode != .Cols) ? .Cols : .Rows,
+                              rowRange: itr ..< result.rows,
+                              colRange: itr ..< result.cols,
+                              proceedLines: (mode == .Both),
+                              nonZeroOnly: true)
+        return iterator.next()
     }
     
     private func eliminateRow(_ i0: Int, _ j0: Int) {

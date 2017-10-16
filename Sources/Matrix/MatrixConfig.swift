@@ -26,10 +26,9 @@ public extension EuclideanRing {
 
 // Field
 
-/*
 public extension Field {
     public static func matrixEliminatiorType<n, m>() -> MatrixEliminator<Self, n, m>.Type? {
         return FieldMatrixEliminator<Self, n, m>.self
     }
 }
-*/
+
