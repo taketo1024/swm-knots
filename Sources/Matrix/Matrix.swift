@@ -22,7 +22,7 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public let cols: Int
     public let type: MatrixType
     
-    private var grid: [R] {
+    internal var grid: [R] {
         willSet {
             clearCache()
         }
@@ -156,31 +156,30 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     
     public static func +(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
         assert((a.rows, a.cols) == (b.rows, b.cols), "Mismatching matrix size.")
-        return Matrix(rows: a.rows, cols: a.cols, type: (a.type == b.type) ? a.type : .Default) { (i, j) -> R in
-            return a[i, j] + b[i, j]
-        }
+        
+        let grid = (0 ..< a.grid.count).map { a.grid[$0] + b.grid[$0] }
+        return Matrix(rows: a.rows, cols: a.cols, type: (a.type == b.type) ? a.type : .Default, grid: grid)
     }
     
     public prefix static func -(a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-        return Matrix(rows: a.rows, cols: a.cols, type: a.type) { (i, j) -> R in
-            return -a[i, j]
-        }
+        let grid = a.grid.map { -$0 }
+        return Matrix(rows: a.rows, cols: a.cols, type: a.type, grid: grid)
     }
     
     public static func *(r: R, a: Matrix<R, n, m>) -> Matrix<R, n, m> {
-        return Matrix(rows: a.rows, cols: a.cols, type: a.type) { (i, j) -> R in
-            return r * a[i, j]
-        }
+        let grid = a.grid.map { r * $0 }
+        return Matrix(rows: a.rows, cols: a.cols, type: a.type, grid: grid)
     }
     
     public static func *(a: Matrix<R, n, m>, r: R) -> Matrix<R, n, m> {
-        return Matrix(rows: a.rows, cols: a.cols, type: a.type) { (i, j) -> R in
-            return a[i, j] * r
-        }
+        let grid = a.grid.map { $0 * r }
+        return Matrix(rows: a.rows, cols: a.cols, type: a.type, grid: grid)
     }
     
     public static func * <p>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
         assert(a.cols == b.rows, "Mismatching matrix size.")
+        
+        // TODO improve performance
         return Matrix<R, n, p>(rows: a.rows, cols: b.cols, type: (a.type == b.type) ? a.type : .Default) { (i, k) -> R in
             return (0 ..< a.cols)
                 .map({j in a[i, j] * b[j, k]})
@@ -425,7 +424,6 @@ public extension Matrix where n == _1 {
 public extension Matrix where n == m {
     public var determinant: R {
         if eliminatable {
-            // FIXME this is wrong! (ignores sign)
             let s = smithNormalForm
             return s.process.map{ $0.determinant.inverse! }.multiplyAll() * s.diagonal.multiplyAll()
         } else {
