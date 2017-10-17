@@ -104,7 +104,7 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
         s.apply(to: &result)
         process.append(s)
         
-        log("\(itr): \(s) \n\n\(result.detailDescription)\n")
+        log("\(process.count): \(s) \n\n\(result.detailDescription)\n")
     }
     
     internal func log(_ msg: @autoclosure () -> String) {
@@ -181,7 +181,7 @@ internal enum EliminationStep<R: Ring> {
         }
     }
     
-    func apply<n, m>(to A: inout RowOperationMatrix<R, n, m>) {
+    func apply(to A: inout RowOperationMatrix<R>) {
         switch self {
         case let .AddRow(i, j, r):
             A.addRow(at: i, to: j, multipliedBy: r)
@@ -189,6 +189,19 @@ internal enum EliminationStep<R: Ring> {
             A.multiplyRow(at: i, by: r)
         case let .SwapRows(i, j):
             A.swapRows(i, j)
+        default:
+            break
+        }
+    }
+    
+    func apply(to A: inout ColOperationMatrix<R>) {
+        switch self {
+        case let .AddCol(i, j, r):
+            A.addCol(at: i, to: j, multipliedBy: r)
+        case let .MulCol(i, r):
+            A.multiplyCol(at: i, by: r)
+        case let .SwapCols(i, j):
+            A.swapCols(i, j)
         default:
             break
         }

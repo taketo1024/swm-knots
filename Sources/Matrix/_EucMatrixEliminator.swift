@@ -8,82 +8,84 @@
 
 import Foundation
 
-// "A new algorithm for computing the Smith normal form and its implementation on parallel machines"
-// Gerold J ̈ager
-// https://www.informatik.uni-kiel.de/~gej/publ/parsmith2.pdf
-
 private enum Phase {
-    case INIT
-    case HNF
-    case BAND
-    case DIAG
+    case Init
+    case Rows
+    case Cols
+    case Diag
 }
 
 public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEliminator<R, n, m> {
-    private var phase = Phase.INIT
+    private var phase: Phase = .Init
+    private var targetRow = 0
+    private var targetCol = 0
     
+    private var rowOperation: RowOperationMatrix<R>!
+    private var colOperation: ColOperationMatrix<R>!
+
     override func iteration() -> Bool {
         switch phase {
-        case .INIT: return toNextPhase()
-        case .HNF : return doHNF()
-        case .BAND: return toNextPhase() // TODO
-        case .DIAG: return toNextPhase() // TODO
+        case .Init: return toNextPhase()
+        case .Rows: return doRows()
+        case .Cols: return doCols()
+        case .Diag: return true
         }
     }
     
     func toNextPhase() -> Bool {
         switch phase {
-        case .INIT:
-            HNFTarget = RowOperationMatrix(result)
-            phase = .HNF
-            log("\(itr): HNF start \n")
+        case .Init:
+            rowOperation = RowOperationMatrix(result)
+            phase = .Rows
             return false
             
-        case .HNF :
-            phase = .BAND
-            log("\(itr): BAND start \n")
+        case .Rows :
+            if rowOperation.isDiagonal {
+                result = Matrix(rows: rows, cols: cols, type: result.type, grid: rowOperation.toGrid)
+                phase = .Diag
+            } else {
+                colOperation = ColOperationMatrix(rowOperation)
+                rowOperation = nil
+                targetRow = 0
+                targetCol = 0
+                phase = .Cols
+            }
+
             return false
             
-        case .BAND:
-            phase = .DIAG
-            log("\(itr): DIAG start \n")
+        case .Cols :
+            if colOperation.isDiagonal {
+                result = Matrix(rows: rows, cols: cols, type: result.type, grid: colOperation.toGrid)
+                phase = .Diag
+            } else {
+                rowOperation = RowOperationMatrix(colOperation)
+                colOperation = nil
+                targetRow = 0
+                targetCol = 0
+                phase = .Rows
+            }
             return false
-            
-        case .DIAG:
-            return true
+
+        default:
+            return false
         }
     }
     
-    private var HNFTarget: RowOperationMatrix<R, n, m>!
-    private var HNFTargetRow = 0
-    private var HNFTargetCol = 0
-
-    func doHNF() -> Bool {
-        if HNFTargetRow >= rows || HNFTargetCol >= cols {
+    func doRows() -> Bool {
+        if targetRow >= rows || targetCol >= cols {
             return toNextPhase()
         }
         
-        var elements = HNFTarget.elements(below: HNFTargetRow, col: HNFTargetCol)
+        var elements = rowOperation.elements(below: targetRow, col: targetCol)
         
         // skip col if empty
         if elements.isEmpty {
-            HNFTargetCol += 1
+            targetCol += 1
             return false
         }
         
         // initial pivot
-        var (i0, a0): (Int, R) = {
-            var cand = elements.first!
-            for (i, a) in elements {
-                if a.isInvertible {
-                    return (i, a)
-                }
-                if a.degree < cand.value.degree {
-                    cand = (i, a)
-                }
-            }
-            return cand
-        }()
+        var (i0, a0) = findMin(elements)
         
         // eliminate until there is only one non-zero element left
         elim: while elements.count > 1 {
@@ -94,7 +96,9 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
                 }
                 
                 let (q, r) = a /% a0
-                apply(&HNFTarget!, .AddRow(at: i0, to: i, mul: -q))
+                if q != 0 {
+                    apply(&rowOperation!, .AddRow(at: i0, to: i, mul: -q))
+                }
                 
                 if r == 0 {
                     elements.remove(at: k)
@@ -109,26 +113,109 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         
         // final step for this col
         let (i, a) = elements.first!
-        if i != HNFTargetRow {
-            apply(&HNFTarget!, EliminationStep.SwapRows(i, HNFTargetRow))
+        if i != targetRow {
+            apply(&rowOperation!, .SwapRows(i, targetRow))
         }
         
-        for i in 0 ..< HNFTargetRow {
-            let b = HNFTarget[i, HNFTargetCol]
+        for i in 0 ..< targetRow {
+            let b = rowOperation[i, targetCol]
             let (q, _) = b /% a
-            apply(&HNFTarget!, .AddRow(at: HNFTargetRow, to: i, mul: -q))
+            if q != 0 {
+                apply(&rowOperation!, .AddRow(at: targetRow, to: i, mul: -q))
+            }
         }
         
-        HNFTargetRow += 1
-        HNFTargetCol += 1
+        targetRow += 1
+        targetCol += 1
         return false
     }
     
-    func apply(_ target: inout RowOperationMatrix<R, n, m>, _ s: EliminationStep<R>) {
+    func doCols() -> Bool {
+        if targetRow >= rows || targetCol >= cols {
+            return toNextPhase()
+        }
+        
+        var elements = colOperation.elements(row:targetRow, after: targetCol)
+        
+        // skip col if empty
+        if elements.isEmpty {
+            targetRow += 1
+            return false
+        }
+        
+        // initial pivot
+        var (j0, a0) = findMin(elements)
+        
+        // eliminate until there is only one non-zero element left
+        elim: while elements.count > 1 {
+            for (k, e) in elements.enumerated() {
+                let (j, a) = e
+                if j == j0 {
+                    continue
+                }
+                
+                let (q, r) = a /% a0
+                if q != 0 {
+                    apply(&colOperation!, .AddCol(at: j0, to: j, mul: -q))
+                }
+                
+                if r == 0 {
+                    elements.remove(at: k)
+                    continue elim
+                } else {
+                    elements[k] = (j, r)
+                    (j0, a0) = (j, r)
+                    continue elim
+                }
+            }
+        }
+        
+        // final step for this col
+        let (j, a) = elements.first!
+        if j != targetCol {
+            apply(&colOperation!, .SwapCols(j, targetCol))
+        }
+        
+        for j in 0 ..< targetCol {
+            let b = colOperation[targetRow, j]
+            let (q, _) = b /% a
+            
+            if q != 0 {
+                apply(&colOperation!, .AddCol(at: targetCol, to: j, mul: -q))
+            }
+        }
+        
+        targetRow += 1
+        targetCol += 1
+        return false
+    }
+    
+    private func findMin(_ elements: [(Int, R)]) -> (Int, R) {
+        var cand = elements.first!
+        for (i, a) in elements {
+            if a.isInvertible {
+                return (i, a)
+            }
+            if a.degree < cand.1.degree {
+                cand = (i, a)
+            }
+        }
+        return cand
+    }
+    
+    func apply(_ target: inout RowOperationMatrix<R>, _ s: EliminationStep<R>) {
         s.apply(to: &target)
         process.append(s)
         
         // TODO remove
-        log("\(itr): \(s) \n\n\(HNFTarget.toMatrix.detailDescription)\n")
+        log("\(process.count): \(s) \n\n\( DynamicMatrix(rows: rowOperation.rows, cols: rowOperation.cols, grid: rowOperation.toGrid).detailDescription)\n")
+    }
+    
+    func apply(_ target: inout ColOperationMatrix<R>, _ s: EliminationStep<R>) {
+        s.apply(to: &target)
+        process.append(s)
+        
+        // TODO remove
+        log("\(process.count): \(s) \n\n\( DynamicMatrix(rows: colOperation.rows, cols: colOperation.cols, grid: colOperation.toGrid).detailDescription)\n")
     }
 }
