@@ -8,25 +8,23 @@
 
 import Foundation
 
-public struct ColOperationMatrix<R: Ring, n: _Int, m: _Int>: CustomStringConvertible {
+public struct ColOperationMatrix<R: Ring>: CustomStringConvertible {
     public let rows: Int
     public let cols: Int
-    public let type: MatrixType
     
-    private var colTable: [Int: [(row: Int, value: R)]]
+    internal var colTable: [Int: [(row: Int, value: R)]]
     
     public subscript(i: Int, j: Int) -> R {
         return colTable[j]?.first{ $0.row == i }?.value ?? 0 // TODO use binary search
     }
     
-    public init(_ a: Matrix<R, n, m>) {
-        self.init(a.rows, a.cols, a.type, a.grid)
+    public init<n, m>(_ a: Matrix<R, n, m>) {
+        self.init(a.rows, a.cols, a.grid)
     }
     
-    public init(_ rows: Int, _ cols: Int, _ type: MatrixType, _ grid: [R]) {
+    public init(_ rows: Int, _ cols: Int, _ grid: [R]) {
         self.rows = rows
         self.cols = cols
-        self.type = type
         self.colTable = [:]
         
         for (k, a) in grid.enumerated() {
@@ -42,15 +40,45 @@ public struct ColOperationMatrix<R: Ring, n: _Int, m: _Int>: CustomStringConvert
             
             colTable[j]!.append( (i, a) )
         }
+        
+        sort()
     }
     
-    public var toMatrix: Matrix<R, n, m> {
-        let comps = colTable.map{ e -> [MatrixComponent<R>] in
-            let (j, list) = e
-            return list.map{ ($0.row, j, $0.value) }
-        }.joined().toArray()
+    public init(_ r: RowOperationMatrix<R>) {
+        self.rows = r.rows
+        self.cols = r.cols
+        self.colTable = [:]
         
-        return Matrix(rows: rows, cols: cols, type: type, components: comps)
+        for (i, list) in r.rowTable {
+            for (j, a) in list {
+                if colTable[j] == nil {
+                    colTable[j] = []
+                }
+                colTable[j]!.append( (i, a) )
+            }
+        }
+        
+        sort()
+    }
+    
+    internal mutating func sort() {
+        for (j, list) in colTable {
+            colTable[j] = list.sorted{ (e1, e2) in e1.row < e2.row }
+        }
+    }
+    
+    public var toGrid: [R] {
+        var grid = Array(repeating: R.zero, count: rows * cols)
+        for (j, list) in colTable {
+            for (i, a) in list {
+                grid[i * cols + j] = a
+            }
+        }
+        return grid
+    }
+    
+    public var isDiagonal: Bool {
+        return colTable.forAll { (j, list) in (list.count == 1) && list.first!.row == j }
     }
     
     public mutating func multiplyCol(at j0: Int, by r: R) {
@@ -122,7 +150,7 @@ public struct ColOperationMatrix<R: Ring, n: _Int, m: _Int>: CustomStringConvert
         colTable[j1] = result
     }
     
-    public mutating func swapRows(_ j0: Int, _ j1: Int) {
+    public mutating func swapCols(_ j0: Int, _ j1: Int) {
         let r0 = colTable[j0]
         colTable[j0] = colTable[j1]
         colTable[j1] = r0

@@ -8,25 +8,23 @@
 
 import Foundation
 
-public struct RowOperationMatrix<R: Ring, n: _Int, m: _Int>: CustomStringConvertible {
+public struct RowOperationMatrix<R: Ring>: CustomStringConvertible {
     public let rows: Int
     public let cols: Int
-    public let type: MatrixType
     
-    private var rowTable: [Int: [(col: Int, value: R)]]
+    internal var rowTable: [Int: [(col: Int, value: R)]]
     
     public subscript(i: Int, j: Int) -> R {
         return rowTable[i]?.first{ $0.col == j }?.value ?? 0 // TODO use binary search
     }
     
-    public init(_ a: Matrix<R, n, m>) {
-        self.init(a.rows, a.cols, a.type, a.grid)
+    public init<n, m>(_ a: Matrix<R, n, m>) {
+        self.init(a.rows, a.cols, a.grid)
     }
     
-    public init(_ rows: Int, _ cols: Int, _ type: MatrixType, _ grid: [R]) {
+    public init(_ rows: Int, _ cols: Int, _ grid: [R]) {
         self.rows = rows
         self.cols = cols
-        self.type = type
         self.rowTable = [:]
         
         for (k, a) in grid.enumerated() {
@@ -44,13 +42,41 @@ public struct RowOperationMatrix<R: Ring, n: _Int, m: _Int>: CustomStringConvert
         }
     }
     
-    public var toMatrix: Matrix<R, n, m> {
-        let comps = rowTable.map{ e -> [MatrixComponent<R>] in
-            let (i, list) = e
-            return list.map{ (i, $0.col, $0.value) }
-        }.joined().toArray()
+    public init(_ r: ColOperationMatrix<R>) {
+        self.rows = r.rows
+        self.cols = r.cols
+        self.rowTable = [:]
         
-        return Matrix(rows: rows, cols: cols, type: type, components: comps)
+        for (j, list) in r.colTable {
+            for (i, a) in list {
+                if rowTable[i] == nil {
+                    rowTable[i] = []
+                }
+                rowTable[i]!.append( (j, a) )
+            }
+        }
+        
+        sort()
+    }
+    
+    internal mutating func sort() {
+        for (i, list) in rowTable {
+            rowTable[i] = list.sorted{ (e1, e2) in e1.col < e2.col }
+        }
+    }
+    
+    public var toGrid: [R] {
+        var grid = Array(repeating: R.zero, count: rows * cols)
+        for (i, list) in rowTable {
+            for (j, a) in list {
+                grid[i * cols + j] = a
+            }
+        }
+        return grid
+    }
+    
+    public var isDiagonal: Bool {
+        return rowTable.forAll { (i, list) in (list.count == 1) && list.first!.col == i }
     }
     
     public mutating func multiplyRow(at i0: Int, by r: R) {
