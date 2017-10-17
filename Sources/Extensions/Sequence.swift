@@ -26,6 +26,10 @@ internal extension Sequence {
         }
         return false
     }
+    
+    func toArray() -> [Element] {
+        return Array(self)
+    }
 }
 
 extension Sequence where Element: Hashable {

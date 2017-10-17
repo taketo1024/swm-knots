@@ -8,15 +8,15 @@
 
 import Foundation
 
-public struct RowOperationMatrix<R: Ring, n: _Int, m: _Int>: CustomStringConvertible {
+public struct ColOperationMatrix<R: Ring, n: _Int, m: _Int>: CustomStringConvertible {
     public let rows: Int
     public let cols: Int
     public let type: MatrixType
     
-    private var rowTable: [Int: [(col: Int, value: R)]]
+    private var colTable: [Int: [(row: Int, value: R)]]
     
     public subscript(i: Int, j: Int) -> R {
-        return rowTable[i]?.first{ $0.col == j }?.value ?? 0 // TODO use binary search
+        return colTable[j]?.first{ $0.row == i }?.value ?? 0 // TODO use binary search
     }
     
     public init(_ a: Matrix<R, n, m>) {
@@ -27,7 +27,7 @@ public struct RowOperationMatrix<R: Ring, n: _Int, m: _Int>: CustomStringConvert
         self.rows = rows
         self.cols = cols
         self.type = type
-        self.rowTable = [:]
+        self.colTable = [:]
         
         for (k, a) in grid.enumerated() {
             if a == 0 {
@@ -36,63 +36,63 @@ public struct RowOperationMatrix<R: Ring, n: _Int, m: _Int>: CustomStringConvert
             let i = k / cols
             let j = k % cols
             
-            if rowTable[i] == nil {
-                rowTable[i] = []
+            if colTable[j] == nil {
+                colTable[j] = []
             }
             
-            rowTable[i]!.append( (j, a) )
+            colTable[j]!.append( (i, a) )
         }
     }
     
     public var toMatrix: Matrix<R, n, m> {
-        let comps = rowTable.map{ e -> [MatrixComponent<R>] in
-            let (i, list) = e
-            return list.map{ (i, $0.col, $0.value) }
+        let comps = colTable.map{ e -> [MatrixComponent<R>] in
+            let (j, list) = e
+            return list.map{ ($0.row, j, $0.value) }
         }.joined().toArray()
         
         return Matrix(rows: rows, cols: cols, type: type, components: comps)
     }
     
-    public mutating func multiplyRow(at i0: Int, by r: R) {
-        if rowTable[i0] == nil {
+    public mutating func multiplyCol(at j0: Int, by r: R) {
+        if colTable[j0] == nil {
             return
         }
         
-        let n = rowTable[i0]!.count
-        var p = UnsafeMutablePointer(&rowTable[i0]!)
+        let n = colTable[j0]!.count
+        var p = UnsafeMutablePointer(&colTable[j0]!)
         
         for _ in 0 ..< n {
-            let (j, a) = p.pointee
-            p.pointee = (j, r * a)
+            let (i, a) = p.pointee
+            p.pointee = (i, r * a)
             p += 1
         }
     }
     
-    public mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R) {
-        guard let r0 = rowTable[i0] else {
+    public mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R) {
+        guard let c0 = colTable[j0] else {
             return
         }
         
-        guard let r1 = rowTable[i1] else {
-            rowTable[i1] = r0.map{ ($0.col, r * $0.value )}
+        guard let c1 = colTable[j1] else {
+            colTable[j1] = c0.map{ (i, a) in (i, r * a) }
             return
         }
         
-        var result: [(col: Int, value: R)] = []
+        var result: [(row: Int, value: R)] = []
         
-        var (p0, p1) = (UnsafePointer(r0), UnsafePointer(r1))
+        var (p0, p1) = (UnsafePointer(c0), UnsafePointer(c1))
         var (k0, k1) = (0, 0) // counters
-        let (n0, n1) = (r0.count, r1.count)
+        let (n0, n1) = (c0.count, c1.count)
         
         while k0 < n0 || k1 < n1 {
             let b = (k0 < n0 && k1 < n1)
-            if b && (p0.pointee.col == p1.pointee.col) {
-                let j0 = p0.pointee.col
+            if b && (p0.pointee.row == p1.pointee.row) {
+                let i0 = p0.pointee.row
                 let (a0, a1) = (p0.pointee.value, p1.pointee.value)
                 let value = r * a0 + a1
                 
                 if value != 0 {
-                    result.append( (j0, value) )
+                    result.append( (i0, value) )
                 }
                 
                 p0 += 1
@@ -100,18 +100,18 @@ public struct RowOperationMatrix<R: Ring, n: _Int, m: _Int>: CustomStringConvert
                 k0 += 1
                 k1 += 1
                 
-            } else if (k1 >= n1) || (b && p0.pointee.col < p1.pointee.col) {
-                let j0 = p0.pointee.col
+            } else if (k1 >= n1) || (b && p0.pointee.row < p1.pointee.row) {
+                let i0 = p0.pointee.row
                 let a0 = p0.pointee.value
-                result.append( (j0, r * a0) )
+                result.append( (i0, r * a0) )
                 
                 p0 += 1
                 k0 += 1
                 
-            } else if (k0 >= n0) || (b && p0.pointee.col > p1.pointee.col) {
-                let j1 = p1.pointee.col
+            } else if (k0 >= n0) || (b && p0.pointee.row > p1.pointee.row) {
+                let i1 = p1.pointee.row
                 let a1 = p1.pointee.value
-                result.append( (j1, a1) )
+                result.append( (i1, a1) )
                 
                 p1 += 1
                 k1 += 1
@@ -119,21 +119,21 @@ public struct RowOperationMatrix<R: Ring, n: _Int, m: _Int>: CustomStringConvert
             }
         }
         
-        rowTable[i1] = result
+        colTable[j1] = result
     }
     
-    public mutating func swapRows(_ i0: Int, _ i1: Int) {
-        let r0 = rowTable[i0]
-        rowTable[i0] = rowTable[i1]
-        rowTable[i1] = r0
+    public mutating func swapRows(_ j0: Int, _ j1: Int) {
+        let r0 = colTable[j0]
+        colTable[j0] = colTable[j1]
+        colTable[j1] = r0
     }
     
-    public func elements(below i0: Int, col j0: Int) -> [(row: Int, value: R)] {
-        return (i0 ..< rows).flatMap{ i in rowTable[i]?.first.flatMap{ (j, a) in j == j0 ? Optional( (i, a) ) : nil } }
+    public func elements(row i0: Int, after j0: Int) -> [(col: Int, value: R)] {
+        return (j0 ..< cols).flatMap{ j in colTable[j]?.first.flatMap{ (i, a) in i == i0 ? Optional( (j, a) ) : nil } }
     }
     
     public var description: String {
-        return rowTable.map { e in
+        return colTable.map { e in
             "\(e.key): [" + e.value.map{ (j, a) in "\(j): \(a)"}.joined(separator: ", ") + "]"
         }.joined(separator: "\n")
     }

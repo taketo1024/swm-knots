@@ -65,6 +65,7 @@
 		14D261321EE44DB4006775E2 /* DynamicType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261311EE44DB4006775E2 /* DynamicType.swift */; };
 		14D261341EE4614E006775E2 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* Set.swift */; };
 		14F330A51F95A15D001E89D6 /* _EucMatrixEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14F330A41F95A15D001E89D6 /* _EucMatrixEliminator.swift */; };
+		14FE4A8C1F95ED13005FB6CD /* ColOperationMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14FE4A8B1F95ED13005FB6CD /* ColOperationMatrix.swift */; };
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
 		DD6125921F31964E00FD5533 /* EucMatrixEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125911F31964E00FD5533 /* EucMatrixEliminator.swift */; };
 		DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125991F31AA2500FD5533 /* Cache.swift */; };
@@ -149,6 +150,7 @@
 		14D261311EE44DB4006775E2 /* DynamicType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DynamicType.swift; sourceTree = "<group>"; };
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
 		14F330A41F95A15D001E89D6 /* _EucMatrixEliminator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _EucMatrixEliminator.swift; sourceTree = "<group>"; };
+		14FE4A8B1F95ED13005FB6CD /* ColOperationMatrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColOperationMatrix.swift; sourceTree = "<group>"; };
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
 		DD6125911F31964E00FD5533 /* EucMatrixEliminator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EucMatrixEliminator.swift; sourceTree = "<group>"; };
 		DD6125931F31966D00FD5533 /* FieldMatrixEliminator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FieldMatrixEliminator.swift; sourceTree = "<group>"; };
@@ -315,6 +317,7 @@
 				DD6125931F31966D00FD5533 /* FieldMatrixEliminator.swift */,
 				14F330A41F95A15D001E89D6 /* _EucMatrixEliminator.swift */,
 				14B93FBA1F94816400098467 /* RowOperationMatrix.swift */,
+				14FE4A8B1F95ED13005FB6CD /* ColOperationMatrix.swift */,
 			);
 			path = Matrix;
 			sourceTree = "<group>";
@@ -522,6 +525,7 @@
 				146905B21EE4F4F100153686 /* DynamicGroup.swift in Sources */,
 				1424F5011EB997780052581F /* Matrix.swift in Sources */,
 				1499CD011F236328009C3C99 /* CustomOperations.swift in Sources */,
+				14FE4A8C1F95ED13005FB6CD /* ColOperationMatrix.swift in Sources */,
 				14B42A981EE6264300D99997 /* DynamicRing.swift in Sources */,
 				145F46011EEAF0CC0045CDB2 /* Z_2.swift in Sources */,
 				147D98061EB9B26200C736AC /* Dictionary.swift in Sources */,
