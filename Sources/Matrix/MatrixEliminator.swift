@@ -180,4 +180,17 @@ internal enum EliminationStep<R: Ring> {
             A.swapCols(i, j)
         }
     }
+    
+    func apply<n, m>(to A: inout RowOperationMatrix<R, n, m>) {
+        switch self {
+        case let .AddRow(i, j, r):
+            A.addRow(at: i, to: j, multipliedBy: r)
+        case let .MulRow(i, r):
+            A.multiplyRow(at: i, by: r)
+        case let .SwapRows(i, j):
+            A.swapRows(i, j)
+        default:
+            break
+        }
+    }
 }
