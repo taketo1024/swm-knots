@@ -16,7 +16,7 @@ public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator
         case .Both where itr >= min(rows, cols),
              .Rows where itr >= rows,
              .Cols where itr >= cols:
-            return false
+            return true
             
         default: break
         }
@@ -24,9 +24,9 @@ public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator
         // Find next pivot.
         guard var (i0, j0, _) = next() else {
             if mode == .Both { // The area left is O. Exit iteration.
-                return false
-            } else {           // The target row/col is O. Continue iteration.
                 return true
+            } else {           // The target row/col is O. Continue iteration.
+                return false
             }
         }
         
@@ -51,7 +51,7 @@ public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator
             eliminateCol(i0, j0)
         }
         
-        return true
+        return false
     }
     
     private func next() -> MatrixComponent<K>? {

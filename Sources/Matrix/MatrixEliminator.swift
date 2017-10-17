@@ -89,7 +89,7 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
     final func run() {
         log("-----Start (mode: \(mode))-----\n\n\(result.detailDescription)\n")
         
-        while iteration() {
+        while !iteration() {
             itr += 1
         }
         
@@ -107,7 +107,7 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
         log("\(itr): \(s) \n\n\(result.detailDescription)\n")
     }
     
-    private func log(_ msg: @autoclosure () -> String) {
+    internal func log(_ msg: @autoclosure () -> String) {
         if debug {
             print(msg())
         }
