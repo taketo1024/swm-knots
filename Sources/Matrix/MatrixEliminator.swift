@@ -22,7 +22,6 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
     public var result: Matrix<R, n, m>
     var process: [EliminationStep<R>]
     
-    let maxItr: Int
     private(set) var itr = 0
     
     var debug: Bool = false
@@ -35,14 +34,6 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
         self.result = target
         self.process = []
         self.debug = debug
-        
-        self.maxItr = {
-            switch mode {
-            case .Both: return min(target.rows, target.cols)
-            case .Rows: return target.rows
-            case .Cols: return target.cols
-            }
-        }()
         
         self.run()
     }
@@ -97,18 +88,12 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
     
     final func run() {
         log("-----Start (mode: \(mode))-----\n\n\(result.detailDescription)\n")
-        iterations()
-        log("-----Done (\(process.count) steps)-----\n\nResult:\n\(result.detailDescription)\n")
-    }
-    
-    func iterations() {
-        while itr < maxItr {
-            if iteration() {
-                itr += 1
-            } else {
-                break
-            }
+        
+        while iteration() {
+            itr += 1
         }
+        
+        log("-----Done (\(process.count) steps)-----\n\nResult:\n\(result.detailDescription)\n")
     }
     
     func iteration() -> Bool {
@@ -119,7 +104,7 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
         s.apply(to: &result)
         process.append(s)
         
-        log("\(itr)/\(maxItr): \(s) \n\n\(result.detailDescription)\n")
+        log("\(itr): \(s) \n\n\(result.detailDescription)\n")
     }
     
     private func log(_ msg: @autoclosure () -> String) {

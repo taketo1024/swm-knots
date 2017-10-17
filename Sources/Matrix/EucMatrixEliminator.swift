@@ -10,9 +10,18 @@ import Foundation
 
 public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEliminator<R, n, m> {
     override func iteration() -> Bool {
-        let doRows = (mode != .Cols)
-        let doCols = (mode != .Rows)
         
+        // Exit if iterations are over.
+        switch mode {
+        case .Both where itr >= min(rows, cols),
+             .Rows where itr >= rows,
+             .Cols where itr >= cols:
+            return false
+            
+        default: break
+        }
+        
+        // Find next pivot.
         guard var (i0, j0, _) = next() else {
             if mode == .Both { // The area left is O. Exit iteration.
                 return false
@@ -20,6 +29,9 @@ public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixElim
                 return true
             }
         }
+        
+        let doRows = (mode != .Cols)
+        let doCols = (mode != .Rows)
         
         elimination: while true {
             if doRows && !eliminateRow(&i0, j0) {

@@ -10,9 +10,18 @@ import Foundation
 
 public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator<K, n, m> {
     override func iteration() -> Bool {
-        let doRows = (mode != .Cols)
-        let doCols = (mode != .Rows)
         
+        // Exit if iterations are over.
+        switch mode {
+        case .Both where itr >= min(rows, cols),
+             .Rows where itr >= rows,
+             .Cols where itr >= cols:
+            return false
+            
+        default: break
+        }
+        
+        // Find next pivot.
         guard var (i0, j0, _) = next() else {
             if mode == .Both { // The area left is O. Exit iteration.
                 return false
@@ -20,6 +29,9 @@ public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator
                 return true
             }
         }
+        
+        let doRows = (mode != .Cols)
+        let doCols = (mode != .Rows)
         
         if doRows && i0 > itr {
             self.apply(.SwapRows(itr, i0))
