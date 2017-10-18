@@ -29,14 +29,6 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         super.init(target, debug)
     }
     
-    public override lazy var result: Matrix<R, n, m> = { [unowned self] in
-        return self.diagToMatrix()
-    }()
-    
-    public override var diagonal: [R] {
-        return _diagonal
-    }
-
     override func iteration() -> Bool {
         switch phase {
         case .Rows: return doRows()
@@ -77,6 +69,7 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
             return false
 
         case .Diag:
+            target = diagToMatrix()
             return true
         }
     }
@@ -214,11 +207,6 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
             return toNextPhase()
         }
         
-        // SNF is complete
-        if (0 ..< _diagonal.count - 1).forAll({ i in _diagonal[i + 1] % _diagonal[i] == 0 }) {
-            return toNextPhase()
-        }
-        
         let (k, a) = findMin(_diagonal[targetRow...].enumerated().toArray())
         let i = k + targetRow
         
@@ -237,7 +225,11 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         }
         
         // now `a` divides all other elements.
-        
+        if a.normalizeUnit != 1 {
+            _diagonal[i] = a * a.normalizeUnit
+            process.append(.MulRow(at: i, by: a.normalizeUnit))
+        }
+
         if i != targetRow {
             swapDiagonal(i, targetRow)
         }
@@ -246,7 +238,7 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         return false
     }
     
-    private func apply(_ s: EliminationStep<R>) {
+    override func apply(_ s: EliminationStep<R>) {
         switch phase {
         case .Rows:
             s.apply(to: &rowOperation!)
@@ -255,7 +247,8 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         case .Diag:
             break
         }
-        addProcess(s)
+        process.append(s)
+        log("\(process.count): \(s) \n\n\( current.detailDescription )\n")
     }
     
     private func findMin(_ elements: [(Int, R)]) -> (Int, R) {
@@ -276,25 +269,14 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         let (x, y, r) = bezout(a, b) // r = ax + by = gcd(a, b)
         let m = -a * b / r           // lcm(a, b)
         
-        addProcess(.AddRow(at: i, to: j, mul: x))     // [a, 0; ax, b]
-        addProcess(.AddCol(at: j, to: i, mul: y))     // [a, 0;  r, b]
-        addProcess(.AddRow(at: j, to: i, mul: -a/r))  // [0, m; r, b]
-        addProcess(.AddCol(at: i, to: j, mul: -b/r))  // [0, m; r, 0]
-        addProcess(.SwapRows(i, j))                   // [r, 0; 0, m]
+        _diagonal[i] = r
+        _diagonal[j] = m
         
-        if r.normalizeUnit != 1 {
-            _diagonal[i] = r * r.normalizeUnit
-            addProcess(.MulRow(at: i, by: r.normalizeUnit))
-        } else {
-            _diagonal[i] = r
-        }
-        
-        if m.normalizeUnit != 1 {
-            _diagonal[j] = m * m.normalizeUnit
-            addProcess(.MulRow(at: j, by: m.normalizeUnit))
-        } else {
-            _diagonal[j] = m
-        }
+        process.append(.AddRow(at: i, to: j, mul: x))     // [a, 0; ax, b]
+        process.append(.AddCol(at: j, to: i, mul: y))     // [a, 0;  r, b]
+        process.append(.AddRow(at: j, to: i, mul: -a/r))  // [0, m; r, b]
+        process.append(.AddCol(at: i, to: j, mul: -b/r))  // [0, m; r, 0]
+        process.append(.SwapRows(i, j))                   // [r, 0; 0, m]
     }
     
     private func swapDiagonal(_ i: Int, _ j: Int) {
@@ -302,8 +284,8 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         _diagonal[i] = _diagonal[j]
         _diagonal[j] = a
         
-        addProcess(.SwapRows(i, targetRow))
-        addProcess(.SwapCols(i, targetRow))
+        process.append(.SwapRows(i, targetRow))
+        process.append(.SwapCols(i, targetRow))
     }
     
     private func diagToMatrix() -> Matrix<R, n, m> {
@@ -317,7 +299,7 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         return Matrix(rows: self.rows, cols: self.cols, type: self.type, grid: grid)
     }
     
-    override var current: Matrix<R, n, m> {
+    private var current: Matrix<R, n, m> {
         switch phase {
         case .Rows:
             return Matrix(rows: rows, cols: cols, grid: rowOperation.toGrid)

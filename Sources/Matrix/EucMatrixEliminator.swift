@@ -16,23 +16,12 @@ public enum MatrixEliminationMode {
 
 public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEliminator<R, n, m> {
     let mode: MatrixEliminationMode
-    var target: Matrix<R, n, m>
     
     public required init(_ target: Matrix<R, n, m>, _ debug: Bool = false) {
-        self.target = target
         self.mode = .Both
         super.init(target, debug)
     }
     
-    public override var result: Matrix<R, n, m> {
-        return target
-    }
-
-    public override lazy var diagonal: [R] = { [unowned self] in
-        let r = min(target.rows, target.cols)
-        return (0 ..< r).map{ target[$0, $0] }
-    }()
-
     override func iteration() -> Bool {
         
         // Exit if iterations are over.
@@ -204,14 +193,5 @@ public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixElim
         }
         
         return true
-    }
-    
-    func apply(_ s: EliminationStep<R>) {
-        s.apply(to: &target)
-        addProcess(s)
-    }
-    
-    override var current: Matrix<R, n, m> {
-        return target
     }
 }
