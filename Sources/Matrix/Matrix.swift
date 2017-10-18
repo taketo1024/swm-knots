@@ -273,29 +273,35 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     
     public mutating func addRow(at i0: Int, to i1: Int, multipliedBy r: R = 1) {
         var p0 = UnsafeMutablePointer(&grid)
+        let d = (gridIndex(i1, 0) - gridIndex(i0, 0))
+        
         p0 += gridIndex(i0, 0)
         
-        var p1 = UnsafeMutablePointer(&grid)
-        p1 += gridIndex(i1, 0)
-        
         for _ in 0 ..< cols {
-            p1.pointee = p1.pointee + r * p0.pointee
+            let a = p0.pointee
+            
+            let p1 = p0 + d
+            let b = p1.pointee
+            
+            p1.pointee = b + r * a
             p0 += 1
-            p1 += 1
         }
     }
     
     public mutating func addCol(at j0: Int, to j1: Int, multipliedBy r: R = 1) {
         var p0 = UnsafeMutablePointer(&grid)
+        let d = (gridIndex(0, j1) - gridIndex(0, j0))
+
         p0 += gridIndex(0, j0)
         
-        var p1 = UnsafeMutablePointer(&grid)
-        p1 += gridIndex(0, j1)
-        
         for _ in 0 ..< rows {
-            p1.pointee = p1.pointee + r * p0.pointee
+            let a = p0.pointee
+            
+            let p1 = p0 + d
+            let b = p1.pointee
+            
+            p1.pointee = b + r * a
             p0 += cols
-            p1 += cols
         }
     }
     
