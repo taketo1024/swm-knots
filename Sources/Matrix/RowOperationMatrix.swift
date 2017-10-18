@@ -79,6 +79,10 @@ public struct RowOperationMatrix<R: Ring>: CustomStringConvertible {
         return rowTable.forAll { (i, list) in (list.count == 1) && list.first!.col == i }
     }
     
+    public var diagonal: [R] {
+        return (0 ..< rowTable.count).map{ i in rowTable[i]!.first!.value }
+    }
+    
     public mutating func multiplyRow(at i0: Int, by r: R) {
         if rowTable[i0] == nil {
             return

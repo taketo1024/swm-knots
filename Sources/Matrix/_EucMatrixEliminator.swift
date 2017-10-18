@@ -22,13 +22,16 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
     
     private var rowOperation: RowOperationMatrix<R>!
     private var colOperation: ColOperationMatrix<R>!
+    
+    private var diag: [R] = [] // TODO rename to diagonal
+    private var diagIndex = 0
 
     override func iteration() -> Bool {
         switch phase {
         case .Init: return toNextPhase()
         case .Rows: return doRows()
         case .Cols: return doCols()
-        case .Diag: return true
+        case .Diag: return doDiag()
         }
     }
     
@@ -41,7 +44,8 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
             
         case .Rows :
             if rowOperation.isDiagonal {
-                result = Matrix(rows: rows, cols: cols, type: result.type, grid: rowOperation.toGrid)
+                result = Matrix(rows: rows, cols: cols, type: result.type, grid: rowOperation.toGrid) // TODO delete
+                diag = rowOperation.diagonal
                 phase = .Diag
             } else {
                 colOperation = ColOperationMatrix(rowOperation)
@@ -55,7 +59,8 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
             
         case .Cols :
             if colOperation.isDiagonal {
-                result = Matrix(rows: rows, cols: cols, type: result.type, grid: colOperation.toGrid)
+                result = Matrix(rows: rows, cols: cols, type: result.type, grid: colOperation.toGrid) // TODO delete
+                diag = colOperation.diagonal
                 phase = .Diag
             } else {
                 rowOperation = RowOperationMatrix(colOperation)
@@ -66,8 +71,8 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
             }
             return false
 
-        default:
-            return false
+        case .Diag:
+            return doFinal()
         }
     }
     
@@ -190,32 +195,100 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         return false
     }
     
+    func doDiag() -> Bool {
+        if diagIndex >= diag.count {
+            return toNextPhase()
+        }
+        
+        // SNF is complete
+        if (0 ..< diag.count - 1).forAll({ i in diag[i + 1] % diag[i] == 0 }) {
+            return toNextPhase()
+        }
+        
+        let (k, a) = findMin(diag[diagIndex...].enumerated().toArray())
+        let i = k + diagIndex
+        
+        if !a.isInvertible {
+            for j in diagIndex ..< diag.count {
+                if i == j {
+                    continue
+                }
+                
+                let b = diag[j]
+                if b % a != 0 {
+                    diagonalGCD(i, j)
+                    return false
+                }
+            }
+        }
+        
+        // now `a` divides all other elements.
+        
+        if i != diagIndex {
+            diag[i] = diag[diagIndex]
+            diag[diagIndex] = a
+            
+            process.append(.SwapRows(i, diagIndex))
+            process.append(.SwapCols(i, diagIndex))
+        }
+        
+        diagIndex += 1
+        return false
+    }
+    
+    func doFinal() -> Bool {
+        var grid = Array(repeating: R.zero, count: rows * cols)
+        var p = UnsafeMutablePointer(&grid)
+        
+        for a in diag {
+            p.pointee = a
+            p += (cols + 1)
+        }
+        
+        self.result = Matrix(rows: rows, cols: cols, type: self.result.type, grid: grid)
+        return true
+    }
+    
     private func findMin(_ elements: [(Int, R)]) -> (Int, R) {
-        var cand = elements.first!
+        var cand = (-1, R.zero)
         for (i, a) in elements {
             if a.isInvertible {
                 return (i, a)
             }
-            if a.degree < cand.1.degree {
+            if cand.0 == -1 || a.degree < cand.1.degree {
                 cand = (i, a)
             }
         }
         return cand
     }
     
+    private func diagonalGCD(_ i: Int, _ j: Int) {
+        let (a, b) = (diag[i], diag[j])
+        let (x, y, r) = bezout(a, b) // ax + by = r
+        
+        diag[i] = r
+        diag[j] = -a * b / r // == lcm(a, b)
+        
+        process.append(.AddRow(at: i, to: j, mul: x))     // [a, 0; ax, b]
+        process.append(.AddCol(at: j, to: i, mul: y))     // [a, 0;  r, b]
+        process.append(.AddRow(at: j, to: i, mul: -a/r))  // [0, -ab/r; r, b]
+        process.append(.AddCol(at: i, to: j, mul: -b/r))  // [0, -ab/r; r, 0]
+        process.append(.SwapRows(i, j))                   // [r, 0; 0, -ab/r]
+        
+        print(process.count)
+    }
+    
     func apply(_ target: inout RowOperationMatrix<R>, _ s: EliminationStep<R>) {
         s.apply(to: &target)
         process.append(s)
         
-        // TODO remove
-        log("\(process.count): \(s) \n\n\( DynamicMatrix(rows: rowOperation.rows, cols: rowOperation.cols, grid: rowOperation.toGrid).detailDescription)\n")
+        log("\(process.count): \(s) \n\n\( DynamicMatrix(rows: target.rows, cols: target.cols, grid: target.toGrid).detailDescription)\n")
     }
     
     func apply(_ target: inout ColOperationMatrix<R>, _ s: EliminationStep<R>) {
         s.apply(to: &target)
         process.append(s)
         
-        // TODO remove
-        log("\(process.count): \(s) \n\n\( DynamicMatrix(rows: colOperation.rows, cols: colOperation.cols, grid: colOperation.toGrid).detailDescription)\n")
+        log("\(process.count): \(s) \n\n\( DynamicMatrix(rows: target.rows, cols: target.cols, grid: target.toGrid).detailDescription)\n")
     }
 }

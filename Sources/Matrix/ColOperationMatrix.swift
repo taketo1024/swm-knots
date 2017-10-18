@@ -81,6 +81,10 @@ public struct ColOperationMatrix<R: Ring>: CustomStringConvertible {
         return colTable.forAll { (j, list) in (list.count == 1) && list.first!.row == j }
     }
     
+    public var diagonal: [R] {
+        return (0 ..< colTable.count).map{ j in colTable[j]!.first!.value }
+    }
+    
     public mutating func multiplyCol(at j0: Int, by r: R) {
         if colTable[j0] == nil {
             return
