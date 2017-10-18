@@ -61,6 +61,14 @@ public struct ColOperationMatrix<R: Ring>: CustomStringConvertible {
         sort()
     }
     
+    public static func identity(_ n: Int) -> ColOperationMatrix<R> {
+        var A = ColOperationMatrix(n, n, [])
+        (0 ..< n).forEach { i in
+            A.colTable[i] = [(i, R.identity)]
+        }
+        return A
+    }
+    
     internal mutating func sort() {
         for (j, list) in colTable {
             colTable[j] = list.sorted{ (e1, e2) in e1.row < e2.row }

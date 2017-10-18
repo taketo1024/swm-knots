@@ -59,6 +59,14 @@ public struct RowOperationMatrix<R: Ring>: CustomStringConvertible {
         sort()
     }
     
+    public static func identity(_ n: Int) -> RowOperationMatrix<R> {
+        var A = RowOperationMatrix(n, n, [])
+        (0 ..< n).forEach { i in
+            A.rowTable[i] = [(i, R.identity)]
+        }
+        return A
+    }
+    
     internal mutating func sort() {
         for (i, list) in rowTable {
             rowTable[i] = list.sorted{ (e1, e2) in e1.col < e2.col }

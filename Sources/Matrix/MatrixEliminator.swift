@@ -39,45 +39,27 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
     }
     
     public lazy var left: Matrix<R, n, n> = { [unowned self] in
-        var Q = result.leftIdentity
-        
-        process
-            .filter{ $0.isRowOperation }
-            .forEach { $0.apply(to: &Q) }
-        
-        return Q
+        var Q = RowOperationMatrix<R>.identity(rows)
+        process.forEach { $0.apply(to: &Q) }
+        return Matrix(rows: rows, cols: cols, type: type, grid: Q.toGrid)
     }()
     
     public lazy var leftInverse: Matrix<R, n, n> = { [unowned self] in
-        var Q = result.leftIdentity
-        
-        process
-            .filter{ $0.isRowOperation }
-            .reversed()
-            .forEach{ $0.inverse.apply(to: &Q) }
-        
-        return Q
+        var Q = RowOperationMatrix<R>.identity(rows)
+        process.reversed().forEach { $0.inverse.apply(to: &Q) }
+        return Matrix(rows: rows, cols: cols, type: type, grid: Q.toGrid)
     }()
     
     public lazy var right: Matrix<R, m, m> = { [unowned self] in
-        var P = result.rightIdentity
-        
-        process
-            .filter{ $0.isColOperation }
-            .forEach { $0.apply(to: &P) }
-        
-        return P
+        var Q = ColOperationMatrix<R>.identity(cols)
+        process.forEach { $0.apply(to: &Q) }
+        return Matrix(rows: rows, cols: cols, type: type, grid: Q.toGrid)
     }()
     
     public lazy var rightInverse: Matrix<R, m, m> = { [unowned self] in
-        var P = result.rightIdentity
-        
-        process
-            .filter{ $0.isColOperation }
-            .reversed()
-            .forEach{ $0.inverse.apply(to: &P) }
-        
-        return P
+        var Q = ColOperationMatrix<R>.identity(cols)
+        process.reversed().forEach { $0.inverse.apply(to: &Q) }
+        return Matrix(rows: rows, cols: cols, type: type, grid: Q.toGrid)
     }()
     
     public func run() {
