@@ -9,14 +9,13 @@
 import Foundation
 
 private enum Phase {
-    case Init
     case Rows
     case Cols
     case Diag
 }
 
 public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEliminator<R, n, m> {
-    private var phase: Phase = .Init
+    private var phase: Phase
     private var targetRow = 0
     private var targetCol = 0
     
@@ -24,13 +23,22 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
     private var colOperation: ColOperationMatrix<R>!
     private var _diagonal: [R] = []
     
+    public required init(_ target: Matrix<R, n, m>, _ mode: MatrixEliminationMode, _ debug: Bool) {
+        self.rowOperation = RowOperationMatrix(target)
+        self.phase = .Rows
+        super.init(target, mode, debug)
+    }
+    
+    public override lazy var result: Matrix<R, n, m> = { [unowned self] in
+        return self.diagToMatrix()
+    }()
+    
     public override var diagonal: [R] {
         return _diagonal
     }
 
     override func iteration() -> Bool {
         switch phase {
-        case .Init: return toNextPhase()
         case .Rows: return doRows()
         case .Cols: return doCols()
         case .Diag: return doDiag()
@@ -39,11 +47,6 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
     
     func toNextPhase() -> Bool {
         switch phase {
-        case .Init:
-            rowOperation = RowOperationMatrix(result)
-            phase = .Rows
-            return false
-            
         case .Rows :
             if rowOperation.isDiagonal {
                 targetRow = 0
@@ -74,7 +77,7 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
             return false
 
         case .Diag:
-            return doFinal()
+            return true
         }
     }
     
@@ -104,7 +107,7 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
                 
                 let (q, r) = a /% a0
                 if q != 0 {
-                    apply(&rowOperation!, .AddRow(at: i0, to: i, mul: -q))
+                    apply(.AddRow(at: i0, to: i, mul: -q))
                 }
                 
                 if r == 0 {
@@ -121,18 +124,18 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         // final step for this col
         let (i, a) = elements.first!
         if i != targetRow {
-            apply(&rowOperation!, .SwapRows(i, targetRow))
+            apply(.SwapRows(i, targetRow))
         }
         
         if a.normalizeUnit != 1 {
-            apply(&rowOperation!, .MulRow(at: i, by: a.normalizeUnit))
+            apply(.MulRow(at: i, by: a.normalizeUnit))
         }
         
         for i in 0 ..< targetRow {
             let b = rowOperation[i, targetCol]
             let (q, _) = b /% a
             if q != 0 {
-                apply(&rowOperation!, .AddRow(at: targetRow, to: i, mul: -q))
+                apply(.AddRow(at: targetRow, to: i, mul: -q))
             }
         }
         
@@ -168,7 +171,7 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
                 
                 let (q, r) = a /% a0
                 if q != 0 {
-                    apply(&colOperation!, .AddCol(at: j0, to: j, mul: -q))
+                    apply(.AddCol(at: j0, to: j, mul: -q))
                 }
                 
                 if r == 0 {
@@ -185,11 +188,11 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         // final step for this col
         let (j, a) = elements.first!
         if j != targetCol {
-            apply(&colOperation!, .SwapCols(j, targetCol))
+            apply(.SwapCols(j, targetCol))
         }
         
         if a.normalizeUnit != 1 {
-            apply(&colOperation!, .MulCol(at: j, by: a.normalizeUnit))
+            apply(.MulCol(at: j, by: a.normalizeUnit))
         }
         
         for j in 0 ..< targetCol {
@@ -197,7 +200,7 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
             let (q, _) = b /% a
             
             if q != 0 {
-                apply(&colOperation!, .AddCol(at: targetCol, to: j, mul: -q))
+                apply(.AddCol(at: targetCol, to: j, mul: -q))
             }
         }
         
@@ -236,28 +239,23 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         // now `a` divides all other elements.
         
         if i != targetRow {
-            _diagonal[i] = _diagonal[targetRow]
-            _diagonal[targetRow] = a
-            
-            process.append(.SwapRows(i, targetRow))
-            process.append(.SwapCols(i, targetRow))
+            swapDiagonal(i, targetRow)
         }
         
         targetRow += 1
         return false
     }
     
-    func doFinal() -> Bool {
-        var grid = Array(repeating: R.zero, count: rows * cols)
-        var p = UnsafeMutablePointer(&grid)
-        
-        for a in _diagonal {
-            p.pointee = a
-            p += (cols + 1)
+    private func apply(_ s: EliminationStep<R>) {
+        switch phase {
+        case .Rows:
+            s.apply(to: &rowOperation!)
+        case .Cols:
+            s.apply(to: &colOperation!)
+        case .Diag:
+            break
         }
-        
-        self.result = Matrix(rows: rows, cols: cols, type: self.result.type, grid: grid)
-        return true
+        addProcess(s)
     }
     
     private func findMin(_ elements: [(Int, R)]) -> (Int, R) {
@@ -278,40 +276,55 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         let (x, y, r) = bezout(a, b) // r = ax + by = gcd(a, b)
         let m = -a * b / r           // lcm(a, b)
         
-        process.append(.AddRow(at: i, to: j, mul: x))     // [a, 0; ax, b]
-        process.append(.AddCol(at: j, to: i, mul: y))     // [a, 0;  r, b]
-        process.append(.AddRow(at: j, to: i, mul: -a/r))  // [0, m; r, b]
-        process.append(.AddCol(at: i, to: j, mul: -b/r))  // [0, m; r, 0]
-        process.append(.SwapRows(i, j))                   // [r, 0; 0, m]
+        addProcess(.AddRow(at: i, to: j, mul: x))     // [a, 0; ax, b]
+        addProcess(.AddCol(at: j, to: i, mul: y))     // [a, 0;  r, b]
+        addProcess(.AddRow(at: j, to: i, mul: -a/r))  // [0, m; r, b]
+        addProcess(.AddCol(at: i, to: j, mul: -b/r))  // [0, m; r, 0]
+        addProcess(.SwapRows(i, j))                   // [r, 0; 0, m]
         
         if r.normalizeUnit != 1 {
             _diagonal[i] = r * r.normalizeUnit
-            process.append(.MulRow(at: i, by: r.normalizeUnit))
+            addProcess(.MulRow(at: i, by: r.normalizeUnit))
         } else {
             _diagonal[i] = r
         }
         
         if m.normalizeUnit != 1 {
             _diagonal[j] = m * m.normalizeUnit
-            process.append(.MulRow(at: j, by: m.normalizeUnit))
+            addProcess(.MulRow(at: j, by: m.normalizeUnit))
         } else {
             _diagonal[j] = m
         }
-        
-        print(process.count)
     }
     
-    func apply(_ target: inout RowOperationMatrix<R>, _ s: EliminationStep<R>) {
-        s.apply(to: &target)
-        process.append(s)
+    private func swapDiagonal(_ i: Int, _ j: Int) {
+        let a = _diagonal[i]
+        _diagonal[i] = _diagonal[j]
+        _diagonal[j] = a
         
-        log("\(process.count): \(s) \n\n\( DynamicMatrix(rows: target.rows, cols: target.cols, grid: target.toGrid).detailDescription)\n")
+        addProcess(.SwapRows(i, targetRow))
+        addProcess(.SwapCols(i, targetRow))
     }
     
-    func apply(_ target: inout ColOperationMatrix<R>, _ s: EliminationStep<R>) {
-        s.apply(to: &target)
-        process.append(s)
+    private func diagToMatrix() -> Matrix<R, n, m> {
+        var grid = Array(repeating: R.zero, count: rows * cols)
+        var p = UnsafeMutablePointer(&grid)
         
-        log("\(process.count): \(s) \n\n\( DynamicMatrix(rows: target.rows, cols: target.cols, grid: target.toGrid).detailDescription)\n")
+        for a in _diagonal {
+            p.pointee = a
+            p += (cols + 1)
+        }
+        return Matrix(rows: self.rows, cols: self.cols, type: self.type, grid: grid)
+    }
+    
+    override var current: Matrix<R, n, m> {
+        switch phase {
+        case .Rows:
+            return Matrix(rows: rows, cols: cols, grid: rowOperation.toGrid)
+        case .Cols:
+            return Matrix(rows: rows, cols: cols, grid: colOperation.toGrid)
+        case .Diag:
+            return diagToMatrix()
+        }
     }
 }

@@ -9,12 +9,21 @@
 import Foundation
 
 public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEliminator<R, n, m> {
-    public override lazy var diagonal: [R] = { [unowned self] in
-        let A = result
-        let r = min(A.rows, A.cols)
-        return (0 ..< r).map{ A[$0, $0] }
-    }()
+    var target: Matrix<R, n, m>
     
+    public required init(_ target: Matrix<R, n, m>, _ mode: MatrixEliminationMode, _ debug: Bool) {
+        self.target = target
+        super.init(target, mode, debug)
+    }
+    
+    public override var result: Matrix<R, n, m> {
+        return target
+    }
+
+    public override lazy var diagonal: [R] = { [unowned self] in
+        let r = min(target.rows, target.cols)
+        return (0 ..< r).map{ target[$0, $0] }
+    }()
 
     override func iteration() -> Bool {
         
@@ -187,5 +196,14 @@ public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixElim
         }
         
         return true
+    }
+    
+    func apply(_ s: EliminationStep<R>) {
+        s.apply(to: &target)
+        addProcess(s)
+    }
+    
+    override var current: Matrix<R, n, m> {
+        return target
     }
 }

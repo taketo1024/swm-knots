@@ -9,6 +9,17 @@
 import Foundation
 
 public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator<K, n, m> {
+    var target: Matrix<K, n, m>
+    
+    public required init(_ target: Matrix<K, n, m>, _ mode: MatrixEliminationMode, _ debug: Bool) {
+        self.target = target
+        super.init(target, mode, debug)
+    }
+    
+    public override var result: Matrix<K, n, m> {
+        return target
+    }
+    
     public override lazy var diagonal: [K] = { [unowned self] in
         let A = result
         let r = min(A.rows, A.cols)
@@ -98,5 +109,14 @@ public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator
             
             apply(.AddCol(at: j0, to: j, mul: -result[i0, j]))
         }
+    }
+    
+    func apply(_ s: EliminationStep<K>) {
+        s.apply(to: &target)
+        addProcess(s)
+    }
+    
+    override var current: Matrix<K, n, m> {
+        return target
     }
 }

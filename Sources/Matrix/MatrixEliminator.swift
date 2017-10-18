@@ -18,24 +18,34 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
     let mode: MatrixEliminationMode
     let rows: Int
     let cols: Int
+    let type: MatrixType
     
-    public var result: Matrix<R, n, m>
-    var process: [EliminationStep<R>]
-    
+    private(set) var process: [EliminationStep<R>]
     private(set) var itr = 0
-    
-    var debug: Bool = false
+    private(set) var debug: Bool
     
     public required init(_ target: Matrix<R, n, m>, _ mode: MatrixEliminationMode, _ debug: Bool = false) {
         self.mode = mode
         self.rows = target.rows
         self.cols = target.cols
+        self.type = target.type
         
-        self.result = target
         self.process = []
         self.debug = debug
         
         self.run()
+    }
+    
+    public var result: Matrix<R, n, m> {
+        fatalError("override in subclass")
+    }
+    
+    public var diagonal: [R] {
+        fatalError("override in subclass")
+    }
+    
+    public var rank: Int {
+        return diagonal.count
     }
     
     public lazy var left: Matrix<R, n, n> = { [unowned self] in
@@ -80,32 +90,30 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
         return P
     }()
     
-    public var diagonal: [R] {
-        fatalError("override in subclass")
-    }
-    
-    final public func run() {
-        log("-----Start (mode: \(mode))-----\n\n\(result.detailDescription)\n")
+    public func run() {
+        log("-----Start-----\n\n\(current.detailDescription)\n")
         
         while !iteration() {
             itr += 1
         }
         
-        log("-----Done (\(process.count) steps)-----\n\nResult:\n\(result.detailDescription)\n")
+        log("-----Done (\(process.count) steps)-----\n\nResult:\n\(current.detailDescription)\n")
     }
     
     func iteration() -> Bool {
         fatalError("override in subclass")
     }
     
-    func apply(_ s: EliminationStep<R>) {
-        s.apply(to: &result)
+    func addProcess(_ s: EliminationStep<R>) {
         process.append(s)
-        
-        log("\(process.count): \(s) \n\n\(result.detailDescription)\n")
+        log("\(process.count): \(s) \n\n\( current.detailDescription )\n")
     }
     
-    internal func log(_ msg: @autoclosure () -> String) {
+    var current: Matrix<R, n, m> {
+        fatalError("override in subclass")
+    }
+    
+    func log(_ msg: @autoclosure () -> String) {
         if debug {
             print(msg())
         }
