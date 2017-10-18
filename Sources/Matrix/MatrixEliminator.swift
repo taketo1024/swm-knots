@@ -100,7 +100,7 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
         fatalError("override in subclass")
     }
     
-    final func apply(_ s: EliminationStep<R>) {
+    func apply(_ s: EliminationStep<R>) {
         s.apply(to: &result)
         process.append(s)
         

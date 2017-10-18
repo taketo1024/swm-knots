@@ -3,6 +3,10 @@ import Foundation
 public protocol Field: EuclideanRing {}
 
 public extension Field {
+    public var normalizeUnit: Self {
+        return self.inverse!
+    }
+    
     public var degree: Int {
         return self == Self.zero ? 0 : 1
     }

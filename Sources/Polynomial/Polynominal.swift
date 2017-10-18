@@ -26,6 +26,10 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
         self.coeffs = coeffs
     }
     
+    public var normalizeUnit: Polynomial<K> {
+        return Polynomial(leadCoeff.inverse!)
+    }
+    
     public var degree: Int {
         let n = coeffs.count - 1
         for i in 0 ..< n {

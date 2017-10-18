@@ -7,6 +7,10 @@ extension IntegerNumber: EuclideanRing {
         self.init(n)
     }
     
+    public var normalizeUnit: IntegerNumber {
+        return (self > 0) ? 1 : -1
+    }
+    
     public var degree: Int {
         return abs(self)
     }

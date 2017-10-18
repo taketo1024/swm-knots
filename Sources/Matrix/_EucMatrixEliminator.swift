@@ -122,6 +122,10 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
             apply(&rowOperation!, .SwapRows(i, targetRow))
         }
         
+        if a.normalizeUnit != 1 {
+            apply(&rowOperation!, .MulRow(at: i, by: a.normalizeUnit))
+        }
+        
         for i in 0 ..< targetRow {
             let b = rowOperation[i, targetCol]
             let (q, _) = b /% a
@@ -132,6 +136,7 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         
         targetRow += 1
         targetCol += 1
+        
         return false
     }
     
@@ -179,6 +184,10 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         let (j, a) = elements.first!
         if j != targetCol {
             apply(&colOperation!, .SwapCols(j, targetCol))
+        }
+        
+        if a.normalizeUnit != 1 {
+            apply(&colOperation!, .MulCol(at: j, by: a.normalizeUnit))
         }
         
         for j in 0 ..< targetCol {
@@ -264,16 +273,28 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
     
     private func diagonalGCD(_ i: Int, _ j: Int) {
         let (a, b) = (diag[i], diag[j])
-        let (x, y, r) = bezout(a, b) // ax + by = r
-        
-        diag[i] = r
-        diag[j] = -a * b / r // == lcm(a, b)
+        let (x, y, r) = bezout(a, b) // r = ax + by = gcd(a, b)
+        let m = -a * b / r           // lcm(a, b)
         
         process.append(.AddRow(at: i, to: j, mul: x))     // [a, 0; ax, b]
         process.append(.AddCol(at: j, to: i, mul: y))     // [a, 0;  r, b]
-        process.append(.AddRow(at: j, to: i, mul: -a/r))  // [0, -ab/r; r, b]
-        process.append(.AddCol(at: i, to: j, mul: -b/r))  // [0, -ab/r; r, 0]
-        process.append(.SwapRows(i, j))                   // [r, 0; 0, -ab/r]
+        process.append(.AddRow(at: j, to: i, mul: -a/r))  // [0, m; r, b]
+        process.append(.AddCol(at: i, to: j, mul: -b/r))  // [0, m; r, 0]
+        process.append(.SwapRows(i, j))                   // [r, 0; 0, m]
+        
+        if r.normalizeUnit != 1 {
+            diag[i] = r * r.normalizeUnit
+            process.append(.MulRow(at: i, by: r.normalizeUnit))
+        } else {
+            diag[i] = r
+        }
+        
+        if m.normalizeUnit != 1 {
+            diag[j] = m * m.normalizeUnit
+            process.append(.MulRow(at: j, by: m.normalizeUnit))
+        } else {
+            diag[j] = m
+        }
         
         print(process.count)
     }
