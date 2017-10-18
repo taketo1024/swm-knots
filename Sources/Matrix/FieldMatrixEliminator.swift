@@ -9,65 +9,42 @@
 import Foundation
 
 public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator<K, n, m> {
-    let mode: MatrixEliminationMode
-    
-    public required init(_ target: Matrix<K, n, m>, _ debug: Bool) {
-        self.mode = .Both
-        super.init(target, debug)
-    }
-    
     override func iteration() -> Bool {
         
         // Exit if iterations are over.
-        switch mode {
-        case .Both where itr >= min(rows, cols),
-             .Rows where itr >= rows,
-             .Cols where itr >= cols:
+        if itr >= min(rows, cols) {
             return true
-            
-        default: break
         }
         
         // Find next pivot.
         guard var (i0, j0, _) = next() else {
-            if mode == .Both { // The area left is O. Exit iteration.
-                return true
-            } else {           // The target row/col is O. Continue iteration.
-                return false
-            }
+            return true
         }
         
-        let doRows = (mode != .Cols)
-        let doCols = (mode != .Rows)
-        
-        if doRows && i0 > itr {
-            self.apply(.SwapRows(itr, i0))
+        if i0 > itr {
+            apply(.SwapRows(itr, i0))
             i0 = itr
         }
         
-        if doCols && j0 > itr {
-            self.apply(.SwapCols(itr, j0))
+        if j0 > itr {
+            apply(.SwapCols(itr, j0))
             j0 = itr
         }
         
-        if doRows {
-            eliminateRow(i0, j0)
-        }
-        
-        if doCols {
-            eliminateCol(i0, j0)
-        }
+        eliminateRow(i0, j0)
+        eliminateCol(i0, j0)
         
         return false
     }
     
     private func next() -> MatrixComponent<K>? {
         var iterator = MatrixIterator(result,
-                              direction: (mode != .Cols) ? .Cols : .Rows,
+                              direction: .Cols,
                               rowRange: itr ..< result.rows,
                               colRange: itr ..< result.cols,
-                              proceedLines: (mode == .Both),
+                              proceedLines: true,
                               nonZeroOnly: true)
+        
         return iterator.next()
     }
     

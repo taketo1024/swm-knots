@@ -8,53 +8,29 @@
 
 import Foundation
 
-public enum MatrixEliminationMode {
-    case Both
-    case Rows
-    case Cols
-}
-
 public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEliminator<R, n, m> {
-    let mode: MatrixEliminationMode
-    
-    public required init(_ target: Matrix<R, n, m>, _ debug: Bool = false) {
-        self.mode = .Both
-        super.init(target, debug)
-    }
-    
     override func iteration() -> Bool {
         
         // Exit if iterations are over.
-        switch mode {
-        case .Both where itr >= min(rows, cols),
-             .Rows where itr >= rows,
-             .Cols where itr >= cols:
+        if itr >= min(rows, cols) {
             return true
-            
-        default: break
         }
         
         // Find next pivot.
         guard var (i0, j0, _) = next() else {
-            if mode == .Both { // The area left is O. Exit iteration.
-                return true
-            } else {           // The target row/col is O. Continue iteration.
-                return false
-            }
+            return true
         }
         
-        let doRows = (mode != .Cols)
-        let doCols = (mode != .Rows)
-        
         elimination: while true {
-            if doRows && !eliminateRow(&i0, j0) {
-                continue elimination
-            }
-            if doCols && !eliminateCol(i0, &j0) {
+            if !eliminateRow(&i0, j0) {
                 continue elimination
             }
             
-            if doRows && doCols && !result[i0, j0].isInvertible {
+            if !eliminateCol(i0, &j0) {
+                continue elimination
+            }
+            
+            if !result[i0, j0].isInvertible {
                 let a = result[i0, j0]
                 for i in itr ..< rows {
                     for j in itr ..< cols {
@@ -64,7 +40,7 @@ public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixElim
                         
                         let b = result[i, j]
                         if b % a != 0 {
-                            self.apply(.AddRow(at: i, to: i0, mul: 1))
+                            apply(.AddRow(at: i, to: i0, mul: 1))
                             continue elimination
                         }
                     }
@@ -73,21 +49,17 @@ public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixElim
             break elimination
         }
         
-        // TODO maybe implement NumberType or Comparable
-        if R.self == IntegerNumber.self && (result[i0, j0] as! IntegerNumber) < 0 {
-            if doRows {
-                self.apply(.MulRow(at: i0, by: -1))
-            } else {
-                self.apply(.MulCol(at: j0, by: -1))
-            }
+        let a = result[i0, j0]
+        if a.normalizeUnit != 1 {
+            apply(.MulRow(at: i0, by: a.normalizeUnit))
         }
         
-        if doRows && i0 > itr {
-            self.apply(.SwapRows(itr, i0))
+        if i0 > itr {
+            apply(.SwapRows(itr, i0))
         }
         
-        if doCols && j0 > itr {
-            self.apply(.SwapCols(itr, j0))
+        if j0 > itr {
+            apply(.SwapCols(itr, j0))
         }
         
         return false
@@ -97,10 +69,10 @@ public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixElim
         var (i0, j0, a0) = (0, 0, R.zero)
         
         var iterator = MatrixIterator(result,
-                                      direction: (mode != .Cols) ? .Cols : .Rows,
+                                      direction: .Cols,
                                       rowRange: itr ..< result.rows,
                                       colRange: itr ..< result.cols,
-                                      proceedLines: (mode == .Both),
+                                      proceedLines: true,
                                       nonZeroOnly: true)
         
         while let c = iterator.next() {
@@ -132,26 +104,11 @@ public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixElim
             let b = result[i, j0]
             let (q, r) = b /% a
             
-            self.apply(.AddRow(at: i0, to: i, mul: -q))
+            apply(.AddRow(at: i0, to: i, mul: -q))
             
             if r != 0 {
                 i0 = i
                 return false
-            }
-        }
-        
-        // at this point, it is guaranteed that result[i, j0] == 0 for (i >= itr, i != i0)
-        
-        if mode == .Rows {
-            for i in 0 ..< itr {
-                if i == i0 || result[i, j0] == 0 {
-                    continue
-                }
-                
-                let b = result[i, j0]
-                let (q, _) = b /% a
-                
-                self.apply(.AddRow(at: i0, to: i, mul: -q))
             }
         }
         
@@ -169,26 +126,11 @@ public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixElim
             let b = result[i0, j]
             let (q, r) = b /% a
             
-            self.apply(.AddCol(at: j0, to: j, mul: -q))
+            apply(.AddCol(at: j0, to: j, mul: -q))
             
             if r != 0 {
                 j0 = j
                 return false
-            }
-        }
-        
-        // at this point, it is guaranteed that result[i0, j] == 0 for (j >= itr, j != j0)
-        
-        if mode == .Cols {
-            for j in 0 ..< itr {
-                if j == j0 || result[i0, j] == 0 {
-                    continue
-                }
-                
-                let b = result[i0, j]
-                let (q, _) = b /% a
-                
-                self.apply(.AddCol(at: j0, to: j, mul: -q))
             }
         }
         
