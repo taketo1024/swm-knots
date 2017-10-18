@@ -332,18 +332,18 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         guard let e = R.matrixEliminatiorType()?.init(self, debug) else {
             fatalError("MatrixElimination not available for ring: \(R.symbol)")
         }
+        e.run()
         return e
     }
     
     public var smithNormalForm: MatrixEliminator<R, n, m> {
-        if let s = smithNormalFormCache.value {
-            return s
+        if let e = smithNormalFormCache.value {
+            return e
         }
         
-        let s = self.eliminate()
-        smithNormalFormCache.value = s
-        
-        return s
+        let e = self.eliminate()
+        smithNormalFormCache.value = e
+        return e
     }
     
     public var rank: Int {

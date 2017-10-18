@@ -24,8 +24,6 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
         
         self.process = []
         self.debug = debug
-        
-        self.run()
     }
     
     public var result: Matrix<R, n, m> {
