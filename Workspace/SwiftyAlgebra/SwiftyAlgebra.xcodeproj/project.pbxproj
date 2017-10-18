@@ -39,6 +39,7 @@
 		1424F50F1EB997780052581F /* TPPolynomial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F41EB997780052581F /* TPPolynomial.swift */; };
 		1424F5111EB997780052581F /* optable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F71EB997780052581F /* optable.swift */; };
 		143735A71F30088B0042004F /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143735A61F30088B0042004F /* String.swift */; };
+		1448D9E91F972EB300646A70 /* MatrixEliminationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1448D9E81F972EB300646A70 /* MatrixEliminationStep.swift */; };
 		144AD2911EC21A4500E23890 /* Homology.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144AD2901EC21A4500E23890 /* Homology.swift */; };
 		144EC9EE1F286A93001BC4BC /* BarycentricSubdivision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144EC9ED1F286A93001BC4BC /* BarycentricSubdivision.swift */; };
 		145339C01EC7D67100F014F4 /* Ref.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145339BF1EC7D67100F014F4 /* Ref.swift */; };
@@ -64,7 +65,6 @@
 		14B93FC11F94934800098467 /* FieldMatrixEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125931F31966D00FD5533 /* FieldMatrixEliminator.swift */; };
 		14D261321EE44DB4006775E2 /* DynamicType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261311EE44DB4006775E2 /* DynamicType.swift */; };
 		14D261341EE4614E006775E2 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* Set.swift */; };
-		14F330A51F95A15D001E89D6 /* _EucMatrixEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14F330A41F95A15D001E89D6 /* _EucMatrixEliminator.swift */; };
 		14FE4A8C1F95ED13005FB6CD /* ColOperationMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14FE4A8B1F95ED13005FB6CD /* ColOperationMatrix.swift */; };
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
 		DD6125921F31964E00FD5533 /* EucMatrixEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125911F31964E00FD5533 /* EucMatrixEliminator.swift */; };
@@ -118,6 +118,7 @@
 		1424F4F41EB997780052581F /* TPPolynomial.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TPPolynomial.swift; sourceTree = "<group>"; };
 		1424F4F71EB997780052581F /* optable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = optable.swift; sourceTree = "<group>"; };
 		143735A61F30088B0042004F /* String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
+		1448D9E81F972EB300646A70 /* MatrixEliminationStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixEliminationStep.swift; sourceTree = "<group>"; };
 		144AD28E1EC13D9E00E23890 /* MatrixEliminationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixEliminationTests.swift; sourceTree = "<group>"; };
 		144AD2901EC21A4500E23890 /* Homology.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Homology.swift; sourceTree = "<group>"; };
 		144EC9ED1F286A93001BC4BC /* BarycentricSubdivision.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarycentricSubdivision.swift; sourceTree = "<group>"; };
@@ -149,7 +150,6 @@
 		14B93FBA1F94816400098467 /* RowOperationMatrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowOperationMatrix.swift; sourceTree = "<group>"; };
 		14D261311EE44DB4006775E2 /* DynamicType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DynamicType.swift; sourceTree = "<group>"; };
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
-		14F330A41F95A15D001E89D6 /* _EucMatrixEliminator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _EucMatrixEliminator.swift; sourceTree = "<group>"; };
 		14FE4A8B1F95ED13005FB6CD /* ColOperationMatrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColOperationMatrix.swift; sourceTree = "<group>"; };
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
 		DD6125911F31964E00FD5533 /* EucMatrixEliminator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EucMatrixEliminator.swift; sourceTree = "<group>"; };
@@ -309,15 +309,15 @@
 		144CFE481EEA88F20023E6EC /* Matrix */ = {
 			isa = PBXGroup;
 			children = (
-				14207CB31EEB90E80007BE8F /* MatrixConfig.swift */,
 				1424F4E11EB997780052581F /* Matrix.swift */,
 				14B93FB81F947E4700098467 /* MatrixIterator.swift */,
 				1420EAE81EEAC64900336620 /* MatrixEliminator.swift */,
 				DD6125911F31964E00FD5533 /* EucMatrixEliminator.swift */,
 				DD6125931F31966D00FD5533 /* FieldMatrixEliminator.swift */,
-				14F330A41F95A15D001E89D6 /* _EucMatrixEliminator.swift */,
+				1448D9E81F972EB300646A70 /* MatrixEliminationStep.swift */,
 				14B93FBA1F94816400098467 /* RowOperationMatrix.swift */,
 				14FE4A8B1F95ED13005FB6CD /* ColOperationMatrix.swift */,
+				14207CB31EEB90E80007BE8F /* MatrixConfig.swift */,
 			);
 			path = Matrix;
 			sourceTree = "<group>";
@@ -515,7 +515,6 @@
 			files = (
 				14A85FF71EDBED9C00A754EA /* Dynamic.swift in Sources */,
 				1424F4FA1EB997780052581F /* EuclideanRing.swift in Sources */,
-				14F330A51F95A15D001E89D6 /* _EucMatrixEliminator.swift in Sources */,
 				144AD2911EC21A4500E23890 /* Homology.swift in Sources */,
 				1424F4F91EB997780052581F /* AdditiveGroup.swift in Sources */,
 				144EC9EE1F286A93001BC4BC /* BarycentricSubdivision.swift in Sources */,
@@ -551,6 +550,7 @@
 				DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */,
 				14929C9E1ED9C798006ACAC5 /* Simplex.swift in Sources */,
 				141417311ECE984800B167CB /* Sequence.swift in Sources */,
+				1448D9E91F972EB300646A70 /* MatrixEliminationStep.swift in Sources */,
 				1420EAE91EEAC64900336620 /* MatrixEliminator.swift in Sources */,
 				1424F4FE1EB997780052581F /* Monoid.swift in Sources */,
 				1424F50F1EB997780052581F /* TPPolynomial.swift in Sources */,
