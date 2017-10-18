@@ -9,11 +9,13 @@
 import Foundation
 
 public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator<K, n, m> {
+    let mode: MatrixEliminationMode
     var target: Matrix<K, n, m>
     
-    public required init(_ target: Matrix<K, n, m>, _ mode: MatrixEliminationMode, _ debug: Bool) {
+    public required init(_ target: Matrix<K, n, m>, _ debug: Bool) {
         self.target = target
-        super.init(target, mode, debug)
+        self.mode = .Both
+        super.init(target, debug)
     }
     
     public override var result: Matrix<K, n, m> {

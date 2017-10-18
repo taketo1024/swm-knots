@@ -23,10 +23,10 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
     private var colOperation: ColOperationMatrix<R>!
     private var _diagonal: [R] = []
     
-    public required init(_ target: Matrix<R, n, m>, _ mode: MatrixEliminationMode, _ debug: Bool) {
+    public required init(_ target: Matrix<R, n, m>, _ debug: Bool = false) {
         self.rowOperation = RowOperationMatrix(target)
         self.phase = .Rows
-        super.init(target, mode, debug)
+        super.init(target, debug)
     }
     
     public override lazy var result: Matrix<R, n, m> = { [unowned self] in

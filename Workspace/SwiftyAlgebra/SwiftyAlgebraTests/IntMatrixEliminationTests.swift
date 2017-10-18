@@ -32,7 +32,7 @@ class IntMatrixEliminationTests: XCTestCase {
                     14, 14, 10, 6, 14,
                     8, 8, 11, 11, 7,
                     10, 14, 5, 14, 14)
-        let E = A.eliminate(mode: .Both)
+        let E = A.eliminate()
         XCTAssertNoThrow(E.result == E.left * A * E.right)
     }
      */
@@ -40,7 +40,7 @@ class IntMatrixEliminationTests: XCTestCase {
     func testEliminationRandomM55() {
         for _ in 0 ..< 10 {
             let A = randomM55()
-            let E = A.eliminate(mode: .Both)
+            let E = A.eliminate()
             XCTAssertEqual(E.result, E.left * A * E.right, "B = LAR")
             XCTAssertEqual(A, E.leftInverse * E.result * E.rightInverse, "A = L^-1 B R^-1")
             XCTAssertTrue(E.result.reduce(true) { (res, itr) in
@@ -52,7 +52,7 @@ class IntMatrixEliminationTests: XCTestCase {
     func testEliminationRegularM55() {
         for _ in 0 ..< 10 {
             let A = randomRegularM55()
-            let E = A.eliminate(mode: .Both)
+            let E = A.eliminate()
             XCTAssertEqual(E.result, M55.identity, "B = I")
             XCTAssertEqual(E.result, E.left * A * E.right, "B = LAR")
             XCTAssertEqual(A, E.leftInverse * E.result * E.rightInverse, "A = L^-1 B R^-1")
@@ -62,7 +62,7 @@ class IntMatrixEliminationTests: XCTestCase {
     func testEliminationSingularM55() {
         for _ in 0 ..< 10 {
             let A = randomSingularM55()
-            let E = A.eliminate(mode: .Both)
+            let E = A.eliminate()
             XCTAssertEqual(E.result, E.left * A * E.right, "B = LAR")
             XCTAssertEqual(A, E.leftInverse * E.result * E.rightInverse, "A = L^-1 B R^-1")
             XCTAssertTrue(E.result.reduce(true) { (res, itr) in
@@ -70,69 +70,7 @@ class IntMatrixEliminationTests: XCTestCase {
             }, "B is diagonal")
         }
     }
-    
-    func testRowEliminationRandomM55() {
-        for _ in 0 ..< 10 {
-            let A = randomM55()
-            let E = A.eliminate(mode: .Rows)
-            XCTAssertEqual(E.right, M55.identity)
-            XCTAssertEqual(E.result, E.left * A)
-            XCTAssertEqual(A, E.leftInverse * E.result)
-        }
-    }
-    
-    func testRowEliminationRegularM55() {
-        for _ in 0 ..< 10 {
-            let A = randomRegularM55()
-            let E = A.eliminate(mode: .Rows)
-            XCTAssertEqual(E.right, M55.identity)
-            XCTAssertEqual(E.result, E.left * A)
-            XCTAssertEqual(A, E.leftInverse * E.result)
-            XCTAssertEqual(E.result, M55.identity)
-        }
-    }
-    
-    func testRowEliminationSingularM55() {
-        for _ in 0 ..< 10 {
-            let A = randomSingularM55()
-            let E = A.eliminate(mode: .Rows)
-            XCTAssertEqual(E.right, M55.identity)
-            XCTAssertEqual(E.result, E.left * A)
-            XCTAssertEqual(A, E.leftInverse * E.result)
-        }
-    }
-    
-    func testColEliminationRandomM55() {
-        for _ in 0 ..< 10 {
-            let A = randomM55()
-            let E = A.eliminate(mode: .Cols)
-            XCTAssertEqual(E.left, M55.identity)
-            XCTAssertEqual(E.result, A * E.right)
-            XCTAssertEqual(A, E.result * E.rightInverse)
-        }
-    }
-    
-    func testColEliminationRegularM55() {
-        for _ in 0 ..< 10 {
-            let A = randomRegularM55()
-            let E = A.eliminate(mode: .Cols)
-            XCTAssertEqual(E.left, M55.identity)
-            XCTAssertEqual(E.result, A * E.right)
-            XCTAssertEqual(A, E.result * E.rightInverse)
-            XCTAssertEqual(E.result, M55.identity)
-        }
-    }
-    
-    func testColEliminationSingularM55() {
-        for _ in 0 ..< 10 {
-            let A = randomSingularM55()
-            let E = A.eliminate(mode: .Cols)
-            XCTAssertEqual(E.left, M55.identity)
-            XCTAssertEqual(E.result, A * E.right)
-            XCTAssertEqual(A, E.result * E.rightInverse)
-        }
-    }
-    
+
     private func rand(_ i: Int) -> Int {
         return Int(arc4random()) % i
     }

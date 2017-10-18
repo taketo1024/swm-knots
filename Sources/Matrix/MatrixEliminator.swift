@@ -8,14 +8,7 @@
 
 import Foundation
 
-public enum MatrixEliminationMode {
-    case Both
-    case Rows
-    case Cols
-}
-
 public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
-    let mode: MatrixEliminationMode
     let rows: Int
     let cols: Int
     let type: MatrixType
@@ -24,8 +17,7 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
     private(set) var itr = 0
     private(set) var debug: Bool
     
-    public required init(_ target: Matrix<R, n, m>, _ mode: MatrixEliminationMode, _ debug: Bool = false) {
-        self.mode = mode
+    public required init(_ target: Matrix<R, n, m>, _ debug: Bool = false) {
         self.rows = target.rows
         self.cols = target.cols
         self.type = target.type

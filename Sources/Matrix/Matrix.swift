@@ -328,8 +328,8 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         return true // FIXME
     }
     
-    public func eliminate(mode: MatrixEliminationMode, debug: Bool = false) -> MatrixEliminator<R, n, m> {
-        guard let e = R.matrixEliminatiorType()?.init(self, mode, debug) else {
+    public func eliminate(debug: Bool = false) -> MatrixEliminator<R, n, m> {
+        guard let e = R.matrixEliminatiorType()?.init(self, debug) else {
             fatalError("MatrixElimination not available for ring: \(R.symbol)")
         }
         return e
@@ -340,7 +340,7 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
             return s
         }
         
-        let s = self.eliminate(mode: .Both)
+        let s = self.eliminate()
         smithNormalFormCache.value = s
         
         return s

@@ -8,12 +8,20 @@
 
 import Foundation
 
+public enum MatrixEliminationMode {
+    case Both
+    case Rows
+    case Cols
+}
+
 public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEliminator<R, n, m> {
+    let mode: MatrixEliminationMode
     var target: Matrix<R, n, m>
     
-    public required init(_ target: Matrix<R, n, m>, _ mode: MatrixEliminationMode, _ debug: Bool) {
+    public required init(_ target: Matrix<R, n, m>, _ debug: Bool = false) {
         self.target = target
-        super.init(target, mode, debug)
+        self.mode = .Both
+        super.init(target, debug)
     }
     
     public override var result: Matrix<R, n, m> {
