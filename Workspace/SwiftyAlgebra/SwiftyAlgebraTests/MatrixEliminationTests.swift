@@ -74,7 +74,29 @@ class MatrixEliminationTests: XCTestCase {
         XCTAssertEqual(E.left * A * E.right, E.result)
         XCTAssertEqual(E.leftInverse * E.result * E.rightInverse, A)
     }
-
+    
+    func testElimination_Z46_rank4WithFactors() {
+        typealias M = Matrix<Z, _4, _6>
+        
+        let A = M(8, -6, 14, -10, -14, 6, 12, -8, 18, -18, -20, 8, -16, 7, -23, 22, 23, -7, 32, -17, 44, -49, -49, 17)
+        let E = A.eliminate()
+        
+        XCTAssertEqual(E.result,
+                       M(1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 12, 0, 0))
+        
+        XCTAssertEqual(E.left * A * E.right, E.result)
+        XCTAssertEqual(E.leftInverse * E.result * E.rightInverse, A)
+    }
+    
+    func testElimination_Z46_zero() {
+        typealias M = Matrix<Z, _4, _6>
+        
+        let A = M.zero
+        let E = A.eliminate()
+        
+        XCTAssertEqual(E.result, M.zero)
+    }
+    
     func testElimination_Q55_regular() {
         typealias M = Matrix<Q, _5, _5>
         
@@ -100,4 +122,5 @@ class MatrixEliminationTests: XCTestCase {
         XCTAssertEqual(E.left * A * E.right, E.result)
         XCTAssertEqual(E.leftInverse * E.result * E.rightInverse, A)
     }
+
 }

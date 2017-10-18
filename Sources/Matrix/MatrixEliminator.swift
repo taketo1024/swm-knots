@@ -41,25 +41,25 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
     public lazy var left: Matrix<R, n, n> = { [unowned self] in
         var Q = RowOperationMatrix<R>.identity(rows)
         process.forEach { $0.apply(to: &Q) }
-        return Matrix(rows: rows, cols: cols, type: type, grid: Q.toGrid)
+        return Matrix(rows: rows, cols: rows, type: type, grid: Q.toGrid)
     }()
     
     public lazy var leftInverse: Matrix<R, n, n> = { [unowned self] in
         var Q = RowOperationMatrix<R>.identity(rows)
         process.reversed().forEach { $0.inverse.apply(to: &Q) }
-        return Matrix(rows: rows, cols: cols, type: type, grid: Q.toGrid)
+        return Matrix(rows: rows, cols: rows, type: type, grid: Q.toGrid)
     }()
     
     public lazy var right: Matrix<R, m, m> = { [unowned self] in
         var Q = ColOperationMatrix<R>.identity(cols)
         process.forEach { $0.apply(to: &Q) }
-        return Matrix(rows: rows, cols: cols, type: type, grid: Q.toGrid)
+        return Matrix(rows: cols, cols: cols, type: type, grid: Q.toGrid)
     }()
     
     public lazy var rightInverse: Matrix<R, m, m> = { [unowned self] in
         var Q = ColOperationMatrix<R>.identity(cols)
         process.reversed().forEach { $0.inverse.apply(to: &Q) }
-        return Matrix(rows: rows, cols: cols, type: type, grid: Q.toGrid)
+        return Matrix(rows: cols, cols: cols, type: type, grid: Q.toGrid)
     }()
     
     public func run() {
