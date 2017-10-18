@@ -9,6 +9,12 @@
 import Foundation
 
 public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator<K, n, m> {
+    public override lazy var diagonal: [K] = { [unowned self] in
+        let A = result
+        let r = min(A.rows, A.cols)
+        return (0 ..< r).map{ A[$0, $0] }
+    }()
+    
     override func iteration() -> Bool {
         
         // Exit if iterations are over.

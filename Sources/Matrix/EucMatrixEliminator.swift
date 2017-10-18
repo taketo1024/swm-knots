@@ -9,6 +9,13 @@
 import Foundation
 
 public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEliminator<R, n, m> {
+    public override lazy var diagonal: [R] = { [unowned self] in
+        let A = result
+        let r = min(A.rows, A.cols)
+        return (0 ..< r).map{ A[$0, $0] }
+    }()
+    
+
     override func iteration() -> Bool {
         
         // Exit if iterations are over.

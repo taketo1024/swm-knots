@@ -80,13 +80,11 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
         return P
     }()
     
-    public lazy var diagonal: [R] = { [unowned self] in
-        let A = result
-        let r = min(A.rows, A.cols)
-        return (0 ..< r).map{ A[$0, $0] }
-    }()
+    public var diagonal: [R] {
+        fatalError("override in subclass")
+    }
     
-    final func run() {
+    final public func run() {
         log("-----Start (mode: \(mode))-----\n\n\(result.detailDescription)\n")
         
         while !iteration() {

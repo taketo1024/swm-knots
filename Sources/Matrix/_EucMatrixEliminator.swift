@@ -22,9 +22,11 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
     
     private var rowOperation: RowOperationMatrix<R>!
     private var colOperation: ColOperationMatrix<R>!
+    private var _diagonal: [R] = []
     
-    private var diag: [R] = [] // TODO rename to diagonal
-    private var diagIndex = 0
+    public override var diagonal: [R] {
+        return _diagonal
+    }
 
     override func iteration() -> Bool {
         switch phase {
@@ -44,8 +46,8 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
             
         case .Rows :
             if rowOperation.isDiagonal {
-                result = Matrix(rows: rows, cols: cols, type: result.type, grid: rowOperation.toGrid) // TODO delete
-                diag = rowOperation.diagonal
+                targetRow = 0
+                _diagonal = rowOperation.diagonal
                 phase = .Diag
             } else {
                 colOperation = ColOperationMatrix(rowOperation)
@@ -59,8 +61,8 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
             
         case .Cols :
             if colOperation.isDiagonal {
-                result = Matrix(rows: rows, cols: cols, type: result.type, grid: colOperation.toGrid) // TODO delete
-                diag = colOperation.diagonal
+                targetRow = 0
+                _diagonal = colOperation.diagonal
                 phase = .Diag
             } else {
                 rowOperation = RowOperationMatrix(colOperation)
@@ -205,25 +207,25 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
     }
     
     func doDiag() -> Bool {
-        if diagIndex >= diag.count {
+        if targetRow >= _diagonal.count {
             return toNextPhase()
         }
         
         // SNF is complete
-        if (0 ..< diag.count - 1).forAll({ i in diag[i + 1] % diag[i] == 0 }) {
+        if (0 ..< _diagonal.count - 1).forAll({ i in _diagonal[i + 1] % _diagonal[i] == 0 }) {
             return toNextPhase()
         }
         
-        let (k, a) = findMin(diag[diagIndex...].enumerated().toArray())
-        let i = k + diagIndex
+        let (k, a) = findMin(_diagonal[targetRow...].enumerated().toArray())
+        let i = k + targetRow
         
         if !a.isInvertible {
-            for j in diagIndex ..< diag.count {
+            for j in targetRow ..< _diagonal.count {
                 if i == j {
                     continue
                 }
                 
-                let b = diag[j]
+                let b = _diagonal[j]
                 if b % a != 0 {
                     diagonalGCD(i, j)
                     return false
@@ -233,15 +235,15 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         
         // now `a` divides all other elements.
         
-        if i != diagIndex {
-            diag[i] = diag[diagIndex]
-            diag[diagIndex] = a
+        if i != targetRow {
+            _diagonal[i] = _diagonal[targetRow]
+            _diagonal[targetRow] = a
             
-            process.append(.SwapRows(i, diagIndex))
-            process.append(.SwapCols(i, diagIndex))
+            process.append(.SwapRows(i, targetRow))
+            process.append(.SwapCols(i, targetRow))
         }
         
-        diagIndex += 1
+        targetRow += 1
         return false
     }
     
@@ -249,7 +251,7 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         var grid = Array(repeating: R.zero, count: rows * cols)
         var p = UnsafeMutablePointer(&grid)
         
-        for a in diag {
+        for a in _diagonal {
             p.pointee = a
             p += (cols + 1)
         }
@@ -272,7 +274,7 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
     }
     
     private func diagonalGCD(_ i: Int, _ j: Int) {
-        let (a, b) = (diag[i], diag[j])
+        let (a, b) = (_diagonal[i], _diagonal[j])
         let (x, y, r) = bezout(a, b) // r = ax + by = gcd(a, b)
         let m = -a * b / r           // lcm(a, b)
         
@@ -283,17 +285,17 @@ public class _EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEli
         process.append(.SwapRows(i, j))                   // [r, 0; 0, m]
         
         if r.normalizeUnit != 1 {
-            diag[i] = r * r.normalizeUnit
+            _diagonal[i] = r * r.normalizeUnit
             process.append(.MulRow(at: i, by: r.normalizeUnit))
         } else {
-            diag[i] = r
+            _diagonal[i] = r
         }
         
         if m.normalizeUnit != 1 {
-            diag[j] = m * m.normalizeUnit
+            _diagonal[j] = m * m.normalizeUnit
             process.append(.MulRow(at: j, by: m.normalizeUnit))
         } else {
-            diag[j] = m
+            _diagonal[j] = m
         }
         
         print(process.count)
