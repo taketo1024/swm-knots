@@ -67,6 +67,15 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         self.init(rows, cols, type, grid)
     }
     
+    public init(rows r: Int? = nil, cols c: Int? = nil, type: MatrixType = .Default, diagonal: [R]) {
+        let (rows, cols) = Matrix.determineSize(r, c, nil)
+        var grid = Array(repeating: R.zero, count: rows * cols)
+        for (i, a) in diagonal.enumerated() {
+            grid[(i * cols) + i] = a
+        }
+        self.init(rows, cols, type, grid)
+    }
+    
     // Convenience initializer of 1.
     public init(_ grid: R...) {
         self.init(grid: grid)
