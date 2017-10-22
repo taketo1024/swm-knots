@@ -24,7 +24,7 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
         self.type = target.type
         self.target = target
         self.process = []
-        self.debug = true
+        self.debug = debug
     }
     
     public var result: Matrix<R, n, m> {
@@ -65,13 +65,13 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
     }()
     
     public func run() {
-        log("-----Start-----\((target.rows, target.cols))\n")
+        log("-----Start-----\n\n\(target.detailDescription)\n")
         
         while !iteration() {
             itr += 1
         }
         
-        log("-----Done (\(process.count) steps)-----\n")
+        log("-----Done (\(process.count) steps)-----\n\nResult:\n\(target.detailDescription)\n")
     }
     
     func iteration() -> Bool {
@@ -81,7 +81,7 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
     func apply(_ s: EliminationStep<R>) {
         s.apply(to: &target)
         process.append(s)
-        log("\(process.count): \(s)")
+        log("\(process.count): \(s) \n\n\( target.detailDescription )\n")
     }
     
     func log(_ msg: @autoclosure () -> String) {
