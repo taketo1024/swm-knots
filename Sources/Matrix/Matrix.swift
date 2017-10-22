@@ -22,12 +22,7 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public let cols: Int
     public let type: MatrixType
     
-    internal var grid: [R] {
-        willSet {
-            clearCache()
-        }
-    }
-    
+    internal var grid: [R]
     internal var smithNormalFormCache: Cache<MatrixEliminator<R, n, m>> = Cache()
     internal func clearCache() {
         smithNormalFormCache.value = nil
