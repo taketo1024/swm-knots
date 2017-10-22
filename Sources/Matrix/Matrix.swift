@@ -183,11 +183,8 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public static func * <p>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
         assert(a.cols == b.rows, "Mismatching matrix size.")
         
-        // TODO improve performance
-        return Matrix<R, n, p>(rows: a.rows, cols: b.cols, type: (a.type == b.type) ? a.type : .Default) { (i, k) -> R in
-            return (0 ..< a.cols)
-                .map({j in a[i, j] * b[j, k]})
-                .reduce(0) {$0 + $1}
+        return Matrix<R, n, p>(rows: a.rows, cols: b.cols, type: (a.type == b.type) ? a.type : .Default) {
+            (i, k) in (0 ..< a.cols).sum { j in a[i, j] * b[j, k] }
         }
     }
     
