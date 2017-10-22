@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal extension Sequence {
+public extension Sequence {
     func forAll(_ f: (Element) -> Bool) -> Bool {
         for e in self {
             if !f(e) {
@@ -32,7 +32,7 @@ internal extension Sequence {
     }
 }
 
-extension Sequence where Element: Hashable {
+public extension Sequence where Element: Hashable {
     func unique() -> [Element] {
         var alreadyAdded = Set<Element>()
         return self.filter { alreadyAdded.insert($0).inserted }
@@ -44,7 +44,7 @@ extension Sequence where Element: Hashable {
     }
 }
 
-extension Sequence {
+public extension Sequence {
     func group<U: Hashable>(by keyGenerator: (Element) -> U) -> [U: [Element]] {
         return Dictionary(grouping: self, by: keyGenerator)
     }
@@ -55,5 +55,29 @@ extension Sequence {
         return self.flatMap{ (x) -> [(X, Y)] in
             s2.map{ (y) -> (X, Y) in (x, y) }
         }
+    }
+}
+
+public extension Sequence where Element: AdditiveGroup {
+    @_inlineable public func sumAll() -> Element {
+        return sum{ $0 }
+    }
+}
+
+public extension Sequence {
+    @_inlineable public func sum<G: AdditiveGroup>(mapping f: (Element) -> G) -> G {
+        return self.reduce(G.zero){ $0 + f($1)}
+    }
+}
+
+public extension Sequence where Element: Monoid {
+    @_inlineable public func multiplyAll() -> Element {
+        return multiply{ $0 }
+    }
+}
+
+public extension Sequence {
+    @_inlineable public func multiply<G: Monoid>(mapping f: (Element) -> G) -> G {
+        return self.reduce(G.identity){ $0 * f($1) }
     }
 }

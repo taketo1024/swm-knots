@@ -153,12 +153,3 @@ public struct QuotientField<R, I>: Field, _QuotientRing where I: Ideal, R == I.S
         return r
     }
 }
-
-public extension Array where Element: Ring {
-    public func multiplyAll() -> Element {
-        typealias R = Element
-        return self.reduce(R.identity) {
-            return $0 * $1
-        }
-    }
-}
