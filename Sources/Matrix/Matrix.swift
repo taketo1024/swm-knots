@@ -22,7 +22,8 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public let cols: Int
     public let type: MatrixType
     
-    internal var grid: [R]
+    public var grid: [R]
+    
     internal var smithNormalFormCache: Cache<MatrixEliminator<R, n, m>> = Cache()
     internal func clearCache() {
         smithNormalFormCache.value = nil
@@ -133,16 +134,17 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         }
     }
     
-    internal func gridIndex(_ i: Int, _ j: Int) -> Int {
+    @_transparent
+    public func gridIndex(_ i: Int, _ j: Int) -> Int {
         return (i * cols) + j
     }
     
     public subscript(i: Int, j: Int) -> R {
-        get {
-            return grid[gridIndex(i, j)]
-        } set {
-            grid[gridIndex(i, j)] = newValue
-        }
+        @_transparent
+        get { return grid[gridIndex(i, j)] }
+        
+        @_transparent
+        set { grid[gridIndex(i, j)] = newValue }
     }
     
     public func makeIterator() -> MatrixIterator<R, n, m> {
@@ -415,14 +417,20 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
 
 public extension Matrix where m == _1 {
     public subscript(index: Int) -> R {
+        @_transparent
         get { return self[index, 0] }
+        
+        @_transparent
         set { self[index, 0] = newValue }
     }
 }
 
 public extension Matrix where n == _1 {
     public subscript(index: Int) -> R {
+        @_transparent
         get { return self[0, index] }
+        
+        @_transparent
         set { self[0, index] = newValue }
     }
 }
