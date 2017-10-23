@@ -182,12 +182,17 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         return Matrix(rows: a.rows, cols: a.cols, type: a.type, grid: grid)
     }
     
+    @_inlineable
+    @_specialize(where R==Int, n==Dynamic, m==Dynamic, p==Dynamic)
     public static func * <p>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
         assert(a.cols == b.rows, "Mismatching matrix size.")
         
-        return Matrix<R, n, p>(rows: a.rows, cols: b.cols, type: (a.type == b.type) ? a.type : .Default) {
-            (i, k) in (0 ..< a.cols).sum { j in a[i, j] * b[j, k] }
+        let grid = (0 ..< a.rows * b.cols).map { (index) -> R in
+            let (i, k) = (index / b.cols, index % b.cols)
+            return (0 ..< a.cols).sum { j in a[i, j] * b[j, k] }
         }
+        
+        return Matrix<R, n, p>(rows: a.rows, cols: b.cols, type: (a.type == b.type) ? a.type : .Default, grid: grid)
     }
     
     public var transposed: Matrix<R, m, n> {
