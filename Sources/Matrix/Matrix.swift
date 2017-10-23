@@ -30,7 +30,8 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     }
 
     // Root Initializer.
-    private init(_ rows: Int, _ cols: Int, _ type: MatrixType, _ grid: [R]) {
+    @_inlineable
+    public init(_ rows: Int, _ cols: Int, _ type: MatrixType, _ grid: [R]) {
         self.rows = rows
         self.cols = cols
         self.type = type
@@ -39,13 +40,13 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     
     // 1. Initialize by Grid.
     public init(rows r: Int? = nil, cols c: Int? = nil, type: MatrixType = .Default, grid: [R]) {
-        let (rows, cols) = Matrix.determineSize(r, c, grid)
+        let (rows, cols) = Matrix.determineSize(r, c)
         self.init(rows, cols, type, grid)
     }
     
     // 2. Initialize by Generator.
     public init(rows r: Int? = nil, cols c: Int? = nil, type: MatrixType = .Default, generator g: (Int, Int) -> R) {
-        let (rows, cols) = Matrix.determineSize(r, c, nil)
+        let (rows, cols) = Matrix.determineSize(r, c)
         let grid = (0 ..< rows * cols).map { (index: Int) -> R in
             let (i, j) = index /% cols
             return g(i, j)
@@ -53,9 +54,9 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         self.init(rows, cols, type, grid)
     }
     
-    // 3. Initialize by Components (good for Sparce Matrix).
+    // 3. Initialize by Components.
     public init(rows r: Int? = nil, cols c: Int? = nil, type: MatrixType = .Default, components: [MatrixComponent<R>]) {
-        let (rows, cols) = Matrix.determineSize(r, c, nil)
+        let (rows, cols) = Matrix.determineSize(r, c)
         var grid = Array(repeating: R.zero, count: rows * cols)
         for (i, j, a) in components {
             grid[(i * cols) + j] = a
@@ -63,75 +64,35 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         self.init(rows, cols, type, grid)
     }
     
+    // Convenience Initializer 1.
+    public init(rows r: Int? = nil, cols c: Int? = nil, type: MatrixType = .Default, _ grid: R...) {
+        let (rows, cols) = Matrix.determineSize(r, c)
+
+        let l = n.intValue * m.intValue
+        if grid.count == l {
+            self.init(rows, cols, type, grid)
+        } else if grid.count < l {
+            self.init(rows, cols, type, grid + Array(repeating: R.zero, count: l - grid.count))
+        } else {
+            self.init(rows, cols, type, grid[0 ..< l].toArray() )
+        }
+    }
+    
+    // Convenience Initializer 2.
+    public init(rows r: Int? = nil, cols c: Int? = nil, type: MatrixType = .Default, fill: R = R.zero) {
+        let (rows, cols) = Matrix.determineSize(r, c)
+        let grid = Array(repeating: fill, count: rows * cols)
+        self.init(rows, cols, type, grid)
+    }
+    
+    // Convenience Initializer 3.
     public init(rows r: Int? = nil, cols c: Int? = nil, type: MatrixType = .Default, diagonal: [R]) {
-        let (rows, cols) = Matrix.determineSize(r, c, nil)
+        let (rows, cols) = Matrix.determineSize(r, c)
         var grid = Array(repeating: R.zero, count: rows * cols)
         for (i, a) in diagonal.enumerated() {
             grid[(i * cols) + i] = a
         }
         self.init(rows, cols, type, grid)
-    }
-    
-    // Convenience initializer of 1.
-    public init(_ grid: R...) {
-        self.init(grid: grid)
-    }
-    
-    private static func determineSize(_ rows: Int?, _ cols: Int?, _ grid: [R]?) -> (rows: Int, cols: Int) {
-        func ceilDiv(_ a: Int, _ b: Int) -> Int {
-            return (a + b - 1) / b
-        }
-        
-        switch(n.self, m.self) {
-            
-        // completely determined by type.
-        case let (R, C) where !(R is Dynamic.Type) && !(C is Dynamic.Type):
-            assert(rows == nil || rows! == R.intValue, "rows mismatch with type-parameter: \(String(describing: rows)) != \(R.intValue)")
-            assert(cols == nil || cols! == C.intValue, "cols mismatch with type-parameter: \(String(describing: cols)) != \(C.intValue)")
-            return (R.intValue, C.intValue)
-            
-        // rows is determined by type.
-        case let (R, C) where !(R is Dynamic.Type) && (C is Dynamic.Type):
-            assert(rows == nil || rows! == R.intValue, "rows mismatch with type-parameter: \(String(describing: rows)) != \(R.intValue)")
-            let r = R.intValue
-            switch (cols, grid) {
-            case let (c?, _):
-                return (r, c)
-            case let (nil, g?) where r > 0:
-                return (r, ceilDiv(g.count, r))
-            default:
-                fatalError("Matrix size indeterminable.")
-            }
-            
-        // cols is determined by type.
-        case let (R, C) where (R is Dynamic.Type) && !(C is Dynamic.Type):
-            assert(cols == nil || cols == C.intValue, "cols mismatch with type-parameter: \(String(describing: cols)) != \(C.intValue)")
-            let c = C.intValue
-            switch (rows, grid) {
-            case let (r?, _):
-                return (r, c)
-            case let (nil, g?) where c > 0:
-                return (ceilDiv(g.count, c), c)
-            default:
-                fatalError("Matrix size indeterminable.")
-            }
-            
-        // rows, cols are dynamic.
-        case let (R, C) where  (R is Dynamic.Type) &&  (C is Dynamic.Type):
-            switch (rows, cols, grid) {
-            case let (r?, c?, _):
-                return (r, c)
-            case let (r?, _, g?) where r > 0:
-                return (r, ceilDiv(g.count, r))
-            case let (_, c?, g?) where c > 0:
-                return (ceilDiv(g.count, c), c)
-            default:
-                fatalError("Matrix size indeterminable.")
-            }
-            
-        default:
-            fatalError()
-        }
     }
     
     @_transparent
@@ -163,23 +124,24 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public static func +(a: Matrix<R, n, m>, b: Matrix<R, n, m>) -> Matrix<R, n, m> {
         assert((a.rows, a.cols) == (b.rows, b.cols), "Mismatching matrix size.")
         
+        let type = (a.type == b.type) ? a.type : .Default
         let grid = (0 ..< a.grid.count).map { a.grid[$0] + b.grid[$0] }
-        return Matrix(rows: a.rows, cols: a.cols, type: (a.type == b.type) ? a.type : .Default, grid: grid)
+        return Matrix(a.rows, a.cols, type, grid)
     }
     
     public prefix static func -(a: Matrix<R, n, m>) -> Matrix<R, n, m> {
         let grid = a.grid.map { -$0 }
-        return Matrix(rows: a.rows, cols: a.cols, type: a.type, grid: grid)
+        return Matrix(a.rows, a.cols, a.type, grid)
     }
     
     public static func *(r: R, a: Matrix<R, n, m>) -> Matrix<R, n, m> {
         let grid = a.grid.map { r * $0 }
-        return Matrix(rows: a.rows, cols: a.cols, type: a.type, grid: grid)
+        return Matrix(a.rows, a.cols, a.type, grid)
     }
     
     public static func *(a: Matrix<R, n, m>, r: R) -> Matrix<R, n, m> {
         let grid = a.grid.map { $0 * r }
-        return Matrix(rows: a.rows, cols: a.cols, type: a.type, grid: grid)
+        return Matrix(a.rows, a.cols, a.type, grid)
     }
     
     @_inlineable
@@ -187,12 +149,13 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public static func * <p>(a: Matrix<R, n, m>, b: Matrix<R, m, p>) -> Matrix<R, n, p> {
         assert(a.cols == b.rows, "Mismatching matrix size.")
         
+        let type = (a.type == b.type) ? a.type : .Default
         let grid = (0 ..< a.rows * b.cols).map { (index) -> R in
             let (i, k) = (index / b.cols, index % b.cols)
             return (0 ..< a.cols).sum { j in a[i, j] * b[j, k] }
         }
         
-        return Matrix<R, n, p>(rows: a.rows, cols: b.cols, type: (a.type == b.type) ? a.type : .Default, grid: grid)
+        return Matrix<R, n, p>(a.rows, b.cols, type, grid)
     }
     
     public var transposed: Matrix<R, m, n> {
@@ -201,6 +164,7 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
         }
     }
     
+    // TODO delete if possible
     public var leftIdentity: Matrix<R, n, n> {
         return Matrix<R, n, n>(rows: rows, cols: rows, type: type) { $0 == $1 ? 1 : 0 }
     }
@@ -208,8 +172,8 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public var rightIdentity: Matrix<R, m, m> {
         return Matrix<R, m, m>(rows: cols, cols: cols, type: type) { $0 == $1 ? 1 : 0 }
     }
-    
-    // TODO delete if possible
+    // --TODO
+
     public func rowArray(_ i: Int) -> [R] {
         return rowVector(i).map{ c in c.value }
     }
@@ -217,7 +181,6 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     public func colArray(_ j: Int) -> [R] {
         return colVector(j).map{ c in c.value }
     }
-    // --TODO
     
     public func rowVector(_ i: Int) -> RowVector<R, m> {
         return submatrix(inRange: (i ..< i + 1, 0 ..< cols))
@@ -417,6 +380,26 @@ public struct Matrix<R: Ring, n: _Int, m: _Int>: Module, Sequence {
     
     public static var symbol: String {
         return "M(\((n.self == Dynamic.self ? "?" : "\(n.intValue)")), \((m.self == Dynamic.self ? "?" : "\(m.intValue)")); \(R.symbol))"
+    }
+    
+    private static func determineSize(_ rows: Int?, _ cols: Int?) -> (rows: Int, cols: Int) {
+        // true: determined, false: not determined
+        switch (!(n.self is Dynamic.Type), !(m.self is Dynamic.Type), rows != nil, cols != nil) {
+        case (true, true, _, _):
+            assert(rows == nil || rows! == n.intValue, "rows mismatch with type-parameter")
+            assert(cols == nil || cols! == m.intValue, "cols mismatch with type-parameter")
+            return (n.intValue, m.intValue)
+        case (false, false, true, true):
+            return (rows!, cols!)
+        case (true, false, _, true):
+            assert(rows == nil || rows! == n.intValue, "rows mismatch with type-parameter")
+            return (n.intValue, cols!)
+        case (false, true, true, _):
+            assert(cols == nil || cols! == m.intValue, "cols mismatch with type-parameter")
+            return (rows!, m.intValue)
+        default:
+            fatalError("Matrix size indeterminable.")
+        }
     }
 }
 
