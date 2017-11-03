@@ -103,9 +103,10 @@ public struct SimplicialComplex: GeometricComplex {
     }
 }
 
-public struct SimplicialMap: Map {
-    public typealias Domain = SimplicialComplex
-    public typealias Codomain = SimplicialComplex
+public struct SimplicialMap: GeometricComplexMap {
+    public typealias ComplexType = SimplicialComplex
+    public typealias Domain = Simplex
+    public typealias Codomain = Simplex
     
     private let map: [Vertex: Vertex]
     
