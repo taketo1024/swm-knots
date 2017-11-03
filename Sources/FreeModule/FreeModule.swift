@@ -21,7 +21,7 @@ public struct FreeModule<R: Ring, A: FreeModuleBase>: Module, Sequence {
         self.init(basis: basis, elements: Dictionary(pairs: zip(basis, components)))
     }
     
-    public init(_ elements: [(R, A)]) {
+    public init<S: Sequence>(_ elements: S) where S.Element == (R, A) {
         let basis = elements.map{$0.1}
         let dict = Dictionary(pairs: elements.map{($0.1, $0.0)})
         self.init(basis: basis, elements: dict)
@@ -92,7 +92,13 @@ public struct FreeModule<R: Ring, A: FreeModuleBase>: Module, Sequence {
     }
     
     public static func generateElements<n, m>(basis: [A], matrix A: Matrix<R, n, m>) -> [FreeModule<R, A>] {
-        return (0 ..< A.cols).map { FreeModule<R, A>(basis: basis, components: A.colArray($0)) }
+        return (0 ..< A.cols).map { j in
+            let elements = (0 ..< A.rows).flatMap { i -> (R, A)? in
+                let a = A[i, j]
+                return (a != 0) ? (a, basis[i]) : nil
+            }
+            return FreeModule<R, A>(elements)
+        }
     }
 }
 
