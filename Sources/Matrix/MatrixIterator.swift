@@ -15,8 +15,8 @@ public enum MatrixIterationDirection {
     case Cols
 }
 
-public struct MatrixIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
-    private let matrix: Matrix<R, n, m>
+public struct MatrixIterator<n: _Int, m: _Int, R: Ring> : IteratorProtocol {
+    private let matrix: Matrix<n, m, R>
     private let direction: MatrixIterationDirection
     private let rowRange: CountableRange<Int>
     private let colRange: CountableRange<Int>
@@ -26,7 +26,7 @@ public struct MatrixIterator<R: Ring, n: _Int, m: _Int> : IteratorProtocol {
     private var current: (Int, Int)
     private var initial = true
     
-    public init(_ matrix: Matrix<R, n, m>, from: (Int, Int)? = nil, direction: MatrixIterationDirection = .Rows, rowRange: CountableRange<Int>? = nil, colRange: CountableRange<Int>? = nil, proceedLines: Bool = true, nonZeroOnly: Bool = false) {
+    public init(_ matrix: Matrix<n, m, R>, from: (Int, Int)? = nil, direction: MatrixIterationDirection = .Rows, rowRange: CountableRange<Int>? = nil, colRange: CountableRange<Int>? = nil, proceedLines: Bool = true, nonZeroOnly: Bool = false) {
         self.matrix = matrix
         self.current = from ?? (rowRange?.lowerBound ?? 0, colRange?.lowerBound ?? 0)
         self.direction = direction

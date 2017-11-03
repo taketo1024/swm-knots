@@ -93,13 +93,13 @@ public struct Permutation<n: _Int>: Group, FiniteSetType {
         return rawCyclicDecomposition.map{ Permutation<n>(cyclic: $0) }
     }
     
-    public func asMatrix() -> Matrix<IntegerNumber, n, n> {
+    public func asMatrix() -> Matrix<n, n, IntegerNumber> {
         return asMatrix(type: IntegerNumber.self)
     }
     
-    public func asMatrix<R: Ring>(type: R.Type) -> Matrix<R, n, n> {
+    public func asMatrix<R: Ring>(type: R.Type) -> Matrix<n, n, R> {
         let comps = (0 ..< degree).map{ i in (i, self[i], R.identity) }
-        return Matrix<R, n, n>(rows: degree, cols: degree, components: comps)
+        return Matrix<n, n, R>(rows: degree, cols: degree, components: comps)
     }
     
     public static var allElements: [Permutation<n>] {

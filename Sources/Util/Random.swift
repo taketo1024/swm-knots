@@ -43,21 +43,21 @@ extension RationalNumber: Randomable {
 
 // TODO conditional conformance - Matrix: Randomable
 public extension Matrix where R: Randomable {
-    public static func rand(_ lowerBound: Int, _ upperBound: Int) -> Matrix<R, n, m> {
+    public static func rand(_ lowerBound: Int, _ upperBound: Int) -> Matrix<n, m, R> {
         return Matrix { (_, _) in  R.rand(lowerBound, upperBound) }
     }
     
-    public static func rand(rank r: Int, shuffle s: Int = 50) -> Matrix<R, n, m> {
-        let A = Matrix<R, n, m>{ (i, j) in (i == j && i < r) ? R.identity : R.zero }
-        let P = Matrix<R, n, n>.randRegular(shuffle: s)
-        let Q = Matrix<R, m, m>.randRegular(shuffle: s)
+    public static func rand(rank r: Int, shuffle s: Int = 50) -> Matrix<n, m, R> {
+        let A = Matrix<n, m, R>{ (i, j) in (i == j && i < r) ? R.identity : R.zero }
+        let P = Matrix<n, n, R>.randRegular(shuffle: s)
+        let Q = Matrix<m, m, R>.randRegular(shuffle: s)
         return P * A * Q
     }
 }
 
 public extension Matrix where R: Randomable, n == m {
-    public static func randRegular(shuffle: Int = 50) -> Matrix<R, n, n> {
-        var A = Matrix<R, n, n>.identity
+    public static func randRegular(shuffle: Int = 50) -> Matrix<n, n, R> {
+        var A = Matrix<n, n, R>.identity
         
         for _ in 0 ..< shuffle {
             let i = Int.rand(0, A.rows)

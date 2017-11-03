@@ -58,7 +58,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
         self.init(degree: degree, basis: d1.domainBasis, matrix1: d1.matrix, matrix2: d2.matrix)
     }
     
-    internal init<n0, n1, n2>(degree: Int, basis: ChainBasis, matrix1 A1: Matrix<R, n0, n1>, matrix2 A2: Matrix<R, n1, n2>) {
+    internal init<n0, n1, n2>(degree: Int, basis: ChainBasis, matrix1 A1: Matrix<n0, n1, R>, matrix2 A2: Matrix<n1, n2, R>) {
         // Z_i : the i-th Cycle group
         let Z = A1.kernelMatrix
         let (n, k) = (Z.rows, Z.cols)
@@ -71,7 +71,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
         //   PAQ = [D; O_k]  =>  Z = Q * [O; I_k]
         //   Q^-1 * Z = [O; I_k]
         let Qinv = A1.smithNormalForm.rightInverse
-        let T: Matrix<R, Dynamic, n1> = Qinv.submatrix(rowsInRange: n - k ..< n) // T * Z = I_k
+        let T: Matrix<Dynamic, n1, R> = Qinv.submatrix(rowsInRange: n - k ..< n) // T * Z = I_k
         
         let (newBasis, newTrans, diagonal) = HomologyGroupInfo.calculate(basis, Z, B, T)
         
@@ -94,12 +94,12 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
     }
     
     // Calculate with size-typed matrices.
-    private static func calculate<n, k, l>(_ basis: ChainBasis, _ Z: Matrix<R, n, k>, _ B: Matrix<R, n, l>, _ T: Matrix<R, k, n>) -> (newBasis: [M],  transitionMatrix: Matrix<R, k, n>, diagonal: [R]) {
+    private static func calculate<n, k, l>(_ basis: ChainBasis, _ Z: Matrix<n, k, R>, _ B: Matrix<n, l, R>, _ T: Matrix<k, n, R>) -> (newBasis: [M],  transitionMatrix: Matrix<k, n, R>, diagonal: [R]) {
         
         // Find R such that B = Z * P.
         // Since T * Z = I_k,  T * B = P.
         
-        let P: Matrix<R, k, l> = T * B
+        let P: Matrix<k, l, R> = T * B
         
         // Eliminate P as S * P * U = [D; 0].
         // By taking basis * Z * S^-1 as a new basis of the cycle group, the relation becomes D.
@@ -111,7 +111,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
         let E = P.smithNormalForm
         
         let newBasis = M.generateElements(basis: basis, matrix: Z * E.leftInverse)
-        let newTrans: Matrix<R, k, n> = E.left * T
+        let newTrans: Matrix<k, n, R> = E.left * T
         let diagonal: [R] = E.diagonal
         
         return (newBasis, newTrans, diagonal)

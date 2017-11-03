@@ -13,7 +13,7 @@ public struct FreeModuleHom<A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Modu
     public let matrix: DynamicMatrix<R>
     
     // The root initializer
-    public init<n, m>(domainBasis: DomainBasis, codomainBasis: CodomainBasis, matrix: Matrix<R, n, m>) {
+    public init<n, m>(domainBasis: DomainBasis, codomainBasis: CodomainBasis, matrix: Matrix<n, m, R>) {
         self.domainBasis = domainBasis
         self.codomainBasis = codomainBasis
         self.matrix = matrix.asDynamic
@@ -31,7 +31,7 @@ public struct FreeModuleHom<A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Modu
     }
     
     public func appliedTo(_ m: Domain) -> Codomain {
-        let v: ColVector<R, Dynamic> = ColVector(rows: domainBasis.count) {(i, _) -> R in
+        let v: ColVector<Dynamic, R> = ColVector(rows: domainBasis.count) {(i, _) -> R in
             m[domainBasis[i]]
         }
         return FreeModule<B, R>(basis: codomainBasis, components: (matrix * v).colArray(0))
@@ -50,7 +50,7 @@ public struct FreeModuleHom<A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Modu
     }
     
     public static var zero: FreeModuleHom<A, B, R> {
-        return FreeModuleHom(domainBasis: [], codomainBasis: [], matrix: Matrix<R, _0, _0>.zero)
+        return FreeModuleHom(domainBasis: [], codomainBasis: [], matrix: Matrix<_0, _0, R>.zero)
     }
     
     public static func identity(basis: DomainBasis) -> FreeModuleHom<A, A, R> {

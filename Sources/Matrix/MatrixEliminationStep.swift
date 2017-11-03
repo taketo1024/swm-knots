@@ -58,7 +58,7 @@ internal enum EliminationStep<R: Ring> {
         }
     }
     
-    func apply<n, m>(to A: inout Matrix<R, n, m>) {
+    func apply<n, m>(to A: inout Matrix<n, m, R>) {
         switch self {
         case let .AddRow(i, j, r):
             A.addRow(at: i, to: j, multipliedBy: r)

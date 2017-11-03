@@ -36,7 +36,7 @@ b / a  // 15/8
 
 ```swift
 typealias Z = IntegerNumber
-typealias M = Matrix<Z, _2, _2>
+typealias M = Matrix<_2, _2, Z>
 
 let a = M(1, 2, 3, 4)  // [1, 2; 3, 4]
 let b = M(2, 1, 1, 2)  // [2, 1; 1, 2]

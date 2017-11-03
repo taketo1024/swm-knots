@@ -91,7 +91,7 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
         return basis.count > 0 ? self[basis.first!].hashValue : 0
     }
     
-    public static func generateElements<n, m>(basis: [A], matrix A: Matrix<R, n, m>) -> [FreeModule<A, R>] {
+    public static func generateElements<n, m>(basis: [A], matrix A: Matrix<n, m, R>) -> [FreeModule<A, R>] {
         return (0 ..< A.cols).map { j in
             let elements = (0 ..< A.rows).flatMap { i -> (A, R)? in
                 let a = A[i, j]
