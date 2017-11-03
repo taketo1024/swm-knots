@@ -9,7 +9,11 @@
 import Foundation
 
 public protocol GeometricCell: FreeModuleBase {
-    var dim: Int {get}
+    var dim: Int { get }
+}
+
+public extension GeometricCell {
+    public var degree: Int { return dim }
 }
 
 public protocol GeometricComplex: CustomStringConvertible {
@@ -34,7 +38,7 @@ public extension GeometricComplex {
     
     public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, Cell, R> {
         return FreeModuleHom { s in
-            self.boundary(ofCell: s).map{ ($0, $1) }
+            (s.dim == i) ? self.boundary(ofCell: s).map{ ($0, $1) } : []
         }
     }
     

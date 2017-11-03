@@ -8,9 +8,15 @@
 
 import Foundation
 
-public protocol ChainType {}
-public struct   Descending : ChainType {}  // for ChainComplex   / Homology
-public struct   Ascending  : ChainType {}  // for CochainComplex / Cohomology
+public protocol ChainType {
+    static func target(_ i: Int) -> Int
+}
+public struct Descending : ChainType {    // for ChainComplex / Homology
+    public static func target(_ i: Int) -> Int { return i - 1 }
+}
+public struct Ascending : ChainType {
+    public static func target(_ i: Int) -> Int { return i + 1 }
+}
 
 public typealias   ChainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Descending, A, R>
 public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Ascending,  A, R>
@@ -42,7 +48,7 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
     }
     
     public func boundaryMap(_ i: Int) -> BoundaryMap {
-        return (offset ... topDegree).contains(i) ? chain[i - offset].map :BoundaryMap.zero
+        return (offset ... topDegree).contains(i) ? chain[i - offset].map : BoundaryMap.zero
     }
     
     public func boundaryMatrix(_ i: Int) -> BoundaryMatrix {
@@ -113,25 +119,40 @@ public extension ChainComplex where chainType == Ascending {
     }
 }
 
-/*
 public extension ChainComplex {
-    public static func ⊗<chainType, A, B, R>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Tensor<A, B>, R> {
-        typealias NewChainBasis = [Tensor<A, B>]
-        typealias NewBoundaryMap = FreeModuleHom<Tensor<A, B>, Tensor<A, B>, R>
+    public static func ⊗<B>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Tensor<A, B>, R> {
+        typealias T = Tensor<A, B>
+        typealias ChainBasis = [T]
+        typealias BoundaryMap = FreeModuleHom<T, T, R>
+        typealias BoundaryMatrix = DynamicMatrix<R>
         
         let offset = C1.offset + C2.offset
         let degree = C1.topDegree + C2.topDegree
-        let chain = (offset ... degree).map{ (k) -> (NewChainBasis, NewBoundaryMap, BoundaryMatrix) in
-            (offset ... k).map { (i) -> NewBoundaryMap in
-                let (d1, d2) = (C1.boundaryMap(i), C2.boundaryMap(k - i))
-                let (I1, I2) = (FreeModuleHom<A, A, R>.identity(basis: d1.domainBasis),
-                                FreeModuleHom<B, B, R>.identity(basis: d2.domainBasis))
+        
+        let basis = (offset ... degree).map{ (k) -> ChainBasis in
+            (offset ... k).flatMap{ i in
+                C1.chainBasis(i).allCombinations(with: C2.chainBasis(k - i)).map{ $0 ⊗ $1 }
+            }
+        }
+
+        let chain = (offset ... degree).map{ (k) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
+            let map = (offset ... k).sum { i -> BoundaryMap in
+                let j = k - i
+                let (d1, d2) = (C1.boundaryMap(i), C2.boundaryMap(j))
+                let (I1, I2) = (FreeModuleHom<A, A, R>{ a in (a.degree == i) ? [(a, R.identity)] : [] },
+                                FreeModuleHom<B, B, R>{ b in (b.degree == j) ? [(b, R.identity)] : [] })
                 let e = R(intValue: (-1).pow(i))
                 return d1 ⊗ I2 + e * I1 ⊗ d2
-                }.sumAll()
+            }
+            let from = basis[k - offset]
+            let next = chainType.target(k - offset)
+            let to = (0 ..< basis.count).contains(next) ? basis[next] : []
+            let matrix = map.asMatrix(from: from, to: to)
+            
+            return (from, map, matrix)
         }
         
-        return _ChainComplex<chainType, Tensor<A, B>, R>(chain)
+        return _ChainComplex<chainType, T, R>(chain)
     }
 }
-*/
+

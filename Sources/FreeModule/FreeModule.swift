@@ -1,6 +1,12 @@
 import Foundation
 
-public protocol FreeModuleBase: SetType {}
+public protocol FreeModuleBase: SetType {
+    var degree: Int { get }
+}
+
+public extension FreeModuleBase {
+    public var degree: Int { return 1 }
+}
 
 public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
     public typealias CoeffRing = R
@@ -129,6 +135,10 @@ public struct Dual<A: FreeModuleBase>: FreeModuleBase {
         base = a
     }
     
+    public var degree: Int {
+        return base.degree
+    }
+    
     public var hashValue: Int {
         return base.hashValue
     }
@@ -164,6 +174,10 @@ public struct Tensor<A: FreeModuleBase, B: FreeModuleBase>: FreeModuleBase {
     public init(_ a: A, _ b: B) {
         _1 = a
         _2 = b
+    }
+    
+    public var degree: Int {
+        return _1.degree + _2.degree
     }
     
     public var hashValue: Int {
