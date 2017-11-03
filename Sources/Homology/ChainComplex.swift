@@ -65,39 +65,30 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
         return _ChainComplex.init(chain, offset: offset + d)
     }
     
-    /* FIXME!
-    @discardableResult
-    public func assertComplex(debug: Bool = false) -> Bool {
-        return (offset ... topDegree).forAll { i1 -> Bool in
+    public func assertComplex(debug: Bool = false) {
+        (offset ... topDegree).forEach { i1 in
             let i2 = descending ? i1 - 1 : i1 + 1
-            let d1 = boundaryMap(i1)
-            let d2 = boundaryMap(i2)
+            let b1 = chainBasis(i1)
+            let (d1, d2) = (boundaryMap(i1), boundaryMap(i2))
+            let (m1, m2) = (boundaryMatrix(i1), boundaryMatrix(i2))
             
             if debug {
                 print("----------")
                 print("C\(i1) -> C\(i2)")
                 print("----------")
-                print("C\(i1) : \(d1.domainBasis)\n")
-                for s in d1.domainBasis {
-                    print("\t", s, " -> ", d1.appliedTo( FreeModule(s) ))
-                }
-                print()
-                print("C\(i2) : \(d2.domainBasis)\n")
-                for s in d2.domainBasis {
-                    print("\t", s, " -> ", d2.appliedTo( FreeModule(s) ))
+                print("C\(i1) : \(b1)\n")
+                for s in b1 {
+                    let x = d1.appliedTo(s)
+                    let y = d2.appliedTo(x)
+                    print("\t\(s) ->\t\(x) ->\t\(y)")
                 }
                 print()
             }
             
-            assert(d1.codomainBasis == d2.domainBasis, "Bases of adjacent chains differ at: \(i1) -> \(i2)")
-            
-            let matrix = d2.matrix * d1.matrix
+            let matrix = m2 * m1
             assert(matrix.forAll { (_, _, a) in a == 0 } , "d\(i2)∘d\(i1) = \(matrix)")
-            
-            return true
         }
     }
- */
     
     public static func ==<chainType, A, R>(lhs: _ChainComplex<chainType, A, R>, rhs: _ChainComplex<chainType, A, R>) -> Bool {
         let offset = min(lhs.offset, rhs.offset)
@@ -123,22 +114,24 @@ public extension ChainComplex where chainType == Ascending {
 }
 
 /*
-public func ⊗<chainType, A, B, R>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Tensor<A, B>, R> {
-    typealias NewChainBasis = [Tensor<A, B>]
-    typealias NewBoundaryMap = FreeModuleHom<Tensor<A, B>, Tensor<A, B>, R>
-    
-    let offset = C1.offset + C2.offset
-    let degree = C1.topDegree + C2.topDegree
-    let chain = (offset ... degree).map{ (k) -> NewBoundaryMap in
-        (offset ... k).map { (i) -> NewBoundaryMap in
-            let (d1, d2) = (C1.boundaryMap(i), C2.boundaryMap(k - i))
-            let (I1, I2) = (FreeModuleHom<A, A, R>.identity(basis: d1.domainBasis),
-                            FreeModuleHom<B, B, R>.identity(basis: d2.domainBasis))
-            let e = R(intValue: (-1).pow(i))
-            return d1 ⊗ I2 + e * I1 ⊗ d2
-        }.sumAll()
+public extension ChainComplex {
+    public static func ⊗<chainType, A, B, R>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Tensor<A, B>, R> {
+        typealias NewChainBasis = [Tensor<A, B>]
+        typealias NewBoundaryMap = FreeModuleHom<Tensor<A, B>, Tensor<A, B>, R>
+        
+        let offset = C1.offset + C2.offset
+        let degree = C1.topDegree + C2.topDegree
+        let chain = (offset ... degree).map{ (k) -> (NewChainBasis, NewBoundaryMap, BoundaryMatrix) in
+            (offset ... k).map { (i) -> NewBoundaryMap in
+                let (d1, d2) = (C1.boundaryMap(i), C2.boundaryMap(k - i))
+                let (I1, I2) = (FreeModuleHom<A, A, R>.identity(basis: d1.domainBasis),
+                                FreeModuleHom<B, B, R>.identity(basis: d2.domainBasis))
+                let e = R(intValue: (-1).pow(i))
+                return d1 ⊗ I2 + e * I1 ⊗ d2
+                }.sumAll()
+        }
+        
+        return _ChainComplex<chainType, Tensor<A, B>, R>(chain)
     }
-    
-    return _ChainComplex<chainType, Tensor<A, B>, R>(chain)
 }
 */

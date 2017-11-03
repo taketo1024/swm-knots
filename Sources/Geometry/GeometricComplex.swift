@@ -33,7 +33,9 @@ public extension GeometricComplex {
     }
     
     public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, Cell, R> {
-        return FreeModuleHom.zero // FIXME!
+        return FreeModuleHom { s in
+            self.boundary(ofCell: s).map{ ($0, $1) }
+        }
     }
     
     public func boundaryMatrix<R: Ring>(_ i: Int) -> DynamicMatrix<R> {
@@ -88,11 +90,16 @@ public extension ChainComplex where chainType == Descending {
 }
 
 public extension CochainComplex where chainType == Ascending {
-    public convenience init<C: GeometricComplex>(_ K: C) where A == Dual<C.Cell> {
+    public convenience init<C: GeometricComplex>(_ K: C) where Dual<C.Cell> == A {
         let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             let basis = K.allCells(ofDim: i).map{ Dual($0) }
-            let map = BoundaryMap.zero // FIXME!
             let matrix = R(intValue: (-1).pow(i + 1)) * K.boundaryMatrix(i + 1).transposed
+            let map = BoundaryMap { d in
+                let j = K.allCells(ofDim: i).index(of: d.base)!
+                let basis = K.allCells(ofDim: i + 1).map{ Dual($0) }
+                let values = matrix.colArray(j)
+                return zip(basis, values).toArray()
+            }
             
             return (basis, map, matrix)
         }
