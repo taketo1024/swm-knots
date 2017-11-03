@@ -41,13 +41,15 @@ public extension GeometricComplex {
     public func boundaryMatrix<R: Ring>(_ i: Int) -> DynamicMatrix<R> {
         let from = (i <= dim) ? allCells(ofDim: i) : []
         let to = (i > 0) ? allCells(ofDim: i - 1) : []
+        return boundaryMatrix(from: from, to: to)
+    }
+    
+    internal func boundaryMatrix<R: Ring>(from: [Cell], to: [Cell]) -> DynamicMatrix<R> {
         let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toCell: toIndex]
-        
         let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
-            return boundary(ofCell: s).map{ (e: (Cell, R)) -> MatrixComponent<R> in
+            return boundary(ofCell: s).flatMap{ (e: (Cell, R)) -> MatrixComponent<R>? in
                 let (t, value) = e
-                let i = toIndex[t]!
-                return (i, j, value)
+                return toIndex[t].flatMap{ i in (i, j, value) }
             }
         }
         
@@ -76,17 +78,18 @@ public extension ChainComplex where chainType == Descending {
         self.init(chain)
     }
     
-    /* FIXME!
     public convenience init<C: GeometricComplex>(_ K: C, _ L: C) where A == C.Cell {
         let chain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             
-            let d: BoundaryMap = K.boundaryMap(i)
-            return d.restrictedTo(domainBasis:   K.allCells(ofDim: i).subtract(L.allCells(ofDim: i)),
-                                  codomainBasis: K.allCells(ofDim: i - 1).subtract(L.allCells(ofDim: i - 1)))
+            let from = K.allCells(ofDim: i).subtract(L.allCells(ofDim: i))
+            let to   = K.allCells(ofDim: i - 1).subtract(L.allCells(ofDim: i - 1))
+            let map: BoundaryMap = K.boundaryMap(i)
+            let matrix: BoundaryMatrix = K.boundaryMatrix(from: from, to: to)
+            
+            return (from, map, matrix)
         }
         self.init(chain)
     }
-    */
 }
 
 public extension CochainComplex where chainType == Ascending {
@@ -113,12 +116,10 @@ public extension Homology where chainType == Descending {
         self.init(c)
     }
 
-    /* FIXME!
     public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where C.Cell == A {
         let c: ChainComplex<A, R> = ChainComplex(K, L)
         self.init(c)
     }
- */
 }
 
 public extension Cohomology where chainType == Ascending {

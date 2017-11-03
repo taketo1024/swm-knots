@@ -66,7 +66,7 @@ public struct SimplicialComplex: GeometricComplex {
     }
     
     public func boundary<R: Ring>(ofCell s: Simplex) -> FreeModule<Simplex, R> {
-        return s.boundary() // FIXME crashes when `lowerBound` is specified.
+        return s.boundary()
     }
     
     public func star(_ v: Vertex) -> [Simplex] { // returns only maximal cells
