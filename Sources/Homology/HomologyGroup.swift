@@ -12,15 +12,15 @@ public protocol _HomologyGroup: _QuotientModule where CoeffRing: EuclideanRing {
     associatedtype chainType: ChainType
     associatedtype BasisElement: FreeModuleBase
     
-    var representative: FreeModule<CoeffRing, BasisElement> { get }
-    init(_ z: FreeModule<CoeffRing, BasisElement>)
+    var representative: FreeModule<BasisElement, CoeffRing> { get }
+    init(_ z: FreeModule<BasisElement, CoeffRing>)
     
     static var degree: Int { get }
     static func generator(_ i: Int) -> Self
-    static var info: HomologyGroupInfo<chainType, CoeffRing, BasisElement> { get }
+    static var info: HomologyGroupInfo<chainType, BasisElement, CoeffRing> { get }
 }
 
-public extension _HomologyGroup where Base == FreeModule<CoeffRing, BasisElement> {
+public extension _HomologyGroup where Base == FreeModule<BasisElement, CoeffRing> {
     public static var degree: Int {
         return info.degree
     }
@@ -48,25 +48,25 @@ public extension _HomologyGroup where Base == FreeModule<CoeffRing, BasisElement
     }
 }
 
-public typealias   DynamicHomologyGroup<R: EuclideanRing, A: FreeModuleBase, ID: _Int> = _DynamicHomologyGroup<Descending, R, A, ID>
-public typealias DynamicCohomologyGroup<R: EuclideanRing, A: FreeModuleBase, ID: _Int> = _DynamicHomologyGroup<Ascending,  R, A, ID>
+public typealias   DynamicHomologyGroup<A: FreeModuleBase, R: EuclideanRing, ID: _Int> = _DynamicHomologyGroup<Descending, A, R, ID>
+public typealias DynamicCohomologyGroup<A: FreeModuleBase, R: EuclideanRing, ID: _Int> = _DynamicHomologyGroup<Ascending,  A, R, ID>
 
-public struct _DynamicHomologyGroup<_chainType: ChainType, R: EuclideanRing, A: FreeModuleBase, _ID: _Int>: DynamicType, _HomologyGroup {
-    public typealias Base = FreeModule<R, A>
-    public typealias Sub  = FreeZeroModule<R, A> // used as stub
+public struct _DynamicHomologyGroup<_chainType: ChainType, A: FreeModuleBase, R: EuclideanRing, _ID: _Int>: DynamicType, _HomologyGroup {
+    public typealias Base = FreeModule<A, R>
+    public typealias Sub  = FreeZeroModule<A, R> // used as stub
     public typealias chainType = _chainType
     public typealias CoeffRing = R
     public typealias BasisElement = A
-    public typealias Info = HomologyGroupInfo<chainType, R, A>
+    public typealias Info = HomologyGroupInfo<chainType, A, R>
     public typealias ID = _ID
     
-    private let z: FreeModule<R, A>
-    public init(_ z: FreeModule<R, A>) {
+    private let z: FreeModule<A, R>
+    public init(_ z: FreeModule<A, R>) {
         // TODO check if z is a cycle.
         self.z = z
     }
     
-    public var representative: FreeModule<R, A> {
+    public var representative: FreeModule<A, R> {
         return z
     }
 }

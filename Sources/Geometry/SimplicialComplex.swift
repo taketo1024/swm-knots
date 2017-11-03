@@ -65,7 +65,7 @@ public struct SimplicialComplex: GeometricComplex {
         return cells
     }
     
-    public func boundary<R: Ring>(ofCell s: Simplex) -> FreeModule<R, Simplex> {
+    public func boundary<R: Ring>(ofCell s: Simplex) -> FreeModule<Simplex, R> {
         return s.boundary() // FIXME crashes when `lowerBound` is specified.
     }
     
@@ -235,7 +235,7 @@ public extension SimplicialComplex {
     }
     
     public func preferredOrientation<R: EuclideanRing>(type: R.Type) -> SimplicialChain<R>? {
-        let H = HomologyGroupInfo<Descending, R, Simplex>(
+        let H = HomologyGroupInfo<Descending, Simplex, R>(
             degree: dim,
             boundaryMap1: boundaryMap(dim),
             boundaryMap2: boundaryMap(dim + 1)

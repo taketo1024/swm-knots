@@ -8,12 +8,12 @@
 
 import Foundation
 
-public class HomologyGroupInfo<chainType: ChainType, R: EuclideanRing, A: FreeModuleBase>: TypeInfo {
+public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: TypeInfo {
     public typealias ChainBasis = [A]
     
     public enum Summand: CustomStringConvertible {
-        case Free(generator: FreeModule<R, A>)
-        case Tor(factor: R, generator: FreeModule<R, A>)
+        case Free(generator: FreeModule<A, R>)
+        case Tor(factor: R, generator: FreeModule<A, R>)
         
         public var isFree: Bool {
             switch self{
@@ -22,7 +22,7 @@ public class HomologyGroupInfo<chainType: ChainType, R: EuclideanRing, A: FreeMo
             }
         }
         
-        public var generator: FreeModule<R, A> {
+        public var generator: FreeModule<A, R> {
             switch self{
             case let .Free(g)  : return g
             case let .Tor(_, g): return g
@@ -46,15 +46,15 @@ public class HomologyGroupInfo<chainType: ChainType, R: EuclideanRing, A: FreeMo
     public let summands: [Summand]
     public let transitionMatrix: DynamicMatrix<R> // chain -> cycle
     
-    private typealias M = FreeModule<R, A>
+    private typealias M = FreeModule<A, R>
     
-    public convenience init(_ chainComplex: _ChainComplex<chainType, R, A>, degree: Int) {
+    public convenience init(_ chainComplex: _ChainComplex<chainType, A, R>, degree: Int) {
         let d1 = chainComplex.boundaryMap(degree)
         let d2 = chainComplex.boundaryMap(chainComplex.descending ? degree + 1 : degree - 1)
         self.init(degree: degree, boundaryMap1: d1, boundaryMap2: d2)
     }
     
-    public convenience init(degree: Int, boundaryMap1 d1: FreeModuleHom<R, A, A>, boundaryMap2 d2: FreeModuleHom<R, A, A>) {
+    public convenience init(degree: Int, boundaryMap1 d1: FreeModuleHom<A, A, R>, boundaryMap2 d2: FreeModuleHom<A, A, R>) {
         self.init(degree: degree, basis: d1.domainBasis, matrix1: d1.matrix, matrix2: d2.matrix)
     }
     
@@ -117,11 +117,11 @@ public class HomologyGroupInfo<chainType: ChainType, R: EuclideanRing, A: FreeMo
         return (newBasis, newTrans, diagonal)
     }
     
-    public func generator(_ i: Int) -> FreeModule<R, A> {
+    public func generator(_ i: Int) -> FreeModule<A, R> {
         return summands[i].generator
     }
     
-    public func components(_ z: FreeModule<R, A>) -> [R] {
+    public func components(_ z: FreeModule<A, R>) -> [R] {
         let chainComps = z.components(correspondingTo: chainBasis)
         let cycleComps = (transitionMatrix * ColVector(rows: chainComps.count, grid: chainComps)).colArray(0)
         
@@ -138,11 +138,11 @@ public class HomologyGroupInfo<chainType: ChainType, R: EuclideanRing, A: FreeMo
         return freeVals + torVals
     }
     
-    public func isHomologue(_ z1: FreeModule<R, A>, _ z2: FreeModule<R, A>) -> Bool {
+    public func isHomologue(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {
         return isNullHomologue(z1 - z2)
     }
     
-    public func isNullHomologue(_ z: FreeModule<R, A>) -> Bool {
+    public func isNullHomologue(_ z: FreeModule<A, R>) -> Bool {
         return components(z).forAll{ $0 == 0 }
     }
     

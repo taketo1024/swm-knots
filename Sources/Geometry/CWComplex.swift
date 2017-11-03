@@ -8,7 +8,7 @@
 
 import Foundation
 
-public typealias CWCellChain = FreeModule<IntegerNumber, CWCell>
+public typealias CWCellChain = FreeModule<CWCell, IntegerNumber>
 
 public struct CWCell: GeometricCell {
     public let id: Int
@@ -56,7 +56,7 @@ public struct CWComplex: GeometricComplex {
         return (0...dim).contains(i) ? cells[i] : []
     }
     
-    public func boundary<R: Ring>(ofCell s: CWCell) -> FreeModule<R, CWCell> {
+    public func boundary<R: Ring>(ofCell s: CWCell) -> FreeModule<CWCell, R> {
         return s.boundary.mapComponents{ R(intValue: $0) }
     }
     

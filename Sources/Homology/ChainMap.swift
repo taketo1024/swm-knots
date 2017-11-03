@@ -8,26 +8,26 @@
 
 import Foundation
 
-public typealias   ChainMap<R: Ring, A: FreeModuleBase, B: FreeModuleBase> = _ChainMap<Descending, R, A, B>
-public typealias CochainMap<R: Ring, A: FreeModuleBase, B: FreeModuleBase> = _ChainMap<Ascending,  R, A, B>
+public typealias   ChainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Descending, A, B, R>
+public typealias CochainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Ascending,  A, B, R>
 
-public struct _ChainMap<chainType: ChainType, R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Map {
-    public typealias Domain   = [FreeModule<R, A>]
-    public typealias Codomain = [FreeModule<R, B>]
+public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Map {
+    public typealias Domain   = [FreeModule<A, R>]
+    public typealias Codomain = [FreeModule<B, R>]
     
-    private let maps: [FreeModuleHom<R, A, B>]
+    private let maps: [FreeModuleHom<A, B, R>]
     
     public let offset: Int
     public let shift: Int
     
-    public init(_ maps: [FreeModuleHom<R, A, B>], offset: Int = 0, shift: Int = 0) {
+    public init(_ maps: [FreeModuleHom<A, B, R>], offset: Int = 0, shift: Int = 0) {
         self.maps = maps
         self.offset = offset
         self.shift = shift
     }
     
-    public init(from: _ChainComplex<chainType, R, A>, to: _ChainComplex<chainType, R, B>, shift: Int = 0, mapping f: (Int, A) -> [(R, B)]) {
-        let maps = (from.offset ... from.topDegree).map { i -> FreeModuleHom<R, A, B> in
+    public init(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, shift: Int = 0, mapping f: (Int, A) -> [(B, R)]) {
+        let maps = (from.offset ... from.topDegree).map { i -> FreeModuleHom<A, B, R> in
             FreeModuleHom(domainBasis: from.chainBasis(i), codomainBasis: to.chainBasis(i + shift), mapping: { f(i, $0) })
         }
         self.init(maps, offset: from.offset, shift: shift)
@@ -41,16 +41,16 @@ public struct _ChainMap<chainType: ChainType, R: Ring, A: FreeModuleBase, B: Fre
         return maps.count - offset - 1
     }
     
-    public func appliedTo(_ x: [FreeModule<R, A>]) -> [FreeModule<R, B>] {
+    public func appliedTo(_ x: [FreeModule<A, R>]) -> [FreeModule<B, R>] {
         fatalError()
     }
     
-    public func map(atIndex i: Int) -> FreeModuleHom<R, A, B> {
+    public func map(atIndex i: Int) -> FreeModuleHom<A, B, R> {
         return (offset ... topDegree).contains(i) ? maps[i - offset] : FreeModuleHom.zero
     }
     
     @discardableResult
-    public func assertChainMap(from: _ChainComplex<chainType, R, A>, to: _ChainComplex<chainType, R, B>, debug: Bool = false) -> Bool {
+    public func assertChainMap(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, debug: Bool = false) -> Bool {
         return (min(from.offset, to.offset) ... max(from.topDegree, to.topDegree)).forAll { i1 -> Bool in
             let i2 = descending ? i1 - 1 : i1 + 1
             

@@ -21,9 +21,9 @@ public protocol GeometricComplex: CustomStringConvertible {
     func allCells(ascending: Bool) -> [Cell]
     func skeleton(_ dim: Int) -> Self
     
-    func boundary<R: Ring>(ofCell: Cell) -> FreeModule<R, Cell> // override point
-    func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<R, Cell, Cell>
-    func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<R, Dual<Cell>, Dual<Cell>>
+    func boundary<R: Ring>(ofCell: Cell) -> FreeModule<Cell, R> // override point
+    func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, Cell, R>
+    func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Dual<Cell>, Dual<Cell>, R>
 }
 
 public extension GeometricComplex {
@@ -32,14 +32,14 @@ public extension GeometricComplex {
         return l.flatMap{ allCells(ofDim: $0) }
     }
     
-    public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<R, Cell, Cell> {
+    public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, Cell, R> {
         let from = allCells(ofDim: i)
         let to = (i > 0) ? allCells(ofDim: i - 1) : []
         let matrix: DynamicMatrix<R> = boundaryMapMatrix(i, from, to)
         return FreeModuleHom(domainBasis: from, codomainBasis: to, matrix: matrix)
     }
     
-    public func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<R, Dual<Cell>, Dual<Cell>> {
+    public func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Dual<Cell>, Dual<Cell>, R> {
         // Regard the basis of C_i as the dual basis of C^i.
         // Since <δf, c> = <f, ∂c>, the matrix is given by the transpose.
         
@@ -102,19 +102,19 @@ public extension CochainComplex where chainType == Ascending {
 
 public extension Homology where chainType == Descending {
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where C.Cell == A {
-        let c: ChainComplex<R, A> = ChainComplex(K)
+        let c: ChainComplex<A, R> = ChainComplex(K)
         self.init(c)
     }
 
     public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where C.Cell == A {
-        let c: ChainComplex<R, A> = ChainComplex(K, L)
+        let c: ChainComplex<A, R> = ChainComplex(K, L)
         self.init(c)
     }
 }
 
 public extension Cohomology where chainType == Ascending {
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
-        let c: CochainComplex<R, A> = CochainComplex(K)
+        let c: CochainComplex<A, R> = CochainComplex(K)
         self.init(c)
     }
 }

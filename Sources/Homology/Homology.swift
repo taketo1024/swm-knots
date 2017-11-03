@@ -8,23 +8,23 @@
 
 import Foundation
 
-public typealias   Homology<R: EuclideanRing, A: FreeModuleBase> = _Homology<Descending, R, A>
-public typealias Cohomology<R: EuclideanRing, A: FreeModuleBase> = _Homology<Ascending, R, A>
+public typealias   Homology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Descending, A, R>
+public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Ascending, A, R>
 
-public final class _Homology<chainType: ChainType, R: EuclideanRing, A: FreeModuleBase>: CustomStringConvertible {
-    public let chainComplex: _ChainComplex<chainType, R, A>
-    internal let groupInfos: [HomologyGroupInfo<chainType, R, A>]
+public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: CustomStringConvertible {
+    public let chainComplex: _ChainComplex<chainType, A, R>
+    internal let groupInfos: [HomologyGroupInfo<chainType, A, R>]
     
-    public subscript(i: Int) -> HomologyGroupInfo<chainType, R, A> {
+    public subscript(i: Int) -> HomologyGroupInfo<chainType, A, R> {
         return groupInfos[i]
     }
     
-    public init(chainComplex: _ChainComplex<chainType, R, A>, groups: [HomologyGroupInfo<chainType, R, A>]) {
+    public init(chainComplex: _ChainComplex<chainType, A, R>, groups: [HomologyGroupInfo<chainType, A, R>]) {
         self.chainComplex = chainComplex
         self.groupInfos = groups
     }
     
-    public convenience init(_ chainComplex: _ChainComplex<chainType, R, A>) {
+    public convenience init(_ chainComplex: _ChainComplex<chainType, A, R>) {
         let offset = chainComplex.offset
         let top = chainComplex.topDegree
         

@@ -12,12 +12,12 @@ public protocol ChainType {}
 public struct   Descending : ChainType {}  // for ChainComplex   / Homology
 public struct   Ascending  : ChainType {}  // for CochainComplex / Cohomology
 
-public typealias   ChainComplex<R: Ring, A: FreeModuleBase> = _ChainComplex<Descending, R, A>
-public typealias CochainComplex<R: Ring, A: FreeModuleBase> = _ChainComplex<Ascending,  R, A>
+public typealias   ChainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Descending, A, R>
+public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Ascending,  A, R>
 
-public final class _ChainComplex<chainType: ChainType, R: Ring, A: FreeModuleBase>: Equatable, CustomStringConvertible {
+public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
     public typealias ChainBasis = [A]
-    public typealias BoundaryMap = FreeModuleHom<R, A, A>
+    public typealias BoundaryMap = FreeModuleHom<A, A, R>
     
     internal let chain: [BoundaryMap]
     public  let offset: Int
@@ -62,7 +62,7 @@ public final class _ChainComplex<chainType: ChainType, R: Ring, A: FreeModuleBas
         }
     }
     
-    public func shifted(_ d: Int) -> _ChainComplex<chainType, R, A> {
+    public func shifted(_ d: Int) -> _ChainComplex<chainType, A, R> {
         return _ChainComplex.init(chain, offset: offset + d)
     }
     
@@ -98,7 +98,7 @@ public final class _ChainComplex<chainType: ChainType, R: Ring, A: FreeModuleBas
         }
     }
     
-    public static func ==<chainType, R, A>(lhs: _ChainComplex<chainType, R, A>, rhs: _ChainComplex<chainType, R, A>) -> Bool {
+    public static func ==<chainType, A, R>(lhs: _ChainComplex<chainType, A, R>, rhs: _ChainComplex<chainType, A, R>) -> Bool {
         let offset = min(lhs.offset, rhs.offset)
         let degree = max(lhs.topDegree, rhs.topDegree)
         return (offset ... degree).forAll { i in lhs.boundaryMap(i) == rhs.boundaryMap(i) }
@@ -110,34 +110,34 @@ public final class _ChainComplex<chainType: ChainType, R: Ring, A: FreeModuleBas
 }
 
 public extension ChainComplex where chainType == Descending {
-    public var dual: CochainComplex<R, A> {
+    public var dual: CochainComplex<A, R> {
         return CochainComplex(chain.reversed(), offset: offset)
     }
 }
 
 public extension ChainComplex where chainType == Ascending {
-    public var dual: ChainComplex<R, A> {
+    public var dual: ChainComplex<A, R> {
         return ChainComplex(chain.reversed(), offset: offset)
     }
 }
 
-public func ⊗<chainType, R, A, B>(C1: _ChainComplex<chainType, R, A>, C2: _ChainComplex<chainType, R, B>) -> _ChainComplex<chainType, R, Tensor<A, B>> {
+public func ⊗<chainType, A, B, R>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Tensor<A, B>, R> {
     typealias NewChainBasis = [Tensor<A, B>]
-    typealias NewBoundaryMap = FreeModuleHom<R, Tensor<A, B>, Tensor<A, B>>
+    typealias NewBoundaryMap = FreeModuleHom<Tensor<A, B>, Tensor<A, B>, R>
     
     let offset = C1.offset + C2.offset
     let degree = C1.topDegree + C2.topDegree
     let chain = (offset ... degree).map{ (k) -> NewBoundaryMap in
         (offset ... k).map { (i) -> NewBoundaryMap in
             let (d1, d2) = (C1.boundaryMap(i), C2.boundaryMap(k - i))
-            let (I1, I2) = (FreeModuleHom<R, A, A>.identity(basis: d1.domainBasis),
-                            FreeModuleHom<R, B, B>.identity(basis: d2.domainBasis))
+            let (I1, I2) = (FreeModuleHom<A, A, R>.identity(basis: d1.domainBasis),
+                            FreeModuleHom<B, B, R>.identity(basis: d2.domainBasis))
             let e = R(intValue: (-1).pow(i))
             return d1 ⊗ I2 + e * I1 ⊗ d2
         }.sumAll()
     }
     
-    return _ChainComplex<chainType, R, Tensor<A, B>>(chain)
+    return _ChainComplex<chainType, Tensor<A, B>, R>(chain)
 }
 
 

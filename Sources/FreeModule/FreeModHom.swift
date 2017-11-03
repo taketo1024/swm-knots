@@ -1,11 +1,11 @@
 import Foundation
 
-public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: ModuleHom {
+public struct FreeModuleHom<A: FreeModuleBase, B: FreeModuleBase, R: Ring>: ModuleHom {
     public typealias CoeffRing = R
     
-    public typealias Domain = FreeModule<R, A>
+    public typealias Domain = FreeModule<A, R>
     public typealias DomainBasis = [A]
-    public typealias Codomain = FreeModule<R, B>
+    public typealias Codomain = FreeModule<B, R>
     public typealias CodomainBasis = [B]
     
     public let domainBasis: DomainBasis
@@ -19,9 +19,9 @@ public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Modu
         self.matrix = matrix.asDynamic
     }
     
-    public init(domainBasis: DomainBasis, codomainBasis: CodomainBasis, mapping: (A) -> [(R, B)]) {
+    public init(domainBasis: DomainBasis, codomainBasis: CodomainBasis, mapping: (A) -> [(B, R)]) {
         let components = domainBasis.enumerated().flatMap{ (j, a) -> [MatrixComponent<R>] in
-            mapping(a).map { (r, b) -> MatrixComponent<R> in
+            mapping(a).map { (b, r) -> MatrixComponent<R> in
                 let i = codomainBasis.index(of: b)!
                 return (i, j, r)
             }
@@ -34,31 +34,31 @@ public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Modu
         let v: ColVector<R, Dynamic> = ColVector(rows: domainBasis.count) {(i, _) -> R in
             m[domainBasis[i]]
         }
-        return FreeModule<R, B>(basis: codomainBasis, components: (matrix * v).colArray(0))
+        return FreeModule<B, R>(basis: codomainBasis, components: (matrix * v).colArray(0))
     }
     
-    public func restrictedTo(domainBasis d: DomainBasis) -> FreeModuleHom<R, A, B> {
+    public func restrictedTo(domainBasis d: DomainBasis) -> FreeModuleHom<A, B, R> {
         return restrictedTo(domainBasis: d, codomainBasis: codomainBasis)
     }
     
-    public func restrictedTo(domainBasis d1: DomainBasis, codomainBasis d2: CodomainBasis) -> FreeModuleHom<R, A, B> {
-        let map = FreeModuleHom<R, A, B>.matrixMap(self)
+    public func restrictedTo(domainBasis d1: DomainBasis, codomainBasis d2: CodomainBasis) -> FreeModuleHom<A, B, R> {
+        let map = FreeModuleHom<A, B, R>.matrixMap(self)
         let matrix = DynamicMatrix<R>(rows: d2.count, cols: d1.count) { (i, j) -> R in
             map(d1[j], d2[i])
         }
         return FreeModuleHom(domainBasis: d1, codomainBasis: d2, matrix: matrix)
     }
     
-    public static var zero: FreeModuleHom<R, A, B> {
+    public static var zero: FreeModuleHom<A, B, R> {
         return FreeModuleHom(domainBasis: [], codomainBasis: [], matrix: Matrix<R, _0, _0>.zero)
     }
     
-    public static func identity(basis: DomainBasis) -> FreeModuleHom<R, A, A> {
+    public static func identity(basis: DomainBasis) -> FreeModuleHom<A, A, R> {
         let I = DynamicMatrix<R>(rows: basis.count, cols: basis.count) { (i, j) -> R in (i == j) ? 1 : 0 }
-        return FreeModuleHom<R, A, A>(domainBasis: basis, codomainBasis: basis, matrix: I)
+        return FreeModuleHom<A, A, R>(domainBasis: basis, codomainBasis: basis, matrix: I)
     }
     
-    public static func ==(lhs: FreeModuleHom<R, A, B>, rhs: FreeModuleHom<R, A, B>) -> Bool {
+    public static func ==(lhs: FreeModuleHom<A, B, R>, rhs: FreeModuleHom<A, B, R>) -> Bool {
         if (lhs.domainBasis == rhs.domainBasis) && (lhs.codomainBasis == rhs.codomainBasis) && (lhs.matrix == rhs.matrix) {
             return true
             
@@ -73,7 +73,7 @@ public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Modu
         return false
     }
     
-    public static func +(f: FreeModuleHom<R, A, B>, g: FreeModuleHom<R, A, B>) -> FreeModuleHom<R, A, B> {
+    public static func +(f: FreeModuleHom<A, B, R>, g: FreeModuleHom<A, B, R>) -> FreeModuleHom<A, B, R> {
         // case: the dom/codom of f and g are same.
         if f.domainBasis == g.domainBasis && f.codomainBasis == g.codomainBasis {
             return FreeModuleHom(domainBasis: f.domainBasis, codomainBasis: f.codomainBasis, matrix: f.matrix + g.matrix)
@@ -113,19 +113,19 @@ public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Modu
         return FreeModuleHom(domainBasis: domain, codomainBasis: codomain, matrix: matrix)
     }
     
-    public prefix static func -(f: FreeModuleHom<R, A, B>) -> FreeModuleHom<R, A, B> {
+    public prefix static func -(f: FreeModuleHom<A, B, R>) -> FreeModuleHom<A, B, R> {
         return FreeModuleHom(domainBasis: f.domainBasis, codomainBasis: f.codomainBasis, matrix: -f.matrix)
     }
     
-    public static func *(r: R, f: FreeModuleHom<R, A, B>) -> FreeModuleHom<R, A, B> {
+    public static func *(r: R, f: FreeModuleHom<A, B, R>) -> FreeModuleHom<A, B, R> {
         return FreeModuleHom(domainBasis: f.domainBasis, codomainBasis: f.codomainBasis, matrix: r * f.matrix)
     }
     
-    public static func *(f: FreeModuleHom<R, A, B>, r: R) -> FreeModuleHom<R, A, B> {
+    public static func *(f: FreeModuleHom<A, B, R>, r: R) -> FreeModuleHom<A, B, R> {
         return FreeModuleHom(domainBasis: f.domainBasis, codomainBasis: f.codomainBasis, matrix: f.matrix * r)
     }
     
-    public static func ∘<C>(g: FreeModuleHom<R, B, C>, f: FreeModuleHom<R, A, B>) -> FreeModuleHom<R, A, C> {
+    public static func ∘<C>(g: FreeModuleHom<B, C, R>, f: FreeModuleHom<A, B, R>) -> FreeModuleHom<A, C, R> {
         let p = DynamicMatrix<R>(rows: g.matrix.cols, cols: f.matrix.rows, components: f.codomainBasis.flatMap { (b: B) -> MatrixComponent<R>? in
             
             let j = f.codomainBasis.index(of: b)!
@@ -135,10 +135,10 @@ public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Modu
                 return nil
             }
         })
-        return FreeModuleHom<R, A, C>(domainBasis: f.domainBasis, codomainBasis: g.codomainBasis, matrix: g.matrix * p * f.matrix)
+        return FreeModuleHom<A, C, R>(domainBasis: f.domainBasis, codomainBasis: g.codomainBasis, matrix: g.matrix * p * f.matrix)
     }
     
-    public static func ⊗<C, D>(f: FreeModuleHom<R, A, B>, g: FreeModuleHom<R, C, D>) -> FreeModuleHom<R, Tensor<A, C>, Tensor<B, D>> {
+    public static func ⊗<C, D>(f: FreeModuleHom<A, B, R>, g: FreeModuleHom<C, D, R>) -> FreeModuleHom<Tensor<A, C>, Tensor<B, D>, R> {
         let (k, l) = (g.codomainBasis.count, g.domainBasis.count)
         
         let domain = f.domainBasis.allCombinations(with: g.domainBasis).map{ (a, b) in a⊗b }
@@ -146,7 +146,7 @@ public struct FreeModuleHom<R: Ring, A: FreeModuleBase, B: FreeModuleBase>: Modu
         let matrix = DynamicMatrix<R>(rows: codomain.count, cols: domain.count) { (i, j) -> R in
             f.matrix[i / k, j / l] * g.matrix[i % k, j % l]
         }
-        return FreeModuleHom<R, Tensor<A, C>, Tensor<B, D>>(domainBasis: domain, codomainBasis: codomain, matrix: matrix)
+        return FreeModuleHom<Tensor<A, C>, Tensor<B, D>, R>(domainBasis: domain, codomainBasis: codomain, matrix: matrix)
     }
     
     public var hashValue: Int {
