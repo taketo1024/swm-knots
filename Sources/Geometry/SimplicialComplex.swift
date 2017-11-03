@@ -237,8 +237,9 @@ public extension SimplicialComplex {
     public func preferredOrientation<R: EuclideanRing>(type: R.Type) -> SimplicialChain<R>? {
         let H = HomologyGroupInfo<Descending, Simplex, R>(
             degree: dim,
-            boundaryMap1: boundaryMap(dim),
-            boundaryMap2: boundaryMap(dim + 1)
+            basis: allCells(ofDim: dim),
+            matrix1: boundaryMatrix(dim),
+            matrix2: boundaryMatrix(dim + 1)
         )
         
         if H.rank == 1 {

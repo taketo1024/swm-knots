@@ -18,12 +18,13 @@ public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Asce
 public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
     public typealias ChainBasis = [A]
     public typealias BoundaryMap = FreeModuleHom<A, A, R>
+    public typealias BoundaryMatrix = DynamicMatrix<R>
     
-    internal let chain: [BoundaryMap]
+    internal let chain: [(basis: ChainBasis, map: BoundaryMap, matrix: BoundaryMatrix)]
     public  let offset: Int
     
     // root initializer
-    public init(_ chain: [BoundaryMap], offset: Int = 0) {
+    public init(_ chain: [(ChainBasis, BoundaryMap, BoundaryMatrix)], offset: Int = 0) {
         self.chain = chain
         self.offset = offset
     }
@@ -37,28 +38,26 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
     }
     
     public func chainBasis(_ i: Int) -> ChainBasis {
-        return (offset ... topDegree).contains(i) ? chain[i - offset].domainBasis : []
+        return (offset ... topDegree).contains(i) ? chain[i - offset].basis : []
     }
     
     public func boundaryMap(_ i: Int) -> BoundaryMap {
+        return (offset ... topDegree).contains(i) ? chain[i - offset].map :BoundaryMap.zero
+    }
+    
+    public func boundaryMatrix(_ i: Int) -> BoundaryMatrix {
         switch i {
         case (offset ... topDegree):
-            return chain[i - offset]
+            return chain[i - offset].matrix
             
         case topDegree + 1 where descending:
-            let basis = chainBasis(topDegree)
-            return BoundaryMap(domainBasis: [],
-                               codomainBasis: basis,
-                               matrix: DynamicMatrix<R>(rows: basis.count, cols: 0, grid: []))
+            return BoundaryMatrix(rows: chainBasis(topDegree).count, cols: 0)
             
         case offset - 1 where !descending:
-            let basis = chainBasis(offset)
-            return BoundaryMap(domainBasis: [],
-                               codomainBasis: basis,
-                               matrix: DynamicMatrix<R>(rows: basis.count, cols: 0, grid: []))
+            return BoundaryMatrix(rows: chainBasis(offset).count, cols: 0)
             
         default:
-            return BoundaryMap.zero
+            return BoundaryMatrix(rows: 0, cols: 0)
         }
     }
     
@@ -66,6 +65,7 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
         return _ChainComplex.init(chain, offset: offset + d)
     }
     
+    /* FIXME!
     @discardableResult
     public func assertComplex(debug: Bool = false) -> Bool {
         return (offset ... topDegree).forAll { i1 -> Bool in
@@ -97,6 +97,7 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
             return true
         }
     }
+ */
     
     public static func ==<chainType, A, R>(lhs: _ChainComplex<chainType, A, R>, rhs: _ChainComplex<chainType, A, R>) -> Bool {
         let offset = min(lhs.offset, rhs.offset)
@@ -121,6 +122,7 @@ public extension ChainComplex where chainType == Ascending {
     }
 }
 
+/*
 public func ⊗<chainType, A, B, R>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Tensor<A, B>, R> {
     typealias NewChainBasis = [Tensor<A, B>]
     typealias NewBoundaryMap = FreeModuleHom<Tensor<A, B>, Tensor<A, B>, R>
@@ -139,5 +141,4 @@ public func ⊗<chainType, A, B, R>(C1: _ChainComplex<chainType, A, R>, C2: _Cha
     
     return _ChainComplex<chainType, Tensor<A, B>, R>(chain)
 }
-
-
+*/

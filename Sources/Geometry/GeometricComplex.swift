@@ -23,7 +23,7 @@ public protocol GeometricComplex: CustomStringConvertible {
     
     func boundary<R: Ring>(ofCell: Cell) -> FreeModule<Cell, R> // override point
     func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, Cell, R>
-    func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Dual<Cell>, Dual<Cell>, R>
+    func boundaryMatrix<R: Ring>(_ i: Int) -> DynamicMatrix<R>
 }
 
 public extension GeometricComplex {
@@ -33,23 +33,12 @@ public extension GeometricComplex {
     }
     
     public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, Cell, R> {
-        let from = allCells(ofDim: i)
+        return FreeModuleHom.zero // FIXME!
+    }
+    
+    public func boundaryMatrix<R: Ring>(_ i: Int) -> DynamicMatrix<R> {
+        let from = (i <= dim) ? allCells(ofDim: i) : []
         let to = (i > 0) ? allCells(ofDim: i - 1) : []
-        let matrix: DynamicMatrix<R> = boundaryMapMatrix(i, from, to)
-        return FreeModuleHom(domainBasis: from, codomainBasis: to, matrix: matrix)
-    }
-    
-    public func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Dual<Cell>, Dual<Cell>, R> {
-        // Regard the basis of C_i as the dual basis of C^i.
-        // Since <δf, c> = <f, ∂c>, the matrix is given by the transpose.
-        
-        let from = allCells(ofDim: i)
-        let to = (i < dim) ? allCells(ofDim: i + 1) : []
-        let matrix = R(intValue: (-1).pow(i + 1)) * boundaryMapMatrix(i + 1, to, from).transposed
-        return FreeModuleHom(domainBasis: from.map{ Dual($0) }, codomainBasis: to.map{ Dual($0) }, matrix: matrix)
-    }
-    
-    private func boundaryMapMatrix<R: Ring>(_ i: Int, _ from: [Cell], _ to : [Cell]) -> DynamicMatrix<R> {
         let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toCell: toIndex]
         
         let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
@@ -79,23 +68,34 @@ public extension GeometricComplex {
 
 public extension ChainComplex where chainType == Descending {
     public convenience init<C: GeometricComplex>(_ K: C) where A == C.Cell {
-        let chain = (0 ... K.dim).map{ (i) -> BoundaryMap in K.boundaryMap(i) }
+        let chain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
+            (K.allCells(ofDim: i), K.boundaryMap(i), K.boundaryMatrix(i))
+        }
         self.init(chain)
     }
     
+    /* FIXME!
     public convenience init<C: GeometricComplex>(_ K: C, _ L: C) where A == C.Cell {
-        let chain = (0 ... K.dim).map{ (i) -> BoundaryMap in
+        let chain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
+            
             let d: BoundaryMap = K.boundaryMap(i)
             return d.restrictedTo(domainBasis:   K.allCells(ofDim: i).subtract(L.allCells(ofDim: i)),
                                   codomainBasis: K.allCells(ofDim: i - 1).subtract(L.allCells(ofDim: i - 1)))
         }
         self.init(chain)
     }
+    */
 }
 
 public extension CochainComplex where chainType == Ascending {
     public convenience init<C: GeometricComplex>(_ K: C) where A == Dual<C.Cell> {
-        let cochain = (0 ... K.dim).map{ (i) -> BoundaryMap in K.coboundaryMap(i) }
+        let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
+            let basis = K.allCells(ofDim: i).map{ Dual($0) }
+            let map = BoundaryMap.zero // FIXME!
+            let matrix = R(intValue: (-1).pow(i + 1)) * K.boundaryMatrix(i + 1).transposed
+            
+            return (basis, map, matrix)
+        }
         self.init(cochain)
     }
 }
@@ -106,10 +106,12 @@ public extension Homology where chainType == Descending {
         self.init(c)
     }
 
+    /* FIXME!
     public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where C.Cell == A {
         let c: ChainComplex<A, R> = ChainComplex(K, L)
         self.init(c)
     }
+ */
 }
 
 public extension Cohomology where chainType == Ascending {

@@ -48,17 +48,11 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
     
     private typealias M = FreeModule<A, R>
     
-    public convenience init(_ chainComplex: _ChainComplex<chainType, A, R>, degree: Int) {
-        let d1 = chainComplex.boundaryMap(degree)
-        let d2 = chainComplex.boundaryMap(chainComplex.descending ? degree + 1 : degree - 1)
-        self.init(degree: degree, boundaryMap1: d1, boundaryMap2: d2)
+    public convenience init(_ C: _ChainComplex<chainType, A, R>, degree i: Int) {
+        self.init(degree: i, basis: C.chainBasis(i), matrix1: C.boundaryMatrix(i), matrix2: C.boundaryMatrix(C.descending ? i + 1 : i - 1))
     }
     
-    public convenience init(degree: Int, boundaryMap1 d1: FreeModuleHom<A, A, R>, boundaryMap2 d2: FreeModuleHom<A, A, R>) {
-        self.init(degree: degree, basis: d1.domainBasis, matrix1: d1.matrix, matrix2: d2.matrix)
-    }
-    
-    internal init<n0, n1, n2>(degree: Int, basis: ChainBasis, matrix1 A1: Matrix<n0, n1, R>, matrix2 A2: Matrix<n1, n2, R>) {
+    internal init<n0, n1, n2>(degree i: Int, basis: ChainBasis, matrix1 A1: Matrix<n0, n1, R>, matrix2 A2: Matrix<n1, n2, R>) {
         // Z_i : the i-th Cycle group
         let Z = A1.kernelMatrix
         let (n, k) = (Z.rows, Z.cols)
@@ -83,7 +77,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
             .Free(generator: newBasis[j])
         }
         
-        self.degree = degree
+        self.degree = i
         self.chainBasis = basis
         
         self.rank = freePart.count
