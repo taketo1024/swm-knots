@@ -103,6 +103,33 @@ public struct SimplicialComplex: GeometricComplex {
     }
 }
 
+public struct SimplicialMap: Map {
+    public typealias Domain = SimplicialComplex
+    public typealias Codomain = SimplicialComplex
+    
+    private let map: [Vertex: Vertex]
+    
+    public init(_ map: [Vertex: Vertex]) {
+        self.map = map
+    }
+    
+    public init<S: Sequence>(_ pairs: S) where S.Element == (Vertex, Vertex) {
+        self.init(Dictionary(pairs: pairs))
+    }
+    
+    public func appliedTo(_ x: Vertex) -> Vertex {
+        return map[x]!
+    }
+    
+    public func appliedTo(_ s: Simplex) -> Simplex {
+        return Simplex(s.vertices.map{ self.appliedTo($0) }.unique())
+    }
+    
+    public func appliedTo(_ K: SimplicialComplex) -> SimplicialComplex {
+        return SimplicialComplex(K.allCells().map{ self.appliedTo($0) }, generateFaces: false)
+    }
+}
+
 public extension SimplicialComplex {
     static func point() -> SimplicialComplex {
         return SimplicialComplex.ball(dim: 0)
