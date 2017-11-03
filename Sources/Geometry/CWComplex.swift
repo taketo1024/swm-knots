@@ -106,8 +106,8 @@ public extension CWComplex {
         } else {
             var C = CWComplex.sphere(dim: i - 1)
             let (d1, d2) = (C.cells[i - 1][0], C.cells[i - 1][1])
-            let cycle = (i == 1) ? CWCellChain([(-1, d1), (1, d2)])
-                                 : CWCellChain([( 1, d1), (1, d2)])
+            let cycle = (i == 1) ? CWCellChain([(d1, -1), (d2, 1)])
+                                 : CWCellChain([(d1,  1), (d2, 1)])
             C.appendCell(ofDim: i, attachedTo: cycle)
             C.appendCell(ofDim: i, attachedTo: -cycle)
             return C

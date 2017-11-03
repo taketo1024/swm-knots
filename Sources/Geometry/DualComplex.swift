@@ -115,14 +115,14 @@ public struct DualSimplicialComplex: GeometricComplex {
         let z = s.chain.boundary()
         let dCells = allCells(ofDim: s.dim - 1)
         
-        let elements = K.cofaces(ofCell: s.base).map{ (t: Simplex) -> (R, DualSimplicialCell) in
+        let elements = K.cofaces(ofCell: s.base).map{ (t: Simplex) -> (DualSimplicialCell, R) in
             let b = SdK.barycenterOf(t)!
             let dCell = dCells.first{ $0.center == b}!
             
             let t0 = dCell.chain.basis[0] // take any simplex to detect orientation
             let e = R(intValue: (dCell.chain[t0] == z[t0]) ? 1 : -1)
             
-            return (e, dCell)
+            return (dCell, e)
         }
         
         return FreeModule(elements)

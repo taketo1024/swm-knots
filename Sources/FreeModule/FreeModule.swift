@@ -21,15 +21,15 @@ public struct FreeModule<R: Ring, A: FreeModuleBase>: Module, Sequence {
         self.init(basis: basis, elements: Dictionary(pairs: zip(basis, components)))
     }
     
-    public init<S: Sequence>(_ elements: S) where S.Element == (R, A) {
-        let basis = elements.map{$0.1}
-        let dict = Dictionary(pairs: elements.map{($0.1, $0.0)})
+    public init<S: Sequence>(_ elements: S) where S.Element == (A, R) {
+        let basis = elements.map{ $0.0 }
+        let dict = Dictionary(pairs: elements)
         self.init(basis: basis, elements: dict)
     }
     
     // generates a basis element
     public init(_ a: A) {
-        self.init([(1, a)])
+        self.init([(a, 1)])
     }
     
     public subscript(a: A) -> R {
@@ -93,9 +93,9 @@ public struct FreeModule<R: Ring, A: FreeModuleBase>: Module, Sequence {
     
     public static func generateElements<n, m>(basis: [A], matrix A: Matrix<R, n, m>) -> [FreeModule<R, A>] {
         return (0 ..< A.cols).map { j in
-            let elements = (0 ..< A.rows).flatMap { i -> (R, A)? in
+            let elements = (0 ..< A.rows).flatMap { i -> (A, R)? in
                 let a = A[i, j]
-                return (a != 0) ? (a, basis[i]) : nil
+                return (a != 0) ? (basis[i], a) : nil
             }
             return FreeModule<R, A>(elements)
         }
@@ -182,8 +182,8 @@ public func ⊗<A, B>(a: A, b: B) -> Tensor<A, B> {
 }
 
 public func ⊗<R, A, B>(x: FreeModule<R, A>, y: FreeModule<R, B>) -> FreeModule<R, Tensor<A, B>> {
-    let elements = x.basis.allCombinations(with: y.basis).map{ (a, b) -> (R, Tensor<A, B>) in
-        return (x[a] * y[b], a⊗b)
+    let elements = x.basis.allCombinations(with: y.basis).map{ (a, b) -> (Tensor<A, B>, R) in
+        return (a ⊗ b, x[a] * y[b])
     }
     return FreeModule(elements)
 }

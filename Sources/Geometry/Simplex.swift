@@ -92,9 +92,9 @@ public struct Simplex: GeometricCell {
     }
     
     public func boundary<R: Ring>() -> SimplicialChain<R> {
-        let values: [(R, Simplex)] = faces().enumerated().map { (i, t) -> (R, Simplex) in
+        let values: [(Simplex, R)] = faces().enumerated().map { (i, t) -> (Simplex, R) in
             let e = R(intValue: (-1).pow(i))
-            return (e, t)
+            return (t, e)
         }
         return SimplicialChain(values)
     }
@@ -118,10 +118,10 @@ public extension Vertex {
     }
     
     public func join<R>(_ chain: SimplicialChain<R>) -> SimplicialChain<R> {
-        return SimplicialChain(chain.basis.map{ (s) -> (R, Simplex) in
+        return SimplicialChain(chain.basis.map{ (s) -> (Simplex, R) in
             let t = self.join(s)
             let e = R(intValue: (-1).pow(t.vertices.index(of: self)!))
-            return (e * chain[s], t)
+            return (t, e * chain[s])
         })
     }
 }
@@ -164,14 +164,14 @@ public extension SimplicialCochain where A == Dual<Simplex> {
     public func cup(_ f: SimplicialCochain<R>) -> SimplicialCochain<R> {
         typealias D = Dual<Simplex>
         let pairs = self.basis.allCombinations(with: f.basis)
-        let elements: [(R, D)] = pairs.flatMap{ (d1, d2) -> (R, D)? in
+        let elements: [(D, R)] = pairs.flatMap{ (d1, d2) -> (D, R)? in
             let (s1, s2) = (d1.base, d2.base)
             let (n1, n2) = (s1.dim, s2.dim)
             
             let s = Simplex(s1.vSet.union(s2.vSet))
             if (s1.vertices.last! == s2.vertices.first!) && (s.vertices == s1.vertices + s2.vertices.dropFirst()) {
                 let e = R(intValue: (-1).pow(n1 * n2))
-                return (e * self[d1] * f[d2], Dual(s))
+                return (Dual(s), e * self[d1] * f[d2])
             } else {
                 return nil
             }
