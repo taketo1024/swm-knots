@@ -24,9 +24,6 @@ public protocol GeometricComplex: CustomStringConvertible {
     func boundary<R: Ring>(ofCell: Cell) -> FreeModule<R, Cell> // override point
     func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<R, Cell, Cell>
     func coboundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<R, Dual<Cell>, Dual<Cell>>
-    
-    func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<R, Cell>
-    func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<R, Dual<Cell>>
 }
 
 public extension GeometricComplex {
@@ -80,45 +77,45 @@ public extension GeometricComplex {
     }
 }
 
-public extension GeometricComplex {
-    public func chainComplex<R: Ring>(type: R.Type) -> ChainComplex<R, Cell> {
-        typealias BoundaryMap = ChainComplex<R, Cell>.BoundaryMap
-        let chain = (0 ... dim).map{ (i) -> BoundaryMap in boundaryMap(i) }
-        return ChainComplex(chain)
+public extension ChainComplex where chainType == Descending {
+    public convenience init<C: GeometricComplex>(_ K: C) where A == C.Cell {
+        let chain = (0 ... K.dim).map{ (i) -> BoundaryMap in K.boundaryMap(i) }
+        self.init(chain)
     }
     
-    public func cochainComplex<R: Ring>(type: R.Type) -> CochainComplex<R, Dual<Cell>> {
-        typealias CoboundaryMap = CochainComplex<R, Dual<Cell>>.BoundaryMap
-        let cochain = (0 ... dim).map{ (i) -> CoboundaryMap in coboundaryMap(i) }
-        return CochainComplex(cochain)
-    }
-    
-    public func chainComplex<R: Ring>(relativeTo sub: Self, type: R.Type) -> ChainComplex<R, Cell> {
-        typealias BoundaryMap = ChainComplex<R, Cell>.BoundaryMap
-        let chain = (0 ... dim).map{ (i) -> BoundaryMap in
-            let d: BoundaryMap = boundaryMap(i)
-            return d.restrictedTo(domainBasis:   allCells(ofDim: i).subtract(sub.allCells(ofDim: i)),
-                                  codomainBasis: allCells(ofDim: i - 1).subtract(sub.allCells(ofDim: i - 1)))
+    public convenience init<C: GeometricComplex>(_ K: C, _ L: C) where A == C.Cell {
+        let chain = (0 ... K.dim).map{ (i) -> BoundaryMap in
+            let d: BoundaryMap = K.boundaryMap(i)
+            return d.restrictedTo(domainBasis:   K.allCells(ofDim: i).subtract(L.allCells(ofDim: i)),
+                                  codomainBasis: K.allCells(ofDim: i - 1).subtract(L.allCells(ofDim: i - 1)))
         }
-        return ChainComplex(chain)
+        self.init(chain)
+    }
+}
+
+public extension CochainComplex where chainType == Ascending {
+    public convenience init<C: GeometricComplex>(_ K: C) where A == Dual<C.Cell> {
+        let cochain = (0 ... K.dim).map{ (i) -> BoundaryMap in K.coboundaryMap(i) }
+        self.init(cochain)
     }
 }
 
 public extension Homology where chainType == Descending {
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where C.Cell == A {
-        let c: ChainComplex<R, A> = K.chainComplex(type: R.self)
+        let c: ChainComplex<R, A> = ChainComplex(K)
         self.init(c)
     }
 
     public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where C.Cell == A {
-        let c: ChainComplex<R, A> = K.chainComplex(relativeTo: L, type: R.self)
+        let c: ChainComplex<R, A> = ChainComplex(K, L)
         self.init(c)
     }
 }
 
 public extension Cohomology where chainType == Ascending {
-    public convenience init<C: GeometricComplex>(_ s: C, _ type: R.Type) where Dual<C.Cell> == A {
-        let c: CochainComplex<R, A>  = s.cochainComplex(type: R.self)
+    public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
+        let c: CochainComplex<R, A> = CochainComplex(K)
         self.init(c)
     }
 }
+
