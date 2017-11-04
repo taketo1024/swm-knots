@@ -99,7 +99,7 @@ public struct SimplicialComplex: GeometricComplex {
             cells[s.dim].append(s)
         }
         
-        return cells
+        return cells.map { list in list.sorted() }
     }
 }
 
@@ -171,7 +171,8 @@ public extension SimplicialComplex {
     }
     
     static func torus(dim: Int) -> SimplicialComplex {
-        return (1 ..< dim).reduce(SimplicialComplex.circle()) { (r, _) in r × SimplicialComplex.circle() }
+        let S = SimplicialComplex.circle()
+        return (1 ..< dim).reduce(S) { (K, _) in K × S }
     }
     
     // ref: Minimal Triangulations of Manifolds https://arxiv.org/pdf/math/0701735.pdf

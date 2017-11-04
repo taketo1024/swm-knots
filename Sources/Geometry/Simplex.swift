@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct Simplex: GeometricCell {
+public struct Simplex: GeometricCell, Comparable {
     public let vertices: [Vertex] // ordered list of vertices.
     internal let vSet: Set<Vertex>  // unordered set of vertices.
     private let id: String
@@ -98,6 +98,21 @@ public struct Simplex: GeometricCell {
     
     public static func ==(a: Simplex, b: Simplex) -> Bool {
         return a.id == b.id
+    }
+    
+    public static func <(a: Simplex, b: Simplex) -> Bool {
+        if a.dim == b.dim {
+            for (v, w) in zip(a.vertices, b.vertices) {
+                if v == w {
+                    continue
+                } else {
+                    return v < w
+                }
+            }
+            return false
+        } else {
+            return a.dim < b.dim
+        }
     }
     
     public var description: String {

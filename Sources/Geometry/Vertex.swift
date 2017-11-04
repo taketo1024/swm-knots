@@ -28,8 +28,8 @@ public struct Vertex: SetType, Comparable {
         self.init(label, [])
     }
     
-    public init(prefix: String, index: Int? = nil) {
-        self.init("\(prefix)\(index ?? list.count)")
+    public init(prefix: String = "v") {
+        self.init("\(prefix)\(list.count)")
     }
     
     public var hashValue: Int {
@@ -52,8 +52,8 @@ public struct Vertex: SetType, Comparable {
         return label
     }
     
-    public static func generate(_ n: Int, prefix: String = "v", indexFrom: Int = 0) -> [Vertex] {
-        return (0 ..< n).map { i in Vertex(prefix: prefix, index: indexFrom + i) }
+    public static func generate(_ n: Int, prefix: String = "v") -> [Vertex] {
+        return (0 ..< n).map { i in Vertex(prefix: prefix) }
     }
     
     public static func vertex(ofID id: Int) -> Vertex {
@@ -67,7 +67,7 @@ public struct Vertex: SetType, Comparable {
         if let v = productList[key] {
             return v
         } else {
-            let label = "(\(components.map{$0.label}.joined(separator: ", ")))"
+            let label = "v(\(components.map{"\($0.id)"}.joined(separator: ",")))"
             let v = Vertex(label, components)
             productList[key] = v
             return v
