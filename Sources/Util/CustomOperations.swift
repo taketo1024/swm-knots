@@ -20,5 +20,5 @@ infix operator **: ExponentiativePrecedence
 infix operator ∩: MultiplicationPrecedence
 infix operator ∪: MultiplicationPrecedence
 infix operator ∘: MultiplicationPrecedence
-infix operator ⨯: MultiplicationPrecedence
+infix operator ×: MultiplicationPrecedence
 infix operator ⊗: MultiplicationPrecedence

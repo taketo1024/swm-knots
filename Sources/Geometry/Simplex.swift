@@ -9,9 +9,10 @@
 import Foundation
 
 public struct Simplex: GeometricCell {
-    public   let vertices: [Vertex] // ordered list of vertices.
+    public let vertices: [Vertex] // ordered list of vertices.
     internal let vSet: Set<Vertex>  // unordered set of vertices.
-    internal let id: String
+    private let id: String
+    private let label: String
     
     public init<S: Sequence>(_ vs: S) where S.Iterator.Element == Vertex {
         let vertices = vs.sorted()
@@ -20,20 +21,12 @@ public struct Simplex: GeometricCell {
         
         self.vertices = vertices
         self.vSet = vSet
-        self.id = "(\(self.vertices.map{$0.description}.joined(separator: ", ")))"
+        self.id = vertices.map{ "\($0.id)" }.joined(separator: ",")
+        self.label = (vertices.count == 1) ? vertices.first!.label : "(\(vertices.map{ $0.label }.joined(separator: ", ")))"
     }
     
-    public init<S: Sequence>(_ V: VertexSet, indices: S) where S.Iterator.Element == Int {
-        let vertices = indices.map{ V.vertex(at: $0) }
-        self.init(vertices)
-    }
-    
-    public init(_ vs: Vertex...) {
-        self.init(vs)
-    }
-    
-    public init(_ V: VertexSet, indices: Int...) {
-        self.init(V, indices: indices)
+    public init<S: Sequence>(_ V: [Vertex], indices: S) where S.Iterator.Element == Int {
+        self.init(indices.map{ V[$0] })
     }
     
     public var dim: Int {
@@ -103,12 +96,12 @@ public struct Simplex: GeometricCell {
         return id.hashValue
     }
     
-    public var description: String {
-        return id
+    public static func ==(a: Simplex, b: Simplex) -> Bool {
+        return a.id == b.id
     }
     
-    public static func ==(a: Simplex, b: Simplex) -> Bool {
-        return a.id == b.id // should be `a.verticesSet == b.verticesSet` but for performance.
+    public var description: String {
+        return label
     }
 }
 

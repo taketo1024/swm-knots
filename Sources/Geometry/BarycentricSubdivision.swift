@@ -22,7 +22,6 @@ public struct BarycentricSubdivision: GeometricComplex {
     }
     
     public init(_ K: SimplicialComplex) {
-        var V = VertexSet()
         var bcells = Set<Simplex>()
         
         var b2s: [Vertex: Simplex] = [:]
@@ -31,8 +30,7 @@ public struct BarycentricSubdivision: GeometricComplex {
         func generate(cells: [Simplex], barycenters: [Vertex]) {
             let s = cells.last!
             let v = s2b[s] ?? {
-                let label = (s.dim > 0) ? "b\(s.vertices.map{String($0.index)}.joined())" : s.vertices.first!.label
-                let v = V.add(label: label)
+                let v = (s.dim > 0) ? Vertex(prefix: "b") : s.vertices.first!
                 b2s[v] = s
                 s2b[s] = v
                 return v
