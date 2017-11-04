@@ -136,7 +136,6 @@ public extension Cohomology where chainType == Ascending {
 public protocol GeometricComplexMap: Map where Domain == ComplexType.Cell, Codomain == ComplexType.Cell {
     associatedtype ComplexType: GeometricComplex
     var from: ComplexType { get }
-    var to: ComplexType { get }
 }
 
 public extension ChainMap where chainType == Descending {
