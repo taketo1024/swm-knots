@@ -136,3 +136,10 @@ public extension Cohomology where chainType == Ascending {
 public protocol GeometricComplexMap: Map where Domain == ComplexType.Cell, Codomain == ComplexType.Cell {
     associatedtype ComplexType: GeometricComplex
 }
+
+public extension ChainMap where chainType == Descending {
+    public init<F: GeometricComplexMap>(_ f: F, _ type: R.Type) where A == F.ComplexType.Cell, B == F.ComplexType.Cell {
+        typealias Cell = F.ComplexType.Cell
+        self.init { cell -> [(Cell, R)] in [(f.appliedTo(cell), R.identity)] }
+    }
+}

@@ -103,34 +103,6 @@ public struct SimplicialComplex: GeometricComplex {
     }
 }
 
-public struct SimplicialMap: GeometricComplexMap {
-    public typealias ComplexType = SimplicialComplex
-    public typealias Domain = Simplex
-    public typealias Codomain = Simplex
-    
-    private let map: [Vertex: Vertex]
-    
-    public init(_ map: [Vertex: Vertex]) {
-        self.map = map
-    }
-    
-    public init<S: Sequence>(_ pairs: S) where S.Element == (Vertex, Vertex) {
-        self.init(Dictionary(pairs: pairs))
-    }
-    
-    public func appliedTo(_ x: Vertex) -> Vertex {
-        return map[x]!
-    }
-    
-    public func appliedTo(_ s: Simplex) -> Simplex {
-        return Simplex(s.vertices.map{ self.appliedTo($0) }.unique())
-    }
-    
-    public func appliedTo(_ K: SimplicialComplex) -> SimplicialComplex {
-        return SimplicialComplex(K.allCells().map{ self.appliedTo($0) }, generateFaces: false)
-    }
-}
-
 public extension SimplicialComplex {
     static func point() -> SimplicialComplex {
         return SimplicialComplex.ball(dim: 0)
@@ -247,5 +219,33 @@ public extension SimplicialComplex {
         } else {
             return nil
         }
+    }
+}
+
+public struct SimplicialMap: GeometricComplexMap {
+    public typealias ComplexType = SimplicialComplex
+    public typealias Domain = Simplex
+    public typealias Codomain = Simplex
+    
+    private let map: (Vertex) -> Vertex
+    
+    public init(_ map: @escaping (Vertex) -> Vertex) {
+        self.map = map
+    }
+    
+    public init(_ map: [Vertex: Vertex]) {
+        self.map = { v in map[v]! }
+    }
+    
+    public func appliedTo(_ x: Vertex) -> Vertex {
+        return map(x)
+    }
+    
+    public func appliedTo(_ s: Simplex) -> Simplex {
+        return Simplex(s.vertices.map{ self.appliedTo($0) }.unique())
+    }
+    
+    public func appliedTo(_ K: SimplicialComplex) -> SimplicialComplex {
+        return SimplicialComplex(K.allCells().map{ self.appliedTo($0) }, generateFaces: false)
     }
 }
