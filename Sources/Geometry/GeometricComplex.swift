@@ -75,14 +75,14 @@ public extension GeometricComplex {
 }
 
 public extension ChainComplex where chainType == Descending {
-    public convenience init<C: GeometricComplex>(_ K: C) where A == C.Cell {
+    public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == C.Cell {
         let chain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             (K.allCells(ofDim: i), K.boundaryMap(i), K.boundaryMatrix(i))
         }
         self.init(chain)
     }
     
-    public convenience init<C: GeometricComplex>(_ K: C, _ L: C) where A == C.Cell {
+    public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where A == C.Cell {
         let chain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             
             let from = K.allCells(ofDim: i).subtract(L.allCells(ofDim: i))
@@ -97,7 +97,7 @@ public extension ChainComplex where chainType == Descending {
 }
 
 public extension CochainComplex where chainType == Ascending {
-    public convenience init<C: GeometricComplex>(_ K: C) where Dual<C.Cell> == A {
+    public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
         let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             let basis = K.allCells(ofDim: i).map{ Dual($0) }
             let matrix = R(intValue: (-1).pow(i + 1)) * K.boundaryMatrix(i + 1).transposed
@@ -116,19 +116,19 @@ public extension CochainComplex where chainType == Ascending {
 
 public extension Homology where chainType == Descending {
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where C.Cell == A {
-        let c: ChainComplex<A, R> = ChainComplex(K)
+        let c = ChainComplex(K, type)
         self.init(c)
     }
 
     public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where C.Cell == A {
-        let c: ChainComplex<A, R> = ChainComplex(K, L)
+        let c = ChainComplex(K, L, type)
         self.init(c)
     }
 }
 
 public extension Cohomology where chainType == Ascending {
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
-        let c: CochainComplex<A, R> = CochainComplex(K)
+        let c = CochainComplex(K, type)
         self.init(c)
     }
 }

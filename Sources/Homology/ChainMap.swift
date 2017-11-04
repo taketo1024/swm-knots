@@ -8,52 +8,35 @@
 
 import Foundation
 
-/* FIXME!
 public typealias   ChainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Descending, A, B, R>
 public typealias CochainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Ascending,  A, B, R>
 
 public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Map {
-    public typealias Domain   = [FreeModule<A, R>]
-    public typealias Codomain = [FreeModule<B, R>]
+    public typealias Domain   = FreeModule<A, R>
+    public typealias Codomain = FreeModule<B, R>
     
-    private let maps: [FreeModuleHom<A, B, R>]
-    
-    public let offset: Int
     public let shift: Int
+    private let f: FreeModuleHom<A, B, R>
     
-    public init(_ maps: [FreeModuleHom<A, B, R>], offset: Int = 0, shift: Int = 0) {
-        self.maps = maps
-        self.offset = offset
+    public init(shift: Int = 0, _ f: @escaping (A) -> [(B, R)]) {
         self.shift = shift
+        self.f = FreeModuleHom(f)
     }
     
-    public init(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, shift: Int = 0, mapping f: (Int, A) -> [(B, R)]) {
-        let maps = (from.offset ... from.topDegree).map { i -> FreeModuleHom<A, B, R> in
-            FreeModuleHom(domainBasis: from.chainBasis(i), codomainBasis: to.chainBasis(i + shift), mapping: { f(i, $0) })
-        }
-        self.init(maps, offset: from.offset, shift: shift)
+    public init(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, shift: Int = 0, _ f: @escaping (A) -> [(B, R)]) {
+        self.init(shift: shift, f)
     }
     
-    public var descending: Bool {
-        return (chainType.self == Descending.self)
+    public func appliedTo(_ a: A) -> FreeModule<B, R> {
+        return f.appliedTo(a)
     }
     
-    public var topDegree: Int {
-        return maps.count - offset - 1
+    public func appliedTo(_ x: FreeModule<A, R>) -> FreeModule<B, R> {
+        return f.appliedTo(x)
     }
     
-    public func appliedTo(_ x: [FreeModule<A, R>]) -> [FreeModule<B, R>] {
-        fatalError()
-    }
-    
-    public func map(atIndex i: Int) -> FreeModuleHom<A, B, R> {
-        return (offset ... topDegree).contains(i) ? maps[i - offset] : FreeModuleHom.zero
-    }
-    
-    @discardableResult
-    public func assertChainMap(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, debug: Bool = false) -> Bool {
-        return (min(from.offset, to.offset) ... max(from.topDegree, to.topDegree)).forAll { i1 -> Bool in
-            let i2 = descending ? i1 - 1 : i1 + 1
+    public func assertChainMap(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, debug: Bool = false) {
+        (min(from.offset, to.offset) ... max(from.topDegree, to.topDegree)).forEach { i1 in
             
             //        f1
             //  C_i1 ----> C'_i1
@@ -63,21 +46,29 @@ public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBa
             //  C_i2 ----> C'_i2
             //        f2
             
-            let (f1, f2) = (map(atIndex: i1), map(atIndex: i2))
+            let b1 = from.chainBasis(i1)
             let (d1, d2) = (from.boundaryMap(i1), to.boundaryMap(i1 + shift))
             
             if debug {
                 print("----------")
-                print("C\(i1) -> C'\(i2 + shift)")
+                print("C\(i1) -> C'\(i1 + shift)")
                 print("----------")
-                print("C\(i1) : \(d1.domainBasis)\n")
-                print("f2 ∘ d1\n", (f2 ∘ d1).matrix.detailDescription, "\n")
-                print("d2 ∘ f1\n", (d2 ∘ f1).matrix.detailDescription, "\n")
-                print()
+                print("C\(i1) : \(b1)\n")
+                
+                for a in b1 {
+                    let x1 =  f.appliedTo(a)
+                    let y1 = d2.appliedTo(x1)
+                    let x2 = d1.appliedTo(a)
+                    let y2 =  f.appliedTo(x2)
+                    
+                    print("\td2 ∘ f1: \(a) ->\t\(x1) ->\t\(y1)")
+                    print("\tf2 ∘ d1: \(a) ->\t\(x2) ->\t\(y2)")
+                    print()
+                }
             }
             
-            return true // f2 ∘ d1 == d2 ∘ f1
+            assert( (d2 ∘ f).equals(f ∘ d1, forElements: b1.map{ FreeModule($0) } ) )
         }
     }
 }
- */
+
