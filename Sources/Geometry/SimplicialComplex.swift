@@ -112,6 +112,20 @@ public extension SimplicialComplex {
         return SimplicialComplex(cells)
     }
     
+    // subtraction (the result may not be a proper simplicial complex)
+    public static func -(K1: SimplicialComplex, v: Vertex) -> SimplicialComplex {
+        let K2 = SimplicialComplex(Simplex([v]))
+        return K1 - K2
+    }
+
+    public static func -(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
+        let subtr = K2.allCells()
+        let cells = K1.cells.map{ list -> [Simplex] in
+            return list.filter{ s in subtr.forAll{ !s.contains($0) } }
+        }
+        return SimplicialComplex(cells)
+    }
+    
     // product complex
     public static func ×(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
         let simplexPairs = K1.maximalCells.allCombinations(with: K2.maximalCells)
