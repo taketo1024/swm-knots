@@ -227,14 +227,18 @@ public struct SimplicialMap: GeometricComplexMap {
     public typealias Domain = Simplex
     public typealias Codomain = Simplex
     
+    public var from: SimplicialComplex
+    public var to: SimplicialComplex
     private let map: (Vertex) -> Vertex
     
-    public init(_ map: @escaping (Vertex) -> Vertex) {
+    public init(from: SimplicialComplex, to: SimplicialComplex, _ map: @escaping (Vertex) -> Vertex) {
+        self.from = from
+        self.to = to
         self.map = map
     }
     
-    public init(_ map: [Vertex: Vertex]) {
-        self.map = { v in map[v]! }
+    public init(from: SimplicialComplex, to: SimplicialComplex, _ map: [Vertex: Vertex]) {
+        self.init(from: from, to: to, { v in map[v]! })
     }
     
     public func appliedTo(_ x: Vertex) -> Vertex {

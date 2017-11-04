@@ -143,6 +143,10 @@ public struct Dual<A: FreeModuleBase>: FreeModuleBase {
         return base.hashValue
     }
     
+    public func pair(_ s: A) -> Int {
+        return (base == s) ? 1 : 0
+    }
+    
     public static func ==(a: Dual<A>, b: Dual<A>) -> Bool {
         return a.base == b.base
     }
