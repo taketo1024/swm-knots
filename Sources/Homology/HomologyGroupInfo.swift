@@ -42,7 +42,6 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
     
     public let rank: Int
     public let torsions: Int
-    
     public let summands: [Summand]
     public let transitionMatrix: DynamicMatrix<R> // chain -> cycle
     
@@ -111,8 +110,8 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
         return (newBasis, newTrans, diagonal)
     }
     
-    public func generator(_ i: Int) -> FreeModule<A, R> {
-        return summands[i].generator
+    public subscript (i: Int) -> Summand {
+        return summands[i]
     }
     
     public func components(_ z: FreeModule<A, R>) -> [R] {

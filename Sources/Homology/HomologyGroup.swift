@@ -26,7 +26,7 @@ public extension _HomologyGroup where Base == FreeModule<BasisElement, CoeffRing
     }
     
     public static func generator(_ i: Int) -> Self {
-        return Self.init(info.generator(i))
+        return Self.init(info.summands[i].generator)
     }
     
     public static func isEquivalent (a: Base, b: Base) -> Bool {

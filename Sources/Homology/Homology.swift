@@ -46,12 +46,21 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
     }
 }
 
-public extension _Homology where chainType == Descending, R == IntegerNumber {
+public extension Homology where chainType == Descending {
     public func bettiNumer(i: Int) -> Int {
-        return groupInfos[i].summands.filter{ $0.isFree }.count
+        return self[i].summands.filter{ $0.isFree }.count
     }
     
     public var eulerCharacteristic: Int {
         return (0 ... chainComplex.topDegree).reduce(0){ $0 + (($1 % 2 == 0) ? 1 : -1) * bettiNumer(i: $1) }
+    }
+    
+    public var fundamentalClass: FreeModule<A, R>? {
+        if groupInfos.isEmpty {
+            return nil
+        }
+        
+        let top = groupInfos.last!.summands
+        return (top.count == 1) ? top[0].generator : nil
     }
 }
