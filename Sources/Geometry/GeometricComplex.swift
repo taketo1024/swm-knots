@@ -112,6 +112,18 @@ public extension CochainComplex where chainType == Ascending {
         }
         self.init(cochain)
     }
+    
+    public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where Dual<C.Cell> == A {
+        let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
+            let from = K.allCells(ofDim: i).subtract(L.allCells(ofDim: i))
+            let to   = K.allCells(ofDim: i + 1).subtract(L.allCells(ofDim: i + 1))
+            let map = BoundaryMap.zero // TODO
+            let matrix = R(intValue: (-1).pow(i + 1)) * K.boundaryMatrix(from: to, to: from).transposed
+            
+            return (from.map{ Dual($0) }, map, matrix)
+        }
+        self.init(cochain)
+    }
 }
 
 public extension Homology where chainType == Descending {
@@ -129,6 +141,11 @@ public extension Homology where chainType == Descending {
 public extension Cohomology where chainType == Ascending {
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
         let c = CochainComplex(K, type)
+        self.init(c)
+    }
+
+    public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where Dual<C.Cell> == A {
+        let c = CochainComplex(K, L, type)
         self.init(c)
     }
 }
