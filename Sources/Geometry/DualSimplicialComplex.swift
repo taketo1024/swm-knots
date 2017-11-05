@@ -69,33 +69,36 @@ public struct DualSimplicialComplex: GeometricComplex {
     public typealias Cell = DualSimplicialCell
     
     internal let K: SimplicialComplex
-    internal let SdK: BarycentricSubdivision
+    internal let SdK: SimplicialComplex
     internal let cells: [[Cell]] // [0: [0-dim cells], 1: [1-dim cells], ...]
+    internal let s2b: [Simplex: Vertex]
+    internal let b2s: [Vertex: Simplex]
     
     // root initializer
-    public init(_ K: SimplicialComplex, _ SdK: BarycentricSubdivision, _ cells: [[Cell]]) {
+    public init(_ K: SimplicialComplex, _ SdK: SimplicialComplex, _ cells: [[Cell]], _ s2b: [Simplex: Vertex], _ b2s: [Vertex: Simplex]) {
         self.K = K
         self.SdK = SdK
         self.cells = cells
+        self.s2b = s2b
+        self.b2s = b2s
     }
     
     public init(_ K: SimplicialComplex) {
         let n = K.dim
-        let SdK = K.barycentricSubdivision()
+        let (SdK, s2b, b2s) = K._barycentricSubdivision()
         
         let cells = (0 ... n).reversed().map { (i) -> [DualSimplicialCell] in
             let bcells = SdK.allCells(ofDim: n - i) // comps of dual-cells, codim: i
             
             return K.allCells(ofDim: i).map { (s: Simplex) -> DualSimplicialCell in
-                let b = SdK.barycenterOf(s)!
+                let b = s2b[s]!
                 let comps = bcells.filter{ (bcell) in
-                    bcell.contains(b)
-                        && bcell.vertices.forAll{ SdK.simplex(forBarycenter: $0)!.contains(s) }
+                    bcell.contains(b) && bcell.vertices.forAll{ b2s[$0]!.contains(s) }
                 }
                 return DualSimplicialCell(dim: n - i, base: s, center: b, components: comps)
             }
         }
-        self.init(K, SdK, cells)
+        self.init(K, SdK, cells, s2b, b2s)
     }
     
     public var dim: Int {
@@ -104,7 +107,7 @@ public struct DualSimplicialComplex: GeometricComplex {
     
     public func skeleton(_ dim: Int) -> DualSimplicialComplex {
         let sub = Array(cells[0 ... dim])
-        return DualSimplicialComplex(K, SdK, sub)
+        return DualSimplicialComplex(K, SdK, sub, s2b, b2s)
     }
     
     public func allCells(ofDim i: Int) -> [DualSimplicialCell] {
@@ -116,7 +119,7 @@ public struct DualSimplicialComplex: GeometricComplex {
         let dCells = allCells(ofDim: s.dim - 1)
         
         let elements = K.cofaces(ofCell: s.base).map{ (t: Simplex) -> (DualSimplicialCell, R) in
-            let b = SdK.barycenterOf(t)!
+            let b = s2b[t]!
             let dCell = dCells.first{ $0.center == b}!
             
             let t0 = dCell.chain.basis[0] // take any simplex to detect orientation
@@ -130,7 +133,7 @@ public struct DualSimplicialComplex: GeometricComplex {
 }
 
 public extension SimplicialComplex {
-    public func dualComplex() -> DualSimplicialComplex {
+    public var dual : DualSimplicialComplex {
         return DualSimplicialComplex(self)
     }
 }

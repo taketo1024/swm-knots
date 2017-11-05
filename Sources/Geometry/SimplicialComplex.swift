@@ -158,6 +158,42 @@ public extension SimplicialComplex {
         
         return SimplicialComplex(cells)
     }
+    
+    public var barycentricSubdivision: SimplicialComplex {
+        return _barycentricSubdivision().0
+    }
+    
+    internal func _barycentricSubdivision() -> (SimplicialComplex, s2b: [Simplex: Vertex], b2s: [Vertex: Simplex]) {
+        var bcells = Set<Simplex>()
+        
+        var b2s: [Vertex: Simplex] = [:]
+        var s2b: [Simplex: Vertex] = [:]
+        
+        func generate(cells: [Simplex], barycenters: [Vertex]) {
+            let s = cells.last!
+            let v = s2b[s] ?? {
+                let v = (s.dim > 0) ? Vertex(prefix: "b") : s.vertices.first!
+                b2s[v] = s
+                s2b[s] = v
+                return v
+                }()
+            
+            if s.dim > 0 {
+                for t in s.faces() {
+                    generate(cells: cells + [t], barycenters: barycenters + [v])
+                }
+            } else {
+                let bcell = Simplex(barycenters + [v])
+                bcells.insert(bcell)
+            }
+        }
+        
+        for s in self.maximalCells {
+            generate(cells: [s], barycenters: [])
+        }
+        
+        return (SimplicialComplex(bcells), s2b, b2s)
+    }
 }
 
 // Commonly used examples
