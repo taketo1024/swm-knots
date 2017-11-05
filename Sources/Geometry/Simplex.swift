@@ -10,17 +10,18 @@ import Foundation
 
 public struct Simplex: GeometricCell, Comparable {
     public let vertices: [Vertex] // ordered list of vertices.
-    internal let vSet: Set<Vertex>  // unordered set of vertices.
+    fileprivate let unorderedVertices: Set<Vertex>  // unordered set of vertices.
+    
     private let id: String
     private let label: String
     
     public init<S: Sequence>(_ vs: S) where S.Iterator.Element == Vertex {
         let vertices = vs.sorted()
-        let vSet = Set(vertices)
-        assert(vertices.count == vSet.count)
+        let unordered = Set(vertices)
+        assert(vertices.count == unordered.count)
         
         self.vertices = vertices
-        self.vSet = vSet
+        self.unorderedVertices = unordered
         self.id = vertices.map{ "\($0.id)" }.joined(separator: ",")
         self.label = (vertices.count == 1) ? vertices.first!.label : "(\(vertices.map{ $0.label }.joined(separator: ", ")))"
     }
@@ -52,11 +53,11 @@ public struct Simplex: GeometricCell, Comparable {
     }
     
     public func contains(_ v: Vertex) -> Bool {
-        return vSet.contains(v)
+        return unorderedVertices.contains(v)
     }
     
     public func contains(_ s: Simplex) -> Bool {
-        return s.vSet.isSubset(of: self.vSet)
+        return s.unorderedVertices.isSubset(of: self.unorderedVertices)
     }
     
     public func allSubsimplices() -> [Simplex] {
@@ -73,15 +74,15 @@ public struct Simplex: GeometricCell, Comparable {
     }
     
     public func join(_ s: Simplex) -> Simplex {
-        return Simplex(self.vSet.union(s.vSet))
+        return Simplex(self.unorderedVertices.union(s.unorderedVertices))
     }
     
     public func subtract(_ s: Simplex) -> Simplex {
-        return Simplex(self.vSet.subtracting(s.vSet))
+        return Simplex(self.unorderedVertices.subtracting(s.unorderedVertices))
     }
     
     public func subtract(_ v: Vertex) -> Simplex {
-        return Simplex(self.vSet.subtracting([v]))
+        return Simplex(self.unorderedVertices.subtracting([v]))
     }
     
     public func boundary<R: Ring>() -> SimplicialChain<R> {
@@ -176,7 +177,7 @@ public extension SimplicialCochain where A == Dual<Simplex> {
             let (s1, s2) = (d1.base, d2.base)
             let (n1, n2) = (s1.dim, s2.dim)
             
-            let s = Simplex(s1.vSet.union(s2.vSet))
+            let s = Simplex(s1.unorderedVertices.union(s2.unorderedVertices))
             if (s1.vertices.last! == s2.vertices.first!) && (s.vertices == s1.vertices + s2.vertices.dropFirst()) {
                 let e = R(intValue: (-1).pow(n1 * n2))
                 return (Dual(s), e * self[d1] * f[d2])

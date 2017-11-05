@@ -52,7 +52,7 @@ public struct CWComplex: GeometricComplex {
         return CWComplex(sub)
     }
     
-    public func allCells(ofDim i: Int) -> [CWCell] {
+    public func cells(ofDim i: Int) -> [CWCell] {
         return (0...dim).contains(i) ? cells[i] : []
     }
     

@@ -28,7 +28,7 @@ public struct SimplicialMap: GeometricComplexMap {
     }
     
     public var image: SimplicialComplex {
-        let cells = domain.cells.map{ cells in
+        let cells = domain.cellTable.map{ cells in
             cells.flatMap{ s -> Simplex? in
                 let t = self.appliedTo(s)
                 return (s.dim == t.dim) ? t : nil

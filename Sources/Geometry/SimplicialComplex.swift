@@ -10,45 +10,54 @@ import Foundation
 
 public struct SimplicialComplex: GeometricComplex {
     public typealias Cell = Simplex
-    internal let cells: [[Simplex]]
+    internal let cellTable: [[Simplex]]
     
     // root initializer
-    internal init(_ cells: [[Simplex]]) {
-        self.cells = cells
+    internal init(_ cellTable: [[Simplex]]) {
+        self.cellTable = cellTable
     }
     
-    public init<S: Sequence>(_ cells: S, generateFaces gFlag: Bool = true) where S.Iterator.Element == Simplex {
-        self.init(SimplicialComplex.alignCells(cells, generateFaces: gFlag))
+    public init<S: Sequence>(allCells cells: S) where S.Iterator.Element == Simplex {
+        self.init(SimplicialComplex.alignCells(cells, generateFaces: false))
     }
     
-    public init(_ cells: Simplex...) {
-        self.init(cells)
+    public init(allCells cells: Simplex...) {
+        self.init(allCells: cells)
+    }
+    
+    public init<S: Sequence>(maximalCells cells: S) where S.Iterator.Element == Simplex {
+        self.init(SimplicialComplex.alignCells(cells, generateFaces: true))
+    }
+    
+    public init(maximalCells cells: Simplex...) {
+        self.init(maximalCells: cells)
     }
     
     public var dim: Int {
-        return cells.count - 1
+        return cellTable.count - 1
     }
     
     public func skeleton(_ dim: Int) -> SimplicialComplex {
-        let sub = Array(cells[0 ... dim])
+        let sub = Array(cellTable[0 ... dim])
         return SimplicialComplex(sub)
     }
     
-    public func allCells(ofDim i: Int) -> [Simplex] {
-        return (0...dim).contains(i) ? cells[i] : []
+    public func cells(ofDim i: Int) -> [Simplex] {
+        return (0...dim).contains(i) ? cellTable[i] : []
     }
     
-    public var vertices: [Vertex] {
-        return allCells(ofDim: 0).map{ $0.vertices[0] }
+    public var allVertices: [Vertex] {
+        return cells(ofDim: 0).map{ $0.vertices[0] }
     }
     
     private var _maximalCells: Cache<[Simplex]> = Cache()
+    
     public var maximalCells: [Simplex] {
         if let cells = _maximalCells.value {
             return cells
         }
         
-        var cells = Array(self.cells.reversed().joined())
+        var cells = Array(self.cellTable.reversed().joined())
         var i = 0
         while i < cells.count {
             let s = cells[i]
@@ -86,7 +95,7 @@ public struct SimplicialComplex: GeometricComplex {
     }
     
     public func cofaces(ofCell s: Simplex) -> [Simplex] {
-        return allCells(ofDim: s.dim + 1).filter{ $0.contains(s) }
+        return cells(ofDim: s.dim + 1).filter{ $0.contains(s) }
     }
     
     internal static func alignCells<S: Sequence>(_ cells: S, generateFaces gFlag: Bool) -> [[Simplex]] where S.Iterator.Element == Simplex {
@@ -108,19 +117,19 @@ public extension SimplicialComplex {
     // disjoint union
     public static func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
         let dim = max(K1.dim, K2.dim)
-        let cells = (0 ... dim).map{ i in K1.allCells(ofDim: i) + K2.allCells(ofDim: i) }
+        let cells = (0 ... dim).map{ i in K1.cells(ofDim: i) + K2.cells(ofDim: i) }
         return SimplicialComplex(cells)
     }
     
     // subtraction (the result may not be a proper simplicial complex)
     public static func -(K1: SimplicialComplex, v: Vertex) -> SimplicialComplex {
-        let K2 = SimplicialComplex(Simplex([v]))
+        let K2 = SimplicialComplex(allCells: Simplex([v]))
         return K1 - K2
     }
 
     public static func -(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
-        let subtr = K2.allCells()
-        let cells = K1.cells.map{ list -> [Simplex] in
+        let subtr = K2.allCells
+        let cells = K1.cellTable.map{ list -> [Simplex] in
             return list.filter{ s in subtr.forAll{ !s.contains($0) } }
         }
         return SimplicialComplex(cells)
@@ -156,7 +165,7 @@ public extension SimplicialComplex {
             return Simplex(vertices)
         }
         
-        return SimplicialComplex(cells)
+        return SimplicialComplex(maximalCells: cells)
     }
     
     public var barycentricSubdivision: SimplicialComplex {
@@ -192,7 +201,7 @@ public extension SimplicialComplex {
             generate(cells: [s], barycenters: [])
         }
         
-        return (SimplicialComplex(bcells), s2b, b2s)
+        return (SimplicialComplex(maximalCells: bcells), s2b, b2s)
     }
 }
 
@@ -213,7 +222,7 @@ public extension SimplicialComplex {
     static func ball(dim: Int) -> SimplicialComplex {
         let V = Vertex.generate(dim + 1)
         let s = Simplex(V, indices: 0...dim)
-        return SimplicialComplex([s])
+        return SimplicialComplex(maximalCells: [s])
     }
     
     static func sphere(dim: Int) -> SimplicialComplex {
@@ -234,12 +243,12 @@ public extension SimplicialComplex {
             let V = Vertex.generate(6)
             let indices = [(0,1,3),(1,4,3),(1,2,4),(4,2,0),(4,0,5),(0,1,5),(1,2,5),(2,3,5),(0,3,2),(3,4,5)]
             let simplices = indices.map { v in Simplex(V, indices: [v.0, v.1, v.2]) }
-            return SimplicialComplex(simplices)
+            return SimplicialComplex(maximalCells: simplices)
         case 3:
             let V = Vertex.generate(11)
             let indices = [(1,2,3,7), (1,2,3,0), (1,2,6,9), (1,2,6,0), (1,2,7,9), (1,3,5,10), (1,3,5,0), (1,3,7,10), (1,4,7,9), (1,4,7,10), (1,4,8,9), (1,4,8,10), (1,5,6,8), (1,5,6,0), (1,5,8,10), (1,6,8,9), (2,3,4,8), (2,3,4,0), (2,3,7,8), (2,4,6,10), (2,4,6,0), (2,4,8,10), (2,5,7,8), (2,5,7,9), (2,5,8,10), (2,5,9,10), (2,6,9,10), (3,4,5,9), (3,4,5,0), (3,4,8,9), (3,5,9,10), (3,6,7,8), (3,6,7,10), (3,6,8,9), (3,6,9,10), (4,5,6,7), (4,5,6,0), (4,5,7,9), (4,6,7,10), (5,6,7,8)]
             let simplices = indices.map { v in Simplex(V, indices: [v.0, v.1, v.2, v.3]) }
-            return SimplicialComplex(simplices)
+            return SimplicialComplex(maximalCells: simplices)
         default:
             fatalError("RP^n (n >= 4) not yet supported.")
         }
@@ -254,7 +263,7 @@ public extension SimplicialComplex {
     public func preferredOrientation<R: EuclideanRing>(type: R.Type) -> SimplicialChain<R>? {
         let H = HomologyGroupInfo<Descending, Simplex, R>(
             degree: dim,
-            basis: allCells(ofDim: dim),
+            basis: cells(ofDim: dim),
             matrix1: boundaryMatrix(dim),
             matrix2: boundaryMatrix(dim + 1)
         )

@@ -24,7 +24,7 @@ public struct DualSimplicialCell: GeometricCell {
     public init(dim: Int, base: Simplex, center: Vertex, components: [Simplex]) {
         let chain = { () -> SimplicialChain<IntegerNumber> in
             if dim > 1 {
-                let Lk = SimplicialComplex(components.map{$0.subtract(center)})
+                let Lk = SimplicialComplex(maximalCells: components.map{$0.subtract(center)})
                 guard let z = Lk.preferredOrientation() else {
                     fatalError("invalid dual-cell. center: \(center), components: \(components)")
                 }
@@ -88,9 +88,9 @@ public struct DualSimplicialComplex: GeometricComplex {
         let (SdK, s2b, b2s) = K._barycentricSubdivision()
         
         let cells = (0 ... n).reversed().map { (i) -> [DualSimplicialCell] in
-            let bcells = SdK.allCells(ofDim: n - i) // comps of dual-cells, codim: i
+            let bcells = SdK.cells(ofDim: n - i) // comps of dual-cells, codim: i
             
-            return K.allCells(ofDim: i).map { (s: Simplex) -> DualSimplicialCell in
+            return K.cells(ofDim: i).map { (s: Simplex) -> DualSimplicialCell in
                 let b = s2b[s]!
                 let comps = bcells.filter{ (bcell) in
                     bcell.contains(b) && bcell.vertices.forAll{ b2s[$0]!.contains(s) }
@@ -110,13 +110,13 @@ public struct DualSimplicialComplex: GeometricComplex {
         return DualSimplicialComplex(K, SdK, sub, s2b, b2s)
     }
     
-    public func allCells(ofDim i: Int) -> [DualSimplicialCell] {
+    public func cells(ofDim i: Int) -> [DualSimplicialCell] {
         return (0...dim).contains(i) ? cells[i] : []
     }
     
     public func boundary<R: Ring>(ofCell s: DualSimplicialCell) -> FreeModule<DualSimplicialCell, R> {
         let z = s.chain.boundary()
-        let dCells = allCells(ofDim: s.dim - 1)
+        let dCells = cells(ofDim: s.dim - 1)
         
         let elements = K.cofaces(ofCell: s.base).map{ (t: Simplex) -> (DualSimplicialCell, R) in
             let b = s2b[t]!

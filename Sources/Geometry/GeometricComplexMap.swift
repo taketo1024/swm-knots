@@ -47,7 +47,7 @@ public extension CochainMap where chainType == Ascending {
         typealias Cell = F.ComplexType.Cell
         self.init { (g: Dual<Cell>) -> [(Dual<Cell>, R)] in
             let i = g.degree
-            let ss = f.domain.allCells(ofDim: i)
+            let ss = f.domain.cells(ofDim: i)
             return ss.flatMap { (s: Cell) -> (Dual<Cell>, R)? in
                 let t = f.appliedTo(s)
                 return (g.pair(t) == 1) ? (Dual(s), R.identity) : nil

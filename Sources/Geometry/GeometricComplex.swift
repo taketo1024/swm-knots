@@ -21,8 +21,8 @@ public protocol GeometricComplex: CustomStringConvertible {
     
     var dim: Int {get}
     
-    func allCells(ofDim: Int) -> [Cell]
-    func allCells(ascending: Bool) -> [Cell]
+    var allCells: [Cell] { get }
+    func cells(ofDim: Int) -> [Cell]
     func skeleton(_ dim: Int) -> Self
     
     func boundary<R: Ring>(ofCell: Cell) -> FreeModule<Cell, R> // override point
@@ -31,9 +31,8 @@ public protocol GeometricComplex: CustomStringConvertible {
 }
 
 public extension GeometricComplex {
-    public func allCells(ascending: Bool = true) -> [Cell] {
-        let l = (ascending) ? Array(0 ... dim) : Array((0 ... dim).reversed())
-        return l.flatMap{ allCells(ofDim: $0) }
+    public var allCells: [Cell] {
+        return (0 ... dim).flatMap{ cells(ofDim: $0) }
     }
     
     public func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, Cell, R> {
@@ -43,8 +42,8 @@ public extension GeometricComplex {
     }
     
     public func boundaryMatrix<R: Ring>(_ i: Int) -> DynamicMatrix<R> {
-        let from = (i <= dim) ? allCells(ofDim: i) : []
-        let to = (i > 0) ? allCells(ofDim: i - 1) : []
+        let from = (i <= dim) ? cells(ofDim: i) : []
+        let to = (i > 0) ? cells(ofDim: i - 1) : []
         return boundaryMatrix(from: from, to: to)
     }
     
@@ -67,7 +66,7 @@ public extension GeometricComplex {
     public var detailDescription: String {
         return "\(description) {\n" +
             (0 ... dim)
-                .map{ (i) -> (Int, [Cell]) in (i, allCells(ofDim: i)) }
+                .map{ (i) -> (Int, [Cell]) in (i, cells(ofDim: i)) }
                 .map{ (i, cells) -> String in "\t\(i): " + cells.map{"\($0)"}.joined(separator: ", ")}
                 .joined(separator: "\n")
             + "\n}"
@@ -77,7 +76,7 @@ public extension GeometricComplex {
 public extension ChainComplex where chainType == Descending {
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == C.Cell {
         let chain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
-            (K.allCells(ofDim: i), K.boundaryMap(i), K.boundaryMatrix(i))
+            (K.cells(ofDim: i), K.boundaryMap(i), K.boundaryMatrix(i))
         }
         self.init(chain)
     }
@@ -85,8 +84,8 @@ public extension ChainComplex where chainType == Descending {
     public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where A == C.Cell {
         let chain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             
-            let from = K.allCells(ofDim: i).subtract(L.allCells(ofDim: i))
-            let to   = K.allCells(ofDim: i - 1).subtract(L.allCells(ofDim: i - 1))
+            let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
+            let to   = K.cells(ofDim: i - 1).subtract(L.cells(ofDim: i - 1))
             let map: BoundaryMap = K.boundaryMap(i)
             let matrix: BoundaryMatrix = K.boundaryMatrix(from: from, to: to)
             
@@ -99,11 +98,11 @@ public extension ChainComplex where chainType == Descending {
 public extension CochainComplex where chainType == Ascending {
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
         let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
-            let basis = K.allCells(ofDim: i).map{ Dual($0) }
+            let basis = K.cells(ofDim: i).map{ Dual($0) }
             let matrix = R(intValue: (-1).pow(i + 1)) * K.boundaryMatrix(i + 1).transposed
             let map = BoundaryMap { d in
-                let j = K.allCells(ofDim: i).index(of: d.base)!
-                let basis = K.allCells(ofDim: i + 1).map{ Dual($0) }
+                let j = K.cells(ofDim: i).index(of: d.base)!
+                let basis = K.cells(ofDim: i + 1).map{ Dual($0) }
                 let values = matrix.colArray(j)
                 return zip(basis, values).toArray()
             }
@@ -115,8 +114,8 @@ public extension CochainComplex where chainType == Ascending {
     
     public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where Dual<C.Cell> == A {
         let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
-            let from = K.allCells(ofDim: i).subtract(L.allCells(ofDim: i))
-            let to   = K.allCells(ofDim: i + 1).subtract(L.allCells(ofDim: i + 1))
+            let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
+            let to   = K.cells(ofDim: i + 1).subtract(L.cells(ofDim: i + 1))
             let map = BoundaryMap.zero // TODO
             let matrix = R(intValue: (-1).pow(i + 1)) * K.boundaryMatrix(from: to, to: from).transposed
             
