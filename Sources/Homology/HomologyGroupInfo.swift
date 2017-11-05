@@ -48,7 +48,7 @@ public class HomologyGroupInfo<chainType: ChainType, A: FreeModuleBase, R: Eucli
     private typealias M = FreeModule<A, R>
     
     public convenience init(_ C: _ChainComplex<chainType, A, R>, degree i: Int) {
-        self.init(degree: i, basis: C.chainBasis(i), matrix1: C.boundaryMatrix(i), matrix2: C.boundaryMatrix(C.descending ? i + 1 : i - 1))
+        self.init(degree: i, basis: C.chainBasis(i), matrix1: C.boundaryMatrix(i), matrix2: C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
     }
     
     internal init<n0, n1, n2>(degree i: Int, basis: ChainBasis, matrix1 A1: Matrix<n0, n1, R>, matrix2 A2: Matrix<n1, n2, R>) {

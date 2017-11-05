@@ -40,10 +40,6 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
         self.offset = offset
     }
     
-    public var descending: Bool {
-        return (chainType.self == Descending.self)
-    }
-    
     public var topDegree: Int {
         return chain.count + offset - 1
     }
