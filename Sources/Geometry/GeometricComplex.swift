@@ -152,7 +152,19 @@ public extension Cohomology where chainType == Ascending {
 
 public protocol GeometricComplexMap: Map where Domain == ComplexType.Cell, Codomain == ComplexType.Cell {
     associatedtype ComplexType: GeometricComplex
-    var from: ComplexType { get }
+    var domain:   ComplexType { get }
+    var codomain: ComplexType? { get }
+    var image:    ComplexType { get }
+}
+
+public extension GeometricComplexMap {
+    public func asChainMap<R: EuclideanRing>(_ type: R.Type) -> ChainMap<ComplexType.Cell, ComplexType.Cell, R> {
+        return ChainMap(self, R.self)
+    }
+
+    public func asCochainMap<R: EuclideanRing>(_ type: R.Type) -> CochainMap<Dual<ComplexType.Cell>, Dual<ComplexType.Cell>, R> {
+        return CochainMap(self, R.self)
+    }
 }
 
 public extension ChainMap where chainType == Descending {
@@ -177,7 +189,7 @@ public extension CochainMap where chainType == Ascending {
         typealias Cell = F.ComplexType.Cell
         self.init { (g: Dual<Cell>) -> [(Dual<Cell>, R)] in
             let i = g.degree
-            let ss = f.from.allCells(ofDim: i)
+            let ss = f.domain.allCells(ofDim: i)
             return ss.flatMap { (s: Cell) -> (Dual<Cell>, R)? in
                 let t = f.appliedTo(s)
                 return (g.pair(t) == 1) ? (Dual(s), R.identity) : nil
