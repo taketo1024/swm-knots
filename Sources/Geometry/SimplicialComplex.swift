@@ -255,7 +255,9 @@ public extension SimplicialComplex {
     }
 }
 
+// Topological Invariants
 public extension SimplicialComplex {
+    // TODO remove
     public func preferredOrientation() -> SimplicialChain<IntegerNumber>? {
         return preferredOrientation(type: IntegerNumber.self)
     }
@@ -270,6 +272,52 @@ public extension SimplicialComplex {
         
         if H.rank == 1 {
             return H.summands[0].generator
+        } else {
+            return nil
+        }
+    }
+    // --TODO
+    
+    public var eulerNumber: Int {
+        return (0 ... dim).sum{ i in (-1).pow(i) * cells(ofDim: i).count }
+    }
+
+    public var fundamentalClass: SimplicialChain<IntegerNumber>? {
+        return fundamentalClass(type: IntegerNumber.self)
+    }
+    
+    public func fundamentalClass<R: EuclideanRing>(type: R.Type) -> SimplicialChain<R>? {
+        let H = Homology(self, R.self)
+        let s = H[dim].summands
+        
+        if let first = s.first, s.count == 1 && first.isFree {
+            return first.generator
+        } else {
+            return nil
+        }
+    }
+    
+    public var eulerClass: SimplicialCochain<IntegerNumber>? {
+        return eulerClass(IntegerNumber.self)
+    }
+    
+    public func eulerClass<R: EuclideanRing>(_ type: R.Type) -> SimplicialCochain<R>? {
+        
+        // See [Milnor-Stasheff: Characteristic Classes §11]
+        
+        let M = self
+        let d = SimplicialMap.diagonal(from: M)
+        
+        let MxM = M × M
+        let ΔM = d.image
+        
+        let H = Cohomology(MxM, MxM - ΔM, R.self)
+        let s = H[dim].summands
+        
+        if let first = s.first, s.count == 1 && first.isFree {
+            let u = first.generator                      // the Diagonal cohomology class of M
+            let e = d.asCochainMap(R.self).appliedTo(u)  // the Euler class of M
+            return e
         } else {
             return nil
         }
