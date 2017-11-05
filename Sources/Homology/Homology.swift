@@ -13,35 +13,42 @@ public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Asc
 
 public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: CustomStringConvertible {
     public let chainComplex: _ChainComplex<chainType, A, R>
-    internal let groupInfos: [HomologyGroupInfo<chainType, A, R>]
+    private var groups: [HomologyGroupInfo<chainType, A, R>?]
     
     public subscript(i: Int) -> HomologyGroupInfo<chainType, A, R> {
-        return groupInfos[i]
-    }
-    
-    public init(chainComplex: _ChainComplex<chainType, A, R>, groups: [HomologyGroupInfo<chainType, A, R>]) {
-        self.chainComplex = chainComplex
-        self.groupInfos = groups
-    }
-    
-    public convenience init(_ chainComplex: _ChainComplex<chainType, A, R>) {
-        let offset = chainComplex.offset
-        let top = chainComplex.topDegree
-        
-        let groups = (offset ... top).map {
-            HomologyGroupInfo(chainComplex, degree: $0)
+        guard (offset ... topDegree).contains(i) else {
+            fatalError() // TODO return empty info
         }
         
-        self.init(chainComplex: chainComplex, groups: groups)
+        if let g = groups[i - offset] {
+            return g
+        } else {
+            let g = HomologyGroupInfo(chainComplex, degree: i)
+            groups[i - offset] = g
+            return g
+        }
+    }
+    
+    public init(_ chainComplex: _ChainComplex<chainType, A, R>) {
+        self.chainComplex = chainComplex
+        self.groups = Array(repeating: nil, count: chainComplex.topDegree - chainComplex.offset + 1)
+    }
+    
+    private var offset: Int {
+        return chainComplex.offset
+    }
+    
+    public var topDegree: Int {
+        return chainComplex.topDegree
     }
     
     public var description: String {
-        return "{" + groupInfos.map{"\($0.degree):\($0)"}.joined(separator: ", ") + "}"
+        return "H(_; \(R.symbol))"
     }
     
     public var detailDescription: String {
-        return "{\n"
-            + groupInfos.map{"\t\($0.degree) : \($0.detailDescription)"}.joined(separator: ",\n")
+        return "H(_; \(R.symbol)) = {\n"
+            + (offset ... topDegree).map{ self[$0] }.map{ g in "\t\(g.degree) : \(g.detailDescription)"}.joined(separator: ",\n")
             + "\n}"
     }
 }
