@@ -267,27 +267,6 @@ public extension SimplicialComplex {
 
 // Topological Invariants
 public extension SimplicialComplex {
-    // TODO remove
-    public func preferredOrientation() -> SimplicialChain<IntegerNumber>? {
-        return preferredOrientation(type: IntegerNumber.self)
-    }
-    
-    public func preferredOrientation<R: EuclideanRing>(type: R.Type) -> SimplicialChain<R>? {
-        let H = HomologyGroupInfo<Descending, Simplex, R>(
-            degree: dim,
-            basis: cells(ofDim: dim),
-            matrix1: boundaryMatrix(dim),
-            matrix2: boundaryMatrix(dim + 1)
-        )
-        
-        if H.rank == 1 {
-            return H.summands[0].generator
-        } else {
-            return nil
-        }
-    }
-    // --TODO
-    
     public var eulerNumber: Int {
         return (0 ... dim).sum{ i in (-1).pow(i) * cells(ofDim: i).count }
     }
