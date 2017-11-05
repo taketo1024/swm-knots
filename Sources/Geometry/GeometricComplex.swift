@@ -19,7 +19,8 @@ public extension GeometricCell {
 public protocol GeometricComplex: CustomStringConvertible {
     associatedtype Cell: GeometricCell
     
-    var dim: Int {get}
+    var name: String { get }
+    var dim: Int { get }
     
     var allCells: [Cell] { get }
     func cells(ofDim: Int) -> [Cell]
@@ -31,6 +32,10 @@ public protocol GeometricComplex: CustomStringConvertible {
 }
 
 public extension GeometricComplex {
+    public var name: String {
+        return "_" // TODO
+    }
+    
     public var allCells: [Cell] {
         return (0 ... dim).flatMap{ cells(ofDim: $0) }
     }
@@ -60,7 +65,7 @@ public extension GeometricComplex {
     }
     
     public var description: String {
-        return "\(type(of: self))(dim: \(dim))"
+        return "\(type(of: self))(\(name))"
     }
     
     public var detailDescription: String {
@@ -78,7 +83,7 @@ public extension ChainComplex where chainType == Descending {
         let chain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             (K.cells(ofDim: i), K.boundaryMap(i), K.boundaryMatrix(i))
         }
-        self.init(chain)
+        self.init(name: K.name, chain)
     }
     
     public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where A == C.Cell {
@@ -91,7 +96,7 @@ public extension ChainComplex where chainType == Descending {
             
             return (from, map, matrix)
         }
-        self.init(chain)
+        self.init(name: "\(K.name), \(L.name)", chain)
     }
 }
 
@@ -109,7 +114,7 @@ public extension CochainComplex where chainType == Ascending {
             
             return (basis, map, matrix)
         }
-        self.init(cochain)
+        self.init(name: K.name, cochain)
     }
     
     public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where Dual<C.Cell> == A {
@@ -121,7 +126,7 @@ public extension CochainComplex where chainType == Ascending {
             
             return (from.map{ Dual($0) }, map, matrix)
         }
-        self.init(cochain)
+        self.init(name: "\(K.name), \(L.name)", cochain)
     }
 }
 

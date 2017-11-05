@@ -43,11 +43,11 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
     }
     
     public var description: String {
-        return "H(_; \(R.symbol))"
+        return (chainType.descending ? "H" : "cH") + "(\(chainComplex.name); \(R.symbol))"
     }
     
     public var detailDescription: String {
-        return "H(_; \(R.symbol)) = {\n"
+        return (chainType.descending ? "H" : "cH") + "(\(chainComplex.name); \(R.symbol)) = {\n"
             + (offset ... topDegree).map{ self[$0] }.map{ g in "\t\(g.degree) : \(g.detailDescription)"}.joined(separator: ",\n")
             + "\n}"
     }
