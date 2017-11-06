@@ -221,14 +221,17 @@ public extension SimplicialComplex {
         return SimplicialComplex(name: "I", maximalCells: [s])
     }
     
-    static func circle() -> SimplicialComplex {
-        return SimplicialComplex.sphere(dim: 1)
+    static func circle(vertices n: Int = 3) -> SimplicialComplex {
+        assert(n >= 3)
+        let V = Vertex.generate(n)
+        let segments = (0 ..< n).map { i in Simplex(V, indices: [i, (i + 1) % n]) }
+        return SimplicialComplex(name: "S^1", maximalCells: segments)
     }
     
     static func sphere(dim: Int) -> SimplicialComplex {
         let V = Vertex.generate(dim + 2)
-        let s = Simplex(V, indices: 0 ... (dim + 1))
-        return SimplicialComplex(name: "S^\(dim)", maximalCells: s.faces())
+        let faces = Simplex(V, indices: 0 ... (dim + 1)).faces()
+        return SimplicialComplex(name: "S^\(dim)", maximalCells: faces)
     }
     
     static func ball(dim: Int) -> SimplicialComplex {
