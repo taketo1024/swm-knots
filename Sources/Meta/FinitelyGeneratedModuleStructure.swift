@@ -10,7 +10,7 @@ import Foundation
 
 // https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
-public class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: EuclideanRing>: Structure, Sequence {
+public final class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: EuclideanRing>: Structure, Sequence {
     public let basis: [A]
     public let summands: [Summand]
     public let transitionMatrix: DynamicMatrix<R>
@@ -38,6 +38,31 @@ public class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: EuclideanRin
         return summands[i]
     }
     
+    public var rank: Int {
+        return self.filter{ $0.isFree }.count
+    }
+    
+    public var generators: [FreeModule<A, R>] {
+        return self.map{ s in s.generator }
+    }
+    
+    public func factorize(_ z: FreeModule<A, R>) -> [R] {
+        let n = basis.count
+        let v = transitionMatrix * ColVector(rows: n, grid: z.factorize(by: basis))
+        
+        return self.enumerated().map { (i, s) in
+            return s.isFree ? v[i] : v[i] % s.factor
+        }
+    }
+    
+    public func isEquivalentToZero(_ z: FreeModule<A, R>) -> Bool {
+        return factorize(z).forAll{ $0 == 0 }
+    }
+    
+    public func isEquivalent(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {
+        return isEquivalentToZero(z1 - z2)
+    }
+    
     public func makeIterator() -> IndexingIterator<[Summand]> {
         return summands.makeIterator()
     }
@@ -49,7 +74,11 @@ public class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: EuclideanRin
     public var description: String {
         return summands.isEmpty ? "0" : summands.map{$0.description}.joined(separator: "⊕")
     }
-
+    
+    public var detailDescription: String {
+        return "\(self),\t\(self.map{ $0.generator })"
+    }
+    
     public final class Summand: Structure {
         public let generator: FreeModule<A, R>
         public let factor: R

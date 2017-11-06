@@ -75,7 +75,7 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
         
         if a.factors.keys == b.factors.keys {
             return a.factors.forAll { (i, z) in
-                return H[i].isHomologue(z, b[i])
+                return H[i].isEquivalent(z, b[i])
             }
         } else {
             return false
