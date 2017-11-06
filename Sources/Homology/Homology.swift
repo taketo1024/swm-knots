@@ -21,37 +21,41 @@ import Foundation
 public typealias   Homology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Descending, A, R>
 public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Ascending, A, R>
 
-public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: CustomStringConvertible {
+public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: Equatable, CustomStringConvertible {
     public typealias Cycle = FreeModule<A, R>
     
     public let chainComplex: _ChainComplex<chainType, A, R>
-    private var summands: [HomologySummand?]
+    private var _summands: [HomologySummand?]
     
     public subscript(i: Int) -> HomologySummand {
         guard (offset ... topDegree).contains(i) else {
             fatalError() // TODO return empty info
         }
         
-        if let g = summands[i - offset] {
+        if let g = _summands[i - offset] {
             return g
         } else {
-            let g = HomologySummand(chainComplex, degree: i)
-            summands[i - offset] = g
+            let g = HomologySummand(i, chainComplex)
+            _summands[i - offset] = g
             return g
         }
     }
     
     public init(_ chainComplex: _ChainComplex<chainType, A, R>) {
         self.chainComplex = chainComplex
-        self.summands = Array(repeating: nil, count: chainComplex.topDegree - chainComplex.offset + 1) // lazy init
+        self._summands = Array(repeating: nil, count: chainComplex.topDegree - chainComplex.offset + 1) // lazy init
     }
     
-    private var offset: Int {
+    public var offset: Int {
         return chainComplex.offset
     }
     
     public var topDegree: Int {
         return chainComplex.topDegree
+    }
+    
+    public static func ==(a: _Homology<chainType, A, R>, b: _Homology<chainType, A, R>) -> Bool {
+        return a.chainComplex.name == b.chainComplex.name // TODO replace with a more precise & efficient way.
     }
     
     public var description: String {
@@ -71,8 +75,8 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
         public let chainBasis: [A]
         public let summands: [Summand]
         public let transitionMatrix: DynamicMatrix<R> // chain -> cycle
-        
-        public init(_ C: _ChainComplex<chainType, A, R>, degree i: Int) {
+
+        internal init(_ i: Int, _ C: _ChainComplex<chainType, A, R>) {
             let basis = C.chainBasis(i)
             
             let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
@@ -101,24 +105,28 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             return summands[i]
         }
         
+        public var generators: [Cycle] {
+            return summands.map{ s in s.generator }
+        }
+        
         public var rank: Int {
             return summands.filter{ $0.isFree }.count
         }
         
-        public func factorize(_ z: FreeModule<A, R>) -> [R] {
+        public func factorize(_ z: Cycle) -> [R] {
             let n = chainBasis.count
-            let v = transitionMatrix * ColVector(rows: n, grid: chainBasis.map{ z[$0] })
+            let v = transitionMatrix * ColVector(rows: n, grid: z.factorize(by: chainBasis))
             
             return summands.enumerated().map { (i, s) in
                 return s.isFree ? v[i] : v[i] % s.factor
             }
         }
         
-        public func isNullHomologue(_ z: FreeModule<A, R>) -> Bool {
+        public func isNullHomologue(_ z: Cycle) -> Bool {
             return factorize(z).forAll{ $0 == 0 }
         }
         
-        public func isHomologue(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {
+        public func isHomologue(_ z1: Cycle, _ z2: Cycle) -> Bool {
             return isNullHomologue(z1 - z2)
         }
         

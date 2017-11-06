@@ -153,3 +153,4 @@ public extension Cohomology where chainType == Ascending {
         self.init(c)
     }
 }
+

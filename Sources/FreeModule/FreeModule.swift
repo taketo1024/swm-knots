@@ -43,7 +43,7 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
         return elements.keys.toArray()
     }
     
-    public func components(correspondingTo list: [A]) -> [R] {
+    public func factorize(by list: [A]) -> [R] {
         return list.map{ self[$0] }
     }
     

@@ -47,7 +47,7 @@
 		145F46011EEAF0CC0045CDB2 /* Z_2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F46001EEAF0CC0045CDB2 /* Z_2.swift */; };
 		146399741F191AD500A34CEE /* DualSimplicialComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146399731F191AD500A34CEE /* DualSimplicialComplex.swift */; };
 		146905B21EE4F4F100153686 /* DynamicGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146905B11EE4F4F100153686 /* DynamicGroup.swift */; };
-		146A296E1F1DA32400531AA2 /* HomologyGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146A296D1F1DA32400531AA2 /* HomologyGroup.swift */; };
+		146A296E1F1DA32400531AA2 /* HomologyClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146A296D1F1DA32400531AA2 /* HomologyClass.swift */; };
 		147D965D1F30759F00967992 /* ChainMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D965C1F30759F00967992 /* ChainMap.swift */; };
 		147D98031EB9B06900C736AC /* IntegerFactorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98021EB9B06900C736AC /* IntegerFactorization.swift */; };
 		147D98061EB9B26200C736AC /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98051EB9B26200C736AC /* Dictionary.swift */; };
@@ -127,7 +127,7 @@
 		145F46001EEAF0CC0045CDB2 /* Z_2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Z_2.swift; sourceTree = "<group>"; };
 		146399731F191AD500A34CEE /* DualSimplicialComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DualSimplicialComplex.swift; sourceTree = "<group>"; };
 		146905B11EE4F4F100153686 /* DynamicGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DynamicGroup.swift; sourceTree = "<group>"; };
-		146A296D1F1DA32400531AA2 /* HomologyGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomologyGroup.swift; sourceTree = "<group>"; };
+		146A296D1F1DA32400531AA2 /* HomologyClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomologyClass.swift; sourceTree = "<group>"; };
 		147D965C1F30759F00967992 /* ChainMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChainMap.swift; sourceTree = "<group>"; };
 		147D98021EB9B06900C736AC /* IntegerFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntegerFactorization.swift; sourceTree = "<group>"; };
 		147D98051EB9B26200C736AC /* Dictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dictionary.swift; sourceTree = "<group>"; };
@@ -349,7 +349,7 @@
 				140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */,
 				147D965C1F30759F00967992 /* ChainMap.swift */,
 				144AD2901EC21A4500E23890 /* Homology.swift */,
-				146A296D1F1DA32400531AA2 /* HomologyGroup.swift */,
+				146A296D1F1DA32400531AA2 /* HomologyClass.swift */,
 			);
 			path = Homology;
 			sourceTree = "<group>";
@@ -565,7 +565,7 @@
 				1424F5021EB997780052581F /* Permutation.swift in Sources */,
 				141C0CDF1F28232F00D9BDDE /* CWComplex.swift in Sources */,
 				1424F4FC1EB997780052581F /* Group.swift in Sources */,
-				146A296E1F1DA32400531AA2 /* HomologyGroup.swift in Sources */,
+				146A296E1F1DA32400531AA2 /* HomologyClass.swift in Sources */,
 				14A85FF31ED9D63E00A754EA /* GeometricComplex.swift in Sources */,
 				140F4FAF1F96F66400C4C039 /* Random.swift in Sources */,
 				14929C9F1ED9C798006ACAC5 /* SimplicialComplex.swift in Sources */,
