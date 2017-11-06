@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol Structure: class, CustomStringConvertible { }
+public protocol Structure: class, Equatable, CustomStringConvertible { }
 
 public extension Structure {
     public var detailDescription: String {
@@ -20,6 +20,10 @@ public class SubgroupStructure<G: Group>: Structure {
     public typealias Base = G
     
     public func contains(_ g: G) -> Bool {
+        fatalError("implement in subclass")
+    }
+    
+    public static func ==(a: SubgroupStructure<G>, b: SubgroupStructure<G>) -> Bool {
         fatalError("implement in subclass")
     }
     
@@ -44,6 +48,10 @@ public final class FiniteSubgroupStructure<G: Group>: SubgroupStructure<G> {
         return allElements.contains(g)
     }
     
+    public static func ==(a: FiniteSubgroupStructure<G>, b: FiniteSubgroupStructure<G>) -> Bool {
+        return a.allElements == b.allElements
+    }
+    
     public override var description: String {
         return "{\(Array(allElements).map{"\($0)"}.joined(separator: ", "))}"
     }
@@ -57,6 +65,10 @@ public class IdealStructure<R: Ring>: Structure {
     }
     
     public func contains(_ r: R) -> Bool {
+        fatalError("implement in subclass")
+    }
+    
+    public static func ==(a: IdealStructure<R>, b: IdealStructure<R>) -> Bool {
         fatalError("implement in subclass")
     }
     
@@ -83,6 +95,10 @@ public final class EuclideanIdealStructure<R: EuclideanRing>: IdealStructure<R> 
     
     public override func contains(_ r: R) -> Bool {
         return r % generator == R.zero
+    }
+    
+    public static func ==(a: EuclideanIdealStructure<R>, b: EuclideanIdealStructure<R>) -> Bool {
+        return a.generator == b.generator
     }
     
     public override func inverseInQuotient(_ r: R) -> R? {

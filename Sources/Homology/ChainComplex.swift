@@ -24,7 +24,7 @@ public struct Ascending : ChainType {
 public typealias   ChainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Descending, A, R>
 public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Ascending,  A, R>
 
-public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
+public struct _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
     public typealias ChainBasis = [A]
     public typealias BoundaryMap = FreeModuleHom<A, A, R>
     public typealias BoundaryMatrix = DynamicMatrix<R>
@@ -97,10 +97,10 @@ public final class _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Rin
         }
     }
     
-    public static func ==<chainType, A, R>(lhs: _ChainComplex<chainType, A, R>, rhs: _ChainComplex<chainType, A, R>) -> Bool {
-        let offset = min(lhs.offset, rhs.offset)
-        let degree = max(lhs.topDegree, rhs.topDegree)
-        return (offset ... degree).forAll { i in lhs.boundaryMap(i) == rhs.boundaryMap(i) }
+    public static func ==<chainType, A, R>(a: _ChainComplex<chainType, A, R>, b: _ChainComplex<chainType, A, R>) -> Bool {
+        let offset = min(a.offset, b.offset)
+        let degree = max(a.topDegree, b.topDegree)
+        return (offset ... degree).forAll { i in (a.chainBasis(i) == b.chainBasis(i)) && (a.boundaryMatrix(i) == b.boundaryMatrix(i)) }
     }
     
     public var description: String {

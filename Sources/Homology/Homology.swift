@@ -21,7 +21,7 @@ import Foundation
 public typealias   Homology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Descending, A, R>
 public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Ascending, A, R>
 
-public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: Equatable, Structure {
+public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: Structure {
     public typealias Cycle = FreeModule<A, R>
     
     public let chainComplex: _ChainComplex<chainType, A, R>
@@ -55,7 +55,7 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
     }
     
     public static func ==(a: _Homology<chainType, A, R>, b: _Homology<chainType, A, R>) -> Bool {
-        return a.chainComplex.name == b.chainComplex.name // TODO replace with a more precise & efficient way.
+        return a.chainComplex == b.chainComplex
     }
     
     public var description: String {
@@ -133,6 +133,10 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
         public var description: String {
             let desc = summands.map{$0.description}.joined(separator: "⊕")
             return desc.isEmpty ? "0" : desc
+        }
+        
+        public static func ==(a: HomologySummand, b: HomologySummand) -> Bool {
+            return a.summands == b.summands
         }
         
         public var detailDescription: String {

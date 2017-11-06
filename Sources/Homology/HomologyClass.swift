@@ -70,7 +70,8 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
             return (a.structure == nil && b.structure == nil) // when both a, b are 0.
         }
         
-        assert(H == H2)
+        assert(H.chainComplex.name == H2.chainComplex.name)
+        // assert(H == H2) // this assertion is heavy
         
         if a.factors.keys == b.factors.keys {
             return a.factors.forAll { (i, z) in
@@ -86,7 +87,8 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
             return (a.structure == nil) ? b : a
         }
         
-        assert(H == H2)
+        assert(H.chainComplex.name == H2.chainComplex.name)
+        // assert(H == H2) // this assertion is heavy
         
         return _HomologyClass(a.z + b.z, H)
     }

@@ -79,14 +79,14 @@ public extension GeometricComplex {
 }
 
 public extension ChainComplex where chainType == Descending {
-    public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == C.Cell {
+    public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == C.Cell {
         let chain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             (K.cells(ofDim: i), K.boundaryMap(i), K.boundaryMatrix(i))
         }
         self.init(name: K.name, chain)
     }
     
-    public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where A == C.Cell {
+    public init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where A == C.Cell {
         let chain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             
             let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
@@ -101,7 +101,7 @@ public extension ChainComplex where chainType == Descending {
 }
 
 public extension CochainComplex where chainType == Ascending {
-    public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
+    public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
         let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             let basis = K.cells(ofDim: i).map{ Dual($0) }
             let matrix = R(intValue: (-1).pow(i + 1)) * K.boundaryMatrix(i + 1).transposed
@@ -117,7 +117,7 @@ public extension CochainComplex where chainType == Ascending {
         self.init(name: K.name, cochain)
     }
     
-    public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where Dual<C.Cell> == A {
+    public init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where Dual<C.Cell> == A {
         let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
             let to   = K.cells(ofDim: i + 1).subtract(L.cells(ofDim: i + 1))

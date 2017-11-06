@@ -9,7 +9,7 @@
 import Foundation
 
 public extension FreeModule {
-    public struct Summand: CustomStringConvertible {
+    public final class Summand: Structure {
         public let generator: FreeModule<A, R>
         public let factor: R
         
@@ -20,6 +20,10 @@ public extension FreeModule {
         
         public var isFree: Bool {
             return factor == R.zero
+        }
+        
+        public static func ==(a: FreeModule<A, R>.Summand, b: FreeModule<A, R>.Summand) -> Bool {
+            return (a.generator, a.factor) == (b.generator, b.factor)
         }
         
         public var description: String {
