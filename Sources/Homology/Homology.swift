@@ -68,21 +68,13 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             + "\n}"
     }
     
-    public final class HomologySummand: Structure {
-        public typealias Summand = Cycle.Summand
-        
+    public final class HomologySummand: FinitelyGeneratedModuleStructure<A, R> {
         public let degree: Int
-        public let chainBasis: [A]
-        public let summands: [Summand]
-        public let transitionMatrix: DynamicMatrix<R> // chain -> cycle
-
-        internal init(_ i: Int, _ C: _ChainComplex<chainType, A, R>) {
+        
+        public init(_ i: Int, _ C: _ChainComplex<chainType, A, R>) {
             let basis = C.chainBasis(i)
             
-            let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
-            
-            let (Z, B) = (A1.kernelMatrix, A2.imageMatrix)
-            
+            // Z = Ker(A1), B = Im(A2)
             // T: Transition matrix from C to Z (represents cycles in Z-coords.)
             //
             //   P * A1 * Q = [D; O_k]
@@ -91,33 +83,27 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             //
             // Put T = Q^-1[ * , n - k ..< n], then T * Z = I_k.
             
-            let T1 = A1.smithNormalForm.rightInverse.submatrix(rowsInRange: (Z.rows - Z.cols) ..< Z.rows) as DynamicMatrix<R>
-            
-            let (summands, T2) = Cycle.invariantFactorDecomposition(basis: basis, generators: Z, relations: B, transition: T1)
+            let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
+            let (Z, B) = (A1.kernelMatrix, A2.imageMatrix)
+            let T = A1.smithNormalForm.rightInverse.submatrix(rowsInRange: (Z.rows - Z.cols) ..< Z.rows) as DynamicMatrix<R>
             
             self.degree = i
-            self.chainBasis = basis
-            self.summands = summands
-            self.transitionMatrix = T2
-        }
-        
-        public subscript (i: Int) -> Summand {
-            return summands[i]
+            super.init(basis: basis, generators: Z, relations: B, transition: T)
         }
         
         public var generators: [Cycle] {
-            return summands.map{ s in s.generator }
+            return self.map{ s in s.generator }
         }
         
         public var rank: Int {
-            return summands.filter{ $0.isFree }.count
+            return self.filter{ $0.isFree }.count
         }
         
         public func factorize(_ z: Cycle) -> [R] {
-            let n = chainBasis.count
-            let v = transitionMatrix * ColVector(rows: n, grid: z.factorize(by: chainBasis))
+            let n = basis.count
+            let v = transitionMatrix * ColVector(rows: n, grid: z.factorize(by: basis))
             
-            return summands.enumerated().map { (i, s) in
+            return self.enumerated().map { (i, s) in
                 return s.isFree ? v[i] : v[i] % s.factor
             }
         }
@@ -130,24 +116,15 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             return isNullHomologue(z1 - z2)
         }
         
-        public var description: String {
-            let desc = summands.map{$0.description}.joined(separator: "⊕")
-            return desc.isEmpty ? "0" : desc
-        }
-        
-        public static func ==(a: HomologySummand, b: HomologySummand) -> Bool {
-            return a.summands == b.summands
-        }
-        
         public var detailDescription: String {
-            return "\(self),\t\(summands.map{ $0.generator })"
+            return "\(self),\t\(self.map{ $0.generator })"
         }
     }
 }
 
 public extension Homology where chainType == Descending {
     public func bettiNumer(i: Int) -> Int {
-        return self[i].summands.filter{ $0.isFree }.count
+        return self[i].filter{ $0.isFree }.count
     }
     
     public var eulerNumber: Int {

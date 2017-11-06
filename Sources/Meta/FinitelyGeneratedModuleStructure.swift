@@ -8,7 +8,48 @@
 
 import Foundation
 
-public extension FreeModule {
+// https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
+
+public class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: EuclideanRing>: Structure, Sequence {
+    public let basis: [A]
+    public let summands: [Summand]
+    public let transitionMatrix: DynamicMatrix<R>
+    
+    public init(basis: [A], generators A: DynamicMatrix<R>, relations B: DynamicMatrix<R>, transition T1: DynamicMatrix<R>) {
+        let (generators, T2) = FinitelyGeneratedModuleStructure<A, R>.calculate(A, B, T1)
+        
+        let summands = generators.map{ (v, a) -> Summand in
+            let z = FreeModule(basis: basis, vector: v)
+            return Summand(z, a)
+        }
+        
+        self.basis = basis
+        self.summands = summands
+        self.transitionMatrix = T2
+    }
+    
+    public convenience init(basis: [A], relations B: DynamicMatrix<R>) {
+        let n = basis.count
+        let I = DynamicMatrix<R>.identity(size: n)
+        self.init(basis: basis, generators: I, relations: B, transition: I)
+    }
+    
+    public subscript(i: Int) -> Summand {
+        return summands[i]
+    }
+    
+    public func makeIterator() -> IndexingIterator<[Summand]> {
+        return summands.makeIterator()
+    }
+    
+    public static func ==(a: FinitelyGeneratedModuleStructure<A, R>, b: FinitelyGeneratedModuleStructure<A, R>) -> Bool {
+        return a.summands == b.summands
+    }
+    
+    public var description: String {
+        return summands.isEmpty ? "0" : summands.map{$0.description}.joined(separator: "⊕")
+    }
+
     public final class Summand: Structure {
         public let generator: FreeModule<A, R>
         public let factor: R
@@ -22,7 +63,7 @@ public extension FreeModule {
             return factor == R.zero
         }
         
-        public static func ==(a: FreeModule<A, R>.Summand, b: FreeModule<A, R>.Summand) -> Bool {
+        public static func ==(a: Summand, b: Summand) -> Bool {
             return (a.generator, a.factor) == (b.generator, b.factor)
         }
         
@@ -34,24 +75,13 @@ public extension FreeModule {
         }
     }
     
-    // https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
-    public static func invariantFactorDecomposition(basis: [A], generators A: DynamicMatrix<R>, relations B: DynamicMatrix<R>, transition T: DynamicMatrix<R>) -> (summands: [Summand], transition: DynamicMatrix<R>) {
-        assert(basis.count == A.rows) // n
-        assert(A.rows == B.rows)      // n ≧ k
-        assert(A.cols >= B.cols)      // k ≧ l
-        
-        let (generators, T2) = calculate(A, B, T)
-        let summands = generators.map{ (v, a) -> Summand in
-            let z = FreeModule(basis: basis, vector: v)
-            return Summand(z, a)
-        }
-        
-        return (summands, T2)
-    }
-    
     private static func calculate(_ A: DynamicMatrix<R>, _ B: DynamicMatrix<R>, _ T: DynamicMatrix<R>) -> (generators: [(DynamicColVector<R>, R)], transition: DynamicMatrix<R>) {
         
-        let (k, l) = (A.cols, B.cols) // n >= k >= l
+        assert(A.rows == B.rows)
+        assert(A.rows >= A.cols)  // n ≧ k
+        assert(A.cols >= B.cols)  // k ≧ l
+        
+        let (k, l) = (A.cols, B.cols)
         
         // R ∈ M(k, l) : Relation from A to B,  B = A * R.
         //

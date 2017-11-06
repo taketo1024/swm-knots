@@ -8,6 +8,13 @@
 
 import Foundation
 
+// A `Structure` instance expresses a mathematical structure that is determined dynamically.
+// Used when we want a 'dynamic-type', where Swift-types are strictly static.
+//
+// * All finite subgroups of a finite (static) group.
+// * The invariant factor decomposition of a given f.g. module.
+// * The Homology group of a given SimplicialComplex.
+
 public protocol Structure: class, Equatable, CustomStringConvertible { }
 
 public extension Structure {
@@ -54,60 +61,5 @@ public final class FiniteSubgroupStructure<G: Group>: SubgroupStructure<G> {
     
     public override var description: String {
         return "{\(Array(allElements).map{"\($0)"}.joined(separator: ", "))}"
-    }
-}
-
-public class IdealStructure<R: Ring>: Structure {
-    public typealias Base = R
-    
-    public func reduced(_ r: R) -> R {
-        fatalError("implement in subclass")
-    }
-    
-    public func contains(_ r: R) -> Bool {
-        fatalError("implement in subclass")
-    }
-    
-    public static func ==(a: IdealStructure<R>, b: IdealStructure<R>) -> Bool {
-        fatalError("implement in subclass")
-    }
-    
-    public func inverseInQuotient(_ r: R) -> R? {
-        fatalError("implement in subclass")
-    }
-    
-    public var description: String {
-        return "\(type(of: self))"
-    }
-}
-
-public final class EuclideanIdealStructure<R: EuclideanRing>: IdealStructure<R> {
-    public let generator: R
-    
-    public init(generator: R)  {
-        self.generator = generator
-        super.init()
-    }
-    
-    public override func reduced(_ r: R) -> R {
-        return r % generator
-    }
-    
-    public override func contains(_ r: R) -> Bool {
-        return r % generator == R.zero
-    }
-    
-    public static func ==(a: EuclideanIdealStructure<R>, b: EuclideanIdealStructure<R>) -> Bool {
-        return a.generator == b.generator
-    }
-    
-    public override func inverseInQuotient(_ r: R) -> R? {
-        // same implementation as in `EuclideanIdeal`
-        let (a, _, u) = bezout(r, generator)
-        return u.inverse.map{ inv in inv * a }
-    }
-    
-    public override var description: String {
-        return "(\(generator))"
     }
 }

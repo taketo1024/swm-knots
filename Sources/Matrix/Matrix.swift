@@ -164,16 +164,6 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         }
     }
     
-    // TODO delete if possible
-    public var leftIdentity: Matrix<n, n, R> {
-        return Matrix<n, n, R>(rows: rows, cols: rows, type: type) { $0 == $1 ? 1 : 0 }
-    }
-    
-    public var rightIdentity: Matrix<m, m, R> {
-        return Matrix<m, m, R>(rows: cols, cols: cols, type: type) { $0 == $1 ? 1 : 0 }
-    }
-    // --TODO
-
     public func rowArray(_ i: Int) -> [R] {
         return rowVector(i).map{ c in c.value }
     }
@@ -452,7 +442,7 @@ public extension Matrix where n == m {
     public var inverse: Matrix<n, n, R>? {
         if eliminatable {
             let s = smithNormalForm
-            if s.result == self.leftIdentity {
+            if s.result == Matrix.identity(size: self.rows) {
                 return s.right * s.left
             } else {
                 return nil
@@ -463,10 +453,15 @@ public extension Matrix where n == m {
     }
     
     public static var identity: Matrix<n, n, R> {
-        return Matrix<n, n, R> { $0 == $1 ? 1 : 0 }
+        assert(n.self != Dynamic.self)
+        return identity(size: n.intValue)
+    }
+    
+    public static func identity(size: Int) -> Matrix<n, n, R> {
+        return Matrix<n, n, R> (rows: size, cols: size) { $0 == $1 ? 1 : 0 }
     }
     
     public static func ** (a: Matrix<n, n, R>, k: Int) -> Matrix<n, n, R> {
-        return k == 0 ? a.leftIdentity : a * (a ** (k - 1))
+        return k == 0 ? Matrix.identity(size: a.rows) : a * (a ** (k - 1))
     }
 }

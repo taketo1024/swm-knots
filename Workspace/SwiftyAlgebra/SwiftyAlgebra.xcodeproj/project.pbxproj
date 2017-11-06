@@ -50,7 +50,7 @@
 		147D965D1F30759F00967992 /* ChainMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D965C1F30759F00967992 /* ChainMap.swift */; };
 		147D98031EB9B06900C736AC /* IntegerFactorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98021EB9B06900C736AC /* IntegerFactorization.swift */; };
 		147D98061EB9B26200C736AC /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98051EB9B26200C736AC /* Dictionary.swift */; };
-		148B41151FAF765000E59134 /* ModuleDecomposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148B41141FAF765000E59134 /* ModuleDecomposition.swift */; };
+		148B41151FAF765000E59134 /* FinitelyGeneratedModuleStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148B41141FAF765000E59134 /* FinitelyGeneratedModuleStructure.swift */; };
 		14929C9E1ED9C798006ACAC5 /* Simplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14929C9C1ED9C798006ACAC5 /* Simplex.swift */; };
 		14929C9F1ED9C798006ACAC5 /* SimplicialComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */; };
 		1499CD011F236328009C3C99 /* CustomOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1499CD001F236328009C3C99 /* CustomOperations.swift */; };
@@ -127,7 +127,7 @@
 		147D965C1F30759F00967992 /* ChainMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChainMap.swift; sourceTree = "<group>"; };
 		147D98021EB9B06900C736AC /* IntegerFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntegerFactorization.swift; sourceTree = "<group>"; };
 		147D98051EB9B26200C736AC /* Dictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dictionary.swift; sourceTree = "<group>"; };
-		148B41141FAF765000E59134 /* ModuleDecomposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleDecomposition.swift; sourceTree = "<group>"; };
+		148B41141FAF765000E59134 /* FinitelyGeneratedModuleStructure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinitelyGeneratedModuleStructure.swift; sourceTree = "<group>"; };
 		14929C941ED9BFE5006ACAC5 /* AlgebraicExtensions.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = AlgebraicExtensions.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		14929C951ED9BFE5006ACAC5 /* FreeModules.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = FreeModules.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		14929C961ED9BFE5006ACAC5 /* Homology.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Homology.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -272,7 +272,6 @@
 				140E809F1ECDEA8E00B89719 /* combinations.swift */,
 				147D98021EB9B06900C736AC /* IntegerFactorization.swift */,
 				1424F4F11EB997780052581F /* PolynomialFactorization.swift */,
-				148B41141FAF765000E59134 /* ModuleDecomposition.swift */,
 			);
 			path = Tools;
 			sourceTree = "<group>";
@@ -281,6 +280,7 @@
 			isa = PBXGroup;
 			children = (
 				14D261311EE44DB4006775E2 /* Structure.swift */,
+				148B41141FAF765000E59134 /* FinitelyGeneratedModuleStructure.swift */,
 				1424F4F31EB997780052581F /* IntTypeParameter.swift */,
 				1424F4F41EB997780052581F /* PolynomialTypeParameter.swift */,
 			);
@@ -550,7 +550,7 @@
 				140F4FAF1F96F66400C4C039 /* Random.swift in Sources */,
 				14929C9F1ED9C798006ACAC5 /* SimplicialComplex.swift in Sources */,
 				142932011FAEB6E7003EE1BB /* GeometricComplexMap.swift in Sources */,
-				148B41151FAF765000E59134 /* ModuleDecomposition.swift in Sources */,
+				148B41151FAF765000E59134 /* FinitelyGeneratedModuleStructure.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
