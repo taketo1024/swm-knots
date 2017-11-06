@@ -25,7 +25,7 @@ public struct DualSimplicialCell: GeometricCell {
         let chain = { () -> SimplicialChain<IntegerNumber> in
             if dim > 1 {
                 let Lk = SimplicialComplex(maximalCells: components.map{$0.subtract(center)})
-                guard let z = Lk.fundamentalClass else {
+                guard let z = Lk.orientationCycle else {
                     fatalError("invalid dual-cell. center: \(center), components: \(components)")
                 }
                 
