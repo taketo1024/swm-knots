@@ -21,7 +21,7 @@ import Foundation
 public typealias   Homology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Descending, A, R>
 public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Ascending, A, R>
 
-public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: Equatable, CustomStringConvertible {
+public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: Equatable, Structure {
     public typealias Cycle = FreeModule<A, R>
     
     public let chainComplex: _ChainComplex<chainType, A, R>
@@ -68,7 +68,7 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             + "\n}"
     }
     
-    public final class HomologySummand: TypeInfo {
+    public final class HomologySummand: Structure {
         public typealias Summand = Cycle.Summand
         
         public let degree: Int

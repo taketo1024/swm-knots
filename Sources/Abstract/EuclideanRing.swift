@@ -20,10 +20,6 @@ public extension EuclideanRing {
     public static func /% (_ a: Self, b: Self) -> (q: Self, r: Self) {
         return Self.eucDiv(a, b)
     }
-    
-    public var asIdeal: EuclideanIdealInfo<Self> {
-        return EuclideanIdealInfo(generator: self)
-    }
 }
 
 public func gcd<R: EuclideanRing>(_ a: R, _ b: R) -> R {
