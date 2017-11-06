@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		140BCD511EBA3F8A00D7CE74 /* ChainComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */; };
 		140E80A01ECDEA8E00B89719 /* combinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140E809F1ECDEA8E00B89719 /* combinations.swift */; };
-		140F4FAF1F96F66400C4C039 /* Random.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140F4FAE1F96F66400C4C039 /* Random.swift */; };
+		140F4FAF1F96F66400C4C039 /* random.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140F4FAE1F96F66400C4C039 /* random.swift */; };
 		141417311ECE984800B167CB /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141417301ECE984800B167CB /* Sequence.swift */; };
 		141C0CDF1F28232F00D9BDDE /* CWComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141C0CDE1F28232F00D9BDDE /* CWComplex.swift */; };
 		14207CB41EEB90E80007BE8F /* MatrixConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14207CB31EEB90E80007BE8F /* MatrixConfig.swift */; };
@@ -82,7 +82,7 @@
 /* Begin PBXFileReference section */
 		140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChainComplex.swift; sourceTree = "<group>"; };
 		140E809F1ECDEA8E00B89719 /* combinations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = combinations.swift; path = ../Util/combinations.swift; sourceTree = "<group>"; };
-		140F4FAE1F96F66400C4C039 /* Random.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Random.swift; sourceTree = "<group>"; };
+		140F4FAE1F96F66400C4C039 /* random.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = random.swift; sourceTree = "<group>"; };
 		141417301ECE984800B167CB /* Sequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
 		1414D8551EE0F927001A1D42 /* Polynomials.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Polynomials.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		141C0CDE1F28232F00D9BDDE /* CWComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CWComplex.swift; sourceTree = "<group>"; };
@@ -222,7 +222,7 @@
 				1424F4DF1EB997780052581F /* Permutation */,
 				14929C9B1ED9C798006ACAC5 /* Geometry */,
 				147D98071EBA0C0C00C736AC /* Homology */,
-				1424F4EF1EB997780052581F /* Tools */,
+				1424F4EF1EB997780052581F /* Computation */,
 				1424F4F21EB997780052581F /* Meta */,
 				147D98041EB9B24900C736AC /* Extensions */,
 				1424F4F51EB997780052581F /* Util */,
@@ -266,14 +266,14 @@
 			path = Numbers;
 			sourceTree = "<group>";
 		};
-		1424F4EF1EB997780052581F /* Tools */ = {
+		1424F4EF1EB997780052581F /* Computation */ = {
 			isa = PBXGroup;
 			children = (
 				140E809F1ECDEA8E00B89719 /* combinations.swift */,
 				147D98021EB9B06900C736AC /* IntegerFactorization.swift */,
 				1424F4F11EB997780052581F /* PolynomialFactorization.swift */,
 			);
-			path = Tools;
+			path = Computation;
 			sourceTree = "<group>";
 		};
 		1424F4F21EB997780052581F /* Meta */ = {
@@ -290,12 +290,11 @@
 		1424F4F51EB997780052581F /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				1499CD001F236328009C3C99 /* CustomOperations.swift */,
+				140F4FAE1F96F66400C4C039 /* random.swift */,
 				DD3B16EF1ECECC5500EC6C2A /* debug.swift */,
 				1424F4F71EB997780052581F /* optable.swift */,
 				145339BF1EC7D67100F014F4 /* Ref.swift */,
 				DD6125991F31AA2500FD5533 /* Cache.swift */,
-				140F4FAE1F96F66400C4C039 /* Random.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -322,6 +321,7 @@
 				147D98051EB9B26200C736AC /* Dictionary.swift */,
 				141417301ECE984800B167CB /* Sequence.swift */,
 				143735A61F30088B0042004F /* String.swift */,
+				1499CD001F236328009C3C99 /* CustomOperations.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -547,7 +547,7 @@
 				1424F4FC1EB997780052581F /* Group.swift in Sources */,
 				146A296E1F1DA32400531AA2 /* HomologyClass.swift in Sources */,
 				14A85FF31ED9D63E00A754EA /* GeometricComplex.swift in Sources */,
-				140F4FAF1F96F66400C4C039 /* Random.swift in Sources */,
+				140F4FAF1F96F66400C4C039 /* random.swift in Sources */,
 				14929C9F1ED9C798006ACAC5 /* SimplicialComplex.swift in Sources */,
 				142932011FAEB6E7003EE1BB /* GeometricComplexMap.swift in Sources */,
 				148B41151FAF765000E59134 /* FinitelyGeneratedModuleStructure.swift in Sources */,
