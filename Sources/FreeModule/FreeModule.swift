@@ -1,82 +1,94 @@
 import Foundation
 
-public protocol FreeModuleBase: SetType {}
+public protocol FreeModuleBase: SetType {
+    var degree: Int { get }
+}
 
-public struct FreeModule<R: Ring, A: FreeModuleBase>: Module, Sequence {
+public extension FreeModuleBase {
+    public var degree: Int { return 1 }
+}
+
+public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
     public typealias CoeffRing = R
+    public typealias Basis = [A]
     
-    public let basis: [A]
     internal let elements: [A: R]
     
     // root initializer
-    internal init(basis: [A], elements: [A : R]) {
-        self.basis = basis
-        self.elements = elements
+    public init(_ elements: [A : R]) {
+        self.elements = elements.filter{ $0.value != 0 }
     }
     
-    public init(basis: [A], components: [R]) {
-        guard basis.count == components.count else {
-            fatalError("#basis (\(basis.count)) != #components (\(components.count))")
-        }
-        self.init(basis: basis, elements: Dictionary(pairs: zip(basis, components)))
+    public init<S: Sequence>(_ elements: S) where S.Element == (A, R) {
+        let dict = Dictionary(pairs: elements)
+        self.init(dict)
     }
     
-    public init<S: Sequence>(_ elements: S) where S.Element == (R, A) {
-        let basis = elements.map{$0.1}
-        let dict = Dictionary(pairs: elements.map{($0.1, $0.0)})
-        self.init(basis: basis, elements: dict)
+    public init(basis: Basis, components: [R]) {
+        assert(basis.count == components.count)
+        self.init(Dictionary(pairs: zip(basis, components)))
+    }
+    
+    public init<n>(basis: Basis, vector: ColVector<n, R>) {
+        assert(basis.count == vector.rows)
+        self.init(Dictionary(pairs: zip(basis, vector.grid)))
     }
     
     // generates a basis element
     public init(_ a: A) {
-        self.init([(1, a)])
+        self.init([(a, 1)])
     }
     
     public subscript(a: A) -> R {
         return elements[a] ?? R.zero
     }
     
-    public func components(correspondingTo list: [A]) -> [R] {
+    public var basis: Basis {
+        return elements.keys.toArray()
+    }
+    
+    public func factorize(by list: Basis) -> [R] {
         return list.map{ self[$0] }
     }
     
-    public static var zero: FreeModule<R, A> {
-        return FreeModule<R, A>.init([])
+    public static var zero: FreeModule<A, R> {
+        return FreeModule<A, R>.init([])
     }
     
-    public func mapComponents<R2: Ring>(_ f: (R) -> R2) -> FreeModule<R2, A> {
-        return FreeModule<R2, A>(basis: basis, elements: elements.mapValues(f))
+    public func mapValues<R2: Ring>(_ f: (R) -> R2) -> FreeModule<A, R2> {
+        return FreeModule<A, R2>(elements.mapValues(f))
     }
     
-    public func makeIterator() -> DictionaryIterator<A, R> {
-        return elements.makeIterator()
+    public func makeIterator() -> AnyIterator<(A, R)> {
+        return AnyIterator(elements.lazy.map{ (a, r) in (a, r) }.makeIterator())
     }
     
-    public static func == (a: FreeModule<R, A>, b: FreeModule<R, A>) -> Bool {
-        return a.elements == b.elements // bases need not be in same order.
+    public static func == (a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
+        return a.elements == b.elements
     }
     
-    public static func + (a: FreeModule<R, A>, b: FreeModule<R, A>) -> FreeModule<R, A> {
-        let basis = (a.basis + b.basis).unique()
-        let elements = Dictionary(keys: basis) { a[$0] + b[$0] }
-        return FreeModule<R, A>(basis: basis, elements: elements)
+    public static func + (a: FreeModule<A, R>, b: FreeModule<A, R>) -> FreeModule<A, R> {
+        var d: [A : R] = a.elements
+        for (a, r) in b {
+            d[a] = d[a, default: R.zero] + r
+        }
+        return FreeModule<A, R>(d)
     }
     
-    public static prefix func - (a: FreeModule<R, A>) -> FreeModule<R, A> {
-        return FreeModule<R, A>(basis: a.basis, elements: a.elements.mapValues{ -$0 })
+    public static prefix func - (a: FreeModule<A, R>) -> FreeModule<A, R> {
+        return FreeModule<A, R>(a.elements.mapValues{ -$0 })
     }
     
-    public static func * (r: R, a: FreeModule<R, A>) -> FreeModule<R, A> {
-        return FreeModule<R, A>(basis: a.basis, elements: a.elements.mapValues{ r * $0 })
+    public static func * (r: R, a: FreeModule<A, R>) -> FreeModule<A, R> {
+        return FreeModule<A, R>(a.elements.mapValues{ r * $0 })
     }
     
-    public static func * (a: FreeModule<R, A>, r: R) -> FreeModule<R, A> {
-        return FreeModule<R, A>(basis: a.basis, elements: a.elements.mapValues{ $0 * r })
+    public static func * (a: FreeModule<A, R>, r: R) -> FreeModule<A, R> {
+        return FreeModule<A, R>(a.elements.mapValues{ $0 * r })
     }
     
     public var description: String {
-        let sum: String = basis.map {($0, self[$0])}
-            .filter{ (_, r) in r != R.zero }
+        let sum: String = self.filter{ (_, r) in r != R.zero }
             .map { (a, r) in (r == R.identity) ? "\(a)" : "\(r)\(a)" }
             .joined(separator: " + ")
         
@@ -84,26 +96,16 @@ public struct FreeModule<R: Ring, A: FreeModuleBase>: Module, Sequence {
     }
     
     public static var symbol: String {
-        return "FM(\(R.symbol))"
+        return "FreeMod(\(R.symbol))"
     }
     
     public var hashValue: Int {
-        return basis.count > 0 ? self[basis.first!].hashValue : 0
-    }
-    
-    public static func generateElements<n, m>(basis: [A], matrix A: Matrix<R, n, m>) -> [FreeModule<R, A>] {
-        return (0 ..< A.cols).map { j in
-            let elements = (0 ..< A.rows).flatMap { i -> (R, A)? in
-                let a = A[i, j]
-                return (a != 0) ? (a, basis[i]) : nil
-            }
-            return FreeModule<R, A>(elements)
-        }
+        return (self == FreeModule.zero) ? 0 : 1
     }
 }
 
-public struct FreeZeroModule<R: Ring, A: FreeModuleBase>: Submodule {
-    public typealias Super = FreeModule<R, A>
+public struct FreeZeroModule<A: FreeModuleBase, R: Ring>: Submodule {
+    public typealias Super = FreeModule<A, R>
     public typealias CoeffRing = R
     
     public init(_ m: Super) {}
@@ -112,7 +114,7 @@ public struct FreeZeroModule<R: Ring, A: FreeModuleBase>: Submodule {
         return Super.zero
     }
     
-    public static func contains(_ g: FreeModule<R, A>) -> Bool {
+    public static func contains(_ g: FreeModule<A, R>) -> Bool {
         return g == Super.zero
     }
     
@@ -127,8 +129,16 @@ public struct Dual<A: FreeModuleBase>: FreeModuleBase {
         base = a
     }
     
+    public var degree: Int {
+        return base.degree
+    }
+    
     public var hashValue: Int {
         return base.hashValue
+    }
+    
+    public func pair(_ s: A) -> Int {
+        return (base == s) ? 1 : 0
     }
     
     public static func ==(a: Dual<A>, b: Dual<A>) -> Bool {
@@ -141,14 +151,14 @@ public struct Dual<A: FreeModuleBase>: FreeModuleBase {
 }
 
 public extension FreeModule {
-    public func evaluate(_ f: FreeModule<R, Dual<A>>) -> R {
+    public func evaluate(_ f: FreeModule<Dual<A>, R>) -> R {
         return self.reduce(R.zero) { (res, next) -> R in
             let (a, r) = next
             return res + r * f[Dual(a)]
         }
     }
     
-    public func evaluate<B>(_ b: FreeModule<R, B>) -> R where A == Dual<B> {
+    public func evaluate<B>(_ b: FreeModule<B, R>) -> R where A == Dual<B> {
         return b.reduce(R.zero) { (res, next) -> R in
             let (a, r) = next
             return res + r * self[Dual(a)]
@@ -162,6 +172,10 @@ public struct Tensor<A: FreeModuleBase, B: FreeModuleBase>: FreeModuleBase {
     public init(_ a: A, _ b: B) {
         _1 = a
         _2 = b
+    }
+    
+    public var degree: Int {
+        return _1.degree + _2.degree
     }
     
     public var hashValue: Int {
@@ -181,9 +195,9 @@ public func ⊗<A, B>(a: A, b: B) -> Tensor<A, B> {
     return Tensor(a, b)
 }
 
-public func ⊗<R, A, B>(x: FreeModule<R, A>, y: FreeModule<R, B>) -> FreeModule<R, Tensor<A, B>> {
-    let elements = x.basis.allCombinations(with: y.basis).map{ (a, b) -> (R, Tensor<A, B>) in
-        return (x[a] * y[b], a⊗b)
+public func ⊗<A, B, R>(x: FreeModule<A, R>, y: FreeModule<B, R>) -> FreeModule<Tensor<A, B>, R> {
+    let elements = x.basis.allCombinations(with: y.basis).map{ (a, b) -> (Tensor<A, B>, R) in
+        return (a ⊗ b, x[a] * y[b])
     }
     return FreeModule(elements)
 }

@@ -1,7 +1,5 @@
 import Foundation
 
-infix operator /%: MultiplicationPrecedence
-
 public protocol EuclideanRing: Ring {
     var degree: Int { get }
     static func eucDiv(_ a: Self, _ b: Self) -> (q: Self, r: Self)
@@ -20,10 +18,6 @@ public extension EuclideanRing {
     public static func /% (_ a: Self, b: Self) -> (q: Self, r: Self) {
         return Self.eucDiv(a, b)
     }
-    
-    public var asIdeal: EuclideanIdealInfo<Self> {
-        return EuclideanIdealInfo(generator: self)
-    }
 }
 
 public func gcd<R: EuclideanRing>(_ a: R, _ b: R) -> R {
@@ -40,7 +34,7 @@ public func lcm<R: EuclideanRing>(_ a: R, _ b: R) -> R {
 }
 
 public func bezout<R: EuclideanRing>(_ a: R, _ b: R) -> (x: R, y: R, r: R) {
-    typealias M = SquareMatrix<R, _2>
+    typealias M = SquareMatrix<_2, R>
     
     func euclid(_ a: R, _ b: R, _ qs: [R]) -> (qs: [R], r: R) {
         switch b {

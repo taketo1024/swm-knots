@@ -8,17 +8,17 @@
 
 import Foundation
 
-public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
+public class MatrixEliminator<n: _Int, m: _Int, R: Ring> {
     let rows: Int
     let cols: Int
     let type: MatrixType
-    var target: Matrix<R, n, m>
+    var target: Matrix<n, m, R>
     var process: [EliminationStep<R>]
     
     private(set) var itr = 0
     private(set) var debug: Bool
     
-    public required init(_ target: Matrix<R, n, m>, _ debug: Bool = false) {
+    public required init(_ target: Matrix<n, m, R>, _ debug: Bool = false) {
         self.rows = target.rows
         self.cols = target.cols
         self.type = target.type
@@ -27,7 +27,7 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
         self.debug = debug
     }
     
-    public var result: Matrix<R, n, m> {
+    public var result: Matrix<n, m, R> {
         return target
     }
     
@@ -40,25 +40,25 @@ public class MatrixEliminator<R: Ring, n: _Int, m: _Int> {
         return diagonal.filter{ $0 != 0 }.count
     }
     
-    public lazy var left: Matrix<R, n, n> = { [unowned self] in
+    public lazy var left: Matrix<n, n, R> = { [unowned self] in
         var Q = RowOperationMatrix<R>.identity(rows)
         process.forEach { $0.apply(to: &Q) }
         return Matrix(rows: rows, cols: rows, type: type, grid: Q.toGrid)
     }()
     
-    public lazy var leftInverse: Matrix<R, n, n> = { [unowned self] in
+    public lazy var leftInverse: Matrix<n, n, R> = { [unowned self] in
         var Q = RowOperationMatrix<R>.identity(rows)
         process.reversed().forEach { $0.inverse.apply(to: &Q) }
         return Matrix(rows: rows, cols: rows, type: type, grid: Q.toGrid)
     }()
     
-    public lazy var right: Matrix<R, m, m> = { [unowned self] in
+    public lazy var right: Matrix<m, m, R> = { [unowned self] in
         var Q = ColOperationMatrix<R>.identity(cols)
         process.forEach { $0.apply(to: &Q) }
         return Matrix(rows: cols, cols: cols, type: type, grid: Q.toGrid)
     }()
     
-    public lazy var rightInverse: Matrix<R, m, m> = { [unowned self] in
+    public lazy var rightInverse: Matrix<m, m, R> = { [unowned self] in
         var Q = ColOperationMatrix<R>.identity(cols)
         process.reversed().forEach { $0.inverse.apply(to: &Q) }
         return Matrix(rows: cols, cols: cols, type: type, grid: Q.toGrid)

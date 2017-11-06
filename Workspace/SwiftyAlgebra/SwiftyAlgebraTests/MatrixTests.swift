@@ -13,7 +13,7 @@ import XCTest
 
 class MatrixTests: XCTestCase {
     
-    typealias MZ22 = Matrix<Z, _2, _2>
+    typealias M = Matrix<_2, _2, Z>
     
     override func setUp() {
         super.setUp()
@@ -38,50 +38,50 @@ class MatrixTests: XCTestCase {
     }
     
     public func testAddRow() {
-        var a = MZ22(1,2,3,4)
+        var a = M(1,2,3,4)
         a.addRow(at: 0, to: 1)
-        XCTAssertEqual(a, MZ22(1,2,4,6))
+        XCTAssertEqual(a, M(1,2,4,6))
     }
     
     public func testAddRowWithMul() {
-        var a = MZ22(1,2,3,4)
+        var a = M(1,2,3,4)
         a.addRow(at: 0, to: 1, multipliedBy: 2)
-        XCTAssertEqual(a, MZ22(1,2,5,8))
+        XCTAssertEqual(a, M(1,2,5,8))
     }
     
     public func testAddCol() {
-        var a = MZ22(1,2,3,4)
+        var a = M(1,2,3,4)
         a.addCol(at: 0, to: 1)
-        XCTAssertEqual(a, MZ22(1,3,3,7))
+        XCTAssertEqual(a, M(1,3,3,7))
     }
     
     public func testAddColWithMul() {
-        var a = MZ22(1,2,3,4)
+        var a = M(1,2,3,4)
         a.addCol(at: 0, to: 1, multipliedBy: 2)
-        XCTAssertEqual(a, MZ22(1,4,3,10))
+        XCTAssertEqual(a, M(1,4,3,10))
     }
     
     public func testMulRow() {
-        var a = MZ22(1,2,3,4)
+        var a = M(1,2,3,4)
         a.multiplyRow(at: 0, by: 2)
-        XCTAssertEqual(a, MZ22(2,4,3,4))
+        XCTAssertEqual(a, M(2,4,3,4))
     }
     
     public func testMulCol() {
-        var a = MZ22(1,2,3,4)
+        var a = M(1,2,3,4)
         a.multiplyCol(at: 0, by: 2)
-        XCTAssertEqual(a, MZ22(2,2,6,4))
+        XCTAssertEqual(a, M(2,2,6,4))
     }
     
     public func testSwapRows() {
-        var a = MZ22(1,2,3,4)
+        var a = M(1,2,3,4)
         a.swapRows(0, 1)
-        XCTAssertEqual(a, MZ22(3,4,1,2))
+        XCTAssertEqual(a, M(3,4,1,2))
     }
     
     public func testSwapCols() {
-        var a = MZ22(1,2,3,4)
+        var a = M(1,2,3,4)
         a.swapCols(0, 1)
-        XCTAssertEqual(a, MZ22(2,1,4,3))
+        XCTAssertEqual(a, M(2,1,4,3))
     }
 }

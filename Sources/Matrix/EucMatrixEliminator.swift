@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class EucMatrixEliminator<R: EuclideanRing, n: _Int, m: _Int>: MatrixEliminator<R, n, m> {
+public class EucMatrixEliminator<n: _Int, m: _Int, R: EuclideanRing>: MatrixEliminator<n, m, R> {
     override func iteration() -> Bool {
         
         // Exit if iterations are over.

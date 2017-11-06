@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator<K, n, m> {
+public class FieldMatrixEliminator<n: _Int, m: _Int, R: Field>: MatrixEliminator<n, m, R> {
     override func iteration() -> Bool {
         
         // Exit if iterations are over.
@@ -37,7 +37,7 @@ public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator
         return false
     }
     
-    private func next() -> MatrixComponent<K>? {
+    private func next() -> MatrixComponent<R>? {
         var iterator = MatrixIterator(result,
                               direction: .Cols,
                               rowRange: itr ..< result.rows,
@@ -50,7 +50,7 @@ public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator
     
     private func eliminateRow(_ i0: Int, _ j0: Int) {
         let a = result[i0, j0]
-        if a != K.identity {
+        if a != R.identity {
             apply(.MulRow(at: i0, by: a.inverse!))
         }
         
@@ -65,7 +65,7 @@ public class FieldMatrixEliminator<K: Field, n: _Int, m: _Int>: MatrixEliminator
     
     private func eliminateCol(_ i0: Int, _ j0: Int) {
         let a = result[i0, j0]
-        if a != K.identity {
+        if a != R.identity {
             apply(.MulCol(at: i0, by: a.inverse!))
         }
         

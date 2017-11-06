@@ -8,32 +8,26 @@
 
 import Foundation
 
-public struct Simplex: GeometricCell {
-    public   let vertices: [Vertex] // ordered list of vertices.
-    internal let vSet: Set<Vertex>  // unordered set of vertices.
-    internal let id: String
+public struct Simplex: GeometricCell, Comparable {
+    public let vertices: [Vertex] // ordered list of vertices.
+    fileprivate let unorderedVertices: Set<Vertex>  // unordered set of vertices.
+    
+    private let id: String
+    private let label: String
     
     public init<S: Sequence>(_ vs: S) where S.Iterator.Element == Vertex {
         let vertices = vs.sorted()
-        let vSet = Set(vertices)
-        assert(vertices.count == vSet.count)
+        let unordered = Set(vertices)
+        assert(vertices.count == unordered.count)
         
         self.vertices = vertices
-        self.vSet = vSet
-        self.id = "(\(self.vertices.map{$0.description}.joined(separator: ", ")))"
+        self.unorderedVertices = unordered
+        self.id = vertices.map{ "\($0.id)" }.joined(separator: ",")
+        self.label = (vertices.count == 1) ? vertices.first!.label : "(\(vertices.map{ $0.label }.joined(separator: ", ")))"
     }
     
-    public init<S: Sequence>(_ V: VertexSet, indices: S) where S.Iterator.Element == Int {
-        let vertices = indices.map{ V.vertex(at: $0) }
-        self.init(vertices)
-    }
-    
-    public init(_ vs: Vertex...) {
-        self.init(vs)
-    }
-    
-    public init(_ V: VertexSet, indices: Int...) {
-        self.init(V, indices: indices)
+    public init<S: Sequence>(_ V: [Vertex], indices: S) where S.Iterator.Element == Int {
+        self.init(indices.map{ V[$0] })
     }
     
     public var dim: Int {
@@ -59,11 +53,11 @@ public struct Simplex: GeometricCell {
     }
     
     public func contains(_ v: Vertex) -> Bool {
-        return vSet.contains(v)
+        return unorderedVertices.contains(v)
     }
     
     public func contains(_ s: Simplex) -> Bool {
-        return s.vSet.isSubset(of: self.vSet)
+        return s.unorderedVertices.isSubset(of: self.unorderedVertices)
     }
     
     public func allSubsimplices() -> [Simplex] {
@@ -80,21 +74,21 @@ public struct Simplex: GeometricCell {
     }
     
     public func join(_ s: Simplex) -> Simplex {
-        return Simplex(self.vSet.union(s.vSet))
+        return Simplex(self.unorderedVertices.union(s.unorderedVertices))
     }
     
     public func subtract(_ s: Simplex) -> Simplex {
-        return Simplex(self.vSet.subtracting(s.vSet))
+        return Simplex(self.unorderedVertices.subtracting(s.unorderedVertices))
     }
     
     public func subtract(_ v: Vertex) -> Simplex {
-        return Simplex(self.vSet.subtracting([v]))
+        return Simplex(self.unorderedVertices.subtracting([v]))
     }
     
     public func boundary<R: Ring>() -> SimplicialChain<R> {
-        let values: [(R, Simplex)] = faces().enumerated().map { (i, t) -> (R, Simplex) in
+        let values: [(Simplex, R)] = faces().enumerated().map { (i, t) -> (Simplex, R) in
             let e = R(intValue: (-1).pow(i))
-            return (e, t)
+            return (t, e)
         }
         return SimplicialChain(values)
     }
@@ -103,12 +97,27 @@ public struct Simplex: GeometricCell {
         return id.hashValue
     }
     
-    public var description: String {
-        return id
+    public static func ==(a: Simplex, b: Simplex) -> Bool {
+        return a.id == b.id
     }
     
-    public static func ==(a: Simplex, b: Simplex) -> Bool {
-        return a.id == b.id // should be `a.verticesSet == b.verticesSet` but for performance.
+    public static func <(a: Simplex, b: Simplex) -> Bool {
+        if a.dim == b.dim {
+            for (v, w) in zip(a.vertices, b.vertices) {
+                if v == w {
+                    continue
+                } else {
+                    return v < w
+                }
+            }
+            return false
+        } else {
+            return a.dim < b.dim
+        }
+    }
+    
+    public var description: String {
+        return label
     }
 }
 
@@ -118,16 +127,16 @@ public extension Vertex {
     }
     
     public func join<R>(_ chain: SimplicialChain<R>) -> SimplicialChain<R> {
-        return SimplicialChain(chain.basis.map{ (s) -> (R, Simplex) in
+        return SimplicialChain(chain.basis.map{ (s) -> (Simplex, R) in
             let t = self.join(s)
             let e = R(intValue: (-1).pow(t.vertices.index(of: self)!))
-            return (e * chain[s], t)
+            return (t, e * chain[s])
         })
     }
 }
 
-public typealias SimplicialChain<R: Ring>   = FreeModule<R, Simplex>
-public typealias SimplicialCochain<R: Ring> = FreeModule<R, Dual<Simplex>>
+public typealias SimplicialChain<R: Ring>   = FreeModule<Simplex, R>
+public typealias SimplicialCochain<R: Ring> = FreeModule<Dual<Simplex>, R>
 
 public extension SimplicialChain where A == Simplex {
     public func boundary() -> SimplicialChain<R> {
@@ -164,14 +173,14 @@ public extension SimplicialCochain where A == Dual<Simplex> {
     public func cup(_ f: SimplicialCochain<R>) -> SimplicialCochain<R> {
         typealias D = Dual<Simplex>
         let pairs = self.basis.allCombinations(with: f.basis)
-        let elements: [(R, D)] = pairs.flatMap{ (d1, d2) -> (R, D)? in
+        let elements: [(D, R)] = pairs.flatMap{ (d1, d2) -> (D, R)? in
             let (s1, s2) = (d1.base, d2.base)
             let (n1, n2) = (s1.dim, s2.dim)
             
-            let s = Simplex(s1.vSet.union(s2.vSet))
+            let s = Simplex(s1.unorderedVertices.union(s2.unorderedVertices))
             if (s1.vertices.last! == s2.vertices.first!) && (s.vertices == s1.vertices + s2.vertices.dropFirst()) {
                 let e = R(intValue: (-1).pow(n1 * n2))
-                return (e * self[d1] * f[d2], Dual(s))
+                return (Dual(s), e * self[d1] * f[d2])
             } else {
                 return nil
             }

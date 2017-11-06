@@ -44,21 +44,21 @@ public extension Group {
 }
 
 public extension Group where Self: FiniteSetType {
-    public static func cyclicSubgroup(generator: Self) -> FiniteSubgroupInfo<Self> {
+    public static func cyclicSubgroup(generator: Self) -> FiniteSubgroupStructure<Self> {
         var g = generator
         var set = Set([identity])
         while !set.contains(g) {
             set.insert(g)
             g = g * g
         }
-        return FiniteSubgroupInfo(allElements: set)
+        return FiniteSubgroupStructure(allElements: set)
     }
     
-    public static var allCyclicSubgroups: [FiniteSubgroupInfo<Self>] {
+    public static var allCyclicSubgroups: [FiniteSubgroupStructure<Self>] {
         return allElements.map{ cyclicSubgroup(generator: $0) }.sorted{ $0.countElements < $1.countElements }
     }
     
-    public static var allSubgroups: [FiniteSubgroupInfo<Self>] {
+    public static var allSubgroups: [FiniteSubgroupStructure<Self>] {
         let n = countElements
         if n == 1 {
             return [cyclicSubgroup(generator: identity)]
@@ -81,7 +81,7 @@ public extension Group where Self: FiniteSetType {
         
         return unions
             .sorted{ $0.count < $1.count }
-            .map{ FiniteSubgroupInfo(allElements: $0) }
+            .map{ FiniteSubgroupStructure(allElements: $0) }
     }
 }
 

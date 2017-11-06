@@ -18,7 +18,7 @@ public struct ColOperationMatrix<R: Ring>: CustomStringConvertible {
         return colTable[j]?.first{ $0.row == i }?.value ?? 0 // TODO use binary search
     }
     
-    public init<n, m>(_ a: Matrix<R, n, m>) {
+    public init<n, m>(_ a: Matrix<n, m, R>) {
         self.init(a.rows, a.cols, a.grid)
     }
     

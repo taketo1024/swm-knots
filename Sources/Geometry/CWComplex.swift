@@ -8,7 +8,7 @@
 
 import Foundation
 
-public typealias CWCellChain = FreeModule<IntegerNumber, CWCell>
+public typealias CWCellChain = FreeModule<CWCell, IntegerNumber>
 
 public struct CWCell: GeometricCell {
     public let id: Int
@@ -52,12 +52,12 @@ public struct CWComplex: GeometricComplex {
         return CWComplex(sub)
     }
     
-    public func allCells(ofDim i: Int) -> [CWCell] {
+    public func cells(ofDim i: Int) -> [CWCell] {
         return (0...dim).contains(i) ? cells[i] : []
     }
     
-    public func boundary<R: Ring>(ofCell s: CWCell) -> FreeModule<R, CWCell> {
-        return s.boundary.mapComponents{ R(intValue: $0) }
+    public func boundary<R: Ring>(ofCell s: CWCell) -> FreeModule<CWCell, R> {
+        return s.boundary.mapValues{ R(intValue: $0) }
     }
     
     @discardableResult
@@ -106,8 +106,8 @@ public extension CWComplex {
         } else {
             var C = CWComplex.sphere(dim: i - 1)
             let (d1, d2) = (C.cells[i - 1][0], C.cells[i - 1][1])
-            let cycle = (i == 1) ? CWCellChain([(-1, d1), (1, d2)])
-                                 : CWCellChain([( 1, d1), (1, d2)])
+            let cycle = (i == 1) ? CWCellChain([(d1, -1), (d2, 1)])
+                                 : CWCellChain([(d1,  1), (d2, 1)])
             C.appendCell(ofDim: i, attachedTo: cycle)
             C.appendCell(ofDim: i, attachedTo: -cycle)
             return C

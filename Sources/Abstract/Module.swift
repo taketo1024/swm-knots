@@ -82,3 +82,11 @@ public struct QuotientModule<M, N>: _QuotientModule where N: Submodule, M == N.S
         return m
     }
 }
+
+public protocol ModuleHom: Map, Module where Domain: Module, Codomain : Module {}
+
+public extension ModuleHom {
+    public static var symbol: String {
+        return "Hom_\(CoeffRing.symbol)(\(Domain.symbol), \(Codomain.symbol))"
+    }
+}

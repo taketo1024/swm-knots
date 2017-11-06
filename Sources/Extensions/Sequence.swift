@@ -9,6 +9,10 @@
 import Foundation
 
 public extension Sequence {
+    var anyElement: Element? {
+        return first { _ in true }
+    }
+    
     func forAll(_ f: (Element) -> Bool) -> Bool {
         for e in self {
             if !f(e) {
