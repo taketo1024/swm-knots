@@ -10,6 +10,7 @@ public extension FreeModuleBase {
 
 public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
     public typealias CoeffRing = R
+    public typealias Basis = [A]
     
     internal let elements: [A: R]
     
@@ -23,11 +24,14 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
         self.init(dict)
     }
     
-    public init(basis: [A], components: [R]) {
-        guard basis.count == components.count else {
-            fatalError("#basis (\(basis.count)) != #components (\(components.count))")
-        }
+    public init(basis: Basis, components: [R]) {
+        assert(basis.count == components.count)
         self.init(Dictionary(pairs: zip(basis, components)))
+    }
+    
+    public init<n>(basis: Basis, vector: ColVector<n, R>) {
+        assert(basis.count == vector.rows)
+        self.init(Dictionary(pairs: zip(basis, vector.grid)))
     }
     
     // generates a basis element
@@ -39,11 +43,11 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
         return elements[a] ?? R.zero
     }
     
-    public var basis: [A] {
+    public var basis: Basis {
         return elements.keys.toArray()
     }
     
-    public func factorize(by list: [A]) -> [R] {
+    public func factorize(by list: Basis) -> [R] {
         return list.map{ self[$0] }
     }
     
@@ -51,12 +55,12 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
         return FreeModule<A, R>.init([])
     }
     
-    public func mapComponents<R2: Ring>(_ f: (R) -> R2) -> FreeModule<A, R2> {
+    public func mapValues<R2: Ring>(_ f: (R) -> R2) -> FreeModule<A, R2> {
         return FreeModule<A, R2>(elements.mapValues(f))
     }
     
-    public func makeIterator() -> DictionaryIterator<A, R> {
-        return elements.makeIterator()
+    public func makeIterator() -> AnyIterator<(A, R)> {
+        return AnyIterator(elements.lazy.map{ (a, r) in (a, r) }.makeIterator())
     }
     
     public static func == (a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
@@ -97,16 +101,6 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
     
     public var hashValue: Int {
         return (self == FreeModule.zero) ? 0 : 1
-    }
-    
-    public static func generateElements<n, m>(basis: [A], matrix A: Matrix<n, m, R>) -> [FreeModule<A, R>] {
-        return (0 ..< A.cols).map { j in
-            let elements = (0 ..< A.rows).flatMap { i -> (A, R)? in
-                let a = A[i, j]
-                return (a != 0) ? (basis[i], a) : nil
-            }
-            return FreeModule<A, R>(elements)
-        }
     }
 }
 

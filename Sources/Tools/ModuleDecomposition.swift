@@ -38,7 +38,7 @@ public extension FreeModule {
         
         let (generators, T2) = calculate(A, B, T)
         let summands = generators.map{ (v, a) -> Summand in
-            let z = FreeModule(basis: basis, components: v.grid)
+            let z = FreeModule(basis: basis, vector: v)
             return Summand(z, a)
         }
         

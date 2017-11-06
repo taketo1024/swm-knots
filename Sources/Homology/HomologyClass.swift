@@ -27,7 +27,7 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
     public init(_ z: Cycle, _ H: Structure) {
         self.z = z
         self.factors = z.group { (a, _) in a.degree }
-                        .mapValues{ pairs in Cycle(pairs.map{ ($0.key, $0.value) }) } // TODO do somthin 'bout key / value
+                        .mapValues{ Cycle($0) }
         self.structure = H
     }
     
@@ -50,7 +50,7 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
     }
     
     public var isHomogeneous: Bool {
-        if let i = z.anyElement?.key.degree {
+        if let i = z.anyElement?.0.degree {
             return z.forAll{ (a, _) in a.degree == i }
         } else {
             return true
@@ -58,7 +58,7 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
     }
     
     public var homogeneousDegree: Int {
-        return z.anyElement?.key.degree ?? 0
+        return z.anyElement?.0.degree ?? 0
     }
     
     public static var zero: _HomologyClass<chainType, A, R> {

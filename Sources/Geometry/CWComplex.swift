@@ -57,7 +57,7 @@ public struct CWComplex: GeometricComplex {
     }
     
     public func boundary<R: Ring>(ofCell s: CWCell) -> FreeModule<CWCell, R> {
-        return s.boundary.mapComponents{ R(intValue: $0) }
+        return s.boundary.mapValues{ R(intValue: $0) }
     }
     
     @discardableResult

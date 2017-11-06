@@ -8,6 +8,7 @@
 
 import Foundation
 
+// TODO: merge with CellularComplex
 public struct DualSimplicialCell: GeometricCell {
     public let dim: Int
     public let base: Simplex
