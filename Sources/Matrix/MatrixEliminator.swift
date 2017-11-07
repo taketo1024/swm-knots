@@ -19,91 +19,6 @@ public enum MatrixForm {
 }
 
 public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
-    internal enum MatrixEliminationStep {
-        case AddRow(at: Int, to: Int, mul: R)
-        case MulRow(at: Int, by: R)
-        case SwapRows(Int, Int)
-        case AddCol(at: Int, to: Int, mul: R)
-        case MulCol(at: Int, by: R)
-        case SwapCols(Int, Int)
-        
-        var isRowOperation: Bool {
-            switch self {
-            case .AddRow, .MulRow, .SwapRows: return true
-            default: return false
-            }
-        }
-        
-        var isColOperation: Bool {
-            switch self {
-            case .AddCol, .MulCol, .SwapCols: return true
-            default: return false
-            }
-        }
-        
-        var determinant: R {
-            switch self {
-            case .AddRow(_, _, _), .AddCol(_, _, _):
-                return R.identity
-            case let .MulRow(at: _, by: r):
-                return r
-            case let .MulCol(at: _, by: r):
-                return r
-            case .SwapRows(_, _), .SwapCols(_, _):
-                return -R.identity
-            }
-        }
-        
-        var inverse: MatrixEliminationStep {
-            switch self {
-            case let .AddRow(i, j, r):
-                return .AddRow(at: i, to: j, mul: -r)
-            case let .AddCol(i, j, r):
-                return .AddCol(at: i, to: j, mul: -r)
-            case let .MulRow(at: i, by: r):
-                return .MulRow(at: i, by: r.inverse!)
-            case let .MulCol(at: i, by: r):
-                return .MulCol(at: i, by: r.inverse!)
-            case .SwapRows(_, _), .SwapCols(_, _):
-                return self
-            }
-        }
-        
-        internal var transpose: MatrixEliminationStep {
-            switch self {
-            case let .AddRow(i, j, r):
-                return .AddCol(at: i, to: j, mul: r)
-            case let .AddCol(i, j, r):
-                return .AddRow(at: i, to: j, mul: r)
-            case let .MulRow(at: i, by: r):
-                return .MulCol(at: i, by: r)
-            case let .MulCol(at: i, by: r):
-                return .MulRow(at: i, by: r)
-            case let .SwapRows(i, j):
-                return .SwapCols(i, j)
-            case let .SwapCols(i, j):
-                return .SwapRows(i, j)
-            }
-        }
-        
-        internal func apply(to A: ComputationalMatrix<R>) {
-            switch self {
-            case let .AddRow(i, j, r):
-                A.addRow(at: i, to: j, multipliedBy: r)
-            case let .AddCol(i, j, r):
-                A.addCol(at: i, to: j, multipliedBy: r)
-            case let .MulRow(i, r):
-                A.multiplyRow(at: i, by: r)
-            case let .MulCol(i, r):
-                A.multiplyCol(at: i, by: r)
-            case let .SwapRows(i, j):
-                A.swapRows(i, j)
-            case let .SwapCols(i, j):
-                A.swapCols(i, j)
-            }
-        }
-    }
-
     internal var target: ComputationalMatrix<R>
     internal var process: [MatrixEliminationStep]
     internal var debug: Bool
@@ -196,17 +111,101 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     
     func log(_ msg: @autoclosure () -> String) {
         if debug {
-            print(msg())
-            if rows < 100 && cols < 100 {
-                print()
-                print(target.asDynamicMatrix().detailDescription)
-                print()
+            if rows < 20 && cols < 20 {
+                print(msg(), "\n", target.asDynamicMatrix().detailDescription, "\n")
+            } else {
+                print(msg(), "\n\t", target, "\n")
             }
         }
     }
     
     public var description: String {
         return "\(type(of: self))"
+    }
+    
+    internal enum MatrixEliminationStep {
+        case AddRow(at: Int, to: Int, mul: R)
+        case MulRow(at: Int, by: R)
+        case SwapRows(Int, Int)
+        case AddCol(at: Int, to: Int, mul: R)
+        case MulCol(at: Int, by: R)
+        case SwapCols(Int, Int)
+        
+        var isRowOperation: Bool {
+            switch self {
+            case .AddRow, .MulRow, .SwapRows: return true
+            default: return false
+            }
+        }
+        
+        var isColOperation: Bool {
+            switch self {
+            case .AddCol, .MulCol, .SwapCols: return true
+            default: return false
+            }
+        }
+        
+        var determinant: R {
+            switch self {
+            case .AddRow(_, _, _), .AddCol(_, _, _):
+                return R.identity
+            case let .MulRow(at: _, by: r):
+                return r
+            case let .MulCol(at: _, by: r):
+                return r
+            case .SwapRows(_, _), .SwapCols(_, _):
+                return -R.identity
+            }
+        }
+        
+        var inverse: MatrixEliminationStep {
+            switch self {
+            case let .AddRow(i, j, r):
+                return .AddRow(at: i, to: j, mul: -r)
+            case let .AddCol(i, j, r):
+                return .AddCol(at: i, to: j, mul: -r)
+            case let .MulRow(at: i, by: r):
+                return .MulRow(at: i, by: r.inverse!)
+            case let .MulCol(at: i, by: r):
+                return .MulCol(at: i, by: r.inverse!)
+            case .SwapRows(_, _), .SwapCols(_, _):
+                return self
+            }
+        }
+        
+        internal var transpose: MatrixEliminationStep {
+            switch self {
+            case let .AddRow(i, j, r):
+                return .AddCol(at: i, to: j, mul: r)
+            case let .AddCol(i, j, r):
+                return .AddRow(at: i, to: j, mul: r)
+            case let .MulRow(at: i, by: r):
+                return .MulCol(at: i, by: r)
+            case let .MulCol(at: i, by: r):
+                return .MulRow(at: i, by: r)
+            case let .SwapRows(i, j):
+                return .SwapCols(i, j)
+            case let .SwapCols(i, j):
+                return .SwapRows(i, j)
+            }
+        }
+        
+        internal func apply(to A: ComputationalMatrix<R>) {
+            switch self {
+            case let .AddRow(i, j, r):
+                A.addRow(at: i, to: j, multipliedBy: r)
+            case let .AddCol(i, j, r):
+                A.addCol(at: i, to: j, multipliedBy: r)
+            case let .MulRow(i, r):
+                A.multiplyRow(at: i, by: r)
+            case let .MulCol(i, r):
+                A.multiplyCol(at: i, by: r)
+            case let .SwapRows(i, j):
+                A.swapRows(i, j)
+            case let .SwapCols(i, j):
+                A.swapCols(i, j)
+            }
+        }
     }
 }
 
@@ -228,15 +227,15 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
             return true
         }
         
-        // pivot element
-        let col = target.enumerate(col: targetCol, fromRow: targetRow, headsOnly: true)
-        guard let (i0, a0) = findMin(col) else {
+        // find pivot point
+        let targetElements = target.enumerate(col: targetCol, fromRow: targetRow, headsOnly: true)
+        guard let (i0, a0) = findMin(targetElements) else {
             targetCol += 1
             return false
         }
         
         // eliminate target col
-        for (i, a) in col {
+        for (i, a) in targetElements {
             if i == i0 {
                 continue
             }
@@ -260,7 +259,7 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         
         targetRow += 1
         targetCol += 1
-        
+
         return false
     }
 }

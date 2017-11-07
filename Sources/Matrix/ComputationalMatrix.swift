@@ -18,16 +18,13 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     public var cols: Int
     
     internal var align: ComputationalMatrixAlignment
+    internal var table:  [Int : [(Int, R)]] // [row : [ (col, R) ]]
+    
     internal var eliminationResult: AnyObject? = nil // TODO cache for each form?
     
-    // align: .Rows  ->  [row : [(col, value)]]
-    // align: .Cols  ->  [col : [(row, value)]]
-    internal var table:  [Int : [(Int, R)]]
-
     public subscript(i: Int, j: Int) -> R {
-        print("[warn] subscript on ComputationalMatrix is slow.")
         let (p, q) = (align == .Rows) ? (i, j) : (j, i)
-        return table[p]?.first{ $0.0 == q }?.1 ?? 0
+        return table[p]?.binarySearch(q, { $0.0 })?.element.1 ?? R.zero
     }
     
     private init(_ rows: Int, _ cols: Int, _ align: ComputationalMatrixAlignment, _ table: [Int : [(Int, R)]]) {
@@ -331,7 +328,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
                 if h {
                     return row.first.flatMap{ (j, a) in (j == j0) ? (i, a) : nil }
                 } else {
-                    return row.first{ (j, _) in j == j0 }.map{ (_, a) in (i, a)}
+                    return row.binarySearch(j0, {$0.0}).map{ (_, e) in (i, e.1) }
                 }
             }
         case .Cols:
