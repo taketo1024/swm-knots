@@ -74,8 +74,24 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
     private func generateSummand(_ i: Int) -> Summand {
         let C = chainComplex
         let basis = C.chainBasis(i)
+        let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
+
+        // TODO cache elimination result
         
-        // Z = Ker(A1), B = Im(A2)
+        // Z = Ker(A1)
+        let E1 = DiagonalEliminator(A1.copy()).run()
+        let Z = E1.right.submatrix(colRange: E1.rank ..< A1.cols)
+        
+        // B = Im(A2)
+        let E2 = DiagonalEliminator(A2.copy()).run()
+        let B = E2.leftInverse.submatrix(colRange: 0 ..< E2.rank)
+        
+        E2.diagonal.enumerated().forEach { (j, a) in
+            if j < B.cols {
+                B.multiplyCol(at: j, by: a)
+            }
+        }
+
         // T: Transition matrix from C to Z (represents cycles in Z-coords.)
         //
         //   P * A1 * Q = [D; O_k]
@@ -84,9 +100,7 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
         //
         // Put T = Q^-1[ * , n - k ..< n], then T * Z = I_k.
         
-        let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
-        let (Z, B) = (A1.kernelMatrix, A2.imageMatrix)
-        let T = A1.smithNormalForm.rightInverse.submatrix(rowsInRange: (Z.rows - Z.cols) ..< Z.rows) as DynamicMatrix<R>
+        let T = E1.rightInverse.submatrix(rowRange: (Z.rows - Z.cols) ..< Z.rows)
         
         return Summand(basis: basis, generators: Z, relations: B, transition: T)
     }

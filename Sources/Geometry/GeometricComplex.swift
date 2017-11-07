@@ -28,7 +28,7 @@ public protocol GeometricComplex: CustomStringConvertible {
     
     func boundary<R: Ring>(ofCell: Cell) -> FreeModule<Cell, R> // override point
     func boundaryMap<R: Ring>(_ i: Int) -> FreeModuleHom<Cell, Cell, R>
-    func boundaryMatrix<R: Ring>(_ i: Int) -> DynamicMatrix<R>
+    func boundaryMatrix<R: Ring>(_ i: Int) -> ComputationalMatrix<R>
 }
 
 public extension GeometricComplex {
@@ -46,13 +46,13 @@ public extension GeometricComplex {
         }
     }
     
-    public func boundaryMatrix<R: Ring>(_ i: Int) -> DynamicMatrix<R> {
+    public func boundaryMatrix<R: Ring>(_ i: Int) -> ComputationalMatrix<R> {
         let from = (i <= dim) ? cells(ofDim: i) : []
         let to = (i > 0) ? cells(ofDim: i - 1) : []
         return boundaryMatrix(from: from, to: to)
     }
     
-    internal func boundaryMatrix<R: Ring>(from: [Cell], to: [Cell]) -> DynamicMatrix<R> {
+    internal func boundaryMatrix<R: Ring>(from: [Cell], to: [Cell]) -> ComputationalMatrix<R> {
         let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toCell: toIndex]
         let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
             return boundary(ofCell: s).flatMap{ (e: (Cell, R)) -> MatrixComponent<R>? in
@@ -61,7 +61,7 @@ public extension GeometricComplex {
             }
         }
         
-        return DynamicMatrix(rows: to.count, cols: from.count, type: .Sparse, components: components)
+        return ComputationalMatrix(rows: to.count, cols: from.count, components: components)
     }
     
     public var description: String {
@@ -104,12 +104,17 @@ public extension CochainComplex where chainType == Ascending {
     public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
         let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             let basis = K.cells(ofDim: i).map{ Dual($0) }
-            let matrix = R(intValue: (-1).pow(i + 1)) * K.boundaryMatrix(i + 1).transposed
+            
+//            let matrix = R(intValue: (-1).pow(i + 1)) * K.boundaryMatrix(i + 1).transposed // FIXME
+            let matrix = (K.boundaryMatrix(i + 1) as BoundaryMatrix).transpose()
+            
             let map = BoundaryMap { d in
-                let j = K.cells(ofDim: i).index(of: d.base)!
-                let basis = K.cells(ofDim: i + 1).map{ Dual($0) }
-                let values = matrix.colArray(j)
-                return zip(basis, values).toArray()
+                return []
+                // FIXME!
+//                let j = K.cells(ofDim: i).index(of: d.base)!
+//                let basis = K.cells(ofDim: i + 1).map{ Dual($0) }
+//                let values = matrix.colArray(j)
+//                return zip(basis, values).toArray()
             }
             
             return (basis, map, matrix)
@@ -121,8 +126,10 @@ public extension CochainComplex where chainType == Ascending {
         let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
             let to   = K.cells(ofDim: i + 1).subtract(L.cells(ofDim: i + 1))
-            let map = BoundaryMap.zero // TODO
-            let matrix = R(intValue: (-1).pow(i + 1)) * K.boundaryMatrix(from: to, to: from).transposed
+            let map = BoundaryMap.zero // FIXME!
+            
+//            let matrix = R(intValue: (-1).pow(i + 1)) * K.boundaryMatrix(from: to, to: from).transposed // FIXME!
+            let matrix = (K.boundaryMatrix(from: to, to: from) as BoundaryMatrix).transpose()
             
             return (from.map{ Dual($0) }, map, matrix)
         }

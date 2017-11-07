@@ -13,13 +13,13 @@ import Foundation
 public final class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: EuclideanRing>: Structure, Sequence {
     public let basis: [A]
     public let summands: [Summand]
-    public let transitionMatrix: DynamicMatrix<R>
+    public let transitionMatrix: ComputationalMatrix<R>
     
-    public init(basis: [A], generators A: DynamicMatrix<R>, relations B: DynamicMatrix<R>, transition T1: DynamicMatrix<R>) {
-        let (generators, T2) = FinitelyGeneratedModuleStructure<A, R>.calculate(A, B, T1)
+    public init(basis: [A], generators A: ComputationalMatrix<R>, relations B: ComputationalMatrix<R>, transition T1: ComputationalMatrix<R>) {
+        let (A2, factors, T2) = FinitelyGeneratedModuleStructure<A, R>.calculate(A, B, T1)
         
-        let summands = generators.map{ (v, a) -> Summand in
-            let z = FreeModule(basis: basis, vector: v)
+        let generators = A2.generateElements(from: basis)
+        let summands = zip(generators, factors).map { (z, a) in
             return Summand(z, a)
         }
         
@@ -28,9 +28,9 @@ public final class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: Euclid
         self.transitionMatrix = T2
     }
     
-    public convenience init(basis: [A], relations B: DynamicMatrix<R>) {
+    public convenience init(basis: [A], relations B: ComputationalMatrix<R>) {
         let n = basis.count
-        let I = DynamicMatrix<R>.identity(size: n)
+        let I = ComputationalMatrix<R>.identity(n)
         self.init(basis: basis, generators: I, relations: B, transition: I)
     }
     
@@ -47,12 +47,15 @@ public final class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: Euclid
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
-        let n = basis.count
-        let v = transitionMatrix * ColVector(rows: n, grid: z.factorize(by: basis))
+        // FIXME
+        return []
         
-        return self.enumerated().map { (i, s) in
-            return s.isFree ? v[i] : v[i] % s.factor
-        }
+//        let n = basis.count
+//        let v = transitionMatrix * ComputationalMatrix(rows: n, cols: 1, grid: z.factorize(by: basis))
+//
+//        return self.enumerated().map { (i, s) in
+//            return s.isFree ? v[i] : v[i] % s.factor
+//        }
     }
     
     public func isEquivalentToZero(_ z: FreeModule<A, R>) -> Bool {
@@ -104,7 +107,7 @@ public final class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: Euclid
         }
     }
     
-    private static func calculate(_ A: DynamicMatrix<R>, _ B: DynamicMatrix<R>, _ T: DynamicMatrix<R>) -> (generators: [(DynamicColVector<R>, R)], transition: DynamicMatrix<R>) {
+    private static func calculate(_ A: ComputationalMatrix<R>, _ B: ComputationalMatrix<R>, _ T: ComputationalMatrix<R>) -> (generators: ComputationalMatrix<R>, factors: [R], transition: ComputationalMatrix<R>) {
         
         assert(A.rows == B.rows)
         assert(A.rows >= A.cols)  // n ≧ k
@@ -138,14 +141,13 @@ public final class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: Euclid
         //   T' * A' = (P' * T) * (Z * P'^-1) = P' * I_k * P'^-1 = I_k.
         //
         
-        let E  = R1.smithNormalForm
+        let E  = SmithEliminator(R1).run()
         let factors = (E.diagonal + Array(repeating: R.zero, count: k - l)).filter{ $0 != R.identity }
         let s = factors.count
         
-        let A2 = A * (E.leftInverse.submatrix(colsInRange: (k - s) ..< k) as DynamicMatrix<R>)
-        let T2 = (E.left.submatrix(rowsInRange: (k - s) ..< k) as DynamicMatrix<R>) * T
+        let A2 = A * E.leftInverse.submatrix(colRange: (k - s) ..< k)
+        let T2 = E.left.submatrix(rowRange: (k - s) ..< k) * T
         
-        let summands = factors.enumerated().map{ (j, a) in (A2.colVector(j), a) }
-        return (summands, T2)
+        return (A2, factors, T2)
     }
 }

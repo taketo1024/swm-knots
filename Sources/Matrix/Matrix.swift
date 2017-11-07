@@ -292,7 +292,7 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
     
     public var eliminatable: Bool {
-        return true // FIXME
+        return true
     }
     
     public func eliminate(debug: Bool = false) -> MatrixEliminator<n, m, R> {

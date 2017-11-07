@@ -27,7 +27,7 @@ public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Asce
 public struct _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
     public typealias ChainBasis = [A]
     public typealias BoundaryMap = FreeModuleHom<A, A, R>
-    public typealias BoundaryMatrix = DynamicMatrix<R>
+    public typealias BoundaryMatrix = ComputationalMatrix<R>
     
     public let name: String
     internal let chain: [(basis: ChainBasis, map: BoundaryMap, matrix: BoundaryMatrix)]
@@ -58,13 +58,13 @@ public struct _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: E
             return chain[i - offset].matrix
             
         case topDegree + 1 where chainType.descending:
-            return BoundaryMatrix(rows: chainBasis(topDegree).count, cols: 0)
+            return BoundaryMatrix.zero(rows: chainBasis(topDegree).count, cols: 0)
             
         case offset - 1 where !chainType.descending:
-            return BoundaryMatrix(rows: chainBasis(offset).count, cols: 0)
+            return BoundaryMatrix.zero(rows: chainBasis(offset).count, cols: 0)
             
         default:
-            return BoundaryMatrix(rows: 0, cols: 0)
+            return BoundaryMatrix.zero(rows: 0, cols: 0)
         }
     }
     
@@ -93,7 +93,7 @@ public struct _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: E
             }
             
             let matrix = m2 * m1
-            assert(matrix.forAll { (_, _, a) in a == 0 } , "d\(i2)∘d\(i1) = \(matrix)")
+            assert(matrix.isZero, "d\(i2)∘d\(i1) = \(matrix)")
         }
     }
     
@@ -108,6 +108,7 @@ public struct _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: E
     }
 }
 
+/* FIXME
 public extension ChainComplex {
     public static func ⊗<B>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Tensor<A, B>, R> {
         typealias T = Tensor<A, B>
@@ -144,4 +145,4 @@ public extension ChainComplex {
         return _ChainComplex<chainType, T, R>(name: "\(C1.name)⊗\(C2.name)", chain)
     }
 }
-
+*/
