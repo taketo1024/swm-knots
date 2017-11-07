@@ -105,6 +105,10 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
+    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == RationalNumber)
+    @_specialize(where R == RealNumber)
+    @_specialize(where R == Z_2)
     public static func *(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> ComputationalMatrix<R> {
         assert(a.rows == b.cols)
         
@@ -134,6 +138,10 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return result
     }
     
+    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == RationalNumber)
+    @_specialize(where R == RealNumber)
+    @_specialize(where R == Z_2)
     public func multiplyRow(at i0: Int, by r: R) {
         switchAlignment(.Rows)
         
@@ -159,6 +167,10 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
+    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == RationalNumber)
+    @_specialize(where R == RealNumber)
+    @_specialize(where R == Z_2)
     public func addRow(at i0: Int, to i1: Int, multipliedBy r: R = R.identity) {
         switchAlignment(.Rows)
         
@@ -245,6 +257,10 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         transpose()
     }
     
+    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == RationalNumber)
+    @_specialize(where R == RealNumber)
+    @_specialize(where R == Z_2)
     public func enumerate(row i0: Int, fromCol j0: Int = 0, headsOnly h: Bool = false) -> [(Int, R)] {
         switch align {
         case .Rows:
@@ -261,6 +277,10 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
+    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == RationalNumber)
+    @_specialize(where R == RealNumber)
+    @_specialize(where R == Z_2)
     public func enumerate(col j0: Int, fromRow i0: Int = 0, headsOnly h: Bool = false) -> [(Int, R)] {
         switch align {
         case .Rows:
@@ -287,6 +307,10 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return ComputationalMatrix(rows: n, cols: n, components: components, align: align)
     }
     
+    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == RationalNumber)
+    @_specialize(where R == RealNumber)
+    @_specialize(where R == Z_2)
     public static func ==(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> Bool {
         if (a.rows, a.cols) != (b.rows, b.cols) {
             return false

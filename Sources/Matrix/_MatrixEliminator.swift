@@ -56,13 +56,15 @@ public class _MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     }
     
     internal func prepare() {
+        // override in subclass
     }
     
     internal func iteration() -> Bool {
-        fatalError("implement in subclass")
+        fatalError("override in subclass")
     }
     
     internal func finish() {
+        // override in subclass
     }
     
     internal func run(_ eliminator: _MatrixEliminator.Type) {
@@ -79,7 +81,11 @@ public class _MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         transpose()
     }
     
-    internal func findMin<S: Sequence>(_ sequence: S) -> (Int, R)? where S.Element == (Int, R) {
+    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == RationalNumber)
+    @_specialize(where R == RealNumber)
+    @_specialize(where R == Z_2)
+    internal func findMin(_ sequence: [(Int, R)]) -> (Int, R)? {
         var cand: (Int, R)? = nil
         for (i, a) in sequence {
             if a.isInvertible {
@@ -93,7 +99,7 @@ public class _MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     }
     
     internal func apply(_ s: EliminationStep<R>) {
-        s.apply(to: &target)
+        s.apply(to: target)
         process.append(s)
         log("\(process.count): \(s)")
     }
@@ -125,6 +131,10 @@ public final class RowEchelonEliminator<R: EuclideanRing>: _MatrixEliminator<R> 
          target.switchAlignment(.Rows)
     }
     
+    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == RationalNumber)
+    @_specialize(where R == RealNumber)
+    @_specialize(where R == Z_2)
     override func iteration() -> Bool {
         if targetRow >= rows || targetCol >= cols {
             return true
@@ -182,6 +192,10 @@ public final class RowHermiteEliminator<R: EuclideanRing>: _MatrixEliminator<R> 
         run(RowEchelonEliminator.self)
     }
     
+    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == RationalNumber)
+    @_specialize(where R == RealNumber)
+    @_specialize(where R == Z_2)
     internal override func iteration() -> Bool {
         if targetRow >= rows || targetCol >= cols {
             return true
@@ -240,6 +254,10 @@ public final class SmithEliminator<R: EuclideanRing>: _MatrixEliminator<R> {
         run(DiagonalEliminator.self)
     }
     
+    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == RationalNumber)
+    @_specialize(where R == RealNumber)
+    @_specialize(where R == Z_2)
     internal override func iteration() -> Bool {
         if R.isField || targetIndex >= target.table.count {
             return true
@@ -320,7 +338,7 @@ internal extension EliminationStep {
         }
     }
     
-    internal func apply(to A: inout ComputationalMatrix<R>) {
+    internal func apply(to A: ComputationalMatrix<R>) {
         switch self {
         case let .AddRow(i, j, r):
             A.addRow(at: i, to: j, multipliedBy: r)
