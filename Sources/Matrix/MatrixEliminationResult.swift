@@ -8,12 +8,12 @@
 
 import Foundation
 
-public class MatrixEliminationResult<R: Ring> {
+public class MatrixEliminationResult<R: EuclideanRing> {
     public let result: ComputationalMatrix<R>
-    internal let process: [EliminationStep<R>]
+    internal let process: [MatrixEliminator<R>.MatrixEliminationStep]
     public let form: MatrixForm
     
-    internal init(_ result: ComputationalMatrix<R>, _ process: [EliminationStep<R>], _ form: MatrixForm) {
+    internal init(_ result: ComputationalMatrix<R>, _ process: [MatrixEliminator<R>.MatrixEliminationStep], _ form: MatrixForm) {
         self.result = result
         self.process = process
         self.form = form

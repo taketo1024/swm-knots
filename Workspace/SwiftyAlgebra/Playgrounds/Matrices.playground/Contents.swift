@@ -14,7 +14,7 @@ typealias R = RealNumber
 do {
     typealias M = Matrix<_2,_2, Z>
     
-    let a = M(grid:[1, 2, 3, 4])
+    let a = M(1, 2, 3, 4)
     let b = M(2, 1, 1, 2)
     a + b
     a * b
@@ -38,11 +38,8 @@ do {
     typealias M = Matrix<_3,_3, Z>
     
     let A = M(1, -2, -6, 2, 4, 12, 1, -4, -12)
-    let E = A.smithNormalForm
+    let E = DiagonalEliminator(A)
     let (B, P, Q) = (E.result, E.left, E.right)
     
     B == P * A * Q
-    
-    let kernel = A.kernelVectors.first!
-    A * kernel == ColVector<_3, Z>.zero
 }
