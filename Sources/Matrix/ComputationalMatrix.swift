@@ -245,36 +245,41 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         transpose()
     }
     
-    public func enumerate(row i0: Int, fromCol j0: Int = 0) -> AnySequence<(Int, R)> {
+    public func enumerate(row i0: Int, fromCol j0: Int = 0, headsOnly h: Bool = false) -> [(Int, R)] {
         switch align {
         case .Rows:
             if let row = table[i0] {
-                return AnySequence(row.lazy.filter{ (col, _) in col >= j0})
+                return row.filter{ (col, _) in col >= j0}
             } else {
-                return AnySequence([])
+                return []
             }
         case .Cols:
-            return AnySequence((j0 ..< cols).lazy.flatMap{ j -> (Int, R)? in
-                guard let col = self.table[j] else {
-                    return nil
-                }
-                for (i, a) in col {
-                    if i == i0 {
-                        return (j, a)
-                    } else if i > i0 {
-                        return nil
-                    }
-                }
-                return nil
-            })
+            transpose()
+            let result = enumerate(col: i0, fromRow: j0, headsOnly: h)
+            transpose()
+            return result
         }
     }
     
-    public func enumerate(col j0: Int, fromRow i0: Int = 0) -> AnySequence<(Int, R)> {
-        transpose()
-        let result = enumerate(row: j0, fromCol: i0)
-        transpose()
-        return result
+    public func enumerate(col j0: Int, fromRow i0: Int = 0, headsOnly h: Bool = false) -> [(Int, R)] {
+        switch align {
+        case .Rows:
+            return (i0 ..< rows).lazy.flatMap{ i -> (Int, R)? in
+                guard let row = self.table[i] else {
+                    return nil
+                }
+                if h {
+                    return row.first.flatMap{ (j, a) in (j == j0) ? (i, a) : nil }
+                } else {
+                    return row.first{ (j, _) in j == j0 }.map{ (_, a) in (i, a)}
+                }
+            }
+        case .Cols:
+            transpose()
+            let result = enumerate(row: j0, fromCol: i0, headsOnly: h)
+            transpose()
+            return result
+        }
     }
     
     public static func identity(_ n: Int, align: ComputationalMatrixAlignment = .Rows) -> ComputationalMatrix<R> {
