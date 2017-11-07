@@ -41,6 +41,7 @@
 		142932011FAEB6E7003EE1BB /* GeometricComplexMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142932001FAEB6E7003EE1BB /* GeometricComplexMap.swift */; };
 		142932031FAEB6FB003EE1BB /* SimplicialMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142932021FAEB6FB003EE1BB /* SimplicialMap.swift */; };
 		14360F911FB130350075133E /* ComputationalMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14360F901FB130350075133E /* ComputationalMatrix.swift */; };
+		14360F931FB148C30075133E /* _MatrixEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14360F921FB148C30075133E /* _MatrixEliminator.swift */; };
 		143735A71F30088B0042004F /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143735A61F30088B0042004F /* String.swift */; };
 		1448D9E91F972EB300646A70 /* MatrixEliminationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1448D9E81F972EB300646A70 /* MatrixEliminationStep.swift */; };
 		144AD2911EC21A4500E23890 /* Homology.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144AD2901EC21A4500E23890 /* Homology.swift */; };
@@ -118,6 +119,7 @@
 		142932001FAEB6E7003EE1BB /* GeometricComplexMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometricComplexMap.swift; sourceTree = "<group>"; };
 		142932021FAEB6FB003EE1BB /* SimplicialMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialMap.swift; sourceTree = "<group>"; };
 		14360F901FB130350075133E /* ComputationalMatrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComputationalMatrix.swift; sourceTree = "<group>"; };
+		14360F921FB148C30075133E /* _MatrixEliminator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _MatrixEliminator.swift; sourceTree = "<group>"; };
 		143735A61F30088B0042004F /* String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		1448D9E81F972EB300646A70 /* MatrixEliminationStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixEliminationStep.swift; sourceTree = "<group>"; };
 		144AD28E1EC13D9E00E23890 /* MatrixEliminationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixEliminationTests.swift; sourceTree = "<group>"; };
@@ -314,6 +316,7 @@
 				14FE4A8B1F95ED13005FB6CD /* ColOperationMatrix.swift */,
 				14207CB31EEB90E80007BE8F /* MatrixConfig.swift */,
 				14360F901FB130350075133E /* ComputationalMatrix.swift */,
+				14360F921FB148C30075133E /* _MatrixEliminator.swift */,
 			);
 			path = Matrix;
 			sourceTree = "<group>";
@@ -501,6 +504,7 @@
 			files = (
 				1424F4FA1EB997780052581F /* EuclideanRing.swift in Sources */,
 				14360F911FB130350075133E /* ComputationalMatrix.swift in Sources */,
+				14360F931FB148C30075133E /* _MatrixEliminator.swift in Sources */,
 				144AD2911EC21A4500E23890 /* Homology.swift in Sources */,
 				1424F4F91EB997780052581F /* AdditiveGroup.swift in Sources */,
 				1424F5071EB997780052581F /* Rational.swift in Sources */,

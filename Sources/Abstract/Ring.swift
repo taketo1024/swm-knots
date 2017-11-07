@@ -7,6 +7,7 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
     var isInvertible: Bool { get }
     var normalizeUnit: Self { get }
     
+    static var isField: Bool { get }
     static func matrixEliminatiorType<n, m>() -> MatrixEliminator<n, m, Self>.Type?
 }
 
@@ -34,6 +35,10 @@ public extension Ring {
     
     public static func **(a: Self, n: Int) -> Self {
         return (0 ..< n).reduce(Self.identity){ (res, _) in res * a }
+    }
+    
+    public static var isField: Bool {
+        return false
     }
 }
 
