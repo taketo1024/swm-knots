@@ -18,8 +18,8 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     public let cols: Int
     
     internal var align: ComputationalMatrixAlignment
-    internal var rowTable: [Int: [(col: Int, value: R)]]
-    internal var colTable: [Int: [(row: Int, value: R)]]
+    internal var rowTable: [Int: [(col: Int, value: R)]]!
+    internal var colTable: [Int: [(row: Int, value: R)]]!
 
     public subscript(i: Int, j: Int) -> R {
         switch align {
@@ -46,18 +46,22 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         self.cols = cols
         
         self.align = align
-        self.rowTable = [:]
-        self.colTable = [:]
-
+        self.rowTable = (align == .Rows) ? [:] : nil
+        self.colTable = (align == .Cols) ? [:] : nil
+        
         for (i, j, a) in components {
-            if a == R.zero { continue }
-            add(i, j, a)
+            if a == R.zero {
+                continue
+            }
+            set(i, j, a)
         }
         
         sort()
     }
-
-    internal func add(_ i: Int, _ j: Int, _ a: R) {
+    
+    internal func set(_ i: Int, _ j: Int, _ a: R) {
+        assert(a != R.zero)
+        
         switch align {
         case .Rows:
             if rowTable[i] == nil {
@@ -139,21 +143,49 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             rowTable = [:]
             for (j, list) in colTable {
                 for (i, a) in list {
-                    add(i, j, a)
+                    set(i, j, a)
                 }
             }
-            colTable = [:]
+            colTable = nil
         case .Cols:
             colTable = [:]
             for (i, list) in rowTable {
                 for (j, a) in list {
-                    add(i, j, a)
+                    set(i, j, a)
                 }
             }
-            rowTable = [:]
+            rowTable = nil
+        }
+        sort()
+    }
+    
+    public static func *(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> ComputationalMatrix<R> {
+        assert(a.cols == b.rows)
+        
+        let result = ComputationalMatrix<R>(rows: a.rows, cols: b.cols, components: [])
+        
+        // TODO support .Cols
+        
+        a.switchAlignment(.Rows)
+        b.switchAlignment(.Rows)
+        
+        for (i, list) in a.rowTable {
+            var row: [Int: R] = [:]
+            
+            for (j, a) in list {
+                if let bRow = b.rowTable[j] {
+                    for (k, b) in bRow {
+                        row[k] = row[k, default: R.zero] + a * b
+                    }
+                }
+            }
+            
+            row.lazy.filter{ (_, a) in a != R.zero }.forEach{ (j, a) in
+                result.set(i, j, a)
+            }
         }
         
-        sort()
+        return result
     }
     
     public func multiplyRow(at i0: Int, by r: R) {
@@ -164,7 +196,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
         
         let n = rowTable[i0]!.count
-        var p = UnsafeMutablePointer(&rowTable[i0]!)
+        var p = UnsafeMutablePointer(&rowTable![i0]!)
         
         for _ in 0 ..< n {
             let (j, a) = p.pointee
@@ -181,7 +213,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
         
         let n = colTable[j0]!.count
-        var p = UnsafeMutablePointer(&colTable[j0]!)
+        var p = UnsafeMutablePointer(&colTable![j0]!)
         
         for _ in 0 ..< n {
             let (i, a) = p.pointee
@@ -357,7 +389,6 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     public static func ==(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> Bool {
-        print(a.detailDescription, "?=", b.detailDescription)
         return a.toGrid == b.toGrid // TODO performance
     }
     
