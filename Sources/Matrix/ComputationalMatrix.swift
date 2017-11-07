@@ -14,20 +14,19 @@ public enum ComputationalMatrixAlignment {
 }
 
 public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConvertible {
-    public let rows: Int
-    public let cols: Int
+    public var rows: Int
+    public var cols: Int
     
     internal var align: ComputationalMatrixAlignment
-    internal var rowTable: [Int: [(col: Int, value: R)]]!
-    internal var colTable: [Int: [(row: Int, value: R)]]!
+    
+    // align: .Rows  ->  [row : [(col, value)]]
+    // align: .Cols  ->  [col : [(row, value)]]
+    internal var table:  [Int : [(Int, R)]]
 
     public subscript(i: Int, j: Int) -> R {
-        switch align {
-        case .Rows :
-            return rowTable[i]?.first{ $0.col == j }?.value ?? 0 // TODO use binary search
-        case .Cols:
-            return colTable[j]?.first{ $0.row == i }?.value ?? 0 // TODO use binary search
-        }
+        print("[warn] subscript on ComputationalMatrix is slow.")
+        let (p, q) = (align == .Rows) ? (i, j) : (j, i)
+        return table[p]?.first{ $0.0 == q }?.1 ?? 0
     }
     
     public convenience init<n, m>(_ a: Matrix<n, m, R>, align: ComputationalMatrixAlignment = .Rows) {
@@ -46,88 +45,29 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         self.cols = cols
         
         self.align = align
-        self.rowTable = (align == .Rows) ? [:] : nil
-        self.colTable = (align == .Cols) ? [:] : nil
+        self.table = [:]
         
         for (i, j, a) in components {
             if a == R.zero {
                 continue
             }
-            set(i, j, a)
+            (align == .Rows) ? set(i, j, a) : set(j, i, a)
         }
-        
         sort()
     }
     
     internal func set(_ i: Int, _ j: Int, _ a: R) {
         assert(a != R.zero)
         
-        switch align {
-        case .Rows:
-            if rowTable[i] == nil {
-                rowTable[i] = []
-            }
-            rowTable[i]!.append( (j, a) )
-        case .Cols:
-            if colTable[j] == nil {
-                colTable[j] = []
-            }
-            colTable[j]!.append( (i, a) )
+        if table[i] == nil {
+            table[i] = []
         }
+        table[i]!.append( (j, a) )
     }
 
     internal func sort() {
-        switch align {
-        case .Rows:
-            for (i, list) in rowTable {
-                rowTable[i] = list.sorted{ (e1, e2) in e1.col < e2.col }
-            }
-        case .Cols:
-            for (j, list) in colTable {
-                colTable[j] = list.sorted{ (e1, e2) in e1.row < e2.row }
-            }
-        }
-    }
-    
-    public static func identity(_ n: Int, align: ComputationalMatrixAlignment = .Rows) -> ComputationalMatrix<R> {
-        let components = (0 ..< n).map{ i in MatrixComponent(i, i, R.identity)}
-        return ComputationalMatrix(rows: n, cols: n, components: components, align: align)
-    }
-    
-    public var toGrid: [R] {
-        var grid = Array(repeating: R.zero, count: rows * cols)
-        switch align {
-        case .Rows:
-            for (i, list) in rowTable {
-                for (j, a) in list {
-                    grid[i * cols + j] = a
-                }
-            }
-        case .Cols:
-            for (j, list) in colTable {
-                for (i, a) in list {
-                    grid[i * cols + j] = a
-                }
-            }
-        }
-        return grid
-    }
-    
-    public var isDiagonal: Bool {
-        switch align {
-        case .Rows:
-            return rowTable.forAll { (i, list) in (list.count == 1) && list.first!.col == i }
-        case .Cols:
-            return colTable.forAll { (j, list) in (list.count == 1) && list.first!.row == j }
-        }
-    }
-    
-    public var diagonal: [R] {
-        switch align {
-        case .Rows:
-            return (0 ..< rowTable.count).map{ i in rowTable[i]!.first!.value }
-        case .Cols:
-            return (0 ..< colTable.count).map{ j in colTable[j]!.first!.value }
+        for (i, list) in table {
+            table[i] = list.sorted{ (e1, e2) in e1.0 < e2.0 }
         }
     }
     
@@ -138,29 +78,35 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         
         self.align = align
         
-        switch align {
-        case .Rows:
-            rowTable = [:]
-            for (j, list) in colTable {
-                for (i, a) in list {
-                    set(i, j, a)
-                }
+        let copy = table
+        self.table = [:]
+        
+        for (i, list) in copy {
+            for (j, a) in list {
+                set(j, i, a)
             }
-            colTable = nil
-        case .Cols:
-            colTable = [:]
-            for (i, list) in rowTable {
-                for (j, a) in list {
-                    set(i, j, a)
-                }
-            }
-            rowTable = nil
         }
+        
         sort()
     }
     
+    public func transpose() {
+        (rows, cols) = (cols, rows)
+        align = (align == .Rows) ? .Cols : .Rows
+    }
+    
+    public var isDiagonal: Bool {
+        return table.forAll { (i, list) in (list.count == 1) && list.first!.0 == i }
+    }
+    
+    public var diagonal: [R] {
+        return table.keys.sorted().flatMap { i -> R? in
+            table[i]!.first.flatMap{ (j, a) -> R? in (i == j) ? a : nil }
+        }
+    }
+    
     public static func *(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> ComputationalMatrix<R> {
-        assert(a.cols == b.rows)
+        assert(a.rows == b.cols)
         
         let result = ComputationalMatrix<R>(rows: a.rows, cols: b.cols, components: [])
         
@@ -169,11 +115,11 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         a.switchAlignment(.Rows)
         b.switchAlignment(.Rows)
         
-        for (i, list) in a.rowTable {
+        for (i, list) in a.table {
             var row: [Int: R] = [:]
             
             for (j, a) in list {
-                if let bRow = b.rowTable[j] {
+                if let bRow = b.table[j] {
                     for (k, b) in bRow {
                         row[k] = row[k, default: R.zero] + a * b
                     }
@@ -191,50 +137,41 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     public func multiplyRow(at i0: Int, by r: R) {
         switchAlignment(.Rows)
         
-        if rowTable[i0] == nil {
+        guard var row = table[i0] else {
             return
         }
         
-        let n = rowTable[i0]!.count
-        var p = UnsafeMutablePointer(&rowTable![i0]!)
+        let n = row.count
+        var p = UnsafeMutablePointer(&row)
         
         for _ in 0 ..< n {
             let (j, a) = p.pointee
             p.pointee = (j, r * a)
             p += 1
         }
-    }
-    
-    public func multiplyCol(at j0: Int, by r: R) {
-        switchAlignment(.Cols)
         
-        if colTable[j0] == nil {
-            return
-        }
+        row = row.filter{ $0.1 != R.zero }
         
-        let n = colTable[j0]!.count
-        var p = UnsafeMutablePointer(&colTable![j0]!)
-        
-        for _ in 0 ..< n {
-            let (i, a) = p.pointee
-            p.pointee = (i, r * a)
-            p += 1
+        if row.count == 0 {
+            table.removeValue(forKey: i0)
+        } else {
+            table[i0] = row
         }
     }
     
     public func addRow(at i0: Int, to i1: Int, multipliedBy r: R = R.identity) {
         switchAlignment(.Rows)
         
-        guard let r0 = rowTable[i0] else {
+        guard let r0 = table[i0] else {
             return
         }
         
-        guard let r1 = rowTable[i1] else {
-            rowTable[i1] = r0.map{ ($0.col, r * $0.value )}
+        guard let r1 = table[i1] else {
+            table[i1] = r0.map{ ($0.0, r * $0.1 )}
             return
         }
         
-        var result: [(col: Int, value: R)] = []
+        var result: [(Int, R)] = []
         
         var (p0, p1) = (UnsafePointer(r0), UnsafePointer(r1))
         var (k0, k1) = (0, 0) // counters
@@ -242,9 +179,9 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         
         while k0 < n0 || k1 < n1 {
             let b = (k0 < n0 && k1 < n1)
-            if b && (p0.pointee.col == p1.pointee.col) {
-                let j0 = p0.pointee.col
-                let (a0, a1) = (p0.pointee.value, p1.pointee.value)
+            if b && (p0.pointee.0 == p1.pointee.0) {
+                let j0 = p0.pointee.0
+                let (a0, a1) = (p0.pointee.1, p1.pointee.1)
                 let value = r * a0 + a1
                 
                 if value != 0 {
@@ -256,17 +193,17 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
                 k0 += 1
                 k1 += 1
                 
-            } else if (k1 >= n1) || (b && p0.pointee.col < p1.pointee.col) {
-                let j0 = p0.pointee.col
-                let a0 = p0.pointee.value
+            } else if (k1 >= n1) || (b && p0.pointee.0 < p1.pointee.0) {
+                let j0 = p0.pointee.0
+                let a0 = p0.pointee.1
                 result.append( (j0, r * a0) )
                 
                 p0 += 1
                 k0 += 1
                 
-            } else if (k0 >= n0) || (b && p0.pointee.col > p1.pointee.col) {
-                let j1 = p1.pointee.col
-                let a1 = p1.pointee.value
+            } else if (k0 >= n0) || (b && p0.pointee.0 > p1.pointee.0) {
+                let j1 = p1.pointee.0
+                let a1 = p1.pointee.1
                 result.append( (j1, a1) )
                 
                 p1 += 1
@@ -275,137 +212,122 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             }
         }
         
-        rowTable[i1] = result
-    }
-    
-    public func addCol(at j0: Int, to j1: Int, multipliedBy r: R = R.identity) {
-        switchAlignment(.Cols)
-        
-        guard let c0 = colTable[j0] else {
-            return
+        if result.count == 0 {
+            table.removeValue(forKey: i1)
+        } else {
+            table[i1] = result
         }
-        
-        guard let c1 = colTable[j1] else {
-            colTable[j1] = c0.map{ (i, a) in (i, r * a) }
-            return
-        }
-        
-        var result: [(row: Int, value: R)] = []
-        
-        var (p0, p1) = (UnsafePointer(c0), UnsafePointer(c1))
-        var (k0, k1) = (0, 0) // counters
-        let (n0, n1) = (c0.count, c1.count)
-        
-        while k0 < n0 || k1 < n1 {
-            let b = (k0 < n0 && k1 < n1)
-            if b && (p0.pointee.row == p1.pointee.row) {
-                let i0 = p0.pointee.row
-                let (a0, a1) = (p0.pointee.value, p1.pointee.value)
-                let value = r * a0 + a1
-                
-                if value != 0 {
-                    result.append( (i0, value) )
-                }
-                
-                p0 += 1
-                p1 += 1
-                k0 += 1
-                k1 += 1
-                
-            } else if (k1 >= n1) || (b && p0.pointee.row < p1.pointee.row) {
-                let i0 = p0.pointee.row
-                let a0 = p0.pointee.value
-                result.append( (i0, r * a0) )
-                
-                p0 += 1
-                k0 += 1
-                
-            } else if (k0 >= n0) || (b && p0.pointee.row > p1.pointee.row) {
-                let i1 = p1.pointee.row
-                let a1 = p1.pointee.value
-                result.append( (i1, a1) )
-                
-                p1 += 1
-                k1 += 1
-                
-            }
-        }
-        
-        colTable[j1] = result
     }
     
     public func swapRows(_ i0: Int, _ i1: Int) {
         switchAlignment(.Rows)
         
-        let r0 = rowTable[i0]
-        rowTable[i0] = rowTable[i1]
-        rowTable[i1] = r0
+        let r0 = table[i0]
+        table[i0] = table[i1]
+        table[i1] = r0
+    }
+    
+    public func multiplyCol(at j0: Int, by r: R) {
+        transpose()
+        multiplyRow(at: j0, by: r)
+        transpose()
+    }
+    
+    public func addCol(at j0: Int, to j1: Int, multipliedBy r: R = R.identity) {
+        transpose()
+        addRow(at: j0, to: j1, multipliedBy: r)
+        transpose()
     }
     
     public func swapCols(_ j0: Int, _ j1: Int) {
-        switchAlignment(.Cols)
-        
-        let r0 = colTable[j0]
-        colTable[j0] = colTable[j1]
-        colTable[j1] = r0
+        transpose()
+        swapRows(j0, j1)
+        transpose()
     }
     
-    public func enumerate(row i0: Int, fromCol j0: Int) -> AnySequence<(col: Int, value: R)> {
+    public func enumerate(row i0: Int, fromCol j0: Int = 0) -> AnySequence<(Int, R)> {
         switch align {
         case .Rows:
-            if let row = rowTable[i0] {
+            if let row = table[i0] {
                 return AnySequence(row.lazy.filter{ (col, _) in col >= j0})
             } else {
                 return AnySequence([])
             }
         case .Cols:
-            return AnySequence((j0 ..< cols).lazy.flatMap{ j -> (col: Int, value: R)? in
-                if let (i, a) = self.colTable[j]?.first, i == i0 {
-                    return (j, a)
-                } else {
+            return AnySequence((j0 ..< cols).lazy.flatMap{ j -> (Int, R)? in
+                guard let col = self.table[j] else {
                     return nil
                 }
+                for (i, a) in col {
+                    if i == i0 {
+                        return (j, a)
+                    } else if i > i0 {
+                        return nil
+                    }
+                }
+                return nil
             })
         }
     }
     
-    public func enumerate(col j0: Int, fromRow i0: Int) -> AnySequence<(row: Int, value: R)> {
-        switch align {
-        case .Rows:
-            return AnySequence((i0 ..< rows).lazy.flatMap{ i -> (row: Int, value: R)? in
-                if let (j, a) = self.rowTable[i]?.first, j == j0 {
-                    return (i, a)
-                } else {
-                    return nil
-                }
-            })
-        case .Cols:
-            if let col = colTable[j0] {
-                return AnySequence(col.lazy.filter{ (row, _) in row >= i0})
-            } else {
-                return AnySequence([])
-            }
-        }
+    public func enumerate(col j0: Int, fromRow i0: Int = 0) -> AnySequence<(Int, R)> {
+        transpose()
+        let result = enumerate(row: j0, fromCol: i0)
+        transpose()
+        return result
+    }
+    
+    public static func identity(_ n: Int, align: ComputationalMatrixAlignment = .Rows) -> ComputationalMatrix<R> {
+        let components = (0 ..< n).map{ i in MatrixComponent(i, i, R.identity)}
+        return ComputationalMatrix(rows: n, cols: n, components: components, align: align)
     }
     
     public static func ==(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> Bool {
-        return a.toGrid == b.toGrid // TODO performance
+        if (a.rows, a.cols) != (b.rows, b.cols) {
+            return false
+        }
+        
+        if a.align != b.align {
+            b.switchAlignment(a.align)
+        }
+        
+        // wish we could just write `a.table == b.table` ..
+        
+        return (a.table.keys == b.table.keys) && a.table.keys.forAll{ i in
+            let (x, y) = (a.table[i]!, b.table[i]!)
+            if x.count != y.count {
+                return false
+            }
+            return (0 ..< x.count).forAll { i in x[i] == y[i] }
+        }
+    }
+    
+    public func generateGrid() -> [R] {
+        var grid = Array(repeating: R.zero, count: rows * cols)
+        switch align {
+        case .Rows:
+            for (i, list) in table {
+                for (j, a) in list {
+                    grid[i * cols + j] = a
+                }
+            }
+        case .Cols:
+            for (j, list) in table {
+                for (i, a) in list {
+                    grid[i * cols + j] = a
+                }
+            }
+        }
+        return grid
     }
     
     public var description: String {
-        return "CMatrix(\(align), \(align == .Rows ? rowTable.sum{ $0.1.count } : colTable.sum{ $0.1.count } ))"
+        return "CMatrix(\(align), \(align == .Rows ? table.sum{ $0.1.count } : table.sum{ $0.1.count } ))"
     }
     
     public var detailDescription: String {
-        switch align {
-        case .Rows:
-            return description + " [ " + rowTable.flatMap { (i, list) in
-                list.map{ (j, a) in "\((i, j, a))"}
-                }.joined(separator: ", ") + " ]"
-        case .Cols:
-            return description + " [ " + colTable.flatMap { (j, list) in
-                list.map{ (i, a) in "\((i, j, a))"}
-                }.joined(separator: ", ") + " ]"
-        }
+        return description + " [ " + table.flatMap { (i, list) in
+            list.map{ (j, a) in "\( align == .Rows ? (i, j, a) : (j, i, a) )"}
+            }.joined(separator: ", ") + " ]"
     }
 }
