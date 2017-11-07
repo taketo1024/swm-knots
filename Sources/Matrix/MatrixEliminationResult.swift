@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class MatrixEliminationResult<R: EuclideanRing> {
+public final class MatrixEliminationResult<R: EuclideanRing> {
     public let result: ComputationalMatrix<R>
     internal let process: [MatrixEliminator<R>.MatrixEliminationStep]
     public let form: MatrixForm
@@ -28,17 +28,23 @@ public class MatrixEliminationResult<R: EuclideanRing> {
         return diagonal.count
     }
     
-    public lazy var left: ComputationalMatrix<R> = { [unowned self] in
+    @_specialize(where R == IntegerNumber)
+    private func _left() -> ComputationalMatrix<R> {
         let P = ComputationalMatrix<R>.identity(result.rows)
         
         process.lazy
-               .filter { $0.isRowOperation }
-               .forEach { $0.apply(to: P) }
+            .filter { $0.isRowOperation }
+            .forEach { $0.apply(to: P) }
         
         return P
+    }
+    
+    public lazy var left: ComputationalMatrix<R> = { [unowned self] in
+        return self._left()
     }()
     
-    public lazy var leftInverse: ComputationalMatrix<R> = { [unowned self] in
+    @_specialize(where R == IntegerNumber)
+    private func _leftInverse() -> ComputationalMatrix<R> {
         let P = ComputationalMatrix<R>.identity(result.rows)
         
         process.lazy
@@ -47,9 +53,14 @@ public class MatrixEliminationResult<R: EuclideanRing> {
                .forEach { $0.inverse.apply(to: P) }
         
         return P
+    }
+    
+    public lazy var leftInverse: ComputationalMatrix<R> = { [unowned self] in
+        return self._leftInverse()
     }()
     
-    public lazy var right: ComputationalMatrix<R> = { [unowned self] in
+    @_specialize(where R == IntegerNumber)
+    private func _right() -> ComputationalMatrix<R> {
         let P = ComputationalMatrix<R>.identity(result.cols, align: .Cols)
         
         process.lazy
@@ -57,9 +68,14 @@ public class MatrixEliminationResult<R: EuclideanRing> {
                .forEach { $0.apply(to: P) }
         
         return P
-    }()
+    }
     
-    public lazy var rightInverse: ComputationalMatrix<R> = { [unowned self] in
+    public lazy var right: ComputationalMatrix<R> = { [unowned self] in
+        return self._right()
+    }()
+
+    @_specialize(where R == IntegerNumber)
+    private func _rightInverse() -> ComputationalMatrix<R> {
         let P = ComputationalMatrix<R>.identity(result.cols, align: .Cols)
         
         process.lazy
@@ -68,5 +84,9 @@ public class MatrixEliminationResult<R: EuclideanRing> {
                .forEach { $0.inverse.apply(to: P) }
         
         return P
+    }
+    
+    public lazy var rightInverse: ComputationalMatrix<R> = { [unowned self] in
+        return self._rightInverse()
     }()
 }

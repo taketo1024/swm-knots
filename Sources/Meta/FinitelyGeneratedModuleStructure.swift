@@ -141,7 +141,7 @@ public final class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: Euclid
         //   T' * A' = (P' * T) * (Z * P'^-1) = P' * I_k * P'^-1 = I_k.
         //
         
-        let E  = SmithEliminator(R1).run()
+        let E  = R1.eliminate(form: .Smith)
         let factors = (E.diagonal + Array(repeating: R.zero, count: k - l)).filter{ $0 != R.identity }
         let s = factors.count
         

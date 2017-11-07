@@ -76,14 +76,12 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
         let basis = C.chainBasis(i)
         let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
 
-        // TODO cache elimination result
-        
         // Z = Ker(A1)
-        let E1 = DiagonalEliminator(A1.copy()).run()
+        let E1 = A1.eliminate(form: .Diagonal)
         let Z = E1.right.submatrix(colRange: E1.rank ..< A1.cols)
         
         // B = Im(A2)
-        let E2 = DiagonalEliminator(A2.copy()).run()
+        let E2 = A2.eliminate(form: .Diagonal)
         let B = E2.leftInverse.submatrix(colRange: 0 ..< E2.rank)
         
         E2.diagonal.enumerated().forEach { (j, a) in

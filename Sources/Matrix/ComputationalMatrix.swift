@@ -18,6 +18,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     public var cols: Int
     
     internal var align: ComputationalMatrixAlignment
+    internal var eliminationResult: AnyObject? = nil // TODO cache for each form?
     
     // align: .Rows  ->  [row : [(col, value)]]
     // align: .Cols  ->  [col : [(row, value)]]
@@ -120,6 +121,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return submatrix(0 ..< rows, colRange)
     }
     
+    @_specialize(where R == IntegerNumber)
     public func submatrix(_ rowRange: CountableRange<Int>, _ colRange: CountableRange<Int>) -> ComputationalMatrix<R> {
         assert(0 <= rowRange.lowerBound && rowRange.upperBound <= rows)
         assert(0 <= colRange.lowerBound && colRange.upperBound <= cols)
@@ -421,5 +423,29 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return description + " [ " + table.flatMap { (i, list) in
             list.map{ (j, a) in "\( align == .Rows ? (i, j, a) : (j, i, a) )"}
             }.joined(separator: ", ") + " ]"
+    }
+}
+
+public extension ComputationalMatrix where R: EuclideanRing{
+    public func eliminate(form: MatrixForm = .Diagonal, debug: Bool = false) -> MatrixEliminationResult<R> {
+        if let res = eliminationResult as? MatrixEliminationResult<R> {
+            return res
+        }
+        
+        let eliminator = { () -> MatrixEliminator<R> in
+            switch form {
+            case .RowEchelon: return RowEchelonEliminator(self, debug: debug)
+            case .ColEchelon: return ColEchelonEliminator(self, debug: debug)
+            case .RowHermite: return RowHermiteEliminator(self, debug: debug)
+            case .ColHermite: return ColHermiteEliminator(self, debug: debug)
+            case .Diagonal:   return DiagonalEliminator  (self, debug: debug)
+            case .Smith:      return SmithEliminator     (self, debug: debug)
+            default: fatalError()
+            }
+        }()
+        
+        let result = eliminator.run()
+        eliminationResult = result
+        return result
     }
 }
