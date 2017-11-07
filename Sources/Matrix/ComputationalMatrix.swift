@@ -139,13 +139,6 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
                 .map{ (j, list) in (j - colRange.lowerBound,
                                     list.flatMap{ (i, a) in rowRange.contains(i) ? (i - rowRange.lowerBound, a) : nil }) }
             
-            let shit = Dictionary(pairs: table)
-            
-            print(self.table)
-            print(rowRange, colRange)
-            print(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound)
-            print(shit)
-            
             return ComputationalMatrix(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound, align, Dictionary(pairs: table))
         }
     }
