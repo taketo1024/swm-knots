@@ -60,6 +60,13 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     internal func set(_ i: Int, _ j: Int, _ a: R) {
+        if (align == .Rows) {
+            assert(0 <= i && i < rows)
+            assert(0 <= j && j < cols)
+        } else {
+            assert(0 <= i && i < cols)
+            assert(0 <= j && j < rows)
+        }
         assert(a != R.zero)
         
         if table[i] == nil {
@@ -98,11 +105,55 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         sort()
     }
     
-    public func transpose() {
+    @discardableResult
+    public func transpose() -> ComputationalMatrix<R> {
         (rows, cols) = (cols, rows)
         align = (align == .Rows) ? .Cols : .Rows
+        return self
     }
     
+    public func submatrix(rowRange: CountableRange<Int>) -> ComputationalMatrix<R> {
+        return submatrix(rowRange, 0 ..< cols)
+    }
+    
+    public func submatrix(colRange: CountableRange<Int>) -> ComputationalMatrix<R> {
+        return submatrix(0 ..< rows, colRange)
+    }
+    
+    public func submatrix(_ rowRange: CountableRange<Int>, _ colRange: CountableRange<Int>) -> ComputationalMatrix<R> {
+        assert(0 <= rowRange.lowerBound && rowRange.upperBound <= rows)
+        assert(0 <= colRange.lowerBound && colRange.upperBound <= cols)
+
+        switch align {
+        case .Rows:
+            let table = self.table
+                .filter { (i, _) in rowRange.contains(i) }
+                .map{ (i, list) in (i - rowRange.lowerBound,
+                                    list.flatMap{ (j, a) in colRange.contains(j) ? (j - colRange.lowerBound, a) : nil }) }
+            
+            return ComputationalMatrix(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound, align, Dictionary(pairs: table))
+            
+        case .Cols:
+            let table = self.table
+                .filter { (j, _) in colRange.contains(j) }
+                .map{ (j, list) in (j - colRange.lowerBound,
+                                    list.flatMap{ (i, a) in rowRange.contains(i) ? (i - rowRange.lowerBound, a) : nil }) }
+            
+            let shit = Dictionary(pairs: table)
+            
+            print(self.table)
+            print(rowRange, colRange)
+            print(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound)
+            print(shit)
+            
+            return ComputationalMatrix(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound, align, Dictionary(pairs: table))
+        }
+    }
+    
+    public var isZero: Bool {
+        return table.isEmpty
+    }
+
     public var isDiagonal: Bool {
         return table.forAll { (i, list) in (list.count == 1) && list.first!.0 == i }
     }
@@ -115,7 +166,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     
     @_specialize(where R == IntegerNumber)
     public static func *(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> ComputationalMatrix<R> {
-        assert(a.rows == b.cols)
+        assert(a.cols == b.rows)
         
         let result = ComputationalMatrix<R>(rows: a.rows, cols: b.cols, components: [])
         
@@ -296,11 +347,6 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
-    public static func identity(_ n: Int, align: ComputationalMatrixAlignment = .Rows) -> ComputationalMatrix<R> {
-        let components = (0 ..< n).map{ i in MatrixComponent(i, i, R.identity)}
-        return ComputationalMatrix(rows: n, cols: n, components: components, align: align)
-    }
-    
     @_specialize(where R == IntegerNumber)
     public static func ==(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> Bool {
         if (a.rows, a.cols) != (b.rows, b.cols) {
@@ -322,12 +368,24 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
+    public static func zero(rows: Int, cols: Int, align: ComputationalMatrixAlignment = .Rows) -> ComputationalMatrix<R> {
+        return ComputationalMatrix(rows: rows, cols: cols, components: [], align: align)
+    }
+    
+    public static func identity(_ n: Int, align: ComputationalMatrixAlignment = .Rows) -> ComputationalMatrix<R> {
+        let components = (0 ..< n).map{ i in MatrixComponent(i, i, R.identity)}
+        return ComputationalMatrix(rows: n, cols: n, components: components, align: align)
+    }
+    
     public func generateGrid() -> [R] {
         var grid = Array(repeating: R.zero, count: rows * cols)
         switch align {
         case .Rows:
             for (i, list) in table {
                 for (j, a) in list {
+                    if i * cols + j >= grid.count {
+                        print(i, j)
+                    }
                     grid[i * cols + j] = a
                 }
             }
@@ -341,15 +399,30 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return grid
     }
     
+    public func generateElements<A>(from basis: [A]) -> [FreeModule<A, R>] {
+        assert(basis.count <= rows)
+        
+        switchAlignment(.Cols)
+        
+        return (0 ..< cols).map { j -> FreeModule<A, R> in
+            guard let v = table[j] else {
+                return FreeModule.zero
+            }
+            return FreeModule( v.map{ (i, r) in (basis[i], r)} )
+        }
+    }
+    
     public var asMatrix: DynamicMatrix<R> {
         return DynamicMatrix(rows: rows, cols: cols, grid: generateGrid())
     }
     
     public var description: String {
-        return "CMatrix(\(align), \(align == .Rows ? table.sum{ $0.1.count } : table.sum{ $0.1.count } ))"
+        return "CMatrix(\(rows), \(cols); \(table.sum{ $0.1.count }) elements)"
     }
     
     public var detailDescription: String {
-        return description + "\n" + asMatrix.detailDescription
+        return description + " [ " + table.flatMap { (i, list) in
+            list.map{ (j, a) in "\( align == .Rows ? (i, j, a) : (j, i, a) )"}
+            }.joined(separator: ", ") + " ]"
     }
 }
