@@ -8,7 +8,8 @@
 
 import Foundation
 
-public enum MatrixEliminationMode {
+public enum MatrixForm {
+    case Default
     case RowEchelon
     case ColEchelon
     case RowHermite
@@ -40,12 +41,12 @@ public class _MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         return target.cols
     }
 
-    // TODO
-//    public var result: MatrixEliminationResult<R> {
-//        return MatrixEliminationResult(target, process)
-//    }
+    public var result: MatrixEliminationResult<R> {
+        return MatrixEliminationResult(target, process, .Default)
+    }
     
-    public final func run() {
+    @discardableResult
+    public final func run() -> MatrixEliminationResult<R> {
         log("-----Start:\(self)-----")
         
         prepare()
@@ -53,6 +54,8 @@ public class _MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         finish()
         
         log("-----Done:\(self), \(process.count) steps)-----")
+        
+        return result
     }
     
     internal func prepare() {
@@ -82,9 +85,6 @@ public class _MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     }
     
     @_specialize(where R == IntegerNumber)
-    @_specialize(where R == RationalNumber)
-    @_specialize(where R == RealNumber)
-    @_specialize(where R == Z_2)
     internal func findMin(_ sequence: [(Int, R)]) -> (Int, R)? {
         var cand: (Int, R)? = nil
         for (i, a) in sequence {
@@ -112,9 +112,11 @@ public class _MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     func log(_ msg: @autoclosure () -> String) {
         if debug {
             print(msg())
-            print()
-            print(DynamicMatrix<R>(rows: rows, cols: cols, grid: target.generateGrid()).detailDescription)
-            print()
+            if rows < 100 && cols < 100 {
+                print()
+                print(target.asMatrix.detailDescription)
+                print()
+            }
         }
     }
     
@@ -127,14 +129,15 @@ public final class RowEchelonEliminator<R: EuclideanRing>: _MatrixEliminator<R> 
     internal var targetRow = 0
     internal var targetCol = 0
     
+    public override var result: MatrixEliminationResult<R> {
+        return MatrixEliminationResult(target, process, .RowEchelon)
+    }
+    
     override func prepare() {
          target.switchAlignment(.Rows)
     }
     
     @_specialize(where R == IntegerNumber)
-    @_specialize(where R == RationalNumber)
-    @_specialize(where R == RealNumber)
-    @_specialize(where R == Z_2)
     override func iteration() -> Bool {
         if targetRow >= rows || targetCol >= cols {
             return true
@@ -178,6 +181,10 @@ public final class RowEchelonEliminator<R: EuclideanRing>: _MatrixEliminator<R> 
 }
 
 public final class ColEchelonEliminator<R: EuclideanRing>: _MatrixEliminator<R> {
+    public override var result: MatrixEliminationResult<R> {
+        return MatrixEliminationResult(target, process, .ColEchelon)
+    }
+    
     internal override func iteration() -> Bool {
         runTranpose(RowEchelonEliminator.self)
         return true
@@ -188,14 +195,15 @@ public final class RowHermiteEliminator<R: EuclideanRing>: _MatrixEliminator<R> 
     internal var targetRow = 0
     internal var targetCol = 0
     
+    public override var result: MatrixEliminationResult<R> {
+        return MatrixEliminationResult(target, process, .RowHermite)
+    }
+    
     override func prepare() {
         run(RowEchelonEliminator.self)
     }
     
     @_specialize(where R == IntegerNumber)
-    @_specialize(where R == RationalNumber)
-    @_specialize(where R == RealNumber)
-    @_specialize(where R == Z_2)
     internal override func iteration() -> Bool {
         if targetRow >= rows || targetCol >= cols {
             return true
@@ -223,6 +231,10 @@ public final class RowHermiteEliminator<R: EuclideanRing>: _MatrixEliminator<R> 
 }
 
 public final class ColHermiteEliminator<R: EuclideanRing>: _MatrixEliminator<R> {
+    public override var result: MatrixEliminationResult<R> {
+        return MatrixEliminationResult(target, process, .ColHermite)
+    }
+    
     internal override func iteration() -> Bool {
         runTranpose(RowHermiteEliminator.self)
         return true
@@ -230,6 +242,10 @@ public final class ColHermiteEliminator<R: EuclideanRing>: _MatrixEliminator<R> 
 }
 
 public final class DiagonalEliminator<R: EuclideanRing>: _MatrixEliminator<R> {
+    public override var result: MatrixEliminationResult<R> {
+        return MatrixEliminationResult(target, process, .Diagonal)
+    }
+    
     override func iteration() -> Bool {
         if target.isDiagonal {
             return true
@@ -250,14 +266,15 @@ public final class DiagonalEliminator<R: EuclideanRing>: _MatrixEliminator<R> {
 public final class SmithEliminator<R: EuclideanRing>: _MatrixEliminator<R> {
     internal var targetIndex = 0
     
+    public override var result: MatrixEliminationResult<R> {
+        return MatrixEliminationResult(target, process, .Smith)
+    }
+    
     override func prepare() {
         run(DiagonalEliminator.self)
     }
     
     @_specialize(where R == IntegerNumber)
-    @_specialize(where R == RationalNumber)
-    @_specialize(where R == RealNumber)
-    @_specialize(where R == Z_2)
     internal override func iteration() -> Bool {
         if R.isField || targetIndex >= target.table.count {
             return true
