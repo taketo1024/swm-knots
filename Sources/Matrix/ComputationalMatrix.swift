@@ -29,6 +29,13 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return table[p]?.first{ $0.0 == q }?.1 ?? 0
     }
     
+    private init(_ rows: Int, _ cols: Int, _ align: ComputationalMatrixAlignment, _ table: [Int : [(Int, R)]]) {
+        self.rows = rows
+        self.cols = cols
+        self.align = align
+        self.table = table
+    }
+    
     public convenience init<n, m>(_ a: Matrix<n, m, R>, align: ComputationalMatrixAlignment = .Rows) {
         self.init(rows: a.rows, cols: a.cols, grid: a.grid, align: align)
     }
@@ -40,12 +47,8 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         self.init(rows: rows, cols: cols, components: components, align: align)
     }
     
-    public init<S: Sequence>(rows: Int, cols: Int, components: S, align: ComputationalMatrixAlignment = .Rows) where S.Element == MatrixComponent<R> {
-        self.rows = rows
-        self.cols = cols
-        
-        self.align = align
-        self.table = [:]
+    public convenience init<S: Sequence>(rows: Int, cols: Int, components: S, align: ComputationalMatrixAlignment = .Rows) where S.Element == MatrixComponent<R> {
+        self.init(rows, cols, align, [:])
         
         for (i, j, a) in components {
             if a == R.zero {
@@ -65,10 +68,15 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         table[i]!.append( (j, a) )
     }
 
+    @_specialize(where R == IntegerNumber)
     internal func sort() {
         for (i, list) in table {
             table[i] = list.sorted{ (e1, e2) in e1.0 < e2.0 }
         }
+    }
+    
+    public func copy() -> ComputationalMatrix<R> {
+        return ComputationalMatrix(rows, cols, align, table)
     }
     
     public func switchAlignment(_ align: ComputationalMatrixAlignment) {
@@ -106,9 +114,6 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == IntegerNumber)
-    @_specialize(where R == RationalNumber)
-    @_specialize(where R == RealNumber)
-    @_specialize(where R == Z_2)
     public static func *(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> ComputationalMatrix<R> {
         assert(a.rows == b.cols)
         
@@ -135,13 +140,11 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             }
         }
         
+        result.sort()
         return result
     }
     
     @_specialize(where R == IntegerNumber)
-    @_specialize(where R == RationalNumber)
-    @_specialize(where R == RealNumber)
-    @_specialize(where R == Z_2)
     public func multiplyRow(at i0: Int, by r: R) {
         switchAlignment(.Rows)
         
@@ -168,9 +171,6 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == IntegerNumber)
-    @_specialize(where R == RationalNumber)
-    @_specialize(where R == RealNumber)
-    @_specialize(where R == Z_2)
     public func addRow(at i0: Int, to i1: Int, multipliedBy r: R = R.identity) {
         switchAlignment(.Rows)
         
@@ -258,9 +258,6 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == IntegerNumber)
-    @_specialize(where R == RationalNumber)
-    @_specialize(where R == RealNumber)
-    @_specialize(where R == Z_2)
     public func enumerate(row i0: Int, fromCol j0: Int = 0, headsOnly h: Bool = false) -> [(Int, R)] {
         switch align {
         case .Rows:
@@ -278,9 +275,6 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == IntegerNumber)
-    @_specialize(where R == RationalNumber)
-    @_specialize(where R == RealNumber)
-    @_specialize(where R == Z_2)
     public func enumerate(col j0: Int, fromRow i0: Int = 0, headsOnly h: Bool = false) -> [(Int, R)] {
         switch align {
         case .Rows:
@@ -308,9 +302,6 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == IntegerNumber)
-    @_specialize(where R == RationalNumber)
-    @_specialize(where R == RealNumber)
-    @_specialize(where R == Z_2)
     public static func ==(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> Bool {
         if (a.rows, a.cols) != (b.rows, b.cols) {
             return false
@@ -322,7 +313,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         
         // wish we could just write `a.table == b.table` ..
         
-        return (a.table.keys == b.table.keys) && a.table.keys.forAll{ i in
+        return (Set(a.table.keys) == Set(b.table.keys)) && a.table.keys.forAll{ i in
             let (x, y) = (a.table[i]!, b.table[i]!)
             if x.count != y.count {
                 return false
@@ -350,13 +341,15 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return grid
     }
     
+    public var asMatrix: DynamicMatrix<R> {
+        return DynamicMatrix(rows: rows, cols: cols, grid: generateGrid())
+    }
+    
     public var description: String {
         return "CMatrix(\(align), \(align == .Rows ? table.sum{ $0.1.count } : table.sum{ $0.1.count } ))"
     }
     
     public var detailDescription: String {
-        return description + " [ " + table.flatMap { (i, list) in
-            list.map{ (j, a) in "\( align == .Rows ? (i, j, a) : (j, i, a) )"}
-            }.joined(separator: ", ") + " ]"
+        return description + "\n" + asMatrix.detailDescription
     }
 }
