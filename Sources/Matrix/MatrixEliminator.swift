@@ -199,7 +199,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
             print(msg())
             if rows < 100 && cols < 100 {
                 print()
-                print(target.asMatrix.detailDescription)
+                print(target.asDynamicMatrix().detailDescription)
                 print()
             }
         }

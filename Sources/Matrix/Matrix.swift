@@ -129,7 +129,6 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
     
     @_inlineable
-    @_specialize(where R==Int, n==Dynamic, m==Dynamic, p==Dynamic)
     public static func * <p>(a: Matrix<n, m, R>, b: Matrix<m, p, R>) -> Matrix<n, p, R> {
         assert(a.cols == b.rows, "Mismatching matrix size.")
         return Matrix<n, p, R>(rows: a.rows, cols: b.cols) { (i, k) in
@@ -251,45 +250,43 @@ public extension Matrix where n == m {
     public static func ** (a: Matrix<n, n, R>, k: Int) -> Matrix<n, n, R> {
         return k == 0 ? Matrix.identity(size: a.rows) : a * (a ** (k - 1))
     }
-    
-        /*
+}
+
+public extension Matrix where n == m, R: EuclideanRing {
     public var determinant: R {
-        if eliminatable {
-            let s = smithNormalForm
-            return s.process.map{ $0.determinant.inverse! }.multiplyAll() * s.diagonal.multiplyAll()
+        let e = DiagonalEliminator(self).run()
+        if e.rank == self.rows {
+            return e.process.multiply { $0.determinant.inverse! } * e.diagonal.multiplyAll()
         } else {
-            print("[warn] running inefficient determinant calculation.")
-     
-            let n = rows
-            return n.permutations.map { (s: [Int]) -> R in
-                let e = Permutation<Dynamic>(elements: s).signature
-                let p = (0 ..< n).map { self[$0, s[$0]] }.multiplyAll()
-                return R(intValue: e) * p
-                }.sumAll()
+            return 0
         }
     }
     
     public var isInvertible: Bool {
-        if eliminatable {
-            return smithNormalForm.diagonal.multiplyAll().isInvertible
-        } else {
-            return determinant.isInvertible
-        }
+        return determinant.isInvertible
     }
     
     public var inverse: Matrix<n, n, R>? {
-        if eliminatable {
-            let s = smithNormalForm
-            if s.result == Matrix.identity(size: self.rows) {
-                return s.right * s.left
-            } else {
-                return nil
-            }
-        } else {
-            fatalError("matrix-inverse not yet impled for general coeff-rings.")
-        }
+        let e = DiagonalEliminator(self).run()
+        let (P, Q): (Matrix<n, n, R>, Matrix<n, n, R>) = (e.left.asMatrix(), e.right.asMatrix())
+        return P * Q
     }
- */
     
-
+    // MEMO use computational Matrix for more direct manipulation.
+    public func eliminate(form: MatrixForm = .Diagonal, debug: Bool = false) -> (result: Matrix<n, m, R>, left: Matrix<n, n, R>, right: Matrix<m, m, R>) {
+        let eliminator = { () -> MatrixEliminator<R> in
+            switch form {
+            case .RowEchelon: return RowEchelonEliminator(self, debug: debug)
+            case .ColEchelon: return ColEchelonEliminator(self, debug: debug)
+            case .RowHermite: return RowHermiteEliminator(self, debug: debug)
+            case .ColHermite: return ColHermiteEliminator(self, debug: debug)
+            case .Diagonal:   return DiagonalEliminator  (self, debug: debug)
+            case .Smith:      return SmithEliminator     (self, debug: debug)
+            default: fatalError()
+            }
+        }()
+        
+        let result = eliminator.run()
+        return (result.result.asMatrix(), result.left.asMatrix(), result.right.asMatrix())
+    }
 }

@@ -405,8 +405,12 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
-    public var asMatrix: DynamicMatrix<R> {
-        return DynamicMatrix(rows: rows, cols: cols, grid: generateGrid())
+    public func asMatrix<n, m>() -> Matrix<n, m, R> {
+        return Matrix(rows: rows, cols: cols, grid: generateGrid())
+    }
+    
+    public func asDynamicMatrix() -> DynamicMatrix<R> {
+        return asMatrix()
     }
     
     public var description: String {
