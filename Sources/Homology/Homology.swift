@@ -75,32 +75,8 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
         let C = chainComplex
         let basis = C.chainBasis(i)
         let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
-
-        // Z = Ker(A1)
-        let E1 = A1.eliminate(form: .Diagonal)
-        let Z = E1.right.submatrix(colRange: E1.rank ..< A1.cols)
-        
-        // B = Im(A2)
-        let E2 = A2.eliminate(form: .Diagonal)
-        let B = E2.leftInverse.submatrix(colRange: 0 ..< E2.rank)
-        
-        E2.diagonal.enumerated().forEach { (j, a) in
-            if j < B.cols {
-                B.multiplyCol(at: j, by: a)
-            }
-        }
-
-        // T: Transition matrix from C to Z (represents cycles in Z-coords.)
-        //
-        //   P * A1 * Q = [D; O_k]
-        //   =>  Z = Q[ * , n - k ..< n] = Q * [O_(n-k); I_k]
-        //   =>  Q^-1 * Z = [O; I_k]
-        //
-        // Put T = Q^-1[ * , n - k ..< n], then T * Z = I_k.
-        
-        let T = E1.rightInverse.submatrix(rowRange: (Z.rows - Z.cols) ..< Z.rows)
-        
-        return Summand(basis: basis, generators: Z, relations: B, transition: T)
+        let (E1, E2) = (A1.eliminate(), A2.eliminate())
+        return Summand(basis: basis, generators: E1.kernelMatrix, relations: E2.imageMatrix, transition: E1.kernelTransitionMatrix)
     }
 }
 

@@ -28,6 +28,10 @@ public final class MatrixEliminationResult<R: EuclideanRing> {
         return diagonal.count
     }
     
+    public lazy var left: ComputationalMatrix<R> = { [unowned self] in
+        return self._left()
+    }()
+    
     @_specialize(where R == IntegerNumber)
     private func _left() -> ComputationalMatrix<R> {
         let P = ComputationalMatrix<R>.identity(result.rows)
@@ -39,24 +43,26 @@ public final class MatrixEliminationResult<R: EuclideanRing> {
         return P
     }
     
-    public lazy var left: ComputationalMatrix<R> = { [unowned self] in
-        return self._left()
+    public lazy var leftInverse: ComputationalMatrix<R> = { [unowned self] in
+        return self._leftInverse()
     }()
     
     @_specialize(where R == IntegerNumber)
-    private func _leftInverse() -> ComputationalMatrix<R> {
-        let P = ComputationalMatrix<R>.identity(result.rows)
+    private func _leftInverse(restrictedToCols colRange: CountableRange<Int>? = nil) -> ComputationalMatrix<R> {
+        let P = (colRange == nil)
+            ? ComputationalMatrix<R>.identity(result.rows)
+            : ComputationalMatrix<R>.identity(result.rows).submatrix(colRange: colRange!)
         
         process.lazy
-               .filter { $0.isRowOperation }
-               .reversed()
-               .forEach { $0.inverse.apply(to: P) }
+            .filter { $0.isRowOperation }
+            .reversed()
+            .forEach { $0.inverse.apply(to: P) }
         
         return P
     }
     
-    public lazy var leftInverse: ComputationalMatrix<R> = { [unowned self] in
-        return self._leftInverse()
+    public lazy var right: ComputationalMatrix<R> = { [unowned self] in
+        return self._right()
     }()
     
     @_specialize(where R == IntegerNumber)
@@ -70,13 +76,15 @@ public final class MatrixEliminationResult<R: EuclideanRing> {
         return P
     }
     
-    public lazy var right: ComputationalMatrix<R> = { [unowned self] in
-        return self._right()
+    public lazy var rightInverse: ComputationalMatrix<R> = { [unowned self] in
+        return self._rightInverse()
     }()
-
+    
     @_specialize(where R == IntegerNumber)
-    private func _rightInverse() -> ComputationalMatrix<R> {
-        let P = ComputationalMatrix<R>.identity(result.cols, align: .Cols)
+    private func _rightInverse(restrictedToRows rowRange: CountableRange<Int>? = nil) -> ComputationalMatrix<R> {
+        let P = (rowRange == nil)
+            ? ComputationalMatrix<R>.identity(result.cols, align: .Cols)
+            : ComputationalMatrix<R>.identity(result.cols, align: .Cols).submatrix(rowRange: rowRange!)
         
         process.lazy
                .filter { $0.isColOperation }
@@ -86,7 +94,44 @@ public final class MatrixEliminationResult<R: EuclideanRing> {
         return P
     }
     
-    public lazy var rightInverse: ComputationalMatrix<R> = { [unowned self] in
-        return self._rightInverse()
+    // The matrix made by the basis of Ker(A).
+    // Z = (z1, ..., zk) , k = col(A) - rank(A).
+    //
+    // P * A * Q = [D_r; O_k]
+    // =>  Z = Q[:, r ..< m] = Q * [O_r; I_k]
+
+    public lazy var kernelMatrix: ComputationalMatrix<R> = { [unowned self] in
+        return right.submatrix(colRange: rank ..< result.cols)
+    }()
+    
+    // The matrix made by the basis of Im(A).
+    // B = (b1, ..., br) , r = rank(A)
+    //
+    // P * A * Q = [D_r; O_k]
+    // => D is the imageMatrix with basis P.
+    // => P^-1 * D is the imageMatrix with the standard basis.
+
+    public lazy var imageMatrix: ComputationalMatrix<R> = { [unowned self] in
+        let A = _leftInverse(restrictedToCols: 0 ..< rank)
+        
+        for (j, a) in diagonal.enumerated() {
+            if j >= rank { break }
+            A.multiplyCol(at: j, by: a)
+        }
+        
+        return A
+    }()
+    
+    // T: The basis transition matrix from (ei) to (zi),
+    // i.e. T * zi = ei.
+    //
+    // P * A * Q = [D_r; O_k]
+    // =>  Z = Q[:, r ..< m] = Q * [O_r; I_k]
+    // =>  Q^-1 * Z = [O; I_k]
+    //
+    // T = Q^-1[:, r ..< m]  gives  T * Z = I_k.
+    
+    public lazy var kernelTransitionMatrix: ComputationalMatrix<R> = { [unowned self] in
+        return _rightInverse(restrictedToRows: rank ..< result.cols)
     }()
 }
