@@ -12,7 +12,7 @@ import SwiftyAlgebra
 func main() {
     typealias Z = IntegerNumber
     
-    let T = SimplicialComplex.torus(dim: 3)
+    let T = SimplicialComplex.torus(dim: 4)
     let H = Homology(T, Z.self)
     print("H(T; Z) =", H.detailDescription, "\n")
 }

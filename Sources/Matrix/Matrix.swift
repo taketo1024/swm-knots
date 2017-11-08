@@ -254,14 +254,7 @@ public extension Matrix where n == m {
 
 public extension Matrix where n == m, R: EuclideanRing {
     public var determinant: R {
-        let e = DiagonalEliminator(self).run()
-        if e.rank == self.rows {
-            return e.rowOps.multiply { $0.determinant }.inverse!
-                   * e.colOps.multiply { $0.determinant }.inverse!
-                   * e.diagonal.multiplyAll()
-        } else {
-            return 0
-        }
+        return eliminate().determinant
     }
     
     public var isInvertible: Bool {
@@ -269,26 +262,26 @@ public extension Matrix where n == m, R: EuclideanRing {
     }
     
     public var inverse: Matrix<n, n, R>? {
-        let e = DiagonalEliminator(self).run()
-        let (P, Q): (Matrix<n, n, R>, Matrix<n, n, R>) = (e.left.asMatrix(), e.right.asMatrix())
-        return P * Q
+        return eliminate().inverse
     }
     
     // MEMO use computational Matrix for more direct manipulation.
-    public func eliminate(form: MatrixForm = .Diagonal, debug: Bool = false) -> (result: Matrix<n, m, R>, left: Matrix<n, n, R>, right: Matrix<m, m, R>) {
+    public func eliminate(form: MatrixForm = .Diagonal, debug: Bool = false) -> MatrixEliminationResultWrapper<n, m, R> {
+        let cmatrix = ComputationalMatrix(self)
         let eliminator = { () -> MatrixEliminator<R> in
             switch form {
-            case .RowEchelon: return RowEchelonEliminator(self, debug: debug)
-            case .ColEchelon: return ColEchelonEliminator(self, debug: debug)
-            case .RowHermite: return RowHermiteEliminator(self, debug: debug)
-            case .ColHermite: return ColHermiteEliminator(self, debug: debug)
-            case .Diagonal:   return DiagonalEliminator  (self, debug: debug)
-            case .Smith:      return SmithEliminator     (self, debug: debug)
+            case .RowEchelon: return RowEchelonEliminator(cmatrix, debug: debug)
+            case .ColEchelon: return ColEchelonEliminator(cmatrix, debug: debug)
+            case .RowHermite: return RowHermiteEliminator(cmatrix, debug: debug)
+            case .ColHermite: return ColHermiteEliminator(cmatrix, debug: debug)
+            case .Diagonal:   return DiagonalEliminator  (cmatrix, debug: debug)
+            case .Smith:      return SmithEliminator     (cmatrix, debug: debug)
             default: fatalError()
             }
         }()
         
         let result = eliminator.run()
-        return (result.result.asMatrix(), result.left.asMatrix(), result.right.asMatrix())
+        return MatrixEliminationResultWrapper(self, result)
     }
 }
+

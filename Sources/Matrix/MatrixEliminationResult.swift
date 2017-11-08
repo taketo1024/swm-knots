@@ -30,6 +30,25 @@ public final class MatrixEliminationResult<R: EuclideanRing> {
         return diagonal.count
     }
     
+    public lazy var inverse: ComputationalMatrix<R>? = {
+        assert(result.rows == result.cols)
+        assert(form == .Diagonal || form == .Smith)
+        return (rank == result.rows) ? right * left : nil
+    }()
+    
+    public lazy var determinant: R = { [unowned self] in
+        assert(result.rows == result.cols)
+        assert(form == .Diagonal || form == .Smith)
+        
+        if rank == result.rows {
+            return rowOps.multiply { $0.determinant }.inverse!
+                 * colOps.multiply { $0.determinant }.inverse!
+                 * diagonal.multiplyAll()
+        } else {
+            return 0
+        }
+    }()
+    
     public lazy var left: ComputationalMatrix<R> = { [unowned self] in
         return self._left()
     }()

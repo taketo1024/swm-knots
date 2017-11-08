@@ -36,8 +36,8 @@ do {
     
     let A = M(1, -2, -6, 2, 4, 12, 1, -4, -12)
     
-    // set `debug: true` to see the elimination process.
-    let (B, P, Q) = A.eliminate(form: .Diagonal, debug: true)
+    let E = A.eliminate(form: .Diagonal, debug: false) // set `debug: true` to see the elimination process.
+    let (B, P, Q) = (E.result, E.left, E.right)
     
     B == P * A * Q
 }

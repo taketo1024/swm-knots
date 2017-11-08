@@ -24,10 +24,6 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     internal var colOps: [MatrixEliminationStep]
     internal var debug: Bool
     
-    public convenience init<n, m>(_ target: Matrix<n, m, R>, debug: Bool = false) {
-        self.init(ComputationalMatrix(target), debug: debug)
-    }
-    
     public required init(_ target: ComputationalMatrix<R>, debug: Bool = false) {
         self.target = target
         self.rowOps = []
@@ -105,12 +101,12 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     internal func apply(_ s: MatrixEliminationStep) {
         s.apply(to: target)
         s.isRowOperation ? rowOps.append(s) : colOps.append(s)
-        log("\(rowOps.count): \(s)")
+        log("\(s)")
     }
     
     func transpose() {
         target.transpose()
-        log("\(rowOps.count + colOps.count): Transpose")
+        log("Transpose")
     }
     
     func log(_ msg: @autoclosure () -> String) {
