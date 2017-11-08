@@ -178,7 +178,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
                 }
             }
             
-            row.lazy.filter{ (_, a) in a != R.zero }.forEach{ (j, a) in
+            row.filter{ (_, a) in a != R.zero }.forEach{ (j, a) in
                 result.set(i, j, a)
             }
         }
@@ -321,7 +321,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     public func enumerate(col j0: Int, fromRow i0: Int = 0, headsOnly h: Bool = false) -> [(Int, R)] {
         switch align {
         case .Rows:
-            return (i0 ..< rows).lazy.flatMap{ i -> (Int, R)? in
+            return (i0 ..< rows).flatMap{ i -> (Int, R)? in
                 guard let row = self.table[i] else {
                     return nil
                 }

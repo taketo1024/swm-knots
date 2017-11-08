@@ -20,7 +20,8 @@ public enum MatrixForm {
 
 public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     internal var target: ComputationalMatrix<R>
-    internal var process: [MatrixEliminationStep]
+    internal var rowOps: [MatrixEliminationStep]
+    internal var colOps: [MatrixEliminationStep]
     internal var debug: Bool
     
     public convenience init<n, m>(_ target: Matrix<n, m, R>, debug: Bool = false) {
@@ -29,7 +30,8 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     
     public required init(_ target: ComputationalMatrix<R>, debug: Bool = false) {
         self.target = target
-        self.process = []
+        self.rowOps = []
+        self.colOps = []
         self.debug = debug
     }
     
@@ -42,7 +44,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     }
 
     public var result: MatrixEliminationResult<R> {
-        return MatrixEliminationResult(target, process, .Default)
+        return MatrixEliminationResult(target, rowOps, colOps, .Default)
     }
     
     @discardableResult
@@ -53,7 +55,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         while !iteration() {}
         finish()
         
-        log("-----Done:\(self), \(process.count) steps)-----")
+        log("-----Done:\(self), \(rowOps.count + colOps.count) steps)-----")
         
         return result
     }
@@ -73,14 +75,16 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     internal func run(_ eliminator: MatrixEliminator.Type) {
         let e = eliminator.init(target, debug: debug)
         e.run()
-        process += e.process
+        rowOps += e.rowOps
+        colOps += e.colOps
     }
     
     internal func runTranpose(_ eliminator: MatrixEliminator.Type) {
         transpose()
         let e = eliminator.init(target, debug: debug)
         e.run()
-        process += e.process.map{ s in s.transpose }
+        rowOps += e.colOps.map{ s in s.transpose }
+        colOps += e.rowOps.map{ s in s.transpose }
         transpose()
     }
     
@@ -100,13 +104,13 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     
     internal func apply(_ s: MatrixEliminationStep) {
         s.apply(to: target)
-        process.append(s)
-        log("\(process.count): \(s)")
+        s.isRowOperation ? rowOps.append(s) : colOps.append(s)
+        log("\(rowOps.count): \(s)")
     }
     
     func transpose() {
         target.transpose()
-        log("\(process.count): Transpose")
+        log("\(rowOps.count + colOps.count): Transpose")
     }
     
     func log(_ msg: @autoclosure () -> String) {
@@ -190,6 +194,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
             }
         }
         
+        @_specialize(where R == IntegerNumber)
         internal func apply(to A: ComputationalMatrix<R>) {
             switch self {
             case let .AddRow(i, j, r):

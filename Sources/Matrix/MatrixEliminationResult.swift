@@ -10,12 +10,14 @@ import Foundation
 
 public final class MatrixEliminationResult<R: EuclideanRing> {
     public let result: ComputationalMatrix<R>
-    internal let process: [MatrixEliminator<R>.MatrixEliminationStep]
+    internal let rowOps: [MatrixEliminator<R>.MatrixEliminationStep]
+    internal let colOps: [MatrixEliminator<R>.MatrixEliminationStep]
     public let form: MatrixForm
     
-    internal init(_ result: ComputationalMatrix<R>, _ process: [MatrixEliminator<R>.MatrixEliminationStep], _ form: MatrixForm) {
+    internal init(_ result: ComputationalMatrix<R>, _ rowOps: [MatrixEliminator<R>.MatrixEliminationStep], _ colOps: [MatrixEliminator<R>.MatrixEliminationStep], _ form: MatrixForm) {
         self.result = result
-        self.process = process
+        self.rowOps = rowOps
+        self.colOps = colOps
         self.form = form
     }
     
@@ -35,11 +37,9 @@ public final class MatrixEliminationResult<R: EuclideanRing> {
     @_specialize(where R == IntegerNumber)
     private func _left() -> ComputationalMatrix<R> {
         let P = ComputationalMatrix<R>.identity(result.rows)
-        
-        process.lazy
-            .filter { $0.isRowOperation }
-            .forEach { $0.apply(to: P) }
-        
+        for s in rowOps {
+            s.apply(to: P)
+        }
         return P
     }
     
@@ -53,10 +53,9 @@ public final class MatrixEliminationResult<R: EuclideanRing> {
             ? ComputationalMatrix<R>.identity(result.rows)
             : ComputationalMatrix<R>.identity(result.rows).submatrix(colRange: colRange!)
         
-        process.lazy
-            .filter { $0.isRowOperation }
-            .reversed()
-            .forEach { $0.inverse.apply(to: P) }
+        for s in rowOps.reversed() {
+            s.inverse.apply(to: P)
+        }
         
         return P
     }
@@ -68,11 +67,9 @@ public final class MatrixEliminationResult<R: EuclideanRing> {
     @_specialize(where R == IntegerNumber)
     private func _right() -> ComputationalMatrix<R> {
         let P = ComputationalMatrix<R>.identity(result.cols, align: .Cols)
-        
-        process.lazy
-               .filter{ $0.isColOperation }
-               .forEach { $0.apply(to: P) }
-        
+        for s in colOps {
+            s.apply(to: P)
+        }
         return P
     }
     
@@ -86,10 +83,9 @@ public final class MatrixEliminationResult<R: EuclideanRing> {
             ? ComputationalMatrix<R>.identity(result.cols, align: .Cols)
             : ComputationalMatrix<R>.identity(result.cols, align: .Cols).submatrix(rowRange: rowRange!)
         
-        process.lazy
-               .filter { $0.isColOperation }
-               .reversed()
-               .forEach { $0.inverse.apply(to: P) }
+        for s in colOps.reversed() {
+            s.inverse.apply(to: P)
+        }
         
         return P
     }

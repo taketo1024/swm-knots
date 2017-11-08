@@ -256,7 +256,9 @@ public extension Matrix where n == m, R: EuclideanRing {
     public var determinant: R {
         let e = DiagonalEliminator(self).run()
         if e.rank == self.rows {
-            return e.process.multiply { $0.determinant.inverse! } * e.diagonal.multiplyAll()
+            return e.rowOps.multiply { $0.determinant }.inverse!
+                   * e.colOps.multiply { $0.determinant }.inverse!
+                   * e.diagonal.multiplyAll()
         } else {
             return 0
         }

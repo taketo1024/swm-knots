@@ -12,7 +12,7 @@ public final class SmithEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     internal var targetIndex = 0
     
     public override var result: MatrixEliminationResult<R> {
-        return MatrixEliminationResult(target, process, .Smith)
+        return MatrixEliminationResult(target, rowOps, colOps, .Smith)
     }
     
     override func prepare() {
