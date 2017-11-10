@@ -38,6 +38,10 @@ public final class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: Euclid
         return summands[i]
     }
     
+    public var isTrivial: Bool {
+        return summands.isEmpty
+    }
+    
     public var rank: Int {
         return self.filter{ $0.isFree }.count
     }
