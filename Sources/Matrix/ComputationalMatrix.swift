@@ -251,7 +251,11 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             } else if (k1 >= n1) || (b && p0.pointee.0 < p1.pointee.0) {
                 let j0 = p0.pointee.0
                 let a0 = p0.pointee.1
-                result.append( (j0, r * a0) )
+                let value = r * a0
+                
+                if value != 0 {
+                    result.append( (j0, r * a0) )
+                }
                 
                 p0 += 1
                 k0 += 1
