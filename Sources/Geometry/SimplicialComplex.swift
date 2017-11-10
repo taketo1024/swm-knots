@@ -12,12 +12,14 @@ public struct SimplicialComplex: GeometricComplex {
     public typealias Cell = Simplex
     
     public var name: String
+    public let vertices: [Vertex]
     internal let cellTable: [[Simplex]]
     
     // root initializer
     internal init(name: String? = nil, _ cellTable: [[Simplex]]) {
         self.name = name ?? "_"
         self.cellTable = cellTable
+        self.vertices = cellTable[0].map{ $0.vertices[0] }
     }
     
     public init<S: Sequence>(name: String? = nil, allCells cells: S) where S.Iterator.Element == Simplex {
@@ -47,10 +49,6 @@ public struct SimplicialComplex: GeometricComplex {
     
     public func cells(ofDim i: Int) -> [Simplex] {
         return (0...dim).contains(i) ? cellTable[i] : []
-    }
-    
-    public var allVertices: [Vertex] {
-        return cells(ofDim: 0).map{ $0.vertices[0] }
     }
     
     private var _maximalCells: Cache<[Simplex]> = Cache()

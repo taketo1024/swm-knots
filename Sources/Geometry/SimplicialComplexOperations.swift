@@ -27,7 +27,7 @@ public extension SimplicialComplex {
     }
     
     public var boundaryVertices: [Vertex] {
-        return allVertices.filter { v in
+        return vertices.filter { v in
             SimplicialComplex(maximalCells: self.link(v)).orientationCycle == nil
         }
     }

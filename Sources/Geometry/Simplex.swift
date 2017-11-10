@@ -26,7 +26,11 @@ public struct Simplex: GeometricCell, Comparable {
         self.label = (vertices.count == 1) ? vertices.first!.label : "(\(vertices.map{ $0.label }.joined(separator: ", ")))"
     }
     
-    public init<S: Sequence>(_ V: [Vertex], indices: S) where S.Iterator.Element == Int {
+    public init(_ vs: Vertex...) {
+        self.init(vs)
+    }
+    
+    public init<S: Sequence>(vertexSet V: [Vertex], indices: S) where S.Element == Int {
         self.init(indices.map{ V[$0] })
     }
     
