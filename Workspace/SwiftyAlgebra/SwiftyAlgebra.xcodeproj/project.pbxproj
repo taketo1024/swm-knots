@@ -66,8 +66,11 @@
 		14D261321EE44DB4006775E2 /* Structure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261311EE44DB4006775E2 /* Structure.swift */; };
 		14D261341EE4614E006775E2 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* Set.swift */; };
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
+		DD5D09941FB5ACD700E1BDFC /* SimplicialComplexExamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */; };
+		DD5D09961FB5AD0700E1BDFC /* TopologicalInvariants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5D09951FB5AD0700E1BDFC /* TopologicalInvariants.swift */; };
 		DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125991F31AA2500FD5533 /* Cache.swift */; };
 		DD90ACC91F763553001AFC9C /* PolynomialIdeal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */; };
+		DDC2400E1FB0852800258765 /* SimplicialComplexOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -150,8 +153,11 @@
 		14D261311EE44DB4006775E2 /* Structure.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Structure.swift; sourceTree = "<group>"; };
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
+		DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialComplexExamples.swift; sourceTree = "<group>"; };
+		DD5D09951FB5AD0700E1BDFC /* TopologicalInvariants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopologicalInvariants.swift; sourceTree = "<group>"; };
 		DD6125991F31AA2500FD5533 /* Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
 		DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolynomialIdeal.swift; sourceTree = "<group>"; };
+		DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialComplexOperations.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -362,9 +368,12 @@
 				14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */,
 				142932001FAEB6E7003EE1BB /* GeometricComplexMap.swift */,
 				14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */,
+				DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */,
+				DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */,
 				142932021FAEB6FB003EE1BB /* SimplicialMap.swift */,
 				146399731F191AD500A34CEE /* DualSimplicialComplex.swift */,
 				141C0CDE1F28232F00D9BDDE /* CWComplex.swift */,
+				DD5D09951FB5AD0700E1BDFC /* TopologicalInvariants.swift */,
 			);
 			path = Geometry;
 			sourceTree = "<group>";
@@ -504,6 +513,7 @@
 				14360F931FB148C30075133E /* MatrixEliminator.swift in Sources */,
 				1410C1131FB1EC9E00CEE47D /* Array.swift in Sources */,
 				144AD2911EC21A4500E23890 /* Homology.swift in Sources */,
+				DD5D09941FB5ACD700E1BDFC /* SimplicialComplexExamples.swift in Sources */,
 				1424F4F91EB997780052581F /* AdditiveGroup.swift in Sources */,
 				1424F5071EB997780052581F /* Rational.swift in Sources */,
 				14D261341EE4614E006775E2 /* Set.swift in Sources */,
@@ -521,6 +531,7 @@
 				145339C01EC7D67100F014F4 /* Ref.swift in Sources */,
 				1424F5061EB997780052581F /* Integer.swift in Sources */,
 				1424F5001EB997780052581F /* FreeModule.swift in Sources */,
+				DDC2400E1FB0852800258765 /* SimplicialComplexOperations.swift in Sources */,
 				DD90ACC91F763553001AFC9C /* PolynomialIdeal.swift in Sources */,
 				1424F5041EB997780052581F /* FreeModHom.swift in Sources */,
 				1410C1171FB203CC00CEE47D /* HermiteEliminator.swift in Sources */,
@@ -531,6 +542,7 @@
 				1424F5051EB997780052581F /* Map.swift in Sources */,
 				1424F5081EB997780052581F /* Real.swift in Sources */,
 				1424F4FB1EB997780052581F /* Field.swift in Sources */,
+				DD5D09961FB5AD0700E1BDFC /* TopologicalInvariants.swift in Sources */,
 				DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */,
 				1410C11B1FB2040900CEE47D /* SmithEliminator.swift in Sources */,
 				14929C9E1ED9C798006ACAC5 /* Simplex.swift in Sources */,
