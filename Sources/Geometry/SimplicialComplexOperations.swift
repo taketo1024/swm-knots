@@ -26,6 +26,18 @@ public extension SimplicialComplex {
         return star(s).map{ $0.subtract(s) }.filter{ $0.dim >= 0 }
     }
     
+    public var boundaryVertices: [Vertex] {
+        return allVertices.filter { v in
+            SimplicialComplex(maximalCells: self.link(v)).orientationCycle == nil
+        }
+    }
+    
+    public func identifyVertices(_ pairs: [(Vertex, Vertex)]) -> SimplicialComplex {
+        let dict = Dictionary(pairs: pairs)
+        let map = SimplicialMap(from: self) { v in dict[v] ?? v }
+        return map.image
+    }
+    
     // disjoint union
     public static func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
         let dim = max(K1.dim, K2.dim)
