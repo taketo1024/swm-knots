@@ -140,12 +140,22 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         return Matrix<m, n, R>(rows: cols, cols: rows) { (i, j) in self[j, i] }
     }
     
+    // --TODO delete
     public func rowArray(_ i: Int) -> [R] {
         return (0 ..< cols).map{ j in self[i, j] }
     }
     
     public func colArray(_ j: Int) -> [R] {
         return (0 ..< rows).map{ i in self[i, j] }
+    }
+    // --TODO
+    
+    public func rowVector(_ i: Int) -> RowVector<m, R> {
+        return submatrix(rowRange: i ..< i + 1)
+    }
+    
+    public func colVector(_ j: Int) -> ColVector<n, R> {
+        return submatrix(colRange: j ..< j + 1)
     }
     
     public func submatrix<k: _Int>(rowRange: CountableRange<Int>) -> Matrix<k, m, R> {
@@ -216,6 +226,27 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
 }
 
+public extension Matrix where R: EuclideanRing {
+    // MEMO use computational Matrix for more direct manipulation.
+    public func eliminate(form: MatrixForm = .Diagonal, debug: Bool = false) -> MatrixEliminationResultWrapper<n, m, R> {
+        let cmatrix = ComputationalMatrix(self)
+        let eliminator = { () -> MatrixEliminator<R> in
+            switch form {
+            case .RowEchelon: return RowEchelonEliminator(cmatrix, debug: debug)
+            case .ColEchelon: return ColEchelonEliminator(cmatrix, debug: debug)
+            case .RowHermite: return RowHermiteEliminator(cmatrix, debug: debug)
+            case .ColHermite: return ColHermiteEliminator(cmatrix, debug: debug)
+            case .Diagonal:   return DiagonalEliminator  (cmatrix, debug: debug)
+            case .Smith:      return SmithEliminator     (cmatrix, debug: debug)
+            default: fatalError()
+            }
+        }()
+        
+        let result = eliminator.run()
+        return MatrixEliminationResultWrapper(self, result)
+    }
+}
+
 public extension Matrix where m == _1 {
     public subscript(index: Int) -> R {
         @_transparent
@@ -264,24 +295,4 @@ public extension Matrix where n == m, R: EuclideanRing {
     public var inverse: Matrix<n, n, R>? {
         return eliminate().inverse
     }
-    
-    // MEMO use computational Matrix for more direct manipulation.
-    public func eliminate(form: MatrixForm = .Diagonal, debug: Bool = false) -> MatrixEliminationResultWrapper<n, m, R> {
-        let cmatrix = ComputationalMatrix(self)
-        let eliminator = { () -> MatrixEliminator<R> in
-            switch form {
-            case .RowEchelon: return RowEchelonEliminator(cmatrix, debug: debug)
-            case .ColEchelon: return ColEchelonEliminator(cmatrix, debug: debug)
-            case .RowHermite: return RowHermiteEliminator(cmatrix, debug: debug)
-            case .ColHermite: return ColHermiteEliminator(cmatrix, debug: debug)
-            case .Diagonal:   return DiagonalEliminator  (cmatrix, debug: debug)
-            case .Smith:      return SmithEliminator     (cmatrix, debug: debug)
-            default: fatalError()
-            }
-        }()
-        
-        let result = eliminator.run()
-        return MatrixEliminationResultWrapper(self, result)
-    }
 }
-
