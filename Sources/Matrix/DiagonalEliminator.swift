@@ -62,7 +62,7 @@ public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminatio
     // Z = (z1, ..., zk) , k = col(A) - rank(A).
     //
     // P * A * Q = [D_r; O_k]
-    // =>  Z = Q[:, r ..< m] = Q * [O_r; I_k]
+    // =>  Z := Q[:, r ..< m], then A * Z = O_k
     
     public override lazy var kernelMatrix: ComputationalMatrix<R> = { [unowned self] in
         return right.submatrix(colRange: rank ..< result.cols)
@@ -77,13 +77,7 @@ public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminatio
     
     public override lazy var imageMatrix: ComputationalMatrix<R> = { [unowned self] in
         let A = _leftInverse(restrictedToCols: 0 ..< rank)
-        
-        for (j, a) in diagonal.enumerated() {
-            if j >= rank { break }
-            A.multiplyCol(at: j, by: a)
-        }
-        
-        return A
+        return A * result.submatrix(0 ..< rank, 0 ..< rank)
     }()
     
     // T: The basis transition matrix from (ei) to (zi),
@@ -93,7 +87,7 @@ public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminatio
     // =>  Z = Q[:, r ..< m] = Q * [O_r; I_k]
     // =>  Q^-1 * Z = [O; I_k]
     //
-    // T = Q^-1[:, r ..< m]  gives  T * Z = I_k.
+    // T = Q^-1[r ..< m, :]  gives  T * Z = I_k.
     
     public override lazy var kernelTransitionMatrix: ComputationalMatrix<R> = { [unowned self] in
         return _rightInverse(restrictedToRows: rank ..< result.cols)
