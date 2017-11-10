@@ -77,8 +77,8 @@ public struct SimplicialComplex: GeometricComplex {
         return cells
     }
     
-    public func boundary<R: Ring>(ofCell s: Simplex) -> FreeModule<Simplex, R> {
-        return s.boundary()
+    public func boundary<R: Ring>(ofCell s: Simplex, _ type: R.Type) -> FreeModule<Simplex, R> {
+        return s.boundary(R.self)
     }
     
     public func star(_ v: Vertex) -> [Simplex] { // returns only maximal cells

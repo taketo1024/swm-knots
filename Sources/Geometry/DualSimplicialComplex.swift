@@ -115,7 +115,7 @@ public struct DualSimplicialComplex: GeometricComplex {
         return (0...dim).contains(i) ? cells[i] : []
     }
     
-    public func boundary<R: Ring>(ofCell s: DualSimplicialCell) -> FreeModule<DualSimplicialCell, R> {
+    public func boundary<R: Ring>(ofCell s: DualSimplicialCell, _ type: R.Type) -> FreeModule<DualSimplicialCell, R> {
         let z = s.chain.boundary()
         let dCells = cells(ofDim: s.dim - 1)
         

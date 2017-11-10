@@ -300,6 +300,12 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         transpose()
     }
     
+    @discardableResult
+    public func multiply(_ r: R) -> ComputationalMatrix<R> {
+        table = table.mapValues{ list in list.map{ (j, a) in (j, r * a) } }
+        return self
+    }
+    
     @_specialize(where R == IntegerNumber)
     public static func ==(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> Bool {
         if (a.rows, a.cols) != (b.rows, b.cols) {
