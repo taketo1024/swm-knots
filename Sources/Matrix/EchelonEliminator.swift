@@ -12,10 +12,6 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     internal var targetRow = 0
     internal var targetCol = 0
     
-    public override var result: MatrixEliminationResult<R> {
-        return MatrixEliminationResult(target, rowOps, colOps, .RowEchelon)
-    }
-    
     override func prepare() {
         target.switchAlignment(.Rows)
     }
@@ -64,10 +60,6 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
 }
 
 public final class ColEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
-    public override var result: MatrixEliminationResult<R> {
-        return MatrixEliminationResult(target, rowOps, colOps, .ColEchelon)
-    }
-    
     internal override func iteration() -> Bool {
         runTranpose(RowEchelonEliminator.self)
         return true

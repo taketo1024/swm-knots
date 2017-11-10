@@ -9,8 +9,8 @@
 import Foundation
 
 public final class DiagonalEliminator<R: EuclideanRing>: MatrixEliminator<R> {
-    public override var result: MatrixEliminationResult<R> {
-        return DiagonalEliminationResult(target, rowOps, colOps, .Diagonal)
+    internal override var resultType: MatrixEliminationResult<R>.Type {
+        return DiagonalEliminationResult.self
     }
     
     override func iteration() -> Bool {

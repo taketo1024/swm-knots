@@ -12,10 +12,6 @@ public final class RowHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     internal var targetRow = 0
     internal var targetCol = 0
     
-    public override var result: MatrixEliminationResult<R> {
-        return MatrixEliminationResult(target, rowOps, colOps, .RowHermite)
-    }
-    
     override func prepare() {
         run(RowEchelonEliminator.self)
     }
@@ -48,10 +44,6 @@ public final class RowHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
 }
 
 public final class ColHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
-    public override var result: MatrixEliminationResult<R> {
-        return MatrixEliminationResult(target, rowOps, colOps, .ColHermite)
-    }
-    
     internal override func iteration() -> Bool {
         runTranpose(RowHermiteEliminator.self)
         return true

@@ -21,9 +21,10 @@ public class MatrixEliminationResult<R: EuclideanRing> {
         self.form = form
     }
     
-    public lazy var left: ComputationalMatrix<R> = { [unowned self] in
-        return self._left()
-    }()
+    public lazy var left: ComputationalMatrix<R>         = _left()
+    public lazy var leftInverse: ComputationalMatrix<R>  = _leftInverse()
+    public lazy var right: ComputationalMatrix<R>        = _right()
+    public lazy var rightInverse: ComputationalMatrix<R> = _rightInverse()
     
     @_specialize(where R == IntegerNumber)
     internal func _left() -> ComputationalMatrix<R> {
@@ -33,10 +34,6 @@ public class MatrixEliminationResult<R: EuclideanRing> {
         }
         return P
     }
-    
-    public lazy var leftInverse: ComputationalMatrix<R> = { [unowned self] in
-        return self._leftInverse()
-    }()
     
     @_specialize(where R == IntegerNumber)
     internal func _leftInverse(restrictedToCols colRange: CountableRange<Int>? = nil) -> ComputationalMatrix<R> {
@@ -51,10 +48,6 @@ public class MatrixEliminationResult<R: EuclideanRing> {
         return P
     }
     
-    public lazy var right: ComputationalMatrix<R> = { [unowned self] in
-        return self._right()
-    }()
-    
     @_specialize(where R == IntegerNumber)
     internal func _right() -> ComputationalMatrix<R> {
         let P = ComputationalMatrix<R>.identity(result.cols, align: .Cols)
@@ -63,10 +56,6 @@ public class MatrixEliminationResult<R: EuclideanRing> {
         }
         return P
     }
-    
-    public lazy var rightInverse: ComputationalMatrix<R> = { [unowned self] in
-        return self._rightInverse()
-    }()
     
     @_specialize(where R == IntegerNumber)
     internal func _rightInverse(restrictedToRows rowRange: CountableRange<Int>? = nil) -> ComputationalMatrix<R> {
