@@ -47,15 +47,12 @@ public final class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: Euclid
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
-        // FIXME
-        return []
-        
-//        let n = basis.count
-//        let v = transitionMatrix * ComputationalMatrix(rows: n, cols: 1, grid: z.factorize(by: basis))
-//
-//        return self.enumerated().map { (i, s) in
-//            return s.isFree ? v[i] : v[i] % s.factor
-//        }
+        let n = basis.count
+        let v = transitionMatrix * ComputationalMatrix(rows: n, cols: 1, grid: z.factorize(by: basis))
+
+        return summands.enumerated().map { (i, s) in
+            return s.isFree ? v[i, 0] : v[i, 0] % s.factor
+        }
     }
     
     public func isEquivalentToZero(_ z: FreeModule<A, R>) -> Bool {
