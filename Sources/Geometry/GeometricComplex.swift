@@ -49,10 +49,10 @@ public extension GeometricComplex {
     public func boundaryMatrix<R: Ring>(_ i: Int, _ type: R.Type) -> ComputationalMatrix<R> {
         let from = (i <= dim) ? cells(ofDim: i) : []
         let to = (i > 0) ? cells(ofDim: i - 1) : []
-        return boundaryMatrix(from, to, R.self)
+        return partialBoundaryMatrix(from, to, R.self)
     }
     
-    internal func boundaryMatrix<R: Ring>(_ from: [Cell], _ to: [Cell], _ type: R.Type) -> ComputationalMatrix<R> {
+    internal func partialBoundaryMatrix<R: Ring>(_ from: [Cell], _ to: [Cell], _ type: R.Type) -> ComputationalMatrix<R> {
         let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toCell: toIndex]
         let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
             return boundary(ofCell: s, R.self).flatMap{ (e: (Cell, R)) -> MatrixComponent<R>? in
@@ -92,7 +92,7 @@ public extension ChainComplex where chainType == Descending {
             let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
             let to   = K.cells(ofDim: i - 1).subtract(L.cells(ofDim: i - 1))
             let map  = K.boundaryMap(i, R.self)
-            let matrix = K.boundaryMatrix(from, to, R.self)
+            let matrix = K.partialBoundaryMatrix(from, to, R.self)
             
             return (from, map, matrix)
         }
@@ -103,22 +103,20 @@ public extension ChainComplex where chainType == Descending {
 public extension CochainComplex where chainType == Ascending {
     public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
         let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
-            let basis = K.cells(ofDim: i).map{ Dual($0) }
+            let from = K.cells(ofDim: i)
+            let to = K.cells(ofDim: i + 1)
+
+            let map = BoundaryMap { d in
+                let s = d.base
+                let row = K.partialBoundaryMatrix(to, [s], R.self).multiply( R(intValue: (-1).pow(i + 1) ) )
+                return zip(to.map{ Dual($0) }, row.generateGrid()).toArray()
+            }
             
-            let matrix = K.boundaryMatrix(i + 1, R.self)
+            let matrix = K.partialBoundaryMatrix(to, from, R.self)
                           .transpose()
                           .multiply( R(intValue: (-1).pow(i + 1) ) )
             
-            let map = BoundaryMap { d in
-                return []
-                // FIXME!
-//                let j = K.cells(ofDim: i).index(of: d.base)!
-//                let basis = K.cells(ofDim: i + 1).map{ Dual($0) }
-//                let values = matrix.colArray(j)
-//                return zip(basis, values).toArray()
-            }
-            
-            return (basis, map, matrix)
+            return (from.map{ Dual($0) }, map, matrix)
         }
         self.init(name: K.name, cochain)
     }
@@ -127,9 +125,14 @@ public extension CochainComplex where chainType == Ascending {
         let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
             let to   = K.cells(ofDim: i + 1).subtract(L.cells(ofDim: i + 1))
-            let map = BoundaryMap.zero // FIXME!
             
-            let matrix = K.boundaryMatrix(to, from, R.self)
+            let map = BoundaryMap { d in
+                let s = d.base
+                let row = K.partialBoundaryMatrix(to, [s], R.self).multiply( R(intValue: (-1).pow(i + 1) ) )
+                return zip(to.map{ Dual($0) }, row.generateGrid()).toArray()
+            }
+            
+            let matrix = K.partialBoundaryMatrix(to, from, R.self)
                           .transpose()
                           .multiply( R(intValue: (-1).pow(i + 1) ) )
             
