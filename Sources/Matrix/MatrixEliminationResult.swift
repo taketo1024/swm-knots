@@ -21,40 +21,12 @@ public class MatrixEliminationResult<R: EuclideanRing> {
         self.form = form
     }
     
-    public lazy var diagonal: [R] = { [unowned self] in
-        assert(form == .Diagonal || form == .Smith)
-        return result.diagonal
-    }()
-    
-    public var rank: Int {
-        return diagonal.count
-    }
-    
-    public lazy var inverse: ComputationalMatrix<R>? = {
-        assert(result.rows == result.cols)
-        assert(form == .Diagonal || form == .Smith)
-        return (rank == result.rows) ? right * left : nil
-    }()
-    
-    public lazy var determinant: R = { [unowned self] in
-        assert(result.rows == result.cols)
-        assert(form == .Diagonal || form == .Smith)
-        
-        if rank == result.rows {
-            return rowOps.multiply { $0.determinant }.inverse!
-                 * colOps.multiply { $0.determinant }.inverse!
-                 * diagonal.multiplyAll()
-        } else {
-            return 0
-        }
-    }()
-    
     public lazy var left: ComputationalMatrix<R> = { [unowned self] in
         return self._left()
     }()
     
     @_specialize(where R == IntegerNumber)
-    private func _left() -> ComputationalMatrix<R> {
+    internal func _left() -> ComputationalMatrix<R> {
         let P = ComputationalMatrix<R>.identity(result.rows)
         for s in rowOps {
             s.apply(to: P)
@@ -67,7 +39,7 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     }()
     
     @_specialize(where R == IntegerNumber)
-    private func _leftInverse(restrictedToCols colRange: CountableRange<Int>? = nil) -> ComputationalMatrix<R> {
+    internal func _leftInverse(restrictedToCols colRange: CountableRange<Int>? = nil) -> ComputationalMatrix<R> {
         let P = (colRange == nil)
             ? ComputationalMatrix<R>.identity(result.rows)
             : ComputationalMatrix<R>.identity(result.rows).submatrix(colRange: colRange!)
@@ -84,7 +56,7 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     }()
     
     @_specialize(where R == IntegerNumber)
-    private func _right() -> ComputationalMatrix<R> {
+    internal func _right() -> ComputationalMatrix<R> {
         let P = ComputationalMatrix<R>.identity(result.cols, align: .Cols)
         for s in colOps {
             s.apply(to: P)
@@ -97,7 +69,7 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     }()
     
     @_specialize(where R == IntegerNumber)
-    private func _rightInverse(restrictedToRows rowRange: CountableRange<Int>? = nil) -> ComputationalMatrix<R> {
+    internal func _rightInverse(restrictedToRows rowRange: CountableRange<Int>? = nil) -> ComputationalMatrix<R> {
         let P = (rowRange == nil)
             ? ComputationalMatrix<R>.identity(result.cols, align: .Cols)
             : ComputationalMatrix<R>.identity(result.cols, align: .Cols).submatrix(rowRange: rowRange!)
@@ -109,46 +81,33 @@ public class MatrixEliminationResult<R: EuclideanRing> {
         return P
     }
     
-    // The matrix made by the basis of Ker(A).
-    // Z = (z1, ..., zk) , k = col(A) - rank(A).
-    //
-    // P * A * Q = [D_r; O_k]
-    // =>  Z = Q[:, r ..< m] = Q * [O_r; I_k]
-
-    public lazy var kernelMatrix: ComputationalMatrix<R> = { [unowned self] in
-        return right.submatrix(colRange: rank ..< result.cols)
-    }()
+    public var rank: Int {
+        fatalError("not available.")
+    }
     
-    // The matrix made by the basis of Im(A).
-    // B = (b1, ..., br) , r = rank(A)
-    //
-    // P * A * Q = [D_r; O_k]
-    // => D is the imageMatrix with basis P.
-    // => P^-1 * D is the imageMatrix with the standard basis.
-
-    public lazy var imageMatrix: ComputationalMatrix<R> = { [unowned self] in
-        let A = _leftInverse(restrictedToCols: 0 ..< rank)
-        
-        for (j, a) in diagonal.enumerated() {
-            if j >= rank { break }
-            A.multiplyCol(at: j, by: a)
-        }
-        
-        return A
-    }()
+    public var diagonal: [R]{
+        fatalError("not available.")
+    }
     
-    // T: The basis transition matrix from (ei) to (zi),
-    // i.e. T * zi = ei.
-    //
-    // P * A * Q = [D_r; O_k]
-    // =>  Z = Q[:, r ..< m] = Q * [O_r; I_k]
-    // =>  Q^-1 * Z = [O; I_k]
-    //
-    // T = Q^-1[:, r ..< m]  gives  T * Z = I_k.
+    public var inverse: ComputationalMatrix<R>? {
+        fatalError("not available.")
+    }
     
-    public lazy var kernelTransitionMatrix: ComputationalMatrix<R> = { [unowned self] in
-        return _rightInverse(restrictedToRows: rank ..< result.cols)
-    }()
+    public var determinant: R {
+        fatalError("not available.")
+    }
+    
+    public var kernelMatrix: ComputationalMatrix<R> {
+        fatalError("not available.")
+    }
+    
+    public var imageMatrix: ComputationalMatrix<R> {
+        fatalError("not available.")
+    }
+    
+    public var kernelTransitionMatrix: ComputationalMatrix<R> {
+        fatalError("not available.")
+    }
 }
 
 // A Wrapper struct for Matrix<n, m, R> types.
@@ -162,14 +121,6 @@ public struct MatrixEliminationResultWrapper<n: _Int, m: _Int, R: EuclideanRing>
     
     public var result: Matrix<n, m, R> {
         return res.result.asMatrix()
-    }
-    
-    public var diagonal: [R] {
-        return res.diagonal
-    }
-    
-    public var rank: Int {
-        return res.rank
     }
     
     public var left: Matrix<n, n, R> {
@@ -186,6 +137,14 @@ public struct MatrixEliminationResultWrapper<n: _Int, m: _Int, R: EuclideanRing>
     
     public var rightInverse: Matrix<m, m, R> {
         return res.rightInverse.asMatrix()
+    }
+    
+    public var rank: Int {
+        return res.rank
+    }
+    
+    public var diagonal: [R] {
+        return res.diagonal
     }
 }
 

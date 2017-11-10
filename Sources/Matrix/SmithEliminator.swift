@@ -11,8 +11,8 @@ import Foundation
 public final class SmithEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     internal var targetIndex = 0
     
-    public override var result: MatrixEliminationResult<R> {
-        return MatrixEliminationResult(target, rowOps, colOps, .Smith)
+    internal override var resultType: MatrixEliminationResult<R>.Type {
+        return DiagonalEliminationResult.self
     }
     
     override func prepare() {
