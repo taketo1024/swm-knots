@@ -14,8 +14,8 @@ public enum ComputationalMatrixAlignment {
 }
 
 public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConvertible {
-    public var rows: Int
-    public var cols: Int
+    public internal(set) var rows: Int
+    public internal(set) var cols: Int
     
     internal var align: ComputationalMatrixAlignment
     internal var table:  [Int : [(Int, R)]] // [row : [ (col, R) ]]

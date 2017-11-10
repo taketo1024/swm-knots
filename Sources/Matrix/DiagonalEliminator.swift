@@ -9,8 +9,15 @@
 import Foundation
 
 public final class DiagonalEliminator<R: EuclideanRing>: MatrixEliminator<R> {
+    internal var initialRows = 0
+    internal var initialCols = 0
+    
     internal override var resultType: MatrixEliminationResult<R>.Type {
         return DiagonalEliminationResult.self
+    }
+    
+    override func prepare() {
+        (initialRows, initialCols) = (target.rows, target.cols)
     }
     
     override func iteration() -> Bool {
@@ -19,14 +26,20 @@ public final class DiagonalEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         }
         
         run(RowHermiteEliminator.self)
+        target.rows = target.table.keys.count
         
         if target.isDiagonal {
             return true
         }
         
         run(ColHermiteEliminator.self)
-        
+        target.cols = target.table.keys.count
+
         return false
+    }
+    
+    override func finish() {
+        (target.rows, target.cols) = (initialRows, initialCols)
     }
 }
 
