@@ -85,7 +85,7 @@ public struct Simplex: GeometricCell, Comparable {
         return Simplex(self.unorderedVertices.subtracting([v]))
     }
     
-    public func boundary<R: Ring>() -> SimplicialChain<R> {
+    public func boundary<R: Ring>(_ type: R.Type) -> SimplicialChain<R> {
         let values: [(Simplex, R)] = faces().enumerated().map { (i, t) -> (Simplex, R) in
             let e = R(intValue: (-1).pow(i))
             return (t, e)
@@ -142,7 +142,7 @@ public extension SimplicialChain where A == Simplex {
     public func boundary() -> SimplicialChain<R> {
         return self.reduce(SimplicialChain<R>.zero) { (res, next) -> SimplicialChain<R> in
             let (s, r) = next
-            return res + r * s.boundary()
+            return res + r * s.boundary(R.self)
         }
     }
     

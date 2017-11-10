@@ -77,15 +77,6 @@ public struct FreeModuleHom<A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Modu
         }
     }
     
-    public func asMatrix(from: [A], to: [B], type: MatrixType = .Default) -> DynamicMatrix<R> {
-        let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)})
-        let components = from.enumerated().flatMap { e -> [MatrixComponent<R>] in
-            let (j, a) = e
-            return self.appliedTo(a).flatMap{ (b, r) in toIndex[b].flatMap{ i in (i, j, r) } }
-        }
-        return Matrix(rows: to.count, cols: from.count, type: type, components: components)
-    }
-    
     public var hashValue: Int {
         return 0 // TODO
     }

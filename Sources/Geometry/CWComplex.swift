@@ -56,7 +56,7 @@ public struct CWComplex: GeometricComplex {
         return (0...dim).contains(i) ? cells[i] : []
     }
     
-    public func boundary<R: Ring>(ofCell s: CWCell) -> FreeModule<CWCell, R> {
+    public func boundary<R: Ring>(ofCell s: CWCell, _ type: R.Type) -> FreeModule<CWCell, R> {
         return s.boundary.mapValues{ R(intValue: $0) }
     }
     

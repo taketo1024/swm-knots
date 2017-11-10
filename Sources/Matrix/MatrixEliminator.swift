@@ -8,85 +8,208 @@
 
 import Foundation
 
-public class MatrixEliminator<n: _Int, m: _Int, R: Ring> {
-    let rows: Int
-    let cols: Int
-    let type: MatrixType
-    var target: Matrix<n, m, R>
-    var process: [EliminationStep<R>]
+public enum MatrixForm {
+    case Default
+    case RowEchelon
+    case ColEchelon
+    case RowHermite
+    case ColHermite
+    case Diagonal
+    case Smith
+}
+
+public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
+    internal var target: ComputationalMatrix<R>
+    internal var rowOps: [ElementaryOperation]
+    internal var colOps: [ElementaryOperation]
+    internal var debug: Bool
     
-    private(set) var itr = 0
-    private(set) var debug: Bool
-    
-    public required init(_ target: Matrix<n, m, R>, _ debug: Bool = false) {
-        self.rows = target.rows
-        self.cols = target.cols
-        self.type = target.type
+    public required init(_ target: ComputationalMatrix<R>, debug: Bool = false) {
         self.target = target
-        self.process = []
+        self.rowOps = []
+        self.colOps = []
         self.debug = debug
     }
     
-    public var result: Matrix<n, m, R> {
-        return target
+    public var rows: Int {
+        return target.rows
     }
     
-    public lazy var diagonal: [R] = { [unowned self] in
-        let r = min(target.rows, target.cols)
-        return (0 ..< r).map{ target[$0, $0] }
-    }()
-    
-    public var rank: Int {
-        return diagonal.filter{ $0 != 0 }.count
+    public var cols: Int {
+        return target.cols
     }
     
-    public lazy var left: Matrix<n, n, R> = { [unowned self] in
-        var Q = RowOperationMatrix<R>.identity(rows)
-        process.forEach { $0.apply(to: &Q) }
-        return Matrix(rows: rows, cols: rows, type: type, grid: Q.toGrid)
-    }()
+    internal var resultType: MatrixEliminationResult<R>.Type {
+        return MatrixEliminationResult.self
+    }
+
+    public var result: MatrixEliminationResult<R> {
+        return resultType.init(target, rowOps, colOps, .Default)
+    }
     
-    public lazy var leftInverse: Matrix<n, n, R> = { [unowned self] in
-        var Q = RowOperationMatrix<R>.identity(rows)
-        process.reversed().forEach { $0.inverse.apply(to: &Q) }
-        return Matrix(rows: rows, cols: rows, type: type, grid: Q.toGrid)
-    }()
-    
-    public lazy var right: Matrix<m, m, R> = { [unowned self] in
-        var Q = ColOperationMatrix<R>.identity(cols)
-        process.forEach { $0.apply(to: &Q) }
-        return Matrix(rows: cols, cols: cols, type: type, grid: Q.toGrid)
-    }()
-    
-    public lazy var rightInverse: Matrix<m, m, R> = { [unowned self] in
-        var Q = ColOperationMatrix<R>.identity(cols)
-        process.reversed().forEach { $0.inverse.apply(to: &Q) }
-        return Matrix(rows: cols, cols: cols, type: type, grid: Q.toGrid)
-    }()
-    
-    public func run() {
-        log("-----Start-----\n\n\(target.detailDescription)\n")
+    @discardableResult
+    public final func run() -> MatrixEliminationResult<R> {
+        log("-----Start:\(self)-----")
         
-        while !iteration() {
-            itr += 1
-        }
+        prepare()
+        while !iteration() {}
+        finish()
         
-        log("-----Done (\(process.count) steps)-----\n\nResult:\n\(target.detailDescription)\n")
+        log("-----Done:\(self), \(rowOps.count + colOps.count) steps)-----")
+        
+        return result
     }
     
-    func iteration() -> Bool {
+    internal func prepare() {
+        // override in subclass
+    }
+    
+    internal func iteration() -> Bool {
         fatalError("override in subclass")
     }
     
-    func apply(_ s: EliminationStep<R>) {
-        s.apply(to: &target)
-        process.append(s)
-        log("\(process.count): \(s) \n\n\( target.detailDescription )\n")
+    internal func finish() {
+        // override in subclass
+    }
+    
+    internal func run(_ eliminator: MatrixEliminator.Type) {
+        let e = eliminator.init(target, debug: debug)
+        e.run()
+        rowOps += e.rowOps
+        colOps += e.colOps
+    }
+    
+    internal func runTranpose(_ eliminator: MatrixEliminator.Type) {
+        transpose()
+        let e = eliminator.init(target, debug: debug)
+        e.run()
+        rowOps += e.colOps.map{ s in s.transpose }
+        colOps += e.rowOps.map{ s in s.transpose }
+        transpose()
+    }
+    
+    @_specialize(where R == IntegerNumber)
+    internal func findMin(_ sequence: [(Int, R)]) -> (Int, R)? {
+        var cand: (Int, R)? = nil
+        for (i, a) in sequence {
+            if a.isInvertible {
+                return (i, a)
+            }
+            if cand == nil || a.degree < cand!.1.degree {
+                cand = (i, a)
+            }
+        }
+        return cand
+    }
+    
+    internal func apply(_ s: ElementaryOperation) {
+        s.apply(to: target)
+        s.isRowOperation ? rowOps.append(s) : colOps.append(s)
+        log("\(s)")
+    }
+    
+    func transpose() {
+        target.transpose()
+        log("Transpose")
     }
     
     func log(_ msg: @autoclosure () -> String) {
         if debug {
-            print(msg())
+            if rows < 20 && cols < 20 {
+                print(msg(), "\n", target.asDynamicMatrix().detailDescription, "\n")
+            } else {
+                print(msg(), "\n\t", target, "\n")
+            }
+        }
+    }
+    
+    public var description: String {
+        return "\(type(of: self))"
+    }
+    
+    public enum ElementaryOperation {
+        case AddRow(at: Int, to: Int, mul: R)
+        case MulRow(at: Int, by: R)
+        case SwapRows(Int, Int)
+        case AddCol(at: Int, to: Int, mul: R)
+        case MulCol(at: Int, by: R)
+        case SwapCols(Int, Int)
+        
+        public var isRowOperation: Bool {
+            switch self {
+            case .AddRow, .MulRow, .SwapRows: return true
+            default: return false
+            }
+        }
+        
+        public var isColOperation: Bool {
+            switch self {
+            case .AddCol, .MulCol, .SwapCols: return true
+            default: return false
+            }
+        }
+        
+        public var determinant: R {
+            switch self {
+            case .AddRow(_, _, _), .AddCol(_, _, _):
+                return R.identity
+            case let .MulRow(at: _, by: r):
+                return r
+            case let .MulCol(at: _, by: r):
+                return r
+            case .SwapRows(_, _), .SwapCols(_, _):
+                return -R.identity
+            }
+        }
+        
+        public var inverse: ElementaryOperation {
+            switch self {
+            case let .AddRow(i, j, r):
+                return .AddRow(at: i, to: j, mul: -r)
+            case let .AddCol(i, j, r):
+                return .AddCol(at: i, to: j, mul: -r)
+            case let .MulRow(at: i, by: r):
+                return .MulRow(at: i, by: r.inverse!)
+            case let .MulCol(at: i, by: r):
+                return .MulCol(at: i, by: r.inverse!)
+            case .SwapRows(_, _), .SwapCols(_, _):
+                return self
+            }
+        }
+        
+        public var transpose: ElementaryOperation {
+            switch self {
+            case let .AddRow(i, j, r):
+                return .AddCol(at: i, to: j, mul: r)
+            case let .AddCol(i, j, r):
+                return .AddRow(at: i, to: j, mul: r)
+            case let .MulRow(at: i, by: r):
+                return .MulCol(at: i, by: r)
+            case let .MulCol(at: i, by: r):
+                return .MulRow(at: i, by: r)
+            case let .SwapRows(i, j):
+                return .SwapCols(i, j)
+            case let .SwapCols(i, j):
+                return .SwapRows(i, j)
+            }
+        }
+        
+        @_specialize(where R == IntegerNumber)
+        public func apply(to A: ComputationalMatrix<R>) {
+            switch self {
+            case let .AddRow(i, j, r):
+                A.addRow(at: i, to: j, multipliedBy: r)
+            case let .AddCol(i, j, r):
+                A.addCol(at: i, to: j, multipliedBy: r)
+            case let .MulRow(i, r):
+                A.multiplyRow(at: i, by: r)
+            case let .MulCol(i, r):
+                A.multiplyCol(at: i, by: r)
+            case let .SwapRows(i, j):
+                A.swapRows(i, j)
+            case let .SwapCols(i, j):
+                A.swapCols(i, j)
+            }
         }
     }
 }

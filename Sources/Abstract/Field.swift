@@ -29,4 +29,8 @@ public extension Field {
     public static func eucDiv(_ a: Self, _ b: Self) -> (q: Self, r: Self) {
         return (a/b, 0)
     }
+    
+    public static var isField: Bool {
+        return true
+    }
 }
