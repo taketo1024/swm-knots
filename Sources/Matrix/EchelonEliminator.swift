@@ -18,12 +18,12 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     
     @_specialize(where R == IntegerNumber)
     override func iteration() -> Bool {
-        if targetRow >= rows || targetCol >= cols {
+        if targetRow >= target.table.count || targetCol >= cols {
             return true
         }
         
         // find pivot point
-        let targetElements = target.enumerate(col: targetCol, fromRow: targetRow, headsOnly: true)
+        let targetElements = pivotCandidates()
         guard let (i0, a0) = findMin(targetElements) else {
             targetCol += 1
             return false
@@ -56,6 +56,16 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         targetCol += 1
         
         return false
+    }
+    
+    @_specialize(where R == IntegerNumber)
+    private func pivotCandidates() -> [(Int, R)] {
+        // Take (i, a)'s from table = [ i : [ (j, a) ] ]
+        // where (i >= targetRow && j == targetCol)
+        return target.table.flatMap{ (i, list) -> (Int, R)? in
+            let (j, a) = list.first!
+            return (i >= targetRow && j == targetCol) ? (i, a) : nil
+        }
     }
 }
 

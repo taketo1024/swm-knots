@@ -301,45 +301,6 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == IntegerNumber)
-    public func enumerate(row i0: Int, fromCol j0: Int = 0, headsOnly h: Bool = false) -> [(Int, R)] {
-        switch align {
-        case .Rows:
-            if let row = table[i0] {
-                return row.filter{ (col, _) in col >= j0}
-            } else {
-                return []
-            }
-        case .Cols:
-            transpose()
-            let result = enumerate(col: i0, fromRow: j0, headsOnly: h)
-            transpose()
-            return result
-        }
-    }
-    
-    @_specialize(where R == IntegerNumber)
-    public func enumerate(col j0: Int, fromRow i0: Int = 0, headsOnly h: Bool = false) -> [(Int, R)] {
-        switch align {
-        case .Rows:
-            return (i0 ..< rows).flatMap{ i -> (Int, R)? in
-                guard let row = self.table[i] else {
-                    return nil
-                }
-                if h {
-                    return row.first.flatMap{ (j, a) in (j == j0) ? (i, a) : nil }
-                } else {
-                    return row.binarySearch(j0, {$0.0}).map{ (_, e) in (i, e.1) }
-                }
-            }
-        case .Cols:
-            transpose()
-            let result = enumerate(row: j0, fromCol: i0, headsOnly: h)
-            transpose()
-            return result
-        }
-    }
-    
-    @_specialize(where R == IntegerNumber)
     public static func ==(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> Bool {
         if (a.rows, a.cols) != (b.rows, b.cols) {
             return false

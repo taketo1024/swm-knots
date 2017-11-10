@@ -11,30 +11,32 @@ import Foundation
 public final class RowHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     internal var targetRow = 0
     internal var targetCol = 0
-    
+    internal var rank = 0
+
     override func prepare() {
         run(RowEchelonEliminator.self)
+        rank = target.table.count
     }
     
     @_specialize(where R == IntegerNumber)
     internal override func iteration() -> Bool {
-        if targetRow >= rows || targetCol >= cols {
+        if targetRow >= rank || targetCol >= cols {
             return true
         }
         
-        let col = Array(target.enumerate(col: targetCol))
-        guard let (i0, a0) = col.last, i0 >= targetRow else {
+        let a0 = target[targetRow, targetCol]
+        if a0 == R.zero {
             targetCol += 1
             return false
         }
         
-        for (i, a) in col {
-            if i == i0 {
-                break
+        for i in 0 ..< targetRow {
+            let a = target[i, targetCol]
+            if a == R.zero {
+                continue
             }
-            
             let q = a / a0
-            apply(.AddRow(at: i0, to: i, mul: -q))
+            apply(.AddRow(at: targetRow, to: i, mul: -q))
         }
         
         targetRow += 1
