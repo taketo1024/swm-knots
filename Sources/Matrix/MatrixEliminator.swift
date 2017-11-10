@@ -20,8 +20,8 @@ public enum MatrixForm {
 
 public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     internal var target: ComputationalMatrix<R>
-    internal var rowOps: [MatrixEliminationStep]
-    internal var colOps: [MatrixEliminationStep]
+    internal var rowOps: [ElementaryOperation]
+    internal var colOps: [ElementaryOperation]
     internal var debug: Bool
     
     public required init(_ target: ComputationalMatrix<R>, debug: Bool = false) {
@@ -38,9 +38,13 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     public var cols: Int {
         return target.cols
     }
+    
+    internal var resultType: MatrixEliminationResult<R>.Type {
+        return MatrixEliminationResult.self
+    }
 
     public var result: MatrixEliminationResult<R> {
-        return MatrixEliminationResult(target, rowOps, colOps, .Default)
+        return resultType.init(target, rowOps, colOps, .Default)
     }
     
     @discardableResult
@@ -98,7 +102,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         return cand
     }
     
-    internal func apply(_ s: MatrixEliminationStep) {
+    internal func apply(_ s: ElementaryOperation) {
         s.apply(to: target)
         s.isRowOperation ? rowOps.append(s) : colOps.append(s)
         log("\(s)")
@@ -123,7 +127,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         return "\(type(of: self))"
     }
     
-    internal enum MatrixEliminationStep {
+    public enum ElementaryOperation {
         case AddRow(at: Int, to: Int, mul: R)
         case MulRow(at: Int, by: R)
         case SwapRows(Int, Int)
@@ -131,21 +135,21 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         case MulCol(at: Int, by: R)
         case SwapCols(Int, Int)
         
-        var isRowOperation: Bool {
+        public var isRowOperation: Bool {
             switch self {
             case .AddRow, .MulRow, .SwapRows: return true
             default: return false
             }
         }
         
-        var isColOperation: Bool {
+        public var isColOperation: Bool {
             switch self {
             case .AddCol, .MulCol, .SwapCols: return true
             default: return false
             }
         }
         
-        var determinant: R {
+        public var determinant: R {
             switch self {
             case .AddRow(_, _, _), .AddCol(_, _, _):
                 return R.identity
@@ -158,7 +162,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
             }
         }
         
-        var inverse: MatrixEliminationStep {
+        public var inverse: ElementaryOperation {
             switch self {
             case let .AddRow(i, j, r):
                 return .AddRow(at: i, to: j, mul: -r)
@@ -173,7 +177,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
             }
         }
         
-        internal var transpose: MatrixEliminationStep {
+        public var transpose: ElementaryOperation {
             switch self {
             case let .AddRow(i, j, r):
                 return .AddCol(at: i, to: j, mul: r)
@@ -191,7 +195,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         }
         
         @_specialize(where R == IntegerNumber)
-        internal func apply(to A: ComputationalMatrix<R>) {
+        public func apply(to A: ComputationalMatrix<R>) {
             switch self {
             case let .AddRow(i, j, r):
                 A.addRow(at: i, to: j, multipliedBy: r)

@@ -8,13 +8,13 @@
 
 import Foundation
 
-public final class MatrixEliminationResult<R: EuclideanRing> {
+public class MatrixEliminationResult<R: EuclideanRing> {
     public let result: ComputationalMatrix<R>
-    internal let rowOps: [MatrixEliminator<R>.MatrixEliminationStep]
-    internal let colOps: [MatrixEliminator<R>.MatrixEliminationStep]
+    internal let rowOps: [MatrixEliminator<R>.ElementaryOperation]
+    internal let colOps: [MatrixEliminator<R>.ElementaryOperation]
     public let form: MatrixForm
     
-    internal init(_ result: ComputationalMatrix<R>, _ rowOps: [MatrixEliminator<R>.MatrixEliminationStep], _ colOps: [MatrixEliminator<R>.MatrixEliminationStep], _ form: MatrixForm) {
+    public required init(_ result: ComputationalMatrix<R>, _ rowOps: [MatrixEliminator<R>.ElementaryOperation], _ colOps: [MatrixEliminator<R>.ElementaryOperation], _ form: MatrixForm) {
         self.result = result
         self.rowOps = rowOps
         self.colOps = colOps
@@ -149,4 +149,52 @@ public final class MatrixEliminationResult<R: EuclideanRing> {
     public lazy var kernelTransitionMatrix: ComputationalMatrix<R> = { [unowned self] in
         return _rightInverse(restrictedToRows: rank ..< result.cols)
     }()
+}
+
+// A Wrapper struct for Matrix<n, m, R> types.
+
+public struct MatrixEliminationResultWrapper<n: _Int, m: _Int, R: EuclideanRing> {
+    private let res: MatrixEliminationResult<R>
+    
+    public init<n, m>(_ matrix: Matrix<n, m, R>, _ res: MatrixEliminationResult<R>) {
+        self.res = res
+    }
+    
+    public var result: Matrix<n, m, R> {
+        return res.result.asMatrix()
+    }
+    
+    public var diagonal: [R] {
+        return res.diagonal
+    }
+    
+    public var rank: Int {
+        return res.rank
+    }
+    
+    public var left: Matrix<n, n, R> {
+        return res.left.asMatrix()
+    }
+    
+    public var leftInverse: Matrix<n, n, R> {
+        return res.leftInverse.asMatrix()
+    }
+    
+    public var right: Matrix<m, m, R> {
+        return res.right.asMatrix()
+    }
+    
+    public var rightInverse: Matrix<m, m, R> {
+        return res.rightInverse.asMatrix()
+    }
+}
+
+public extension MatrixEliminationResultWrapper where n == m {
+    public var inverse: Matrix<n, n, R>? {
+        return res.inverse?.asMatrix()
+    }
+    
+    public var determinant: R {
+        return res.determinant
+    }
 }
