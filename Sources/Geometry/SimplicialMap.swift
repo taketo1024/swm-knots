@@ -32,7 +32,7 @@ public struct SimplicialMap: GeometricComplexMap {
             cells.flatMap{ s -> Simplex? in
                 let t = self.appliedTo(s)
                 return (s.dim == t.dim) ? t : nil
-            }
+            }.unique()
         }
         return SimplicialComplex(cells)
     }
