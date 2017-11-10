@@ -42,7 +42,6 @@ extension RationalNumber: Randomable {
 }
 
 // TODO conditional conformance - Matrix: Randomable
-/* FIXME
 public extension Matrix where R: Randomable {
     public static func rand(_ lowerBound: Int, _ upperBound: Int) -> Matrix<n, m, R> {
         return Matrix { (_, _) in  R.rand(lowerBound, upperBound) }
@@ -57,8 +56,9 @@ public extension Matrix where R: Randomable {
 }
 
 public extension Matrix where R: Randomable, n == m {
-    public static func randRegular(shuffle: Int = 50) -> Matrix<n, n, R> {
-        var A = Matrix<n, n, R>.identity
+    public static func randRegular(_ size: Int? = nil, shuffle: Int = 50) -> Matrix<n, n, R> {
+        let s = size ?? n.intValue
+        let A = ComputationalMatrix<R>.identity(s)
         
         for _ in 0 ..< shuffle {
             let i = Int.rand(0, A.rows)
@@ -78,7 +78,6 @@ public extension Matrix where R: Randomable, n == m {
             }
         }
         
-        return A
+        return A.asMatrix()
     }
 }
-*/
