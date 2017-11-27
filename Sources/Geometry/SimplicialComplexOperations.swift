@@ -96,6 +96,12 @@ public extension SimplicialComplex {
         return SimplicialComplex(name: "\(K1.name) × \(K2.name)", maximalCells: cells)
     }
     
+    public func connectedSum(with K2: SimplicialComplex) -> SimplicialComplex {
+        assert(self.dim == K2.dim)
+        let (s1, s2) = (self.cells(ofDim: self.dim).anyElement!, K2.cells(ofDim: self.dim).anyElement!)
+        return ((self + K2) - s1 - s2).identifyVertices(s1.vertices.enumerated().map{ (i, v) in (v, s2.vertices[i])})
+    }
+    
     public var barycentricSubdivision: SimplicialComplex {
         return _barycentricSubdivision().0
     }
