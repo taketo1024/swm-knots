@@ -50,7 +50,7 @@ public extension GeometricComplex {
     
     public func boundaryMap<R: Ring>(_ i: Int, _ type: R.Type) -> FreeModuleHom<Cell, Cell, R> {
         return FreeModuleHom { s in
-            (s.dim == i) ? s.boundary(R.self) : FreeModule.zero
+            (s.dim == i) ? s.boundary(R.self) : .zero
         }
     }
     

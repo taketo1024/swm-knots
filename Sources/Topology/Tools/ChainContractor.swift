@@ -110,7 +110,7 @@ public class ChainContractor<R: EuclideanRing> {
         log("\(step)\t\(s) : f(∂\(s)) = \(f_bs)")
         log("")
         
-        if f_bs == C.zero {
+        if f_bs == .zero {
             log("\tadd: \(s)")
             
             generators.append(s)
@@ -128,7 +128,7 @@ public class ChainContractor<R: EuclideanRing> {
             hNodes[s] = Node(s)
             dNodes[s] = Node(s)
             
-            fNodes[t1]!.value = C.zero
+            fNodes[t1]!.value = .zero
             fNodes[t1]!.refs = (C(t1) - a.inverse! * f_bs).map{ (t, a) in (fNodes[t]!, a) }
             
             hNodes[t1]!.value = -a.inverse! * C(s)
@@ -169,7 +169,7 @@ public class ChainContractor<R: EuclideanRing> {
         // assert chain complex
         for s in generators {
             let dds = d(d(s))
-            assert(dds == C.zero, "∂∂\(s) = \(dds), should be zero")
+            assert(dds == .zero, "∂∂\(s) = \(dds), should be zero")
         }
         
         // assert gf - 1 = h∂ + ∂h
@@ -194,14 +194,14 @@ public class ChainContractor<R: EuclideanRing> {
         var value: C
         var refs: [(Node, R)] = []
         
-        init(_ cell: S, value: C = C.zero, refs: [(Node, R)] = []) {
+        init(_ cell: S, value: C = .zero, refs: [(Node, R)] = []) {
             self.cell = cell
             self.value = value
             self.refs = refs
         }
         
         var isZeroNode: Bool {
-            return value == C.zero && refs.isEmpty
+            return value == .zero && refs.isEmpty
         }
         
         func collect(flatten: Bool = false) -> C {
@@ -294,7 +294,7 @@ public extension ChainContractor {
         // factorize by: z -> f(z) -> [r]
         
         let factorizer = { (z: C) -> [R] in
-            if z == C.zero {
+            if z == .zero {
                 return []
             }
             let i = z.anyElement!.0.degree
