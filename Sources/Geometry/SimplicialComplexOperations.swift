@@ -47,7 +47,11 @@ public extension SimplicialComplex {
     
     // subtraction (the result may not be a proper simplicial complex)
     public static func -(K1: SimplicialComplex, v: Vertex) -> SimplicialComplex {
-        let K2 = SimplicialComplex(name: v.label, allCells: Simplex([v]))
+        return K1 - Simplex(v)
+    }
+    
+    public static func -(K1: SimplicialComplex, s: Simplex) -> SimplicialComplex {
+        let K2 = SimplicialComplex(name: s.description, allCells: [s])
         return K1 - K2
     }
     
