@@ -66,4 +66,27 @@ public extension SimplicialComplex {
             fatalError("RP^n (n >= 4) not yet supported.")
         }
     }
+    
+    static func lensSpace(_ n: Int) -> SimplicialComplex {
+        let (p, q) = (n, 1) // TODO: q > 1
+        let k = 3 // #vertices of a circle
+        let kp = k * p
+        
+        let B1 = SimplicialComplex.circle(vertices: k * p)
+        let B2 = SimplicialComplex.circle(vertices: k * p)
+        let D1 = Vertex().join(B1)
+        let D2 = Vertex().join(B2)
+
+        let S = SimplicialComplex.circle(vertices: k) // the fiber S^1
+        let K1 = (D1 × S) + (D2 × S) // disjoint union
+        
+        let L = K1.identifyVertices(B1.vertices.enumerated().flatMap { (i, b1) -> [(Vertex, Vertex)] in
+            let b2 = B2.vertices[(kp - i) % kp]
+            return S.vertices.enumerated().map { (j, v) -> (Vertex, Vertex) in
+                let w = S.vertices[((kp - i) * q + j) % k]
+                return (b2 × w, b1 × v)
+            }}).named("L(\(p),\(q))")
+        
+        return L
+    }
 }
