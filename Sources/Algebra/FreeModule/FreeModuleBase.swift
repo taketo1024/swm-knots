@@ -52,14 +52,14 @@ public struct Dual<A: FreeModuleBase>: FreeModuleBase {
 
 public extension FreeModule {
     public func evaluate(_ f: FreeModule<Dual<A>, R>) -> R {
-        return self.reduce(R.zero) { (res, next) -> R in
+        return self.reduce(.zero) { (res, next) -> R in
             let (a, r) = next
             return res + r * f[Dual(a)]
         }
     }
     
     public func evaluate<B>(_ b: FreeModule<B, R>) -> R where A == Dual<B> {
-        return b.reduce(R.zero) { (res, next) -> R in
+        return b.reduce(.zero) { (res, next) -> R in
             let (a, r) = next
             return res + r * self[Dual(a)]
         }

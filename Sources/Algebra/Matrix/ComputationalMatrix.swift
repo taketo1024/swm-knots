@@ -26,7 +26,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     
     public subscript(i: Int, j: Int) -> R {
         let (p, q) = (align == .Rows) ? (i, j) : (j, i)
-        return table[p]?.binarySearch(q, { $0.0 })?.element.1 ?? R.zero
+        return table[p]?.binarySearch(q, { $0.0 })?.element.1 ?? .zero
     }
     
     private init(_ rows: Int, _ cols: Int, _ align: ComputationalMatrixAlignment, _ table: [Int : [(Int, R)]]) {
@@ -42,7 +42,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     
     public convenience init(rows: Int, cols: Int, grid: [R], align: ComputationalMatrixAlignment = .Rows) {
         let components = grid.enumerated().flatMap{ (k, a) -> MatrixComponent<R>? in
-            (a != R.zero) ? (k / cols, k % cols, a) : nil
+            (a != .zero) ? (k / cols, k % cols, a) : nil
         }
         self.init(rows: rows, cols: cols, components: components, align: align)
     }
@@ -50,10 +50,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     public convenience init<S: Sequence>(rows: Int, cols: Int, components: S, align: ComputationalMatrixAlignment = .Rows) where S.Element == MatrixComponent<R> {
         self.init(rows, cols, align, [:])
         
-        for (i, j, a) in components {
-            if a == R.zero {
-                continue
-            }
+        for (i, j, a) in components where a != .zero {
             (align == .Rows) ? set(i, j, a) : set(j, i, a)
         }
         sort()
@@ -75,7 +72,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             assert(0 <= i && i < cols)
             assert(0 <= j && j < rows)
         }
-        assert(a != R.zero)
+        assert(a != .zero)
         
         if table[i] == nil {
             table[i] = []
@@ -183,12 +180,12 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             for (j, a) in list {
                 if let bRow = b.table[j] {
                     for (k, b) in bRow {
-                        row[k] = row[k, default: R.zero] + a * b
+                        row[k] = row[k, default: .zero] + a * b
                     }
                 }
             }
             
-            row.filter{ (_, a) in a != R.zero }.forEach{ (j, a) in
+            row.filter{ (_, a) in a != .zero }.forEach{ (j, a) in
                 result.set(i, j, a)
             }
         }
@@ -214,7 +211,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             p += 1
         }
         
-        row = row.filter{ $0.1 != R.zero }
+        row = row.filter{ $0.1 != .zero }
         
         if row.count == 0 {
             table.removeValue(forKey: i0)
@@ -343,7 +340,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     public static func identity(_ n: Int, align: ComputationalMatrixAlignment = .Rows) -> ComputationalMatrix<R> {
-        let components = (0 ..< n).map{ i in MatrixComponent(i, i, .identity)}
+        let components = (0 ..< n).map{ i in MatrixComponent(i, i, R.identity)}
         return ComputationalMatrix(rows: n, cols: n, components: components, align: align)
     }
     

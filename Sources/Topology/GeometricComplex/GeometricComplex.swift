@@ -59,7 +59,7 @@ public extension GeometricComplex {
         let e = R(intValue: (-1).pow(d.degree + 1))
         let vals = cells(ofDim: d.degree + 1).flatMap{ t -> (Dual<Cell>, R)? in
             let a = t.boundary(R.self)[s]
-            return (a != R.zero) ? (Dual(t), e * a) : nil
+            return (a != .zero) ? (Dual(t), e * a) : nil
         }
         return FreeModule(vals)
     }

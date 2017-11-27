@@ -113,7 +113,7 @@ public final class SimpleModuleStructure<A: FreeModuleBase, R: EuclideanRing>: M
         }
         
         public var isFree: Bool {
-            return divisor == R.zero
+            return divisor == .zero
         }
         
         public static func ==(a: Summand, b: Summand) -> Bool {
@@ -196,7 +196,7 @@ public typealias AbstractSimpleModuleStructure<R: EuclideanRing> = SimpleModuleS
 
 public extension AbstractSimpleModuleStructure where A == Int {
     public convenience init(rank r: Int, torsions: [R] = []) {
-        let summands = (0 ..< r).map{ i in Summand(i, R.zero) }
+        let summands = (0 ..< r).map{ i in Summand(i, .zero) }
             + torsions.enumerated().map{ (i, d) in Summand(FreeModule(i + r), d) }
         
         self.init(summands)

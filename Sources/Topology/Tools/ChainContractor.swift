@@ -277,7 +277,7 @@ public extension ChainContractor {
                 let to = self.generators.filter { s in s.dim == i + 1 }
                 let vals = to.flatMap { t -> (Dual<S>, R)? in
                     let a = self.d(t)[s]
-                    return (a != R.zero) ? (Dual(t), e * a) : nil
+                    return (a != .zero) ? (Dual(t), e * a) : nil
                 }
                 return SimplicialCochain(vals)
             }
