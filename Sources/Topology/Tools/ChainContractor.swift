@@ -222,7 +222,7 @@ public class ChainContractor<R: EuclideanRing> {
         }
         
         func passes(_ s: S) -> Bool {
-            return (cell == s) || refs.exists{ (n, _) in n.passes(s) }
+            return (cell == s) || refs.contains{ (n, _) in n.passes(s) }
         }
         
         var hashValue: Int {
