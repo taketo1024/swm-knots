@@ -24,7 +24,11 @@ public struct SimplicialMap: GeometricComplexMap {
     }
     
     public init(from: SimplicialComplex, to: SimplicialComplex? = nil, _ map: [Vertex: Vertex]) {
-        self.init(from: from, to: to, { v in map[v]! })
+        self.init(from: from, to: to, { v in map[v] ?? v })
+    }
+    
+    public init(from: SimplicialComplex, to: SimplicialComplex? = nil, _ map: [(Vertex, Vertex)]) {
+        self.init(from: from, to: to, Dictionary(pairs: map))
     }
     
     public var image: SimplicialComplex {

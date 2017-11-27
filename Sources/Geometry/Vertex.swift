@@ -28,7 +28,7 @@ public struct Vertex: SetType, Comparable {
         self.init(label, [])
     }
     
-    public init(prefix: String) {
+    public init(prefix: String = "v") {
         self.init("\(prefix)\(list.count)")
     }
     
