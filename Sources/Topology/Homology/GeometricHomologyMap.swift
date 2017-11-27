@@ -45,7 +45,7 @@ public extension CochainMap where T == Ascending {
             let i = g.degree
             let ss = f.domain.cells(ofDim: i).flatMap { (s: Cell) -> (Dual<Cell>, R)? in
                 let t = f.appliedTo(s)
-                return (g.pair(t) == 1) ? (Dual(s), R.identity) : nil
+                return (g.pair(t) == 1) ? (Dual(s), .identity) : nil
             }
             return Codomain(ss)
         }

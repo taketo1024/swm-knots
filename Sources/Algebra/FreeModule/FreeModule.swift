@@ -85,8 +85,8 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
     
     public var description: String {
         let list = (A.self == Int.self)
-            ? self.map { (a, r) in (r == R.identity) ? "e\(a)" : "\(r)e\(a)" }
-            : self.map { (a, r) in (r == R.identity) ? "\(a)" : "\(r)\(a)" }
+            ? self.map { (a, r) in (r == .identity) ? "e\(a)" : "\(r)e\(a)" }
+            : self.map { (a, r) in (r == .identity) ? "\(a)" : "\(r)\(a)" }
         
         return list.isEmpty ? "0" : list.joined(separator: " + ")
     }

@@ -166,7 +166,7 @@ public extension SimpleModuleStructure {
         
         let E  = R1.eliminate(form: .Smith)
         
-        let divisors = (E.diagonal + Array(repeating: R.zero, count: k - l)).filter{ $0 != R.identity }
+        let divisors = (E.diagonal + Array(repeating: R.zero, count: k - l)).filter{ $0 != .identity }
         let s = divisors.count
         
         let A2 = A * E.leftInverse.submatrix(colRange: (k - s) ..< k)

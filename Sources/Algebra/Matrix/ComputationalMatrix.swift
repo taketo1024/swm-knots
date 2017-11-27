@@ -224,7 +224,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    public func addRow(at i0: Int, to i1: Int, multipliedBy r: R = R.identity) {
+    public func addRow(at i0: Int, to i1: Int, multipliedBy r: R = .identity) {
         switchAlignment(.Rows)
         
         guard let r0 = table[i0] else {
@@ -302,7 +302,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         transpose()
     }
     
-    public func addCol(at j0: Int, to j1: Int, multipliedBy r: R = R.identity) {
+    public func addCol(at j0: Int, to j1: Int, multipliedBy r: R = .identity) {
         transpose()
         addRow(at: j0, to: j1, multipliedBy: r)
         transpose()
@@ -343,7 +343,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     public static func identity(_ n: Int, align: ComputationalMatrixAlignment = .Rows) -> ComputationalMatrix<R> {
-        let components = (0 ..< n).map{ i in MatrixComponent(i, i, R.identity)}
+        let components = (0 ..< n).map{ i in MatrixComponent(i, i, .identity)}
         return ComputationalMatrix(rows: n, cols: n, components: components, align: align)
     }
     

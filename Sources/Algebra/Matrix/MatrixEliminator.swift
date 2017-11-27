@@ -152,7 +152,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         public var determinant: R {
             switch self {
             case .AddRow(_, _, _), .AddCol(_, _, _):
-                return R.identity
+                return .identity
             case let .MulRow(at: _, by: r):
                 return r
             case let .MulCol(at: _, by: r):
