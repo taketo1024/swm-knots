@@ -167,7 +167,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    public static func *(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> ComputationalMatrix<R> {
+    public static func *(a: ComputationalMatrix, b: ComputationalMatrix) -> ComputationalMatrix<R> {
         assert(a.cols == b.rows)
         
         let result = ComputationalMatrix<R>(rows: a.rows, cols: b.cols, components: [])
@@ -321,7 +321,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    public static func ==(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> Bool {
+    public static func ==(a: ComputationalMatrix, b: ComputationalMatrix) -> Bool {
         if (a.rows, a.cols) != (b.rows, b.cols) {
             return false
         }
