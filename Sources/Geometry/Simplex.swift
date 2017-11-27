@@ -16,13 +16,13 @@ public struct Simplex: GeometricCell, Comparable {
     private let label: String
     
     public init<S: Sequence>(_ vs: S) where S.Iterator.Element == Vertex {
-        let vertices = vs.sorted()
+        let vertices = vs.toArray()
         let unordered = Set(vertices)
         assert(vertices.count == unordered.count)
         
         self.vertices = vertices
         self.unorderedVertices = unordered
-        self.id = vertices.map{ "\($0.id)" }.joined(separator: ",")
+        self.id = vertices.sorted().map{ "\($0.id)" }.joined(separator: ",")
         self.label = (vertices.count == 1) ? vertices.first!.label : "(\(vertices.map{ $0.label }.joined(separator: ", ")))"
     }
     
@@ -43,7 +43,7 @@ public struct Simplex: GeometricCell, Comparable {
     }
     
     public func face(_ index: Int) -> Simplex {
-        var vs = vertices
+        var vs = vertices.sorted()
         vs.remove(at: index)
         return Simplex(vs)
     }
