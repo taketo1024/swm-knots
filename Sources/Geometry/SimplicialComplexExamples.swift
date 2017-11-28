@@ -65,6 +65,30 @@ public extension SimplicialComplex {
         }
     }
     
+    static func mobiusStrip(circleVertices n: Int = 3, intervalVertices m: Int = 3) -> SimplicialComplex {
+        let I1 = interval(vertices: n + 1)
+        let I2 = interval(vertices: m)
+        let K = I1 × I2
+        return K.identifyVertices( (0 ..< m).map { i in
+            (I1.vertices[0] × I2.vertices[i], I1.vertices[n] × I2.vertices[m - 1 - i])
+        } ).named("M")
+    }
+    
+    static func kleinBottle(circleVertices n: Int = 3) -> SimplicialComplex {
+        let I = interval(vertices: n + 1)
+        let K = I × I
+        return
+            K.identifyVertices(
+                (0 ... n).map { i in
+                    (I.vertices[i] × I.vertices[n], I.vertices[i] × I.vertices[0])
+                }
+            ).identifyVertices(
+                (0 ..< n).map { i in
+                    (I.vertices[n] × I.vertices[n - 1 - i], I.vertices[0] × I.vertices[i])
+                }
+            ).named("Kl")
+    }
+    
     static func lensSpace(_ n: Int) -> SimplicialComplex {
         let (p, q) = (n, 1) // TODO: q > 1
         let k = 3 // #vertices of a circle
