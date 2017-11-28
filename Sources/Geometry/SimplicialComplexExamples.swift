@@ -40,11 +40,9 @@ public extension SimplicialComplex {
         return SimplicialComplex(name: "D^\(dim)", maximalCells: [s])
     }
     
-    static func torus(dim: Int) -> SimplicialComplex {
-        let S = SimplicialComplex.circle()
-        var T = (1 ..< dim).reduce(S) { (K, _) in K × S }
-        T.name = "T^\(dim)"
-        return T
+    static func torus(dim: Int, circleVertices n: Int = 3) -> SimplicialComplex {
+        let S = SimplicialComplex.circle(vertices: n)
+        return S.pow(dim).named("T^\(dim)")
     }
     
     // ref: Minimal Triangulations of Manifolds https://arxiv.org/pdf/math/0701735.pdf

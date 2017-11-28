@@ -65,35 +65,46 @@ public extension SimplicialComplex {
     
     // product complex
     public static func ×(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
-        let simplexPairs = K1.maximalCells.allCombinations(with: K2.maximalCells)
-        let vertexPairs  = simplexPairs.flatMap{ (s, t) -> [[(Vertex, Vertex)]] in
-            let k = s.dim + t.dim
+        let pcells = productSimplices(K1.maximalCells, K2.maximalCells)
+        return SimplicialComplex(name: "\(K1.name) × \(K2.name)", maximalCells: pcells)
+    }
+    
+    public func pow(_ n: Int) -> SimplicialComplex {
+        let cells = maximalCells
+        let pcells = (1 ..< n).reduce(cells) { (pow, _) -> [Simplex] in
+            SimplicialComplex.productSimplices(pow, cells)
+        }
+        return SimplicialComplex(name: "\(name)^\(n)", maximalCells: pcells)
+    }
+    
+    internal static func productSimplices(_ ss: [Simplex], _ ts: [Simplex]) -> [Simplex] {
+        return ss.allCombinations(with: ts).flatMap{ (s, t) in productSimplices(s, t) }
+    }
+    
+    internal static func productSimplices(_ s: Simplex, _ t: Simplex) -> [Simplex] {
+        let (n, m) = (s.dim, t.dim)
+        
+        // generate array of (n + m)-dim product simplices by the zig-zag method.
+        
+        let combis = (n + m).choose(n)
+        let vPairs = combis.map{ c -> [(Vertex, Vertex)] in
+            let start = [(s.vertices[0], t.vertices[0])]
+            var (i, j) = (0, 0)
             
-            // list of indices with each (k + 1)-elements in increasing order
-            let Is: [[Int]] = (s.dim + 1).multichoose(k + 1)
-            let Js: [[Int]] = (t.dim + 1).multichoose(k + 1)
-            
-            // list of pairs of ordered indices [(I, J), ...]
-            let allPairs: [([Int], [Int])]  = Is.allCombinations(with: Js)
-            
-            // filter valid pairs that form a k-simplex
-            // if (I[i], J[i]) == (I[i + 1], J[i + 1]), then these two vertices collapse.
-            let validPairs = allPairs.filter{ (I, J) in
-                (0 ..< k).forAll{ (i: Int) -> Bool in (I[i], J[i]) != (I[i + 1], J[i + 1]) }
-            }
-            
-            // indexPairs that correspond to the indices of each VertexSets
-            return validPairs.map{ (I, J) -> [(Vertex, Vertex)] in
-                zip(I, J).map{ (i, j) in (s.vertices[i], t.vertices[j]) }
+            return start + (0 ..< (n + m)).map { k -> (Vertex, Vertex) in
+                if c.contains(k) {
+                    defer { i += 1 }
+                } else {
+                    defer { j += 1 }
+                }
+                return (s.vertices[i], t.vertices[j])
             }
         }
         
-        let cells = vertexPairs.map { (list: [(Vertex, Vertex)]) -> Simplex in
-            let vertices = list.map{ (v, w) in v × w }
+        return vPairs.map { list -> Simplex in
+            let vertices = list.map { (v, w) in v × w }
             return Simplex(vertices)
         }
-        
-        return SimplicialComplex(name: "\(K1.name) × \(K2.name)", maximalCells: cells)
     }
     
     public func connectedSum(with K2: SimplicialComplex) -> SimplicialComplex {
