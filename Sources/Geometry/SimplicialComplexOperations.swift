@@ -69,12 +69,14 @@ public extension SimplicialComplex {
         return SimplicialComplex(name: "\(K1.name) × \(K2.name)", maximalCells: pcells)
     }
     
-    public func pow(_ n: Int) -> SimplicialComplex {
-        let cells = maximalCells
-        let pcells = (1 ..< n).reduce(cells) { (pow, _) -> [Simplex] in
-            SimplicialComplex.productSimplices(pow, cells)
-        }
-        return SimplicialComplex(name: "\(name)^\(n)", maximalCells: pcells)
+    public static func ×(K1: SimplicialComplex, v2: Vertex) -> SimplicialComplex {
+        let K2 = SimplicialComplex(maximalCells: Simplex([v2])).named(v2.label)
+        return K1 × K2
+    }
+    
+    public static func ×(v1: Vertex, K2: SimplicialComplex) -> SimplicialComplex {
+        let K1 = SimplicialComplex(maximalCells: Simplex([v1])).named(v1.label)
+        return K1 × K2
     }
     
     internal static func productSimplices(_ ss: [Simplex], _ ts: [Simplex]) -> [Simplex] {
@@ -105,6 +107,33 @@ public extension SimplicialComplex {
             let vertices = list.map { (v, w) in v × w }
             return Simplex(vertices)
         }
+    }
+    
+    public func pow(_ n: Int) -> SimplicialComplex {
+        let cells = maximalCells
+        let pcells = (1 ..< n).reduce(cells) { (pow, _) -> [Simplex] in
+            SimplicialComplex.productSimplices(pow, cells)
+        }
+        return SimplicialComplex(name: "\(name)^\(n)", maximalCells: pcells)
+    }
+    
+    public static func /(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
+        let vs = Set(K2.vertices)
+        let v0 = vs.anyElement!
+        let map = SimplicialMap(from: K1) { v in vs.contains(v) ? v0 : v }
+        return map.image.named("\(K1.name) / \(K2.name)")
+    }
+    
+    public static func ∨(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
+        let (v1, v2) = (K1.vertices[0], K2.vertices[0])
+        let K = K1 + K2
+        let map = SimplicialMap(from: K, [v2 : v1])
+        return map.image.named("\(K1.name) ∨ \(K2.name)")
+    }
+    
+    public static func ∧(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
+        let (v1, v2) = (K1.vertices[0], K2.vertices[0])
+        return (K1 × K2) / ( (K1 × v2) ∨ (v1 × K2) )
     }
     
     public func connectedSum(with K2: SimplicialComplex) -> SimplicialComplex {
