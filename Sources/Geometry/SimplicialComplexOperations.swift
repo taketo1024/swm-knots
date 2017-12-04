@@ -136,10 +136,23 @@ public extension SimplicialComplex {
         return (K1 × K2) / ( (K1 × v2) ∨ (v1 × K2) )
     }
     
+    public func cone(intervalVertices n: Int = 2) -> SimplicialComplex {
+        let K = self
+        let I = SimplicialComplex.interval(vertices: n)
+        return ( (K × I) / (K × I.vertices[0]) ).named("C(\(K.name))")
+    }
+    
+    public func suspension(intervalVertices n: Int = 3) -> SimplicialComplex {
+        let K = self
+        let I = SimplicialComplex.interval(vertices: n)
+        return ( (K × I) / (K × I.vertices[0]) / (K × I.vertices[n - 1]) ).named("S(\(K.name))")
+    }
+    
     public func connectedSum(with K2: SimplicialComplex) -> SimplicialComplex {
-        assert(self.dim == K2.dim)
-        let (s1, s2) = (self.cells(ofDim: self.dim).anyElement!, K2.cells(ofDim: self.dim).anyElement!)
-        return ((self + K2) - s1 - s2).identifyVertices(s1.vertices.enumerated().map{ (i, v) in (v, s2.vertices[i])})
+        let K1 = self
+        assert(K1.dim == K2.dim)
+        let (s1, s2) = (K1.cells(ofDim: K1.dim).anyElement!, K2.cells(ofDim: K1.dim).anyElement!)
+        return ((K1 + K2) - s1 - s2).identifyVertices(s1.vertices.enumerated().map{ (i, v) in (v, s2.vertices[i])})
     }
     
     public var barycentricSubdivision: SimplicialComplex {
