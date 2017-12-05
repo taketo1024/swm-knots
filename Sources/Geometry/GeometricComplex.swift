@@ -22,6 +22,8 @@ public protocol GeometricComplex: CustomStringConvertible {
     var name: String { get }
     var dim: Int { get }
     
+    func contains(_ cell: Cell) -> Bool
+    
     var allCells: [Cell] { get }
     func cells(ofDim: Int) -> [Cell]
     func skeleton(_ dim: Int) -> Self
@@ -34,6 +36,10 @@ public protocol GeometricComplex: CustomStringConvertible {
 public extension GeometricComplex {
     public var name: String {
         return "_" // TODO
+    }
+    
+    public func contains(_ cell: Cell) -> Bool {
+        return cells(ofDim: cell.dim).contains(cell)
     }
     
     public var allCells: [Cell] {
