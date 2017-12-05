@@ -11,14 +11,14 @@ import Foundation
 public typealias CellularChain<R: Ring> = FreeModule<CellularCell, R>
 
 public struct CellularCell: GeometricCell {
-    public let simplices: [Simplex]
+    public let simplices: SimplicialChain<IntegerNumber>
     internal let boundary: CellularChain<IntegerNumber>
     
-    internal init(_ simplices: [Simplex], _ boundary: CellularChain<IntegerNumber>) {
-        assert(!simplices.isEmpty)
+    internal init(_ simplices: SimplicialChain<IntegerNumber>, _ boundary: CellularChain<IntegerNumber>) {
+        assert(!simplices.basis.isEmpty)
         assert({
-            let n = simplices.anyElement!.dim
-            return simplices.forAll{$0.dim == n}
+            let n = simplices.basis[0].dim
+            return simplices.basis.forAll{$0.dim == n}
         }())
         
         self.simplices = simplices
@@ -26,7 +26,7 @@ public struct CellularCell: GeometricCell {
     }
     
     public var dim: Int {
-        return simplices.anyElement!.dim
+        return simplices.basis[0].dim
     }
     
     public var hashValue: Int {
@@ -38,7 +38,7 @@ public struct CellularCell: GeometricCell {
     }
     
     public var description: String {
-        return "e\(simplices)"
+        return "e\(dim)(\(simplices))"
     }
 }
 
@@ -76,17 +76,18 @@ public struct CellularComplex: GeometricComplex {
     
     @discardableResult
     public mutating func appendVertex(_ v: Vertex) -> CellularCell {
-        return appendCell( simplices: [Simplex(v)] )
+        let c = SimplicialChain<IntegerNumber>(Simplex(v))
+        return appendCell(simplices: c)
     }
     
     @discardableResult
-    public mutating func appendCell(simplices: [Simplex], attachedAlong boundary: CellularChain<IntegerNumber> = CellularChain.zero) -> CellularCell {
-        if !simplices.forAll({ underlyingComplex.contains($0) }) {
-            let K = SimplicialComplex( maximalCells: simplices )
+    public mutating func appendCell(simplices: SimplicialChain<IntegerNumber>, attachedAlong boundary: CellularChain<IntegerNumber> = CellularChain.zero) -> CellularCell {
+        if !simplices.basis.forAll({ underlyingComplex.contains($0) }) {
+            let K = SimplicialComplex( maximalCells: simplices.basis )
             self.underlyingComplex = self.underlyingComplex + K
         }
         
-        let n = simplices.anyElement!.dim
+        let n = simplices.basis[0].dim
         assert(boundary.basis.forAll{ $0.dim == n - 1 }, "only attatching to 1-dim lower cells is supported.")
         
         while cells.count - 1 < n {
@@ -113,7 +114,8 @@ public extension CellularComplex {
         var C = CellularComplex(underlyingComplex: K)
         let v0 = C.appendVertex(K.vertices[0])
         let v1 = C.appendVertex(K.vertices[n - 1])
-        C.appendCell(simplices: K.cells(ofDim: 1), attachedAlong: CellularChain([(v1, 1), (v0, -1)]))
+        let c = SimplicialChain(K.cells(ofDim: 1).map{ ($0, 1)} )
+        C.appendCell(simplices: c, attachedAlong: CellularChain([(v1, 1), (v0, -1)]))
         return C
     }
     

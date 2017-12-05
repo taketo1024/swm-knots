@@ -10,25 +10,25 @@ import Foundation
 
 // Operations
 public extension SimplicialComplex {
-    public func star(_ v: Vertex) -> [Simplex] { // returns only maximal cells
-        return maximalCells.filter{ $0.contains(v) }
+    public func star(_ v: Vertex) -> SimplicialComplex {
+        return star( Simplex(v) )
     }
     
-    public func star(_ s: Simplex) -> [Simplex] { // returns only maximal cells
-        return maximalCells.filter{ $0.contains(s) }
+    public func star(_ s: Simplex) -> SimplicialComplex {
+        return SimplicialComplex( maximalCells: maximalCells.filter{ $0.contains(s) } ).named("St\(s)")
     }
     
-    public func link(_ v: Vertex) -> [Simplex] { // returns only maximal cells
-        return star(v).map{ $0.subtract(v) }.filter{ $0.dim >= 0 }
+    public func link(_ v: Vertex) -> SimplicialComplex {
+        return (star(v) - v).named("Lk\(v)")
     }
     
-    public func link(_ s: Simplex) -> [Simplex] { // returns only maximal cells
-        return star(s).map{ $0.subtract(s) }.filter{ $0.dim >= 0 }
+    public func link(_ s: Simplex) -> SimplicialComplex {
+        return (star(s) - s).named("Lk\(s)")
     }
     
     public var boundaryVertices: [Vertex] {
         return vertices.filter { v in
-            SimplicialComplex(maximalCells: self.link(v)).orientationCycle == nil
+            self.link(v).orientationCycle == nil
         }
     }
     
@@ -189,6 +189,50 @@ public extension SimplicialComplex {
         }
         
         return (SimplicialComplex(name: "Sd(\(name))", maximalCells: bcells), s2b, b2s)
+    }
+    
+    public var dualComplex: CellularComplex {
+        let K = self
+        let n = K.dim
+        let (SdK, s2b, b2s) = K._barycentricSubdivision()
+        
+        var cellsList = [[CellularCell]]()
+        var s2d = [Simplex : CellularCell]()
+        var d2s = [CellularCell : Simplex]()
+        
+        for i in (0 ... n).reversed() {
+            let bcells = SdK.cells(ofDim: n - i)
+            let dcells = K.cells(ofDim: i).map { s -> CellularCell in
+                let chain: SimplicialChain<IntegerNumber> = {
+                    let b = s2b[s]!
+                    let star = SimplicialComplex( maximalCells: bcells.filter{ (bcell) in
+                        bcell.contains(b) && bcell.vertices.forAll{ b2s[$0]!.contains(s) }
+                    })
+                    let link = star - b
+                    let H = Homology(star, link, IntegerNumber.self)
+                    return H[H.topDegree].generators[0]
+                }()
+                
+                let z = chain.boundary()
+                let boundary = CellularChain( K.cofaces(ofCell: s).map{ t -> (CellularCell, IntegerNumber) in
+                    let dcell = s2d[t]!
+                    
+                    let t0 = dcell.simplices.basis[0] // take any simplex to detect orientation
+                    let e = (dcell.simplices[t0] == z[t0]) ? 1 : -1
+                    
+                    return (dcell, e)
+                })
+                
+                let d = CellularCell(chain, boundary)
+                s2d[s] = d
+                d2s[d] = s
+                
+                return d
+            }
+            cellsList.append(dcells)
+        }
+        
+        return CellularComplex(SdK, cellsList)
     }
 }
 
