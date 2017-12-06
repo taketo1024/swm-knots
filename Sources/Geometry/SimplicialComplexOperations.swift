@@ -27,9 +27,7 @@ public extension SimplicialComplex {
     }
     
     public var boundaryVertices: [Vertex] {
-        return vertices.filter { v in
-            self.link(v).orientationCycle == nil
-        }
+        return vertices.filter { v in !link(v).isOrientable }
     }
     
     public func identifyVertices(_ pairs: [(Vertex, Vertex)]) -> SimplicialComplex {
@@ -191,9 +189,12 @@ public extension SimplicialComplex {
         return (SimplicialComplex(name: "Sd(\(name))", maximalCells: bcells), s2b, b2s)
     }
     
-    public var dualComplex: CellularComplex {
-        let K = self
-        let n = K.dim
+    public var dualComplex: CellularComplex? {
+        if isOrientable {
+            return nil
+        }
+        
+        let (K, n) = (self, dim)
         let (SdK, s2b, b2s) = K._barycentricSubdivision()
         
         var cellsList = [[CellularCell]]()
@@ -209,8 +210,7 @@ public extension SimplicialComplex {
                         bcell.contains(b) && bcell.vertices.forAll{ b2s[$0]!.contains(s) }
                     })
                     let link = star - b
-                    let H = Homology(star, link, IntegerNumber.self)
-                    return H[H.topDegree].generators[0]
+                    return star.orientationCycle(relativeTo: link)!
                 }()
                 
                 let z = chain.boundary()
