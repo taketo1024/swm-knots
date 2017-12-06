@@ -119,12 +119,25 @@ public extension CellularComplex {
         return C
     }
     
-    static func circle() -> CellularComplex {
+    static func circle(vertices k: Int = 3) -> CellularComplex {
         return CellularComplex.sphere(dim: 1)
     }
     
-    static func sphere(dim i: Int) -> CellularComplex {
-        fatalError("TBD")
+    static func sphere(dim n: Int, suspensionVertices k: Int? = nil) -> CellularComplex {
+        assert(n >= 0)
+        
+        let K = SimplicialComplex.sphere(dim: n, suspensionVertices: k)
+        var C = CellularComplex(underlyingComplex: K)
+        
+        if n == 0 {
+            C.appendVertex(K.vertices[0])
+            C.appendVertex(K.vertices[1])
+        } else {
+            C.appendVertex(K.vertices[0])
+            C.appendCell(simplices: SimplicialChain(K.cells(ofDim: 1).map{ ($0, 1)} ))
+        }
+        
+        return C
     }
     
     static func ball(dim: Int) -> CellularComplex {

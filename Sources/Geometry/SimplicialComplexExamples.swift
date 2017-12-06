@@ -14,30 +14,46 @@ public extension SimplicialComplex {
         return SimplicialComplex(name: "pt", allCells: Simplex([v]))
     }
     
-    static func interval(vertices n: Int = 2) -> SimplicialComplex {
-        assert(n >= 2)
-        let V = Vertex.generate(n)
-        let segments = (0 ..< n - 1).map { i in Simplex(vertexSet: V, indices: [i, i + 1]) }
+    static func interval(vertices k: Int = 2) -> SimplicialComplex {
+        assert(k >= 2)
+        let V = Vertex.generate(k)
+        let segments = (0 ..< k - 1).map { i in Simplex(vertexSet: V, indices: [i, i + 1]) }
         return SimplicialComplex(name: "I", maximalCells: segments)
     }
     
-    static func circle(vertices n: Int = 3) -> SimplicialComplex {
-        assert(n >= 3)
-        let V = Vertex.generate(n)
-        let segments = (0 ..< n).map { i in Simplex(vertexSet: V, indices: [i, (i + 1) % n]) }
+    static func circle(vertices k: Int = 3) -> SimplicialComplex {
+        assert(k >= 3)
+        let V = Vertex.generate(k)
+        let segments = (0 ..< k).map { i in Simplex(vertexSet: V, indices: [i, (i + 1) % k]) }
         return SimplicialComplex(name: "S^1", maximalCells: segments)
     }
     
-    static func sphere(dim: Int) -> SimplicialComplex {
-        let V = Vertex.generate(dim + 2)
-        let faces = Simplex(vertexSet: V, indices: 0 ... (dim + 1)).faces()
-        return SimplicialComplex(name: "S^\(dim)", maximalCells: faces)
+    static func sphere(dim n: Int, suspensionVertices k: Int? = nil) -> SimplicialComplex {
+        assert(n >= 0)
+        assert(k == nil || k! >= 3)
+        
+        if k == nil || n == 0 {
+            let V = Vertex.generate(n + 2)
+            let faces = Simplex(vertexSet: V, indices: 0 ... (n + 1)).faces()
+            return SimplicialComplex(name: "S^\(n)", maximalCells: faces)
+        } else {
+            return sphere(dim: n - 1, suspensionVertices: k).suspension(intervalVertices: k!)
+        }
     }
     
-    static func ball(dim: Int) -> SimplicialComplex {
-        let V = Vertex.generate(dim + 1)
-        let s = Simplex(vertexSet: V, indices: 0...dim)
-        return SimplicialComplex(name: "D^\(dim)", maximalCells: [s])
+    static func ball(dim n: Int, suspensionVertices k: Int? = nil) -> SimplicialComplex {
+        assert(n >= 0)
+        assert(k == nil || k! >= 3)
+        
+        if k == nil || n == 0 {
+            let V = Vertex.generate(n + 1)
+            let s = Simplex(vertexSet: V, indices: 0...n)
+            return SimplicialComplex(name: "D^\(n)", maximalCells: [s])
+        } else {
+            let v = Vertex()
+            let S = sphere(dim: n - 1, suspensionVertices: k)
+            return v.join(S)
+        }
     }
     
     static func torus(dim: Int, circleVertices n: Int = 3) -> SimplicialComplex {
@@ -65,32 +81,32 @@ public extension SimplicialComplex {
         }
     }
     
-    static func mobiusStrip(circleVertices n: Int = 3, intervalVertices m: Int = 3) -> SimplicialComplex {
-        let I1 = interval(vertices: n + 1)
-        let I2 = interval(vertices: m)
+    static func mobiusStrip(circleVertices k: Int = 3, intervalVertices l: Int = 3) -> SimplicialComplex {
+        let I1 = interval(vertices: k + 1)
+        let I2 = interval(vertices: l)
         let K = I1 × I2
-        return K.identifyVertices( (0 ..< m).map { i in
-            (I1.vertices[0] × I2.vertices[i], I1.vertices[n] × I2.vertices[m - 1 - i])
+        return K.identifyVertices( (0 ..< l).map { i in
+            (I1.vertices[0] × I2.vertices[i], I1.vertices[k] × I2.vertices[l - 1 - i])
         } ).named("M")
     }
     
-    static func kleinBottle(circleVertices n: Int = 3) -> SimplicialComplex {
-        let I = interval(vertices: n + 1)
+    static func kleinBottle(circleVertices k: Int = 3) -> SimplicialComplex {
+        let I = interval(vertices: k + 1)
         let K = I × I
         return
             K.identifyVertices(
-                (0 ... n).map { i in
-                    (I.vertices[i] × I.vertices[n], I.vertices[i] × I.vertices[0])
+                (0 ... k).map { i in
+                    (I.vertices[i] × I.vertices[k], I.vertices[i] × I.vertices[0])
                 }
             ).identifyVertices(
-                (0 ..< n).map { i in
-                    (I.vertices[n] × I.vertices[n - 1 - i], I.vertices[0] × I.vertices[i])
+                (0 ..< k).map { i in
+                    (I.vertices[k] × I.vertices[k - 1 - i], I.vertices[0] × I.vertices[i])
                 }
             ).named("Kl")
     }
     
-    static func lensSpace(_ n: Int) -> SimplicialComplex {
-        let (p, q) = (n, 1) // TODO: q > 1
+    static func lensSpace(_ p: Int) -> SimplicialComplex {
+        let q = 1 // TODO: q > 1
         let k = 3 // #vertices of a circle
         let kp = k * p
         
