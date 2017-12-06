@@ -29,6 +29,10 @@ public struct CellularCell: GeometricCell {
         return simplices.basis[0].dim
     }
     
+    public func boundary<R: Ring>(_ type: R.Type) -> FreeModule<CellularCell, R> {
+        return boundary.mapValues{ R(intValue: $0) }
+    }
+    
     public var hashValue: Int {
         return 0 // TODO
     }

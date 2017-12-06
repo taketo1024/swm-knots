@@ -10,6 +10,7 @@ import Foundation
 
 public protocol GeometricCell: FreeModuleBase {
     var dim: Int { get }
+    func boundary<R: Ring>(_ type: R.Type) -> FreeModule<Self, R>
 }
 
 public extension GeometricCell {
@@ -28,7 +29,6 @@ public protocol GeometricComplex: CustomStringConvertible {
     func cells(ofDim: Int) -> [Cell]
     func skeleton(_ dim: Int) -> Self
     
-    func boundary<R: Ring>(ofCell: Cell, _ type: R.Type) -> FreeModule<Cell, R> // override point
     func boundaryMap<R: Ring>(_ i: Int, _ type: R.Type) -> FreeModuleHom<Cell, Cell, R>
     func boundaryMatrix<R: Ring>(_ i: Int, _ type: R.Type) -> ComputationalMatrix<R>
 }
@@ -48,7 +48,7 @@ public extension GeometricComplex {
     
     public func boundaryMap<R: Ring>(_ i: Int, _ type: R.Type) -> FreeModuleHom<Cell, Cell, R> {
         return FreeModuleHom { s in
-            (s.dim == i) ? self.boundary(ofCell: s, R.self).map{ ($0, $1) } : []
+            (s.dim == i) ? s.boundary(R.self).map{ ($0, $1) } : []
         }
     }
     
@@ -61,7 +61,7 @@ public extension GeometricComplex {
     internal func partialBoundaryMatrix<R: Ring>(_ from: [Cell], _ to: [Cell], _ type: R.Type) -> ComputationalMatrix<R> {
         let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toCell: toIndex]
         let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
-            return boundary(ofCell: s, R.self).flatMap{ (e: (Cell, R)) -> MatrixComponent<R>? in
+            return s.boundary(R.self).flatMap{ (e: (Cell, R)) -> MatrixComponent<R>? in
                 let (t, value) = e
                 return toIndex[t].flatMap{ i in (i, j, value) }
             }
