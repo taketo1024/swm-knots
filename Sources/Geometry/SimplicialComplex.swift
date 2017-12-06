@@ -75,10 +75,6 @@ public struct SimplicialComplex: GeometricComplex {
         return cells
     }
     
-    public func boundary<R: Ring>(ofCell s: Simplex, _ type: R.Type) -> FreeModule<Simplex, R> {
-        return s.boundary(R.self)
-    }
-    
     public func cofaces(ofCell s: Simplex) -> [Simplex] {
         return cells(ofDim: s.dim + 1).filter{ $0.contains(s) }
     }

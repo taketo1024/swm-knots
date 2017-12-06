@@ -74,10 +74,6 @@ public struct CellularComplex: GeometricComplex {
         return (0...dim).contains(i) ? cells[i] : []
     }
     
-    public func boundary<R: Ring>(ofCell s: CellularCell, _ type: R.Type) -> FreeModule<CellularCell, R> {
-        return s.boundary.mapValues{ R(intValue: $0) }
-    }
-    
     @discardableResult
     public mutating func appendVertex(_ v: Vertex) -> CellularCell {
         let c = SimplicialChain<IntegerNumber>(Simplex(v))
