@@ -47,7 +47,7 @@ public extension GeometricComplex {
     }
     
     public func fundamentalClass<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> HomologyClass<Cell, R>? {
-        let H = Homology(self, R.self)
+        let H = (L == nil) ? Homology(self, R.self) : Homology(self, L!, R.self)
         let summand = H[dim].summands
         
         if summand.count == 1 && summand[0].isFree {
