@@ -26,6 +26,16 @@ public extension SimplicialComplex {
         return (star(s) - s).named("Lk\(s)")
     }
     
+    public var boundary: SimplicialComplex {
+        let set = Set( maximalCells.flatMap{ $0.faces() } )
+            .filter { s in
+                let star = self.star(s)
+                let link = star - s
+                return !star.isOrientable(relativeTo: link)
+            }
+        return SimplicialComplex(name: "∂\(name)", maximalCells: set)
+    }
+    
     public var boundaryVertices: [Vertex] {
         return vertices.filter { v in !link(v).isOrientable }
     }
@@ -58,7 +68,10 @@ public extension SimplicialComplex {
         let cells = K1.cellTable.map{ list -> [Simplex] in
             return list.filter{ s in subtr.forAll{ !s.contains($0) } }
         }
-        return SimplicialComplex(name: "\(K1) - \(K2)", cells)
+        
+        // TODO dropLast empty list
+        
+        return SimplicialComplex(name: "\(K1.name) - \(K2.name)", cells)
     }
     
     // product complex

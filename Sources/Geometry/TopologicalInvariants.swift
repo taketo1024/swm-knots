@@ -22,8 +22,12 @@ public extension GeometricComplex {
         return orientationCycle != nil
     }
     
-    public func isOrientable<R: EuclideanRing>(_ type: R.Type) -> Bool {
-        return orientationCycle(R.self) != nil
+    public func isOrientable(relativeTo L: Self) -> Bool {
+        return orientationCycle(relativeTo: L) != nil
+    }
+    
+    public func isOrientable<R: EuclideanRing>(relativeTo L: Self?, _ type: R.Type) -> Bool {
+        return orientationCycle(relativeTo: L, R.self) != nil
     }
     
     public var orientationCycle: FreeModule<Cell, IntegerNumber>? {

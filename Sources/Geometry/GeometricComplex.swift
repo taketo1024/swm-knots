@@ -71,7 +71,7 @@ public extension GeometricComplex {
     }
     
     public var description: String {
-        return "\(type(of: self))(\(name))"
+        return (name == "_") ? "\(type(of: self))" : name
     }
     
     public var detailDescription: String {
