@@ -17,12 +17,3 @@ import Foundation
 
 public protocol AlgebraicStructure: class, Equatable, CustomStringConvertible { }
 
-public extension AlgebraicStructure {
-    public var description: String {
-        return "\(type(of: self))"
-    }
-
-    public var detailDescription: String {
-        return description
-    }
-}

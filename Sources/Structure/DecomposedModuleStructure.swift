@@ -63,7 +63,7 @@ public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing
         return a.summands == b.summands
     }
     
-    public var description: String {
+    public override var description: String {
         return summands.isEmpty ? "0" : summands.map{$0.description}.joined(separator: "⊕")
     }
     

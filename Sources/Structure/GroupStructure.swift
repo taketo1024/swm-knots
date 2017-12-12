@@ -12,6 +12,10 @@ public class GroupStructure: AlgebraicStructure {
     public static func ==(a: GroupStructure, b: GroupStructure) -> Bool {
         fatalError("implement in subclass")
     }
+    
+    public var description: String {
+        return "\(type(of: self))"
+    }
 }
 
 public class SubgroupStructure<G: Group>: GroupStructure {
@@ -46,7 +50,7 @@ public final class FiniteSubgroupStructure<G: Group>: SubgroupStructure<G> {
         return a.allElements == b.allElements
     }
     
-    public var description: String {
+    public override var description: String {
         return "{\(Array(allElements).map{"\($0)"}.joined(separator: ", "))}"
     }
 }
