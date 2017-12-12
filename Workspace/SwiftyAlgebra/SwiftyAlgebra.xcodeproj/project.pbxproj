@@ -51,6 +51,7 @@
 		14546DAB1FDF9DD200898326 /* GroupStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14546DAA1FDF9DD200898326 /* GroupStructure.swift */; };
 		14546DAF1FDFA69400898326 /* ModuleStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14546DAE1FDFA69400898326 /* ModuleStructure.swift */; };
 		14546DB11FDFAD3200898326 /* InvariantFactorDecomposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14546DB01FDFAD3200898326 /* InvariantFactorDecomposition.swift */; };
+		14546DB71FDFCE5100898326 /* HomologyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14546DB61FDFCE5100898326 /* HomologyMap.swift */; };
 		145B10D51FB19B03004EC11E /* MatrixEliminationResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145B10D41FB19B03004EC11E /* MatrixEliminationResult.swift */; };
 		145F46011EEAF0CC0045CDB2 /* Z_2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F46001EEAF0CC0045CDB2 /* Z_2.swift */; };
 		14647D361FB5A47E0083E849 /* HomologyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14647D351FB5A47E0083E849 /* HomologyTests.swift */; };
@@ -134,6 +135,7 @@
 		14546DAA1FDF9DD200898326 /* GroupStructure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupStructure.swift; sourceTree = "<group>"; };
 		14546DAE1FDFA69400898326 /* ModuleStructure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleStructure.swift; sourceTree = "<group>"; };
 		14546DB01FDFAD3200898326 /* InvariantFactorDecomposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvariantFactorDecomposition.swift; sourceTree = "<group>"; };
+		14546DB61FDFCE5100898326 /* HomologyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomologyMap.swift; sourceTree = "<group>"; };
 		145B10D41FB19B03004EC11E /* MatrixEliminationResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixEliminationResult.swift; sourceTree = "<group>"; };
 		145F46001EEAF0CC0045CDB2 /* Z_2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Z_2.swift; sourceTree = "<group>"; };
 		14647D351FB5A47E0083E849 /* HomologyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomologyTests.swift; sourceTree = "<group>"; };
@@ -233,10 +235,10 @@
 				14A365721F27636600D23C87 /* FreeModule */,
 				14A365731F27638300D23C87 /* Polynomial */,
 				1424F4DF1EB997780052581F /* Permutation */,
-				14929C9B1ED9C798006ACAC5 /* Geometry */,
 				147D98071EBA0C0C00C736AC /* Homology */,
-				1424F4EF1EB997780052581F /* Computation */,
 				14546DA91FDF9DB800898326 /* Structure */,
+				14929C9B1ED9C798006ACAC5 /* Geometry */,
+				1424F4EF1EB997780052581F /* Computation */,
 				1424F4F21EB997780052581F /* Meta */,
 				147D98041EB9B24900C736AC /* Extensions */,
 				1424F4F51EB997780052581F /* Util */,
@@ -357,6 +359,7 @@
 				147D965C1F30759F00967992 /* ChainMap.swift */,
 				144AD2901EC21A4500E23890 /* Homology.swift */,
 				146A296D1F1DA32400531AA2 /* HomologyClass.swift */,
+				14546DB61FDFCE5100898326 /* HomologyMap.swift */,
 			);
 			path = Homology;
 			sourceTree = "<group>";
@@ -535,6 +538,7 @@
 				140BCD511EBA3F8A00D7CE74 /* ChainComplex.swift in Sources */,
 				1424F5011EB997780052581F /* Matrix.swift in Sources */,
 				1499CD011F236328009C3C99 /* CustomOperations.swift in Sources */,
+				14546DB71FDFCE5100898326 /* HomologyMap.swift in Sources */,
 				145F46011EEAF0CC0045CDB2 /* Z_2.swift in Sources */,
 				147D98061EB9B26200C736AC /* Dictionary.swift in Sources */,
 				1424F50E1EB997780052581F /* IntTypeParameter.swift in Sources */,
