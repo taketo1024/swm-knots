@@ -21,7 +21,8 @@ import Foundation
 public typealias   Homology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Descending, A, R>
 public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Ascending, A, R>
 
-public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: Structure {
+// TODO abstract as `GradedModule`
+public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: AlgebraicStructure {
     public typealias Summand = FinitelyGeneratedModuleStructure<A, R>
     public typealias Cycle = FreeModule<A, R>
     

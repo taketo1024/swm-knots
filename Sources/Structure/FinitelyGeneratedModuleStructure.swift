@@ -10,7 +10,7 @@ import Foundation
 
 // https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
-public final class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: EuclideanRing>: Structure, Sequence {
+public final class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: EuclideanRing>: AlgebraicStructure, Sequence {
     public let basis: [A]
     public let summands: [Summand]
     public let transitionMatrix: ComputationalMatrix<R>
@@ -83,7 +83,7 @@ public final class FinitelyGeneratedModuleStructure<A: FreeModuleBase, R: Euclid
         return "\(self),\t\(self.map{ $0.generator })"
     }
     
-    public final class Summand: Structure {
+    public final class Summand: AlgebraicStructure {
         public let generator: FreeModule<A, R>
         public let factor: R
         
