@@ -74,9 +74,7 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
         // assert(H == H2) // this assertion is heavy
         
         if a.factors.keys == b.factors.keys {
-            return a.factors.forAll { (i, z) in
-                return H[i].isEquivalent(z, b[i])
-            }
+            return a.factors.forAll { (i, z) in H[i].cyclesAreHomologous(z, b[i]) }
         } else {
             return false
         }

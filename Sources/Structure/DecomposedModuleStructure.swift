@@ -34,8 +34,20 @@ public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing
         return summands.isEmpty
     }
     
+    public var isFree: Bool {
+        return summands.forAll { $0.isFree } 
+    }
+    
     public var rank: Int {
         return self.filter{ $0.isFree }.count
+    }
+    
+    public func generator(_ i: Int) -> FreeModule<A, R> {
+        return summands[i].generator
+    }
+    
+    public func torsion(_ i: Int) -> R {
+        return summands[i].divisor
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
@@ -47,12 +59,12 @@ public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing
         }
     }
     
-    public func isEquivalentToZero(_ z: FreeModule<A, R>) -> Bool {
+    public func elementIsZero(_ z: FreeModule<A, R>) -> Bool {
         return factorize(z).forAll{ $0 == 0 }
     }
     
-    public func isEquivalent(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {
-        return isEquivalentToZero(z1 - z2)
+    public func elementsAreEqual(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {
+        return elementIsZero(z1 - z2)
     }
     
     public func makeIterator() -> IndexingIterator<[Summand]> {

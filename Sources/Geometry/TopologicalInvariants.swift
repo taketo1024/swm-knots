@@ -52,10 +52,10 @@ public extension GeometricComplex {
     
     public func fundamentalClass<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> HomologyClass<Cell, R>? {
         let H = (L == nil) ? Homology(self, R.self) : Homology(self, L!, R.self)
-        let summand = H[dim].summands
+        let top = H[dim]
         
-        if summand.count == 1 && summand[0].isFree {
-            return HomologyClass(summand[0].generator, H)
+        if top.isFree && top.rank == 1 {
+            return top.generator(0)
         } else {
             return nil
         }
@@ -96,10 +96,10 @@ public extension SimplicialComplex {
         let ΔM = d.image
         
         let cH = Cohomology(MxM, MxM - ΔM, R.self)
-        let summands = cH[dim].summands
+        let top = cH[dim]
         
-        if summands.count == 1 && summands[0].isFree {
-            let u = summands[0].generator                // the Diagonal cohomology class of M
+        if top.isFree && top.rank == 1 {
+            let u = top.generator(0).representative
             let e = d.asCochainMap(R.self).appliedTo(u)  // the Euler class of M
             return CohomologyClass(e, Cohomology(self, R.self))
         } else {
