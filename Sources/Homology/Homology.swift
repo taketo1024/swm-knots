@@ -23,7 +23,7 @@ public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Asc
 
 // TODO abstract as `GradedModule`
 public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: AlgebraicStructure {
-    public typealias Summand = FinitelyGeneratedModuleStructure<A, R>
+    public typealias Summand = DecomposedModuleStructure<A, R>
     public typealias Cycle = FreeModule<A, R>
     
     public let chainComplex: _ChainComplex<chainType, A, R>
@@ -77,7 +77,11 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
         let basis = C.chainBasis(i)
         let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
         let (E1, E2) = (A1.eliminate(), A2.eliminate())
-        return Summand(basis: basis, generators: E1.kernelMatrix, relations: E2.imageMatrix, transition: E1.kernelTransitionMatrix)
+        
+        return ModuleStructure.invariantFactorDecomposition(generators: basis,
+                                                            generatingMatrix: E1.kernelMatrix,
+                                                            relationMatrix:   E2.imageMatrix,
+                                                            transitionMatrix: E1.kernelTransitionMatrix)
     }
 }
 

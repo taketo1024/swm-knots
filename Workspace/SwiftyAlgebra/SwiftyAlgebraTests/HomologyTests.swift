@@ -63,7 +63,7 @@ class HomologyTests: XCTestCase {
         let K = SimplicialComplex.realProjectiveSpace(dim: 2)
         let h  = H(K, Z.self)
         XCTAssert(h[0].summands.count == 1 && h[0][0].isFree)
-        XCTAssert(h[1].summands.count == 1 && h[1][0].factor == 2 )
+        XCTAssert(h[1].summands.count == 1 && h[1][0].divisor == 2 )
         XCTAssert(h[2].isTrivial)
     }
     
@@ -190,7 +190,7 @@ class HomologyTests: XCTestCase {
         let h  = cH(K, Z.self)
         XCTAssert(h[0].summands.count == 1 && h[0][0].isFree)
         XCTAssert(h[1].isTrivial)
-        XCTAssert(h[2].summands.count == 1 && h[2][0].factor == 2 )
+        XCTAssert(h[2].summands.count == 1 && h[2][0].divisor == 2 )
     }
     
     func test_cH_D3_Z2() {
