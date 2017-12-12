@@ -35,7 +35,7 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
     
     public subscript(i: Int) -> Summand {
         guard (offset ... topDegree).contains(i) else {
-            fatalError() // TODO return empty info
+            return Summand.zero(self)
         }
         
         if let g = _summands[i - offset] {
@@ -79,18 +79,27 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
         internal var homology: _Homology<chainType, A, R> // FIXME circular reference!
         internal let structure: DecomposedModuleStructure<A, R>
         
-        internal init(_ H: _Homology<chainType, A, R>, _ i: Int) {
+        private init(_ H: _Homology<chainType, A, R>, _ structure: DecomposedModuleStructure<A, R>) {
+            self.homology = H
+            self.structure = structure
+        }
+        
+        internal convenience init(_ H: _Homology<chainType, A, R>, _ i: Int) {
             let C = H.chainComplex
             let basis = C.chainBasis(i)
             let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
             let (E1, E2) = (A1.eliminate(), A2.eliminate())
             
-            self.homology = H
-            self.structure = ModuleStructure.invariantFactorDecomposition(
+            self.init(H, ModuleStructure.invariantFactorDecomposition(
                 generators:       basis,
                 generatingMatrix: E1.kernelMatrix,
                 relationMatrix:   E2.imageMatrix,
                 transitionMatrix: E1.kernelTransitionMatrix)
+            )
+        }
+        
+        internal static func zero(_ H: _Homology<chainType, A, R>) -> Summand {
+            return Summand(H, DecomposedModuleStructure(generators: [], summands: [], transitionMatrix: ComputationalMatrix.zero(rows: 0, cols: 0)))
         }
         
         public var isTrivial: Bool {
