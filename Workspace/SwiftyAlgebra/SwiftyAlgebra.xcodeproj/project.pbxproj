@@ -16,7 +16,7 @@
 		1410C1191FB203E200CEE47D /* DiagonalEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1410C1181FB203E200CEE47D /* DiagonalEliminator.swift */; };
 		1410C11B1FB2040900CEE47D /* SmithEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1410C11A1FB2040900CEE47D /* SmithEliminator.swift */; };
 		141417311ECE984800B167CB /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141417301ECE984800B167CB /* Sequence.swift */; };
-		141C0CDF1F28232F00D9BDDE /* CWComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141C0CDE1F28232F00D9BDDE /* CWComplex.swift */; };
+		141C0CDF1F28232F00D9BDDE /* CellularComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141C0CDE1F28232F00D9BDDE /* CellularComplex.swift */; };
 		1420EAE61EEAC46300336620 /* MatrixEliminationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144AD28E1EC13D9E00E23890 /* MatrixEliminationTests.swift */; };
 		1424F4C61EB9976C0052581F /* SwiftyAlgebra.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1424F4BC1EB9976C0052581F /* SwiftyAlgebra.framework */; };
 		1424F4CB1EB9976C0052581F /* SwiftyAlgebraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4CA1EB9976C0052581F /* SwiftyAlgebraTests.swift */; };
@@ -50,7 +50,6 @@
 		145339C01EC7D67100F014F4 /* Ref.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145339BF1EC7D67100F014F4 /* Ref.swift */; };
 		145B10D51FB19B03004EC11E /* MatrixEliminationResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145B10D41FB19B03004EC11E /* MatrixEliminationResult.swift */; };
 		145F46011EEAF0CC0045CDB2 /* Z_2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F46001EEAF0CC0045CDB2 /* Z_2.swift */; };
-		146399741F191AD500A34CEE /* DualSimplicialComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146399731F191AD500A34CEE /* DualSimplicialComplex.swift */; };
 		14647D361FB5A47E0083E849 /* HomologyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14647D351FB5A47E0083E849 /* HomologyTests.swift */; };
 		146A296E1F1DA32400531AA2 /* HomologyClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146A296D1F1DA32400531AA2 /* HomologyClass.swift */; };
 		147D965D1F30759F00967992 /* ChainMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D965C1F30759F00967992 /* ChainMap.swift */; };
@@ -94,7 +93,7 @@
 		1410C11A1FB2040900CEE47D /* SmithEliminator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmithEliminator.swift; sourceTree = "<group>"; };
 		141417301ECE984800B167CB /* Sequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
 		1414D8551EE0F927001A1D42 /* Polynomials.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Polynomials.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		141C0CDE1F28232F00D9BDDE /* CWComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CWComplex.swift; sourceTree = "<group>"; };
+		141C0CDE1F28232F00D9BDDE /* CellularComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CellularComplex.swift; sourceTree = "<group>"; };
 		1424F4BC1EB9976C0052581F /* SwiftyAlgebra.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftyAlgebra.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1424F4BF1EB9976C0052581F /* SwiftyAlgebra.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftyAlgebra.h; sourceTree = "<group>"; };
 		1424F4C01EB9976C0052581F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -131,7 +130,6 @@
 		145339BF1EC7D67100F014F4 /* Ref.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Ref.swift; sourceTree = "<group>"; };
 		145B10D41FB19B03004EC11E /* MatrixEliminationResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixEliminationResult.swift; sourceTree = "<group>"; };
 		145F46001EEAF0CC0045CDB2 /* Z_2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Z_2.swift; sourceTree = "<group>"; };
-		146399731F191AD500A34CEE /* DualSimplicialComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DualSimplicialComplex.swift; sourceTree = "<group>"; };
 		14647D351FB5A47E0083E849 /* HomologyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomologyTests.swift; sourceTree = "<group>"; };
 		146A296D1F1DA32400531AA2 /* HomologyClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomologyClass.swift; sourceTree = "<group>"; };
 		147D965C1F30759F00967992 /* ChainMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChainMap.swift; sourceTree = "<group>"; };
@@ -371,8 +369,7 @@
 				DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */,
 				DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */,
 				142932021FAEB6FB003EE1BB /* SimplicialMap.swift */,
-				146399731F191AD500A34CEE /* DualSimplicialComplex.swift */,
-				141C0CDE1F28232F00D9BDDE /* CWComplex.swift */,
+				141C0CDE1F28232F00D9BDDE /* CellularComplex.swift */,
 				DD5D09951FB5AD0700E1BDFC /* TopologicalInvariants.swift */,
 			);
 			path = Geometry;
@@ -537,7 +534,6 @@
 				1410C1171FB203CC00CEE47D /* HermiteEliminator.swift in Sources */,
 				145B10D51FB19B03004EC11E /* MatrixEliminationResult.swift in Sources */,
 				14D261321EE44DB4006775E2 /* Structure.swift in Sources */,
-				146399741F191AD500A34CEE /* DualSimplicialComplex.swift in Sources */,
 				140E80A01ECDEA8E00B89719 /* combinations.swift in Sources */,
 				1424F5051EB997780052581F /* Map.swift in Sources */,
 				1424F5081EB997780052581F /* Real.swift in Sources */,
@@ -557,7 +553,7 @@
 				143735A71F30088B0042004F /* String.swift in Sources */,
 				1424F5111EB997780052581F /* optable.swift in Sources */,
 				1424F5021EB997780052581F /* Permutation.swift in Sources */,
-				141C0CDF1F28232F00D9BDDE /* CWComplex.swift in Sources */,
+				141C0CDF1F28232F00D9BDDE /* CellularComplex.swift in Sources */,
 				1424F4FC1EB997780052581F /* Group.swift in Sources */,
 				146A296E1F1DA32400531AA2 /* HomologyClass.swift in Sources */,
 				14A85FF31ED9D63E00A754EA /* GeometricComplex.swift in Sources */,
