@@ -56,7 +56,7 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
     }
     
     public static func ==(a: _Homology<chainType, A, R>, b: _Homology<chainType, A, R>) -> Bool {
-        return a.chainComplex == b.chainComplex
+        return (a.offset == b.offset) && (a.topDegree == b.topDegree) && (a.offset ... a.topDegree).forAll { i in a[i] == b[i] }
     }
     
     public var description: String {
@@ -115,6 +115,10 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
         
         public func torsion(_ i: Int) -> R {
             return structure.torsion(i)
+        }
+        
+        public var zero: _HomologyClass<chainType, A, R> {
+            return _HomologyClass.zero
         }
         
         public func cycleIsNullHomologous(_ z: Cycle) -> Bool {
