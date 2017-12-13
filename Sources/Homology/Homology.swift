@@ -122,6 +122,10 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             return _HomologyClass(structure.generator(i), homology)
         }
         
+        public var generators: [_HomologyClass<chainType, A, R>] {
+            return (0 ..< summands.count).map{ i in generator(i) }
+        }
+        
         public func torsion(_ i: Int) -> R {
             return structure.torsion(i)
         }
