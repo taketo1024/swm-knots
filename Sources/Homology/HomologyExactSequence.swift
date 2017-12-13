@@ -14,7 +14,6 @@ public typealias CohomologyExactSequence<A: FreeModuleBase, R: EuclideanRing> = 
 public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: Sequence, CustomStringConvertible {
     public typealias Object = _Homology<chainType, A, R>.Summand
     public typealias Arrow  = _HomologyMap<chainType, A, A, R>
-    public typealias Element = (Object, Arrow)
     
     internal let H:    [_Homology<chainType, A, R>]       // [0,      1,      2]
     internal let map : [_HomologyMap<chainType, A, A, R>] // [0 -> 1, 1 -> 2, 2 -> 0]
@@ -35,20 +34,32 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
         self.bottomDegree = Swift.min(chain0.offset,    chain1.offset,    chain2.offset)
     }
     
+    internal func seqIndex(_ i: Int, _ n: Int) -> Int {
+        return chainType.descending ? (topDegree - n) * 3 + i : (n - bottomDegree) * 3 + i
+    }
+    
+    internal func gridIndex(_ k: Int) -> (Int, Int) {
+        let (i, j) = (k >= 0) ? (k % 3, k / 3) : (k % 3 + 3, k / 3 - 1)
+        return (i, chainType.descending ? topDegree - j : bottomDegree + j)
+    }
+    
     public subscript(i: Int, n: Int) -> Object {
         assert((0 ..< 3).contains(i))
         return H[i][n]
     }
     
-    public func arrow(_ i: Int) -> Arrow {
-        assert((0 ..< 3).contains(i))
-        return map[i]
+    public subscript(k: Int) -> Object {
+        return object(k)
     }
     
-    public func makeIterator() -> IndexingIterator<[Element]> {
-        return degrees.flatMap { n in
-            (0 ..< 3).map{ i in (H[i][n], map[i]) }
-        }.makeIterator()
+    public func object(_ k: Int) -> Object {
+        let (i, n) = gridIndex(k)
+        return H[i][n]
+    }
+    
+    public func arrow(_ k: Int) -> Arrow {
+        let i = gridIndex(k).0
+        return map[i]
     }
     
     internal var degrees: [Int] {
@@ -57,18 +68,18 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
             : (bottomDegree ... topDegree).toArray()
     }
     
-    public func assertExactness(at i1: Int, _ n1: Int, debug: Bool = false) {
-        if H[i1][n1].isTrivial {
+    public func assertExactness(at i: Int, _ n: Int, debug: Bool = false) {
+        let k = seqIndex(i, n)
+        let H1 = object(k)
+        
+        if H1.isTrivial {
             return
         }
         
-        let (i0, n0) = (i1 > 0) ? (i1 - 1, n1) : (2, n1 + 1)
-        let (i2, n2) = (i1 < 2) ? (i1 + 1, n1) : (0, n1 - 1)
+        let (H0, H2) = (object(k - 1), object(k + 1))
+        let (f0, f1) = (arrow(k - 1), arrow(k))
         
-        let (H0, H1, H2) = (H[i0][n0], H[i1][n1], H[i2][n2])
-        let (f0, f1) =     (map[i0],   map[i1])
-        
-        debugLog(print: debug, "----------\nExactness at \(H[i1])[\((n1))]\n\(H0) -> * \(H1) * -> \(H2)\n----------")
+        debugLog(print: debug, "----------\nExactness at \(H[i])[\((n))]\n\(H0) -> \(H1) -> \(H2)\n----------")
         
         // Im ⊂ Ker
         for x in H0.generators {
@@ -92,6 +103,11 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
                 assertExactness(at: i, n, debug: debug)
             }
         }
+    }
+    
+    public func makeIterator() -> AnyIterator<Object> {
+        let lazy = (0 ..< (topDegree - bottomDegree + 1) * 3).lazy.map{ k in self.object(k) }
+        return AnyIterator(lazy.makeIterator())
     }
     
     public var description: String {
