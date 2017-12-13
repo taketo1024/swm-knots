@@ -50,7 +50,11 @@ public struct SimplicialMap: GeometricComplexMap {
     }
     
     public static func identity(from: SimplicialComplex) -> SimplicialMap {
-        return SimplicialMap(from: from) { v in v }
+        return SimplicialMap(from: from, to: from) { v in v }
+    }
+    
+    public static func inclusion(from: SimplicialComplex, to: SimplicialComplex) -> SimplicialMap {
+        return SimplicialMap(from: from, to: to) { v in v }
     }
     
     public static func diagonal(from: SimplicialComplex) -> SimplicialMap {
