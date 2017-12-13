@@ -24,7 +24,7 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
                 _ chain1: _ChainComplex<chainType, A, R>, _ map1 : _ChainMap<chainType, A, A, R>,
                 _ chain2: _ChainComplex<chainType, A, R>, _ delta: _ChainMap<chainType, A, A, R>) {
         
-        self.H    = [_Homology(chain0), _Homology(chain2), _Homology(chain2)]
+        self.H    = [_Homology(chain0), _Homology(chain1), _Homology(chain2)]
         self.map  = [_HomologyMap(from: H[0], to: H[1], inducedFrom: map0),
                      _HomologyMap(from: H[1], to: H[2], inducedFrom: map1),
                      _HomologyMap(from: H[2], to: H[0], inducedFrom: delta)]
