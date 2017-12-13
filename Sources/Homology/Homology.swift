@@ -134,6 +134,10 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             return _HomologyClass.zero
         }
         
+        public func factorize(_ z: Cycle) -> [R] {
+            return structure.factorize(z)
+        }
+        
         public func cycleIsNullHomologous(_ z: Cycle) -> Bool {
             return structure.elementIsZero(z)
         }

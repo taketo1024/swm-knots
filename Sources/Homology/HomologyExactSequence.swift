@@ -62,6 +62,20 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
         return map[i]
     }
     
+    public func matrix(_ k: Int) -> ComputationalMatrix<R> {
+        let from = object(k)
+        let to   = object(k + 1)
+        let map  = arrow(k)
+        
+        let comps = from.generators.enumerated().flatMap { (j, z) -> [MatrixComponent<R>] in
+            let w = map.appliedTo(z)
+            let vec = to.factorize(w.representative)
+            return vec.enumerated().map{ (i, a) in (i, j, a) }
+        }
+        
+        return ComputationalMatrix(rows: to.generators.count, cols: from.generators.count, components: comps)
+    }
+    
     internal var degrees: [Int] {
         return chainType.descending
             ? (bottomDegree ... topDegree).reversed().toArray()
