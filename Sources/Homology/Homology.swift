@@ -72,30 +72,28 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
     }
     
     private func generateSummand(_ i: Int) -> Summand {
-        return Summand(self, i)
+        let C = chainComplex
+        let basis = C.chainBasis(i)
+        let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
+        let (E1, E2) = (A1.eliminate(), A2.eliminate())
+        
+        let S = SimpleModuleStructure.invariantFactorDecomposition(
+            generators:       basis,
+            generatingMatrix: E1.kernelMatrix,
+            relationMatrix:   E2.imageMatrix,
+            transitionMatrix: E1.kernelTransitionMatrix
+        )
+
+        return Summand(self, S)
     }
     
     public class Summand: AlgebraicStructure {
         internal var homology: _Homology<chainType, A, R> // FIXME circular reference!
         internal let structure: SimpleModuleStructure<A, R>
         
-        private init(_ H: _Homology<chainType, A, R>, _ structure: SimpleModuleStructure<A, R>) {
+        internal init(_ H: _Homology<chainType, A, R>, _ structure: SimpleModuleStructure<A, R>) {
             self.homology = H
             self.structure = structure
-        }
-        
-        internal convenience init(_ H: _Homology<chainType, A, R>, _ i: Int) {
-            let C = H.chainComplex
-            let basis = C.chainBasis(i)
-            let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
-            let (E1, E2) = (A1.eliminate(), A2.eliminate())
-            
-            self.init(H, SimpleModuleStructure.invariantFactorDecomposition(
-                generators:       basis,
-                generatingMatrix: E1.kernelMatrix,
-                relationMatrix:   E2.imageMatrix,
-                transitionMatrix: E1.kernelTransitionMatrix)
-            )
         }
         
         internal static func zero(_ H: _Homology<chainType, A, R>) -> Summand {

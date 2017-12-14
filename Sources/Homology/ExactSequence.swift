@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct ExactSequence<A: FreeModuleBase, R: EuclideanRing> {
+public struct ExactSequence<A: FreeModuleBase, R: EuclideanRing>: Sequence {
     public typealias Object = SimpleModuleStructure<A, R>
     public typealias Arrow  = FreeModuleHom<A, A, R>
     
@@ -154,5 +154,18 @@ public struct ExactSequence<A: FreeModuleBase, R: EuclideanRing> {
         return nil
     }
     
-
+    public func makeIterator() -> AnyIterator<Object?> {
+        let lazy = (0 ..< length).lazy.map{ k in self[k] }
+        return AnyIterator(lazy.makeIterator())
+    }
+    
+    public var description: String {
+        return "ExactSequence(length: \(length))"
+    }
+    
+    public var detailDescription: String {
+        return "\(self.description)\n--------------------\n0\t-> "
+            + objects.map{ $0.flatMap{"\($0)"} ?? "?" }.joined(separator: "\t-> ")
+            + "\t-> 0"
+    }
 }

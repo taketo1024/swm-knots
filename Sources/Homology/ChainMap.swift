@@ -15,8 +15,8 @@ public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBa
     public typealias Domain   = FreeModule<A, R>
     public typealias Codomain = FreeModule<B, R>
     
-    public  let shift: Int
-    private let map: FreeModuleHom<A, B, R>
+    public let shift: Int
+    internal let map: FreeModuleHom<A, B, R>
     
     public init(shift: Int = 0, _ map: @escaping (A) -> [(B, R)]) {
         self.shift = shift

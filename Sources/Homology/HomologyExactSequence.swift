@@ -15,6 +15,8 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
     public typealias Object = _Homology<chainType, A, R>.Summand
     public typealias Arrow  = _HomologyMap<chainType, A, A, R>
     
+    public var sequence : ExactSequence<A, R>
+    
     internal let H:    [_Homology<chainType, A, R>]       // [0,      1,      2]
     internal let map : [_HomologyMap<chainType, A, A, R>] // [0 -> 1, 1 -> 2, 2 -> 0]
     
@@ -32,6 +34,17 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
         
         self.topDegree    = Swift.max(chain0.topDegree, chain1.topDegree, chain2.topDegree)
         self.bottomDegree = Swift.min(chain0.offset,    chain1.offset,    chain2.offset)
+        
+        self.sequence  = ExactSequence(count: 3 * (topDegree - bottomDegree + 1))
+        
+        // fill arrows
+        for i in 0 ..< sequence.length - 1 {
+            sequence.arrows[i] = map[i % 3].chainMap.map
+        }
+    }
+    
+    public var length: Int {
+        return (topDegree - bottomDegree + 1) * 3
     }
     
     internal func seqIndex(_ i: Int, _ n: Int) -> Int {
@@ -43,37 +56,15 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
         return (i, chainType.descending ? topDegree - j : bottomDegree + j)
     }
     
-    public subscript(i: Int, n: Int) -> Object {
+    public subscript(i: Int, n: Int) -> Object? {
         assert((0 ..< 3).contains(i))
-        return H[i][n]
+        let k = seqIndex(i, n)
+        return sequence[k].map{ Object(H[i], $0) } ?? nil
     }
     
-    public subscript(k: Int) -> Object {
-        return object(k)
-    }
-    
-    public func object(_ k: Int) -> Object {
-        let (i, n) = gridIndex(k)
-        return H[i][n]
-    }
-    
-    public func arrow(_ k: Int) -> Arrow {
+    public subscript(k: Int) -> Object? {
         let i = gridIndex(k).0
-        return map[i]
-    }
-    
-    public func matrix(_ k: Int) -> ComputationalMatrix<R> {
-        let from = object(k)
-        let to   = object(k + 1)
-        let map  = arrow(k)
-        
-        let comps = from.generators.enumerated().flatMap { (j, z) -> [MatrixComponent<R>] in
-            let w = map.appliedTo(z)
-            let vec = to.factorize(w.representative)
-            return vec.enumerated().map{ (i, a) in (i, j, a) }
-        }
-        
-        return ComputationalMatrix(rows: to.generators.count, cols: from.generators.count, components: comps)
+        return sequence[k].map{ (s: SimpleModuleStructure<A, R>) in _Homology<chainType, A, R>.Summand(H[i], s) } ?? nil
     }
     
     internal var degrees: [Int] {
@@ -82,89 +73,39 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
             : (bottomDegree ... topDegree).toArray()
     }
     
-    public func solve(_ i: Int) -> _Homology<chainType, A, R> {
-        let H = self.H[i]
-        for n in bottomDegree ..< topDegree {
-            if let h = solve(i, n) {
-                print("solved: \(H)[\(n)]: ", h.detailDescription)
-            }
-        }
-        return H
-    }
-
-    public func solve(_ i: Int, _ n: Int) -> Object? {
-        
-        //     f0      f1        f2      f3
-        // h0 ---> h1 ---> [h2] ---> h3 ---> h4  (exact)
-        //
-        // ==>
-        //               i         f2
-        // 0 -> Ker(f2) >--> [h2] -->> Im(f2) -> 0  (exact)
-        //       = Im(f1)               = Ker(f3)
-        //      ~= Coker(f0)
-        
+    public mutating func fill(column i: Int, degree n: Int) {
+        assert((0 ..< 3).contains(i))
         let k = seqIndex(i, n)
-        let (h0, h1, h3, h4) = (object(k - 2), object(k - 1), object(k + 1), object(k + 2))
-        let (f0, f1, f2, f3) = (arrow(k - 2), arrow(k - 1), arrow(k), arrow(k + 1))
-        let H2 = H[i]
-
-        // trivial cases
-        
-        // h2 = 0
-        if h1.isTrivial && h3.isTrivial {
-            return Object.zero(H2)
-        }
-        
-        // h1 ~= h2, f1: isom
-        if h0.isTrivial && h3.isTrivial {
-        }
-        
-        // h2 ~= h3, f2: isom
-        if h1.isTrivial && h4.isTrivial {
-        }
-        
-        return nil
+        sequence[k] = H[i][n].structure
     }
     
-    public func assertExactness(at i: Int, _ n: Int, debug: Bool = false) {
+    public mutating func fill(column i: Int) {
+        assert((0 ..< 3).contains(i))
+        for n in bottomDegree ... topDegree {
+            fill(column: i, degree: n)
+        }
+    }
+    
+    public mutating func solve(column i: Int, degree n: Int) -> Object? {
+        sequence.solve(seqIndex(i, n))
+        return self[i, n]
+    }
+    
+    public mutating func solve(column i: Int) -> [Object?] {
+        return (bottomDegree ... topDegree).map{ n in solve(column: i, degree: n) }
+    }
+    
+    public func assertExactness(column i: Int, degree n: Int, debug: Bool = false) {
         let k = seqIndex(i, n)
-        let H1 = object(k)
-        
-        if H1.isTrivial {
-            return
-        }
-        
-        let (H0, H2) = (object(k - 1), object(k + 1))
-        let (f0, f1) = (arrow(k - 1), arrow(k))
-        
-        debugLog(print: debug, "----------\nExactness at \(H[i])[\((n))]\n\(H0) -> \(H1) -> \(H2)\n----------")
-        
-        // Im ⊂ Ker
-        for x in H0.generators {
-            let y = f0.appliedTo(x)
-            let z = f1.appliedTo(y)
-            
-            debugLog(print: debug, "\t\(x) ->\t\(y) ->\t\(z)")
-            
-            assert(z == H2.zero)
-        }
-        
-        // Im ⊃ Ker
-        // TODO
-
-        debugLog(print: debug, "\n")
+        sequence.assertExactness(at: k, debug: debug)
     }
     
     public func assertExactness(debug: Bool = false) {
-        for n in degrees {
-            for i in (0 ..< 3) {
-                assertExactness(at: i, n, debug: debug)
-            }
-        }
+        sequence.assertExactness(debug: debug)
     }
     
-    public func makeIterator() -> AnyIterator<Object> {
-        let lazy = (0 ..< (topDegree - bottomDegree + 1) * 3).lazy.map{ k in self.object(k) }
+    public func makeIterator() -> AnyIterator<Object?> {
+        let lazy = (0 ..< length).lazy.map{ k in self[k] }
         return AnyIterator(lazy.makeIterator())
     }
     
@@ -173,8 +114,13 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
     }
     
     public var detailDescription: String {
-        return "\(self.description)\n--------------------\n" + degrees.map { n in
-            "\(n): \t\(H[0][n].description) -> \t\(H[1][n].description) -> \t\(H[2][n].description) -> "
-        }.joined(separator: "\n") + "\t0"
+        func s(_ i: Int, _ n: Int) -> String {
+            return self[i, n].map{ "\($0)" } ?? "?"
+        }
+        return "\(self.description)\n--------------------\n"
+            + degrees.map { n -> String in
+                "\(n): \t" + (0 ..< 3).map{ i in self[i, n].map{ "\($0)" } ?? "?" }.joined(separator: "\t-> ")
+                }.joined(separator: "\t->\n")
+            + "\t-> 0"
     }
 }
