@@ -86,11 +86,13 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
         }
     }
     
+    @discardableResult
     public mutating func solve(column i: Int, degree n: Int) -> Object? {
         sequence.solve(seqIndex(i, n))
         return self[i, n]
     }
     
+    @discardableResult
     public mutating func solve(column i: Int) -> [Object?] {
         return (bottomDegree ... topDegree).map{ n in solve(column: i, degree: n) }
     }
@@ -110,7 +112,7 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
     }
     
     public var description: String {
-        return "\(H[0]) -> \(H[1]) -> \(H[2])"
+        return (0 ..< 3).map{"\(H[$0])"}.joined(separator: " -> ")
     }
     
     public var detailDescription: String {

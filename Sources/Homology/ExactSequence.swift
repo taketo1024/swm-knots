@@ -35,6 +35,11 @@ public struct ExactSequence<A: FreeModuleBase, R: EuclideanRing>: Sequence {
         } set {
             if (0 ..< length).contains(i) {
                 objects[i] = newValue
+                
+                if let o = newValue, o.isTrivial {
+                    arrows[i - 1] = Arrow.zero
+                    arrows[i]     = Arrow.zero
+                }
             }
         }
     }
@@ -118,6 +123,58 @@ public struct ExactSequence<A: FreeModuleBase, R: EuclideanRing>: Sequence {
     
     @discardableResult
     public mutating func solve(_ i: Int) -> Object? {
+        if let o = self[i] {
+            return o
+        }
+        
+        if let o = _solve(i) {
+            self[i] = o
+            return o
+        } else {
+            return nil
+        }
+    }
+    
+    private func _solve(_ i2: Int) -> Object? {
+        
+        // Aim: [M2]
+        //
+        //     f0      f1        f2      f3
+        // M0 ---> M1 ---> [M2] ---> M3 ---> M4  (exact)
+        //
+        
+        guard
+            let M1 = self[i2 - 1],
+            let M3 = self[i2 + 1]
+            else {
+                return nil
+        }
+        
+        // Case 1.
+        // 0 -> [M2] -> 0  ==>  M2 = 0
+        
+        if M1.isTrivial && M3.isTrivial {
+            return Object.zeroModule
+        }
+        
+        // Case 2.
+        // 0 -> M1 -> [M2] -> 0  ==>  M1 ~= M2
+        
+        if let M0 = self[i2 - 2], M0.isTrivial && M3.isTrivial {
+            // TODO
+            return nil
+        }
+        
+        // Case 3.
+        // 0 -> [M2] -> M3 -> 0  ==>  M2 ~= M3
+        
+        if let M4 = self[i2 + 2], M1.isTrivial && M4.isTrivial {
+            // TODO
+            return nil
+        }
+        
+        // General Case.
+        //
         //     f0      f1        f2      f3
         // M0 ---> M1 ---> [M2] ---> M3 ---> M4  (exact)
         //
@@ -127,31 +184,13 @@ public struct ExactSequence<A: FreeModuleBase, R: EuclideanRing>: Sequence {
         //       = Im(f1)               = Ker(f3)
         //      ~= Coker(f0)
         
-        guard
-            let M1 = self[i - 1],
-            let M3 = self[i + 1]
-            else {
-                return nil
-        }
-        
-        // Case 1.
-        // 0 -> M2 -> 0  ==>  M2 = 0
-        
-        if M1.isTrivial && M3.isTrivial {
-            let M2 = Object.zeroModule
-            self[i] = M2
-            return M2
-        }
-        
-        // Case 2.
-        // 0 -> M1 -> M2 -> 0  ==>  M1 ~= M2
-        
-        if let M0 = self[i - 2], M0.isTrivial && M3.isTrivial {
-            // TODO
-            return nil
-        }
-
+        // TODO
         return nil
+    }
+    
+    @discardableResult
+    public mutating func solveAll() -> [Object?] {
+        return (0 ..< length).map{ i in solve(i) }
     }
     
     public func makeIterator() -> AnyIterator<Object?> {
