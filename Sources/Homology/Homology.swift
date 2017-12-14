@@ -77,9 +77,9 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
     
     public class Summand: AlgebraicStructure {
         internal var homology: _Homology<chainType, A, R> // FIXME circular reference!
-        internal let structure: DecomposedModuleStructure<A, R>
+        internal let structure: SimpleModuleStructure<A, R>
         
-        private init(_ H: _Homology<chainType, A, R>, _ structure: DecomposedModuleStructure<A, R>) {
+        private init(_ H: _Homology<chainType, A, R>, _ structure: SimpleModuleStructure<A, R>) {
             self.homology = H
             self.structure = structure
         }
@@ -90,7 +90,7 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
             let (E1, E2) = (A1.eliminate(), A2.eliminate())
             
-            self.init(H, ModuleStructure.invariantFactorDecomposition(
+            self.init(H, SimpleModuleStructure.invariantFactorDecomposition(
                 generators:       basis,
                 generatingMatrix: E1.kernelMatrix,
                 relationMatrix:   E2.imageMatrix,
@@ -99,7 +99,7 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
         }
         
         internal static func zero(_ H: _Homology<chainType, A, R>) -> Summand {
-            return Summand(H, DecomposedModuleStructure.zeroModule)
+            return Summand(H, SimpleModuleStructure.zeroModule)
         }
         
         public var isTrivial: Bool {
@@ -114,7 +114,7 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             return structure.rank
         }
         
-        public var summands: [DecomposedModuleStructure<A, R>.Summand] {
+        public var summands: [SimpleModuleStructure<A, R>.Summand] {
             return structure.summands
         }
         

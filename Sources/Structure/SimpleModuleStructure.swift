@@ -11,10 +11,13 @@ import Foundation
 // A decomposed form of a freely & finitely presented module,
 // i.e. a module with finite generators and a finite & free presentation.
 //
+//           B        A
+// 0 -> R^m ---> R^n ---> M -> 0
+//
 // See: https://en.wikipedia.org/wiki/Free_presentation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
-public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing>: ModuleStructure<R> {
+public final class SimpleModuleStructure<A: FreeModuleBase, R: EuclideanRing>: ModuleStructure<R> {
     public  let summands: [Summand]
     private let originalGenerators: [A]
     private let transitionMatrix: ComputationalMatrix<R> // oldBasis -> newBasis
@@ -30,8 +33,8 @@ public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing
         return summands[i]
     }
     
-    public static var zeroModule: DecomposedModuleStructure<A, R> {
-        return DecomposedModuleStructure([], originalGenerators: [], transitionMatrix: ComputationalMatrix.zero(rows: 0, cols: 0))
+    public static var zeroModule: SimpleModuleStructure<A, R> {
+        return SimpleModuleStructure([], originalGenerators: [], transitionMatrix: ComputationalMatrix.zero(rows: 0, cols: 0))
     }
     
     public var isTrivial: Bool {
@@ -75,7 +78,7 @@ public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing
         return elementIsZero(z1 - z2)
     }
     
-    public static func ==(a: DecomposedModuleStructure<A, R>, b: DecomposedModuleStructure<A, R>) -> Bool {
+    public static func ==(a: SimpleModuleStructure<A, R>, b: SimpleModuleStructure<A, R>) -> Bool {
         return a.summands == b.summands
     }
     
@@ -110,5 +113,59 @@ public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing
             case false: return "\(R.symbol)/\(divisor)"
             }
         }
+    }
+}
+
+public extension SimpleModuleStructure {
+    public static func invariantFactorDecomposition(generators: [A], generatingMatrix A: ComputationalMatrix<R>, relationMatrix B: ComputationalMatrix<R>, transitionMatrix T: ComputationalMatrix<R>) -> SimpleModuleStructure<A, R> {
+        
+        assert(A.rows == B.rows)
+        assert(A.rows >= A.cols)  // n ≧ k
+        assert(A.cols >= B.cols)  // k ≧ l
+        
+        let (k, l) = (A.cols, B.cols)
+        
+        // R ∈ M(k, l) : Relation from A to B,  B = A * R.
+        //
+        // R = T * B, since
+        //     T * A = I_k,
+        //     T * B = T * (A * R) = I_k * R = R.
+        //
+        // R gives the structure of the quotient A / B.
+        
+        let R1 = T * B
+        
+        // Retake bases of Z and B to obtain the decomposition of H.
+        //
+        //   P' * R * Q' = [D'; O].
+        //   => (B * Q') = (Z * R) * Q' = (Z * P'^-1) * [D; O]
+        //
+        // D gives the relation between the new bases.
+        //
+        // eg)     D = [1,   1,   2,   0]
+        //     A / B =  0  + 0 + Z/2 + Z
+        //
+        // The transition matrix to A' = (A * P'^-1) is given by
+        //
+        //   T' := P' * T, since
+        //   T' * A' = (P' * T) * (Z * P'^-1) = P' * I_k * P'^-1 = I_k.
+        //
+        
+        let E  = R1.eliminate(form: .Smith)
+        
+        let divisors = (E.diagonal + Array(repeating: R.zero, count: k - l)).filter{ $0 != R.identity }
+        let s = divisors.count
+        
+        let A2 = A * E.leftInverse.submatrix(colRange: (k - s) ..< k)
+        let T2 = E.left.submatrix(rowRange: (k - s) ..< k) * T
+        
+        // create summands
+        
+        let newGenerators = A2.generateElements(from: generators)
+        let summands = zip(newGenerators, divisors).map { (z, a) in
+            return SimpleModuleStructure<A, R>.Summand(z, a)
+        }
+        
+        return SimpleModuleStructure(summands, originalGenerators: generators, transitionMatrix: T2)
     }
 }
