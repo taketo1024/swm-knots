@@ -14,6 +14,9 @@ import Foundation
 //           B        A
 // 0 -> R^m ---> R^n ---> M -> 0
 //
+// ==> M ~= R^r + (R/d_0) + ... + (R/d_k),
+//     r: rank, k: torsion
+//
 // See: https://en.wikipedia.org/wiki/Free_presentation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
@@ -90,6 +93,11 @@ public final class SimpleModuleStructure<A: FreeModuleBase, R: EuclideanRing>: M
         return "\(self),\t\(generators)"
     }
     
+    public var asAbstract: AbstractSimpleModuleStructure<R> {
+        let torsions = summands.filter{!$0.isFree}.map{$0.divisor}
+        return AbstractSimpleModuleStructure(rank: rank, torsions: torsions)
+    }
+    
     public final class Summand: AlgebraicStructure {
         public let generator: FreeModule<A, R>
         public let divisor: R
@@ -97,6 +105,10 @@ public final class SimpleModuleStructure<A: FreeModuleBase, R: EuclideanRing>: M
         internal init(_ generator: FreeModule<A, R>, _ divisor: R) {
             self.generator = generator
             self.divisor = divisor
+        }
+        
+        internal convenience init(_ a: A, _ divisor: R) {
+            self.init(FreeModule(a), divisor)
         }
         
         public var isFree: Bool {
@@ -169,3 +181,21 @@ public extension SimpleModuleStructure {
         return SimpleModuleStructure(summands, originalGenerators: generators, transitionMatrix: T2)
     }
 }
+
+extension Int: FreeModuleBase {}
+
+public typealias AbstractSimpleModuleStructure<R: EuclideanRing> = SimpleModuleStructure<Int, R>
+
+public extension AbstractSimpleModuleStructure where A == Int {
+    public convenience init(rank r: Int, torsions: [R]) {
+        let n = r + torsions.count
+        let summands = (0 ..< r).map{ i in Summand(i, R.zero) }
+            + torsions.enumerated().map{ (i, d) in Summand(FreeModule(i + r), d) }
+        
+        let generators = (0 ..< n).toArray()
+        let matrix = ComputationalMatrix<R>.identity(n)
+        
+        self.init(summands, originalGenerators: generators, transitionMatrix: matrix)
+    }
+}
+
