@@ -48,7 +48,7 @@ public extension GeometricComplex {
     
     public func boundaryMap<R: Ring>(_ i: Int, _ type: R.Type) -> FreeModuleHom<Cell, Cell, R> {
         return FreeModuleHom { s in
-            (s.dim == i) ? s.boundary(R.self).map{ ($0, $1) } : []
+            (s.dim == i) ? s.boundary(R.self) : FreeModule.zero
         }
     }
     
@@ -115,7 +115,7 @@ public extension CochainComplex where chainType == Ascending {
             let map = BoundaryMap { d in
                 let s = d.base
                 let row = K.partialBoundaryMatrix(to, [s], R.self).multiply( R(intValue: (-1).pow(i + 1) ) )
-                return zip(to.map{ Dual($0) }, row.generateGrid()).toArray()
+                return FreeModule( zip(to.map{ Dual($0) }, row.generateGrid()) )
             }
             
             let matrix = K.partialBoundaryMatrix(to, from, R.self)
@@ -135,7 +135,7 @@ public extension CochainComplex where chainType == Ascending {
             let map = BoundaryMap { d in
                 let s = d.base
                 let row = K.partialBoundaryMatrix(to, [s], R.self).multiply( R(intValue: (-1).pow(i + 1) ) )
-                return zip(to.map{ Dual($0) }, row.generateGrid()).toArray()
+                return FreeModule( zip(to.map{ Dual($0) }, row.generateGrid()) )
             }
             
             let matrix = K.partialBoundaryMatrix(to, from, R.self)

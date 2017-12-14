@@ -18,12 +18,12 @@ public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBa
     public let shift: Int
     internal let map: FreeModuleHom<A, B, R>
     
-    public init(shift: Int = 0, _ map: @escaping (A) -> [(B, R)]) {
+    public init(shift: Int = 0, _ map: @escaping (A) -> Codomain) {
         self.shift = shift
         self.map = FreeModuleHom(map)
     }
     
-    public init(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, shift: Int = 0, _ f: @escaping (A) -> [(B, R)]) {
+    public init(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, shift: Int = 0, _ f: @escaping (A) -> Codomain) {
         self.init(shift: shift, f)
     }
     

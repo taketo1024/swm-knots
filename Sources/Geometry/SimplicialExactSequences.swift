@@ -16,10 +16,10 @@ public extension HomologyExactSequence where chainType == Descending, A == Simpl
         
         let i = ChainMap(SimplicialMap.inclusion(from: A, to: X), R.self)
         let j = ChainMap(from: CX, to: CXA) { s in
-            CXA.chainBasis(s.degree).contains(s) ? [(s, R.identity)] : []
+            CXA.chainBasis(s.degree).contains(s) ? SimplicialChain(s) : SimplicialChain.zero
         }
         let d = ChainMap(from: CXA, to: CA, shift: -1) { s in
-            s.boundary(R.self).map{ ($0.0, $0.1) }
+            s.boundary(R.self)
         }
         
         self.init(CA, i, CX, j, CXA, d)
