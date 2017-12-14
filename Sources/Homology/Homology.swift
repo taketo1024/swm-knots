@@ -99,7 +99,7 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
         }
         
         internal static func zero(_ H: _Homology<chainType, A, R>) -> Summand {
-            return Summand(H, DecomposedModuleStructure(generators: [], summands: [], transitionMatrix: ComputationalMatrix.zero(rows: 0, cols: 0)))
+            return Summand(H, DecomposedModuleStructure.zeroModule)
         }
         
         public var isTrivial: Bool {

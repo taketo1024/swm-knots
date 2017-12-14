@@ -8,26 +8,30 @@
 
 import Foundation
 
-// A decomposed form of a freely & finitely presented module over a PID,
+// A decomposed form of a freely & finitely presented module,
 // i.e. a module with finite generators and a finite & free presentation.
 //
 // See: https://en.wikipedia.org/wiki/Free_presentation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
-public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing>: ModuleStructure<R>, Sequence {
-    private let generators: [A]
-    public let summands: [Summand]
-    public let transitionMatrix: ComputationalMatrix<R> // oldBasis -> newBasis
+public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing>: ModuleStructure<R> {
+    public  let summands: [Summand]
+    private let originalGenerators: [A]
+    private let transitionMatrix: ComputationalMatrix<R> // oldBasis -> newBasis
     
-    public init(generators: [A], summands: [Summand], transitionMatrix: ComputationalMatrix<R>) {
-        self.generators = generators
+    public init(_ summands: [Summand], originalGenerators: [A], transitionMatrix: ComputationalMatrix<R>) {
         self.summands = summands
+        self.originalGenerators = originalGenerators
         self.transitionMatrix = transitionMatrix
         super.init()
     }
     
     public subscript(i: Int) -> Summand {
         return summands[i]
+    }
+    
+    public static var zeroModule: DecomposedModuleStructure<A, R> {
+        return DecomposedModuleStructure([], originalGenerators: [], transitionMatrix: ComputationalMatrix.zero(rows: 0, cols: 0))
     }
     
     public var isTrivial: Bool {
@@ -39,7 +43,11 @@ public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing
     }
     
     public var rank: Int {
-        return self.filter{ $0.isFree }.count
+        return summands.filter{ $0.isFree }.count
+    }
+    
+    public var generators: [FreeModule<A, R>] {
+        return summands.map{ $0.generator }
     }
     
     public func generator(_ i: Int) -> FreeModule<A, R> {
@@ -51,8 +59,8 @@ public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
-        let n = generators.count
-        let v = transitionMatrix * ComputationalMatrix(rows: n, cols: 1, grid: z.factorize(by: generators))
+        let n = originalGenerators.count
+        let v = transitionMatrix * ComputationalMatrix(rows: n, cols: 1, grid: z.factorize(by: originalGenerators))
 
         return summands.enumerated().map { (i, s) in
             return s.isFree ? v[i, 0] : v[i, 0] % s.divisor
@@ -67,10 +75,6 @@ public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing
         return elementIsZero(z1 - z2)
     }
     
-    public func makeIterator() -> IndexingIterator<[Summand]> {
-        return summands.makeIterator()
-    }
-    
     public static func ==(a: DecomposedModuleStructure<A, R>, b: DecomposedModuleStructure<A, R>) -> Bool {
         return a.summands == b.summands
     }
@@ -80,7 +84,7 @@ public final class DecomposedModuleStructure<A: FreeModuleBase, R: EuclideanRing
     }
     
     public var detailDescription: String {
-        return "\(self),\t\(self.map{ $0.generator })"
+        return "\(self),\t\(generators)"
     }
     
     public final class Summand: AlgebraicStructure {

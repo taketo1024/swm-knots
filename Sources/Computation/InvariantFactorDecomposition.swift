@@ -61,6 +61,6 @@ public extension ModuleStructure where R: EuclideanRing {
             return DecomposedModuleStructure<A, R>.Summand(z, a)
         }
 
-        return DecomposedModuleStructure(generators: generators, summands: summands, transitionMatrix: T2)
+        return DecomposedModuleStructure(summands, originalGenerators: generators, transitionMatrix: T2)
     }
 }
