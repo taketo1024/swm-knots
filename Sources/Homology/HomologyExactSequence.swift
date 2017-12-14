@@ -82,6 +82,50 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
             : (bottomDegree ... topDegree).toArray()
     }
     
+    public func solve(_ i: Int) -> _Homology<chainType, A, R> {
+        let H = self.H[i]
+        for n in bottomDegree ..< topDegree {
+            if let h = solve(i, n) {
+                print("solved: \(H)[\(n)]: ", h.detailDescription)
+            }
+        }
+        return H
+    }
+
+    public func solve(_ i: Int, _ n: Int) -> Object? {
+        
+        //     f0      f1        f2      f3
+        // h0 ---> h1 ---> [h2] ---> h3 ---> h4  (exact)
+        //
+        // ==>
+        //               i         f2
+        // 0 -> Ker(f2) >--> [h2] -->> Im(f2) -> 0  (exact)
+        //       = Im(f1)               = Ker(f3)
+        //      ~= Coker(f0)
+        
+        let k = seqIndex(i, n)
+        let (h0, h1, h3, h4) = (object(k - 2), object(k - 1), object(k + 1), object(k + 2))
+        let (f0, f1, f2, f3) = (arrow(k - 2), arrow(k - 1), arrow(k), arrow(k + 1))
+        let H2 = H[i]
+
+        // trivial cases
+        
+        // h2 = 0
+        if h1.isTrivial && h3.isTrivial {
+            return Object.zero(H2)
+        }
+        
+        // h1 ~= h2, f1: isom
+        if h0.isTrivial && h3.isTrivial {
+        }
+        
+        // h2 ~= h3, f2: isom
+        if h1.isTrivial && h4.isTrivial {
+        }
+        
+        return nil
+    }
+    
     public func assertExactness(at i: Int, _ n: Int, debug: Bool = false) {
         let k = seqIndex(i, n)
         let H1 = object(k)
