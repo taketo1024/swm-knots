@@ -77,6 +77,26 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         return ComputationalMatrix(rows: to.generators.count, cols: from.generators.count, components: comps)
     }
     
+    internal func isInjective(_ i: Int) -> Bool {
+        if  let M0 = self[i], M0.isFree,
+            let M1 = self[i + 1], M1.isFree,
+            let A = matrix(i), A.eliminate().isInjective {
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    internal func isSurjective(_ i: Int) -> Bool {
+        if  let M0 = self[i], M0.isFree,
+            let M1 = self[i + 1], M1.isFree,
+            let A = matrix(i), A.eliminate().isSurjective {
+            return true
+        } else {
+            return false
+        }
+    }
+    
     public func assertExactness(at i1: Int, debug d: Bool = false) {
         
         //     f0        f1
@@ -126,7 +146,7 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
             return o
         }
         
-        if let o = _solve(i) {
+        if let o = _solve(i, debug: d) {
             self[i] = o
             return o
         } else {
@@ -134,7 +154,7 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         }
     }
     
-    private func _solve(_ i2: Int, debug d: Bool = false) -> Object? {
+    private mutating func _solve(_ i2: Int, debug d: Bool = false) -> Object? {
         
         // Aim: [M2]
         //
@@ -142,32 +162,56 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         // M0 ---> M1 ---> [M2] ---> M3 ---> M4  (exact)
         //
         
+        let (i0, i1, i3, i4) = (i2 - 2, i2 - 1, i2 + 1, i2 + 2)
+        
         guard
-            let M1 = self[i2 - 1],
-            let M3 = self[i2 + 1]
+            let M1 = self[i1],
+            let M3 = self[i3]
             else {
+                log("\(i2): adjacent objects are unknown.", d)
                 return nil
         }
         
         // Case 1.
         // 0 -> [M2] -> 0  ==>  M2 = 0
         
-        if M1.isTrivial && M3.isTrivial {
+        if M1.isTrivial, M3.isTrivial {
+            log("\(i2): trivial.", d)
             return Object.zeroModule
         }
         
         // Case 2.
         // 0 -> M1 -> [M2] -> 0  ==>  M1 ~= M2
         
-        if let M0 = self[i2 - 2], M0.isTrivial && M3.isTrivial {
+        if let M0 = self[i0], M0.isTrivial, M3.isTrivial {
+            log("\(i2): isom to \(i1).", d)
+            arrows[i1] = Arrow.identity
             return M1
         }
         
         // Case 3.
         // 0 -> [M2] -> M3 -> 0  ==>  M2 ~= M3
         
-        if let M4 = self[i2 + 2], M1.isTrivial && M4.isTrivial {
+        if let M4 = self[i4], M1.isTrivial, M4.isTrivial {
+            log("\(i2): isom to \(i3).", d)
+            arrows[i2] = Arrow.identity
             return M3
+        }
+        
+        // Case 4.
+        // M1 = 0, M3 >-> M4  ==>  f2 = 0, M2 = Ker(f2) = Im(f1) = 0
+        
+        if M1.isTrivial, isInjective(i3) {
+            log("\(i2): \(i1) = 0, \(i3) -> \(i4) is injective.", d)
+            return Object.zeroModule
+        }
+        
+        // Case 5.
+        // M0 ->> M1, M3 = 0  ==> 0 = Coker(f0) ~= Im(f1) = Ker(f2), M2 = 0
+        
+        if M3.isTrivial, isSurjective(i0) {
+            log("\(i2): \(i0) -> \(i1) is surjective, \(i3) = 0.", d)
+            return Object.zeroModule
         }
         
         // General Case.
@@ -181,7 +225,18 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         //       = Im(f1)               = Ker(f3)
         //      ~= Coker(f0)
         
+        guard
+            let M0 = self[i0], M0.isFree, M1.isFree,
+            let M4 = self[i4], M3.isFree, M4.isFree,
+            let A0 = matrix(i0),
+            let A3 = matrix(i3)
+            else {
+                log("\(i2): unsolvable.", d)
+                return nil
+        }
+        
         // TODO
+        log("\(i2): unsolvable.", d)
         return nil
     }
     

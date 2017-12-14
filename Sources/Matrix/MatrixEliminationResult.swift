@@ -97,6 +97,18 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     public var kernelTransitionMatrix: ComputationalMatrix<R> {
         fatalError("not available.")
     }
+    
+    public var isInjective: Bool {
+        return result.cols <= result.rows && rank == result.cols
+    }
+    
+    public var isSurjective: Bool {
+        return result.cols >= result.rows && rank == result.rows
+    }
+    
+    public var isBijective: Bool {
+        return isInjective && isSurjective
+    }
 }
 
 // A Wrapper struct for Matrix<n, m, R> types.

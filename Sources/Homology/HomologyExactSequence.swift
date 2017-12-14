@@ -89,12 +89,10 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
         sequence[k] = H[i1][n1].structure.asAbstract
         
         if sequence[k - 1] != nil && sequence.arrows[k - 1] == nil {
-            print("\theh")
             sequence.arrows[k - 1] = arrow(k - 1)
         }
         
         if sequence[k + 1] != nil && sequence.arrows[k] == nil {
-            print("\thuh")
             sequence.arrows[k] = arrow(k)
         }
     }
