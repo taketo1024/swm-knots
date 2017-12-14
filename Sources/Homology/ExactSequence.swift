@@ -8,9 +8,9 @@
 
 import Foundation
 
-public struct ExactSequence<A: FreeModuleBase, R: EuclideanRing>: Sequence {
-    public typealias Object = SimpleModuleStructure<A, R>
-    public typealias Arrow  = FreeModuleHom<A, A, R>
+public struct ExactSequence<R: EuclideanRing>: Sequence {
+    public typealias Object = AbstractSimpleModuleStructure<R>
+    public typealias Arrow  = FreeModuleHom<Int, Int, R>
     
     internal var objects: [Object?]
     public   var arrows : Arrows
@@ -77,52 +77,51 @@ public struct ExactSequence<A: FreeModuleBase, R: EuclideanRing>: Sequence {
         return ComputationalMatrix(rows: to.generators.count, cols: from.generators.count, components: comps)
     }
     
-    public func assertExactness(at i: Int, debug: Bool = false) {
+    public func assertExactness(at i1: Int, debug d: Bool = false) {
         
         //     f0        f1
         // M0 ---> [M1] ---> M2
-
+        
+        let (i0, i2) = (i1 - 1, i1 + 1)
+        
         guard
-            let M0 = self[i - 1],
-            let M1 = self[i],
-            let M2 = self[i + 1],
-            let f0 = arrows[i],
-            let f1 = arrows[i + 1]
+            let M0 = self[i0],
+            let M1 = self[i1],
+            let M2 = self[i2],
+            let f0 = arrows[i0],
+            let f1 = arrows[i1]
             else {
-                debugLog("\(i): Assertion passed.\n")
+                log("\(i1): skipped.", d)
                 return
         }
         
+        log("\(i1): \(M0) -> [\(M1)] -> \(M2)", d)
+        
         if M1.isTrivial {
-            debugLog("\(i): Trivial.\n")
             return
         }
-        
-        debugLog(print: debug, "\(i): \(M0) -> \(M1) -> \(M2)")
         
         // Im ⊂ Ker
         for x in M0.generators {
             let y = f0.appliedTo(x)
             let z = f1.appliedTo(y)
             
-            debugLog(print: debug, "\t\(x) ->\t\(y) ->\t\(z)")
+            log("\t\(x) ->\t\(y) ->\t\(z)", d)
             assert(M2.elementIsZero(z))
         }
         
         // Im ⊃ Ker
         // TODO
-        
-        debugLog(print: debug, "\n")
     }
     
     public func assertExactness(debug: Bool = false) {
         for i in 0 ..< length {
-            assertExactness(at: i)
+            assertExactness(at: i, debug: debug)
         }
     }
     
     @discardableResult
-    public mutating func solve(_ i: Int) -> Object? {
+    public mutating func solve(_ i: Int, debug d: Bool = false) -> Object? {
         if let o = self[i] {
             return o
         }
@@ -135,7 +134,7 @@ public struct ExactSequence<A: FreeModuleBase, R: EuclideanRing>: Sequence {
         }
     }
     
-    private func _solve(_ i2: Int) -> Object? {
+    private func _solve(_ i2: Int, debug d: Bool = false) -> Object? {
         
         // Aim: [M2]
         //
@@ -161,16 +160,14 @@ public struct ExactSequence<A: FreeModuleBase, R: EuclideanRing>: Sequence {
         // 0 -> M1 -> [M2] -> 0  ==>  M1 ~= M2
         
         if let M0 = self[i2 - 2], M0.isTrivial && M3.isTrivial {
-            // TODO
-            return nil
+            return M1
         }
         
         // Case 3.
         // 0 -> [M2] -> M3 -> 0  ==>  M2 ~= M3
         
         if let M4 = self[i2 + 2], M1.isTrivial && M4.isTrivial {
-            // TODO
-            return nil
+            return M3
         }
         
         // General Case.
@@ -189,8 +186,8 @@ public struct ExactSequence<A: FreeModuleBase, R: EuclideanRing>: Sequence {
     }
     
     @discardableResult
-    public mutating func solveAll() -> [Object?] {
-        return (0 ..< length).map{ i in solve(i) }
+    public mutating func solveAll(debug: Bool = false) -> [Object?] {
+        return (0 ..< length).map{ i in solve(i, debug: debug) }
     }
     
     public func makeIterator() -> AnyIterator<Object?> {

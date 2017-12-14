@@ -12,35 +12,27 @@ public typealias   HomologyExactSequence<A: FreeModuleBase, R: EuclideanRing> = 
 public typealias CohomologyExactSequence<A: FreeModuleBase, R: EuclideanRing> = _HomologyExactSequence<Ascending , A, R>
 
 public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: Sequence, CustomStringConvertible {
-    public typealias Object = _Homology<chainType, A, R>.Summand
-    public typealias Arrow  = _HomologyMap<chainType, A, A, R>
-    
-    public var sequence : ExactSequence<A, R>
+    public typealias Object = ExactSequence<R>.Object
     
     internal let H:    [_Homology<chainType, A, R>]       // [0,      1,      2]
-    internal let map : [_HomologyMap<chainType, A, A, R>] // [0 -> 1, 1 -> 2, 2 -> 0]
+    internal let maps: [_HomologyMap<chainType, A, A, R>] // [0 -> 1, 1 -> 2, 2 -> 0]
     
     public let topDegree: Int
     public let bottomDegree: Int
-    
+    public var sequence : ExactSequence<R>
+
     public init(_ chain0: _ChainComplex<chainType, A, R>, _ map0 : _ChainMap<chainType, A, A, R>,
                 _ chain1: _ChainComplex<chainType, A, R>, _ map1 : _ChainMap<chainType, A, A, R>,
                 _ chain2: _ChainComplex<chainType, A, R>, _ delta: _ChainMap<chainType, A, A, R>) {
         
         self.H    = [_Homology(chain0), _Homology(chain1), _Homology(chain2)]
-        self.map  = [_HomologyMap(from: H[0], to: H[1], inducedFrom: map0),
+        self.maps  = [_HomologyMap(from: H[0], to: H[1], inducedFrom: map0),
                      _HomologyMap(from: H[1], to: H[2], inducedFrom: map1),
                      _HomologyMap(from: H[2], to: H[0], inducedFrom: delta)]
         
         self.topDegree    = Swift.max(chain0.topDegree, chain1.topDegree, chain2.topDegree)
         self.bottomDegree = Swift.min(chain0.offset,    chain1.offset,    chain2.offset)
-        
         self.sequence  = ExactSequence(count: 3 * (topDegree - bottomDegree + 1))
-        
-        // fill arrows
-        for i in 0 ..< sequence.length - 1 {
-            sequence.arrows[i] = map[i % 3].chainMap.map
-        }
     }
     
     public var length: Int {
@@ -58,13 +50,11 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
     
     public subscript(i: Int, n: Int) -> Object? {
         assert((0 ..< 3).contains(i))
-        let k = seqIndex(i, n)
-        return sequence[k].map{ Object(H[i], $0) } ?? nil
+        return sequence[seqIndex(i, n)]
     }
     
     public subscript(k: Int) -> Object? {
-        let i = gridIndex(k).0
-        return sequence[k].map{ (s: SimpleModuleStructure<A, R>) in _Homology<chainType, A, R>.Summand(H[i], s) } ?? nil
+        return sequence[k]
     }
     
     internal var degrees: [Int] {
@@ -73,10 +63,40 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
             : (bottomDegree ... topDegree).toArray()
     }
     
-    public mutating func fill(column i: Int, degree n: Int) {
-        assert((0 ..< 3).contains(i))
-        let k = seqIndex(i, n)
-        sequence[k] = H[i][n].structure
+    private func arrow(_ k: Int) -> ExactSequence<R>.Arrow {
+        let (i0, n0) = gridIndex(k)
+        let (i1, n1) = gridIndex(k + 1)
+
+        //    f
+        // H0 --> H1
+        
+        let H0 = H[i0][n0]
+        let H1 = H[i1][n1]
+        let f = maps[i0]
+        
+        return ExactSequence<R>.Arrow{ i in
+            let z = H0.generator(i)
+            let w = f.appliedTo(z)
+            let n = H1.summands.count
+            return FreeModule(zip( 0 ..< n, H1.factorize(w.representative) ))
+        }
+    }
+    
+    public mutating func fill(column i1: Int, degree n1: Int) {
+        assert((0 ..< 3).contains(i1))
+        
+        let k = seqIndex(i1, n1)
+        sequence[k] = H[i1][n1].structure.asAbstract
+        
+        if sequence[k - 1] != nil && sequence.arrows[k - 1] == nil {
+            print("\theh")
+            sequence.arrows[k - 1] = arrow(k - 1)
+        }
+        
+        if sequence[k + 1] != nil && sequence.arrows[k] == nil {
+            print("\thuh")
+            sequence.arrows[k] = arrow(k)
+        }
     }
     
     public mutating func fill(column i: Int) {
@@ -87,14 +107,14 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, R:
     }
     
     @discardableResult
-    public mutating func solve(column i: Int, degree n: Int) -> Object? {
-        sequence.solve(seqIndex(i, n))
+    public mutating func solve(column i: Int, degree n: Int, debug: Bool = false) -> Object? {
+        sequence.solve(seqIndex(i, n), debug: debug)
         return self[i, n]
     }
     
     @discardableResult
-    public mutating func solve(column i: Int) -> [Object?] {
-        return (bottomDegree ... topDegree).map{ n in solve(column: i, degree: n) }
+    public mutating func solve(column i: Int, debug: Bool = false) -> [Object?] {
+        return (bottomDegree ... topDegree).map{ n in solve(column: i, degree: n, debug: debug) }
     }
     
     public func assertExactness(column i: Int, degree n: Int, debug: Bool = false) {
