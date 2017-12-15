@@ -16,7 +16,7 @@ public typealias CohomologyExactSequence<A: FreeModuleBase, B: FreeModuleBase, C
 
 public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBase, C: FreeModuleBase, R: EuclideanRing>: Sequence, CustomStringConvertible {
     public typealias Object = ExactSequence<R>.Object
-    
+
     internal let H0: _Homology<chainType, A, R>
     internal let H1: _Homology<chainType, B, R>
     internal let H2: _Homology<chainType, C, R>
@@ -75,26 +75,22 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, B:
             : (bottomDegree ... topDegree).toArray()
     }
     
-    private func arrow(_ k: Int) -> ExactSequence<R>.Arrow {
-        let (i0, n0) = gridIndex(k)
-        let (_ , n1) = gridIndex(k + 1)
-        
-        switch i0 {
-        case 0: return _arrow(H0[n0], map0,  H1[n1])
-        case 1: return _arrow(H1[n0], map1,  H2[n1])
-        case 2: return _arrow(H2[n0], delta, H0[n1])
-        default: fatalError()
-        }
+    public mutating func isZeroMap(_ i: Int) -> Bool {
+        return sequence.isZeroMap(i)
     }
     
-    private func _arrow<X, Y>(_ h0: _Homology<chainType, X, R>.Summand, _ f: _HomologyMap<chainType, X, Y, R>, _ h1: _Homology<chainType, Y, R>.Summand) -> ExactSequence<R>.Arrow {
-        return ExactSequence<R>.Arrow{ i in
-            let z = h0.generator(i)
-            let w = f.appliedTo(z)
-            let n = h1.summands.count
-            return FreeModule( zip( 0 ..< n, h1.factorize(w.representative) ) )
-        }
+    public mutating func isInjective(_ i: Int) -> Bool {
+        return sequence.isZeroMap(i - 1)
     }
+    
+    public mutating func isSurjective(_ i: Int) -> Bool {
+        return sequence.isZeroMap(i + 1)
+    }
+    
+    public mutating func isIsomorphic(_ i: Int) -> Bool {
+        return sequence.isIsomorphic(i)
+    }
+
     
     public mutating func fill(column i: Int, degree n: Int) {
         assert((0 ..< 3).contains(i))
@@ -110,12 +106,12 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, B:
             }
         }()
 
-        if sequence[k - 1] != nil && sequence.arrows[k - 1] == nil {
-            sequence.arrows[k - 1] = arrow(k - 1)
+        if sequence[k - 1] != nil && sequence.arrows[k - 1].map == nil {
+            sequence.arrows[k - 1].map = makeMap(k - 1)
         }
 
-        if sequence[k + 1] != nil && sequence.arrows[k] == nil {
-            sequence.arrows[k] = arrow(k)
+        if sequence[k + 1] != nil && sequence.arrows[k].map == nil {
+            sequence.arrows[k].map = makeMap(k)
         }
     }
     
@@ -123,6 +119,27 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, B:
         assert((0 ..< 3).contains(i))
         for n in bottomDegree ... topDegree {
             fill(column: i, degree: n)
+        }
+    }
+    
+    private func makeMap(_ k: Int) -> ExactSequence<R>.Map {
+        let (i0, n0) = gridIndex(k)
+        let (_ , n1) = gridIndex(k + 1)
+        
+        switch i0 {
+        case 0: return _makeMap(H0[n0], map0,  H1[n1])
+        case 1: return _makeMap(H1[n0], map1,  H2[n1])
+        case 2: return _makeMap(H2[n0], delta, H0[n1])
+        default: fatalError()
+        }
+    }
+    
+    private func _makeMap<X, Y>(_ h0: _Homology<chainType, X, R>.Summand, _ f: _HomologyMap<chainType, X, Y, R>, _ h1: _Homology<chainType, Y, R>.Summand) -> ExactSequence<R>.Map {
+        return ExactSequence<R>.Map { i in
+            let z = h0.generator(i)
+            let w = f.appliedTo(z)
+            let n = h1.summands.count
+            return FreeModule( zip( 0 ..< n, h1.factorize(w.representative) ) )
         }
     }
     
