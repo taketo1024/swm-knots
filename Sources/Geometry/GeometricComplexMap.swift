@@ -31,9 +31,9 @@ public extension ChainMap where chainType == Descending {
     //                          s |-> f(s)
     public init<F: GeometricComplexMap>(_ f: F, _ type: R.Type) where A == F.ComplexType.Cell, B == F.ComplexType.Cell {
         typealias Cell = F.ComplexType.Cell
-        self.init { s -> [(Cell, R)] in
+        self.init { s -> Codomain in
             let t = f.appliedTo(s)
-            return (s.dim == t.dim) ? [(t, R.identity)] : []
+            return (s.dim == t.dim) ? Codomain(t) : Codomain.zero
         }
     }
 }
@@ -45,13 +45,25 @@ public extension CochainMap where chainType == Ascending {
     
     public init<F: GeometricComplexMap>(_ f: F, _ type: R.Type) where A == Dual<F.ComplexType.Cell>, B == Dual<F.ComplexType.Cell> {
         typealias Cell = F.ComplexType.Cell
-        self.init { (g: Dual<Cell>) -> [(Dual<Cell>, R)] in
+        self.init { (g: Dual<Cell>) -> Codomain in
             let i = g.degree
-            let ss = f.domain.cells(ofDim: i)
-            return ss.flatMap { (s: Cell) -> (Dual<Cell>, R)? in
+            let ss = f.domain.cells(ofDim: i).flatMap { (s: Cell) -> (Dual<Cell>, R)? in
                 let t = f.appliedTo(s)
                 return (g.pair(t) == 1) ? (Dual(s), R.identity) : nil
             }
+            return Codomain(ss)
         }
+    }
+}
+
+public extension HomologyMap where chainType == Descending {
+    public init<F: GeometricComplexMap>(from: Homology<A, R>, to: Homology<B, R>, inducedFrom f: F) where A == F.ComplexType.Cell, B == F.ComplexType.Cell {
+        self.init(from: from, to: to, inducedFrom: ChainMap(f, R.self))
+    }
+}
+
+public extension CohomologyMap where chainType == Ascending {
+    public init<F: GeometricComplexMap>(from: Cohomology<A, R>, to: Cohomology<B, R>, inducedFrom f: F) where A == Dual<F.ComplexType.Cell>, B == Dual<F.ComplexType.Cell> {
+        self.init(from: from, to: to, inducedFrom: CochainMap(f, R.self))
     }
 }

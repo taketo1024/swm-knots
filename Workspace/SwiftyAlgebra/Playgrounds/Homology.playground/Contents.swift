@@ -53,4 +53,3 @@ do {
     let h   = H(RP2, A.self)
     print(h.detailDescription, "\n")
 }
-

@@ -83,7 +83,7 @@ public struct QuotientModule<M, N>: _QuotientModule where N: Submodule, M == N.S
     }
 }
 
-public protocol ModuleHom: Map, Module where Domain: Module, Codomain : Module {}
+public protocol ModuleHom: Map, Module where Domain: Module, Codomain : Module, CoeffRing == Domain.CoeffRing, CoeffRing == Codomain.CoeffRing {}
 
 public extension ModuleHom {
     public static var symbol: String {

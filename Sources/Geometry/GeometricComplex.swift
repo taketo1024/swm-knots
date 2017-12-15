@@ -42,13 +42,17 @@ public extension GeometricComplex {
         return cells(ofDim: cell.dim).contains(cell)
     }
     
+    internal var validDims: [Int] {
+        return (dim >= 0) ? (0 ... dim).toArray() : []
+    }
+
     public var allCells: [Cell] {
-        return (0 ... dim).flatMap{ cells(ofDim: $0) }
+        return validDims.flatMap{ cells(ofDim: $0) }
     }
     
     public func boundaryMap<R: Ring>(_ i: Int, _ type: R.Type) -> FreeModuleHom<Cell, Cell, R> {
         return FreeModuleHom { s in
-            (s.dim == i) ? s.boundary(R.self).map{ ($0, $1) } : []
+            (s.dim == i) ? s.boundary(R.self) : FreeModule.zero
         }
     }
     
@@ -76,24 +80,23 @@ public extension GeometricComplex {
     
     public var detailDescription: String {
         return "\(description) {\n" +
-            (0 ... dim)
-                .map{ (i) -> (Int, [Cell]) in (i, cells(ofDim: i)) }
-                .map{ (i, cells) -> String in "\t\(i): " + cells.map{"\($0)"}.joined(separator: ", ")}
-                .joined(separator: "\n")
+            validDims.map{ (i) -> (Int, [Cell]) in (i, cells(ofDim: i)) }
+                     .map{ (i, cells) -> String in "\t\(i): " + cells.map{"\($0)"}.joined(separator: ", ")}
+                     .joined(separator: "\n")
             + "\n}"
     }
 }
 
 public extension ChainComplex where chainType == Descending {
     public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == C.Cell {
-        let chain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
+        let chain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             (K.cells(ofDim: i), K.boundaryMap(i, R.self), K.boundaryMatrix(i, R.self))
         }
         self.init(name: K.name, chain)
     }
     
     public init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where A == C.Cell {
-        let chain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
+        let chain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             
             let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
             let to   = K.cells(ofDim: i - 1).subtract(L.cells(ofDim: i - 1))
@@ -108,14 +111,14 @@ public extension ChainComplex where chainType == Descending {
 
 public extension CochainComplex where chainType == Ascending {
     public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
-        let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
+        let cochain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             let from = K.cells(ofDim: i)
             let to = K.cells(ofDim: i + 1)
 
             let map = BoundaryMap { d in
                 let s = d.base
                 let row = K.partialBoundaryMatrix(to, [s], R.self).multiply( R(intValue: (-1).pow(i + 1) ) )
-                return zip(to.map{ Dual($0) }, row.generateGrid()).toArray()
+                return FreeModule( zip(to.map{ Dual($0) }, row.generateGrid()) )
             }
             
             let matrix = K.partialBoundaryMatrix(to, from, R.self)
@@ -128,14 +131,14 @@ public extension CochainComplex where chainType == Ascending {
     }
     
     public init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where Dual<C.Cell> == A {
-        let cochain = (0 ... K.dim).map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
+        let cochain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
             let to   = K.cells(ofDim: i + 1).subtract(L.cells(ofDim: i + 1))
             
             let map = BoundaryMap { d in
                 let s = d.base
                 let row = K.partialBoundaryMatrix(to, [s], R.self).multiply( R(intValue: (-1).pow(i + 1) ) )
-                return zip(to.map{ Dual($0) }, row.generateGrid()).toArray()
+                return FreeModule( zip(to.map{ Dual($0) }, row.generateGrid()) )
             }
             
             let matrix = K.partialBoundaryMatrix(to, from, R.self)

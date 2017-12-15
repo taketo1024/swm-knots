@@ -46,11 +46,10 @@ public extension SimplicialComplex {
         return map.image
     }
     
-    // disjoint union
     public static func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
         let dim = max(K1.dim, K2.dim)
-        let cells = (0 ... dim).map{ i in (K1.cells(ofDim: i) + K2.cells(ofDim: i)).unique() }
-        return SimplicialComplex(name: "\(K1) + \(K2)", cells)
+        let table = (dim >= 0) ? (0 ... dim).map{ i in (K1.cells(ofDim: i) + K2.cells(ofDim: i)).unique() } : []
+        return SimplicialComplex(name: "\(K1) + \(K2)", table: table)
     }
     
     // subtraction (the result may not be a proper simplicial complex)
@@ -65,13 +64,13 @@ public extension SimplicialComplex {
     
     public static func -(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
         let subtr = K2.allCells
-        let cells = K1.cellTable.map{ list -> [Simplex] in
+        let cells = K1.table.map{ list -> [Simplex] in
             return list.filter{ s in subtr.forAll{ !s.contains($0) } }
         }
         
         // TODO dropLast empty list
         
-        return SimplicialComplex(name: "\(K1.name) - \(K2.name)", cells)
+        return SimplicialComplex(name: "\(K1.name) - \(K2.name)", table: cells)
     }
     
     // product complex
@@ -133,6 +132,14 @@ public extension SimplicialComplex {
         let v0 = vs.anyElement!
         let map = SimplicialMap(from: K1) { v in vs.contains(v) ? v0 : v }
         return map.image.named("\(K1.name) / \(K2.name)")
+    }
+    
+    public static func ∩(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
+        let table = K1.table.enumerated().map { (i, list1) -> [Simplex] in
+            let list2 = K2.cells(ofDim: i)
+            return list1.filter{ s in list2.contains(s) }
+        }
+        return SimplicialComplex(name: "\(K1.name) ∩ \(K2.name)", table: table)
     }
     
     public static func ∨(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
@@ -214,7 +221,7 @@ public extension SimplicialComplex {
         var s2d = [Simplex : CellularCell]()
         var d2s = [CellularCell : Simplex]()
         
-        for i in (0 ... n).reversed() {
+        for i in K.validDims.reversed() {
             let bcells = SdK.cells(ofDim: n - i)
             let dcells = K.cells(ofDim: i).map { s -> CellularCell in
                 let chain: SimplicialChain<IntegerNumber> = {
@@ -250,8 +257,18 @@ public extension SimplicialComplex {
 }
 
 public extension Vertex {
+    public var asComplex: SimplicialComplex {
+        return Simplex(self).asComplex.named(label)
+    }
+    
     public func join(_ K: SimplicialComplex) -> SimplicialComplex {
         let cells = K.maximalCells.map{ s in self.join(s) }
         return SimplicialComplex(name: "\(self) * \(K.name)", maximalCells: cells)
+    }
+}
+
+public extension Simplex {
+    public var asComplex: SimplicialComplex {
+        return SimplicialComplex(name: "△^\(dim)", maximalCells: self)
     }
 }

@@ -66,31 +66,32 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
     }
     
     public static func ==(a: _HomologyClass<chainType, A, R>, b: _HomologyClass<chainType, A, R>) -> Bool {
-        guard let H = a.structure, let H2 = b.structure else {
-            return (a.structure == nil && b.structure == nil) // when both a, b are 0.
-        }
-        
-        assert(H.chainComplex.name == H2.chainComplex.name)
-        // assert(H == H2) // this assertion is heavy
-        
-        if a.factors.keys == b.factors.keys {
-            return a.factors.forAll { (i, z) in
-                return H[i].isEquivalent(z, b[i])
+        switch (a.structure, b.structure) {
+        case let (H1?, H2?):
+            
+            assert(H1 == H2)
+            
+            if a.factors.keys == b.factors.keys {
+                return a.factors.forAll { (i, z) in H1[i].cyclesAreHomologous(z, b[i]) }
+            } else {
+                return false
             }
-        } else {
-            return false
+        case let (H1?, nil):
+            return a.factors.forAll { (i, z) in H1[i].cycleIsNullHomologous(z) }
+        case let (nil, H2?):
+            return b.factors.forAll { (i, z) in H2[i].cycleIsNullHomologous(z) }
+        default:
+            return true
         }
     }
     
     public static func +(a: _HomologyClass<chainType, A, R>, b: _HomologyClass<chainType, A, R>) -> _HomologyClass<chainType, A, R> {
-        guard let H = a.structure, let H2 = b.structure else {
+        guard let H1 = a.structure, let H2 = b.structure else {
             return (a.structure == nil) ? b : a
         }
         
-        assert(H.chainComplex.name == H2.chainComplex.name)
-        // assert(H == H2) // this assertion is heavy
-        
-        return _HomologyClass(a.z + b.z, H)
+        assert(H1 == H2)
+        return _HomologyClass(a.z + b.z, H1)
     }
     
     public static prefix func -(a: _HomologyClass<chainType, A, R>) -> _HomologyClass<chainType, A, R> {

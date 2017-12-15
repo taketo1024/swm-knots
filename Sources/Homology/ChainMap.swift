@@ -11,28 +11,29 @@ import Foundation
 public typealias   ChainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Descending, A, B, R>
 public typealias CochainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Ascending,  A, B, R>
 
+// TODO conform Module<R>
 public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Map {
     public typealias Domain   = FreeModule<A, R>
     public typealias Codomain = FreeModule<B, R>
     
     public let shift: Int
-    private let f: FreeModuleHom<A, B, R>
+    internal let map: FreeModuleHom<A, B, R>
     
-    public init(shift: Int = 0, _ f: @escaping (A) -> [(B, R)]) {
+    public init(shift: Int = 0, _ map: @escaping (A) -> Codomain) {
         self.shift = shift
-        self.f = FreeModuleHom(f)
+        self.map = FreeModuleHom(map)
     }
     
-    public init(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, shift: Int = 0, _ f: @escaping (A) -> [(B, R)]) {
+    public init(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, shift: Int = 0, _ f: @escaping (A) -> Codomain) {
         self.init(shift: shift, f)
     }
     
     public func appliedTo(_ a: A) -> FreeModule<B, R> {
-        return f.appliedTo(a)
+        return map.appliedTo(a)
     }
     
     public func appliedTo(_ x: FreeModule<A, R>) -> FreeModule<B, R> {
-        return f.appliedTo(x)
+        return map.appliedTo(x)
     }
     
     public func assertChainMap(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, debug: Bool = false) {
@@ -56,10 +57,10 @@ public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBa
                 print("C\(i1) : \(b1)\n")
                 
                 for a in b1 {
-                    let x1 =  f.appliedTo(a)
+                    let x1 =  map.appliedTo(a)
                     let y1 = d2.appliedTo(x1)
                     let x2 = d1.appliedTo(a)
-                    let y2 =  f.appliedTo(x2)
+                    let y2 =  map.appliedTo(x2)
                     
                     print("\td2 ∘ f1: \(a) ->\t\(x1) ->\t\(y1)")
                     print("\tf2 ∘ d1: \(a) ->\t\(x2) ->\t\(y2)")
@@ -67,8 +68,21 @@ public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBa
                 }
             }
             
-            assert( (d2 ∘ f).equals(f ∘ d1, forElements: b1.map{ FreeModule($0) } ) )
+            assert( (d2 ∘ map).equals(map ∘ d1, forElements: b1.map{ FreeModule($0) } ) )
         }
     }
+    
+    public static func +(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, B, R>) -> _ChainMap<chainType, A, B, R> {
+        fatalError("TODO")
+    }
+    
+    public static func -(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, B, R>) -> _ChainMap<chainType, A, B, R> {
+        fatalError("TODO")
+    }
+    
+    public static func ⊕<C>(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, C, R>) -> _ChainMap<chainType, A, Sum<B, C>, R> {
+        return _ChainMap<chainType, A, Sum<B, C>, R> { a in f1.appliedTo(a) ⊕ f2.appliedTo(a) }
+    }
+    
 }
 
