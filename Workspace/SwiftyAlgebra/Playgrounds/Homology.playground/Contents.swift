@@ -18,17 +18,6 @@ typealias A = Z
 //typealias A = Z_2
 //typealias A = Q
 
-let S1 = SimplicialComplex.circle()
-let S2 = SimplicialComplex.circle()
-let X = S1 × S2
-let Y = S1 × S2.vertices[0]
-
-let E = HomologyExactSequence(X, Y, Z.self)
-
-print(E.detailDescription, "\n")
-E.assertExactness(debug: true)
-
-/*
 // D^3 = Δ^3
 do {
     let D3 = SimplicialComplex.ball(dim: 3)
@@ -64,5 +53,3 @@ do {
     let h   = H(RP2, A.self)
     print(h.detailDescription, "\n")
 }
-
-*/

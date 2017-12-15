@@ -170,6 +170,7 @@
 		DD6125991F31AA2500FD5533 /* Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
 		DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolynomialIdeal.swift; sourceTree = "<group>"; };
 		DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialComplexOperations.swift; sourceTree = "<group>"; };
+		DDDE60A01FE43EB000BF476B /* Homology2.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Homology2.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -381,6 +382,7 @@
 				1414D8551EE0F927001A1D42 /* Polynomials.playground */,
 				14929C941ED9BFE5006ACAC5 /* AlgebraicExtensions.playground */,
 				14929C961ED9BFE5006ACAC5 /* Homology.playground */,
+				DDDE60A01FE43EB000BF476B /* Homology2.playground */,
 			);
 			path = Playgrounds;
 			sourceTree = "<group>";
