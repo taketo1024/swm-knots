@@ -257,8 +257,18 @@ public extension SimplicialComplex {
 }
 
 public extension Vertex {
+    public var asComplex: SimplicialComplex {
+        return Simplex(self).asComplex.named(label)
+    }
+    
     public func join(_ K: SimplicialComplex) -> SimplicialComplex {
         let cells = K.maximalCells.map{ s in self.join(s) }
         return SimplicialComplex(name: "\(self) * \(K.name)", maximalCells: cells)
+    }
+}
+
+public extension Simplex {
+    public var asComplex: SimplicialComplex {
+        return SimplicialComplex(name: "△^\(dim)", maximalCells: self)
     }
 }

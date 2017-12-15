@@ -11,6 +11,7 @@ import Foundation
 public typealias   ChainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Descending, A, B, R>
 public typealias CochainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Ascending,  A, B, R>
 
+// TODO conform Module<R>
 public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Map {
     public typealias Domain   = FreeModule<A, R>
     public typealias Codomain = FreeModule<B, R>
@@ -80,7 +81,7 @@ public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBa
     }
     
     public static func ⊕<C>(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, C, R>) -> _ChainMap<chainType, A, Sum<B, C>, R> {
-        fatalError("TODO")
+        return _ChainMap<chainType, A, Sum<B, C>, R> { a in f1.appliedTo(a) ⊕ f2.appliedTo(a) }
     }
     
 }

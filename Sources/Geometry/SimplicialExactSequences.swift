@@ -26,8 +26,8 @@ public extension HomologyExactSequence where chainType == Descending, A == Simpl
     }
 }
     
-public extension HomologyExactSequence where chainType == Descending {
-    public static func MayerVietoris(_ X: SimplicialComplex, _ A: SimplicialComplex, _ B: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<Simplex, Sum<Simplex, Simplex>, Simplex, R> {
+public extension HomologyExactSequence where chainType == Descending, A == Simplex, B == Sum<Simplex, Simplex>, C == Simplex {
+    public static func MayerVietoris(_ X: SimplicialComplex, _ A: SimplicialComplex, _ B: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<A, B, C, R> {
 
         //               A
         //         iA ↗︎     ↘︎ jA
