@@ -65,7 +65,7 @@ public final class SimpleModuleStructure<A: FreeModuleBase, R: EuclideanRing>: M
     }
     
     public var torsions: [R] {
-        return summands.map{ $0.divisor }
+        return summands.filter{ !$0.isFree }.map{ $0.divisor }
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
