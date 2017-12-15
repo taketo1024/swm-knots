@@ -74,6 +74,9 @@ public enum Sum<A: FreeModuleBase, B: FreeModuleBase>: FreeModuleBase {
     case _1(_: A)
     case _2(_: B)
     
+    public init(_ a: A) { self = ._1(a) }
+    public init(_ b: B) { self = ._2(b) }
+    
     public var degree: Int {
         switch self {
         case let ._1(a): return a.degree

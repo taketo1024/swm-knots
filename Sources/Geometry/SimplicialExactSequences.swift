@@ -61,7 +61,8 @@ public extension HomologyExactSequence where chainType == Descending, A == Simpl
         let d = ChainMap(from: CX, to: CAnB, shift: -1) { s in
             A.contains(s) ? s.boundary(type) : SimplicialChain.zero
         }
-
-        return HomologyExactSequence(CAnB, i, CAB, j, CX, d)
+        
+        fatalError()
+//        return HomologyExactSequence(CAnB, i, CAB, j, CX, d)
     }
 }
