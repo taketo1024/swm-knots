@@ -11,7 +11,7 @@ import Foundation
 // Topological Invariants
 public extension GeometricComplex {
     public var eulerNumber: Int {
-        return (0 ... dim).sum{ i in (-1).pow(i) * cells(ofDim: i).count }
+        return validDims.sum{ i in (-1).pow(i) * cells(ofDim: i).count }
     }
 
     public func eulerNumber<R: EuclideanRing>(_ type: R.Type) -> R {

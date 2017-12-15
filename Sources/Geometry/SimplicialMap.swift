@@ -32,13 +32,13 @@ public struct SimplicialMap: GeometricComplexMap {
     }
     
     public var image: SimplicialComplex {
-        let cells = domain.cellTable.map{ cells in
+        let cells = domain.table.map{ cells in
             cells.flatMap{ s -> Simplex? in
                 let t = self.appliedTo(s)
                 return (s.dim == t.dim) ? t : nil
             }.unique()
         }
-        return SimplicialComplex(cells)
+        return SimplicialComplex(table: cells)
     }
     
     public func appliedTo(_ x: Vertex) -> Vertex {

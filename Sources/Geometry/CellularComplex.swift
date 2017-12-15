@@ -50,28 +50,36 @@ public struct CellularComplex: GeometricComplex {
     public typealias Cell = CellularCell
     
     public internal(set) var underlyingComplex: SimplicialComplex
-    internal var cells: [[CellularCell]]
+    internal var table: [[CellularCell]]
     
     public init(underlyingComplex: SimplicialComplex) {
         self.init(underlyingComplex, [])
     }
     
-    internal init(_ K: SimplicialComplex, _ cells: [[CellularCell]] = []) {
+    internal init(_ K: SimplicialComplex, _ table: [[CellularCell]] = []) {
         self.underlyingComplex = K
-        self.cells = cells
+        self.table = table
+    }
+    
+    public static var empty: CellularComplex {
+        return CellularComplex.init(underlyingComplex: SimplicialComplex.empty)
     }
     
     public var dim: Int {
-        return max(0, cells.count - 1)
+        return table.count - 1
     }
     
-    public func skeleton(_ dim: Int) -> CellularComplex {
-        let sub = Array(cells[0 ... dim])
-        return CellularComplex(underlyingComplex, sub)
+    public func skeleton(_ n: Int) -> CellularComplex {
+        if n >= 0 {
+            let sub = table[0 ... n].toArray()
+            return CellularComplex(underlyingComplex, sub)
+        } else {
+            return CellularComplex.empty
+        }
     }
     
     public func cells(ofDim i: Int) -> [CellularCell] {
-        return (0...dim).contains(i) ? cells[i] : []
+        return validDims.contains(i) ? table[i] : []
     }
     
     @discardableResult
@@ -90,12 +98,12 @@ public struct CellularComplex: GeometricComplex {
         let n = simplices.basis[0].dim
         assert(boundary.basis.forAll{ $0.dim == n - 1 }, "only attatching to 1-dim lower cells is supported.")
         
-        while cells.count - 1 < n {
-            cells.append([])
+        while table.count - 1 < n {
+            table.append([])
         }
         
         let cell = CellularCell(simplices, boundary)
-        cells[n].append(cell)
+        table[n].append(cell)
         
         return cell
     }
