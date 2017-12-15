@@ -74,6 +74,10 @@ public class MatrixEliminationResult<R: EuclideanRing> {
         fatalError("not available.")
     }
     
+    public var nullity: Int {
+        return result.cols - rank
+    }
+    
     public var diagonal: [R]{
         fatalError("not available.")
     }
@@ -103,7 +107,7 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     }
     
     public var isSurjective: Bool {
-        return result.cols >= result.rows && rank == result.rows
+        return result.cols >= result.rows && rank == result.rows && diagonal.forAll{ $0.isInvertible }
     }
     
     public var isBijective: Bool {
@@ -142,6 +146,10 @@ public struct MatrixEliminationResultWrapper<n: _Int, m: _Int, R: EuclideanRing>
     
     public var rank: Int {
         return res.rank
+    }
+    
+    public var nullity: Int {
+        return res.nullity
     }
     
     public var diagonal: [R] {

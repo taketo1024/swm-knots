@@ -146,7 +146,7 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         // M0 ---> M1 ---> [M2] ---> M3 ---> M4  (exact)
         //
         
-        let (i0, i1, i3, i4) = (i2 - 2, i2 - 1, i2 + 1, i2 + 2)
+        let (i0, i1, i3) = (i2 - 2, i2 - 1, i2 + 1)
         
         // Case 1.
         //
@@ -186,18 +186,31 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         // M0 ---> M1 ---> [M2] ---> M3 ---> M4  (exact)
         //
         // ==>
-        //               i         f2
-        // 0 -> Ker(f2) >--> [M2] -->> Im(f2) -> 0  (exact)
-        //       = Im(f1)               = Ker(f3)
+        //                       f2
+        // 0 -> Ker(f2) ⊂  [M2] -->> Im(f2) -> 0  (exact)
+        //       = Im(f1)             = Ker(f3)
         //      ~= Coker(f0)
         
-        // TODO
-        log("\(i2): unsolvable.", d)
-        return nil
+        guard
+            let M1 = self[i1], M1.isFree, // TODO concider non-free case
+            let M3 = self[i3], M3.isFree,
+            let A0 = matrix(i0),
+            let A3 = matrix(i3)
+            else {
+                log("\(i2): unsolvable.", d)
+                return nil
+        }
+        
+        let N0 = AbstractSimpleModuleStructure.invariantFactorDecomposition(rank: M1.rank, relationMatrix: A0)
+        let N1 = AbstractSimpleModuleStructure<R>(rank: A3.eliminate().nullity)
+        
+        log("\(i2): \(N0) ⊕ \(N1)", d)
+        
+        return N0 ⊕ N1
     }
     
     @discardableResult
-    public mutating func solveAll(debug: Bool = false) -> [Object?] {
+    public mutating func solve(debug: Bool = false) -> [Object?] {
         return (0 ..< length).map{ i in solve(i, debug: debug) }
     }
     

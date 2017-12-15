@@ -150,8 +150,8 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, B:
     }
     
     @discardableResult
-    public mutating func solve(column i: Int, debug: Bool = false) -> [Object?] {
-        return (bottomDegree ... topDegree).map{ n in solve(column: i, degree: n, debug: debug) }
+    public mutating func solve(debug: Bool = false) -> [Object?] {
+        return sequence.solve(debug: debug)
     }
     
     public func assertExactness(column i: Int, degree n: Int, debug: Bool = false) {
