@@ -182,8 +182,6 @@ public extension SimpleModuleStructure {
     }
 }
 
-extension Int: FreeModuleBase {}
-
 public typealias AbstractSimpleModuleStructure<R: EuclideanRing> = SimpleModuleStructure<Int, R>
 
 public extension AbstractSimpleModuleStructure where A == Int {

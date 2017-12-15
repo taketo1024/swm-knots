@@ -45,7 +45,6 @@
 		142932031FAEB6FB003EE1BB /* SimplicialMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142932021FAEB6FB003EE1BB /* SimplicialMap.swift */; };
 		14360F911FB130350075133E /* ComputationalMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14360F901FB130350075133E /* ComputationalMatrix.swift */; };
 		14360F931FB148C30075133E /* MatrixEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14360F921FB148C30075133E /* MatrixEliminator.swift */; };
-		143735A71F30088B0042004F /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143735A61F30088B0042004F /* String.swift */; };
 		144AD2911EC21A4500E23890 /* Homology.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144AD2901EC21A4500E23890 /* Homology.swift */; };
 		145339C01EC7D67100F014F4 /* Ref.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145339BF1EC7D67100F014F4 /* Ref.swift */; };
 		14546DAB1FDF9DD200898326 /* GroupStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14546DAA1FDF9DD200898326 /* GroupStructure.swift */; };
@@ -71,6 +70,7 @@
 		14D261341EE4614E006775E2 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* Set.swift */; };
 		DD119BC21FE2271E00FB4758 /* ExactSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD119BC11FE2271E00FB4758 /* ExactSequence.swift */; };
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
+		DD4E539B1FE374F300C75F7E /* FreeModuleBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */; };
 		DD5D09941FB5ACD700E1BDFC /* SimplicialComplexExamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */; };
 		DD5D09961FB5AD0700E1BDFC /* TopologicalInvariants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5D09951FB5AD0700E1BDFC /* TopologicalInvariants.swift */; };
 		DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125991F31AA2500FD5533 /* Cache.swift */; };
@@ -130,7 +130,6 @@
 		142932021FAEB6FB003EE1BB /* SimplicialMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialMap.swift; sourceTree = "<group>"; };
 		14360F901FB130350075133E /* ComputationalMatrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComputationalMatrix.swift; sourceTree = "<group>"; };
 		14360F921FB148C30075133E /* MatrixEliminator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixEliminator.swift; sourceTree = "<group>"; };
-		143735A61F30088B0042004F /* String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		144AD28E1EC13D9E00E23890 /* MatrixEliminationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixEliminationTests.swift; sourceTree = "<group>"; };
 		144AD2901EC21A4500E23890 /* Homology.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Homology.swift; sourceTree = "<group>"; };
 		145339BF1EC7D67100F014F4 /* Ref.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Ref.swift; sourceTree = "<group>"; };
@@ -163,6 +162,7 @@
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
 		DD119BC11FE2271E00FB4758 /* ExactSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExactSequence.swift; sourceTree = "<group>"; };
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
+		DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeModuleBase.swift; sourceTree = "<group>"; };
 		DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialComplexExamples.swift; sourceTree = "<group>"; };
 		DD5D09951FB5AD0700E1BDFC /* TopologicalInvariants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopologicalInvariants.swift; sourceTree = "<group>"; };
 		DD6125991F31AA2500FD5533 /* Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
@@ -349,7 +349,6 @@
 				1410C1121FB1EC9E00CEE47D /* Array.swift */,
 				147D98051EB9B26200C736AC /* Dictionary.swift */,
 				141417301ECE984800B167CB /* Sequence.swift */,
-				143735A61F30088B0042004F /* String.swift */,
 				1499CD001F236328009C3C99 /* CustomOperations.swift */,
 			);
 			path = Extensions;
@@ -406,6 +405,7 @@
 			children = (
 				1424F4E01EB997780052581F /* FreeModule.swift */,
 				1424F4E51EB997780052581F /* FreeModHom.swift */,
+				DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */,
 			);
 			path = FreeModule;
 			sourceTree = "<group>";
@@ -549,6 +549,7 @@
 				145F46011EEAF0CC0045CDB2 /* Z_2.swift in Sources */,
 				147D98061EB9B26200C736AC /* Dictionary.swift in Sources */,
 				1424F50E1EB997780052581F /* IntTypeParameter.swift in Sources */,
+				DD4E539B1FE374F300C75F7E /* FreeModuleBase.swift in Sources */,
 				1410C1191FB203E200CEE47D /* DiagonalEliminator.swift in Sources */,
 				142932031FAEB6FB003EE1BB /* SimplicialMap.swift in Sources */,
 				14546DAB1FDF9DD200898326 /* GroupStructure.swift in Sources */,
@@ -581,7 +582,6 @@
 				1489F4D81FE026D0008E600D /* SimplicialExactSequences.swift in Sources */,
 				1424F5031EB997780052581F /* Polynominal.swift in Sources */,
 				1424F4FD1EB997780052581F /* Module.swift in Sources */,
-				143735A71F30088B0042004F /* String.swift in Sources */,
 				1424F5111EB997780052581F /* optable.swift in Sources */,
 				1424F5021EB997780052581F /* Permutation.swift in Sources */,
 				141C0CDF1F28232F00D9BDDE /* CellularComplex.swift in Sources */,
