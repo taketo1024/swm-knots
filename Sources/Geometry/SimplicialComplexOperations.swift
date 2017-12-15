@@ -135,7 +135,11 @@ public extension SimplicialComplex {
     }
     
     public static func ∩(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
-        fatalError("TODO")
+        let table = K1.table.enumerated().map { (i, list1) -> [Simplex] in
+            let list2 = K2.cells(ofDim: i)
+            return list1.filter{ s in list2.contains(s) }
+        }
+        return SimplicialComplex(name: "\(K1.name) ∩ \(K2.name)", table: table)
     }
     
     public static func ∨(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
