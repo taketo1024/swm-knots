@@ -79,7 +79,7 @@ public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBa
         fatalError("TODO")
     }
     
-    public static func ⊕(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, B, R>) -> _ChainMap<chainType, A, B, R> {
+    public static func ⊕<C>(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, C, R>) -> _ChainMap<chainType, A, Sum<B, C>, R> {
         fatalError("TODO")
     }
     

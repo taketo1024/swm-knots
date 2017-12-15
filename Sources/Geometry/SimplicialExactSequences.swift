@@ -8,25 +8,27 @@
 
 import Foundation
 
-public extension HomologyExactSequence where chainType == Descending, A == Simplex {
+public extension HomologyExactSequence where chainType == Descending, A == Simplex, B == Simplex, C == Simplex {
     public init(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) {
         let CA  = ChainComplex(A, type)
         let CX  = ChainComplex(X, type)
         let CXA = ChainComplex(X, A, type)
         
-        let i = ChainMap(SimplicialMap.inclusion(from: A, to: X), R.self)
-        let j = ChainMap(from: CX, to: CXA) { s in
+        let i: ChainMap<A, A, R> = ChainMap(SimplicialMap.inclusion(from: A, to: X), R.self)
+        let j: ChainMap<A, A, R> = ChainMap(from: CX, to: CXA) { s in
             CXA.chainBasis(s.degree).contains(s) ? SimplicialChain(s) : SimplicialChain.zero
         }
-        let d = ChainMap(from: CXA, to: CA, shift: -1) { s in
+        let d: ChainMap<A, A, R> = ChainMap(from: CXA, to: CA, shift: -1) { s in
             s.boundary(R.self)
         }
         
         self.init(CA, i, CX, j, CXA, d)
     }
+}
     
-    public static func MayerVietoris(_ X: SimplicialComplex, _ A: SimplicialComplex, _ B: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<A, R> {
-        
+public extension HomologyExactSequence where chainType == Descending {
+    public static func MayerVietoris(_ X: SimplicialComplex, _ A: SimplicialComplex, _ B: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<Simplex, Sum<Simplex, Simplex>, Simplex, R> {
+
         //               A
         //         iA ↗︎     ↘︎ jA
         //   A ∩ B               A ∪ B = X
@@ -41,28 +43,33 @@ public extension HomologyExactSequence where chainType == Descending, A == Simpl
         //
         //   .. -> H(A ∩ B) ------> H(A) ⊕ H(B) ------> H(A + B) ~= H(X) -> ... (exact)
         //
-        
+
         let AnB = A ∩ B
-        
+
         let CAnB = ChainComplex(AnB, type)
         let CA   = ChainComplex(A,   type)
         let CB   = ChainComplex(B,   type)
         let CX   = ChainComplex(X,   type)
-        
+
         let iA = ChainMap(SimplicialMap.inclusion(from: AnB, to: A), R.self)
         let iB = ChainMap(SimplicialMap.inclusion(from: AnB, to: B), R.self)
         let jA = ChainMap(SimplicialMap.inclusion(from: A,   to: X), R.self)
         let jB = ChainMap(SimplicialMap.inclusion(from: B,   to: X), R.self)
-        
+
         let CAB = CA ⊕ CB
-        let   i = iA ⊕ iB
-        let   j = jA - jB
+        let i   = iA ⊕ iB
         
+        let j = ChainMap(from: CAB, to: CX) { c in
+            switch c {
+            case let ._1(a): return  jA.appliedTo(a)
+            case let ._2(b): return -jB.appliedTo(b)
+            }
+        }
+
         let d = ChainMap(from: CX, to: CAnB, shift: -1) { s in
             A.contains(s) ? s.boundary(type) : SimplicialChain.zero
         }
-        
-        fatalError()
-//        return HomologyExactSequence(CAnB, i, CAB, j, CX, d)
+
+        return HomologyExactSequence(CAnB, i, CAB, j, CX, d)
     }
 }
