@@ -46,7 +46,6 @@ public extension SimplicialComplex {
         return map.image
     }
     
-    // disjoint union
     public static func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
         let dim = max(K1.dim, K2.dim)
         let cells = (0 ... dim).map{ i in (K1.cells(ofDim: i) + K2.cells(ofDim: i)).unique() }
@@ -133,6 +132,10 @@ public extension SimplicialComplex {
         let v0 = vs.anyElement!
         let map = SimplicialMap(from: K1) { v in vs.contains(v) ? v0 : v }
         return map.image.named("\(K1.name) / \(K2.name)")
+    }
+    
+    public static func ∩(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
+        fatalError("TODO")
     }
     
     public static func ∨(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {

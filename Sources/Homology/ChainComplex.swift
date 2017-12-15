@@ -109,6 +109,10 @@ public struct _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: E
 }
 
 public extension ChainComplex {
+    public static func ⊕(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, A, R>) -> _ChainComplex<chainType, A, R> {
+        fatalError("TODO")
+    }
+
     public static func ⊗<B>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Tensor<A, B>, R> {
         typealias T = Tensor<A, B>
         typealias C = _ChainComplex<chainType, T, R>

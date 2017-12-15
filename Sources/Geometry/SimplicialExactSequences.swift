@@ -24,4 +24,44 @@ public extension HomologyExactSequence where chainType == Descending, A == Simpl
         
         self.init(CA, i, CX, j, CXA, d)
     }
+    
+    public static func MayerVietoris(_ X: SimplicialComplex, _ A: SimplicialComplex, _ B: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<A, R> {
+        
+        //               A
+        //         iA ↗︎     ↘︎ jA
+        //   A ∩ B               A ∪ B = X
+        //         iB ↘︎     ↗︎ jB
+        //               B
+        //
+        // ==>
+        //                   iA⊕iB               jA-jB
+        //   0  -> C(A ∩ B) ------> C(A) ⊕ C(B) ------> C(A + B) -> 0  (exact)
+        //
+        // ==>
+        //
+        //   .. -> H(A ∩ B) ------> H(A) ⊕ H(B) ------> H(A + B) ~= H(X) -> ... (exact)
+        //
+        
+        let AnB = A ∩ B
+        
+        let CAnB = ChainComplex(AnB, type)
+        let CA   = ChainComplex(A,   type)
+        let CB   = ChainComplex(B,   type)
+        let CX   = ChainComplex(X,   type)
+        
+        let iA = ChainMap(SimplicialMap.inclusion(from: AnB, to: A), R.self)
+        let iB = ChainMap(SimplicialMap.inclusion(from: AnB, to: B), R.self)
+        let jA = ChainMap(SimplicialMap.inclusion(from: A,   to: X), R.self)
+        let jB = ChainMap(SimplicialMap.inclusion(from: B,   to: X), R.self)
+        
+        let CAB = CA ⊕ CB
+        let   i = iA ⊕ iB
+        let   j = jA - jB
+        
+        let d = ChainMap(from: CX, to: CAnB, shift: -1) { s in
+            A.contains(s) ? s.boundary(type) : SimplicialChain.zero
+        }
+
+        return HomologyExactSequence(CAnB, i, CAB, j, CX, d)
+    }
 }

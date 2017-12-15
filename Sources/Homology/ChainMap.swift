@@ -70,5 +70,18 @@ public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBa
             assert( (d2 ∘ map).equals(map ∘ d1, forElements: b1.map{ FreeModule($0) } ) )
         }
     }
+    
+    public static func +(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, B, R>) -> _ChainMap<chainType, A, B, R> {
+        fatalError("TODO")
+    }
+    
+    public static func -(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, B, R>) -> _ChainMap<chainType, A, B, R> {
+        fatalError("TODO")
+    }
+    
+    public static func ⊕(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, B, R>) -> _ChainMap<chainType, A, B, R> {
+        fatalError("TODO")
+    }
+    
 }
 
