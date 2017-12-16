@@ -31,6 +31,8 @@ public protocol GeometricComplex: CustomStringConvertible {
     
     func boundaryMap<R: Ring>(_ i: Int, _ type: R.Type) -> FreeModuleHom<Cell, Cell, R>
     func boundaryMatrix<R: Ring>(_ i: Int, _ type: R.Type) -> ComputationalMatrix<R>
+    
+    func coboundary<R: Ring>(_ d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R>
 }
 
 public extension GeometricComplex {
@@ -60,6 +62,14 @@ public extension GeometricComplex {
         let from = (i <= dim) ? cells(ofDim: i) : []
         let to = (i > 0) ? cells(ofDim: i - 1) : []
         return partialBoundaryMatrix(from, to, R.self)
+    }
+    
+    public func coboundary<R: Ring>(_ d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R> {
+        let s = d.base
+        let to = cells(ofDim: d.degree + 1)
+        let e = R(intValue: (-1).pow(d.degree + 1))
+        let row = partialBoundaryMatrix(to, [s], R.self).multiply(e)
+        return FreeModule( zip(to.map{ Dual($0) }, row.generateGrid()) )
     }
     
     internal func partialBoundaryMatrix<R: Ring>(_ from: [Cell], _ to: [Cell], _ type: R.Type) -> ComputationalMatrix<R> {
@@ -113,17 +123,14 @@ public extension CochainComplex where chainType == Ascending {
     public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
         let cochain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             let from = K.cells(ofDim: i)
-            let to = K.cells(ofDim: i + 1)
+            let to   = K.cells(ofDim: i + 1)
 
-            let map = BoundaryMap { d in
-                let s = d.base
-                let row = K.partialBoundaryMatrix(to, [s], R.self).multiply( R(intValue: (-1).pow(i + 1) ) )
-                return FreeModule( zip(to.map{ Dual($0) }, row.generateGrid()) )
-            }
+            let map = BoundaryMap { d in FreeModule(K.coboundary(d, R.self)) }
             
+            let e = R(intValue: (-1).pow(i + 1))
             let matrix = K.partialBoundaryMatrix(to, from, R.self)
                           .transpose()
-                          .multiply( R(intValue: (-1).pow(i + 1) ) )
+                          .multiply(e)
             
             return (from.map{ Dual($0) }, map, matrix)
         }
@@ -134,16 +141,17 @@ public extension CochainComplex where chainType == Ascending {
         let cochain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
             let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
             let to   = K.cells(ofDim: i + 1).subtract(L.cells(ofDim: i + 1))
-            
+
             let map = BoundaryMap { d in
-                let s = d.base
-                let row = K.partialBoundaryMatrix(to, [s], R.self).multiply( R(intValue: (-1).pow(i + 1) ) )
-                return FreeModule( zip(to.map{ Dual($0) }, row.generateGrid()) )
+                let c = K.coboundary(d, R.self)
+                let vals = c.filter{ (d, _) in to.contains( d.base ) }
+                return FreeModule(vals)
             }
             
+            let e = R(intValue: (-1).pow(i + 1))
             let matrix = K.partialBoundaryMatrix(to, from, R.self)
                           .transpose()
-                          .multiply( R(intValue: (-1).pow(i + 1) ) )
+                          .multiply(e)
             
             return (from.map{ Dual($0) }, map, matrix)
         }
