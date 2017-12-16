@@ -10,15 +10,20 @@ import Foundation
 
 public extension HomologyExactSequence where chainType == Descending, A == Simplex, B == Simplex, C == Simplex {
     public init(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) {
+        
+        //             i         j
+        //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
+        //
+        
         let CA  = ChainComplex(A, type)
         let CX  = ChainComplex(X, type)
         let CXA = ChainComplex(X, A, type)
         
-        let i: ChainMap<A, A, R> = ChainMap(SimplicialMap.inclusion(from: A, to: X), R.self)
-        let j: ChainMap<A, A, R> = ChainMap(from: CX, to: CXA) { s in
+        let i = ChainMap(SimplicialMap.inclusion(from: A, to: X), R.self)
+        let j = ChainMap(from: CX, to: CXA) { (s: Simplex) in
             CXA.chainBasis(s.degree).contains(s) ? SimplicialChain(s) : SimplicialChain.zero
         }
-        let d: ChainMap<A, A, R> = ChainMap(from: CXA, to: CA, shift: -1) { s in
+        let d = ChainMap(from: CXA, to: CA, shift: -1) { (s: Simplex) in
             s.boundary(R.self)
         }
         
@@ -71,5 +76,29 @@ public extension HomologyExactSequence where chainType == Descending, A == Simpl
         }
 
         return HomologyExactSequence(CAnB, i, CAB, j, CX, d)
+    }
+}
+
+public extension CohomologyExactSequence where chainType == Ascending, A == Dual<Simplex>, B == Dual<Simplex>, C == Dual<Simplex> {
+    public init(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) {
+        
+        //             i         j
+        //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
+        //
+        //
+        // ==> Hom(-, R)
+        //
+        //             i*        j*
+        //   0 <- C*A <--  C*X  <-- C*XA <- 0  (exact)
+        
+        let CXA = CochainComplex(X, A, type)
+        let CX  = CochainComplex(X, type)
+        let CA  = CochainComplex(A, type)
+        
+        let i = CochainMap(SimplicialMap.inclusion(from: A, to: X), R.self)
+        let j = CochainMap(from: CXA, to: CX) { d in SimplicialCochain(d) }
+        let d = CochainMap(from: CA, to: CXA, shift: +1) { d in X.coboundary(d, R.self) }
+        
+        self.init(CXA, j, CX, i, CA, d)
     }
 }
