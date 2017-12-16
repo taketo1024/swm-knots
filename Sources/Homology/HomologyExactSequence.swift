@@ -17,9 +17,9 @@ public typealias CohomologyExactSequence<A: FreeModuleBase, B: FreeModuleBase, C
 public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBase, C: FreeModuleBase, R: EuclideanRing>: Sequence, CustomStringConvertible {
     public typealias Object = ExactSequence<R>.Object
 
-    internal let H0: _Homology<chainType, A, R>
-    internal let H1: _Homology<chainType, B, R>
-    internal let H2: _Homology<chainType, C, R>
+    public let H0: _Homology<chainType, A, R>
+    public let H1: _Homology<chainType, B, R>
+    public let H2: _Homology<chainType, C, R>
     
     internal let map0:  _HomologyMap<chainType, A, B, R>
     internal let map1:  _HomologyMap<chainType, B, C, R>
