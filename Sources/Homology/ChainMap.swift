@@ -73,11 +73,11 @@ public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBa
     }
     
     public static func +(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, B, R>) -> _ChainMap<chainType, A, B, R> {
-        fatalError("TODO")
+        return _ChainMap{ a in f1.appliedTo(a) + f2.appliedTo(a) }
     }
     
-    public static func -(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, B, R>) -> _ChainMap<chainType, A, B, R> {
-        fatalError("TODO")
+    public static prefix func -(f: _ChainMap<chainType, A, B, R>) -> _ChainMap<chainType, A, B, R> {
+        return _ChainMap{ a in -f.appliedTo(a) }
     }
     
     public static func ⊕<C>(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, C, R>) -> _ChainMap<chainType, A, Sum<B, C>, R> {

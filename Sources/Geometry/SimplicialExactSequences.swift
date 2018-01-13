@@ -10,15 +10,20 @@ import Foundation
 
 public extension HomologyExactSequence where chainType == Descending, A == Simplex, B == Simplex, C == Simplex {
     public init(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) {
+        
+        //             i         j
+        //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
+        //
+        
         let CA  = ChainComplex(A, type)
         let CX  = ChainComplex(X, type)
         let CXA = ChainComplex(X, A, type)
         
-        let i: ChainMap<A, A, R> = ChainMap(SimplicialMap.inclusion(from: A, to: X), R.self)
-        let j: ChainMap<A, A, R> = ChainMap(from: CX, to: CXA) { s in
+        let i = ChainMap(SimplicialMap.inclusion(from: A, to: X), R.self)
+        let j = ChainMap(from: CX, to: CXA) { (s: Simplex) in
             CXA.chainBasis(s.degree).contains(s) ? SimplicialChain(s) : SimplicialChain.zero
         }
-        let d: ChainMap<A, A, R> = ChainMap(from: CXA, to: CA, shift: -1) { s in
+        let d = ChainMap(from: CXA, to: CA, shift: -1) { (s: Simplex) in
             s.boundary(R.self)
         }
         
@@ -56,10 +61,10 @@ public extension HomologyExactSequence where chainType == Descending, A == Simpl
         let jA = ChainMap(SimplicialMap.inclusion(from: A,   to: X), R.self)
         let jB = ChainMap(SimplicialMap.inclusion(from: B,   to: X), R.self)
 
-        let CAB = CA ⊕ CB
-        let i   = iA ⊕ iB
+        let CAoB = CA ⊕ CB
+        let i    = iA ⊕ iB
         
-        let j = ChainMap(from: CAB, to: CX) { c in
+        let j = ChainMap(from: CAoB, to: CX) { c in
             switch c {
             case let ._1(a): return  jA.appliedTo(a)
             case let ._2(b): return -jB.appliedTo(b)
@@ -70,6 +75,68 @@ public extension HomologyExactSequence where chainType == Descending, A == Simpl
             A.contains(s) ? s.boundary(type) : SimplicialChain.zero
         }
 
-        return HomologyExactSequence(CAnB, i, CAB, j, CX, d)
+        return HomologyExactSequence(CAnB, i, CAoB, j, CX, d)
+    }
+}
+
+public extension CohomologyExactSequence where chainType == Ascending, A == Dual<Simplex>, B == Dual<Simplex>, C == Dual<Simplex> {
+    public init(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) {
+        
+        //             i         j
+        //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
+        //
+        //
+        // ==> Hom(-, R)
+        //
+        //             i*        j*
+        //   0 <- C*A <--  C*X  <-- C*XA <- 0  (exact)
+        
+        let CXA = CochainComplex(X, A, type)
+        let CX  = CochainComplex(X, type)
+        let CA  = CochainComplex(A, type)
+        
+        let i = CochainMap(SimplicialMap.inclusion(from: A, to: X), R.self)
+        let j = CochainMap(from: CXA, to: CX) { d in SimplicialCochain(d) }
+        let d = CochainMap(from: CA, to: CXA, shift: +1) { d in X.coboundary(d, R.self) }
+        
+        self.init(CXA, j, CX, i, CA, d)
+    }
+}
+
+public extension CohomologyExactSequence where chainType == Ascending, A == Dual<Simplex>, B == Sum<Dual<Simplex>, Dual<Simplex>>, C == Dual<Simplex> {
+    public static func MayerVietoris(_ X: SimplicialComplex, _ A: SimplicialComplex, _ B: SimplicialComplex, _ type: R.Type) -> CohomologyExactSequence<A, B, C, R> {
+        
+        //                   jA⊕(-jB)                 iA+iB
+        //   0  -> C*(A + B) --------> C*(A) ⊕ C*(B) ------> C*(A ∩ B) -> 0  (exact)
+        //
+        // ==>
+        //
+        //   .. -> H*(A + B) --------> H*(A) ⊕ H*(B) ------> H*(A ∩ B) -> ... (exact)
+        //         ~= H*(X)
+        //
+        
+        let AnB = A ∩ B
+        
+        let CX   = CochainComplex(X,   type)
+        let CA   = CochainComplex(A,   type)
+        let CB   = CochainComplex(B,   type)
+        let CAnB = CochainComplex(AnB, type)
+
+        let jA = CochainMap(SimplicialMap.inclusion(from: A,   to: X), R.self)
+        let jB = CochainMap(SimplicialMap.inclusion(from: B,   to: X), R.self)
+        
+        let CAoB = CA ⊕ CB
+        let j    = jA ⊕ (-jB)
+        
+        let i = CochainMap(from: CAoB, to: CAnB) { d in
+            switch d {
+            case let ._1(dA): return FreeModule(dA)
+            case let ._2(dB): return FreeModule(dB)
+            }
+        }
+        
+        let d = CochainMap(from: CAnB, to: CX, shift: +1) { d in A.coboundary(d, R.self) }
+        
+        return CohomologyExactSequence(CX, j, CAoB, i, CAnB, d)
     }
 }
