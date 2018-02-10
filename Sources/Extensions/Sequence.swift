@@ -37,6 +37,11 @@ public extension Sequence {
 }
 
 public extension Sequence where Element: Hashable {
+    var isUnique: Bool {
+        var alreadyAdded = Set<Element>()
+        return self.forAll { alreadyAdded.insert($0).inserted }
+    }
+    
     func unique() -> [Element] {
         var alreadyAdded = Set<Element>()
         return self.filter { alreadyAdded.insert($0).inserted }
