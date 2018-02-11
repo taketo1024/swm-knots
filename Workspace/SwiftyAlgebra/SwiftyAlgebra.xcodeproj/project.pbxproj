@@ -405,9 +405,9 @@
 				DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */,
 				DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */,
 				DD0C5B97202F388200FC71B5 /* SimplicialChainOperations.swift */,
+				DD0C5B99202F39D600FC71B5 /* SimplicialCohomologyRing.swift */,
 				142932021FAEB6FB003EE1BB /* SimplicialMap.swift */,
 				1489F4D71FE026D0008E600D /* SimplicialExactSequences.swift */,
-				DD0C5B99202F39D600FC71B5 /* SimplicialCohomologyRing.swift */,
 				141C0CDE1F28232F00D9BDDE /* CellularComplex.swift */,
 				DD5D09951FB5AD0700E1BDFC /* TopologicalInvariants.swift */,
 			);

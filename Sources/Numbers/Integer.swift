@@ -35,14 +35,14 @@ extension IntegerNumber: EuclideanRing {
         case 1:
             return 1
         case -1:
-            return (n % 2 == 0) ? 1 : -1
+            return n.isEven ? 1 : -1
         default:
             return (0 ..< n).reduce(1){ (res, _) in res * self }
         }
     }
     
-    public var evenOddSign: Int {
-        return (self % 2 == 0) ? 1 : -1
+    public var isEven: Bool {
+        return (self % 2 == 0)
     }
 }
 

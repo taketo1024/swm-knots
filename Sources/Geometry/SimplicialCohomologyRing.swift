@@ -46,3 +46,14 @@ public extension CohomologyClass where chainType == Ascending, A == Dual<Simplex
         return a.cap(x)
     }
 }
+
+public extension CohomologyClass where chainType == Ascending, A == Dual<Simplex>, R == Z_2 {
+    public func Sq(_ i: Int) -> CohomologyClass<A, R> {
+        if let H = structure {
+            let a = self.representative
+            return CohomologyClass( a.Sq(i), H )
+        } else {
+            return CohomologyClass.zero
+        }
+    }
+}

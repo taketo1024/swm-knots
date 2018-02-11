@@ -81,10 +81,6 @@ public struct Simplex: GeometricCell, Comparable {
         return queue.unique()
     }
     
-    public func join(_ s: Simplex) -> Simplex {
-        return Simplex(self.unorderedVertices.union(s.unorderedVertices))
-    }
-    
     public func subtract(_ s: Simplex) -> Simplex {
         return Simplex(self.unorderedVertices.subtracting(s.unorderedVertices))
     }
@@ -99,6 +95,14 @@ public struct Simplex: GeometricCell, Comparable {
             return (t, e)
         }
         return SimplicialChain(values)
+    }
+    
+    public static func ∪(_ s1: Simplex, _ s2: Simplex) -> Simplex {
+        return Simplex(s1.unorderedVertices.union(s2.unorderedVertices))
+    }
+    
+    public static func ∩(_ s1: Simplex, _ s2: Simplex) -> Simplex {
+        return Simplex(s1.unorderedVertices.intersection(s2.unorderedVertices))
     }
     
     public var hashValue: Int {
