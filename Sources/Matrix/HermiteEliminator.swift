@@ -18,7 +18,7 @@ public final class RowHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         rank = target.table.count
     }
     
-    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == ComputationSpecializedRing)
     internal override func iteration() -> Bool {
         if targetRow >= rank || targetCol >= cols {
             return true

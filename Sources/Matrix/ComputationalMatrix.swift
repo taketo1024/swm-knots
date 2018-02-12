@@ -8,6 +8,8 @@
 
 import Foundation
 
+internal typealias ComputationSpecializedRing = IntegerNumber
+
 public enum ComputationalMatrixAlignment {
     case Rows
     case Cols
@@ -81,7 +83,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         table[i]!.append( (j, a) )
     }
 
-    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == ComputationSpecializedRing)
     internal func sort() {
         for (i, list) in table {
             table[i] = list.sorted{ (e1, e2) in e1.0 < e2.0 }
@@ -126,7 +128,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return submatrix(0 ..< rows, colRange)
     }
     
-    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == ComputationSpecializedRing)
     public func submatrix(_ rowRange: CountableRange<Int>, _ colRange: CountableRange<Int>) -> ComputationalMatrix<R> {
         assert(0 <= rowRange.lowerBound && rowRange.upperBound <= rows)
         assert(0 <= colRange.lowerBound && colRange.upperBound <= cols)
@@ -164,7 +166,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
-    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == ComputationSpecializedRing)
     public static func *(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> ComputationalMatrix<R> {
         assert(a.cols == b.rows)
         
@@ -195,7 +197,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return result
     }
     
-    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == ComputationSpecializedRing)
     public func multiplyRow(at i0: Int, by r: R) {
         switchAlignment(.Rows)
         
@@ -221,7 +223,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
-    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == ComputationSpecializedRing)
     public func addRow(at i0: Int, to i1: Int, multipliedBy r: R = R.identity) {
         switchAlignment(.Rows)
         
@@ -318,7 +320,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return self
     }
     
-    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == ComputationSpecializedRing)
     public static func ==(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> Bool {
         if (a.rows, a.cols) != (b.rows, b.cols) {
             return false

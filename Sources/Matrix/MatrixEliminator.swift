@@ -88,7 +88,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         transpose()
     }
     
-    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == ComputationSpecializedRing)
     internal func findMin(_ sequence: [(Int, R)]) -> (Int, R)? {
         var cand: (Int, R)? = nil
         for (i, a) in sequence {
@@ -194,7 +194,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
             }
         }
         
-        @_specialize(where R == IntegerNumber)
+        @_specialize(where R == ComputationSpecializedRing)
         public func apply(to A: ComputationalMatrix<R>) {
             switch self {
             case let .AddRow(i, j, r):
