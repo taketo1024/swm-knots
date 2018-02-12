@@ -82,6 +82,7 @@
 		DD90ACC91F763553001AFC9C /* PolynomialIdeal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */; };
 		DDC2400E1FB0852800258765 /* SimplicialComplexOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */; };
 		DDDA1610203170850024764F /* WuClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDA160F203170850024764F /* WuClass.swift */; };
+		DDDA16142031730F0024764F /* StiefelWhitneyClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDA16132031730E0024764F /* StiefelWhitneyClass.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -180,6 +181,7 @@
 		DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolynomialIdeal.swift; sourceTree = "<group>"; };
 		DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialComplexOperations.swift; sourceTree = "<group>"; };
 		DDDA160F203170850024764F /* WuClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WuClass.swift; sourceTree = "<group>"; };
+		DDDA16132031730E0024764F /* StiefelWhitneyClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StiefelWhitneyClass.swift; sourceTree = "<group>"; };
 		DDDE60A01FE43EB000BF476B /* Homology2.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Homology2.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 /* End PBXFileReference section */
 
@@ -443,6 +445,7 @@
 			children = (
 				DD5D09951FB5AD0700E1BDFC /* EulerClass.swift */,
 				DDDA160F203170850024764F /* WuClass.swift */,
+				DDDA16132031730E0024764F /* StiefelWhitneyClass.swift */,
 			);
 			path = CharacteristicClasses;
 			sourceTree = "<group>";
@@ -565,6 +568,7 @@
 				1410C1131FB1EC9E00CEE47D /* Array.swift in Sources */,
 				144AD2911EC21A4500E23890 /* Homology.swift in Sources */,
 				DD5D09941FB5ACD700E1BDFC /* SimplicialComplexExamples.swift in Sources */,
+				DDDA16142031730F0024764F /* StiefelWhitneyClass.swift in Sources */,
 				DD119BC21FE2271E00FB4758 /* ExactSequence.swift in Sources */,
 				1424F4F91EB997780052581F /* AdditiveGroup.swift in Sources */,
 				1424F5071EB997780052581F /* Rational.swift in Sources */,
