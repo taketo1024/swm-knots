@@ -22,7 +22,7 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
     
     private let z: Cycle
     private let factors: [Int : Cycle]
-    public  let structure: Structure?
+    internal let structure: Structure?
     
     public init(_ z: Cycle, _ H: Structure) {
         self.z = z
@@ -37,8 +37,8 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
         self.structure = nil
     }
     
-    public subscript(_ i: Int) -> Cycle {
-        return factors[i] ?? Cycle.zero
+    public subscript(_ i: Int) -> _HomologyClass<chainType, A, R> {
+        return factors[i].map{ _HomologyClass($0, structure!) } ?? _HomologyClass.zero
     }
     
     public var representative: Cycle {
@@ -65,6 +65,10 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
         return self.init()
     }
     
+    public var isZero: Bool {
+        return self == _HomologyClass<chainType, A, R>.zero
+    }
+    
     public static func ==(a: _HomologyClass<chainType, A, R>, b: _HomologyClass<chainType, A, R>) -> Bool {
         switch (a.structure, b.structure) {
         case let (H1?, H2?):
@@ -72,7 +76,10 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
             assert(H1 == H2)
             
             if a.factors.keys == b.factors.keys {
-                return a.factors.forAll { (i, z) in H1[i].cyclesAreHomologous(z, b[i]) }
+                return a.factors.forAll { (i, z) in
+                    let w = b.factors[i] ?? Cycle.zero
+                    return H1[i].cyclesAreHomologous(z, w)
+                }
             } else {
                 return false
             }

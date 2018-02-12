@@ -28,3 +28,11 @@ public extension SimplicialComplex {
         return StiefelWhitneyClasses.sumAll()
     }
 }
+
+public func w(_ i: Int, _ M: SimplicialComplex) -> CohomologyClass<Dual<Simplex>, Z_2> {
+    return M.StiefelWhitneyClass(i)!
+}
+
+public func w(_ M: SimplicialComplex) -> CohomologyClass<Dual<Simplex>, Z_2> {
+    return M.totalStiefelWhitneyClass
+}
