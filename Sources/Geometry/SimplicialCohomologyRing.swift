@@ -30,6 +30,11 @@ public extension CohomologyClass where chainType == Ascending, A == Dual<Simplex
     public static func ∪(a: CohomologyClass<A, R>, b: CohomologyClass<A, R>) -> CohomologyClass<A, R> {
         return a.cup(b)
     }
+    
+    public func pow(_ n: Int) -> CohomologyClass<A, R> {
+        let a = self
+        return n == 1 ? a : a * a.pow(n - 1)
+    }
 
     public func cap(_ x: HomologyClass<Simplex, R>) -> HomologyClass<Simplex, R> {
         guard let _ = self.structure, let H2 = x.structure else {
