@@ -125,7 +125,6 @@ public extension SimplicialCochain where A == Dual<Simplex>, R == Z_2 {
             if s1.sortedVertices == even {
                 return (A(z), 1)
             } else {
-                print(s1.sortedVertices, "!=", even)
                 return nil
             }
         }
