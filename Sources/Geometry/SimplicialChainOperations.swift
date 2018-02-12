@@ -131,6 +131,8 @@ public extension SimplicialCochain where A == Dual<Simplex>, R == Z_2 {
         
         let pairs = self.basis.allCombinations(with: g.basis)
         let elements = pairs.flatMap{ (d1, d2) in cup(d1, d2) }
+                            .group{ $0.0 }
+                            .map{ (d, e) in (d, e.sum{ $0.1 }) }
         
         return SimplicialCochain<R>(elements)
     }
