@@ -81,6 +81,7 @@
 		DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125991F31AA2500FD5533 /* Cache.swift */; };
 		DD90ACC91F763553001AFC9C /* PolynomialIdeal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */; };
 		DDC2400E1FB0852800258765 /* SimplicialComplexOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */; };
+		DDDA1610203170850024764F /* WuClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDA160F203170850024764F /* WuClass.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -178,6 +179,7 @@
 		DD6125991F31AA2500FD5533 /* Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
 		DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolynomialIdeal.swift; sourceTree = "<group>"; };
 		DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialComplexOperations.swift; sourceTree = "<group>"; };
+		DDDA160F203170850024764F /* WuClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WuClass.swift; sourceTree = "<group>"; };
 		DDDE60A01FE43EB000BF476B /* Homology2.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Homology2.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 /* End PBXFileReference section */
 
@@ -440,6 +442,7 @@
 			isa = PBXGroup;
 			children = (
 				DD5D09951FB5AD0700E1BDFC /* EulerClass.swift */,
+				DDDA160F203170850024764F /* WuClass.swift */,
 			);
 			path = CharacteristicClasses;
 			sourceTree = "<group>";
@@ -569,6 +572,7 @@
 				14D261341EE4614E006775E2 /* Set.swift in Sources */,
 				140BCD511EBA3F8A00D7CE74 /* ChainComplex.swift in Sources */,
 				1424F5011EB997780052581F /* Matrix.swift in Sources */,
+				DDDA1610203170850024764F /* WuClass.swift in Sources */,
 				1499CD011F236328009C3C99 /* CustomOperations.swift in Sources */,
 				14546DB71FDFCE5100898326 /* HomologyMap.swift in Sources */,
 				145F46011EEAF0CC0045CDB2 /* Z_2.swift in Sources */,
