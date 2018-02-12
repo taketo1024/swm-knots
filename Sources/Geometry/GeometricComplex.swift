@@ -96,3 +96,21 @@ public extension GeometricComplex {
             + "\n}"
     }
 }
+
+public extension GeometricComplex {
+    public var eulerNumber: Int {
+        return validDims.sum{ i in (-1).pow(i) * cells(ofDim: i).count }
+    }
+    
+    public func eulerNumber<R: EuclideanRing>(_ type: R.Type) -> R {
+        return R(intValue: eulerNumber)
+    }
+}
+
+public func χ<G: GeometricComplex>(_ M: G) -> IntegerNumber {
+    return M.eulerNumber
+}
+
+public func χ<G: GeometricComplex, R: EuclideanRing>(_ M: G, _ type: R.Type) -> R {
+    return M.eulerNumber(R.self)
+}

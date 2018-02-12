@@ -68,7 +68,7 @@
 		14B2FB8C1ED8FBA000C182EB /* ComputationalMatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B2FB8B1ED8FBA000C182EB /* ComputationalMatrixTests.swift */; };
 		14D261321EE44DB4006775E2 /* AlgebraicStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261311EE44DB4006775E2 /* AlgebraicStructure.swift */; };
 		14D261341EE4614E006775E2 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* Set.swift */; };
-		DD0AD26420314D0E00414A34 /* OrientationClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0AD26320314D0E00414A34 /* OrientationClass.swift */; };
+		DD0AD26420314D0E00414A34 /* GeometricComplexOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0AD26320314D0E00414A34 /* GeometricComplexOrientation.swift */; };
 		DD0C5B96202F381300FC71B5 /* GeometricComplexExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C5B95202F381300FC71B5 /* GeometricComplexExtensions.swift */; };
 		DD0C5B98202F388200FC71B5 /* SimplicialChainOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C5B97202F388200FC71B5 /* SimplicialChainOperations.swift */; };
 		DD0C5B9A202F39D600FC71B5 /* SimplicialCohomologyRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C5B99202F39D600FC71B5 /* SimplicialCohomologyRing.swift */; };
@@ -165,7 +165,7 @@
 		14B2FB8B1ED8FBA000C182EB /* ComputationalMatrixTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComputationalMatrixTests.swift; sourceTree = "<group>"; };
 		14D261311EE44DB4006775E2 /* AlgebraicStructure.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlgebraicStructure.swift; sourceTree = "<group>"; };
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
-		DD0AD26320314D0E00414A34 /* OrientationClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationClass.swift; sourceTree = "<group>"; };
+		DD0AD26320314D0E00414A34 /* GeometricComplexOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometricComplexOrientation.swift; sourceTree = "<group>"; };
 		DD0C5B95202F381300FC71B5 /* GeometricComplexExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometricComplexExtensions.swift; sourceTree = "<group>"; };
 		DD0C5B97202F388200FC71B5 /* SimplicialChainOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialChainOperations.swift; sourceTree = "<group>"; };
 		DD0C5B99202F39D600FC71B5 /* SimplicialCohomologyRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialCohomologyRing.swift; sourceTree = "<group>"; };
@@ -252,6 +252,7 @@
 				1424F4DF1EB997780052581F /* Permutation */,
 				14929C9B1ED9C798006ACAC5 /* Geometry */,
 				147D98071EBA0C0C00C736AC /* Homology */,
+				DDDA160E20316FAB0024764F /* CharacteristicClasses */,
 				14546DA91FDF9DB800898326 /* Structure */,
 				1424F4EF1EB997780052581F /* Computation */,
 				1424F4F21EB997780052581F /* Meta */,
@@ -403,6 +404,7 @@
 				14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */,
 				142932001FAEB6E7003EE1BB /* GeometricComplexMap.swift */,
 				DD0C5B95202F381300FC71B5 /* GeometricComplexExtensions.swift */,
+				DD0AD26320314D0E00414A34 /* GeometricComplexOrientation.swift */,
 				14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */,
 				DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */,
 				DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */,
@@ -411,8 +413,6 @@
 				142932021FAEB6FB003EE1BB /* SimplicialMap.swift */,
 				1489F4D71FE026D0008E600D /* SimplicialExactSequences.swift */,
 				141C0CDE1F28232F00D9BDDE /* CellularComplex.swift */,
-				DD0AD26320314D0E00414A34 /* OrientationClass.swift */,
-				DD5D09951FB5AD0700E1BDFC /* EulerClass.swift */,
 			);
 			path = Geometry;
 			sourceTree = "<group>";
@@ -434,6 +434,14 @@
 				DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */,
 			);
 			path = Polynomial;
+			sourceTree = "<group>";
+		};
+		DDDA160E20316FAB0024764F /* CharacteristicClasses */ = {
+			isa = PBXGroup;
+			children = (
+				DD5D09951FB5AD0700E1BDFC /* EulerClass.swift */,
+			);
+			path = CharacteristicClasses;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -571,7 +579,7 @@
 				142932031FAEB6FB003EE1BB /* SimplicialMap.swift in Sources */,
 				14546DAB1FDF9DD200898326 /* GroupStructure.swift in Sources */,
 				DD17AFF31FE37F3A00AA5924 /* ChainComplexOperations.swift in Sources */,
-				DD0AD26420314D0E00414A34 /* OrientationClass.swift in Sources */,
+				DD0AD26420314D0E00414A34 /* GeometricComplexOrientation.swift in Sources */,
 				1424F4FF1EB997780052581F /* Ring.swift in Sources */,
 				14A85FF11ED9C8C300A754EA /* Vertex.swift in Sources */,
 				DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */,
