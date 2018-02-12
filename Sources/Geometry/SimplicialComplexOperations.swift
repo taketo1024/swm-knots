@@ -23,7 +23,8 @@ public extension SimplicialComplex {
     }
     
     public func link(_ s: Simplex) -> SimplicialComplex {
-        return (star(s) - s).named("Lk\(s)")
+        let K = SimplicialComplex(maximalCells: [s])
+        return (star(s) - K).named("Lk\(s)")
     }
     
     public var boundary: SimplicialComplex {
@@ -41,8 +42,12 @@ public extension SimplicialComplex {
     }
     
     public func identifyVertices(_ pairs: [(Vertex, Vertex)]) -> SimplicialComplex {
-        let dict = Dictionary(pairs: pairs)
-        let map = SimplicialMap(from: self) { v in dict[v] ?? v }
+        let table = Dictionary(pairs: pairs)
+        return identifyVertices(table)
+    }
+    
+    public func identifyVertices(_ table: [Vertex : Vertex]) -> SimplicialComplex {
+        let map = SimplicialMap(from: self) { v in table[v] ?? v }
         return map.image
     }
     
