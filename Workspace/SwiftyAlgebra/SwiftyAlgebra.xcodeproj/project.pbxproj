@@ -68,6 +68,7 @@
 		14B2FB8C1ED8FBA000C182EB /* ComputationalMatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B2FB8B1ED8FBA000C182EB /* ComputationalMatrixTests.swift */; };
 		14D261321EE44DB4006775E2 /* AlgebraicStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261311EE44DB4006775E2 /* AlgebraicStructure.swift */; };
 		14D261341EE4614E006775E2 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* Set.swift */; };
+		DD0AD26420314D0E00414A34 /* OrientationClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0AD26320314D0E00414A34 /* OrientationClass.swift */; };
 		DD0C5B96202F381300FC71B5 /* GeometricComplexExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C5B95202F381300FC71B5 /* GeometricComplexExtensions.swift */; };
 		DD0C5B98202F388200FC71B5 /* SimplicialChainOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C5B97202F388200FC71B5 /* SimplicialChainOperations.swift */; };
 		DD0C5B9A202F39D600FC71B5 /* SimplicialCohomologyRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0C5B99202F39D600FC71B5 /* SimplicialCohomologyRing.swift */; };
@@ -76,7 +77,7 @@
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
 		DD4E539B1FE374F300C75F7E /* FreeModuleBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */; };
 		DD5D09941FB5ACD700E1BDFC /* SimplicialComplexExamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */; };
-		DD5D09961FB5AD0700E1BDFC /* TopologicalInvariants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5D09951FB5AD0700E1BDFC /* TopologicalInvariants.swift */; };
+		DD5D09961FB5AD0700E1BDFC /* EulerClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5D09951FB5AD0700E1BDFC /* EulerClass.swift */; };
 		DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125991F31AA2500FD5533 /* Cache.swift */; };
 		DD90ACC91F763553001AFC9C /* PolynomialIdeal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */; };
 		DDC2400E1FB0852800258765 /* SimplicialComplexOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */; };
@@ -164,6 +165,7 @@
 		14B2FB8B1ED8FBA000C182EB /* ComputationalMatrixTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComputationalMatrixTests.swift; sourceTree = "<group>"; };
 		14D261311EE44DB4006775E2 /* AlgebraicStructure.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlgebraicStructure.swift; sourceTree = "<group>"; };
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
+		DD0AD26320314D0E00414A34 /* OrientationClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationClass.swift; sourceTree = "<group>"; };
 		DD0C5B95202F381300FC71B5 /* GeometricComplexExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometricComplexExtensions.swift; sourceTree = "<group>"; };
 		DD0C5B97202F388200FC71B5 /* SimplicialChainOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialChainOperations.swift; sourceTree = "<group>"; };
 		DD0C5B99202F39D600FC71B5 /* SimplicialCohomologyRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialCohomologyRing.swift; sourceTree = "<group>"; };
@@ -172,7 +174,7 @@
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
 		DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeModuleBase.swift; sourceTree = "<group>"; };
 		DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialComplexExamples.swift; sourceTree = "<group>"; };
-		DD5D09951FB5AD0700E1BDFC /* TopologicalInvariants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopologicalInvariants.swift; sourceTree = "<group>"; };
+		DD5D09951FB5AD0700E1BDFC /* EulerClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EulerClass.swift; sourceTree = "<group>"; };
 		DD6125991F31AA2500FD5533 /* Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
 		DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolynomialIdeal.swift; sourceTree = "<group>"; };
 		DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialComplexOperations.swift; sourceTree = "<group>"; };
@@ -409,7 +411,8 @@
 				142932021FAEB6FB003EE1BB /* SimplicialMap.swift */,
 				1489F4D71FE026D0008E600D /* SimplicialExactSequences.swift */,
 				141C0CDE1F28232F00D9BDDE /* CellularComplex.swift */,
-				DD5D09951FB5AD0700E1BDFC /* TopologicalInvariants.swift */,
+				DD0AD26320314D0E00414A34 /* OrientationClass.swift */,
+				DD5D09951FB5AD0700E1BDFC /* EulerClass.swift */,
 			);
 			path = Geometry;
 			sourceTree = "<group>";
@@ -568,6 +571,7 @@
 				142932031FAEB6FB003EE1BB /* SimplicialMap.swift in Sources */,
 				14546DAB1FDF9DD200898326 /* GroupStructure.swift in Sources */,
 				DD17AFF31FE37F3A00AA5924 /* ChainComplexOperations.swift in Sources */,
+				DD0AD26420314D0E00414A34 /* OrientationClass.swift in Sources */,
 				1424F4FF1EB997780052581F /* Ring.swift in Sources */,
 				14A85FF11ED9C8C300A754EA /* Vertex.swift in Sources */,
 				DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */,
@@ -584,7 +588,7 @@
 				1424F5051EB997780052581F /* Map.swift in Sources */,
 				1424F5081EB997780052581F /* Real.swift in Sources */,
 				1424F4FB1EB997780052581F /* Field.swift in Sources */,
-				DD5D09961FB5AD0700E1BDFC /* TopologicalInvariants.swift in Sources */,
+				DD5D09961FB5AD0700E1BDFC /* EulerClass.swift in Sources */,
 				DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */,
 				1410C11B1FB2040900CEE47D /* SmithEliminator.swift in Sources */,
 				DD0C5B9A202F39D600FC71B5 /* SimplicialCohomologyRing.swift in Sources */,
