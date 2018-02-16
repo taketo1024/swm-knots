@@ -79,6 +79,7 @@
 		DD5D09941FB5ACD700E1BDFC /* SimplicialComplexExamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */; };
 		DD5D09961FB5AD0700E1BDFC /* EulerClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5D09951FB5AD0700E1BDFC /* EulerClass.swift */; };
 		DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125991F31AA2500FD5533 /* Cache.swift */; };
+		DD773EFD2035522E0031F60B /* ChainContractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD773EFC2035522E0031F60B /* ChainContractor.swift */; };
 		DD90ACC91F763553001AFC9C /* PolynomialIdeal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */; };
 		DDC2400E1FB0852800258765 /* SimplicialComplexOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */; };
 		DDDA1610203170850024764F /* WuClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDA160F203170850024764F /* WuClass.swift */; };
@@ -178,6 +179,7 @@
 		DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialComplexExamples.swift; sourceTree = "<group>"; };
 		DD5D09951FB5AD0700E1BDFC /* EulerClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EulerClass.swift; sourceTree = "<group>"; };
 		DD6125991F31AA2500FD5533 /* Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
+		DD773EFC2035522E0031F60B /* ChainContractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainContractor.swift; sourceTree = "<group>"; };
 		DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolynomialIdeal.swift; sourceTree = "<group>"; };
 		DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialComplexOperations.swift; sourceTree = "<group>"; };
 		DDDA160F203170850024764F /* WuClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WuClass.swift; sourceTree = "<group>"; };
@@ -417,6 +419,7 @@
 				142932021FAEB6FB003EE1BB /* SimplicialMap.swift */,
 				1489F4D71FE026D0008E600D /* SimplicialExactSequences.swift */,
 				141C0CDE1F28232F00D9BDDE /* CellularComplex.swift */,
+				DD773EFC2035522E0031F60B /* ChainContractor.swift */,
 			);
 			path = Geometry;
 			sourceTree = "<group>";
@@ -591,6 +594,7 @@
 				1424F4FF1EB997780052581F /* Ring.swift in Sources */,
 				14A85FF11ED9C8C300A754EA /* Vertex.swift in Sources */,
 				DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */,
+				DD773EFD2035522E0031F60B /* ChainContractor.swift in Sources */,
 				145339C01EC7D67100F014F4 /* Ref.swift in Sources */,
 				1424F5061EB997780052581F /* Integer.swift in Sources */,
 				1424F5001EB997780052581F /* FreeModule.swift in Sources */,

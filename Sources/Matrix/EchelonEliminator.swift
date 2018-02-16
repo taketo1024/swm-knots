@@ -12,6 +12,10 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     internal var targetRow = 0
     internal var targetCol = 0
     
+    internal override var resultType: MatrixEliminationResult<R>.Type {
+        return RowEchelonEliminationResult.self
+    }
+    
     override func prepare() {
         target.switchAlignment(.Rows)
     }
@@ -66,6 +70,12 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
             let (j, a) = list.first!
             return (i >= targetRow && j == targetCol) ? (i, a) : nil
         }
+    }
+}
+
+public final class RowEchelonEliminationResult<R: EuclideanRing>: MatrixEliminationResult<R> {
+    public override var rank: Int {
+        return result.table.count
     }
 }
 
