@@ -9,31 +9,52 @@
 import Foundation
 
 public class ChainContractor<R: EuclideanRing> {
-    typealias A = Simplex
+    typealias S = Simplex
     typealias C = SimplicialChain<R>
     
-    internal let list: [A]
+    internal let K: SimplicialComplex
     
-    internal var gSymbols = [A]()
-    internal var rSymbols  = [C]()
+    internal var step = -1
+    internal var done = Set<S>()
     
-    internal var fTable = [A : C]()
-    internal var hTable = [A : C]()
+    internal var generators = [S]()
+    internal var relations  = [C]()
+    internal var diff = [S : C]()
+
+    internal var fTable = [S : C]()
+    internal var hTable = [S : C]()
     
     public init(_ K: SimplicialComplex, _ type: R.Type) {
-        self.list = K.maximalCells.flatMap{ $0.allSubsimplices().sorted() }.unique()
+        self.K = K
         self.run()
     }
     
-    public var generators: [SimplicialChain<R>] {
-        return gSymbols.map{ g($0) }
+    public var contractedChainComplex: ChainComplex<Simplex, R> {
+        typealias CC = ChainComplex<S, R>
+        let chain = K.validDims.map{ (i) -> (CC.ChainBasis, CC.BoundaryMap, CC.BoundaryMatrix) in
+            
+            let from = generators.filter{ $0.dim == i }
+            let to   = generators.filter{ $0.dim == i - 1 }
+            let map  = CC.BoundaryMap.zero // TODO
+            
+            let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toCell: toIndex]
+
+            let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
+                return diff[s].flatMap { b -> [MatrixComponent<R>] in
+                    b.map { (t, r) in
+                        (toIndex[t]!, j, r)
+                    }
+                } ?? []
+            }
+            let matrix = ComputationalMatrix(rows: to.count, cols: from.count, components: components)
+            
+            return (from, map, matrix)
+        }
+        
+        return CC(name: K.name, chain)
     }
     
-    public var relations: [SimplicialChain<R>] {
-        return rSymbols.map{ g($0) }
-    }
-    
-    internal func f(_ s: A) -> C {
+    internal func f(_ s: S) -> C {
         return fTable[s] ?? C.zero
     }
     
@@ -41,15 +62,15 @@ public class ChainContractor<R: EuclideanRing> {
         return c.sum{ (s, a) in a * f(s) }
     }
     
-    internal func g(_ s: A) -> C {
-        return C(s) + h(s.boundary(R.self))
+    internal func g(_ s: S) -> C {
+        return C(s) + h(C(s).boundary())
     }
     
     internal func g(_ c: C) -> C {
         return c.sum{ (s, a) in a * g(s) }
     }
     
-    internal func h(_ s: A) -> C {
+    internal func h(_ s: S) -> C {
         return hTable[s] ?? C.zero
     }
     
@@ -58,80 +79,134 @@ public class ChainContractor<R: EuclideanRing> {
     }
     
     internal func isZero(_ c: C) -> Bool {
-        if rSymbols.isEmpty {
+        if relations.isEmpty {
             return c == C.zero
         }
         
-        let A = DynamicMatrix<R>(rows: rSymbols.count + 1, cols: gSymbols.count) { (i, j) in
-            let x = gSymbols[j]
-            if i < rSymbols.count {
-                return rSymbols[i][x]
+        let A = DynamicMatrix<R>(rows: relations.count + 1, cols: generators.count) { (i, j) in
+            let x = generators[j]
+            if i < relations.count {
+                return relations[i][x]
             } else {
                 return c[x]
             }
         }
         
         let E = A.eliminate(form: .RowEchelon)
-        return E.rank == rSymbols.count
+        return E.rank == relations.count
+    }
+    
+    internal func makeList(_ s: S) -> [S] {
+        if done.contains(s) {
+            return []
+        }
+        
+        func extract(_ s: S) -> [S] {
+            return [s] + s.faces().filter({ !done.contains($0) }).flatMap{ extract($0) }
+        }
+        return extract(s).reversed().unique()
     }
     
     internal func run() {
-        for (i, s) in list.enumerated() {
-            iteration(i, s)
+        for s in K.maximalCells {
+            let list = makeList(s)
+            
+            for s in list {
+                iteration(s)
+            }
         }
+        
+        assertChainContraction()
         
         print()
         print("final result")
         print("------------")
-        print("\tgenerators: ", generators)
-        print("\trelations : ", relations)
+        print("generators:")
+        print(generators.map{ "\($0.dim): \(g($0))"}.joined(separator: ",\n"))
         print()
     }
     
-    internal func iteration(_ i: Int, _ s: A) {
-        let boundary = s.boundary(R.self)
-        let f_boundary = f(boundary)
+    internal func iteration(_ s: S) {
+        step += 1
         
-        print(i, "\ts: \(s)\n\tf(∂s) = \(f_boundary)")
+        let bs = C(s).boundary()
+        let f_bs = f(bs)
+        
+        print(step, "\ts: \(s)\n\tf(∂s) = \(f_bs)")
         print()
         
-        if isZero(f_boundary) {
-            print("\tadd: ", s)
+        if isZero(f_bs) {
+            print("\tadd:", s)
             
-            gSymbols.append(s)
+            generators.append(s)
             fTable[s] = C(s)
             
         } else {
-            // TODO: extract relations from f_b
-            if let (x, a) = f_boundary.filter({ (_, a) in a.isInvertible }).sorted(by: { $0.0 <= $1.0 }).last {
-                print("\tremove: ", x, "=", a.inverse! * (f_boundary - a * C(x)))
-                gSymbols.remove(at: gSymbols.index(of: x)!)
+            let candidates = f_bs
+                .filter{ (t1, a) in a.isInvertible && diff[t1] == nil }
+                .sorted{ (v1, v2) in v1.0 <= v1.0 }
+            
+            if let (t1, a) = candidates.last {
+                print("\tremove:", t1, "=", a.inverse! * (f_bs - a * C(t1)))
                 
-                for (y, f_y) in fTable.filter({ (_, f_y) in f_y[x] != R.zero }) {
-                    let e = f_y[x] * a.inverse!
-                    fTable[y] = f_y - e * f_boundary
+                generators.remove(at: generators.index(of: t1)!)
+                
+                let h_bs = h(bs)
+                
+                for (t2, v) in fTable.filter({ (_, v) in v[t1] != R.zero }) {
+                    let e = v[t1] * a.inverse!
+                    fTable[t2] = v - e * f_bs
+                    hTable[t2] = h(t2) - e * (C(s) + h_bs)
                 }
-                fTable = fTable.filter{ $0.1 != C.zero }
-
-                for (i, r) in rSymbols.enumerated().filter({ (_, r) in r[x] != R.zero}) {
-                    let e = r[x] * a.inverse!
-                    rSymbols[i] = r - e * f_boundary
+                
+                for (i, r) in relations.enumerated().filter({ (_, r) in r[t1] != R.zero}) {
+                    let e = r[t1] * a.inverse!
+                    relations[i] = r - e * f_bs
                 }
-                rSymbols = rSymbols.filter{ $0 != C.zero }
+                
+                for (s, b) in diff.filter({ (_, b) in b[t1] != R.zero }) {
+                    let e = b[t1] * a.inverse!
+                    diff[s] = b - e * f_bs
+                }
                 
             } else {
-                print("new relation:", f_boundary)
-                rSymbols.append(f_boundary)
+                print("\tadd:", s, " with boundary:", f_bs)
+                
+                generators.append(s)
+                fTable[s] = C(s)
+                
+                relations.append(f_bs)
+                diff[s] = f_bs
             }
             
-            let t = s.face(0)
-            let v = h(t) - C(s) - h(boundary)
-            hTable[t] = v
+            fTable = fTable.filter{ $0.1 != C.zero }
+            hTable = hTable.filter{ $0.1 != C.zero }
+            relations = relations.filter{ $0 != C.zero }
         }
         
+        done.insert(s)
+        
+        print("\tgenerators: ", generators)
         print()
-        print("\tgenerators: ", gSymbols)
-        print("\trelations : ", rSymbols)
-        print()
+        
+//        assertChainContraction()
+    }
+    
+    internal func assertChainContraction() {
+        for s in done {
+            let a1 = g(f(s)) - C(s)
+            let a2 = h(C(s).boundary()) + h(s).boundary()
+            assert(a1 == a2, "(gf - 1)(\(s)) = \(a1),\n(h∂ + ∂h)(\(s)) = \(a2)\n\nf:\(fTable),\n\nh:\(hTable)\n\n")
+        }
+        
+        for s in generators {
+            let b1 = f(g(s))
+            assert(b1 == C(s), "fg(\(s)) = \(b1)\n\nf:\(fTable),\nh:\(hTable)\n\n")
+        }
+        
+        for s in generators.filter({ diff[$0] == nil}) {
+            let b = g(s).boundary()
+            assert(b == C.zero, "∂s = \(b), should be 0.")
+        }
     }
 }
