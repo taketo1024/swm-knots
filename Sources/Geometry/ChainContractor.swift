@@ -55,7 +55,9 @@ public class ChainContractor<R: EuclideanRing> {
     }
     
     internal func f(_ s: S) -> C {
-        return fTable[s] ?? C.zero
+        return fTable[s]!.sum { (t, a) in
+            (s == t) ? a * C(t) : a * f(t)
+        }
     }
     
     internal func f(_ c: C) -> C {
@@ -70,12 +72,20 @@ public class ChainContractor<R: EuclideanRing> {
         return c.sum{ (s, a) in a * g(s) }
     }
     
-    internal func h(_ s: S) -> C {
-        return hTable[s] ?? C.zero
+    internal func h(_ s: S, path: Bool = false) -> C {
+        return hTable[s]!.sum { (t, a) in
+            if t.dim == s.dim + 1 || (path && t == s) {
+                return a * C(t)
+            } else if s != t {
+                return a * h(t, path: path)
+            } else {
+                return C.zero
+            }
+        }
     }
     
-    internal func h(_ c: C) -> C {
-        return c.sum{ (s, a) in a * h(s) }
+    internal func h(_ c: C, path: Bool = false) -> C {
+        return c.sum{ (s, a) in a * h(s, path: path) }
     }
     
     internal func isZero(_ c: C) -> Bool {
@@ -116,7 +126,7 @@ public class ChainContractor<R: EuclideanRing> {
             }
         }
         
-        assertChainContraction()
+//        assertChainContraction()
         
         log("")
         log("final result")
@@ -126,38 +136,38 @@ public class ChainContractor<R: EuclideanRing> {
         log("")
     }
     
+    @_specialize(where R == ComputationSpecializedRing)
     internal func iteration(_ s: S) {
         step += 1
+        
+        hTable[s] = C(s)
         
         let bs = C(s).boundary()
         let f_bs = f(bs)
         
-        log("\(step)\n\ts: \(s)\n\tf(∂s) = \(f_bs)")
+        log("\(step)\t\(s): f∂ = \(f_bs)")
         log("")
         
         if isZero(f_bs) {
             log("\tadd: \(s)")
             
-            generators.append(s)
             fTable[s] = C(s)
+            generators.append(s)
             
         } else {
             let candidates = f_bs
                 .filter{ (t1, a) in a.isInvertible && diff[t1] == nil }
-                .sorted{ (v1, v2) in v1.0 <= v1.0 }
+                .sorted{ (v1, v2) in v1.0 <= v2.0 } // TODO
             
-            if let (t1, a) = candidates.last {
-                log("\tremove: \(t1) = \(a.inverse! * (f_bs - a * C(t1)))")
+            if let (t1, a) = candidates.first {
+                let e = a.inverse!
+                log("\tremove: \(t1) = \(-e * (f_bs - a * C(t1)))")
                 
+                fTable[s] = C.zero
                 generators.remove(at: generators.index(of: t1)!)
                 
-                let h_bs = h(bs)
-                
-                for (t2, v) in fTable.filter({ (_, v) in v[t1] != R.zero }) {
-                    let e = v[t1] * a.inverse!
-                    fTable[t2] = v - e * f_bs
-                    hTable[t2] = h(t2) - e * (C(s) + h_bs)
-                }
+                fTable[t1] = fTable[t1]! - e * f_bs
+                hTable[t1] = hTable[t1]! - e * (C(s) + h(bs, path: true)) // TODO improve performance!
                 
                 for (i, r) in relations.enumerated().filter({ (_, r) in r[t1] != R.zero}) {
                     let e = r[t1] * a.inverse!
@@ -172,21 +182,19 @@ public class ChainContractor<R: EuclideanRing> {
             } else {
                 log("\tadd: \(s) with diff: \(f_bs)")
                 
-                generators.append(s)
                 fTable[s] = C(s)
-                
+                generators.append(s)
                 relations.append(f_bs)
                 diff[s] = f_bs
             }
-            
-            fTable = fTable.filter{ $0.1 != C.zero }
-            hTable = hTable.filter{ $0.1 != C.zero }
-            relations = relations.filter{ $0 != C.zero }
         }
         
         done.insert(s)
         
         log("\tgenerators: \(generators)")
+        log("")
+        log("\tf: \(fTable)")
+        log("\th: \(hTable)")
         log("")
         
 //        assertChainContraction()
@@ -196,17 +204,17 @@ public class ChainContractor<R: EuclideanRing> {
         for s in done {
             let a1 = g(f(s)) - C(s)
             let a2 = h(C(s).boundary()) + h(s).boundary()
-            assert(a1 == a2, "(gf - 1)(\(s)) = \(a1),\n(h∂ + ∂h)(\(s)) = \(a2)\n\nf:\(fTable),\n\nh:\(hTable)\n\n")
+            assert(a1 == a2, "(gf - 1)(\(s)) = \(a1),\n(h∂ + ∂h)(\(s)) = \(a2)\n")
         }
         
         for s in generators {
             let b1 = f(g(s))
-            assert(b1 == C(s), "fg(\(s)) = \(b1)\n\nf:\(fTable),\nh:\(hTable)\n\n")
+            assert(b1 == C(s), "fg(\(s)) = \(b1)\n")
         }
         
         for s in generators.filter({ diff[$0] == nil}) {
             let b = g(s).boundary()
-            assert(b == C.zero, "∂s = \(b), should be 0.")
+            assert(b == C.zero, "∂s = \(b), should be 0.\n")
         }
     }
 }
