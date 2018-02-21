@@ -118,12 +118,12 @@ public class ChainContractor<R: EuclideanRing> {
         
         assertChainContraction()
         
-        print()
-        print("final result")
-        print("------------")
-        print("generators:")
-        print(generators.map{ "\($0.dim): \(g($0))"}.joined(separator: ",\n"))
-        print()
+        log("")
+        log("final result")
+        log("------------")
+        log("generators:")
+        log(generators.map{ "\($0.dim): \(g($0))"}.joined(separator: ",\n"))
+        log("")
     }
     
     internal func iteration(_ s: S) {
@@ -132,11 +132,11 @@ public class ChainContractor<R: EuclideanRing> {
         let bs = C(s).boundary()
         let f_bs = f(bs)
         
-        print(step, "\ts: \(s)\n\tf(∂s) = \(f_bs)")
-        print()
+        log("\(step)\n\ts: \(s)\n\tf(∂s) = \(f_bs)")
+        log("")
         
         if isZero(f_bs) {
-            print("\tadd:", s)
+            log("\tadd: \(s)")
             
             generators.append(s)
             fTable[s] = C(s)
@@ -147,7 +147,7 @@ public class ChainContractor<R: EuclideanRing> {
                 .sorted{ (v1, v2) in v1.0 <= v1.0 }
             
             if let (t1, a) = candidates.last {
-                print("\tremove:", t1, "=", a.inverse! * (f_bs - a * C(t1)))
+                log("\tremove: \(t1) = \(a.inverse! * (f_bs - a * C(t1)))")
                 
                 generators.remove(at: generators.index(of: t1)!)
                 
@@ -170,7 +170,7 @@ public class ChainContractor<R: EuclideanRing> {
                 }
                 
             } else {
-                print("\tadd:", s, " with boundary:", f_bs)
+                log("\tadd: \(s) with diff: \(f_bs)")
                 
                 generators.append(s)
                 fTable[s] = C(s)
@@ -186,8 +186,8 @@ public class ChainContractor<R: EuclideanRing> {
         
         done.insert(s)
         
-        print("\tgenerators: ", generators)
-        print()
+        log("\tgenerators: \(generators)")
+        log("")
         
 //        assertChainContraction()
     }

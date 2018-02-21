@@ -27,6 +27,6 @@ public func measure<T>(_ label: String, _ f: () -> T) -> T {
     return f()
 }
 
-func log(_ msg: @autoclosure () -> String, _ b: Bool) {
+func log(_ msg: @autoclosure () -> String, _ b: Bool = false) {
     if b { print(msg()) }
 }
