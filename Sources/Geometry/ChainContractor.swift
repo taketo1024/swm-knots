@@ -21,43 +21,15 @@ public class ChainContractor<R: EuclideanRing> {
     internal var relations  = [C]()
     internal var diff = [S : C]()
 
-    internal var fTable = [S : C]()
-    internal var hTable = [S : C]()
+    internal var fNodes = [S : Node]()
+    internal var hNodes = [S : Node]()
     
     public init(_ K: SimplicialComplex, _ type: R.Type) {
         self.K = K
-        self.run()
-    }
-    
-    public var contractedChainComplex: ChainComplex<Simplex, R> {
-        typealias CC = ChainComplex<S, R>
-        let chain = K.validDims.map{ (i) -> (CC.ChainBasis, CC.BoundaryMap, CC.BoundaryMatrix) in
-            
-            let from = generators.filter{ $0.dim == i }
-            let to   = generators.filter{ $0.dim == i - 1 }
-            let map  = CC.BoundaryMap.zero // TODO
-            
-            let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toCell: toIndex]
-
-            let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
-                return diff[s].flatMap { b -> [MatrixComponent<R>] in
-                    b.map { (t, r) in
-                        (toIndex[t]!, j, r)
-                    }
-                } ?? []
-            }
-            let matrix = ComputationalMatrix(rows: to.count, cols: from.count, components: components)
-            
-            return (from, map, matrix)
-        }
-        
-        return CC(name: K.name, chain)
     }
     
     internal func f(_ s: S) -> C {
-        return fTable[s]!.sum { (t, a) in
-            (s == t) ? a * C(t) : a * f(t)
-        }
+        return fNodes[s]!.collect()
     }
     
     internal func f(_ c: C) -> C {
@@ -72,20 +44,12 @@ public class ChainContractor<R: EuclideanRing> {
         return c.sum{ (s, a) in a * g(s) }
     }
     
-    internal func h(_ s: S, path: Bool = false) -> C {
-        return hTable[s]!.sum { (t, a) in
-            if t.dim == s.dim + 1 || (path && t == s) {
-                return a * C(t)
-            } else if s != t {
-                return a * h(t, path: path)
-            } else {
-                return C.zero
-            }
-        }
+    internal func h(_ s: S) -> C {
+        return hNodes[s]!.collect(searchPathFirst: true)
     }
     
     internal func h(_ c: C, path: Bool = false) -> C {
-        return c.sum{ (s, a) in a * h(s, path: path) }
+        return c.sum{ (s, a) in a * h(s) }
     }
     
     internal func isZero(_ c: C) -> Bool {
@@ -117,8 +81,8 @@ public class ChainContractor<R: EuclideanRing> {
         return extract(s).reversed().unique()
     }
     
-    internal func run() {
-        for s in K.maximalCells {
+    public func run(doAssert: Bool = false) {
+        for s in K.maximalCells.sorted() {
             let list = makeList(s)
             
             for s in list {
@@ -126,7 +90,9 @@ public class ChainContractor<R: EuclideanRing> {
             }
         }
         
-//        assertChainContraction()
+        if doAssert {
+            assertChainContraction()
+        }
         
         log("")
         log("final result")
@@ -140,8 +106,6 @@ public class ChainContractor<R: EuclideanRing> {
     internal func iteration(_ s: S) {
         step += 1
         
-        hTable[s] = C(s)
-        
         let bs = C(s).boundary()
         let f_bs = f(bs)
         
@@ -151,23 +115,21 @@ public class ChainContractor<R: EuclideanRing> {
         if isZero(f_bs) {
             log("\tadd: \(s)")
             
-            fTable[s] = C(s)
             generators.append(s)
+            
+            fNodes[s] = Node(s, C(s))
+            hNodes[s] = Node(s, C.zero)
             
         } else {
             let candidates = f_bs
                 .filter{ (t1, a) in a.isInvertible && diff[t1] == nil }
                 .sorted{ (v1, v2) in v1.0 <= v2.0 } // TODO
             
-            if let (t1, a) = candidates.first {
+            if let (t1, a) = candidates.last {
                 let e = a.inverse!
                 log("\tremove: \(t1) = \(-e * (f_bs - a * C(t1)))")
                 
-                fTable[s] = C.zero
                 generators.remove(at: generators.index(of: t1)!)
-                
-                fTable[t1] = fTable[t1]! - e * f_bs
-                hTable[t1] = hTable[t1]! - e * (C(s) + h(bs, path: true)) // TODO improve performance!
                 
                 for (i, r) in relations.enumerated().filter({ (_, r) in r[t1] != R.zero}) {
                     let e = r[t1] * a.inverse!
@@ -179,13 +141,24 @@ public class ChainContractor<R: EuclideanRing> {
                     diff[s] = b - e * f_bs
                 }
                 
+                fNodes[s] = Node(s, C.zero)
+                hNodes[s] = Node(s, C.zero)
+                
+                fNodes[t1]!.value = C.zero
+                fNodes[t1]!.refs = (C(t1) - e * f_bs).map{ (t, a) in (fNodes[t]!, a) }
+                
+                hNodes[t1]!.value = -e * C(s)
+                hNodes[t1]!.refs = (C(t1) - e * bs).map{ (t, a) in (hNodes[t]!, a) }
+                
             } else {
                 log("\tadd: \(s) with diff: \(f_bs)")
                 
-                fTable[s] = C(s)
                 generators.append(s)
                 relations.append(f_bs)
                 diff[s] = f_bs
+                
+                fNodes[s] = Node(s, C(s))
+                hNodes[s] = Node(s, C.zero)
             }
         }
         
@@ -193,9 +166,9 @@ public class ChainContractor<R: EuclideanRing> {
         
         log("\tgenerators: \(generators)")
         log("")
-        log("\tf: \(fTable)")
-        log("\th: \(hTable)")
-        log("")
+//        log("\tf: \(fNodes)")
+//        log("\th: \(hNodes)")
+//        log("")
         
 //        assertChainContraction()
     }
@@ -216,5 +189,113 @@ public class ChainContractor<R: EuclideanRing> {
             let b = g(s).boundary()
             assert(b == C.zero, "∂s = \(b), should be 0.\n")
         }
+        
+        log("assertion complete.")
+    }
+    
+    public var contractedChainComplex: ChainComplex<Simplex, R> {
+        typealias CC = ChainComplex<S, R>
+        let chain = K.validDims.map{ (i) -> (CC.ChainBasis, CC.BoundaryMap, CC.BoundaryMatrix) in
+            
+            let from = generators.filter{ $0.dim == i }
+            let to   = generators.filter{ $0.dim == i - 1 }
+            let map  = CC.BoundaryMap.zero // TODO
+            
+            let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toCell: toIndex]
+            
+            let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
+                return diff[s].flatMap { b -> [MatrixComponent<R>] in
+                    b.map { (t, r) in
+                        (toIndex[t]!, j, r)
+                    }
+                    } ?? []
+            }
+            let matrix = ComputationalMatrix(rows: to.count, cols: from.count, components: components)
+            
+            return (from, map, matrix)
+        }
+        
+        return CC(name: K.name, chain)
+    }
+    
+    internal class Node: Hashable, CustomStringConvertible {
+        let cell: S
+        var value: C
+        var refs: [(Node, R)] = []
+        
+        init(_ cell: S, _ value: C) {
+            self.cell = cell
+            self.value = value
+        }
+        
+        var isZero: Bool {
+            return value == C.zero && refs.isEmpty
+        }
+        
+        func collect(searchPathFirst: Bool = false) -> C {
+            if !searchPathFirst {
+                return value + refs.sum { (n, r) in r * n.collect() }
+                
+            } else {
+                if isZero { return C.zero }
+                
+                print("h(\(cell)) = \(self)")
+                
+                var sum = C.zero
+                var queue = [self : R.identity]
+                var stash = [Node : R]()
+                
+                while !queue.isEmpty {
+                    print("\tsum  :", sum)
+                    print("\tqueue:", queue.map{ ($0.1, $0.0.cell)} )
+                    print("\tstash:", stash.map{ ($0.1, $0.0.cell)} )
+
+                    let (n1, a1) = queue.anyElement!
+                    queue.removeValue(forKey: n1)
+                    
+                    print()
+                    print("\tpop  :", (a1, n1))
+                    
+                    sum = sum + a1 * n1.value
+                    for (n2, a2) in n1.refs {
+                        let a = a1 * a2
+                        if n1 == n2 {
+                            stash[n1] = stash[n1, default: R.zero] + a
+                        } else if stash[n2] != nil {
+                            stash[n2] = stash[n2]! + a
+                        } else if !n2.isZero {
+                            queue[n2] = queue[n2, default: R.zero] + a
+                        }
+                    }
+                    
+                    print()
+                }
+                
+                assert(stash.forAll{ $0.value == R.zero })
+                
+                print("\th(\(cell)) = \(sum)")
+                print()
+                
+                return sum
+            }
+        }
+        
+        var hashValue: Int {
+            return cell.hashValue
+        }
+        
+        static func ==(lhs: Node, rhs: Node) -> Bool {
+            return lhs.cell == rhs.cell
+        }
+        
+        public var description: String {
+            return refs.isEmpty
+                ? "\(cell) : {\(value)}"
+                : "\(cell) : {\(value) -> [\(refs.map{ (n, r) in "\(r)\(n.cell)"}.joined(separator: ", "))]}"
+        }
+    }
+    
+    internal func log(_ msg: @autoclosure () -> String) {
+        Debug.log(msg, true)
     }
 }
