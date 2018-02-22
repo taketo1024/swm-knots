@@ -8,6 +8,8 @@
 
 import Foundation
 
+// TODO implement `ChainComplex.dual`
+
 public extension ChainComplex where T == Descending {
     public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == C.Cell {
         let chain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap) in

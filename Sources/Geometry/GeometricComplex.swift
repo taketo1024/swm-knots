@@ -85,6 +85,13 @@ public extension GeometricComplex {
     }
 }
 
+public protocol GeometricComplexMap: Map where Domain == ComplexType.Cell, Codomain == ComplexType.Cell {
+    associatedtype ComplexType: GeometricComplex
+    var domain:   ComplexType { get }
+    var codomain: ComplexType? { get }
+    var image:    ComplexType { get }
+}
+
 public extension GeometricComplex {
     public var eulerNumber: Int {
         return validDims.sum{ i in (-1).pow(i) * cells(ofDim: i).count }

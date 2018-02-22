@@ -41,7 +41,7 @@
 		1424F50E1EB997780052581F /* IntTypeParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F31EB997780052581F /* IntTypeParameter.swift */; };
 		1424F50F1EB997780052581F /* PolynomialTypeParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F41EB997780052581F /* PolynomialTypeParameter.swift */; };
 		1424F5111EB997780052581F /* optable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F71EB997780052581F /* optable.swift */; };
-		142932011FAEB6E7003EE1BB /* GeometricComplexMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142932001FAEB6E7003EE1BB /* GeometricComplexMap.swift */; };
+		142932011FAEB6E7003EE1BB /* GeometricComplexMapExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142932001FAEB6E7003EE1BB /* GeometricComplexMapExtensions.swift */; };
 		142932031FAEB6FB003EE1BB /* SimplicialMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142932021FAEB6FB003EE1BB /* SimplicialMap.swift */; };
 		14360F911FB130350075133E /* ComputationalMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14360F901FB130350075133E /* ComputationalMatrix.swift */; };
 		14360F931FB148C30075133E /* MatrixEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14360F921FB148C30075133E /* MatrixEliminator.swift */; };
@@ -134,7 +134,7 @@
 		1424F4F31EB997780052581F /* IntTypeParameter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntTypeParameter.swift; sourceTree = "<group>"; };
 		1424F4F41EB997780052581F /* PolynomialTypeParameter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolynomialTypeParameter.swift; sourceTree = "<group>"; };
 		1424F4F71EB997780052581F /* optable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = optable.swift; sourceTree = "<group>"; };
-		142932001FAEB6E7003EE1BB /* GeometricComplexMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometricComplexMap.swift; sourceTree = "<group>"; };
+		142932001FAEB6E7003EE1BB /* GeometricComplexMapExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometricComplexMapExtensions.swift; sourceTree = "<group>"; };
 		142932021FAEB6FB003EE1BB /* SimplicialMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialMap.swift; sourceTree = "<group>"; };
 		14360F901FB130350075133E /* ComputationalMatrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComputationalMatrix.swift; sourceTree = "<group>"; };
 		14360F921FB148C30075133E /* MatrixEliminator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixEliminator.swift; sourceTree = "<group>"; };
@@ -408,9 +408,9 @@
 				14A85FF01ED9C8C300A754EA /* Vertex.swift */,
 				14929C9C1ED9C798006ACAC5 /* Simplex.swift */,
 				14A85FF21ED9D63E00A754EA /* GeometricComplex.swift */,
-				142932001FAEB6E7003EE1BB /* GeometricComplexMap.swift */,
-				DD0C5B95202F381300FC71B5 /* GeometricComplexExtensions.swift */,
 				DD0AD26320314D0E00414A34 /* GeometricComplexOrientation.swift */,
+				DD0C5B95202F381300FC71B5 /* GeometricComplexExtensions.swift */,
+				142932001FAEB6E7003EE1BB /* GeometricComplexMapExtensions.swift */,
 				14929C9D1ED9C798006ACAC5 /* SimplicialComplex.swift */,
 				DDC2400D1FB0852800258765 /* SimplicialComplexOperations.swift */,
 				DD5D09931FB5ACD700E1BDFC /* SimplicialComplexExamples.swift */,
@@ -634,7 +634,7 @@
 				1410C1151FB203AE00CEE47D /* EchelonEliminator.swift in Sources */,
 				14546DAF1FDFA69400898326 /* ModuleStructure.swift in Sources */,
 				14929C9F1ED9C798006ACAC5 /* SimplicialComplex.swift in Sources */,
-				142932011FAEB6E7003EE1BB /* GeometricComplexMap.swift in Sources */,
+				142932011FAEB6E7003EE1BB /* GeometricComplexMapExtensions.swift in Sources */,
 				148B41151FAF765000E59134 /* SimpleModuleStructure.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

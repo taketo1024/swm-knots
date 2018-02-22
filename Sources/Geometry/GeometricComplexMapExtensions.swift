@@ -8,12 +8,7 @@
 
 import Foundation
 
-public protocol GeometricComplexMap: Map where Domain == ComplexType.Cell, Codomain == ComplexType.Cell {
-    associatedtype ComplexType: GeometricComplex
-    var domain:   ComplexType { get }
-    var codomain: ComplexType? { get }
-    var image:    ComplexType { get }
-}
+// TODO clean up the clutters.
 
 public extension GeometricComplexMap {
     public func asChainMap<R: EuclideanRing>(_ type: R.Type) -> ChainMap<ComplexType.Cell, ComplexType.Cell, R> {
