@@ -232,14 +232,44 @@ public class ChainContractor<R: EuclideanRing> {
     public var homologyGroup: Homology<Simplex, R> {
         let H = Homology(contractedChainComplex)
         let map = ChainMap { s in self.g(s) }
-        return Homology(name: K.name, H, map )
+        
+        // factorize by: z -> f(z) -> [r]
+        
+        let factorizer = { (z: C) -> [R] in
+            if z == C.zero {
+                return []
+            }
+            let i = z.anyElement!.0.degree
+            return H[i].structure.factorize( self.f(z) )
+        }
+        return Homology(name: K.name, H, map, factorizer)
     }
     
     public var cohomologyGroup: Cohomology<Dual<Simplex>, R> {
         let H = Cohomology(contractedCochainComplex)
         let C = ChainComplex(K, R.self)
         let map = ChainMap { s in self.f(s) }.dualMap(domainChainComplex: C)
-        return Cohomology(name: K.name, H, map)
+        
+        // factorize by: c -> g^*(c) -> [r]
+
+        let factorizer = { (c: SimplicialCochain<R>) -> [R] in
+            if c == .zero {
+                return []
+            }
+            let i = c.anyElement!.0.degree
+            let basis = self.generators.filter{ $0.degree == i }
+            
+            // express cocycle as: (g^*)c = Σ c(g(s)) s^*
+            
+            let values = basis.flatMap { s -> (Dual<S>, R)? in
+                let a = c.evaluate(self.g(s))
+                return (a != .zero) ? (Dual(s), a) : nil
+            }
+            let cocycle = SimplicialCochain<R>(values)
+            
+            return H[i].structure.factorize( cocycle )
+        }
+        return Cohomology(name: K.name, H, map, factorizer)
     }
     
     internal class Node: Hashable, CustomStringConvertible {
@@ -296,6 +326,10 @@ public class ChainContractor<R: EuclideanRing> {
         }
         
         public var description: String {
+            return cell.description
+        }
+
+        public var detailDescription: String {
             return refs.isEmpty
                 ? "\(cell) : {\(value)}"
                 : "\(cell) : {\(value) -> [\(refs.map{ (n, r) in "\(r)\(n.cell)"}.joined(separator: ", "))]}"

@@ -42,7 +42,7 @@ public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
     }
     
     // MEMO: a loophole initializer for chainContraction
-    internal init(name: String, _ H: _Homology<T, A, R>, _ map: _ChainMap<T, A, A, R>) {
+    internal init(name: String, _ H: _Homology<T, A, R>, _ map: _ChainMap<T, A, A, R>, _ factorizer: @escaping (FreeModule<A, R>) -> [R]) {
         self.name = name
         self.topDegree = H.topDegree
         self.offset = H.offset
@@ -55,7 +55,7 @@ public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
             let subSummands = summand.structure.summands.map{ ss in
                 SimpleModuleStructure.Summand( map.appliedTo(ss.generator), ss.divisor )
             }
-            let str = SimpleModuleStructure(subSummands)
+            let str = SimpleModuleStructure(subSummands, factorizer)
             return Summand(self, str)
         }
     }
