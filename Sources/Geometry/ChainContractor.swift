@@ -26,8 +26,10 @@ public class ChainContractor<R: EuclideanRing> {
     internal var fNodes = [S : Node]()
     internal var hNodes = [S : Node]()
     
-    public init(_ K: SimplicialComplex, _ type: R.Type) {
+    public init(_ K: SimplicialComplex, _ type: R.Type, debug: Bool = false) {
         self.K = K
+        self.debug = debug
+        self.run()
     }
     
     internal func f(_ s: S) -> C {
@@ -83,9 +85,7 @@ public class ChainContractor<R: EuclideanRing> {
         return extract(s).reversed().unique()
     }
     
-    public func run(debug: Bool = false, doAssert: Bool = false) {
-        self.debug = debug
-        
+    internal func run() {
         for s in K.maximalCells.sorted() {
             let list = makeList(s)
             
@@ -96,15 +96,15 @@ public class ChainContractor<R: EuclideanRing> {
         
         allDone = true
         
-        if doAssert {
-            assertChainContraction()
-        }
-        
         log("")
-        log("final result")
-        log("------------")
         log("generators:")
-        log(generators.map{ "\($0.dim): \(g($0))"}.joined(separator: ",\n"))
+        log(generators.map{ "\t\($0.dim): \($0)"}.joined(separator: ",\n"))
+        
+        if !relations.isEmpty {
+            log("")
+            log("relations:")
+            log(relations.map { "\t\($0.anyElement!.0.dim): \($0)"}.joined(separator: ",\n"))
+        }
         log("")
     }
     
@@ -171,10 +171,13 @@ public class ChainContractor<R: EuclideanRing> {
         doneCells.insert(s)
         
         log("\tgenerators: \(generators)")
+        if !relations.isEmpty {
+            log("relations: \(relations)")
+        }
         log("")
     }
     
-    internal func assertChainContraction() {
+    public func assertChainContraction() {
         for s in doneCells {
             let a1 = g(f(s)) - C(s)
             let a2 = h(C(s).boundary()) + h(s).boundary()
@@ -201,6 +204,26 @@ public class ChainContractor<R: EuclideanRing> {
             let from = generators.filter { s in s.dim == i }
             let map  = CC.BoundaryMap { s in self.diff[s] ?? C.zero }
             return (from, map)
+        }
+        
+        return CC(name: K.name, chain)
+    }
+    
+    public var contractedCochainComplex: CochainComplex<Dual<Simplex>, R> {
+        typealias CC = CochainComplex<Dual<S>, R>
+        let chain = K.validDims.map{ (i) -> (CC.ChainBasis, CC.BoundaryMap) in
+            let from = generators.filter { s in s.dim == i }
+            let map  = CC.BoundaryMap { d in
+                let s = d.base
+                let e = R(intValue: (-1).pow(d.degree + 1))
+                let to = self.generators.filter { s in s.dim == i + 1 }
+                let vals = to.flatMap { t -> (Dual<S>, R)? in
+                    let a = self.diff[t]?[s] ?? R.zero
+                    return (a != R.zero) ? (Dual(t), e * a) : nil
+                }
+                return SimplicialCochain(vals)
+            }
+            return (from.map{ Dual($0) }, map)
         }
         
         return CC(name: K.name, chain)
