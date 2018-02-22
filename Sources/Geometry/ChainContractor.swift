@@ -15,7 +15,9 @@ public class ChainContractor<R: EuclideanRing> {
     internal let K: SimplicialComplex
     
     internal var step = -1
-    internal var done = Set<S>()
+    internal var doneCells = Set<S>()
+    internal var allDone = false
+    internal var debug = false
     
     internal var generators = [S]()
     internal var relations  = [C]()
@@ -29,7 +31,7 @@ public class ChainContractor<R: EuclideanRing> {
     }
     
     internal func f(_ s: S) -> C {
-        return fNodes[s]!.collect()
+        return fNodes[s]!.collect(flatten: allDone)
     }
     
     internal func f(_ c: C) -> C {
@@ -45,7 +47,7 @@ public class ChainContractor<R: EuclideanRing> {
     }
     
     internal func h(_ s: S) -> C {
-        return hNodes[s]!.collect(searchPathFirst: true)
+        return hNodes[s]!.collect(flatten: allDone)
     }
     
     internal func h(_ c: C, path: Bool = false) -> C {
@@ -71,17 +73,19 @@ public class ChainContractor<R: EuclideanRing> {
     }
     
     internal func makeList(_ s: S) -> [S] {
-        if done.contains(s) {
+        if doneCells.contains(s) {
             return []
         }
         
         func extract(_ s: S) -> [S] {
-            return [s] + s.faces().filter({ !done.contains($0) }).flatMap{ extract($0) }
+            return [s] + s.faces().filter({ !doneCells.contains($0) }).flatMap{ extract($0) }
         }
         return extract(s).reversed().unique()
     }
     
-    public func run(doAssert: Bool = false) {
+    public func run(debug: Bool = false, doAssert: Bool = false) {
+        self.debug = debug
+        
         for s in K.maximalCells.sorted() {
             let list = makeList(s)
             
@@ -89,6 +93,8 @@ public class ChainContractor<R: EuclideanRing> {
                 iteration(s)
             }
         }
+        
+        allDone = true
         
         if doAssert {
             assertChainContraction()
@@ -162,19 +168,14 @@ public class ChainContractor<R: EuclideanRing> {
             }
         }
         
-        done.insert(s)
+        doneCells.insert(s)
         
         log("\tgenerators: \(generators)")
         log("")
-//        log("\tf: \(fNodes)")
-//        log("\th: \(hNodes)")
-//        log("")
-        
-//        assertChainContraction()
     }
     
     internal func assertChainContraction() {
-        for s in done {
+        for s in doneCells {
             let a1 = g(f(s)) - C(s)
             let a2 = h(C(s).boundary()) + h(s).boundary()
             assert(a1 == a2, "(gf - 1)(\(s)) = \(a1),\n(h∂ + ∂h)(\(s)) = \(a2)\n")
@@ -232,51 +233,34 @@ public class ChainContractor<R: EuclideanRing> {
             return value == C.zero && refs.isEmpty
         }
         
-        func collect(searchPathFirst: Bool = false) -> C {
-            if !searchPathFirst {
-                return value + refs.sum { (n, r) in r * n.collect() }
-                
-            } else {
-                if isZero { return C.zero }
-                
-                print("h(\(cell)) = \(self)")
-                
-                var sum = C.zero
-                var queue = [self : R.identity]
-                var stash = [Node : R]()
-                
-                while !queue.isEmpty {
-                    print("\tsum  :", sum)
-                    print("\tqueue:", queue.map{ ($0.1, $0.0.cell)} )
-                    print("\tstash:", stash.map{ ($0.1, $0.0.cell)} )
-
-                    let (n1, a1) = queue.anyElement!
-                    queue.removeValue(forKey: n1)
-                    
-                    print()
-                    print("\tpop  :", (a1, n1))
-                    
-                    sum = sum + a1 * n1.value
-                    for (n2, a2) in n1.refs {
-                        let a = a1 * a2
-                        if n1 == n2 {
-                            stash[n1] = stash[n1, default: R.zero] + a
-                        } else if stash[n2] != nil {
-                            stash[n2] = stash[n2]! + a
-                        } else if !n2.isZero {
-                            queue[n2] = queue[n2, default: R.zero] + a
-                        }
-                    }
-                    
-                    print()
+        func collect(flatten: Bool = false) -> C {
+            var basket = [Node : R]()
+            let value = _collect(1, &basket)
+            
+            assert(basket.forAll{ $0.value == R.zero })
+            
+            if flatten {
+                self.value = value
+                self.refs = []
+            }
+            
+            return value
+        }
+        
+        @_specialize(where R == ComputationSpecializedRing)
+        private func _collect(_ a: R, _ basket: inout [Node : R]) -> C {
+            return value + refs.filter{ (n, r) in
+                if n == self {
+                    basket[n] = basket[n, default: R.zero] + r
+                    return false
+                } else if basket[n] != nil {
+                    basket[n] = basket[n]! + a * r
+                    return false
+                } else {
+                    return !isZero
                 }
-                
-                assert(stash.forAll{ $0.value == R.zero })
-                
-                print("\th(\(cell)) = \(sum)")
-                print()
-                
-                return sum
+            }.sum {
+                (n, r) in r * n._collect(a * r, &basket)
             }
         }
         
@@ -296,6 +280,6 @@ public class ChainContractor<R: EuclideanRing> {
     }
     
     internal func log(_ msg: @autoclosure () -> String) {
-        Debug.log(msg, true)
+        Debug.log(msg, debug)
     }
 }
