@@ -8,7 +8,7 @@
 
 import Foundation
 
-public extension ChainComplex where chainType == Descending {
+public extension ChainComplex where T == Descending {
     public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == C.Cell {
         let chain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap) in
             (K.cells(ofDim: i), K.boundaryMap(i, R.self))
@@ -28,7 +28,7 @@ public extension ChainComplex where chainType == Descending {
     }
 }
 
-public extension CochainComplex where chainType == Ascending {
+public extension CochainComplex where T == Ascending {
     public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
         let cochain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap) in
             let from = K.cells(ofDim: i)
@@ -55,7 +55,7 @@ public extension CochainComplex where chainType == Ascending {
     }
 }
 
-public extension Homology where chainType == Descending {
+public extension Homology where T == Descending {
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where C.Cell == A {
         let c = ChainComplex(K, type)
         self.init(c)
@@ -67,7 +67,7 @@ public extension Homology where chainType == Descending {
     }
 }
 
-public extension Cohomology where chainType == Ascending {
+public extension Cohomology where T == Ascending {
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
         let c = CochainComplex(K, type)
         self.init(c)

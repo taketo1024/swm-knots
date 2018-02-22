@@ -8,7 +8,7 @@
 
 import Foundation
 
-public extension HomologyExactSequence where chainType == Descending, A == Simplex, B == Simplex, C == Simplex {
+public extension HomologyExactSequence where T == Descending, A == Simplex, B == Simplex, C == Simplex {
     public init(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) {
         
         //             i         j
@@ -31,7 +31,7 @@ public extension HomologyExactSequence where chainType == Descending, A == Simpl
     }
 }
     
-public extension HomologyExactSequence where chainType == Descending, A == Simplex, B == Sum<Simplex, Simplex>, C == Simplex {
+public extension HomologyExactSequence where T == Descending, A == Simplex, B == Sum<Simplex, Simplex>, C == Simplex {
     public static func MayerVietoris(_ X: SimplicialComplex, _ A: SimplicialComplex, _ B: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<A, B, C, R> {
 
         //               A
@@ -79,7 +79,7 @@ public extension HomologyExactSequence where chainType == Descending, A == Simpl
     }
 }
 
-public extension CohomologyExactSequence where chainType == Ascending, A == Dual<Simplex>, B == Dual<Simplex>, C == Dual<Simplex> {
+public extension CohomologyExactSequence where T == Ascending, A == Dual<Simplex>, B == Dual<Simplex>, C == Dual<Simplex> {
     public init(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) {
         
         //             i         j
@@ -103,7 +103,7 @@ public extension CohomologyExactSequence where chainType == Ascending, A == Dual
     }
 }
 
-public extension CohomologyExactSequence where chainType == Ascending, A == Dual<Simplex>, B == Sum<Dual<Simplex>, Dual<Simplex>>, C == Dual<Simplex> {
+public extension CohomologyExactSequence where T == Ascending, A == Dual<Simplex>, B == Sum<Dual<Simplex>, Dual<Simplex>>, C == Dual<Simplex> {
     public static func MayerVietoris(_ X: SimplicialComplex, _ A: SimplicialComplex, _ B: SimplicialComplex, _ type: R.Type) -> CohomologyExactSequence<A, B, C, R> {
         
         //                   jA⊕(-jB)                 iA+iB

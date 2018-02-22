@@ -15,9 +15,9 @@ import Foundation
 public typealias   HomologyClass<A: FreeModuleBase, R: EuclideanRing> = _HomologyClass<Descending, A, R>
 public typealias CohomologyClass<A: FreeModuleBase, R: EuclideanRing> = _HomologyClass<Ascending, A, R>
 
-public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: Module {
+public struct _HomologyClass<T: ChainType, A: FreeModuleBase, R: EuclideanRing>: Module {
     public typealias CoeffRing = R
-    public typealias Structure = _Homology<chainType, A, R>
+    public typealias Structure = _Homology<T, A, R>
     public typealias Cycle = Structure.Cycle // = FreeModule<A, R>
     
     private let z: Cycle
@@ -37,7 +37,7 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
         self.structure = nil
     }
     
-    public subscript(_ i: Int) -> _HomologyClass<chainType, A, R> {
+    public subscript(_ i: Int) -> _HomologyClass<T, A, R> {
         return factors[i].map{ _HomologyClass($0, structure!) } ?? _HomologyClass.zero
     }
     
@@ -61,15 +61,15 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
         return z.anyElement?.0.degree ?? 0
     }
     
-    public static var zero: _HomologyClass<chainType, A, R> {
+    public static var zero: _HomologyClass<T, A, R> {
         return self.init()
     }
     
     public var isZero: Bool {
-        return self == _HomologyClass<chainType, A, R>.zero
+        return self == _HomologyClass<T, A, R>.zero
     }
     
-    public static func ==(a: _HomologyClass<chainType, A, R>, b: _HomologyClass<chainType, A, R>) -> Bool {
+    public static func ==(a: _HomologyClass<T, A, R>, b: _HomologyClass<T, A, R>) -> Bool {
         switch (a.structure, b.structure) {
         case let (H1?, H2?):
             
@@ -92,7 +92,7 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
         }
     }
     
-    public static func +(a: _HomologyClass<chainType, A, R>, b: _HomologyClass<chainType, A, R>) -> _HomologyClass<chainType, A, R> {
+    public static func +(a: _HomologyClass<T, A, R>, b: _HomologyClass<T, A, R>) -> _HomologyClass<T, A, R> {
         guard let H1 = a.structure, let H2 = b.structure else {
             return (a.structure == nil) ? b : a
         }
@@ -101,15 +101,15 @@ public struct _HomologyClass<chainType: ChainType, A: FreeModuleBase, R: Euclide
         return _HomologyClass(a.z + b.z, H1)
     }
     
-    public static prefix func -(a: _HomologyClass<chainType, A, R>) -> _HomologyClass<chainType, A, R> {
+    public static prefix func -(a: _HomologyClass<T, A, R>) -> _HomologyClass<T, A, R> {
         return (a.structure != nil) ? _HomologyClass(-a.z, a.structure!) : a
     }
     
-    public static func *(r: R, a: _HomologyClass<chainType, A, R>) -> _HomologyClass<chainType, A, R> {
+    public static func *(r: R, a: _HomologyClass<T, A, R>) -> _HomologyClass<T, A, R> {
         return (a.structure != nil) ? _HomologyClass(r * a.z, a.structure!) : a
     }
     
-    public static func *(a: _HomologyClass<chainType, A, R>, r: R) -> _HomologyClass<chainType, A, R> {
+    public static func *(a: _HomologyClass<T, A, R>, r: R) -> _HomologyClass<T, A, R> {
         return (a.structure != nil) ? _HomologyClass(a.z * r, a.structure!) : a
     }
     

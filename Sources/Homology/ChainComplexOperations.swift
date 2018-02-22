@@ -9,9 +9,8 @@
 import Foundation
 
 public extension ChainComplex {
-    public static func ⊕<B>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Sum<A, B>, R> {
-        typealias T = Sum<A, B>
-        typealias C = _ChainComplex<chainType, T, R>
+    public static func ⊕<B>(C1: _ChainComplex<T, A, R>, C2: _ChainComplex<T, B, R>) -> _ChainComplex<T, Sum<A, B>, R> {
+        typealias C = _ChainComplex<T, Sum<A, B>, R>
         
         let offset = min(C1.offset, C2.offset)
         let degree = max(C1.topDegree, C2.topDegree)
@@ -30,12 +29,11 @@ public extension ChainComplex {
             return (basis, map)
         }
         
-        return _ChainComplex<chainType, T, R>(name: "\(C1.name) ⊕ \(C2.name)", chain)
+        return _ChainComplex<T, Sum<A, B>, R>(name: "\(C1.name) ⊕ \(C2.name)", chain)
     }
     
-    public static func ⊗<B>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Tensor<A, B>, R> {
-        typealias T = Tensor<A, B>
-        typealias C = _ChainComplex<chainType, T, R>
+    public static func ⊗<B>(C1: _ChainComplex<T, A, R>, C2: _ChainComplex<T, B, R>) -> _ChainComplex<T, Tensor<A, B>, R> {
+        typealias C = _ChainComplex<T, Tensor<A, B>, R>
         
         let offset = C1.offset + C2.offset
         let degree = C1.topDegree + C2.topDegree
@@ -59,7 +57,7 @@ public extension ChainComplex {
             return (from, map)
         }
         
-        return _ChainComplex<chainType, T, R>(name: "\(C1.name) ⊗ \(C2.name)", chain)
+        return _ChainComplex<T, Tensor<A, B>, R>(name: "\(C1.name) ⊗ \(C2.name)", chain)
     }
 }
 

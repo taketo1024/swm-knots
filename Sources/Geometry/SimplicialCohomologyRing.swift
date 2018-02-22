@@ -10,7 +10,7 @@ import Foundation
 
 // TODO conform to Ring after conditional-conformance is supported.
 
-public extension CohomologyClass where chainType == Ascending, A == Dual<Simplex> {
+public extension CohomologyClass where T == Ascending, A == Dual<Simplex> {
     public func cup(_ b: CohomologyClass<A, R>) -> CohomologyClass<A, R> {
         let a = self
         guard let H1 = a.structure, let H2 = b.structure else {
@@ -52,7 +52,7 @@ public extension CohomologyClass where chainType == Ascending, A == Dual<Simplex
     }
 }
 
-public extension CohomologyClass where chainType == Ascending, A == Dual<Simplex>, R == Z_2 {
+public extension CohomologyClass where T == Ascending, A == Dual<Simplex>, R == Z_2 {
     public func Sq(_ i: Int) -> CohomologyClass<A, R> {
         if let H = structure {
             let a = self.representative
