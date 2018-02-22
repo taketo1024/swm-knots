@@ -15,6 +15,7 @@ public extension SimplicialComplex {
     }
     
     public func eulerClass<R: EuclideanRing>(_ type: R.Type) -> CohomologyClass<Dual<Simplex>, R>? {
+        fatalError("not working")
         
         // See [Milnor-Stasheff: Characteristic Classes §11]
         
@@ -24,7 +25,7 @@ public extension SimplicialComplex {
         let MxM = M × M
         let ΔM = d.image
         
-        let cH = Cohomology(MxM, MxM - ΔM, R.self)
+        let cH = Cohomology(MxM, MxM - ΔM, R.self) // TODO this
         let top = cH[dim]
         
         if top.isFree && top.rank == 1 {

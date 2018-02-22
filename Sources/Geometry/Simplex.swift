@@ -53,11 +53,15 @@ public struct Simplex: GeometricCell, Comparable {
     }
     
     public func faces() -> [Simplex] {
-        if dim == 0 {
+        if dim <= 0 {
             return []
         } else {
             return (0 ... dim).map{ face($0) }
         }
+    }
+    
+    public var isEmpty: Bool {
+        return dim == -1
     }
     
     public func contains(_ v: Vertex) -> Bool {

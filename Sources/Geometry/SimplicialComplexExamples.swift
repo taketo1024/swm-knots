@@ -11,21 +11,21 @@ import Foundation
 public extension SimplicialComplex {
     static func point() -> SimplicialComplex {
         let v = Vertex("pt")
-        return SimplicialComplex(name: "pt", allCells: Simplex([v]))
+        return SimplicialComplex(name: "pt", cells: Simplex([v]))
     }
     
     static func interval(vertices k: Int = 2) -> SimplicialComplex {
         assert(k >= 2)
         let V = Vertex.generate(k)
         let segments = (0 ..< k - 1).map { i in Simplex(vertexSet: V, indices: [i, i + 1]) }
-        return SimplicialComplex(name: "I", maximalCells: segments)
+        return SimplicialComplex(name: "I", cells: segments)
     }
     
     static func circle(vertices k: Int = 3) -> SimplicialComplex {
         assert(k >= 3)
         let V = Vertex.generate(k)
         let segments = (0 ..< k).map { i in Simplex(vertexSet: V, indices: [i, (i + 1) % k]) }
-        return SimplicialComplex(name: "S^1", maximalCells: segments)
+        return SimplicialComplex(name: "S^1", cells: segments)
     }
     
     static func sphere(dim n: Int, suspensionVertices k: Int? = nil) -> SimplicialComplex {
@@ -35,7 +35,7 @@ public extension SimplicialComplex {
         if k == nil || n == 0 {
             let V = Vertex.generate(n + 2)
             let faces = Simplex(vertexSet: V, indices: 0 ... (n + 1)).faces()
-            return SimplicialComplex(name: "S^\(n)", maximalCells: faces)
+            return SimplicialComplex(name: "S^\(n)", cells: faces)
         } else {
             return sphere(dim: n - 1, suspensionVertices: k).suspension(intervalVertices: k!)
         }
@@ -48,7 +48,7 @@ public extension SimplicialComplex {
         if k == nil || n == 0 {
             let V = Vertex.generate(n + 1)
             let s = Simplex(vertexSet: V, indices: 0...n)
-            return SimplicialComplex(name: "D^\(n)", maximalCells: [s])
+            return SimplicialComplex(name: "D^\(n)", cells: [s])
         } else {
             let v = Vertex()
             let S = sphere(dim: n - 1, suspensionVertices: k)
@@ -72,13 +72,13 @@ public extension SimplicialComplex {
             let V = Vertex.generate(6)
             let indices = [(0,1,3),(1,4,3),(1,2,4),(4,2,0),(4,0,5),(0,1,5),(1,2,5),(2,3,5),(0,3,2),(3,4,5)]
             let simplices = indices.map { v in Simplex(vertexSet: V, indices: [v.0, v.1, v.2]) }
-            return SimplicialComplex(name: "RP^2", maximalCells: simplices)
+            return SimplicialComplex(name: "RP^2", cells: simplices)
             
         case 3:
             let V = Vertex.generate(11)
             let indices = [(1,2,3,7), (1,2,3,0), (1,2,6,9), (1,2,6,0), (1,2,7,9), (1,3,5,10), (1,3,5,0), (1,3,7,10), (1,4,7,9), (1,4,7,10), (1,4,8,9), (1,4,8,10), (1,5,6,8), (1,5,6,0), (1,5,8,10), (1,6,8,9), (2,3,4,8), (2,3,4,0), (2,3,7,8), (2,4,6,10), (2,4,6,0), (2,4,8,10), (2,5,7,8), (2,5,7,9), (2,5,8,10), (2,5,9,10), (2,6,9,10), (3,4,5,9), (3,4,5,0), (3,4,8,9), (3,5,9,10), (3,6,7,8), (3,6,7,10), (3,6,8,9), (3,6,9,10), (4,5,6,7), (4,5,6,0), (4,5,7,9), (4,6,7,10), (5,6,7,8)]
             let simplices = indices.map { v in Simplex(vertexSet: V, indices: [v.0, v.1, v.2, v.3]) }
-            return SimplicialComplex(name: "RP^3", maximalCells: simplices)
+            return SimplicialComplex(name: "RP^3", cells: simplices)
  
         default:
             let S = sphere(dim: n)
