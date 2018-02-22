@@ -21,6 +21,13 @@ public extension SimplicialChain where A == Simplex {
 }
 
 public extension SimplicialCochain where A == Dual<Simplex> {
+    public func coboundary(in K: SimplicialComplex) -> SimplicialCochain<R> {
+        return self.reduce(SimplicialCochain<R>.zero) { (res, next) -> SimplicialCochain<R> in
+            let (d, r) = next
+            return res + r * K.coboundary(of: d, R.self)
+        }
+    }
+    
     public func cup(_ f: SimplicialCochain<R>) -> SimplicialCochain<R> {
         typealias D = Dual<Simplex>
         
