@@ -27,16 +27,17 @@ public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Asce
 public struct _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
     public typealias ChainBasis = [A]
     public typealias BoundaryMap = FreeModuleHom<A, A, R>
-    public typealias BoundaryMatrix = ComputationalMatrix<R>
     
     public let name: String
-    internal let chain: [(basis: ChainBasis, map: BoundaryMap, matrix: BoundaryMatrix)]
+    internal let chain: [(basis: ChainBasis, map: BoundaryMap)]
+    internal let matrices: [ComputationalMatrix<R>]
     internal let offset: Int
     
     // root initializer
-    public init(name: String? = nil, _ chain: [(ChainBasis, BoundaryMap, BoundaryMatrix)], offset: Int = 0) {
+    public init(name: String? = nil, _ chain: [(ChainBasis, BoundaryMap)], offset: Int = 0) {
         self.name = name ?? "_"
         self.chain = chain
+        self.matrices = _ChainComplex<chainType, A, R>.makeMatrices(chain)
         self.offset = offset
     }
     
@@ -52,24 +53,41 @@ public struct _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: E
         return (offset ... topDegree).contains(i) ? chain[i - offset].map : BoundaryMap.zero
     }
     
-    public func boundaryMatrix(_ i: Int) -> BoundaryMatrix {
+    public func boundaryMatrix(_ i: Int) -> ComputationalMatrix<R> {
         switch i {
         case (offset ... topDegree):
-            return chain[i - offset].matrix
+            return matrices[i - offset]
             
         case topDegree + 1 where chainType.descending:
-            return BoundaryMatrix.zero(rows: chainBasis(topDegree).count, cols: 0)
+            return ComputationalMatrix.zero(rows: chainBasis(topDegree).count, cols: 0)
             
         case offset - 1 where !chainType.descending:
-            return BoundaryMatrix.zero(rows: chainBasis(offset).count, cols: 0)
+            return ComputationalMatrix.zero(rows: chainBasis(offset).count, cols: 0)
             
         default:
-            return BoundaryMatrix.zero(rows: 0, cols: 0)
+            return ComputationalMatrix.zero(rows: 0, cols: 0)
         }
     }
     
     public func shifted(_ d: Int) -> _ChainComplex<chainType, A, R> {
         return _ChainComplex.init(name: "\(name)[\(d)]", chain, offset: offset + d)
+    }
+    
+    internal static func makeMatrices(_ chain: [(ChainBasis, BoundaryMap)]) -> [ComputationalMatrix<R>] {
+        return chain.enumerated().map { (i, c) in
+            let (from, map) = c
+            let next = chainType.target(i)
+            let to = (0 ..< chain.count).contains(next) ? chain[next].0 : []
+            
+            let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toBasisElement: toBasisIndex]
+            let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
+                map.appliedTo(x).flatMap { (y, a) -> MatrixComponent<R>? in
+                    toIndex[y].flatMap{ i in (i, j, a) } // nil if toIndex[y] == nil
+                }
+            }
+            
+            return ComputationalMatrix(rows: to.count, cols: from.count, components: components)
+        }
     }
     
     public func assertComplex(debug: Bool = false) {

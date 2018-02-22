@@ -97,7 +97,7 @@ public extension CohomologyExactSequence where chainType == Ascending, A == Dual
         
         let i = CochainMap(SimplicialMap.inclusion(from: A, to: X), R.self)
         let j = CochainMap(from: CXA, to: CX) { d in SimplicialCochain(d) }
-        let d = CochainMap(from: CA, to: CXA, shift: +1) { d in X.coboundary(d, R.self) }
+        let d = CochainMap(from: CA, to: CXA, shift: +1) { d in X.coboundary(of: d, R.self) }
         
         self.init(CXA, j, CX, i, CA, d)
     }
@@ -135,7 +135,7 @@ public extension CohomologyExactSequence where chainType == Ascending, A == Dual
             }
         }
         
-        let d = CochainMap(from: CAnB, to: CX, shift: +1) { d in A.coboundary(d, R.self) }
+        let d = CochainMap(from: CAnB, to: CX, shift: +1) { d in A.coboundary(of: d, R.self) }
         
         return CohomologyExactSequence(CX, j, CAoB, i, CAnB, d)
     }

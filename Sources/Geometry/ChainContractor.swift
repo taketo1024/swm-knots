@@ -196,24 +196,11 @@ public class ChainContractor<R: EuclideanRing> {
     
     public var contractedChainComplex: ChainComplex<Simplex, R> {
         typealias CC = ChainComplex<S, R>
-        let chain = K.validDims.map{ (i) -> (CC.ChainBasis, CC.BoundaryMap, CC.BoundaryMatrix) in
+        let chain = K.validDims.map{ (i) -> (CC.ChainBasis, CC.BoundaryMap) in
             
-            let from = generators.filter{ $0.dim == i }
-            let to   = generators.filter{ $0.dim == i - 1 }
-            let map  = CC.BoundaryMap.zero // TODO
-            
-            let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toCell: toIndex]
-            
-            let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
-                return diff[s].flatMap { b -> [MatrixComponent<R>] in
-                    b.map { (t, r) in
-                        (toIndex[t]!, j, r)
-                    }
-                    } ?? []
-            }
-            let matrix = ComputationalMatrix(rows: to.count, cols: from.count, components: components)
-            
-            return (from, map, matrix)
+            let from = generators.filter { s in s.dim == i }
+            let map  = CC.BoundaryMap { s in self.diff[s] ?? C.zero }
+            return (from, map)
         }
         
         return CC(name: K.name, chain)

@@ -30,9 +30,13 @@ public protocol GeometricComplex: CustomStringConvertible {
     func skeleton(_ dim: Int) -> Self
     
     func boundaryMap<R: Ring>(_ i: Int, _ type: R.Type) -> FreeModuleHom<Cell, Cell, R>
-    func boundaryMatrix<R: Ring>(_ i: Int, _ type: R.Type) -> ComputationalMatrix<R>
     
-    func coboundary<R: Ring>(_ d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R>
+    // MEMO would better write (if possible)
+    //
+    // extension<G> Dual<G.Cell> {
+    //   func coboundary<R>(in: G, _ type: R.Type) -> ... {
+    //
+    func coboundary<R: Ring>(of d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R>
 }
 
 public extension GeometricComplex {
@@ -58,30 +62,14 @@ public extension GeometricComplex {
         }
     }
     
-    public func boundaryMatrix<R: Ring>(_ i: Int, _ type: R.Type) -> ComputationalMatrix<R> {
-        let from = (i <= dim) ? cells(ofDim: i) : []
-        let to = (i > 0) ? cells(ofDim: i - 1) : []
-        return partialBoundaryMatrix(from, to, R.self)
-    }
-    
-    public func coboundary<R: Ring>(_ d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R> {
+    public func coboundary<R: Ring>(of d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R> {
         let s = d.base
-        let to = cells(ofDim: d.degree + 1)
         let e = R(intValue: (-1).pow(d.degree + 1))
-        let row = partialBoundaryMatrix(to, [s], R.self).multiply(e)
-        return FreeModule( zip(to.map{ Dual($0) }, row.generateGrid()) )
-    }
-    
-    internal func partialBoundaryMatrix<R: Ring>(_ from: [Cell], _ to: [Cell], _ type: R.Type) -> ComputationalMatrix<R> {
-        let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toCell: toIndex]
-        let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
-            return s.boundary(R.self).flatMap{ (e: (Cell, R)) -> MatrixComponent<R>? in
-                let (t, value) = e
-                return toIndex[t].flatMap{ i in (i, j, value) }
-            }
+        let vals = cells(ofDim: d.degree + 1).flatMap{ t -> (Dual<Cell>, R)? in
+            let a = t.boundary(R.self)[s]
+            return (a != R.zero) ? (Dual(t), e * a) : nil
         }
-        
-        return ComputationalMatrix(rows: to.count, cols: from.count, components: components)
+        return FreeModule(vals)
     }
     
     public var description: String {
