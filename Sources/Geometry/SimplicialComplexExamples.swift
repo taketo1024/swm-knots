@@ -66,7 +66,7 @@ public extension SimplicialComplex {
     static func realProjectiveSpace(dim n: Int) -> SimplicialComplex {
         switch n {
         case 1:
-            return circle()
+            return circle().named("RP^1")
             
         case 2:
             let V = Vertex.generate(6)

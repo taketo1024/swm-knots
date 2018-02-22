@@ -23,16 +23,18 @@ public extension SimplicialComplex {
     }
     
     public func link(_ s: Simplex) -> SimplicialComplex {
-        let K = SimplicialComplex(cells: [s])
-        return (star(s) - K).named("Lk\(s)")
+        let cells = star(s).maximalCells.flatMap { s1 in
+            SimplicialComplex.subtract(s1, s, strict: true)
+        }
+        return SimplicialComplex(name: "Lk\(s)", cells: cells, filterMaximalCells: true)
     }
     
     public var boundary: SimplicialComplex {
         let set = Set( maximalCells.flatMap{ $0.faces() } )
             .filter { s in
-                let star = self.star(s)
-                let link = star - s
-                return !star.isOrientable(relativeTo: link)
+                let st = star(s)
+                let lk = st.link(s)
+                return !st.isOrientable(relativeTo: lk)
             }
         return SimplicialComplex(name: "∂\(name)", cells: set)
     }
@@ -56,25 +58,34 @@ public extension SimplicialComplex {
         return SimplicialComplex(name: "\(K1) + \(K2)", cells: cells)
     }
     
+    // Returns maximal faces of s1 that are not contained in s2.
+    // If strict, no intersections are allowed.
+    
+    public static func subtract(_ s1: Simplex, _ s2: Simplex, strict: Bool = false) -> [Simplex] {
+        let n = s1 ∩ s2
+        if (!strict && n.dim < s2.dim) || (strict && n.isEmpty) {
+            return [s1]
+        } else if s2.contains(s1) {
+            return []
+        } else {
+            return s1.faces().flatMap{ t1 in subtract(t1, s2, strict: strict) }
+        }
+    }
+    
     public static func -(K1: SimplicialComplex, v: Vertex) -> SimplicialComplex {
         return K1 - Simplex(v)
     }
     
-    public static func -(K1: SimplicialComplex, s: Simplex) -> SimplicialComplex {
-        let K2 = SimplicialComplex(name: s.description, cells: [s])
-        return K1 - K2
+    public static func -(K1: SimplicialComplex, s2: Simplex) -> SimplicialComplex {
+        let cells = K1.maximalCells.flatMap{ s1 in subtract(s1, s2) }
+        return SimplicialComplex(name: "\(K1.name) - \(s2)", cells: cells, filterMaximalCells: true)
     }
     
     public static func -(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
         let subtr = K2.maximalCells
-        let cells = K1.maximalCells.flatMap { s1 -> [Simplex] in
-            if subtr.exists({ s2 in s2.contains(s1) }) {
-                return []
-            } else if subtr.forAll({ s2 in (s1 ∩ s2).isEmpty }) {
-                return [s1]
-            } else {
-                let filtered = s1.allSubsimplices().filter{ t1 in subtr.forAll{ s2 in (t1 ∩ s2).isEmpty } }
-                return SimplicialComplex.filterMaximalCells(filtered)
+        let cells = K1.maximalCells.flatMap { s1 in
+            subtr.reduce([s1]) { (list, s2) in
+                list.flatMap{ t1 in subtract(t1, s2) }
             }
         }
         return SimplicialComplex(name: "\(K1.name) - \(K2.name)", cells: cells, filterMaximalCells: true)
@@ -149,7 +160,7 @@ public extension SimplicialComplex {
             }
         }.unique()
         
-        return SimplicialComplex(name: "\(K1.name) ∩ \(K2.name)", cells: cells)
+        return SimplicialComplex(name: "\(K1.name) ∩ \(K2.name)", cells: cells, filterMaximalCells: true)
     }
     
     public static func ∨(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
