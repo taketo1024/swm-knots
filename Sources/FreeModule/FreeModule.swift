@@ -28,7 +28,11 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
     
     // generates a basis element
     public init(_ a: A) {
-        self.init([(a, 1)])
+        self.init(a, 1)
+    }
+    
+    public init(_ a: A, _ r: R) {
+        self.init([(a, r)])
     }
     
     public subscript(a: A) -> R {
