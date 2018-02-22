@@ -83,6 +83,17 @@ public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: R
     public static func ⊕<C>(f1: _ChainMap<T, A, B, R>, f2: _ChainMap<T, A, C, R>) -> _ChainMap<T, A, Sum<B, C>, R> {
         return _ChainMap<T, A, Sum<B, C>, R> { a in f1.appliedTo(a) ⊕ f2.appliedTo(a) }
     }
-    
 }
 
+public extension ChainMap where T == Descending {
+    public func dualMap(domainChainComplex C: ChainComplex<A, R>) -> CochainMap<Dual<B>, Dual<A>, R> {
+        return CochainMap { (d: Dual<B>) -> FreeModule<Dual<A>, R> in
+            let i = d.degree
+            let values = C.chainBasis(i).flatMap { s -> (Dual<A>, R)? in
+                let a = self.appliedTo(s)[d.base]
+                return (a != R.zero) ? (Dual(s), a) : nil
+            }
+            return FreeModule(values)
+        }
+    }
+}
