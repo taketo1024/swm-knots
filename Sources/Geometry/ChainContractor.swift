@@ -229,6 +229,19 @@ public class ChainContractor<R: EuclideanRing> {
         return CC(name: K.name, chain)
     }
     
+    public var homologyGroup: Homology<Simplex, R> {
+        let H = Homology(contractedChainComplex)
+        let map = ChainMap { s in self.g(s) }
+        return Homology(name: K.name, H, map )
+    }
+    
+    public var cohomologyGroup: Cohomology<Dual<Simplex>, R> {
+        let H = Cohomology(contractedCochainComplex)
+        let C = ChainComplex(K, R.self)
+        let map = ChainMap { s in self.f(s) }.dualMap(domainChainComplex: C)
+        return Cohomology(name: K.name, H, map)
+    }
+    
     internal class Node: Hashable, CustomStringConvertible {
         let cell: S
         var value: C
