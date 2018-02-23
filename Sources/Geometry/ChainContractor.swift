@@ -96,16 +96,20 @@ public class ChainContractor<R: EuclideanRing> {
         
         allDone = true
         
-        log("")
-        log("generators:")
-        log(generators.map{ "\t\($0.dim): \($0)"}.joined(separator: ",\n"))
-        
-        if !relations.isEmpty {
+        if debug {
             log("")
-            log("relations:")
-            log(relations.map { "\t\($0.anyElement!.0.dim): \($0)"}.joined(separator: ",\n"))
+            log("generators:")
+            log(generators.map{ "\t\($0.dim): \($0)"}.joined(separator: ",\n"))
+            
+            if !relations.isEmpty {
+                log("")
+                log("relations:")
+                log(relations.map { "\t\($0.anyElement!.0.dim): \($0)"}.joined(separator: ",\n"))
+            }
+            log("")
+            
+            assertChainContraction()
         }
-        log("")
     }
     
     @_specialize(where R == ComputationSpecializedRing)
@@ -115,7 +119,7 @@ public class ChainContractor<R: EuclideanRing> {
         let bs = C(s).boundary()
         let f_bs = f(bs)
         
-        log("\(step)\t\(s): f∂ = \(f_bs)")
+        log("\(step)\t\(s) -> \(f_bs)")
         log("")
         
         if isZero(f_bs) {
@@ -170,14 +174,22 @@ public class ChainContractor<R: EuclideanRing> {
         
         doneCells.insert(s)
         
-        log("\tgenerators: \(generators)")
-        if !relations.isEmpty {
-            log("relations: \(relations)")
+        if debug {
+            log("\tgenerators: \(generators)")
+            if !relations.isEmpty {
+                log("relations: \(relations)")
+            }
+            log("")
+            
+            logNodes("f", fNodes)
+            logNodes("h", fNodes)
+            log("")
+            
+            assertChainContraction()
         }
-        log("")
     }
     
-    public func assertChainContraction() {
+    internal func assertChainContraction() {
         for s in doneCells {
             let a1 = g(f(s)) - C(s)
             let a2 = h(C(s).boundary()) + h(s).boundary()
@@ -195,8 +207,90 @@ public class ChainContractor<R: EuclideanRing> {
         }
         
         log("assertion complete.")
+        log("")
     }
     
+    internal class Node: Hashable, CustomStringConvertible {
+        let cell: S
+        var value: C
+        var refs: [(Node, R)] = []
+        
+        init(_ cell: S, _ value: C) {
+            self.cell = cell
+            self.value = value
+        }
+        
+        var isZero: Bool {
+            return value == C.zero && refs.isEmpty
+        }
+        
+        func collect(flatten: Bool = false) -> C {
+            if refs.isEmpty {
+                return self.value
+            }
+            
+            var basket = [Node : R]()
+            let value = _collect(1, &basket)
+            
+            assert(basket.forAll{ $0.value == R.zero }, "invalid: \(basket)")
+            
+            if flatten {
+                self.value = value
+                self.refs = []
+            }
+            
+            return value
+        }
+        
+        @_specialize(where R == ComputationSpecializedRing)
+        private func _collect(_ a: R, _ basket: inout [Node : R]) -> C {
+            return value + refs.filter{ (n, r) in
+                if n == self {
+                    basket[n] = basket[n, default: R.zero] + r
+                    return false
+                } else if basket[n] != nil {
+                    basket[n] = basket[n]! + a * r
+                    return false
+                } else {
+                    return !isZero
+                }
+            }.sum {
+                (n, r) in r * n._collect(a * r, &basket)
+            }
+        }
+        
+        var hashValue: Int {
+            return cell.hashValue
+        }
+        
+        static func ==(lhs: Node, rhs: Node) -> Bool {
+            return lhs.cell == rhs.cell
+        }
+        
+        public var description: String {
+            return cell.description
+        }
+
+        public var detailDescription: String {
+            return refs.isEmpty
+                ? "\(cell) : {\(value)}"
+                : "\(cell) : {\(value) -> [\(refs.map{ (n, r) in "\(r)\(n.cell)"}.joined(separator: ", "))]}"
+        }
+    }
+    
+    internal func log(_ msg: @autoclosure () -> String) {
+        Debug.log(msg, debug)
+    }
+    
+    internal func logNodes(_ name: String, _ nodes: [S : Node]) {
+        if debug {
+            let sorted = nodes.values.sorted{ $0.cell <= $1.cell }
+            log("\t\(name): {\n\t\t\(sorted.map{ $0.detailDescription }.joined(separator: ",\n\t\t"))\n\t}\n")
+        }
+    }
+}
+
+public extension ChainContractor {
     public var contractedChainComplex: ChainComplex<Simplex, R> {
         typealias CC = ChainComplex<S, R>
         let chain = K.validDims.map{ (i) -> (CC.ChainBasis, CC.BoundaryMap) in
@@ -251,7 +345,7 @@ public class ChainContractor<R: EuclideanRing> {
         let map = ChainMap { s in self.f(s) }.dualMap(domainChainComplex: C)
         
         // factorize by: c -> g^*(c) -> [r]
-
+        
         let factorizer = { (c: SimplicialCochain<R>) -> [R] in
             if c == .zero {
                 return []
@@ -270,73 +364,5 @@ public class ChainContractor<R: EuclideanRing> {
             return H[i].structure.factorize( cocycle )
         }
         return Cohomology(name: K.name, H, map, factorizer)
-    }
-    
-    internal class Node: Hashable, CustomStringConvertible {
-        let cell: S
-        var value: C
-        var refs: [(Node, R)] = []
-        
-        init(_ cell: S, _ value: C) {
-            self.cell = cell
-            self.value = value
-        }
-        
-        var isZero: Bool {
-            return value == C.zero && refs.isEmpty
-        }
-        
-        func collect(flatten: Bool = false) -> C {
-            var basket = [Node : R]()
-            let value = _collect(1, &basket)
-            
-            assert(basket.forAll{ $0.value == R.zero })
-            
-            if flatten {
-                self.value = value
-                self.refs = []
-            }
-            
-            return value
-        }
-        
-        @_specialize(where R == ComputationSpecializedRing)
-        private func _collect(_ a: R, _ basket: inout [Node : R]) -> C {
-            return value + refs.filter{ (n, r) in
-                if n == self {
-                    basket[n] = basket[n, default: R.zero] + r
-                    return false
-                } else if basket[n] != nil {
-                    basket[n] = basket[n]! + a * r
-                    return false
-                } else {
-                    return !isZero
-                }
-            }.sum {
-                (n, r) in r * n._collect(a * r, &basket)
-            }
-        }
-        
-        var hashValue: Int {
-            return cell.hashValue
-        }
-        
-        static func ==(lhs: Node, rhs: Node) -> Bool {
-            return lhs.cell == rhs.cell
-        }
-        
-        public var description: String {
-            return cell.description
-        }
-
-        public var detailDescription: String {
-            return refs.isEmpty
-                ? "\(cell) : {\(value)}"
-                : "\(cell) : {\(value) -> [\(refs.map{ (n, r) in "\(r)\(n.cell)"}.joined(separator: ", "))]}"
-        }
-    }
-    
-    internal func log(_ msg: @autoclosure () -> String) {
-        Debug.log(msg, debug)
     }
 }
