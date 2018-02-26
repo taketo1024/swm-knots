@@ -120,7 +120,7 @@ public class ChainContractor<R: EuclideanRing> {
             dNodes[s] = Node(s)
             
         } else {
-            let candidates = bs.filter { (t1, _) in generators.contains(t1) && f_bs[t1].isInvertible && hNodes[t1]!.isZero }
+            let candidates = bs.filter { (t1, _) in generators.contains(t1) && f_bs[t1].isInvertible && hNodes[t1]!.isZeroNode }
                                .sorted{ $0.0 <= $1.0 }
             
             if let (t1, a) = candidates.last {
@@ -203,29 +203,26 @@ public class ChainContractor<R: EuclideanRing> {
             self.refs = refs
         }
         
-        var isZero: Bool {
+        var isZeroNode: Bool {
             return value == C.zero && refs.isEmpty
         }
         
+        @_specialize(where R == ComputationSpecializedRing)
         func collect(flatten: Bool = false) -> C {
             if refs.isEmpty {
                 return self.value
             }
             
-            let value = _collect()
+            let result = value +
+                refs.filter{ !$0.0.isZeroNode }
+                    .sum { (n, r) in r * n.collect(flatten: flatten) }
             
             if flatten {
-//                self.value = value
-//                self.refs = []
+                self.value = result
+                self.refs = []
             }
             
-            return value
-        }
-        
-        @_specialize(where R == ComputationSpecializedRing)
-        private func _collect() -> C {
-            return value + refs.filter{ !$0.0.isZero }
-                               .sum { (n, r) in r * n._collect() }
+            return result
         }
         
         var hashValue: Int {
@@ -252,7 +249,7 @@ public class ChainContractor<R: EuclideanRing> {
     }
     
     internal func logNodes(_ name: String, _ nodes: [S : Node]) {
-        let sorted = nodes.values.filter{ !$0.isZero }.sorted{ $0.cell <= $1.cell }
+        let sorted = nodes.values.filter{ !$0.isZeroNode }.sorted{ $0.cell <= $1.cell }
         log("\t\(name): {\n\t\t\(sorted.map{ $0.detailDescription }.joined(separator: ",\n\t\t"))\n\t}\n")
     }
 }
