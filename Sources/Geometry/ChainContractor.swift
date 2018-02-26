@@ -119,39 +119,34 @@ public class ChainContractor<R: EuclideanRing> {
             hNodes[s] = Node(s)
             dNodes[s] = Node(s)
             
-        } else {
-            let candidates = bs.filter { (t1, _) in f_bs[t1].isInvertible } // this implies generators.contains(t1)
-                               .sorted{ $0.0 <= $1.0 }
+        } else if let (t1, a) = removableGenerator(bs, f_bs) {
+            let b = f_bs[t1]
             
-            if let (t1, a) = candidates.last {
-                let b = f_bs[t1]
-                
-                log("\tremove: \(t1) = \(-b.inverse! * (f_bs - C(t1, b)))")
-                
-                generators.remove(at: generators.index(of: t1)!)
-                
-                fNodes[s] = Node(s)
-                hNodes[s] = Node(s)
-                dNodes[s] = Node(s)
-                
-                fNodes[t1]!.value = C.zero
-                fNodes[t1]!.refs = (C(t1) - b.inverse! * f_bs).map{ (t, a) in (fNodes[t]!, a) }
-                
-                hNodes[t1]!.value = -a.inverse! * C(s)
-                hNodes[t1]!.refs = (C(t1) - a.inverse! * bs).map{ (t, a) in (hNodes[t]!, a) }
-                
-                log("\t\t f: \(fNodes[t1]!.detailDescription)")
-                log("\t\t h: \(hNodes[t1]!.detailDescription)")
-
-            } else {
-                log("\tadd: \(s), ∂: \(f_bs)")
-                
-                generators.append(s)
-                
-                fNodes[s] = Node(s, value: C(s))
-                hNodes[s] = Node(s)
-                dNodes[s] = Node(s, refs: f_bs.map{ (t, a) in (fNodes[t]!, a)})
-            }
+            log("\tremove: \(t1) = \(-b.inverse! * (f_bs - C(t1, b)))")
+            
+            generators.remove(at: generators.index(of: t1)!)
+            
+            fNodes[s] = Node(s)
+            hNodes[s] = Node(s)
+            dNodes[s] = Node(s)
+            
+            fNodes[t1]!.value = C.zero
+            fNodes[t1]!.refs = (C(t1) - b.inverse! * f_bs).map{ (t, a) in (fNodes[t]!, a) }
+            
+            hNodes[t1]!.value = -a.inverse! * C(s)
+            hNodes[t1]!.refs = (C(t1) - a.inverse! * bs).map{ (t, a) in (hNodes[t]!, a) }
+            
+            log("\t\t f: \(fNodes[t1]!.detailDescription)")
+            log("\t\t h: \(hNodes[t1]!.detailDescription)")
+            
+        } else {
+            log("\tadd: \(s), ∂: \(f_bs)")
+            
+            generators.append(s)
+            
+            fNodes[s] = Node(s, value: C(s))
+            hNodes[s] = Node(s)
+            dNodes[s] = Node(s, refs: f_bs.map{ (t, a) in (fNodes[t]!, a)})
         }
         
         doneCells.insert(s)
@@ -159,13 +154,17 @@ public class ChainContractor<R: EuclideanRing> {
         if debug {
             log("\tgenerators: \(generators)")
             log("")
-
-//            logNodes("f", fNodes)
-//            logNodes("h", hNodes)
-//            log("")
-
-//            assertChainContraction()
         }
+    }
+    
+    private func removableGenerator(_ bs: C, _ f_bs: C) -> (Simplex, R)? {
+        return bs.sorted{ $0.0 > $1.0 }
+            .lazy
+            .filter { (t1, _) in
+                f_bs[t1].isInvertible // this implies generators.contains(t1)
+                    && f_bs.forAll{ (t, _) in t == t1 || !self.fNodes[t]!.passes(t1)}
+                    &&   bs.forAll{ (t, _) in t == t1 || !self.hNodes[t]!.passes(t1)}
+        }.first
     }
     
     internal func assertChainContraction() {
@@ -223,6 +222,10 @@ public class ChainContractor<R: EuclideanRing> {
             }
             
             return result
+        }
+        
+        func passes(_ s: S) -> Bool {
+            return (cell == s) || refs.exists{ (n, _) in n.passes(s) }
         }
         
         var hashValue: Int {
