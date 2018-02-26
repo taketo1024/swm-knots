@@ -20,7 +20,6 @@ public class ChainContractor<R: EuclideanRing> {
     internal var debug = false
     
     internal var generators = [S]()
-    internal var relations  = [C]()
     internal var diff = [S : C]()
 
     internal var fNodes = [S : Node]()
@@ -56,22 +55,12 @@ public class ChainContractor<R: EuclideanRing> {
         return c.sum{ (s, a) in a * h(s) }
     }
     
-    internal func isZero(_ c: C) -> Bool {
-        if relations.isEmpty {
-            return c == C.zero
-        }
-        
-        let A = DynamicMatrix<R>(rows: relations.count + 1, cols: generators.count) { (i, j) in
-            let x = generators[j]
-            if i < relations.count {
-                return relations[i][x]
-            } else {
-                return c[x]
-            }
-        }
-        
-        let E = A.eliminate(form: .RowEchelon)
-        return E.rank == relations.count
+    internal func d(_ s: S) -> C {
+        return diff[s] ?? C.zero
+    }
+    
+    internal func d(_ c: C) -> C {
+        return c.sum{ (s, a) in a * d(s) }
     }
     
     internal func makeList(_ s: S) -> [S] {
@@ -101,10 +90,10 @@ public class ChainContractor<R: EuclideanRing> {
             log("generators:")
             log(generators.map{ "\t\($0.dim): \($0)"}.joined(separator: ",\n"))
             
-            if !relations.isEmpty {
+            if !diff.isEmpty {
                 log("")
-                log("relations:")
-                log(relations.map { "\t\($0.anyElement!.0.dim): \($0)"}.joined(separator: ",\n"))
+                log("diffs:")
+                log( diff.sorted(by: {$0.0 <= $1.0} ).map { (s, c) in "\t\(s) -> \(c)"}.joined(separator: ",\n"))
             }
             log("")
             
@@ -119,10 +108,10 @@ public class ChainContractor<R: EuclideanRing> {
         let bs = C(s).boundary()
         let f_bs = f(bs)
         
-        log("\(step)\t\(s) -> \(f_bs)")
+        log("\(step)\t\(s) : f(∂\(s)) = \(f_bs)")
         log("")
         
-        if isZero(f_bs) {
+        if f_bs == C.zero {
             log("\tadd: \(s)")
             
             generators.append(s)
@@ -131,40 +120,37 @@ public class ChainContractor<R: EuclideanRing> {
             hNodes[s] = Node(s, C.zero)
             
         } else {
-            let candidates = f_bs
-                .filter{ (t1, a) in a.isInvertible && diff[t1] == nil }
-                .sorted{ (v1, v2) in v1.0 <= v2.0 } // TODO
+            let candidates = bs.filter { (t1, _) in generators.contains(t1) && f_bs[t1].isInvertible && hNodes[t1]!.isZero }
+//                .sorted{ $0.0 <= $1.0 }
             
             if let (t1, a) = candidates.last {
-                let e = a.inverse!
-                log("\tremove: \(t1) = \(-e * (f_bs - a * C(t1)))")
+                let b = f_bs[t1]
+                
+                log("\tremove: \(t1) = \(-b.inverse! * (f_bs - C(t1, b)))")
                 
                 generators.remove(at: generators.index(of: t1)!)
                 
-                for (i, r) in relations.enumerated().filter({ (_, r) in r[t1] != R.zero}) {
-                    let e = r[t1] * a.inverse!
-                    relations[i] = r - e * f_bs
-                }
-                
-                for (s, b) in diff.filter({ (_, b) in b[t1] != R.zero }) {
-                    let e = b[t1] * a.inverse!
-                    diff[s] = b - e * f_bs
+                for (s, d) in diff.filter({ (_, d) in d[t1] != R.zero }) {
+                    let e = d[t1] * b.inverse!
+                    diff[s] = d - e * f_bs
                 }
                 
                 fNodes[s] = Node(s, C.zero)
                 hNodes[s] = Node(s, C.zero)
                 
                 fNodes[t1]!.value = C.zero
-                fNodes[t1]!.refs = (C(t1) - e * f_bs).map{ (t, a) in (fNodes[t]!, a) }
+                fNodes[t1]!.refs = (C(t1) - b.inverse! * f_bs).map{ (t, a) in (fNodes[t]!, a) }
                 
-                hNodes[t1]!.value = -e * C(s)
-                hNodes[t1]!.refs = (C(t1) - e * bs).map{ (t, a) in (hNodes[t]!, a) }
+                hNodes[t1]!.value = -a.inverse! * C(s)
+                hNodes[t1]!.refs = (C(t1) - a.inverse! * bs).map{ (t, a) in (hNodes[t]!, a) }
                 
+                log("\t\t f: \(fNodes[t1]!.detailDescription)")
+                log("\t\t h: \(hNodes[t1]!.detailDescription)")
+
             } else {
-                log("\tadd: \(s) with diff: \(f_bs)")
+                log("\tadd: \(s), ∂: \(f_bs)")
                 
                 generators.append(s)
-                relations.append(f_bs)
                 diff[s] = f_bs
                 
                 fNodes[s] = Node(s, C(s))
@@ -175,38 +161,38 @@ public class ChainContractor<R: EuclideanRing> {
         doneCells.insert(s)
         
         if debug {
+            log("")
             log("\tgenerators: \(generators)")
-            if !relations.isEmpty {
-                log("relations: \(relations)")
-            }
-            log("")
             
-            logNodes("f", fNodes)
-            logNodes("h", fNodes)
-            log("")
-            
-            assertChainContraction()
+//            logNodes("f", fNodes)
+//            logNodes("h", hNodes)
+//            log("")
+
+//            assertChainContraction()
         }
     }
     
     internal func assertChainContraction() {
+        // assert chain complex
+        for s in generators {
+            let dds = d(d(s))
+            assert(dds == C.zero, "∂∂\(s) = \(dds), should be zero")
+        }
+        
+        // assert gf - 1 = h∂ + ∂h
         for s in doneCells {
             let a1 = g(f(s)) - C(s)
             let a2 = h(C(s).boundary()) + h(s).boundary()
             assert(a1 == a2, "(gf - 1)(\(s)) = \(a1),\n(h∂ + ∂h)(\(s)) = \(a2)\n")
         }
         
+        // assert fg = 1
         for s in generators {
-            let b1 = f(g(s))
-            assert(b1 == C(s), "fg(\(s)) = \(b1)\n")
+            let fgs = f(g(s))
+            assert(fgs == C(s), "fg(\(s)) != \(fgs)\n")
         }
         
-        for s in generators.filter({ diff[$0] == nil}) {
-            let b = g(s).boundary()
-            assert(b == C.zero, "∂s = \(b), should be 0.\n")
-        }
-        
-        log("assertion complete.")
+        log("\tassertion complete.")
         log("")
     }
     
@@ -229,34 +215,20 @@ public class ChainContractor<R: EuclideanRing> {
                 return self.value
             }
             
-            var basket = [Node : R]()
-            let value = _collect(1, &basket)
-            
-            assert(basket.forAll{ $0.value == R.zero }, "invalid: \(basket)")
+            let value = _collect()
             
             if flatten {
-                self.value = value
-                self.refs = []
+//                self.value = value
+//                self.refs = []
             }
             
             return value
         }
         
         @_specialize(where R == ComputationSpecializedRing)
-        private func _collect(_ a: R, _ basket: inout [Node : R]) -> C {
-            return value + refs.filter{ (n, r) in
-                if n == self {
-                    basket[n] = basket[n, default: R.zero] + r
-                    return false
-                } else if basket[n] != nil {
-                    basket[n] = basket[n]! + a * r
-                    return false
-                } else {
-                    return !isZero
-                }
-            }.sum {
-                (n, r) in r * n._collect(a * r, &basket)
-            }
+        private func _collect() -> C {
+            return value + refs.filter{ !$0.0.isZero }
+                               .sum { (n, r) in r * n._collect() }
         }
         
         var hashValue: Int {
@@ -283,10 +255,18 @@ public class ChainContractor<R: EuclideanRing> {
     }
     
     internal func logNodes(_ name: String, _ nodes: [S : Node]) {
-        if debug {
-            let sorted = nodes.values.sorted{ $0.cell <= $1.cell }
-            log("\t\(name): {\n\t\t\(sorted.map{ $0.detailDescription }.joined(separator: ",\n\t\t"))\n\t}\n")
-        }
+        let sorted = nodes.values.filter{ $0.value != C.zero || !$0.refs.isEmpty }.sorted{ $0.cell <= $1.cell }
+        log("\t\(name): {\n\t\t\(sorted.map{ $0.detailDescription }.joined(separator: ",\n\t\t"))\n\t}\n")
+    }
+    
+    internal func logG() {
+        let sorted = generators.sorted()
+        log("\tg: {\n\t\t\(sorted.map{ "\($0) : \(g($0))" }.joined(separator: ",\n\t\t"))\n\t}\n")
+    }
+    
+    internal func logGF() {
+        let sorted = doneCells.sorted()
+        log("\tg: {\n\t\t\(sorted.map{ "\($0) : \(g(f($0)))" }.joined(separator: ",\n\t\t"))\n\t}\n")
     }
 }
 
@@ -366,3 +346,5 @@ public extension ChainContractor {
         return Cohomology(name: K.name, H, map, factorizer)
     }
 }
+
+extension String: Error {}
