@@ -120,7 +120,7 @@ public class ChainContractor<R: EuclideanRing> {
             dNodes[s] = Node(s)
             
         } else {
-            let candidates = bs.filter { (t1, _) in generators.contains(t1) && f_bs[t1].isInvertible && hNodes[t1]!.isZeroNode }
+            let candidates = bs.filter { (t1, _) in f_bs[t1].isInvertible } // this implies generators.contains(t1)
                                .sorted{ $0.0 <= $1.0 }
             
             if let (t1, a) = candidates.last {
@@ -238,9 +238,9 @@ public class ChainContractor<R: EuclideanRing> {
         }
 
         public var detailDescription: String {
-            return refs.isEmpty
-                ? "\(cell) : {\(value)}"
-                : "\(cell) : {\(value) -> [\(refs.map{ (n, r) in "\(r)\(n.cell)"}.joined(separator: ", "))]}"
+            return    refs.isEmpty ? "\(cell) : \(value)" :
+                  (value == .zero) ? "\(cell) -> [\(refs.map{ (n, r) in "\(r)\(n.cell)"}.joined(separator: ", "))]" 
+                                   : "\(cell) : {\(value) -> [\(refs.map{ (n, r) in "\(r)\(n.cell)"}.joined(separator: ", "))]}"
         }
     }
     
