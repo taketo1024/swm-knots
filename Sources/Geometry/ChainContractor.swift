@@ -120,9 +120,7 @@ public class ChainContractor<R: EuclideanRing> {
             dNodes[s] = Node(s)
             
         } else if let (t1, a) = removableGenerator(bs, f_bs) {
-            let b = f_bs[t1]
-            
-            log("\tremove: \(t1) = \(-b.inverse! * (f_bs - C(t1, b)))")
+            log("\tremove: \(t1) = \(-a.inverse! * (f_bs - C(t1, a)))")
             
             generators.remove(at: generators.index(of: t1)!)
             
@@ -131,7 +129,7 @@ public class ChainContractor<R: EuclideanRing> {
             dNodes[s] = Node(s)
             
             fNodes[t1]!.value = C.zero
-            fNodes[t1]!.refs = (C(t1) - b.inverse! * f_bs).map{ (t, a) in (fNodes[t]!, a) }
+            fNodes[t1]!.refs = (C(t1) - a.inverse! * f_bs).map{ (t, a) in (fNodes[t]!, a) }
             
             hNodes[t1]!.value = -a.inverse! * C(s)
             hNodes[t1]!.refs = (C(t1) - a.inverse! * bs).map{ (t, a) in (hNodes[t]!, a) }
