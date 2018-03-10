@@ -63,6 +63,8 @@
 		DD17AFF31FE37F3A00AA5924 /* ChainComplexOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD17AFF21FE37F3A00AA5924 /* ChainComplexOperations.swift */; };
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
 		DD4E539B1FE374F300C75F7E /* FreeModuleBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */; };
+		DD6092882053EF4000ABD84F /* MPolynomial.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6092872053EF4000ABD84F /* MPolynomial.swift */; };
+		DD60928C20541A5E00ABD84F /* Letters.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD60928B20541A5E00ABD84F /* Letters.swift */; };
 		DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125991F31AA2500FD5533 /* Cache.swift */; };
 		DD90ACC91F763553001AFC9C /* PolynomialIdeal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */; };
 /* End PBXBuildFile section */
@@ -143,6 +145,9 @@
 		DD17AFF21FE37F3A00AA5924 /* ChainComplexOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainComplexOperations.swift; sourceTree = "<group>"; };
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
 		DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeModuleBase.swift; sourceTree = "<group>"; };
+		DD6092872053EF4000ABD84F /* MPolynomial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MPolynomial.swift; sourceTree = "<group>"; };
+		DD60928B20541A5E00ABD84F /* Letters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Letters.swift; sourceTree = "<group>"; };
+		DD60928D20541E6000ABD84F /* MPolynomials.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MPolynomials.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		DD6125991F31AA2500FD5533 /* Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
 		DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolynomialIdeal.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -287,6 +292,7 @@
 				1424F4F71EB997780052581F /* optable.swift */,
 				145339BF1EC7D67100F014F4 /* Ref.swift */,
 				DD6125991F31AA2500FD5533 /* Cache.swift */,
+				DD60928B20541A5E00ABD84F /* Letters.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -351,6 +357,7 @@
 				14929C981ED9BFE5006ACAC5 /* Matrices.playground */,
 				14929C9A1ED9BFE5006ACAC5 /* Permutations.playground */,
 				1414D8551EE0F927001A1D42 /* Polynomials.playground */,
+				DD60928D20541E6000ABD84F /* MPolynomials.playground */,
 				14929C941ED9BFE5006ACAC5 /* AlgebraicExtensions.playground */,
 			);
 			path = Playgrounds;
@@ -371,6 +378,7 @@
 			children = (
 				1424F4E31EB997780052581F /* Polynominal.swift */,
 				DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */,
+				DD6092872053EF4000ABD84F /* MPolynomial.swift */,
 			);
 			path = Polynomial;
 			sourceTree = "<group>";
@@ -518,8 +526,10 @@
 				1410C1171FB203CC00CEE47D /* HermiteEliminator.swift in Sources */,
 				145B10D51FB19B03004EC11E /* MatrixEliminationResult.swift in Sources */,
 				14D261321EE44DB4006775E2 /* AlgebraicStructure.swift in Sources */,
+				DD60928C20541A5E00ABD84F /* Letters.swift in Sources */,
 				140E80A01ECDEA8E00B89719 /* combinations.swift in Sources */,
 				1424F5051EB997780052581F /* Map.swift in Sources */,
+				DD6092882053EF4000ABD84F /* MPolynomial.swift in Sources */,
 				1424F5081EB997780052581F /* Real.swift in Sources */,
 				1424F4FB1EB997780052581F /* Field.swift in Sources */,
 				DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */,
