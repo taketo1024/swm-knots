@@ -12,48 +12,30 @@ public struct SimplicialComplex: GeometricComplex {
     public typealias Cell = Simplex
     
     public var name: String
-    internal let table: [[Simplex]]
+    public let dim: Int
     
-    // root initializer
-    internal init(name: String? = nil, table: [[Simplex]]) {
+    public let vertices: [Vertex]
+    public let maximalCells: [Simplex]
+    private let _table = Cache<[[Simplex]]>()
+    
+    public init<S: Sequence>(name: String? = nil, cells: S, filterMaximalCells: Bool = false) where S.Iterator.Element == Simplex {
         self.name = name ?? "_"
-        
-        if let l = table.last, l.isEmpty {
-            let n = table.reversed().index{ l in !l.isEmpty }.map{ Int($0) } ?? table.count
-            self.table = table.dropLast(n).toArray()
-        } else {
-            self.table = table
-        }
+        self.maximalCells = filterMaximalCells ? SimplicialComplex.filterMaximalCells(cells) : cells.toArray()
+        self.vertices = maximalCells.reduce(Set<Vertex>()){ (set, s) in set.union(s.vertices) }.unique().sorted()
+        self.dim = maximalCells.reduce(-1){ (res, s) in max(res, s.dim) }
     }
     
-    public init<S: Sequence>(name: String? = nil, allCells cells: S) where S.Iterator.Element == Simplex {
-        self.init(name: name, table: SimplicialComplex.alignCells(cells, generateFaces: false))
-    }
-    
-    public init(name: String? = nil, allCells cells: Simplex...) {
-        self.init(name: name, allCells: cells)
-    }
-    
-    public init<S: Sequence>(name: String? = nil, maximalCells cells: S) where S.Iterator.Element == Simplex {
-        self.init(name: name, table: SimplicialComplex.alignCells(cells, generateFaces: true))
-    }
-    
-    public init(name: String? = nil, maximalCells cells: Simplex...) {
-        self.init(name: name, maximalCells: cells)
+    public init(name: String? = nil, cells: Simplex...) {
+        self.init(name: name, cells: cells)
     }
     
     public static var empty: SimplicialComplex {
-        return SimplicialComplex.init(name: "∅", table: [])
+        return SimplicialComplex.init(name: "∅", cells: [])
     }
     
-    public var dim: Int {
-        return table.count - 1
-    }
-    
-    public func skeleton(_ n: Int) -> SimplicialComplex {
-        if n >= 0 {
-            let sub = table[0 ... n].toArray()
-            return SimplicialComplex(name: "\(self.name)_(\(n))", table: sub)
+    public func skeleton(_ i: Int) -> SimplicialComplex {
+        if validDims.contains(i) {
+            return SimplicialComplex(name: "\(self.name)_(\(i))", cells: table[i])
         } else {
             return SimplicialComplex.empty
         }
@@ -61,34 +43,6 @@ public struct SimplicialComplex: GeometricComplex {
     
     public func cells(ofDim i: Int) -> [Simplex] {
         return validDims.contains(i) ? table[i] : []
-    }
-    
-    public var vertices: [Vertex] {
-        return (dim >= 0) ? table[0].map{ $0.vertices[0] } : []
-    }
-    
-    private var _maximalCells: Cache<[Simplex]> = Cache()
-    
-    public var maximalCells: [Simplex] {
-        if let cells = _maximalCells.value {
-            return cells
-        }
-        
-        var cells = table.reversed().joined().toArray()
-        var i = 0
-        while i < cells.count {
-            let s = cells[i]
-            let subs = s.allSubsimplices().dropFirst()
-            for t in subs {
-                if let j = cells.index(of: t) {
-                    cells.remove(at: j)
-                }
-            }
-            i += 1
-        }
-        
-        _maximalCells.value = cells
-        return cells
     }
     
     public func cofaces(ofCell s: Simplex) -> [Simplex] {
@@ -101,26 +55,32 @@ public struct SimplicialComplex: GeometricComplex {
         return K
     }
     
-    internal static func alignCells<S: Sequence>(_ cells: S, generateFaces gFlag: Bool) -> [[Simplex]] where S.Iterator.Element == Simplex {
-        let dim = cells.reduce(-1) { max($0, $1.dim) }
-        if dim < 0 {
-            return []
+    internal var table: [[Simplex]] {
+        if let table = _table.value {
+            return table
         }
         
-        let set: Set<Simplex>
-        if gFlag {
-            set = cells.reduce( Set<Simplex>() ){ (set, cell) in
-                set.union( cell.allSubsimplices() )
-            }
-        } else {
-            set = Set(cells)
+        let set = maximalCells.reduce( Set<Simplex>() ){ (set, cell) in
+            set.union( cell.allSubsimplices() )
         }
         
-        var cells: [[Simplex]] = (0 ... dim).map{_ in []}
+        var table: [[Simplex]] = (0 ... dim).map{_ in []}
         for s in set {
-            cells[s.dim].append(s)
+            table[s.dim].append(s)
         }
+        table = table.map{ list in list.sorted() }
         
-        return cells.map { list in list.sorted() }
+        _table.value = table
+        return table
+    }
+    
+    static public func filterMaximalCells<S: Sequence>(_ _cells: S) -> [Simplex] where S.Element == Simplex {
+        var result = [Simplex]()
+        for s in _cells.sorted().reversed() {
+            if result.forAll({ t in !t.contains(s) }) {
+                result.append(s)
+            }
+        }
+        return result
     }
 }

@@ -8,12 +8,7 @@
 
 import Foundation
 
-public protocol GeometricComplexMap: Map where Domain == ComplexType.Cell, Codomain == ComplexType.Cell {
-    associatedtype ComplexType: GeometricComplex
-    var domain:   ComplexType { get }
-    var codomain: ComplexType? { get }
-    var image:    ComplexType { get }
-}
+// TODO clean up the clutters.
 
 public extension GeometricComplexMap {
     public func asChainMap<R: EuclideanRing>(_ type: R.Type) -> ChainMap<ComplexType.Cell, ComplexType.Cell, R> {
@@ -25,7 +20,7 @@ public extension GeometricComplexMap {
     }
 }
 
-public extension ChainMap where chainType == Descending {
+public extension ChainMap where T == Descending {
     
     // f: K1 -> K2  ==> f_*: C(K1) -> C(K2)
     //                          s |-> f(s)
@@ -38,7 +33,7 @@ public extension ChainMap where chainType == Descending {
     }
 }
 
-public extension CochainMap where chainType == Ascending {
+public extension CochainMap where T == Ascending {
     
     // f: K1 -> K2  ==> f^*: C^*(K2) -> C^*(K1) , pullback
     //                            g  -> (g∘f: s -> g∘f(s))
@@ -56,13 +51,13 @@ public extension CochainMap where chainType == Ascending {
     }
 }
 
-public extension HomologyMap where chainType == Descending {
+public extension HomologyMap where T == Descending {
     public init<F: GeometricComplexMap>(from: Homology<A, R>, to: Homology<B, R>, inducedFrom f: F) where A == F.ComplexType.Cell, B == F.ComplexType.Cell {
         self.init(from: from, to: to, inducedFrom: ChainMap(f, R.self))
     }
 }
 
-public extension CohomologyMap where chainType == Ascending {
+public extension CohomologyMap where T == Ascending {
     public init<F: GeometricComplexMap>(from: Cohomology<A, R>, to: Cohomology<B, R>, inducedFrom f: F) where A == Dual<F.ComplexType.Cell>, B == Dual<F.ComplexType.Cell> {
         self.init(from: from, to: to, inducedFrom: CochainMap(f, R.self))
     }

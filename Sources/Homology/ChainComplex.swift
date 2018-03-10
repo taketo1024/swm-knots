@@ -24,19 +24,20 @@ public struct Ascending : ChainType {
 public typealias   ChainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Descending, A, R>
 public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Ascending,  A, R>
 
-public struct _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
+public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
     public typealias ChainBasis = [A]
     public typealias BoundaryMap = FreeModuleHom<A, A, R>
-    public typealias BoundaryMatrix = ComputationalMatrix<R>
     
     public let name: String
-    internal let chain: [(basis: ChainBasis, map: BoundaryMap, matrix: BoundaryMatrix)]
+    internal let chain: [(basis: ChainBasis, map: BoundaryMap)]
+    internal let matrices: [ComputationalMatrix<R>]
     internal let offset: Int
     
     // root initializer
-    public init(name: String? = nil, _ chain: [(ChainBasis, BoundaryMap, BoundaryMatrix)], offset: Int = 0) {
+    public init(name: String? = nil, _ chain: [(ChainBasis, BoundaryMap)], offset: Int = 0) {
         self.name = name ?? "_"
         self.chain = chain
+        self.matrices = _ChainComplex<T, A, R>.makeMatrices(chain)
         self.offset = offset
     }
     
@@ -52,29 +53,46 @@ public struct _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: E
         return (offset ... topDegree).contains(i) ? chain[i - offset].map : BoundaryMap.zero
     }
     
-    public func boundaryMatrix(_ i: Int) -> BoundaryMatrix {
+    public func boundaryMatrix(_ i: Int) -> ComputationalMatrix<R> {
         switch i {
         case (offset ... topDegree):
-            return chain[i - offset].matrix
+            return matrices[i - offset]
             
-        case topDegree + 1 where chainType.descending:
-            return BoundaryMatrix.zero(rows: chainBasis(topDegree).count, cols: 0)
+        case topDegree + 1 where T.descending:
+            return ComputationalMatrix.zero(rows: chainBasis(topDegree).count, cols: 0)
             
-        case offset - 1 where !chainType.descending:
-            return BoundaryMatrix.zero(rows: chainBasis(offset).count, cols: 0)
+        case offset - 1 where !T.descending:
+            return ComputationalMatrix.zero(rows: chainBasis(offset).count, cols: 0)
             
         default:
-            return BoundaryMatrix.zero(rows: 0, cols: 0)
+            return ComputationalMatrix.zero(rows: 0, cols: 0)
         }
     }
     
-    public func shifted(_ d: Int) -> _ChainComplex<chainType, A, R> {
+    public func shifted(_ d: Int) -> _ChainComplex<T, A, R> {
         return _ChainComplex.init(name: "\(name)[\(d)]", chain, offset: offset + d)
+    }
+    
+    internal static func makeMatrices(_ chain: [(ChainBasis, BoundaryMap)]) -> [ComputationalMatrix<R>] {
+        return chain.enumerated().map { (i, c) in
+            let (from, map) = c
+            let next = T.target(i)
+            let to = (0 ..< chain.count).contains(next) ? chain[next].0 : []
+            
+            let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toBasisElement: toBasisIndex]
+            let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
+                map.appliedTo(x).flatMap { (y, a) -> MatrixComponent<R>? in
+                    toIndex[y].flatMap{ i in (i, j, a) } // nil if toIndex[y] == nil
+                }
+            }
+            
+            return ComputationalMatrix(rows: to.count, cols: from.count, components: components)
+        }
     }
     
     public func assertComplex(debug: Bool = false) {
         (offset ... topDegree).forEach { i1 in
-            let i2 = chainType.target(i1)
+            let i2 = T.target(i1)
             let b1 = chainBasis(i1)
             let (d1, d2) = (boundaryMap(i1), boundaryMap(i2))
             let (m1, m2) = (boundaryMatrix(i1), boundaryMatrix(i2))
@@ -97,7 +115,7 @@ public struct _ChainComplex<chainType: ChainType, A: FreeModuleBase, R: Ring>: E
         }
     }
     
-    public static func ==<chainType, A, R>(a: _ChainComplex<chainType, A, R>, b: _ChainComplex<chainType, A, R>) -> Bool {
+    public static func ==<T, A, R>(a: _ChainComplex<T, A, R>, b: _ChainComplex<T, A, R>) -> Bool {
         let offset = min(a.offset, b.offset)
         let degree = max(a.topDegree, b.topDegree)
         return (offset ... degree).forAll { i in (a.chainBasis(i) == b.chainBasis(i)) && (a.boundaryMatrix(i) == b.boundaryMatrix(i)) }

@@ -30,9 +30,13 @@ public protocol GeometricComplex: CustomStringConvertible {
     func skeleton(_ dim: Int) -> Self
     
     func boundaryMap<R: Ring>(_ i: Int, _ type: R.Type) -> FreeModuleHom<Cell, Cell, R>
-    func boundaryMatrix<R: Ring>(_ i: Int, _ type: R.Type) -> ComputationalMatrix<R>
     
-    func coboundary<R: Ring>(_ d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R>
+    // MEMO would better write (if possible)
+    //
+    // extension<G> Dual<G.Cell> {
+    //   func coboundary<R>(in: G, _ type: R.Type) -> ... {
+    //
+    func coboundary<R: Ring>(of d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R>
 }
 
 public extension GeometricComplex {
@@ -58,30 +62,14 @@ public extension GeometricComplex {
         }
     }
     
-    public func boundaryMatrix<R: Ring>(_ i: Int, _ type: R.Type) -> ComputationalMatrix<R> {
-        let from = (i <= dim) ? cells(ofDim: i) : []
-        let to = (i > 0) ? cells(ofDim: i - 1) : []
-        return partialBoundaryMatrix(from, to, R.self)
-    }
-    
-    public func coboundary<R: Ring>(_ d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R> {
+    public func coboundary<R: Ring>(of d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R> {
         let s = d.base
-        let to = cells(ofDim: d.degree + 1)
         let e = R(intValue: (-1).pow(d.degree + 1))
-        let row = partialBoundaryMatrix(to, [s], R.self).multiply(e)
-        return FreeModule( zip(to.map{ Dual($0) }, row.generateGrid()) )
-    }
-    
-    internal func partialBoundaryMatrix<R: Ring>(_ from: [Cell], _ to: [Cell], _ type: R.Type) -> ComputationalMatrix<R> {
-        let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toCell: toIndex]
-        let components = from.enumerated().flatMap{ (j, s) -> [MatrixComponent<R>] in
-            return s.boundary(R.self).flatMap{ (e: (Cell, R)) -> MatrixComponent<R>? in
-                let (t, value) = e
-                return toIndex[t].flatMap{ i in (i, j, value) }
-            }
+        let vals = cells(ofDim: d.degree + 1).flatMap{ t -> (Dual<Cell>, R)? in
+            let a = t.boundary(R.self)[s]
+            return (a != R.zero) ? (Dual(t), e * a) : nil
         }
-        
-        return ComputationalMatrix(rows: to.count, cols: from.count, components: components)
+        return FreeModule(vals)
     }
     
     public var description: String {
@@ -97,89 +85,27 @@ public extension GeometricComplex {
     }
 }
 
-public extension ChainComplex where chainType == Descending {
-    public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == C.Cell {
-        let chain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
-            (K.cells(ofDim: i), K.boundaryMap(i, R.self), K.boundaryMatrix(i, R.self))
-        }
-        self.init(name: K.name, chain)
+public protocol GeometricComplexMap: Map where Domain == ComplexType.Cell, Codomain == ComplexType.Cell {
+    associatedtype ComplexType: GeometricComplex
+    var domain:   ComplexType { get }
+    var codomain: ComplexType? { get }
+    var image:    ComplexType { get }
+}
+
+public extension GeometricComplex {
+    public var eulerNumber: Int {
+        return validDims.sum{ i in (-1).pow(i) * cells(ofDim: i).count }
     }
     
-    public init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where A == C.Cell {
-        let chain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
-            
-            let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
-            let to   = K.cells(ofDim: i - 1).subtract(L.cells(ofDim: i - 1))
-            let map  = K.boundaryMap(i, R.self)
-            let matrix = K.partialBoundaryMatrix(from, to, R.self)
-            
-            return (from, map, matrix)
-        }
-        self.init(name: "\(K.name), \(L.name)", chain)
+    public func eulerNumber<R: EuclideanRing>(_ type: R.Type) -> R {
+        return R(intValue: eulerNumber)
     }
 }
 
-public extension CochainComplex where chainType == Ascending {
-    public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
-        let cochain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
-            let from = K.cells(ofDim: i)
-            let to   = K.cells(ofDim: i + 1)
-
-            let map = BoundaryMap { d in FreeModule(K.coboundary(d, R.self)) }
-            
-            let e = R(intValue: (-1).pow(i + 1))
-            let matrix = K.partialBoundaryMatrix(to, from, R.self)
-                          .transpose()
-                          .multiply(e)
-            
-            return (from.map{ Dual($0) }, map, matrix)
-        }
-        self.init(name: K.name, cochain)
-    }
-    
-    public init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where Dual<C.Cell> == A {
-        let cochain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap, BoundaryMatrix) in
-            let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
-            let to   = K.cells(ofDim: i + 1).subtract(L.cells(ofDim: i + 1))
-
-            let map = BoundaryMap { d in
-                let c = K.coboundary(d, R.self)
-                let vals = c.filter{ (d, _) in to.contains( d.base ) }
-                return FreeModule(vals)
-            }
-            
-            let e = R(intValue: (-1).pow(i + 1))
-            let matrix = K.partialBoundaryMatrix(to, from, R.self)
-                          .transpose()
-                          .multiply(e)
-            
-            return (from.map{ Dual($0) }, map, matrix)
-        }
-        self.init(name: "\(K.name), \(L.name)", cochain)
-    }
+public func χ<G: GeometricComplex>(_ M: G) -> IntegerNumber {
+    return M.eulerNumber
 }
 
-public extension Homology where chainType == Descending {
-    public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where C.Cell == A {
-        let c = ChainComplex(K, type)
-        self.init(c)
-    }
-
-    public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where C.Cell == A {
-        let c = ChainComplex(K, L, type)
-        self.init(c)
-    }
+public func χ<G: GeometricComplex, R: EuclideanRing>(_ M: G, _ type: R.Type) -> R {
+    return M.eulerNumber(R.self)
 }
-
-public extension Cohomology where chainType == Ascending {
-    public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
-        let c = CochainComplex(K, type)
-        self.init(c)
-    }
-
-    public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where Dual<C.Cell> == A {
-        let c = CochainComplex(K, L, type)
-        self.init(c)
-    }
-}
-

@@ -12,11 +12,15 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     internal var targetRow = 0
     internal var targetCol = 0
     
+    internal override var resultType: MatrixEliminationResult<R>.Type {
+        return RowEchelonEliminationResult.self
+    }
+    
     override func prepare() {
         target.switchAlignment(.Rows)
     }
     
-    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == ComputationSpecializedRing)
     override func iteration() -> Bool {
         if targetRow >= target.table.count || targetCol >= cols {
             return true
@@ -58,7 +62,7 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         return false
     }
     
-    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == ComputationSpecializedRing)
     private func pivotCandidates() -> [(Int, R)] {
         // Take (i, a)'s from table = [ i : [ (j, a) ] ]
         // where (i >= targetRow && j == targetCol)
@@ -66,6 +70,12 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
             let (j, a) = list.first!
             return (i >= targetRow && j == targetCol) ? (i, a) : nil
         }
+    }
+}
+
+public final class RowEchelonEliminationResult<R: EuclideanRing>: MatrixEliminationResult<R> {
+    public override var rank: Int {
+        return result.table.count
     }
 }
 

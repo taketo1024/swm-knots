@@ -8,7 +8,7 @@
 
 import Foundation
 
-public extension HomologyExactSequence where chainType == Descending, A == Simplex, B == Simplex, C == Simplex {
+public extension HomologyExactSequence where T == Descending, A == Simplex, B == Simplex, C == Simplex {
     public init(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) {
         
         //             i         j
@@ -31,7 +31,7 @@ public extension HomologyExactSequence where chainType == Descending, A == Simpl
     }
 }
     
-public extension HomologyExactSequence where chainType == Descending, A == Simplex, B == Sum<Simplex, Simplex>, C == Simplex {
+public extension HomologyExactSequence where T == Descending, A == Simplex, B == Sum<Simplex, Simplex>, C == Simplex {
     public static func MayerVietoris(_ X: SimplicialComplex, _ A: SimplicialComplex, _ B: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<A, B, C, R> {
 
         //               A
@@ -79,7 +79,7 @@ public extension HomologyExactSequence where chainType == Descending, A == Simpl
     }
 }
 
-public extension CohomologyExactSequence where chainType == Ascending, A == Dual<Simplex>, B == Dual<Simplex>, C == Dual<Simplex> {
+public extension CohomologyExactSequence where T == Ascending, A == Dual<Simplex>, B == Dual<Simplex>, C == Dual<Simplex> {
     public init(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) {
         
         //             i         j
@@ -97,13 +97,13 @@ public extension CohomologyExactSequence where chainType == Ascending, A == Dual
         
         let i = CochainMap(SimplicialMap.inclusion(from: A, to: X), R.self)
         let j = CochainMap(from: CXA, to: CX) { d in SimplicialCochain(d) }
-        let d = CochainMap(from: CA, to: CXA, shift: +1) { d in X.coboundary(d, R.self) }
+        let d = CochainMap(from: CA, to: CXA, shift: +1) { d in X.coboundary(of: d, R.self) }
         
         self.init(CXA, j, CX, i, CA, d)
     }
 }
 
-public extension CohomologyExactSequence where chainType == Ascending, A == Dual<Simplex>, B == Sum<Dual<Simplex>, Dual<Simplex>>, C == Dual<Simplex> {
+public extension CohomologyExactSequence where T == Ascending, A == Dual<Simplex>, B == Sum<Dual<Simplex>, Dual<Simplex>>, C == Dual<Simplex> {
     public static func MayerVietoris(_ X: SimplicialComplex, _ A: SimplicialComplex, _ B: SimplicialComplex, _ type: R.Type) -> CohomologyExactSequence<A, B, C, R> {
         
         //                   jA⊕(-jB)                 iA+iB
@@ -135,7 +135,7 @@ public extension CohomologyExactSequence where chainType == Ascending, A == Dual
             }
         }
         
-        let d = CochainMap(from: CAnB, to: CX, shift: +1) { d in A.coboundary(d, R.self) }
+        let d = CochainMap(from: CAnB, to: CX, shift: +1) { d in A.coboundary(of: d, R.self) }
         
         return CohomologyExactSequence(CX, j, CAoB, i, CAnB, d)
     }

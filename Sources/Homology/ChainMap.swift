@@ -12,7 +12,7 @@ public typealias   ChainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _Ch
 public typealias CochainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Ascending,  A, B, R>
 
 // TODO conform Module<R>
-public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Map {
+public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Map {
     public typealias Domain   = FreeModule<A, R>
     public typealias Codomain = FreeModule<B, R>
     
@@ -24,7 +24,7 @@ public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBa
         self.map = FreeModuleHom(map)
     }
     
-    public init(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, shift: Int = 0, _ f: @escaping (A) -> Codomain) {
+    public init(from: _ChainComplex<T, A, R>, to: _ChainComplex<T, B, R>, shift: Int = 0, _ f: @escaping (A) -> Codomain) {
         self.init(shift: shift, f)
     }
     
@@ -36,7 +36,7 @@ public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBa
         return map.appliedTo(x)
     }
     
-    public func assertChainMap(from: _ChainComplex<chainType, A, R>, to: _ChainComplex<chainType, B, R>, debug: Bool = false) {
+    public func assertChainMap(from: _ChainComplex<T, A, R>, to: _ChainComplex<T, B, R>, debug: Bool = false) {
         (min(from.offset, to.offset) ... max(from.topDegree, to.topDegree)).forEach { i1 in
             
             //        f1
@@ -72,17 +72,28 @@ public struct _ChainMap<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBa
         }
     }
     
-    public static func +(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, B, R>) -> _ChainMap<chainType, A, B, R> {
+    public static func +(f1: _ChainMap<T, A, B, R>, f2: _ChainMap<T, A, B, R>) -> _ChainMap<T, A, B, R> {
         return _ChainMap{ a in f1.appliedTo(a) + f2.appliedTo(a) }
     }
     
-    public static prefix func -(f: _ChainMap<chainType, A, B, R>) -> _ChainMap<chainType, A, B, R> {
+    public static prefix func -(f: _ChainMap<T, A, B, R>) -> _ChainMap<T, A, B, R> {
         return _ChainMap{ a in -f.appliedTo(a) }
     }
     
-    public static func ⊕<C>(f1: _ChainMap<chainType, A, B, R>, f2: _ChainMap<chainType, A, C, R>) -> _ChainMap<chainType, A, Sum<B, C>, R> {
-        return _ChainMap<chainType, A, Sum<B, C>, R> { a in f1.appliedTo(a) ⊕ f2.appliedTo(a) }
+    public static func ⊕<C>(f1: _ChainMap<T, A, B, R>, f2: _ChainMap<T, A, C, R>) -> _ChainMap<T, A, Sum<B, C>, R> {
+        return _ChainMap<T, A, Sum<B, C>, R> { a in f1.appliedTo(a) ⊕ f2.appliedTo(a) }
     }
-    
 }
 
+public extension ChainMap where T == Descending {
+    public func dualMap(domainChainComplex C: ChainComplex<A, R>) -> CochainMap<Dual<B>, Dual<A>, R> {
+        return CochainMap { (d: Dual<B>) -> FreeModule<Dual<A>, R> in
+            let i = d.degree
+            let values = C.chainBasis(i).flatMap { s -> (Dual<A>, R)? in
+                let a = self.appliedTo(s)[d.base]
+                return (a != R.zero) ? (Dual(s), a) : nil
+            }
+            return FreeModule(values)
+        }
+    }
+}

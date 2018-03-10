@@ -22,15 +22,42 @@ public typealias   Homology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Des
 public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Ascending, A, R>
 
 // TODO abstract as `GradedModule`
-public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: EuclideanRing>: AlgebraicStructure {
+public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>: AlgebraicStructure {
     public typealias Cycle = FreeModule<A, R>
     
-    public let chainComplex: _ChainComplex<chainType, A, R>
+    public let name: String
+    public let topDegree: Int
+    public let offset: Int
+    
+    private let chainComplex: _ChainComplex<T, A, R>?
     private var _summands: [Summand?]
     
-    public init(_ chainComplex: _ChainComplex<chainType, A, R>) {
+    public init(_ chainComplex: _ChainComplex<T, A, R>) {
+        self.name = chainComplex.name
+        self.topDegree = chainComplex.topDegree
+        self.offset = chainComplex.offset
+        
         self.chainComplex = chainComplex
         self._summands = Array(repeating: nil, count: chainComplex.topDegree - chainComplex.offset + 1) // lazy init
+    }
+    
+    // MEMO: a loophole initializer for chainContraction
+    internal init(name: String, _ H: _Homology<T, A, R>, _ map: _ChainMap<T, A, A, R>, _ factorizer: @escaping (FreeModule<A, R>) -> [R]) {
+        self.name = name
+        self.topDegree = H.topDegree
+        self.offset = H.offset
+        
+        self.chainComplex = nil
+        self._summands = []
+        
+        self._summands = (0 ..< H._summands.count).map { i in
+            let summand = H[i]
+            let subSummands = summand.structure.summands.map{ ss in
+                SimpleModuleStructure.Summand( map.appliedTo(ss.generator), ss.divisor )
+            }
+            let str = SimpleModuleStructure(subSummands, factorizer)
+            return Summand(self, str)
+        }
     }
     
     public subscript(i: Int) -> Summand {
@@ -47,24 +74,16 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
         }
     }
     
-    public var offset: Int {
-        return chainComplex.offset
-    }
-    
-    public var topDegree: Int {
-        return chainComplex.topDegree
-    }
-    
-    public static func ==(a: _Homology<chainType, A, R>, b: _Homology<chainType, A, R>) -> Bool {
+    public static func ==(a: _Homology<T, A, R>, b: _Homology<T, A, R>) -> Bool {
         return (a.offset == b.offset) && (a.topDegree == b.topDegree) && (a.offset ... a.topDegree).forAll { i in a[i] == b[i] }
     }
     
     public var description: String {
-        return (chainType.descending ? "H" : "cH") + "(\(chainComplex.name); \(R.symbol))"
+        return (T.descending ? "H" : "cH") + "(\(name); \(R.symbol))"
     }
     
     public var detailDescription: String {
-        return (chainType.descending ? "H" : "cH") + "(\(chainComplex.name); \(R.symbol)) = {\n"
+        return (T.descending ? "H" : "cH") + "(\(name); \(R.symbol)) = {\n"
             + (offset ... topDegree).map{ i in (i, self[i]) }
                 .map{ (i, g) in "\t\(i) : \(g.detailDescription)"}
                 .joined(separator: ",\n")
@@ -72,9 +91,9 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
     }
     
     private func generateSummand(_ i: Int) -> Summand {
-        let C = chainComplex
+        let C = chainComplex!
         let basis = C.chainBasis(i)
-        let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(chainType.descending ? i + 1 : i - 1))
+        let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(T.descending ? i + 1 : i - 1))
         let (E1, E2) = (A1.eliminate(), A2.eliminate())
         
         let S = SimpleModuleStructure.invariantFactorDecomposition(
@@ -88,15 +107,15 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
     }
     
     public class Summand: AlgebraicStructure {
-        internal var homology: _Homology<chainType, A, R> // FIXME circular reference!
+        internal var homology: _Homology<T, A, R> // FIXME circular reference!
         internal let structure: SimpleModuleStructure<A, R>
         
-        internal init(_ H: _Homology<chainType, A, R>, _ structure: SimpleModuleStructure<A, R>) {
+        internal init(_ H: _Homology<T, A, R>, _ structure: SimpleModuleStructure<A, R>) {
             self.homology = H
             self.structure = structure
         }
         
-        internal static func zero(_ H: _Homology<chainType, A, R>) -> Summand {
+        internal static func zero(_ H: _Homology<T, A, R>) -> Summand {
             return Summand(H, SimpleModuleStructure.zeroModule)
         }
         
@@ -116,11 +135,11 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             return structure.summands
         }
         
-        public func generator(_ i: Int) -> _HomologyClass<chainType, A, R> {
+        public func generator(_ i: Int) -> _HomologyClass<T, A, R> {
             return _HomologyClass(structure.generator(i), homology)
         }
         
-        public var generators: [_HomologyClass<chainType, A, R>] {
+        public var generators: [_HomologyClass<T, A, R>] {
             return (0 ..< summands.count).map{ i in generator(i) }
         }
         
@@ -128,7 +147,7 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             return structure.torsion(i)
         }
         
-        public var zero: _HomologyClass<chainType, A, R> {
+        public var zero: _HomologyClass<T, A, R> {
             return _HomologyClass.zero
         }
         
@@ -144,7 +163,7 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
             return cycleIsNullHomologous(z1 - z2)
         }
         
-        public static func ==(lhs: _Homology<chainType, A, R>.Summand, rhs: _Homology<chainType, A, R>.Summand) -> Bool {
+        public static func ==(lhs: _Homology<T, A, R>.Summand, rhs: _Homology<T, A, R>.Summand) -> Bool {
             return lhs.structure == rhs.structure
         }
         
@@ -158,12 +177,12 @@ public final class _Homology<chainType: ChainType, A: FreeModuleBase, R: Euclide
     }
 }
 
-public extension Homology where chainType == Descending {
+public extension Homology where T == Descending {
     public func bettiNumer(i: Int) -> Int {
         return self[i].rank
     }
     
     public var eulerNumber: Int {
-        return (0 ... chainComplex.topDegree).reduce(0){ $0 + (-1).pow($1) * bettiNumer(i: $1) }
+        return (0 ... topDegree).reduce(0){ $0 + (-1).pow($1) * bettiNumer(i: $1) }
     }
 }

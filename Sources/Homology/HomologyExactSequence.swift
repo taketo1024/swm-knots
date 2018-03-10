@@ -14,24 +14,24 @@ public typealias   HomologyExactSequence<A: FreeModuleBase, B: FreeModuleBase, C
 public typealias CohomologyExactSequence<A: FreeModuleBase, B: FreeModuleBase, C: FreeModuleBase, R: EuclideanRing>
     = _HomologyExactSequence<Ascending , A, B, C, R>
 
-public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, B: FreeModuleBase, C: FreeModuleBase, R: EuclideanRing>: Sequence, CustomStringConvertible {
+public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, C: FreeModuleBase, R: EuclideanRing>: Sequence, CustomStringConvertible {
     public typealias Object = ExactSequence<R>.Object
 
-    public let H0: _Homology<chainType, A, R>
-    public let H1: _Homology<chainType, B, R>
-    public let H2: _Homology<chainType, C, R>
+    public let H0: _Homology<T, A, R>
+    public let H1: _Homology<T, B, R>
+    public let H2: _Homology<T, C, R>
     
-    internal let map0:  _HomologyMap<chainType, A, B, R>
-    internal let map1:  _HomologyMap<chainType, B, C, R>
-    internal let delta: _HomologyMap<chainType, C, A, R>
+    internal let map0:  _HomologyMap<T, A, B, R>
+    internal let map1:  _HomologyMap<T, B, C, R>
+    internal let delta: _HomologyMap<T, C, A, R>
 
     public let topDegree: Int
     public let bottomDegree: Int
     public var sequence : ExactSequence<R>
 
-    public init(_ chain0: _ChainComplex<chainType, A, R>, _ map0 : _ChainMap<chainType, A, B, R>,
-                _ chain1: _ChainComplex<chainType, B, R>, _ map1 : _ChainMap<chainType, B, C, R>,
-                _ chain2: _ChainComplex<chainType, C, R>, _ delta: _ChainMap<chainType, C, A, R>) {
+    public init(_ chain0: _ChainComplex<T, A, R>, _ map0 : _ChainMap<T, A, B, R>,
+                _ chain1: _ChainComplex<T, B, R>, _ map1 : _ChainMap<T, B, C, R>,
+                _ chain2: _ChainComplex<T, C, R>, _ delta: _ChainMap<T, C, A, R>) {
         
         self.H0 = _Homology(chain0)
         self.H1 = _Homology(chain1)
@@ -52,12 +52,12 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, B:
     }
     
     internal func seqIndex(_ i: Int, _ n: Int) -> Int {
-        return chainType.descending ? (topDegree - n) * 3 + i : (n - bottomDegree) * 3 + i
+        return T.descending ? (topDegree - n) * 3 + i : (n - bottomDegree) * 3 + i
     }
     
     internal func gridIndex(_ k: Int) -> (Int, Int) {
         let (i, j) = (k >= 0) ? (k % 3, k / 3) : (k % 3 + 3, k / 3 - 1)
-        return (i, chainType.descending ? topDegree - j : bottomDegree + j)
+        return (i, T.descending ? topDegree - j : bottomDegree + j)
     }
     
     public subscript(i: Int, n: Int) -> Object? {
@@ -70,7 +70,7 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, B:
     }
     
     internal var degrees: [Int] {
-        return chainType.descending
+        return T.descending
             ? (bottomDegree ... topDegree).reversed().toArray()
             : (bottomDegree ... topDegree).toArray()
     }
@@ -134,7 +134,7 @@ public struct _HomologyExactSequence<chainType: ChainType, A: FreeModuleBase, B:
         }
     }
     
-    private func _makeMap<X, Y>(_ h0: _Homology<chainType, X, R>.Summand, _ f: _HomologyMap<chainType, X, Y, R>, _ h1: _Homology<chainType, Y, R>.Summand) -> ExactSequence<R>.Map {
+    private func _makeMap<X, Y>(_ h0: _Homology<T, X, R>.Summand, _ f: _HomologyMap<T, X, Y, R>, _ h1: _Homology<T, Y, R>.Summand) -> ExactSequence<R>.Map {
         return ExactSequence<R>.Map { i in
             let z = h0.generator(i)
             let w = f.appliedTo(z)

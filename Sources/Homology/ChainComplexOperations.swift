@@ -9,37 +9,31 @@
 import Foundation
 
 public extension ChainComplex {
-    public static func ⊕<B>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Sum<A, B>, R> {
-        typealias T = Sum<A, B>
-        typealias C = _ChainComplex<chainType, T, R>
+    public static func ⊕<B>(C1: _ChainComplex<T, A, R>, C2: _ChainComplex<T, B, R>) -> _ChainComplex<T, Sum<A, B>, R> {
+        typealias C = _ChainComplex<T, Sum<A, B>, R>
         
         let offset = min(C1.offset, C2.offset)
         let degree = max(C1.topDegree, C2.topDegree)
         
-        let chain = (offset ... degree).map { i -> (C.ChainBasis, C.BoundaryMap, C.BoundaryMatrix) in
+        let chain = (offset ... degree).map { i -> (C.ChainBasis, C.BoundaryMap) in
             let basis: C.ChainBasis = C1.chainBasis(i).map{ a in Sum(a) } + C2.chainBasis(i).map{ b in Sum(b) }
             
             let (f1, f2) = (C1.boundaryMap(i), C2.boundaryMap(i))
-            let map: C.BoundaryMap = C.BoundaryMap { c in
+            let map = C.BoundaryMap { c in
                 switch c {
                 case let ._1(a): return FreeModule( f1.appliedTo(a).map{ (a, r) in (._1(a), r) } )
                 case let ._2(b): return FreeModule( f2.appliedTo(b).map{ (b, r) in (._2(b), r) } )
                 }
             }
             
-            let (A1, A2) = (C1.boundaryMatrix(i), C2.boundaryMatrix(i))
-            let comps = A1.components + A2.components.map{ (i, j, a) in (A1.rows + i, A1.cols + j, a) }
-            let matrix = ComputationalMatrix<R>(rows: A1.rows + A2.rows, cols: A1.cols + A2.cols, components: comps)
-            
-            return (basis, map, matrix)
+            return (basis, map)
         }
         
-        return _ChainComplex<chainType, T, R>(name: "\(C1.name) ⊕ \(C2.name)", chain)
+        return _ChainComplex<T, Sum<A, B>, R>(name: "\(C1.name) ⊕ \(C2.name)", chain)
     }
     
-    public static func ⊗<B>(C1: _ChainComplex<chainType, A, R>, C2: _ChainComplex<chainType, B, R>) -> _ChainComplex<chainType, Tensor<A, B>, R> {
-        typealias T = Tensor<A, B>
-        typealias C = _ChainComplex<chainType, T, R>
+    public static func ⊗<B>(C1: _ChainComplex<T, A, R>, C2: _ChainComplex<T, B, R>) -> _ChainComplex<T, Tensor<A, B>, R> {
+        typealias C = _ChainComplex<T, Tensor<A, B>, R>
         
         let offset = C1.offset + C2.offset
         let degree = C1.topDegree + C2.topDegree
@@ -50,7 +44,8 @@ public extension ChainComplex {
             }
         }
         
-        let chain = (offset ... degree).map{ (k) -> (C.ChainBasis, C.BoundaryMap, C.BoundaryMatrix) in
+        let chain = (offset ... degree).map{ (k) -> (C.ChainBasis, C.BoundaryMap) in
+            let from = bases[k - offset]
             let map = (offset ... k).sum { i -> C.BoundaryMap in
                 let j = k - i
                 let (d1, d2) = (C1.boundaryMap(i), C2.boundaryMap(j))
@@ -59,18 +54,10 @@ public extension ChainComplex {
                 let e = R(intValue: (-1).pow(i))
                 return d1 ⊗ I2 + e * I1 ⊗ d2
             }
-            let from = bases[k - offset]
-            let next = chainType.target(k - offset)
-            let to = (0 ..< bases.count).contains(next) ? bases[next] : []
-            let components = from.enumerated().flatMap{ (j, a) -> [MatrixComponent<R>] in
-                let y = map.appliedTo(a)
-                return to.enumerated().map{ (i, b) in (i, j, y[b]) }
-            }
-            let matrix = ComputationalMatrix(rows: to.count, cols: from.count, components: components )
-            return (from, map, matrix)
+            return (from, map)
         }
         
-        return _ChainComplex<chainType, T, R>(name: "\(C1.name) ⊗ \(C2.name)", chain)
+        return _ChainComplex<T, Tensor<A, B>, R>(name: "\(C1.name) ⊗ \(C2.name)", chain)
     }
 }
 

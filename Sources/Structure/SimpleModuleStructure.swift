@@ -22,13 +22,15 @@ import Foundation
 
 public final class SimpleModuleStructure<A: FreeModuleBase, R: EuclideanRing>: ModuleStructure<R> {
     public  let summands: [Summand]
-    private let originalGenerators: [A]
-    private let transitionMatrix: ComputationalMatrix<R> // oldBasis -> newBasis
+    private let factorizer: (FreeModule<A, R>) -> [R]
     
-    public init(_ summands: [Summand], originalGenerators: [A], transitionMatrix: ComputationalMatrix<R>) {
+    public convenience init(_ summands: [Summand]) {
+        self.init(summands, {_ in fatalError()})
+    }
+    
+    public init(_ summands: [Summand], _ factorizer: @escaping (FreeModule<A, R>) -> [R]) {
         self.summands = summands
-        self.originalGenerators = originalGenerators
-        self.transitionMatrix = transitionMatrix
+        self.factorizer = factorizer
         super.init()
     }
     
@@ -37,7 +39,7 @@ public final class SimpleModuleStructure<A: FreeModuleBase, R: EuclideanRing>: M
     }
     
     public static var zeroModule: SimpleModuleStructure<A, R> {
-        return SimpleModuleStructure([], originalGenerators: [], transitionMatrix: ComputationalMatrix.zero(rows: 0, cols: 0))
+        return SimpleModuleStructure([], {_ in []})
     }
     
     public var isTrivial: Bool {
@@ -69,12 +71,7 @@ public final class SimpleModuleStructure<A: FreeModuleBase, R: EuclideanRing>: M
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
-        let n = originalGenerators.count
-        let v = transitionMatrix * ComputationalMatrix(rows: n, cols: 1, grid: z.factorize(by: originalGenerators))
-
-        return summands.enumerated().map { (i, s) in
-            return s.isFree ? v[i, 0] : v[i, 0] % s.divisor
-        }
+        return factorizer(z)
     }
     
     public func elementIsZero(_ z: FreeModule<A, R>) -> Bool {
@@ -182,7 +179,16 @@ public extension SimpleModuleStructure {
             return SimpleModuleStructure<A, R>.Summand(z, a)
         }
         
-        return SimpleModuleStructure(summands, originalGenerators: generators, transitionMatrix: T2)
+        let factorizer = { (z: FreeModule<A, R>) -> [R] in
+            let n = generators.count
+            let v = T2 * ComputationalMatrix(rows: n, cols: 1, grid: z.factorize(by: generators))
+            
+            return summands.enumerated().map { (i, s) in
+                return s.isFree ? v[i, 0] : v[i, 0] % s.divisor
+            }
+        }
+        
+        return SimpleModuleStructure(summands, factorizer)
     }
 }
 
@@ -190,14 +196,10 @@ public typealias AbstractSimpleModuleStructure<R: EuclideanRing> = SimpleModuleS
 
 public extension AbstractSimpleModuleStructure where A == Int {
     public convenience init(rank r: Int, torsions: [R] = []) {
-        let n = r + torsions.count
         let summands = (0 ..< r).map{ i in Summand(i, R.zero) }
             + torsions.enumerated().map{ (i, d) in Summand(FreeModule(i + r), d) }
         
-        let generators = (0 ..< n).toArray()
-        let matrix = ComputationalMatrix<R>.identity(n)
-        
-        self.init(summands, originalGenerators: generators, transitionMatrix: matrix)
+        self.init(summands)
     }
     
     public static func invariantFactorDecomposition(rank r: Int, relationMatrix B: ComputationalMatrix<R>) -> AbstractSimpleModuleStructure<R> {

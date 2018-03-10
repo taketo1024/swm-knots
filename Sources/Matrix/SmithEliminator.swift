@@ -19,7 +19,7 @@ public final class SmithEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         run(DiagonalEliminator.self)
     }
     
-    @_specialize(where R == IntegerNumber)
+    @_specialize(where R == ComputationSpecializedRing)
     internal override func iteration() -> Bool {
         if R.isField || targetIndex >= target.table.count {
             return true
