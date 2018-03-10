@@ -1,6 +1,6 @@
 NAME=SwiftyAlgebra
 MOD=$(NAME).swiftmodule $(NAME).swiftdoc
-SRC=Sources/**/*.swift
+SRC=Workspace/SwiftyAlgebra/SwiftyAlgebra/Sources/**/*.swift
 
 SWIFTC=swiftc
 SWIFT=swift
