@@ -18,6 +18,16 @@ public struct PowerSeries<K: Field>: Ring, Module {
         }
     }
     
+    public init(_ coeffs: K ...) {
+        self.init(coeffs)
+    }
+    
+    public init(_ coeffs: [K]) {
+        self.init() { i in
+            (i < coeffs.count) ? coeffs[i] : .zero
+        }
+    }
+    
     public init(_ coeffs: @escaping ((Int) -> K)) {
         self.coeffs = coeffs
     }
@@ -97,9 +107,13 @@ public struct PowerSeries<K: Field>: Ring, Module {
 }
 
 public extension PowerSeries where K == RationalNumber {
-    public static var exp: PowerSeries<RationalNumber> {
-        return PowerSeries<RationalNumber>() { n in
-            RationalNumber(1, n.factorial)
+    public static var exponential: PowerSeries<K> {
+        return PowerSeries<K>() { n in
+            K(1, n.factorial)
         }
+    }
+    
+    public static func geometricSeries(_ r: K) -> PowerSeries<K> {
+        return PowerSeries<K>() { n in r ** n }
     }
 }
