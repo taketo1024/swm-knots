@@ -11,17 +11,21 @@ typealias R = RealNumber
 
 // Permutation Example.
 
-typealias S_5 = Permutation<_5>
+typealias P = Permutation
 
 do {
-    let σ = S_5(cyclic: 0, 1, 2) // cyclic notation
-    let τ = S_5([0: 2, 1: 3, 2: 4, 3: 0, 4: 1]) // two-line notation
+    let σ = P(cyclic: 0, 1, 2) // cyclic notation
+    let τ = P([0: 2, 1: 3, 2: 4, 3: 0, 4: 1]) // two-line notation
     
     σ[1]
     τ[2]
     
-    (σ * τ) [3]  // 3 -> 0 -> 1
-    (τ * σ) [3]  // 3 -> 3 -> 0
+    σ * τ
+    τ * σ
     
-    σ * τ != τ * σ   // noncommutative
+    σ.inverse
+    τ.inverse
 }
+
+print(SymmetricGroup<_5>.allElements)
+

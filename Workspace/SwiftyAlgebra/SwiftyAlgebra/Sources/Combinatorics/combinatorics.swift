@@ -16,21 +16,6 @@ public extension IntegerNumber {
         return (self == 0) ? 1 : self * (self - 1).factorial
     }
     
-    public var permutations: [[IntegerNumber]] {
-        let n = self
-        switch n {
-        case 0:
-            return [[]]
-        default:
-            let prev = (n - 1).permutations
-            return (0 ..< self).flatMap({ (i: Int) -> [[Int]] in
-                prev.map({ (s: [Int]) -> [Int] in
-                    [i] + s.map{ $0 < i ? $0 : $0 + 1 }
-                })
-            })
-        }
-    }
-
     public func choose(_ k: Int) -> [[Int]] {
         let n = self
         switch (n, k) {
