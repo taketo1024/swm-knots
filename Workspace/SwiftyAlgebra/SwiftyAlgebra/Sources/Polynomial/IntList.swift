@@ -9,23 +9,23 @@
 import Foundation
 
 public struct IntList: Hashable, Comparable, CustomStringConvertible {
-    internal let list: [Int]
-    public init(_ list: Int ...) {
-        self.init(list)
+    internal let elements: [Int]
+    public init(_ elements: Int ...) {
+        self.init(elements)
     }
     
-    public init(_ list: [Int]) {
+    public init(_ elements: [Int]) {
         // TODO trim last 0s.
-        self.list = list
+        self.elements = elements
     }
     
-    public init(_ list: [Int : Int]) {
-        let n = (list.keys.max() ?? -1) + 1
-        self.list = (0 ..< n).map{ list[$0] ?? 0 }
+    public init(_ elements: [Int : Int]) {
+        let n = (elements.keys.max() ?? -1) + 1
+        self.elements = (0 ..< n).map{ elements[$0] ?? 0 }
     }
     
     public subscript(i: Int) -> Int {
-        return (i < list.count) ? list[i] : 0
+        return (i < elements.count) ? elements[i] : 0
     }
     
     public static var empty: IntList {
@@ -33,15 +33,15 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
     }
     
     public var total: Int {
-        return list.sumAll()
+        return elements.sumAll()
     }
     
     public var length: Int {
-        return list.count
+        return elements.count
     }
     
     public func permuted(by p: Permutation) -> IntList {
-        let indices = self.list.enumerated().map{ (i, j) in (p[i], j)}
+        let indices = self.elements.enumerated().map{ (i, j) in (p[i], j)}
         return IntList(Dictionary(pairs: indices))
     }
     
@@ -51,23 +51,23 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
     }
     
     public static func ==(I: IntList, J: IntList) -> Bool {
-        return I.list == J.list
+        return I.elements == J.elements
     }
     
     // e.g. (2, 1, 3) -> 2 + (1 * p) + (3 * p^2)
     public var hashValue: Int {
         let p = 31
-        return list.reversed().reduce(0) { (sum, next) -> Int in
+        return elements.reversed().reduce(0) { (sum, next) -> Int in
             p &* sum &+ next
         }
     }
     
     // lex order
     public static func <(I: IntList, J: IntList) -> Bool {
-        return I.list.lexicographicallyPrecedes(J.list)
+        return I.elements.lexicographicallyPrecedes(J.elements)
     }
     
     public var description: String {
-        return "(\( list.map{ String($0) }.joined(separator: ", ")))"
+        return "(\( elements.map{ String($0) }.joined(separator: ", ")))"
     }
 }

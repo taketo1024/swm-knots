@@ -16,6 +16,7 @@ public extension IntegerNumber {
         return (self == 0) ? 1 : self * (self - 1).factorial
     }
     
+    // TODO use IntList
     public func choose(_ k: Int) -> [[Int]] {
         let n = self
         switch (n, k) {
@@ -28,6 +29,7 @@ public extension IntegerNumber {
         }
     }
     
+    // TODO use IntList
     public func multichoose(_ k: Int) -> [[Int]] {
         let n = self
         switch (n, k) {
@@ -39,6 +41,27 @@ public extension IntegerNumber {
             return (0 ... k).flatMap { (i: Int) -> [[Int]] in
                 (n - 1).multichoose(k - i).map{ (c: [Int]) -> [Int] in c + Array(repeating: n - 1, count: i) }
             }
+        }
+    }
+    
+    public var partitions: [IntList] {
+        assert(self >= 0)
+        if self == 0 {
+            return [IntList.empty]
+        } else {
+            return self.partitions(lowerBound: 1)
+        }
+    }
+    
+    internal func partitions(lowerBound: Int) -> [IntList] {
+        let n = self
+        if lowerBound > n {
+            return []
+        } else {
+            return (lowerBound ... n).flatMap { i -> [IntList] in
+                let ps = (n - i).partitions(lowerBound: Swift.max(i, lowerBound))
+                return ps.map { I in IntList([i] + I.elements) }
+            } + [IntList(n)]
         }
     }
 }
