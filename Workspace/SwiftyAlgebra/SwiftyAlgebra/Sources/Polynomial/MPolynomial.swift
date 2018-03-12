@@ -19,7 +19,7 @@ public struct MPolynomial<K: Field>: Ring, Module {
     }
     
     public init(_ a: K) {
-        self.init([MIndex.zero : a])
+        self.init([MIndex.empty : a])
     }
     
     public init(_ I: MIndex) {
@@ -39,6 +39,10 @@ public struct MPolynomial<K: Field>: Ring, Module {
         return MPolynomial([:])
     }
     
+    public var inverse: MPolynomial<K>? {
+        return (maxDegree == 0) ? coeff(.empty).inverse.flatMap{ a in MPolynomial(a) } : nil
+    }
+    
     internal var mIndices: [MIndex] {
         return coeffs.keys.sorted()
     }
@@ -48,7 +52,7 @@ public struct MPolynomial<K: Field>: Ring, Module {
     }
     
     public var maxDegree: Int {
-        return coeffs.keys.reduce(0) { max($0, $1.degree) }
+        return coeffs.keys.reduce(0) { max($0, $1.total) }
     }
     
     public func coeff(_ indices: Int ...) -> K {
@@ -60,15 +64,15 @@ public struct MPolynomial<K: Field>: Ring, Module {
     }
     
     public var leadDegree: MIndex {
-        return mIndices.last ?? .zero
+        return mIndices.last ?? .empty
     }
     
     public var leadCoeff: K {
         return self.coeff(leadDegree)
     }
     
-    public var inverse: MPolynomial<K>? {
-        return (maxDegree == 0) ? coeff(.zero).inverse.flatMap{ a in MPolynomial(a) } : nil
+    public var constantTerm: K {
+        return self.coeff(.empty)
     }
     
     public func map(_ f: ((K) -> K)) -> MPolynomial<K> {

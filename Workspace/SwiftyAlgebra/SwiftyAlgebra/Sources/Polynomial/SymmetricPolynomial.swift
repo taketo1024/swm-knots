@@ -8,8 +8,35 @@
 
 import Foundation
 
-public extension MPolynomial {
-    public static func elementarySymmetricPolynomial(_ n: Int, _ i: Int) -> MPolynomial<K> {
+public struct SymmetricPolynomial<K: Field>: Subring, Submodule {
+    public typealias Super = MPolynomial<K>
+    public typealias CoeffRing = K
+    
+    private let p: MPolynomial<K>
+    
+    public init(_ p: MPolynomial<K>) {
+        // TODO check symmetry
+        self.p = p
+    }
+    
+    public init(_ a: K) {
+        self.init([MIndex.empty : a])
+    }
+    
+    public init(_ coeffs: [MIndex : K]) {
+        self.init( MPolynomial<K>(coeffs) )
+    }
+
+    public var asSuper: MPolynomial<K> {
+        return p
+    }
+    
+    public static func contains(_ g: MPolynomial<K>) -> Bool {
+        fatalError("not implemented yet.")
+    }
+    
+    // see: https://en.wikipedia.org/wiki/Symmetric_polynomial#Elementary_symmetric_polynomials
+    public static func elementary(_ n: Int, _ i: Int) -> SymmetricPolynomial<K> {
         let mInds = n.choose(i).map { combi -> MIndex in
             // e.g.  [0, 1, 3] -> (1, 1, 0, 1)
             let l = combi.last.flatMap{ $0 + 1 } ?? 0
@@ -17,25 +44,32 @@ public extension MPolynomial {
         }
         
         let coeffs = Dictionary(pairs: mInds.map{ ($0, K.identity) } )
-        return MPolynomial(coeffs)
+        return SymmetricPolynomial(MPolynomial(coeffs))
     }
     
-    public static func monomialSymmetricPolynomial(_ n: Int, _ I: MIndex) -> MPolynomial<K> {
+    // see: https://en.wikipedia.org/wiki/Symmetric_polynomial#Monomial_symmetric_polynomials
+    public static func monomial(_ n: Int, _ I: MIndex) -> SymmetricPolynomial<K> {
+        assert(n == I.total)
         let ss = DynamicPermutation.allElements(size: n)
         let Js = ss.map{ s -> MIndex in
             let indices = I.indices.enumerated().map{ (i, j) in (s.apply(i), j)}
             return MIndex(Dictionary(pairs: indices))
         }.unique()
         let elements = Dictionary(keys: Js){ _ in K.identity }
-        return MPolynomial(elements)
+        return SymmetricPolynomial(MPolynomial(elements))
     }
     
-    public func elementarySymmetricPolynomialDecomposition() -> MPolynomial<K> {
+    // returns the polynomial in elementary-symmetric-polynomials.
+    // e.g. x^2 + xy + y^2 -> s_1^2 - s_2
+    //
+    // see: https://en.wikipedia.org/wiki/Elementary_symmetric_polynomial#The_fundamental_theorem_of_symmetric_polynomials
+    
+    public func elementaryDecomposition() -> MPolynomial<K> {
         var f = self
-        var g = MPolynomial<K>.zero // result
+        var g = MPolynomial(f.constantTerm)
         
         let n = f.numberOfIndeterminates
-        let s = MPolynomial.elementarySymmetricPolynomial
+        let s = SymmetricPolynomial<K>.elementary
         
         while f.maxDegree > 0 {
             let I = f.leadDegree
@@ -56,6 +90,36 @@ public extension MPolynomial {
             assert(f.leadDegree < I)
         }
         
-        return g + f
+        return g
+    }
+    
+    // Inheritences from Super
+    
+    internal var mIndices: [MIndex] {
+        return p.mIndices
+    }
+    public var numberOfIndeterminates: Int {
+        return p.numberOfIndeterminates
+    }
+    public var maxDegree: Int {
+        return p.maxDegree
+    }
+    public func coeff(_ indices: Int ...) -> K {
+        return coeff(MIndex(indices))
+    }
+    public func coeff(_ I: MIndex) -> K {
+        return p.coeff(I)
+    }
+    public var leadDegree: MIndex {
+        return p.leadDegree
+    }
+    public var leadCoeff: K {
+        return p.leadCoeff
+    }
+    public var constantTerm: K {
+        return p.constantTerm
+    }
+    public func map(_ f: ((K) -> K)) -> SymmetricPolynomial<K> {
+        return SymmetricPolynomial(p.map(f))
     }
 }

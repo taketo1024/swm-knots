@@ -28,11 +28,11 @@ public struct MIndex: Hashable, Comparable, CustomStringConvertible {
         return (i < indices.count) ? indices[i] : 0
     }
     
-    public static var zero: MIndex {
+    public static var empty: MIndex {
         return MIndex([])
     }
     
-    public var degree: Int {
+    public var total: Int {
         return indices.sumAll()
     }
     
