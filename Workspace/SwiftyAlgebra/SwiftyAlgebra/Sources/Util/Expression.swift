@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct Letters {
+public struct Expression {
     public static func sup(_ i: Int) -> String {
         return String( String(i).map { c in
             switch c {
@@ -43,5 +43,25 @@ public struct Letters {
             default: return c
             }
         } )
+    }
+    
+    public static func symbol(_ x: String, sub i: Int? = nil, sup j: Int? = nil) -> String {
+        return "\(x)\(i.flatMap{ sub($0) } ?? "")\(j.flatMap{ sup($0) } ?? "")"
+    }
+    
+    public static func term<R: Ring>(_ a: R, _ x: String, _ n: Int = 1) -> String {
+        switch (a, n) {
+        case ( 0, _): return "0"
+        case ( _, 0): return "\(a)"
+        case ( 1, 1): return "\(x)"
+        case (-1, 1): return "-\(x)"
+        case ( 1, _): return "\(x)\(sup(n))"
+        case (-1, _): return "-\(x)\(sup(n))"
+        default:      return "\(a)\(x)\(sup(n))"
+        }
+    }
+    
+    public static func terms<R: Ring>(_ op: String, _ terms: [(R, String, Int)]) -> String {
+        return terms.map{ (a, x, n) in term(a, x, n) }.joined(separator: " \(op) ")
     }
 }
