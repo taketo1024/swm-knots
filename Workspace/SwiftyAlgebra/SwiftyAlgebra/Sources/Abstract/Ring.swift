@@ -42,6 +42,24 @@ public extension Ring {
 
 public protocol Subring: Ring, AdditiveSubgroup, Submonoid where Super: Ring {}
 
+public extension Subring {
+    public init(intValue: IntegerNumber) {
+        self.init( Super.init(intValue: intValue) )
+    }
+
+    public var inverse: Self? {
+        return asSuper.inverse.flatMap{ Self.init($0) }
+    }
+    
+    public static var zero: Self {
+        return Self.init(intValue: 0)
+    }
+    
+    public static var identity: Self {
+        return Self.init(intValue: 1)
+    }
+}
+
 public protocol Ideal: AdditiveSubgroup where Super: Ring {
     static func * (r: Super, a: Self) -> Self
     static func * (m: Self, r: Super) -> Self

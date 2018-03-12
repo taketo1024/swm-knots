@@ -24,7 +24,7 @@ public extension AdditiveSubgroup {
     }
     
     prefix static func - (a: Self) -> Self {
-        return Self.init(a.asSuper)
+        return Self.init(-a.asSuper)
     }
 }
 
