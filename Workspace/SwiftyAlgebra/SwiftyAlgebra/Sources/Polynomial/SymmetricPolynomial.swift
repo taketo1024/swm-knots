@@ -50,12 +50,10 @@ public struct SymmetricPolynomial<K: Field>: Subring, Submodule {
     // see: https://en.wikipedia.org/wiki/Symmetric_polynomial#Monomial_symmetric_polynomials
     public static func monomial(_ n: Int, _ I: MIndex) -> SymmetricPolynomial<K> {
         assert(n == I.total)
-        let ss = DynamicPermutation.allElements(size: n)
-        let Js = ss.map{ s -> MIndex in
-            let indices = I.indices.enumerated().map{ (i, j) in (s.apply(i), j)}
-            return MIndex(Dictionary(pairs: indices))
+        let Js = Permutation.allPermutations(ofLength: n).map { s in
+            I.permuted(by: s)
         }.unique()
-        let elements = Dictionary(keys: Js){ _ in K.identity }
+        let elements = Dictionary( pairs: Js.map{ ($0, K.identity) } )
         return SymmetricPolynomial(MPolynomial(elements))
     }
     

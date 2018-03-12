@@ -40,6 +40,11 @@ public struct MIndex: Hashable, Comparable, CustomStringConvertible {
         return indices.count
     }
     
+    public func permuted(by p: Permutation) -> MIndex {
+        let indices = self.indices.enumerated().map{ (i, j) in (p[i], j)}
+        return MIndex(Dictionary(pairs: indices))
+    }
+    
     public static func *(I: MIndex, J: MIndex) -> MIndex {
         let l = max(I.length, J.length)
         return MIndex( (0 ..< l).map{ i in I[i] + J[i] } )
