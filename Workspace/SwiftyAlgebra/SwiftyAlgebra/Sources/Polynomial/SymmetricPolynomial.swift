@@ -20,10 +20,10 @@ public struct SymmetricPolynomial<K: Field>: Subring, Submodule {
     }
     
     public init(_ a: K) {
-        self.init([MIndex.empty : a])
+        self.init([IntList.empty : a])
     }
     
-    public init(_ coeffs: [MIndex : K]) {
+    public init(_ coeffs: [IntList : K]) {
         self.init( MPolynomial<K>(coeffs) )
     }
 
@@ -37,10 +37,10 @@ public struct SymmetricPolynomial<K: Field>: Subring, Submodule {
     
     // see: https://en.wikipedia.org/wiki/Symmetric_polynomial#Elementary_symmetric_polynomials
     public static func elementary(_ n: Int, _ i: Int) -> SymmetricPolynomial<K> {
-        let mInds = n.choose(i).map { combi -> MIndex in
+        let mInds = n.choose(i).map { combi -> IntList in
             // e.g.  [0, 1, 3] -> (1, 1, 0, 1)
             let l = combi.last.flatMap{ $0 + 1 } ?? 0
-            return MIndex( (0 ..< l).map { combi.contains($0) ? 1 : 0 } )
+            return IntList( (0 ..< l).map { combi.contains($0) ? 1 : 0 } )
         }
         
         let coeffs = Dictionary(pairs: mInds.map{ ($0, K.identity) } )
@@ -48,7 +48,7 @@ public struct SymmetricPolynomial<K: Field>: Subring, Submodule {
     }
     
     // see: https://en.wikipedia.org/wiki/Symmetric_polynomial#Monomial_symmetric_polynomials
-    public static func monomial(_ n: Int, _ I: MIndex) -> SymmetricPolynomial<K> {
+    public static func monomial(_ n: Int, _ I: IntList) -> SymmetricPolynomial<K> {
         assert(n == I.total)
         let Js = Permutation.allPermutations(ofLength: n).map { s in
             I.permuted(by: s)
@@ -83,7 +83,7 @@ public struct SymmetricPolynomial<K: Field>: Subring, Submodule {
             let p = c.enumerated().map{ (j, cj) in s(n, j + 1) ** cj }.multiplyAll()
             
             f = f - a * p
-            g = g + a * MPolynomial(MIndex(c))
+            g = g + a * MPolynomial(IntList(c))
 
             assert(f.leadDegree < I)
         }
@@ -93,7 +93,7 @@ public struct SymmetricPolynomial<K: Field>: Subring, Submodule {
     
     // Inheritences from Super
     
-    internal var mIndices: [MIndex] {
+    internal var mIndices: [IntList] {
         return p.mIndices
     }
     public var numberOfIndeterminates: Int {
@@ -103,12 +103,12 @@ public struct SymmetricPolynomial<K: Field>: Subring, Submodule {
         return p.maxDegree
     }
     public func coeff(_ indices: Int ...) -> K {
-        return coeff(MIndex(indices))
+        return coeff(IntList(indices))
     }
-    public func coeff(_ I: MIndex) -> K {
+    public func coeff(_ I: IntList) -> K {
         return p.coeff(I)
     }
-    public var leadDegree: MIndex {
+    public var leadDegree: IntList {
         return p.leadDegree
     }
     public var leadCoeff: K {

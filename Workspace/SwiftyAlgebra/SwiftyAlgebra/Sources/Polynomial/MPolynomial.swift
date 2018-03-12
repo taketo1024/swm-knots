@@ -12,26 +12,26 @@ public struct MPolynomial<K: Field>: Ring, Module {
     public typealias CoeffRing = K
     
     // e.g. [(2, 1, 3) : 5] -> 5 * x^2 * y * z^3
-    private let coeffs: [MIndex : K]
+    private let coeffs: [IntList : K]
     
     public init(intValue n: Int) {
         self.init(K(intValue: n))
     }
     
     public init(_ a: K) {
-        self.init([MIndex.empty : a])
+        self.init([IntList.empty : a])
     }
     
-    public init(_ I: MIndex) {
+    public init(_ I: IntList) {
         self.init([I : .identity])
     }
     
     public init(_ elements: ([Int], K) ...) {
-        let coeffs = Dictionary(pairs: elements.map{ (I, a) in (MIndex(I), a) } )
+        let coeffs = Dictionary(pairs: elements.map{ (I, a) in (IntList(I), a) } )
         self.init(coeffs)
     }
     
-    public init(_ coeffs: [MIndex : K]) {
+    public init(_ coeffs: [IntList : K]) {
         self.coeffs = coeffs.filter{ $0.value != .zero }
     }
     
@@ -43,7 +43,7 @@ public struct MPolynomial<K: Field>: Ring, Module {
         return (maxDegree == 0) ? coeff(.empty).inverse.flatMap{ a in MPolynomial(a) } : nil
     }
     
-    internal var mIndices: [MIndex] {
+    internal var mIndices: [IntList] {
         return coeffs.keys.sorted()
     }
     
@@ -56,14 +56,14 @@ public struct MPolynomial<K: Field>: Ring, Module {
     }
     
     public func coeff(_ indices: Int ...) -> K {
-        return coeff(MIndex(indices))
+        return coeff(IntList(indices))
     }
     
-    public func coeff(_ I: MIndex) -> K {
+    public func coeff(_ I: IntList) -> K {
         return coeffs[I] ?? .zero
     }
     
-    public var leadDegree: MIndex {
+    public var leadDegree: IntList {
         return mIndices.last ?? .empty
     }
     
@@ -97,7 +97,7 @@ public struct MPolynomial<K: Field>: Ring, Module {
     }
     
     public static func * (f: MPolynomial<K>, g: MPolynomial<K>) -> MPolynomial<K> {
-        var coeffs = [MIndex : K]()
+        var coeffs = [IntList : K]()
         for (I, J) in f.mIndices.allCombinations(with: g.mIndices) {
             let K = I * J
             coeffs[K] = coeffs[K, default: .zero] + f.coeff(I) * g.coeff(J)
@@ -116,8 +116,8 @@ public struct MPolynomial<K: Field>: Ring, Module {
     public var description: String {
         let (sub, sup) = (Expression.sub, Expression.sup)
         
-        func toTerm(_ I: MIndex) -> String {
-            return I.indices.enumerated().flatMap { (i, n) -> String? in
+        func toTerm(_ I: IntList) -> String {
+            return I.list.enumerated().flatMap { (i, n) -> String? in
                 if n > 0 {
                     return (n > 1) ? "x\(sub(i+1))\(sup(n))" : "x\(sub(i+1))"
                 } else {
