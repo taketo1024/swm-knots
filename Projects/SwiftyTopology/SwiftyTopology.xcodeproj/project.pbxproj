@@ -153,7 +153,8 @@
 				DDB6C07F2053D280001313FD /* CharacteristicClasses */,
 				DDB6C0902053D280001313FD /* Tools */,
 			);
-			path = Sources;
+			name = Sources;
+			path = ../../../Sources/Topology;
 			sourceTree = "<group>";
 		};
 		DDB6C07A2053D280001313FD /* Basics */ = {

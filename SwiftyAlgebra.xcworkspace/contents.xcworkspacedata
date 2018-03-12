@@ -2,7 +2,10 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:Workspace/SwiftyAlgebra/SwiftyAlgebra.xcodeproj">
+      location = "group:Projects/SwiftyAlgebra/SwiftyAlgebra.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Projects/SwiftyTopology/SwiftyTopology.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:README.md">
