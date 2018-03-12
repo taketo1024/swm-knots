@@ -1,5 +1,7 @@
 import Foundation
 
+public typealias DynamicPermutation = Permutation<Dynamic>
+
 public struct Permutation<n: _Int>: Group, FiniteSetType {
     
     public let degree: Int
@@ -59,6 +61,10 @@ public struct Permutation<n: _Int>: Group, FiniteSetType {
     
     public func apply(_ i: Int) -> Int {
         return self[i]
+    }
+    
+    public func apply(_ I: [Int]) -> [Int] {
+        return I.map{ apply($0) }
     }
     
     public var signature: Int {
@@ -129,6 +135,12 @@ public struct Permutation<n: _Int>: Group, FiniteSetType {
     
     public var hashValue: Int {
         return elements.count > 0 ? elements[0].hashValue + 1 : 0
+    }
+}
+
+public extension Permutation where n == Dynamic {
+    public static func allElements(size n: Int) -> [Permutation<n>] {
+        return n.permutations.map{ Permutation(elements: $0) }
     }
 }
 

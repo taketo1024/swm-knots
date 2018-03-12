@@ -19,6 +19,11 @@ public struct MIndex: Hashable, Comparable, CustomStringConvertible {
         self.indices = indices
     }
     
+    public init(_ indices: [Int : Int]) {
+        let n = (indices.keys.max() ?? -1) + 1
+        self.indices = (0 ..< n).map{ indices[$0] ?? 0 }
+    }
+    
     public subscript(i: Int) -> Int {
         return (i < indices.count) ? indices[i] : 0
     }

@@ -20,6 +20,16 @@ public extension MPolynomial {
         return MPolynomial(coeffs)
     }
     
+    public static func monomialSymmetricPolynomial(_ n: Int, _ I: MIndex) -> MPolynomial<K> {
+        let ss = DynamicPermutation.allElements(size: n)
+        let Js = ss.map{ s -> MIndex in
+            let indices = I.indices.enumerated().map{ (i, j) in (s.apply(i), j)}
+            return MIndex(Dictionary(pairs: indices))
+        }.unique()
+        let elements = Dictionary(keys: Js){ _ in K.identity }
+        return MPolynomial(elements)
+    }
+    
     public func elementarySymmetricPolynomialDecomposition() -> MPolynomial<K> {
         var f = self
         var g = MPolynomial<K>.zero // result
