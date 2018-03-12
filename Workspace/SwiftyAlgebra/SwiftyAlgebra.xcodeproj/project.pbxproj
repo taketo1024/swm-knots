@@ -70,6 +70,7 @@
 		DD6AF9CB20542499000FC818 /* IntList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6AF9CA20542499000FC818 /* IntList.swift */; };
 		DD6AF9CD205424D2000FC818 /* SymmetricPolynomial.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6AF9CC205424D2000FC818 /* SymmetricPolynomial.swift */; };
 		DD90ACC91F763553001AFC9C /* PolynomialIdeal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */; };
+		DD9B56C720566A9B00215EA6 /* MultiplicativeSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9B56C620566A9B00215EA6 /* MultiplicativeSequence.swift */; };
 		DDB7217A205622DD0001428F /* Permutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB72179205622DD0001428F /* Permutation.swift */; };
 		DDB7217E205633FB0001428F /* AlternatingGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB7217D205633FB0001428F /* AlternatingGroup.swift */; };
 /* End PBXBuildFile section */
@@ -158,6 +159,7 @@
 		DD6AF9CA20542499000FC818 /* IntList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntList.swift; sourceTree = "<group>"; };
 		DD6AF9CC205424D2000FC818 /* SymmetricPolynomial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymmetricPolynomial.swift; sourceTree = "<group>"; };
 		DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolynomialIdeal.swift; sourceTree = "<group>"; };
+		DD9B56C620566A9B00215EA6 /* MultiplicativeSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplicativeSequence.swift; sourceTree = "<group>"; };
 		DDB72179205622DD0001428F /* Permutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permutation.swift; sourceTree = "<group>"; };
 		DDB7217D205633FB0001428F /* AlternatingGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlternatingGroup.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -394,6 +396,7 @@
 				DD6092872053EF4000ABD84F /* MPolynomial.swift */,
 				DD6AF9CC205424D2000FC818 /* SymmetricPolynomial.swift */,
 				DD4E23282056496100BB0CAD /* PowerSeries.swift */,
+				DD9B56C620566A9B00215EA6 /* MultiplicativeSequence.swift */,
 			);
 			path = Polynomial;
 			sourceTree = "<group>";
@@ -564,6 +567,7 @@
 				1424F5021EB997780052581F /* SymmetricGroup.swift in Sources */,
 				DDB7217A205622DD0001428F /* Permutation.swift in Sources */,
 				1424F4FC1EB997780052581F /* Group.swift in Sources */,
+				DD9B56C720566A9B00215EA6 /* MultiplicativeSequence.swift in Sources */,
 				146A296E1F1DA32400531AA2 /* HomologyClass.swift in Sources */,
 				140F4FAF1F96F66400C4C039 /* random.swift in Sources */,
 				1410C1151FB203AE00CEE47D /* EchelonEliminator.swift in Sources */,
