@@ -30,3 +30,13 @@ public struct MultiplicativeSequence<K: Field>: CustomStringConvertible {
         return (0 ..< 5).map{ self[$0].description }.joined(separator: " + ") + " ..."
     }
 }
+
+public extension MultiplicativeSequence where K == RationalNumber {
+    public static var HirzebruchL: MultiplicativeSequence<K> {
+        let B = BernoulliNumber
+        let f = PowerSeries<K> { n in
+            (n == 0) ? 1 : K(2.pow(2 * n), (2 * n).factorial) * B(2 * n)
+        }
+        return MultiplicativeSequence(belongingTo: f)
+    }
+}
