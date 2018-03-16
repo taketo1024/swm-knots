@@ -1,7 +1,5 @@
 import Foundation
 
-public typealias DynamicPermutation = SymmetricGroup<Dynamic>
-
 public struct SymmetricGroup<n: _Int>: Group, FiniteSetType {
     
     internal let p: Permutation

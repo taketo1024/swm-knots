@@ -116,7 +116,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     func log(_ msg: @autoclosure () -> String) {
         if debug {
             if rows < 20 && cols < 20 {
-                print(msg(), "\n", target.asDynamicMatrix().detailDescription, "\n")
+                print(msg(), "\n", target.detailDescription, "\n")
             } else {
                 print(msg(), "\n\t", target, "\n")
             }

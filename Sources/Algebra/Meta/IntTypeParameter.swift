@@ -6,10 +6,6 @@ public protocol _Int {
 
 public protocol _Prime: _Int {}
 
-public struct Dynamic : _Int {
-    public static let intValue = 0
-}
-
 public struct _0 : _Int   { public static let intValue = 0 }
 public struct _1 : _Int   { public static let intValue = 1 }
 public struct _2 : _Prime { public static let intValue = 2 }

@@ -380,21 +380,23 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     public func asMatrix<n, m>() -> Matrix<n, m, R> {
-        return Matrix(rows: rows, cols: cols, grid: generateGrid())
-    }
-    
-    public func asDynamicMatrix() -> DynamicMatrix<R> {
-        return asMatrix()
+        return Matrix(grid: generateGrid())
     }
     
     public var description: String {
-        return "CMatrix(\(rows), \(cols); \(table.sum{ $0.1.count }) elements)"
+        return "CMatrix<\(rows), \(cols)> [ " + table.flatMap { (i, list) in
+            list.map{ (j, a) in "\( align == .Rows ? (i, j, a) : (j, i, a) )"}
+        }.joined(separator: ", ") + " ]"
     }
     
     public var detailDescription: String {
-        return description + " [ " + table.flatMap { (i, list) in
-            list.map{ (j, a) in "\( align == .Rows ? (i, j, a) : (j, i, a) )"}
-            }.joined(separator: ", ") + " ]"
+        let grid = generateGrid()
+        let elements = (0 ..< rows).map({ i -> [String] in
+            return (0 ..< cols).map({ j -> String in
+                return "\(grid[(i * cols) + j])"
+            })
+        })
+        return "[\t\(elements.map{ $0.joined(separator: ",\t") }.joined(separator: "\n\t"))]"
     }
 }
 
