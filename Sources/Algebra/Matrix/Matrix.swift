@@ -229,6 +229,10 @@ public extension Matrix where n == m {
         return Matrix<n, n, R> { $0 == $1 ? 1 : 0 }
     }
     
+    public var trace: R {
+        return (0 ..< rows).sum { i in self[i, i] }
+    }
+    
     public static func ** (a: Matrix<n, n, R>, k: Int) -> Matrix<n, n, R> {
         return k == 0 ? .identity : a * (a ** (k - 1))
     }
