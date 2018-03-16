@@ -39,3 +39,27 @@ public struct SymplecticGroup<n: _Int, K: Field>: MatrixGroup {
         return "Sp(\(n.intValue), \(K.symbol))"
     }
 }
+
+
+// Note <n> is the size of the matrix, thus must be even.
+// see: https://en.wikipedia.org/wiki/Symplectic_group#Sp(n)
+
+public struct UnitarySymplecticGroup<n: _Int>: MatrixGroup {
+    public let matrix: SquareMatrix<n, ComplexNumber>
+    public init(_ matrix: SquareMatrix<n, ComplexNumber>) {
+        assert(n.intValue.isEven)
+        self.matrix = matrix
+    }
+    
+    public static var standardSymplecticMatrix: UnitarySymplecticGroup<n> {
+        return UnitarySymplecticGroup(SymplecticGroup.standardSymplecticMatrix.matrix)
+    }
+    
+    public static func contains(_ g: GeneralLinearGroup<n, ComplexNumber>) -> Bool {
+        return SymplecticGroup.contains(g) && UnitaryGroup<n>.contains(g)
+    }
+    
+    public static var symbol: String  {
+        return "USp(\(n.intValue))"
+    }
+}
