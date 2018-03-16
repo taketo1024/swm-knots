@@ -11,8 +11,8 @@ import Foundation
 public protocol MatrixGroup: Group {
     associatedtype Size: _Int
     associatedtype CoeffField: Field
-    init(_ g: Matrix<Size, Size, CoeffField>)
-    var asMatrix: Matrix<Size, Size, CoeffField> { get }
+    init(_ g: SquareMatrix<Size, CoeffField>)
+    var asMatrix: SquareMatrix<Size, CoeffField> { get }
     
     var determinant: CoeffField { get }
     var trace: CoeffField { get }
@@ -41,6 +41,10 @@ public extension MatrixGroup {
     
     public var trace: CoeffField {
         return asMatrix.trace
+    }
+    
+    public var transposed: Self {
+        return Self( asMatrix.transposed )
     }
     
     public static func *(a: Self, b: Self) -> Self {
@@ -78,6 +82,10 @@ public extension MatrixSubgroup {
     
     public init(generator g: (Int, Int) -> CoeffField) {
         self.init(Matrix(generator: g))
+    }
+    
+    public var asSuper: Super {
+        return Super(asMatrix)
     }
     
     public static var identity: Self {

@@ -12,9 +12,9 @@ public struct GeneralLinearGroup<n: _Int, K: Field>: MatrixGroup {
     public typealias Size = n
     public typealias CoeffField = K
     
-    private let g: Matrix<n, n, K>
-    public init(_ g: Matrix<n, n, K>) { self.g = g }
-    public var asMatrix: Matrix<n, n, K> {  return g }
+    private let g: SquareMatrix<n, K>
+    public init(_ g: SquareMatrix<n, K>) { self.g = g }
+    public var asMatrix: SquareMatrix<n, K> {  return g }
     
     public static var symbol: String  {
         return "GL(\(n.intValue), \(K.symbol))"
@@ -24,10 +24,9 @@ public struct GeneralLinearGroup<n: _Int, K: Field>: MatrixGroup {
 public struct SpecialLinearGroup<n: _Int, K: Field>: MatrixSubgroup {
     public typealias Super = GeneralLinearGroup<n, K>
     
-    private let g: Matrix<n, n, K>
-    public init(_ g: Matrix<n, n, K>) { self.g = g }
-    public var asMatrix: Matrix<n, n, K> { return g }
-    public var asSuper: Super { return Super(asMatrix) }
+    private let g: SquareMatrix<n, K>
+    public init(_ g: SquareMatrix<n, K>) { self.g = g }
+    public var asMatrix: SquareMatrix<n, K> { return g }
     
     public static func contains(_ g: GeneralLinearGroup<n, K>) -> Bool {
         return g.determinant == .identity
