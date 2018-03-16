@@ -32,13 +32,13 @@ public struct _HomologyClass<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
     }
     
     private init() {
-        self.z = Cycle.zero
+        self.z = .zero
         self.factors = [:]
         self.structure = nil
     }
     
     public subscript(_ i: Int) -> _HomologyClass<T, A, R> {
-        return factors[i].map{ _HomologyClass($0, structure!) } ?? _HomologyClass.zero
+        return factors[i].map{ _HomologyClass($0, structure!) } ?? .zero
     }
     
     public var representative: Cycle {
@@ -114,11 +114,11 @@ public struct _HomologyClass<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
     }
     
     public var hashValue: Int {
-        return (z == Cycle.zero) ? 0 : 1
+        return z == .zero ? 0 : 1
     }
     
     public var description: String {
-        return (z != Cycle.zero) ? "[\(z)]" : "0"
+        return z != .zero ? "[\(z)]" : "0"
     }
     
     public var detailDescription: String {
@@ -132,7 +132,7 @@ public struct _HomologyClass<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
 
 public func pair<A, R>(_ x: HomologyClass<A, R>, _ y: CohomologyClass<Dual<A>, R>) -> R {
     guard let H = x.structure, let cH = y.structure else {
-        return R.zero
+        return .zero
     }
     
     // TODO must assert that H, cH is a valid pair.

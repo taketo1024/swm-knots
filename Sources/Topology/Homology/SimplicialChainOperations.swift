@@ -74,7 +74,7 @@ public extension SimplicialCochain where A == Dual<Simplex> {
                 if let (s2, e) = cap(f, s) {
                     return C([(s2, e * r2)])
                 } else {
-                    return C.zero
+                    return .zero
                 }
             }
             return r1 * eval

@@ -8,7 +8,7 @@ public extension Field {
     }
     
     public var degree: Int {
-        return self == Self.zero ? 0 : 1
+        return self == .zero ? 0 : 1
     }
     
     public static func / (a: Self, b: Self) -> Self {
@@ -22,7 +22,7 @@ public extension Field {
         case let n where n < 0:
             return a.inverse! * (a ** (n + 1))
         default:
-            return Self.identity
+            return .identity
         }
     }
     

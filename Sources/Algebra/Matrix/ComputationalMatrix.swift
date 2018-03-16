@@ -26,7 +26,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     
     public subscript(i: Int, j: Int) -> R {
         let (p, q) = (align == .Rows) ? (i, j) : (j, i)
-        return table[p]?.binarySearch(q, { $0.0 })?.element.1 ?? R.zero
+        return table[p]?.binarySearch(q, { $0.0 })?.element.1 ?? .zero
     }
     
     private init(_ rows: Int, _ cols: Int, _ align: ComputationalMatrixAlignment, _ table: [Int : [(Int, R)]]) {
@@ -42,7 +42,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     
     public convenience init(rows: Int, cols: Int, grid: [R], align: ComputationalMatrixAlignment = .Rows) {
         let components = grid.enumerated().flatMap{ (k, a) -> MatrixComponent<R>? in
-            (a != R.zero) ? (k / cols, k % cols, a) : nil
+            (a != .zero) ? (k / cols, k % cols, a) : nil
         }
         self.init(rows: rows, cols: cols, components: components, align: align)
     }
@@ -50,10 +50,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     public convenience init<S: Sequence>(rows: Int, cols: Int, components: S, align: ComputationalMatrixAlignment = .Rows) where S.Element == MatrixComponent<R> {
         self.init(rows, cols, align, [:])
         
-        for (i, j, a) in components {
-            if a == R.zero {
-                continue
-            }
+        for (i, j, a) in components where a != .zero {
             (align == .Rows) ? set(i, j, a) : set(j, i, a)
         }
         sort()
@@ -75,7 +72,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             assert(0 <= i && i < cols)
             assert(0 <= j && j < rows)
         }
-        assert(a != R.zero)
+        assert(a != .zero)
         
         if table[i] == nil {
             table[i] = []
@@ -167,7 +164,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    public static func *(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> ComputationalMatrix<R> {
+    public static func *(a: ComputationalMatrix, b: ComputationalMatrix) -> ComputationalMatrix<R> {
         assert(a.cols == b.rows)
         
         let result = ComputationalMatrix<R>(rows: a.rows, cols: b.cols, components: [])
@@ -183,12 +180,12 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             for (j, a) in list {
                 if let bRow = b.table[j] {
                     for (k, b) in bRow {
-                        row[k] = row[k, default: R.zero] + a * b
+                        row[k] = row[k, default: .zero] + a * b
                     }
                 }
             }
             
-            row.filter{ (_, a) in a != R.zero }.forEach{ (j, a) in
+            row.filter{ (_, a) in a != .zero }.forEach{ (j, a) in
                 result.set(i, j, a)
             }
         }
@@ -214,7 +211,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             p += 1
         }
         
-        row = row.filter{ $0.1 != R.zero }
+        row = row.filter{ $0.1 != .zero }
         
         if row.count == 0 {
             table.removeValue(forKey: i0)
@@ -224,7 +221,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    public func addRow(at i0: Int, to i1: Int, multipliedBy r: R = R.identity) {
+    public func addRow(at i0: Int, to i1: Int, multipliedBy r: R = .identity) {
         switchAlignment(.Rows)
         
         guard let r0 = table[i0] else {
@@ -302,7 +299,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         transpose()
     }
     
-    public func addCol(at j0: Int, to j1: Int, multipliedBy r: R = R.identity) {
+    public func addCol(at j0: Int, to j1: Int, multipliedBy r: R = .identity) {
         transpose()
         addRow(at: j0, to: j1, multipliedBy: r)
         transpose()
@@ -321,7 +318,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    public static func ==(a: ComputationalMatrix<R>, b: ComputationalMatrix<R>) -> Bool {
+    public static func ==(a: ComputationalMatrix, b: ComputationalMatrix) -> Bool {
         if (a.rows, a.cols) != (b.rows, b.cols) {
             return false
         }
@@ -334,10 +331,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         
         return (Set(a.table.keys) == Set(b.table.keys)) && a.table.keys.forAll{ i in
             let (x, y) = (a.table[i]!, b.table[i]!)
-            if x.count != y.count {
-                return false
-            }
-            return (0 ..< x.count).forAll { i in x[i] == y[i] }
+            return x.elementsEqual(y) { $0 == $1 }
         }
     }
     
@@ -379,7 +373,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         
         return (0 ..< cols).map { j -> FreeModule<A, R> in
             guard let v = table[j] else {
-                return FreeModule.zero
+                return .zero
             }
             return FreeModule( v.map{ (i, r) in (basis[i], r)} )
         }

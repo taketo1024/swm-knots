@@ -91,7 +91,7 @@ public extension ChainMap where T == Descending {
             let i = d.degree
             let values = C.chainBasis(i).flatMap { s -> (Dual<A>, R)? in
                 let a = self.appliedTo(s)[d.base]
-                return (a != R.zero) ? (Dual(s), a) : nil
+                return (a != .zero) ? (Dual(s), a) : nil
             }
             return FreeModule(values)
         }

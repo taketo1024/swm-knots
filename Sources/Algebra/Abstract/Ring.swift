@@ -20,19 +20,19 @@ public extension Ring {
     }
     
     public var normalizeUnit: Self {
-        return Self.identity
+        return .identity
     }
     
     public static var zero: Self {
-        return Self.init(intValue: 0)
+        return Self(intValue: 0)
     }
     
     public static var identity: Self {
-        return Self.init(intValue: 1)
+        return Self(intValue: 1)
     }
     
     public static func **(a: Self, n: Int) -> Self {
-        return (0 ..< n).reduce(Self.identity){ (res, _) in res * a }
+        return (0 ..< n).reduce(.identity){ (res, _) in res * a }
     }
     
     public static var isField: Bool {
@@ -70,15 +70,15 @@ public protocol Ideal: AdditiveSubgroup where Super: Ring {
 
 public extension Ideal {
     public static func * (a: Self, b: Self) -> Self {
-        return Self.init(a.asSuper * b.asSuper)
+        return Self(a.asSuper * b.asSuper)
     }
     
     public static func * (r: Super, a: Self) -> Self {
-        return Self.init(r * a.asSuper)
+        return Self(r * a.asSuper)
     }
     
     public static func * (a: Self, r: Super) -> Self {
-        return Self.init(a.asSuper * r)
+        return Self(a.asSuper * r)
     }
 }
 
@@ -130,15 +130,15 @@ public extension _QuotientRing where Base == Sub.Super {
     }
     
     public static var zero: Self {
-        return Self.init(Base.zero)
+        return Self(.zero)
     }
     
     public static var identity: Self {
-        return Self.init(Base.identity)
+        return Self(.identity)
     }
     
     public static func * (a: Self, b: Self) -> Self {
-        return Self.init(a.representative * b.representative)
+        return Self(a.representative * b.representative)
     }
     
     public var hashValue: Int {

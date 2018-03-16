@@ -90,7 +90,7 @@ public struct CellularComplex: GeometricComplex {
     }
     
     @discardableResult
-    public mutating func appendCell(simplices: SimplicialChain<IntegerNumber>, attachedAlong boundary: CellularChain<IntegerNumber> = CellularChain.zero) -> CellularCell {
+    public mutating func appendCell(simplices: SimplicialChain<IntegerNumber>, attachedAlong boundary: CellularChain<IntegerNumber> = .zero) -> CellularCell {
         if !simplices.basis.forAll({ underlyingComplex.contains($0) }) {
             let K = SimplicialComplex(cells: simplices.basis )
             self.underlyingComplex = self.underlyingComplex + K

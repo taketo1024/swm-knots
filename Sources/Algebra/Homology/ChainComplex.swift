@@ -50,7 +50,7 @@ public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable
     }
     
     public func boundaryMap(_ i: Int) -> BoundaryMap {
-        return (offset ... topDegree).contains(i) ? chain[i - offset].map : BoundaryMap.zero
+        return (offset ... topDegree).contains(i) ? chain[i - offset].map : .zero
     }
     
     public func boundaryMatrix(_ i: Int) -> ComputationalMatrix<R> {
@@ -59,13 +59,13 @@ public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable
             return matrices[i - offset]
             
         case topDegree + 1 where T.descending:
-            return ComputationalMatrix.zero(rows: chainBasis(topDegree).count, cols: 0)
+            return .zero(rows: chainBasis(topDegree).count, cols: 0)
             
         case offset - 1 where !T.descending:
-            return ComputationalMatrix.zero(rows: chainBasis(offset).count, cols: 0)
+            return .zero(rows: chainBasis(offset).count, cols: 0)
             
         default:
-            return ComputationalMatrix.zero(rows: 0, cols: 0)
+            return .zero(rows: 0, cols: 0)
         }
     }
     
