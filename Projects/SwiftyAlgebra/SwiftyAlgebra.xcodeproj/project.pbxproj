@@ -347,13 +347,7 @@
 			isa = PBXGroup;
 			children = (
 				1424F4E11EB997780052581F /* Matrix.swift */,
-				14360F901FB130350075133E /* ComputationalMatrix.swift */,
-				14360F921FB148C30075133E /* MatrixEliminator.swift */,
-				145B10D41FB19B03004EC11E /* MatrixEliminationResult.swift */,
-				1410C1141FB203AE00CEE47D /* EchelonEliminator.swift */,
-				1410C1161FB203CC00CEE47D /* HermiteEliminator.swift */,
-				1410C1181FB203E200CEE47D /* DiagonalEliminator.swift */,
-				1410C11A1FB2040900CEE47D /* SmithEliminator.swift */,
+				DD4951C4205B693000516ED0 /* Computation */,
 			);
 			path = Matrix;
 			sourceTree = "<group>";
@@ -438,6 +432,20 @@
 				DDB7217D205633FB0001428F /* AlternatingGroup.swift */,
 			);
 			path = SymmetricGroup;
+			sourceTree = "<group>";
+		};
+		DD4951C4205B693000516ED0 /* Computation */ = {
+			isa = PBXGroup;
+			children = (
+				14360F901FB130350075133E /* ComputationalMatrix.swift */,
+				14360F921FB148C30075133E /* MatrixEliminator.swift */,
+				145B10D41FB19B03004EC11E /* MatrixEliminationResult.swift */,
+				1410C1141FB203AE00CEE47D /* EchelonEliminator.swift */,
+				1410C1161FB203CC00CEE47D /* HermiteEliminator.swift */,
+				1410C1181FB203E200CEE47D /* DiagonalEliminator.swift */,
+				1410C11A1FB2040900CEE47D /* SmithEliminator.swift */,
+			);
+			path = Computation;
 			sourceTree = "<group>";
 		};
 		DD5EE318205699C3007309EF /* App */ = {
