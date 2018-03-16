@@ -260,9 +260,10 @@
 				144CFE481EEA88F20023E6EC /* Matrix */,
 				14A365721F27636600D23C87 /* FreeModule */,
 				14A365731F27638300D23C87 /* Polynomial */,
-				1424F4DF1EB997780052581F /* Combinatorics */,
+				DD4951C1205B60F900516ED0 /* SymmetricGroup */,
 				147D98071EBA0C0C00C736AC /* Homology */,
 				14546DA91FDF9DB800898326 /* Structure */,
+				1424F4DF1EB997780052581F /* Combinatorics */,
 				1424F4EF1EB997780052581F /* Computation */,
 				1424F4F21EB997780052581F /* Meta */,
 				147D98041EB9B24900C736AC /* Extensions */,
@@ -291,11 +292,10 @@
 		1424F4DF1EB997780052581F /* Combinatorics */ = {
 			isa = PBXGroup;
 			children = (
+				DD6AF9CA20542499000FC818 /* IntList.swift */,
 				140E809F1ECDEA8E00B89719 /* combinatorics.swift */,
 				DDB72179205622DD0001428F /* Permutation.swift */,
 				DD9B56C8205671A300215EA6 /* BernoulliNumbers.swift */,
-				1424F4E21EB997780052581F /* SymmetricGroup.swift */,
-				DDB7217D205633FB0001428F /* AlternatingGroup.swift */,
 			);
 			path = Combinatorics;
 			sourceTree = "<group>";
@@ -423,13 +423,21 @@
 			children = (
 				1424F4E31EB997780052581F /* Polynominal.swift */,
 				DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */,
-				DD6AF9CA20542499000FC818 /* IntList.swift */,
 				DD6092872053EF4000ABD84F /* MPolynomial.swift */,
 				DD6AF9CC205424D2000FC818 /* SymmetricPolynomial.swift */,
 				DD4E23282056496100BB0CAD /* PowerSeries.swift */,
 				DD9B56C620566A9B00215EA6 /* MultiplicativeSequence.swift */,
 			);
 			path = Polynomial;
+			sourceTree = "<group>";
+		};
+		DD4951C1205B60F900516ED0 /* SymmetricGroup */ = {
+			isa = PBXGroup;
+			children = (
+				1424F4E21EB997780052581F /* SymmetricGroup.swift */,
+				DDB7217D205633FB0001428F /* AlternatingGroup.swift */,
+			);
+			path = SymmetricGroup;
 			sourceTree = "<group>";
 		};
 		DD5EE318205699C3007309EF /* App */ = {
