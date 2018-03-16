@@ -10,18 +10,12 @@
 import Foundation
 
 // Note <n> is the size of the matrix, thus must be even.
-
-public struct SymplecticGroup<n: _Int, K: Field>: MatrixSubgroup {
-    public typealias Super = GeneralLinearGroup<n, K>
-    
-    private let g: SquareMatrix<n, K>
-    
-    public init(_ g: SquareMatrix<n, K>) {
+public struct SymplecticGroup<n: _Int, K: Field>: MatrixGroup {
+    public let matrix: SquareMatrix<n, K>
+    public init(_ matrix: SquareMatrix<n, K>) {
         assert(n.intValue.isEven)
-        self.g = g
+        self.matrix = matrix
     }
-    
-    public var asMatrix: SquareMatrix<n, K> { return g }
     
     public static var standardSymplecticMatrix: SymplecticGroup<n, K> {
         let m = n.intValue / 2
@@ -37,7 +31,7 @@ public struct SymplecticGroup<n: _Int, K: Field>: MatrixSubgroup {
     }
     
     public static func contains(_ g: GeneralLinearGroup<n, K>) -> Bool {
-        let J = standardSymplecticMatrix.asSuper
+        let J = standardSymplecticMatrix.asGL
         return g.transposed * J * g == J
     }
     

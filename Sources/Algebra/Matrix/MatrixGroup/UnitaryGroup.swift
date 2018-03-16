@@ -8,13 +8,12 @@
 
 import Foundation
 
-public struct UnitaryGroup<n: _Int>: MatrixSubgroup {
-    public typealias Super = GeneralLinearGroup<n, ComplexNumber>
-    
-    private let g: SquareMatrix<n, ComplexNumber>
-    public init(_ g: SquareMatrix<n, ComplexNumber>) { self.g = g }
-    public var asMatrix: SquareMatrix<n, ComplexNumber> { return g }
-    
+public struct UnitaryGroup<n: _Int>: MatrixGroup {
+    public let matrix: SquareMatrix<n, ComplexNumber>
+    public init(_ matrix: SquareMatrix<n, ComplexNumber>) {
+        self.matrix = matrix
+    }
+
     public static func contains(_ g: GeneralLinearGroup<n, ComplexNumber>) -> Bool {
         return g * g.adjoint == .identity
     }
@@ -24,17 +23,12 @@ public struct UnitaryGroup<n: _Int>: MatrixSubgroup {
     }
 }
 
-public struct SpecialUnitaryGroup<n: _Int>: MatrixSubgroup {
-    public typealias Super = UnitaryGroup<n>
-    
-    private let g: SquareMatrix<n, ComplexNumber>
-    public init(_ g: SquareMatrix<n, ComplexNumber>) { self.g = g }
-    public var asMatrix: SquareMatrix<n, ComplexNumber> { return g }
-    
-    public static func contains(_ g: UnitaryGroup<n>) -> Bool {
-        return SpecialLinearGroup.contains(g.asSuper)
+public struct SpecialUnitaryGroup<n: _Int>: MatrixGroup {
+    public let matrix: SquareMatrix<n, ComplexNumber>
+    public init(_ matrix: SquareMatrix<n, ComplexNumber>) {
+        self.matrix = matrix
     }
-    
+
     public static func contains(_ g: GeneralLinearGroup<n, ComplexNumber>) -> Bool {
         return UnitaryGroup.contains(g) && SpecialLinearGroup.contains(g)
     }

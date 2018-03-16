@@ -14,11 +14,15 @@ public protocol MatrixGroup: Group {
     init(_ g: SquareMatrix<Size, CoeffField>)
     
     var size: Int { get }
-    var asMatrix: SquareMatrix<Size, CoeffField> { get }
+    var matrix: SquareMatrix<Size, CoeffField> { get }
     var asGL: GeneralLinearGroup<Size, CoeffField> { get }
     
     var determinant: CoeffField { get }
     var trace: CoeffField { get }
+    
+    static func contains(_ g: GeneralLinearGroup<Size, CoeffField>) -> Bool
+    static func *(a: CoeffField, b: Self) -> Self
+    static func *(a: Self, b: CoeffField) -> Self
 }
 
 public extension MatrixGroup {
@@ -31,7 +35,7 @@ public extension MatrixGroup {
     }
     
     public var size: Int {
-        return asMatrix.rows
+        return matrix.rows
     }
     
     public static var identity: Self {
@@ -39,59 +43,59 @@ public extension MatrixGroup {
     }
     
     public var inverse: Self {
-        return Self(asMatrix.inverse!)
+        return Self(matrix.inverse!)
     }
     
     public var determinant: CoeffField {
-        return asMatrix.determinant
+        return matrix.determinant
     }
     
     public var trace: CoeffField {
-        return asMatrix.trace
+        return matrix.trace
     }
     
     public var transposed: Self {
-        return Self( asMatrix.transposed )
+        return Self( matrix.transposed )
     }
     
     public var asGL: GeneralLinearGroup<Size, CoeffField> {
-        return GeneralLinearGroup( asMatrix )
+        return GeneralLinearGroup( matrix )
     }
     
     public static func *(a: Self, b: Self) -> Self {
-        return Self( a.asMatrix * b.asMatrix )
+        return Self( a.matrix * b.matrix )
     }
     
     public static func *(a: CoeffField, b: Self) -> Self {
         assert(a.isInvertible)
-        return Self( a * b.asMatrix )
+        return Self( a * b.matrix )
     }
     
     public static func *(a: Self, b: CoeffField) -> Self {
         assert(b.isInvertible)
-        return Self( a.asMatrix * b )
+        return Self( a.matrix * b )
     }
     
     public static func ==(lhs: Self, rhs: Self) -> Bool {
-        return lhs.asMatrix == rhs.asMatrix
+        return lhs.matrix == rhs.matrix
     }
     
     public var hashValue: Int {
-        return asMatrix.hashValue
+        return matrix.hashValue
     }
     
     public var description: String {
-        return asMatrix.description
+        return matrix.description
     }
     
     public var detailDescription: String {
-        return asMatrix.detailDescription
+        return matrix.detailDescription
     }
 }
 
 public extension MatrixGroup where CoeffField == ComplexNumber {
     public var adjoint: Self {
-        return Self(asMatrix.adjoint)
+        return Self(matrix.adjoint)
     }
     
     // A + iB -> (A, -B; B, A)
@@ -99,8 +103,7 @@ public extension MatrixGroup where CoeffField == ComplexNumber {
         let n = size
         assert(m.intValue == 2 * n)
         
-        let C = self.asMatrix
-        let (A, B) = (C.realPart, C.imaginaryPart)
+        let (A, B) = (matrix.realPart, matrix.imaginaryPart)
         
         return GeneralLinearGroup<m, RealNumber> { (i, j) in
             if i < n, j < n {
@@ -113,53 +116,5 @@ public extension MatrixGroup where CoeffField == ComplexNumber {
                 return A[i - n, j - n]
             }
         }
-    }
-}
-
-public protocol MatrixSubgroup: MatrixGroup, Subgroup where Super: MatrixGroup, Super.Size == Size, Super.CoeffField == CoeffField {}
-
-public extension MatrixSubgroup {
-    public init(_ g: Super) {
-        self.init(g.asMatrix)
-    }
-    
-    public init(grid: [CoeffField]) {
-        self.init(Matrix(grid: grid))
-    }
-    
-    public init(generator g: (Int, Int) -> CoeffField) {
-        self.init(Matrix(generator: g))
-    }
-    
-    public var asSuper: Super {
-        return Super(asMatrix)
-    }
-    
-    public static var identity: Self {
-        return Self( .identity )
-    }
-    
-    public var inverse: Self {
-        return Self(asMatrix.inverse!)
-    }
-    
-    public static func *(a: Self, b: Self) -> Self {
-        return Self( a.asMatrix * b.asMatrix )
-    }
-    
-    public static func ==(lhs: Self, rhs: Self) -> Bool {
-        return lhs.asMatrix == rhs.asMatrix
-    }
-    
-    public var hashValue: Int {
-        return asMatrix.hashValue
-    }
-    
-    public var description: String {
-        return asMatrix.description
-    }
-    
-    public var detailDescription: String {
-        return asMatrix.detailDescription
     }
 }

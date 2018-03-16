@@ -8,13 +8,12 @@
 
 import Foundation
 
-public struct OrthogonalGroup<n: _Int>: MatrixSubgroup {
-    public typealias Super = GeneralLinearGroup<n, RealNumber>
-    
-    private let g: SquareMatrix<n, RealNumber>
-    public init(_ g: SquareMatrix<n, RealNumber>) { self.g = g }
-    public var asMatrix: SquareMatrix<n, RealNumber> { return g }
-    
+public struct OrthogonalGroup<n: _Int>: MatrixGroup {
+    public let matrix: SquareMatrix<n, RealNumber>
+    public init(_ matrix: SquareMatrix<n, RealNumber>) {
+        self.matrix = matrix
+    }
+
     public static func contains(_ g: GeneralLinearGroup<n, RealNumber>) -> Bool {
         return g * g.transposed == .identity
     }
@@ -24,17 +23,12 @@ public struct OrthogonalGroup<n: _Int>: MatrixSubgroup {
     }
 }
 
-public struct SpecialOrthogonalGroup<n: _Int>: MatrixSubgroup {
-    public typealias Super = OrthogonalGroup<n>
-    
-    private let g: SquareMatrix<n, RealNumber>
-    public init(_ g: SquareMatrix<n, RealNumber>) { self.g = g }
-    public var asMatrix: SquareMatrix<n, RealNumber> { return g }
-    
-    public static func contains(_ g: OrthogonalGroup<n>) -> Bool {
-        return SpecialLinearGroup.contains(g.asSuper)
+public struct SpecialOrthogonalGroup<n: _Int>: MatrixGroup {
+    public let matrix: SquareMatrix<n, RealNumber>
+    public init(_ matrix: SquareMatrix<n, RealNumber>) {
+        self.matrix = matrix
     }
-    
+
     public static func contains(_ g: GeneralLinearGroup<n, RealNumber>) -> Bool {
         return OrthogonalGroup.contains(g) && SpecialLinearGroup.contains(g)
     }
