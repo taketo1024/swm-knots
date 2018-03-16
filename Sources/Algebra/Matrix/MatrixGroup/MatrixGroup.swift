@@ -51,6 +51,16 @@ public extension MatrixGroup {
         return Self( a.asMatrix * b.asMatrix )
     }
     
+    public static func *(a: CoeffField, b: Self) -> Self {
+        assert(a.isInvertible)
+        return Self( a * b.asMatrix )
+    }
+    
+    public static func *(a: Self, b: CoeffField) -> Self {
+        assert(b.isInvertible)
+        return Self( a.asMatrix * b )
+    }
+    
     public static func ==(lhs: Self, rhs: Self) -> Bool {
         return lhs.asMatrix == rhs.asMatrix
     }

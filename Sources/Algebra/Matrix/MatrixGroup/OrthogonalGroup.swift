@@ -18,6 +18,10 @@ public struct OrthogonalGroup<n: _Int>: MatrixSubgroup {
     public static func contains(_ g: GeneralLinearGroup<n, RealNumber>) -> Bool {
         return g * g.transposed == .identity
     }
+    
+    public static var symbol: String  {
+        return "O(\(n.intValue))"
+    }
 }
 
 public struct SpecialOrthogonalGroup<n: _Int>: MatrixSubgroup {
@@ -33,6 +37,10 @@ public struct SpecialOrthogonalGroup<n: _Int>: MatrixSubgroup {
     
     public static func contains(_ g: GeneralLinearGroup<n, RealNumber>) -> Bool {
         return OrthogonalGroup.contains(g) && SpecialLinearGroup.contains(g)
+    }
+    
+    public static var symbol: String  {
+        return "SO(\(n.intValue))"
     }
 }
 

@@ -31,4 +31,8 @@ public struct SpecialLinearGroup<n: _Int, K: Field>: MatrixSubgroup {
     public static func contains(_ g: GeneralLinearGroup<n, K>) -> Bool {
         return g.determinant == .identity
     }
+    
+    public static var symbol: String  {
+        return "SL(\(n.intValue), \(K.symbol))"
+    }
 }
