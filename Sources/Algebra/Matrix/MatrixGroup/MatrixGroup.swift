@@ -12,6 +12,8 @@ public protocol MatrixGroup: Group {
     associatedtype Size: _Int
     associatedtype CoeffField: Field
     init(_ g: SquareMatrix<Size, CoeffField>)
+    
+    var size: Int { get }
     var asMatrix: SquareMatrix<Size, CoeffField> { get }
     
     var determinant: CoeffField { get }
@@ -25,6 +27,10 @@ public extension MatrixGroup {
     
     public init(generator g: (Int, Int) -> CoeffField) {
         self.init(Matrix(generator: g))
+    }
+    
+    public var size: Int {
+        return asMatrix.rows
     }
     
     public static var identity: Self {
