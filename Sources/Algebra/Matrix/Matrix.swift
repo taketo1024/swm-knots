@@ -203,7 +203,7 @@ public extension Matrix where R: EuclideanRing {
     }
 }
 
-public extension Matrix where m == _1 {
+public extension ColVector where m == _1 {
     public subscript(index: Int) -> R {
         @_transparent
         get { return self[index, 0] }
@@ -213,7 +213,7 @@ public extension Matrix where m == _1 {
     }
 }
 
-public extension Matrix where n == _1 {
+public extension RowVector where n == _1 {
     public subscript(index: Int) -> R {
         @_transparent
         get { return self[0, index] }
@@ -224,7 +224,7 @@ public extension Matrix where n == _1 {
 }
 
 // TODO: conform to Ring after conditional conformance is supported.
-public extension Matrix where n == m {
+public extension SquareMatrix where n == m {
     public static var identity: Matrix<n, n, R> {
         return Matrix<n, n, R> { $0 == $1 ? 1 : 0 }
     }
@@ -238,7 +238,7 @@ public extension Matrix where n == m {
     }
 }
 
-public extension Matrix where n == m, R: EuclideanRing {
+public extension SquareMatrix where n == m, R: EuclideanRing {
     public var determinant: R {
         return eliminate().determinant
     }
@@ -259,6 +259,14 @@ public extension Matrix where R == RealNumber {
 }
 
 public extension Matrix where R == ComplexNumber {
+    public var realPart: Matrix<n, m, RealNumber> {
+        return Matrix<n, m, RealNumber>(grid: grid.map{ $0.real })
+    }
+    
+    public var imaginaryPart: Matrix<n, m, RealNumber> {
+        return Matrix<n, m, RealNumber>(grid: grid.map{ $0.imaginary })
+    }
+    
     public var adjoint: Matrix<m, n, R> {
         return Matrix<m, n, R> { (i, j) in self[j, i].conjugate }
     }

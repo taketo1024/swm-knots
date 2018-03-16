@@ -15,6 +15,7 @@ public protocol MatrixGroup: Group {
     
     var size: Int { get }
     var asMatrix: SquareMatrix<Size, CoeffField> { get }
+    var asGL: GeneralLinearGroup<Size, CoeffField> { get }
     
     var determinant: CoeffField { get }
     var trace: CoeffField { get }
@@ -53,6 +54,10 @@ public extension MatrixGroup {
         return Self( asMatrix.transposed )
     }
     
+    public var asGL: GeneralLinearGroup<Size, CoeffField> {
+        return GeneralLinearGroup( asMatrix )
+    }
+    
     public static func *(a: Self, b: Self) -> Self {
         return Self( a.asMatrix * b.asMatrix )
     }
@@ -87,6 +92,27 @@ public extension MatrixGroup {
 public extension MatrixGroup where CoeffField == ComplexNumber {
     public var adjoint: Self {
         return Self(asMatrix.adjoint)
+    }
+    
+    // A + iB -> (A, -B; B, A)
+    public func asReal<m: _Int>() -> GeneralLinearGroup<m, RealNumber> {
+        let n = size
+        assert(m.intValue == 2 * n)
+        
+        let C = self.asMatrix
+        let (A, B) = (C.realPart, C.imaginaryPart)
+        
+        return GeneralLinearGroup<m, RealNumber> { (i, j) in
+            if i < n, j < n {
+                return A[i, j]
+            } else if i < n, j >= n {
+                return -B[i, j - n]
+            } else if i >= n, j < n {
+                return B[i - n, j]
+            } else {
+                return A[i - n, j - n]
+            }
+        }
     }
 }
 
