@@ -76,7 +76,7 @@
 		DD9B56C9205671A300215EA6 /* BernoulliNumbers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9B56C8205671A300215EA6 /* BernoulliNumbers.swift */; };
 		DDB7217A205622DD0001428F /* Permutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB72179205622DD0001428F /* Permutation.swift */; };
 		DDB7217E205633FB0001428F /* AlternatingGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB7217D205633FB0001428F /* AlternatingGroup.swift */; };
-		DDF1DE0D205B6C520097885E /* GL.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF1DE0C205B6C520097885E /* GL.swift */; };
+		DDF1DE0D205B6C520097885E /* GeneralLinearGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF1DE0C205B6C520097885E /* GeneralLinearGroup.swift */; };
 		DDF1DE10205B767E0097885E /* MatrixGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF1DE0F205B767E0097885E /* MatrixGroup.swift */; };
 /* End PBXBuildFile section */
 
@@ -182,7 +182,7 @@
 		DD9B56C8205671A300215EA6 /* BernoulliNumbers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BernoulliNumbers.swift; sourceTree = "<group>"; };
 		DDB72179205622DD0001428F /* Permutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permutation.swift; sourceTree = "<group>"; };
 		DDB7217D205633FB0001428F /* AlternatingGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlternatingGroup.swift; sourceTree = "<group>"; };
-		DDF1DE0C205B6C520097885E /* GL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GL.swift; sourceTree = "<group>"; };
+		DDF1DE0C205B6C520097885E /* GeneralLinearGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralLinearGroup.swift; sourceTree = "<group>"; };
 		DDF1DE0F205B767E0097885E /* MatrixGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixGroup.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -472,7 +472,7 @@
 			isa = PBXGroup;
 			children = (
 				DDF1DE0F205B767E0097885E /* MatrixGroup.swift */,
-				DDF1DE0C205B6C520097885E /* GL.swift */,
+				DDF1DE0C205B6C520097885E /* GeneralLinearGroup.swift */,
 			);
 			path = MatrixGroup;
 			sourceTree = "<group>";
@@ -668,7 +668,7 @@
 				DDB7217A205622DD0001428F /* Permutation.swift in Sources */,
 				1424F4FC1EB997780052581F /* Group.swift in Sources */,
 				DD9B56C720566A9B00215EA6 /* MultiplicativeSequence.swift in Sources */,
-				DDF1DE0D205B6C520097885E /* GL.swift in Sources */,
+				DDF1DE0D205B6C520097885E /* GeneralLinearGroup.swift in Sources */,
 				146A296E1F1DA32400531AA2 /* HomologyClass.swift in Sources */,
 				140F4FAF1F96F66400C4C039 /* random.swift in Sources */,
 				1410C1151FB203AE00CEE47D /* EchelonEliminator.swift in Sources */,
