@@ -8,7 +8,7 @@ public struct RationalNumber: Field {
             fatalError("Given 0 for the dominator of a RationalNumber")
         }
         
-        let d = abs(gcd(p, q)) * (q / abs(q))
+        let d = gcd(p, q).abs * q.sign
         if d == 1 {
             (self.p, self.q) = (p, q)
         } else {
@@ -22,6 +22,10 @@ public struct RationalNumber: Field {
     
     public init(_ n: IntegerNumber) {
         self.init(intValue: n)
+    }
+    
+    public var abs: RationalNumber {
+        return (p >= 0) == (q >= 0) ? self : -self
     }
     
     public var inverse: RationalNumber? {

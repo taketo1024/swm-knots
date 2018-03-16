@@ -7,6 +7,10 @@ extension RealNumber: Field {
         self.init(n)
     }
     
+    public var abs: RealNumber {
+        return Swift.abs(self)
+    }
+    
     public var inverse: RealNumber? {
         return (self != 0) ? 1 / self : nil
     }
@@ -15,3 +19,5 @@ extension RealNumber: Field {
         return "R"
     }
 }
+
+public let π = RealNumber.pi

@@ -69,6 +69,7 @@
 		DD6092882053EF4000ABD84F /* MPolynomial.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6092872053EF4000ABD84F /* MPolynomial.swift */; };
 		DD60928C20541A5E00ABD84F /* Expression.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD60928B20541A5E00ABD84F /* Expression.swift */; };
 		DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125991F31AA2500FD5533 /* Cache.swift */; };
+		DD63B03C205B911E00FAAC42 /* Complex.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD63B03B205B911E00FAAC42 /* Complex.swift */; };
 		DD6AF9CB20542499000FC818 /* IntList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6AF9CA20542499000FC818 /* IntList.swift */; };
 		DD6AF9CD205424D2000FC818 /* SymmetricPolynomial.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6AF9CC205424D2000FC818 /* SymmetricPolynomial.swift */; };
 		DD90ACC91F763553001AFC9C /* PolynomialIdeal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */; };
@@ -176,6 +177,7 @@
 		DD60928B20541A5E00ABD84F /* Expression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expression.swift; sourceTree = "<group>"; };
 		DD60928D20541E6000ABD84F /* MPolynomials.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MPolynomials.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		DD6125991F31AA2500FD5533 /* Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
+		DD63B03B205B911E00FAAC42 /* Complex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Complex.swift; sourceTree = "<group>"; };
 		DD6AF9CA20542499000FC818 /* IntList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntList.swift; sourceTree = "<group>"; };
 		DD6AF9CC205424D2000FC818 /* SymmetricPolynomial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymmetricPolynomial.swift; sourceTree = "<group>"; };
 		DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolynomialIdeal.swift; sourceTree = "<group>"; };
@@ -312,6 +314,7 @@
 				1424F4E81EB997780052581F /* Integer.swift */,
 				1424F4E91EB997780052581F /* Rational.swift */,
 				1424F4EA1EB997780052581F /* Real.swift */,
+				DD63B03B205B911E00FAAC42 /* Complex.swift */,
 				145F46001EEAF0CC0045CDB2 /* Z_2.swift */,
 			);
 			path = Numbers;
@@ -666,6 +669,7 @@
 				DD6AF9CB20542499000FC818 /* IntList.swift in Sources */,
 				1424F50D1EB997780052581F /* PolynomialFactorization.swift in Sources */,
 				1424F5031EB997780052581F /* Polynominal.swift in Sources */,
+				DD63B03C205B911E00FAAC42 /* Complex.swift in Sources */,
 				1424F4FD1EB997780052581F /* Module.swift in Sources */,
 				1424F5111EB997780052581F /* optable.swift in Sources */,
 				1424F5021EB997780052581F /* SymmetricGroup.swift in Sources */,

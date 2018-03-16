@@ -7,12 +7,24 @@ import SwiftyAlgebra
 
 typealias Z = IntegerNumber
 typealias Q = RationalNumber
+typealias R = RealNumber
+typealias C = ComplexNumber
 
 // Rational Number Sample.
 
 do {
     let a = Q(4, 5)
     let b = Q(3, 2)
+    a + b
+    a * b
+}
+
+// Complex Number Sample.
+
+do {
+    let i = C.imaginaryUnit
+    let a = 4 + 5 * i
+    let b = 3 + 2 * i
     a + b
     a * b
     b / a
