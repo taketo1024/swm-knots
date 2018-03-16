@@ -97,5 +97,7 @@ public struct ComplexNumber: Field, ExpressibleByFloatLiteral {
                                   : "\(x)"
     }
     
-    
+    public static var symbol: String {
+        return "C"
+    }
 }

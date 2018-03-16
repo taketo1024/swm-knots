@@ -79,6 +79,7 @@
 		DD9B56C9205671A300215EA6 /* BernoulliNumbers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9B56C8205671A300215EA6 /* BernoulliNumbers.swift */; };
 		DDB7217A205622DD0001428F /* Permutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB72179205622DD0001428F /* Permutation.swift */; };
 		DDB7217E205633FB0001428F /* AlternatingGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB7217D205633FB0001428F /* AlternatingGroup.swift */; };
+		DDC0125A205BB06A00FF525E /* Quaternion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC01259205BB06A00FF525E /* Quaternion.swift */; };
 		DDF1DE0D205B6C520097885E /* GeneralLinearGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF1DE0C205B6C520097885E /* GeneralLinearGroup.swift */; };
 		DDF1DE10205B767E0097885E /* MatrixGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF1DE0F205B767E0097885E /* MatrixGroup.swift */; };
 		DDF1DE14205B8E9B0097885E /* OrthogonalGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF1DE13205B8E9B0097885E /* OrthogonalGroup.swift */; };
@@ -189,6 +190,7 @@
 		DD9B56C8205671A300215EA6 /* BernoulliNumbers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BernoulliNumbers.swift; sourceTree = "<group>"; };
 		DDB72179205622DD0001428F /* Permutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permutation.swift; sourceTree = "<group>"; };
 		DDB7217D205633FB0001428F /* AlternatingGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlternatingGroup.swift; sourceTree = "<group>"; };
+		DDC01259205BB06A00FF525E /* Quaternion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Quaternion.swift; sourceTree = "<group>"; };
 		DDF1DE0C205B6C520097885E /* GeneralLinearGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralLinearGroup.swift; sourceTree = "<group>"; };
 		DDF1DE0F205B767E0097885E /* MatrixGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixGroup.swift; sourceTree = "<group>"; };
 		DDF1DE13205B8E9B0097885E /* OrthogonalGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrthogonalGroup.swift; sourceTree = "<group>"; };
@@ -319,6 +321,7 @@
 				1424F4E91EB997780052581F /* Rational.swift */,
 				1424F4EA1EB997780052581F /* Real.swift */,
 				DD63B03B205B911E00FAAC42 /* Complex.swift */,
+				DDC01259205BB06A00FF525E /* Quaternion.swift */,
 				145F46001EEAF0CC0045CDB2 /* Z_2.swift */,
 			);
 			path = Numbers;
@@ -650,6 +653,7 @@
 				DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */,
 				145339C01EC7D67100F014F4 /* Ref.swift in Sources */,
 				1424F5061EB997780052581F /* Integer.swift in Sources */,
+				DDC0125A205BB06A00FF525E /* Quaternion.swift in Sources */,
 				DDF1DE14205B8E9B0097885E /* OrthogonalGroup.swift in Sources */,
 				1424F5001EB997780052581F /* FreeModule.swift in Sources */,
 				DD90ACC91F763553001AFC9C /* PolynomialIdeal.swift in Sources */,
