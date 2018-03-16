@@ -78,8 +78,13 @@ public extension MatrixGroup {
     }
 }
 
-public protocol MatrixSubgroup: MatrixGroup, Subgroup where Super: MatrixGroup, Super.Size == Size, Super.CoeffField == CoeffField {
+public extension MatrixGroup where CoeffField == ComplexNumber {
+    public var adjoint: Self {
+        return Self(asMatrix.adjoint)
+    }
 }
+
+public protocol MatrixSubgroup: MatrixGroup, Subgroup where Super: MatrixGroup, Super.Size == Size, Super.CoeffField == CoeffField {}
 
 public extension MatrixSubgroup {
     public init(_ g: Super) {

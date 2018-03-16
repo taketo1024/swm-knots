@@ -251,3 +251,19 @@ public extension Matrix where n == m, R: EuclideanRing {
         return eliminate().inverse
     }
 }
+
+public extension Matrix where R == RealNumber {
+    public var norm: R {
+        return sqrt( self.sum { (_, _, a) in a * a } )
+    }
+}
+
+public extension Matrix where R == ComplexNumber {
+    public var adjoint: Matrix<m, n, R> {
+        return Matrix<m, n, R> { (i, j) in self[j, i].conjugate }
+    }
+
+    public var norm: RealNumber {
+        return self.sum { (_, _, a) in (a * a.conjugate).real }
+    }
+}

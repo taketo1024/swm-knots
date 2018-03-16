@@ -39,6 +39,14 @@ public struct ComplexNumber: Field, ExpressibleByFloatLiteral {
         return ComplexNumber(0, 1)
     }
     
+    public var real: RealNumber {
+        return x
+    }
+    
+    public var imaginary: RealNumber {
+        return y
+    }
+    
     public var abs: RealNumber {
         return sqrt(x * x + y * y)
     }
