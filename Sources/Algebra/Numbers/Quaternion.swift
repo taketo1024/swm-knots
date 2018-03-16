@@ -9,7 +9,9 @@
 
 import Foundation
 
-public struct Quaternion: Field, ExpressibleByFloatLiteral {
+// memo: a skew field, i.e. product is non-commutative.
+
+public struct Quaternion: Ring, ExpressibleByFloatLiteral {
     public typealias FloatLiteralType = RealNumber
     
     private let x: RealNumber
@@ -74,7 +76,7 @@ public struct Quaternion: Field, ExpressibleByFloatLiteral {
 
     public var inverse: Quaternion? {
         let r2 = x * x + y * y + z * z + w * w
-        return r2 == 0 ? .zero : Quaternion(x / r2, -y / r2, -z / r2, -w / r2)
+        return r2 == 0 ? nil : Quaternion(x / r2, -y / r2, -z / r2, -w / r2)
     }
     
     public static func ==(lhs: Quaternion, rhs: Quaternion) -> Bool {

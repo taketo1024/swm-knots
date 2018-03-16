@@ -67,7 +67,7 @@ public struct ComplexNumber: Field, ExpressibleByFloatLiteral {
 
     public var inverse: ComplexNumber? {
         let r2 = x * x + y * y
-        return r2 == 0 ? .zero : ComplexNumber(x / r2, -y / r2)
+        return r2 == 0 ? nil : ComplexNumber(x / r2, -y / r2)
     }
     
     public static func ==(lhs: ComplexNumber, rhs: ComplexNumber) -> Bool {
