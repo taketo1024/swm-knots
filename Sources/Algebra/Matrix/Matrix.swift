@@ -1,9 +1,5 @@
 import Foundation
 
-public typealias ColVector<n: _Int, R: Ring>    = Matrix<n, _1, R>
-public typealias RowVector<m: _Int, R: Ring>    = Matrix<_1, m, R>
-public typealias SquareMatrix<n: _Int, R: Ring> = Matrix<n, n, R>
-
 public typealias MatrixComponent<R> = (row: Int, col: Int, value: R)
 
 public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
@@ -182,76 +178,6 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
 }
 
-public extension Matrix where R: EuclideanRing {
-    // MEMO use computational Matrix for more direct manipulation.
-    public func eliminate(form: MatrixForm = .Diagonal, debug: Bool = false) -> MatrixEliminationResultWrapper<n, m, R> {
-        let cmatrix = ComputationalMatrix(self)
-        let eliminator = { () -> MatrixEliminator<R> in
-            switch form {
-            case .RowEchelon: return RowEchelonEliminator(cmatrix, debug: debug)
-            case .ColEchelon: return ColEchelonEliminator(cmatrix, debug: debug)
-            case .RowHermite: return RowHermiteEliminator(cmatrix, debug: debug)
-            case .ColHermite: return ColHermiteEliminator(cmatrix, debug: debug)
-            case .Diagonal:   return DiagonalEliminator  (cmatrix, debug: debug)
-            case .Smith:      return SmithEliminator     (cmatrix, debug: debug)
-            default: fatalError()
-            }
-        }()
-        
-        let result = eliminator.run()
-        return MatrixEliminationResultWrapper(self, result)
-    }
-}
-
-public extension ColVector where m == _1 {
-    public subscript(index: Int) -> R {
-        @_transparent
-        get { return self[index, 0] }
-        
-        @_transparent
-        set { self[index, 0] = newValue }
-    }
-}
-
-public extension RowVector where n == _1 {
-    public subscript(index: Int) -> R {
-        @_transparent
-        get { return self[0, index] }
-        
-        @_transparent
-        set { self[0, index] = newValue }
-    }
-}
-
-// TODO: conform to Ring after conditional conformance is supported.
-public extension SquareMatrix where n == m {
-    public static var identity: Matrix<n, n, R> {
-        return Matrix<n, n, R> { $0 == $1 ? 1 : 0 }
-    }
-    
-    public var trace: R {
-        return (0 ..< rows).sum { i in self[i, i] }
-    }
-    
-    public static func ** (a: Matrix<n, n, R>, k: Int) -> Matrix<n, n, R> {
-        return k == 0 ? .identity : a * (a ** (k - 1))
-    }
-}
-
-public extension SquareMatrix where n == m, R: EuclideanRing {
-    public var determinant: R {
-        return eliminate().determinant
-    }
-    
-    public var isInvertible: Bool {
-        return determinant.isInvertible
-    }
-    
-    public var inverse: Matrix<n, n, R>? {
-        return eliminate().inverse
-    }
-}
-
 public extension Matrix where R == RealNumber {
     public var norm: R {
         return sqrt( self.sum { (_, _, a) in a * a } )
@@ -273,5 +199,26 @@ public extension Matrix where R == ComplexNumber {
 
     public var norm: RealNumber {
         return self.sum { (_, _, a) in (a * a.conjugate).real }
+    }
+}
+
+public extension Matrix where R: EuclideanRing {
+    // MEMO use computational Matrix for more direct manipulation.
+    public func eliminate(form: MatrixForm = .Diagonal, debug: Bool = false) -> MatrixEliminationResultWrapper<n, m, R> {
+        let cmatrix = ComputationalMatrix(self)
+        let eliminator = { () -> MatrixEliminator<R> in
+            switch form {
+            case .RowEchelon: return RowEchelonEliminator(cmatrix, debug: debug)
+            case .ColEchelon: return ColEchelonEliminator(cmatrix, debug: debug)
+            case .RowHermite: return RowHermiteEliminator(cmatrix, debug: debug)
+            case .ColHermite: return ColHermiteEliminator(cmatrix, debug: debug)
+            case .Diagonal:   return DiagonalEliminator  (cmatrix, debug: debug)
+            case .Smith:      return SmithEliminator     (cmatrix, debug: debug)
+            default: fatalError()
+            }
+        }()
+        
+        let result = eliminator.run()
+        return MatrixEliminationResultWrapper(self, result)
     }
 }
