@@ -15,7 +15,7 @@ public struct OrthogonalGroup<n: _Int>: MatrixGroup {
     }
 
     public static func contains(_ g: GeneralLinearGroup<n, RealNumber>) -> Bool {
-        return g * g.transposed == .identity
+        return g.matrix.isOrthogonal
     }
     
     public static var symbol: String  {

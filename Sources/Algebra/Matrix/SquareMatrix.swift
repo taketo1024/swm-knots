@@ -16,10 +16,48 @@ public extension SquareMatrix where n == m {
         return Matrix<n, n, R> { $0 == $1 ? 1 : 0 }
     }
     
+    public var size: Int {
+        return rows
+    }
+    
     public var trace: R {
         return (0 ..< rows).sum { i in self[i, i] }
     }
     
+    public var isZero: Bool {
+        return self.forAll{ (_, _, r) in r == .zero }
+    }
+    
+    public var isDiagonal: Bool {
+        return self.forAll{ (i, j, r) in (i == j) || r == .zero }
+    }
+    
+    public var isSymmetric: Bool {
+        if size <= 1 {
+            return true
+        }
+        return (0 ..< rows - 1).forAll { i in
+            (i + 1 ..< cols).forAll { j in
+                self[i, j] == self[j, i]
+            }
+        }
+    }
+    
+    public var isSkewSymmetric: Bool {
+        if size <= 1 {
+            return isZero
+        }
+        return (0 ..< rows - 1).forAll { i in
+            (i + 1 ..< cols).forAll { j in
+                self[i, j] == -self[j, i]
+            }
+        }
+    }
+    
+    public var isOrthogonal: Bool {
+        return self.transposed * self == .identity
+    }
+
     public static func ** (a: Matrix<n, n, R>, k: Int) -> Matrix<n, n, R> {
         return k == 0 ? .identity : a * (a ** (k - 1))
     }
@@ -39,3 +77,30 @@ public extension SquareMatrix where n == m, R: EuclideanRing {
     }
 }
 
+public extension SquareMatrix where n == m, R == ComplexNumber {
+    public var isHermitian: Bool {
+        if size <= 1 {
+            return true
+        }
+        return (0 ..< rows - 1).forAll { i in
+            (i + 1 ..< cols).forAll { j in
+                self[i, j] == self[j, i].conjugate
+            }
+        }
+    }
+    
+    public var isSkewHermitian: Bool {
+        if size <= 1 {
+            return isZero
+        }
+        return (0 ..< rows - 1).forAll { i in
+            (i + 1 ..< cols).forAll { j in
+                self[i, j] == -self[j, i].conjugate
+            }
+        }
+    }
+    
+    public var isUnitary: Bool {
+        return self.adjoint * self == .identity
+    }
+}

@@ -15,7 +15,7 @@ public struct UnitaryGroup<n: _Int>: MatrixGroup {
     }
 
     public static func contains(_ g: GeneralLinearGroup<n, ComplexNumber>) -> Bool {
-        return g * g.adjoint == .identity
+        return g.matrix.isUnitary
     }
     
     public static var symbol: String  {
