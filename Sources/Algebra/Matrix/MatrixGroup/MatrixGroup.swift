@@ -22,8 +22,6 @@ public protocol MatrixGroup: Group {
     var trace: CoeffRing { get }
     
     static func contains(_ g: GeneralLinearGroup<Size, CoeffRing>) -> Bool
-    static func *(a: CoeffRing, b: Self) -> Self
-    static func *(a: Self, b: CoeffRing) -> Self
 }
 
 public extension MatrixGroup {
@@ -65,16 +63,6 @@ public extension MatrixGroup {
     
     public static func *(a: Self, b: Self) -> Self {
         return Self( a.matrix * b.matrix )
-    }
-    
-    public static func *(a: CoeffRing, b: Self) -> Self {
-        assert(a.isInvertible)
-        return Self( a * b.matrix )
-    }
-    
-    public static func *(a: Self, b: CoeffRing) -> Self {
-        assert(b.isInvertible)
-        return Self( a.matrix * b )
     }
     
     public static func ==(lhs: Self, rhs: Self) -> Bool {
