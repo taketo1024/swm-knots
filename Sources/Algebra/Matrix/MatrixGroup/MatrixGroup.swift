@@ -10,27 +10,28 @@ import Foundation
 
 public protocol MatrixGroup: Group {
     associatedtype Size: _Int
-    associatedtype CoeffField: Field
-    init(_ g: SquareMatrix<Size, CoeffField>)
+    associatedtype CoeffRing: Field
+    init(_ g: SquareMatrix<Size, CoeffRing>)
     
     var size: Int { get }
-    var matrix: SquareMatrix<Size, CoeffField> { get }
-    var asGL: GeneralLinearGroup<Size, CoeffField> { get }
+    var matrix: SquareMatrix<Size, CoeffRing> { get }
+    var asGL: GeneralLinearGroup<Size, CoeffRing> { get }
     
-    var determinant: CoeffField { get }
-    var trace: CoeffField { get }
+    var transposed: Self { get }
+    var determinant: CoeffRing { get }
+    var trace: CoeffRing { get }
     
-    static func contains(_ g: GeneralLinearGroup<Size, CoeffField>) -> Bool
-    static func *(a: CoeffField, b: Self) -> Self
-    static func *(a: Self, b: CoeffField) -> Self
+    static func contains(_ g: GeneralLinearGroup<Size, CoeffRing>) -> Bool
+    static func *(a: CoeffRing, b: Self) -> Self
+    static func *(a: Self, b: CoeffRing) -> Self
 }
 
 public extension MatrixGroup {
-    public init(grid: [CoeffField]) {
+    public init(grid: [CoeffRing]) {
         self.init(Matrix(grid: grid))
     }
     
-    public init(generator g: (Int, Int) -> CoeffField) {
+    public init(generator g: (Int, Int) -> CoeffRing) {
         self.init(Matrix(generator: g))
     }
     
@@ -46,11 +47,11 @@ public extension MatrixGroup {
         return Self(matrix.inverse!)
     }
     
-    public var determinant: CoeffField {
+    public var determinant: CoeffRing {
         return matrix.determinant
     }
     
-    public var trace: CoeffField {
+    public var trace: CoeffRing {
         return matrix.trace
     }
     
@@ -58,7 +59,7 @@ public extension MatrixGroup {
         return Self( matrix.transposed )
     }
     
-    public var asGL: GeneralLinearGroup<Size, CoeffField> {
+    public var asGL: GeneralLinearGroup<Size, CoeffRing> {
         return GeneralLinearGroup( matrix )
     }
     
@@ -66,12 +67,12 @@ public extension MatrixGroup {
         return Self( a.matrix * b.matrix )
     }
     
-    public static func *(a: CoeffField, b: Self) -> Self {
+    public static func *(a: CoeffRing, b: Self) -> Self {
         assert(a.isInvertible)
         return Self( a * b.matrix )
     }
     
-    public static func *(a: Self, b: CoeffField) -> Self {
+    public static func *(a: Self, b: CoeffRing) -> Self {
         assert(b.isInvertible)
         return Self( a.matrix * b )
     }
@@ -93,7 +94,7 @@ public extension MatrixGroup {
     }
 }
 
-public extension MatrixGroup where CoeffField == ComplexNumber {
+public extension MatrixGroup where CoeffRing == ComplexNumber {
     public var adjoint: Self {
         return Self(matrix.adjoint)
     }
