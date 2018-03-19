@@ -53,20 +53,18 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
     
     // Convenience Initializer 1.
-    public init(fill: R = .zero) {
-        let (rows, cols) = (n.intValue, m.intValue)
-        let grid = Array(repeating: fill, count: rows * cols)
-        self.init(grid: grid)
+    public init(fill a: R) {
+        self.init() { (_, _) in a }
     }
     
     // Convenience Initializer 2.
-    public init(diagonal: [R]) {
-        let (rows, cols) = (n.intValue, m.intValue)
-        var grid = Array(repeating: R.zero, count: rows * cols)
-        for (i, a) in diagonal.enumerated() {
-            grid[(i * cols) + i] = a
-        }
-        self.init(grid: grid)
+    public init(diagonal d: [R]) {
+        self.init() { (i, j) in (i == j && i < d.count) ? d[i] : .zero }
+    }
+    
+    // Convenience Initializer 3.
+    public init(scalar a: R) {
+        self.init() { (i, j) in (i == j) ? a : .zero }
     }
     
     @_transparent
