@@ -62,6 +62,18 @@ public struct PowerSeries<K: Field>: Ring, Module {
         }
     }
     
+    public func polynomial(upTo degree: Int) -> Polynomial<K> {
+        return Polynomial(degree: degree) { i in coeff(i) }
+    }
+    
+    public func evaluate(_ x: K, upTo degree: Int) -> K {
+        return polynomial(upTo: degree).evaluate(x)
+    }
+    
+    public func evaluate<n>(_ x: SquareMatrix<n, K>, upTo degree: Int) -> SquareMatrix<n, K> {
+        return polynomial(upTo: degree).evaluate(x)
+    }
+    
     public static func == (f: PowerSeries<K>, g: PowerSeries<K>) -> Bool {
         fatalError("== not available for PowerSeries.")
     }
@@ -106,14 +118,14 @@ public struct PowerSeries<K: Field>: Ring, Module {
     }
 }
 
-public extension PowerSeries where K == RationalNumber {
+public extension PowerSeries {
     public static var exponential: PowerSeries<K> {
-        return PowerSeries<K>() { n in
-            K(1, n.factorial)
+        return PowerSeries { n in
+            1 / K(intValue: n.factorial)
         }
     }
     
     public static func geometricSeries(_ r: K) -> PowerSeries<K> {
-        return PowerSeries<K>() { n in r ** n }
+        return PowerSeries { n in r ** n }
     }
 }
