@@ -15,11 +15,15 @@ public struct ComplexNumber: Field, ExpressibleByFloatLiteral {
     private let y: RealNumber
     
     public init(intValue x: Int) {
-        self.init(RealNumber(x))
+        self.init(RealNumber(x), 0)
     }
     
     public init(floatLiteral x: RealNumber) {
-        self.init(x)
+        self.init(x, 0)
+    }
+    
+    public init(rationalValue r: RationalNumber) {
+        self.init(RealNumber(rationalValue: r), 0)
     }
     
     public init(_ x: RealNumber) {

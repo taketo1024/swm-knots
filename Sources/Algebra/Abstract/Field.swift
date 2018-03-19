@@ -1,8 +1,14 @@
 import Foundation
 
-public protocol Field: EuclideanRing {}
+public protocol Field: EuclideanRing {
+    init(rationalValue r: RationalNumber)
+}
 
 public extension Field {
+    public init(rationalValue r: RationalNumber) {
+        fatalError("TODO")
+    }
+    
     public var normalizeUnit: Self {
         return self.inverse!
     }

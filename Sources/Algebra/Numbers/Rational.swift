@@ -1,7 +1,11 @@
 import Foundation
 
 public struct RationalNumber: Field {
-    fileprivate let p, q: IntegerNumber
+    internal let p, q: IntegerNumber
+    
+    public init(rationalValue r: RationalNumber) {
+        self.init(r.p, r.q)
+    }
     
     public init(_ p: IntegerNumber, _ q: IntegerNumber) {
         guard q != 0 else {

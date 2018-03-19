@@ -7,6 +7,10 @@ extension RealNumber: Field {
         self.init(n)
     }
     
+    public init(rationalValue r: RationalNumber) {
+        self.init( RealNumber(r.p) / RealNumber(r.q) )
+    }
+    
     public var abs: RealNumber {
         return Swift.abs(self)
     }
