@@ -27,6 +27,10 @@ public protocol MatrixLieAlgebra: LieAlgebra {
 }
 
 public extension MatrixLieAlgebra {
+    public init(_ elements: CoeffRing ...) {
+        self.init(Matrix(grid: elements))
+    }
+    
     public init(grid: [CoeffRing]) {
         self.init(Matrix(grid: grid))
     }
@@ -37,6 +41,10 @@ public extension MatrixLieAlgebra {
     
     public var size: Int {
         return matrix.rows
+    }
+    
+    public var trace: CoeffRing {
+        return matrix.trace
     }
     
     public static var zero: Self {
@@ -64,6 +72,12 @@ public extension MatrixLieAlgebra {
         return Self(X * Y - Y * X)
     }
     
+    public func exp(upTo degree: Int = 20) -> GeneralLinearGroup<Size, CoeffRing> {
+        let exp = PowerSeries<CoeffRing>.exponential
+        let Y = exp.evaluate(matrix, upTo: degree)
+        return GeneralLinearGroup(Y)
+    }
+
     public static func ==(lhs: Self, rhs: Self) -> Bool {
         return lhs.matrix == rhs.matrix
     }

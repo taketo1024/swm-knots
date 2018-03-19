@@ -25,6 +25,10 @@ public protocol MatrixGroup: Group {
 }
 
 public extension MatrixGroup {
+    public init(_ elements: CoeffRing ...) {
+        self.init(Matrix(grid: elements))
+    }
+    
     public init(grid: [CoeffRing]) {
         self.init(Matrix(grid: grid))
     }
