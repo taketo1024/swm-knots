@@ -175,6 +175,7 @@
 		14D261311EE44DB4006775E2 /* AlgebraicStructure.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlgebraicStructure.swift; sourceTree = "<group>"; };
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
 		DD119BC11FE2271E00FB4758 /* ExactSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExactSequence.swift; sourceTree = "<group>"; };
+		DD15E2C5205F6B870013EB32 /* LieGroups.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = LieGroups.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		DD17AFF21FE37F3A00AA5924 /* ChainComplexOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainComplexOperations.swift; sourceTree = "<group>"; };
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
 		DD475045205B980B00C75440 /* UnitaryGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnitaryGroup.swift; sourceTree = "<group>"; };
@@ -428,6 +429,7 @@
 				1414D8551EE0F927001A1D42 /* Polynomials.playground */,
 				DD60928D20541E6000ABD84F /* MPolynomials.playground */,
 				14929C941ED9BFE5006ACAC5 /* AlgebraicExtensions.playground */,
+				DD15E2C5205F6B870013EB32 /* LieGroups.playground */,
 			);
 			path = Playgrounds;
 			sourceTree = "<group>";
