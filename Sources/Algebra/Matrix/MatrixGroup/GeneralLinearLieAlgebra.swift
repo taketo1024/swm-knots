@@ -24,3 +24,20 @@ public struct GeneralLinearLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
         return "gl(\(n.intValue), \(K.symbol))"
     }
 }
+
+public struct SpecialLinearLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
+    public typealias CoeffRing = K
+    
+    public let matrix: SquareMatrix<n, K>
+    public init(_ matrix: SquareMatrix<n, K>) {
+        self.matrix = matrix
+    }
+    
+    public static func contains(_ g: GeneralLinearLieAlgebra<n, K>) -> Bool {
+        return g.matrix.trace == .zero
+    }
+    
+    public static var symbol: String  {
+        return "sl(\(n.intValue), \(K.symbol))"
+    }
+}
