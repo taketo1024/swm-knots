@@ -72,12 +72,6 @@ public extension MatrixLieAlgebra {
         return Self(X * Y - Y * X)
     }
     
-    public func exp(upTo degree: Int = 20) -> GeneralLinearGroup<Size, CoeffRing> {
-        let exp = PowerSeries<CoeffRing>.exponential
-        let Y = exp.evaluate(matrix, upTo: degree)
-        return GeneralLinearGroup(Y)
-    }
-
     public static func ==(lhs: Self, rhs: Self) -> Bool {
         return lhs.matrix == rhs.matrix
     }
@@ -93,4 +87,8 @@ public extension MatrixLieAlgebra {
     public var detailDescription: String {
         return matrix.detailDescription
     }
+}
+
+public func exp<𝔤: MatrixLieAlgebra>(_ X: 𝔤) -> GeneralLinearGroup<𝔤.Size, 𝔤.CoeffRing> where 𝔤.CoeffRing : NormedSpace {
+    return GeneralLinearGroup( exp(X.matrix) )
 }

@@ -104,3 +104,32 @@ public extension SquareMatrix where n == m, R == ComplexNumber {
         return self.adjoint * self == .identity
     }
 }
+
+// TODO merge with PowerSeries.exp .
+// must handle Int overflow...
+public func exp<n, K>(_ A: SquareMatrix<n, K>) -> SquareMatrix<n, K> where K: Field, K: NormedSpace {
+    if A == .zero {
+        return .identity
+    }
+    
+    var X = SquareMatrix<n, K>.identity
+    var n = 0
+    var cn = K.identity
+    var An = X
+    let e = A.maxNorm.error
+    
+    while true {
+        n  = n + 1
+        An = An * A
+        cn = cn / K(intValue: n)
+        
+        let Bn = cn * An
+        if Bn.maxNorm.value < e {
+            break
+        } else {
+            X = X + Bn
+        }
+    }
+    
+    return X
+}
