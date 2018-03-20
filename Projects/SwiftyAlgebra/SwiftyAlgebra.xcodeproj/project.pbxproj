@@ -64,6 +64,7 @@
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
 		DD475046205B980B00C75440 /* UnitaryGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD475045205B980B00C75440 /* UnitaryGroup.swift */; };
 		DD475048205BA73F00C75440 /* SymplecticGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD475047205BA73F00C75440 /* SymplecticGroup.swift */; };
+		DD4E16F920614E53004B040C /* NormedSpace.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E16F820614E53004B040C /* NormedSpace.swift */; };
 		DD4E23292056496100BB0CAD /* PowerSeries.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E23282056496100BB0CAD /* PowerSeries.swift */; };
 		DD4E539B1FE374F300C75F7E /* FreeModuleBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */; };
 		DD5EE31A205699C3007309EF /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5EE319205699C3007309EF /* main.swift */; };
@@ -180,6 +181,7 @@
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
 		DD475045205B980B00C75440 /* UnitaryGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnitaryGroup.swift; sourceTree = "<group>"; };
 		DD475047205BA73F00C75440 /* SymplecticGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymplecticGroup.swift; sourceTree = "<group>"; };
+		DD4E16F820614E53004B040C /* NormedSpace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NormedSpace.swift; sourceTree = "<group>"; };
 		DD4E23282056496100BB0CAD /* PowerSeries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerSeries.swift; sourceTree = "<group>"; };
 		DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeModuleBase.swift; sourceTree = "<group>"; };
 		DD5EE317205699C3007309EF /* App */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = App; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -302,6 +304,7 @@
 			isa = PBXGroup;
 			children = (
 				14D261331EE4614E006775E2 /* Set.swift */,
+				1424F4E61EB997780052581F /* Map.swift */,
 				1424F4DD1EB997780052581F /* Monoid.swift */,
 				1424F4DB1EB997780052581F /* Group.swift */,
 				1424F4D81EB997780052581F /* AdditiveGroup.swift */,
@@ -310,7 +313,7 @@
 				1424F4DA1EB997780052581F /* Field.swift */,
 				1424F4DC1EB997780052581F /* Module.swift */,
 				DD9E9313205D65F1002C0ADB /* VectorSpace.swift */,
-				1424F4E61EB997780052581F /* Map.swift */,
+				DD4E16F820614E53004B040C /* NormedSpace.swift */,
 			);
 			path = Abstract;
 			sourceTree = "<group>";
@@ -647,6 +650,7 @@
 				14360F911FB130350075133E /* ComputationalMatrix.swift in Sources */,
 				14360F931FB148C30075133E /* MatrixEliminator.swift in Sources */,
 				1410C1131FB1EC9E00CEE47D /* Array.swift in Sources */,
+				DD4E16F920614E53004B040C /* NormedSpace.swift in Sources */,
 				DD475046205B980B00C75440 /* UnitaryGroup.swift in Sources */,
 				DD4E23292056496100BB0CAD /* PowerSeries.swift in Sources */,
 				144AD2911EC21A4500E23890 /* Homology.swift in Sources */,
