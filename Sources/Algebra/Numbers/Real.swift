@@ -1,10 +1,10 @@
 import Foundation
 
-public struct RealNumber: Field, Comparable, ExpressibleByFloatLiteral {
+public struct RealNumber: Field, NormedSpace, Comparable, ExpressibleByFloatLiteral {
     public typealias FloatLiteralType = Double
     
     internal let value: Double
-    internal let error: Double
+    public let error: Double
     
     public init(floatLiteral x: Double) {
         self.init(x)
@@ -35,16 +35,17 @@ public struct RealNumber: Field, Comparable, ExpressibleByFloatLiteral {
         self.error = error
     }
     
-    public var abs: RealNumber {
+    public var norm: RealNumber {
         return RealNumber( sqrt(value * value) )
     }
     
     public var inverse: RealNumber? {
-        return RealNumber(1/value)
+        // 1/(x + e) ~ 1/x - (1/x^2)e + ...
+        return RealNumber(1/value, error / (value * value))
     }
     
     public static func ==(a: RealNumber, b: RealNumber) -> Bool {
-        print(fabs(a.value - b.value), "<=", max(a.error, b.error), ":", fabs(a.value - b.value) < max(a.error, b.error))
+//        print(fabs(a.value - b.value), "<=", max(a.error, b.error), ":", fabs(a.value - b.value) < max(a.error, b.error))
         return fabs(a.value - b.value) <= max(a.error, b.error)
     }
     
@@ -57,11 +58,15 @@ public struct RealNumber: Field, Comparable, ExpressibleByFloatLiteral {
     }
     
     public static func *(a: RealNumber, b: RealNumber) -> RealNumber {
-        return RealNumber(a.value * b.value, a.value * b.error + a.error * b.value)
+        return RealNumber(a.value * b.value, a.error * fabs(b.value) + b.error * fabs(a.value))
     }
     
     public static func <(lhs: RealNumber, rhs: RealNumber) -> Bool {
         return lhs.value < rhs.value
+    }
+    
+    public var asDouble: Double {
+        return value
     }
     
     public var hashValue: Int {

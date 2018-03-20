@@ -176,30 +176,6 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
 }
 
-public extension Matrix where R == RealNumber {
-    public var norm: R {
-        return sqrt( self.sum { (_, _, a) in a * a } )
-    }
-}
-
-public extension Matrix where R == ComplexNumber {
-    public var realPart: Matrix<n, m, RealNumber> {
-        return Matrix<n, m, RealNumber>(grid: grid.map{ $0.real })
-    }
-    
-    public var imaginaryPart: Matrix<n, m, RealNumber> {
-        return Matrix<n, m, RealNumber>(grid: grid.map{ $0.imaginary })
-    }
-    
-    public var adjoint: Matrix<m, n, R> {
-        return Matrix<m, n, R> { (i, j) in self[j, i].conjugate }
-    }
-
-    public var norm: RealNumber {
-        return self.sum { (_, _, a) in (a * a.conjugate).real }
-    }
-}
-
 public extension Matrix where R: EuclideanRing {
     // MEMO use computational Matrix for more direct manipulation.
     public func eliminate(form: MatrixForm = .Diagonal, debug: Bool = false) -> MatrixEliminationResultWrapper<n, m, R> {
@@ -218,5 +194,30 @@ public extension Matrix where R: EuclideanRing {
         
         let result = eliminator.run()
         return MatrixEliminationResultWrapper(self, result)
+    }
+}
+
+// TODO conditional conformance
+public extension Matrix where R: NormedSpace {
+    public var norm: RealNumber {
+        return sqrt( self.sum { (_, _, a) in a.norm ** 2 } )
+    }
+    
+    public var maxNorm: RealNumber {
+        return self.reduce(.zero) { (res, e) in Swift.max(res, e.2.norm) }
+    }
+}
+
+public extension Matrix where R == ComplexNumber {
+    public var realPart: Matrix<n, m, RealNumber> {
+        return Matrix<n, m, RealNumber>(grid: grid.map{ $0.real })
+    }
+    
+    public var imaginaryPart: Matrix<n, m, RealNumber> {
+        return Matrix<n, m, RealNumber>(grid: grid.map{ $0.imaginary })
+    }
+    
+    public var adjoint: Matrix<m, n, R> {
+        return Matrix<m, n, R> { (i, j) in self[j, i].conjugate }
     }
 }

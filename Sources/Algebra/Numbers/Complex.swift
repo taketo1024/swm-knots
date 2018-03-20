@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct ComplexNumber: Field, ExpressibleByFloatLiteral {
+public struct ComplexNumber: Field, NormedSpace, ExpressibleByFloatLiteral {
     public typealias FloatLiteralType = Double
     
     private let x: RealNumber
@@ -51,12 +51,12 @@ public struct ComplexNumber: Field, ExpressibleByFloatLiteral {
         return y
     }
     
-    public var abs: RealNumber {
+    public var norm: RealNumber {
         return sqrt(x * x + y * y)
     }
     
     public var arg: RealNumber {
-        let r = self.abs
+        let r = self.norm
         if(r == 0) {
             return 0
         }
