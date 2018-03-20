@@ -1,6 +1,6 @@
 import Foundation
 
-public struct RationalNumber: Field {
+public struct RationalNumber: Field, Comparable {
     internal let p, q: IntegerNumber
     
     public init(rationalValue r: RationalNumber) {
@@ -66,6 +66,10 @@ public struct RationalNumber: Field {
     
     public static func / (a: RationalNumber, b: RationalNumber) -> RationalNumber {
         return RationalNumber(a.p * b.q, a.q * b.p)
+    }
+    
+    public static func <(lhs: RationalNumber, rhs: RationalNumber) -> Bool {
+        return lhs.p * rhs.q < rhs.p * lhs.q
     }
     
     public var description: String {

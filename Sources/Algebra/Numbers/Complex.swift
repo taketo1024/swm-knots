@@ -9,7 +9,7 @@
 import Foundation
 
 public struct ComplexNumber: Field, ExpressibleByFloatLiteral {
-    public typealias FloatLiteralType = RealNumber
+    public typealias FloatLiteralType = Double
     
     private let x: RealNumber
     private let y: RealNumber
@@ -18,12 +18,12 @@ public struct ComplexNumber: Field, ExpressibleByFloatLiteral {
         self.init(RealNumber(x), 0)
     }
     
-    public init(floatLiteral x: RealNumber) {
-        self.init(x, 0)
+    public init(floatLiteral x: Double) {
+        self.init(RealNumber(x))
     }
     
     public init(rationalValue r: RationalNumber) {
-        self.init(RealNumber(rationalValue: r), 0)
+        self.init(RealNumber(r), 0)
     }
     
     public init(_ x: RealNumber) {
@@ -35,7 +35,7 @@ public struct ComplexNumber: Field, ExpressibleByFloatLiteral {
         self.y = y
     }
     
-    public init(r: Double, θ: Double) {
+    public init(r: RealNumber, θ: RealNumber) {
         self.init(r * cos(θ), r * sin(θ))
     }
     

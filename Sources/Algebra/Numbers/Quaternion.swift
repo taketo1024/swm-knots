@@ -12,7 +12,7 @@ import Foundation
 // memo: a skew field, i.e. product is non-commutative.
 
 public struct Quaternion: Ring, ExpressibleByFloatLiteral {
-    public typealias FloatLiteralType = RealNumber
+    public typealias FloatLiteralType = Double
     
     private let x: RealNumber
     private let y: RealNumber
@@ -23,8 +23,8 @@ public struct Quaternion: Ring, ExpressibleByFloatLiteral {
         self.init(RealNumber(x))
     }
     
-    public init(floatLiteral x: RealNumber) {
-        self.init(x)
+    public init(floatLiteral x: Double) {
+        self.init(RealNumber(x))
     }
     
     public init(_ x: RealNumber) {
@@ -92,8 +92,10 @@ public struct Quaternion: Ring, ExpressibleByFloatLiteral {
     }
     
     public static func *(a: Quaternion, b: Quaternion) -> Quaternion {
+        // memo: writing `a.x * b.x - a.y * b.y - ...`
+        //       would prevent the compile from passing...
         return Quaternion(
-            a.x * b.x - a.y * b.y - a.z * b.z - a.w * b.w,
+            a.x * b.x + -a.y * b.y - a.z * b.z - a.w * b.w,
             a.x * b.y + a.y * b.x + a.z * b.w - a.w * b.z,
             a.x * b.z - a.y * b.w + a.z * b.x + a.w * b.y,
             a.x * b.w + a.y * b.z - a.z * b.y - a.w * b.x
