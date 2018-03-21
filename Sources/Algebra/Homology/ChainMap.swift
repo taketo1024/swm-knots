@@ -20,11 +20,15 @@ public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: R
     internal let f: FreeModuleHom<A, B, R>
     
     public init(_ f: @escaping (A) -> Codomain) {
-        self.f = FreeModuleHom(f)
+        self.init(FreeModuleHom(f))
     }
     
     public init(_ f: @escaping (Domain) -> Codomain) {
-        self.f = FreeModuleHom(f)
+        self.init(FreeModuleHom(f))
+    }
+    
+    public init(_ f: FreeModuleHom<A, B, R>) {
+        self.f = f
     }
     
     public func applied(to a: A) -> FreeModule<B, R> {
@@ -35,10 +39,13 @@ public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: R
         return f.applied(to: x)
     }
     
-// TODO wrong!
-//    public static func ⊕<C>(f1: _ChainMap<T, A, B, R>, f2: _ChainMap<T, A, C, R>) -> _ChainMap<T, A, Sum<B, C>, R> {
-//        return _ChainMap<T, A, Sum<B, C>, R> { (a: A) in f1.applied(to: a) ⊕ f2.applied(to: a) }
-//    }
+    public static func ∘<C>(g: _ChainMap<T, B, C, R>, f: _ChainMap<T, A, B, R>) -> _ChainMap<T, A, C, R> {
+        return _ChainMap<T, A, C, R>(g.f ∘ f.f)
+    }
+    
+    public static func ⊕<A2, B2>(f1: _ChainMap<T, A, B, R>, f2: _ChainMap<T, A2, B2, R>) -> _ChainMap<T, Sum<A, A2>, Sum<B, B2>, R> {
+        return _ChainMap<T, Sum<A, A2>, Sum<B, B2>, R>( f1.f ⊕ f2.f )
+    }
     
     public func assertChainMap(from: _ChainComplex<T, A, R>, to: _ChainComplex<T, B, R>, debug: Bool = false) {
         (min(from.offset, to.offset) ... max(from.topDegree, to.topDegree)).forEach { i in
@@ -75,6 +82,12 @@ public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: R
                 assert(x2 == y2)
             }
         }
+    }
+}
+
+public extension _ChainMap where B == Sum<A, A> {
+    public static var diagonal: _ChainMap<T, A, Sum<A, A>, R> {
+        return _ChainMap( FreeModuleHom.diagonal )
     }
 }
 

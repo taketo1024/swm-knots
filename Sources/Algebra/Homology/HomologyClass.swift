@@ -131,13 +131,8 @@ public struct _HomologyClass<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
 }
 
 public func pair<A, R>(_ x: HomologyClass<A, R>, _ y: CohomologyClass<Dual<A>, R>) -> R {
-    guard let H = x.structure, let cH = y.structure else {
-        return .zero
-    }
-    
     // TODO must assert that H, cH is a valid pair.
-    
-    return x.representative.evaluate(y.representative)
+    return pair(x.representative, y.representative)
 }
 
 public func pair<A, R>(_ y: CohomologyClass<Dual<A>, R>, _ x: HomologyClass<A, R>) -> R {
