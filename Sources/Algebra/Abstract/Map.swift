@@ -9,9 +9,6 @@ public protocol Map: SetType {
 }
 
 public extension Map {
-// TODO remove
-public init(_ f: @escaping (Domain) -> Codomain) { fatalError("TODO") }
-    
     public static func ==(f: Self, g: Self) -> Bool {
         fatalError("cannot equate general maps.")
     }
