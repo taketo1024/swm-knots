@@ -65,7 +65,12 @@ public extension SquareMatrix where n == m {
 
 public extension SquareMatrix where n == m, R: EuclideanRing {
     public var determinant: R {
-        return eliminate().determinant
+        switch size {
+        case 0: return .identity
+        case 1: return self[0, 0]
+        case 2: return self[0, 0] * self[1, 1] - self[1, 0] * self[0, 1]
+        default: return eliminate().determinant
+        }
     }
     
     public var isInvertible: Bool {
@@ -73,7 +78,16 @@ public extension SquareMatrix where n == m, R: EuclideanRing {
     }
     
     public var inverse: Matrix<n, n, R>? {
-        return eliminate().inverse
+        switch size {
+        case 0: return .identity
+        case 1: return self[0, 0].inverse.flatMap{ Matrix($0) }
+        case 2:
+            let det = determinant
+            return (det.isInvertible)
+                ? det.inverse! * Matrix(self[1, 1], -self[0, 1], -self[1, 0], self[0, 0])
+                : nil
+        default: return eliminate().inverse
+        }
     }
 }
 
