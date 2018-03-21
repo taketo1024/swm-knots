@@ -135,7 +135,7 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
     }
     
     private func _makeMap<X, Y>(_ h0: _Homology<T, X, R>.Summand, _ f: _HomologyMap<T, X, Y, R>, _ h1: _Homology<T, Y, R>.Summand) -> ExactSequence<R>.Map {
-        return ExactSequence<R>.Map { i in
+        return ExactSequence<R>.Map { (i: Int) in
             let z = h0.generator(i)
             let w = f.applied(to: z)
             let n = h1.summands.count

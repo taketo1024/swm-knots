@@ -39,6 +39,10 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
         return elements[a] ?? .zero
     }
     
+    public var degree: Int {
+        return anyElement?.0.degree ?? 0
+    }
+    
     public var basis: Basis {
         return elements.keys.toArray()
     }

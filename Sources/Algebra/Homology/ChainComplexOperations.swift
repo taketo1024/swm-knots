@@ -19,7 +19,7 @@ public extension ChainComplex {
             let basis: C.ChainBasis = C1.chainBasis(i).map{ a in Sum(a) } + C2.chainBasis(i).map{ b in Sum(b) }
             
             let (f1, f2) = (C1.boundaryMap(i), C2.boundaryMap(i))
-            let map = C.BoundaryMap { c in
+            let map = C.BoundaryMap { (c: Sum<A, B>) in
                 switch c {
                 case let ._1(a): return FreeModule( f1.applied(to: a).map{ (a, r) in (._1(a), r) } )
                 case let ._2(b): return FreeModule( f2.applied(to: b).map{ (b, r) in (._2(b), r) } )

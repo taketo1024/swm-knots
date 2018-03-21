@@ -443,9 +443,9 @@
 		14A365721F27636600D23C87 /* FreeModule */ = {
 			isa = PBXGroup;
 			children = (
+				DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */,
 				1424F4E01EB997780052581F /* FreeModule.swift */,
 				1424F4E51EB997780052581F /* FreeModHom.swift */,
-				DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */,
 			);
 			path = FreeModule;
 			sourceTree = "<group>";
