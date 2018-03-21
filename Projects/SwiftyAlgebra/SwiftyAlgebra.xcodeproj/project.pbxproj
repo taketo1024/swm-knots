@@ -60,6 +60,7 @@
 		14D261341EE4614E006775E2 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* Set.swift */; };
 		14FC8FF5206200D000D472D0 /* OrthogonalLieAlgebra.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14FC8FF4206200D000D472D0 /* OrthogonalLieAlgebra.swift */; };
 		14FC8FF72062015600D472D0 /* UnitaryLieAlgebra.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14FC8FF62062015600D472D0 /* UnitaryLieAlgebra.swift */; };
+		14FC8FF920621AB600D472D0 /* SymplecticLieAlgebra.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14FC8FF820621AB600D472D0 /* SymplecticLieAlgebra.swift */; };
 		DD119BC21FE2271E00FB4758 /* ExactSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD119BC11FE2271E00FB4758 /* ExactSequence.swift */; };
 		DD17AFF31FE37F3A00AA5924 /* ChainComplexOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD17AFF21FE37F3A00AA5924 /* ChainComplexOperations.swift */; };
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
@@ -177,6 +178,7 @@
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
 		14FC8FF4206200D000D472D0 /* OrthogonalLieAlgebra.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrthogonalLieAlgebra.swift; sourceTree = "<group>"; };
 		14FC8FF62062015600D472D0 /* UnitaryLieAlgebra.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnitaryLieAlgebra.swift; sourceTree = "<group>"; };
+		14FC8FF820621AB600D472D0 /* SymplecticLieAlgebra.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SymplecticLieAlgebra.swift; sourceTree = "<group>"; };
 		DD119BC11FE2271E00FB4758 /* ExactSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExactSequence.swift; sourceTree = "<group>"; };
 		DD15E2C5205F6B870013EB32 /* LieGroups.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = LieGroups.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		DD17AFF21FE37F3A00AA5924 /* ChainComplexOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainComplexOperations.swift; sourceTree = "<group>"; };
@@ -511,6 +513,7 @@
 				DD9E9315205D68DD002C0ADB /* GeneralLinearLieAlgebra.swift */,
 				14FC8FF4206200D000D472D0 /* OrthogonalLieAlgebra.swift */,
 				14FC8FF62062015600D472D0 /* UnitaryLieAlgebra.swift */,
+				14FC8FF820621AB600D472D0 /* SymplecticLieAlgebra.swift */,
 			);
 			path = MatrixGroup;
 			sourceTree = "<group>";
@@ -715,6 +718,7 @@
 				1424F4FC1EB997780052581F /* Group.swift in Sources */,
 				DD9B56C720566A9B00215EA6 /* MultiplicativeSequence.swift in Sources */,
 				14FC8FF72062015600D472D0 /* UnitaryLieAlgebra.swift in Sources */,
+				14FC8FF920621AB600D472D0 /* SymplecticLieAlgebra.swift in Sources */,
 				DDF1DE0D205B6C520097885E /* GeneralLinearGroup.swift in Sources */,
 				146A296E1F1DA32400531AA2 /* HomologyClass.swift in Sources */,
 				140F4FAF1F96F66400C4C039 /* Randomable.swift in Sources */,

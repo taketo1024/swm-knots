@@ -18,16 +18,8 @@ public struct SymplecticGroup<n: _Int, K: Field>: MatrixGroup {
     }
     
     public static var standardSymplecticMatrix: SymplecticGroup<n, K> {
-        let m = n.intValue / 2
-        return SymplecticGroup { (i, j) in
-            if i < m, j >= m, i == (j - m) {
-                return -.identity
-            } else if i >= m, j < m, (i - m) == j {
-                return .identity
-            } else {
-                return .zero
-            }
-        }
+        assert(n.intValue.isEven)
+        return SymplecticGroup( SquareMatrix<n, K>.standardSymplecticMatrix )
     }
     
     public static func contains(_ g: GeneralLinearGroup<n, K>) -> Bool {
