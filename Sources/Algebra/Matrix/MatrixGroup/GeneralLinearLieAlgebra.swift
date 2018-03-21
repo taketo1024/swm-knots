@@ -9,8 +9,9 @@
 import Foundation
 
 public struct GeneralLinearLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
-    public typealias CoeffRing = K
-    
+    public typealias CoeffRing   = K
+    public typealias ElementRing = K
+
     public let matrix: SquareMatrix<n, K>
     public init(_ matrix: SquareMatrix<n, K>) {
         self.matrix = matrix
@@ -26,8 +27,9 @@ public struct GeneralLinearLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
 }
 
 public struct SpecialLinearLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
-    public typealias CoeffRing = K
-    
+    public typealias CoeffRing   = K
+    public typealias ElementRing = K
+
     public let matrix: SquareMatrix<n, K>
     public init(_ matrix: SquareMatrix<n, K>) {
         self.matrix = matrix
