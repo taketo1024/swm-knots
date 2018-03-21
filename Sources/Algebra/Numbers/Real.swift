@@ -1,6 +1,7 @@
 import Foundation
 
-public struct RealNumber: Field, NormedSpace, Comparable, ExpressibleByFloatLiteral {
+public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByFloatLiteral {
+    public typealias Super = ComplexNumber
     public typealias FloatLiteralType = Double
     
     internal let value: Double
@@ -35,6 +36,11 @@ public struct RealNumber: Field, NormedSpace, Comparable, ExpressibleByFloatLite
         self.error = error
     }
     
+    public init(_ z: ComplexNumber) {
+        assert(RealNumber.contains(z))
+        self.init(z.real.value)
+    }
+    
     public var norm: RealNumber {
         return RealNumber( sqrt(value * value) )
     }
@@ -67,6 +73,14 @@ public struct RealNumber: Field, NormedSpace, Comparable, ExpressibleByFloatLite
     
     public var asDouble: Double {
         return value
+    }
+    
+    public var asSuper: ComplexNumber {
+        return ComplexNumber(self, .zero)
+    }
+    
+    public static func contains(_ z: ComplexNumber) -> Bool {
+        return z.imaginary == .zero
     }
     
     public var hashValue: Int {

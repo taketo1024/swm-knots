@@ -40,3 +40,5 @@ public extension Field {
         return true
     }
 }
+
+public protocol Subfield: Field, Subring {}
