@@ -32,6 +32,7 @@ public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: R
         return map.applied(to: x)
     }
     
+    /*
     public func assertChainMap(from: _ChainComplex<T, A, R>, to: _ChainComplex<T, B, R>, debug: Bool = false) {
         (min(from.offset, to.offset) ... max(from.topDegree, to.topDegree)).forEach { i1 in
             
@@ -67,6 +68,7 @@ public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: R
             assert( (d2 ∘ map).equals(map ∘ d1, forElements: b1.map{ FreeModule($0) } ) )
         }
     }
+ */
     
     public static func +(f1: _ChainMap<T, A, B, R>, f2: _ChainMap<T, A, B, R>) -> _ChainMap<T, A, B, R> {
         return _ChainMap{ a in f1.applied(to: a) + f2.applied(to: a) }

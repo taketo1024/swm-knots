@@ -160,17 +160,26 @@ public struct QuotientRing<R, I>: _QuotientRing where I: Ideal, R == I.Super {
     }
 }
 
-// TODO merge with QuotientRing after conditional conformance is supported.
-public struct QuotientField<R, I>: Field, _QuotientRing where I: Ideal, R == I.Super {
-    public typealias Sub = I
+public protocol _RingHom: Map where Domain: Ring, Codomain: Ring {}
+
+public struct RingHom<X: Ring, Y: Ring>: _RingHom {
+    public typealias Domain = X
+    public typealias Codomain = Y
     
-    internal let r: R
-    
-    public init(_ r: R) {
-        self.r = I.reduced(r)
+    private let f: (X) -> Y
+    public init(_ f: @escaping (X) -> Y) {
+        self.f = f
     }
     
-    public var representative: R {
-        return r
+    public func applied(to x: X) -> Y {
+        return f(x)
+    }
+    
+    public func composed<W>(with f: RingHom<W, X>) -> RingHom<W, Y> {
+        return RingHom<W, Y> { x in self.applied(to: f.applied(to: x)) }
+    }
+    
+    public static func ∘<Z>(g: RingHom<Y, Z>, f: RingHom<X, Y>) -> RingHom<X, Z> {
+        return g.composed(with: f)
     }
 }
