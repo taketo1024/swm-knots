@@ -67,6 +67,22 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         self.init() { (i, j) in (i == j) ? a : .zero }
     }
     
+    // Block Matrix [A, B; C, D]
+    public init<n1, n2, m1, m2>(_ A: Matrix<n1, m1, R>, _ B: Matrix<n1, m2, R>, _ C: Matrix<n2, m1, R>, _ D: Matrix<n2, m2, R>) {
+        let (n1, n2, m1, m2) = (n1.intValue, n2.intValue, m1.intValue, m2.intValue)
+        assert(n1 + n2 == n.intValue)
+        assert(m1 + m2 == m.intValue)
+        self.init() { (i, j) in
+            switch (i, j) {
+            case (i, j) where i <  n1 && j <  m1: return A[i, j]
+            case (i, j) where i >= n1 && j <  m1: return B[i - n1, j]
+            case (i, j) where i <  n1 && j >= m1: return C[i, j - m1]
+            case (i, j) where i >= n1 && j >= m1: return D[i - n1, j - m1]
+            default: return .zero
+            }
+        }
+    }
+    
     @_transparent
     public func gridIndex(_ i: Int, _ j: Int) -> Int {
         return (i * cols) + j

@@ -119,6 +119,23 @@ public extension SquareMatrix where n == m, R == ComplexNumber {
     }
 }
 
+public extension SquareMatrix where n == m {
+    public static var standardSymplecticMatrix: SquareMatrix<n, R> {
+        assert(n.intValue.isEven)
+        
+        let m = n.intValue / 2
+        return SquareMatrix { (i, j) in
+            if i < m, j >= m, i == (j - m) {
+                return -.identity
+            } else if i >= m, j < m, (i - m) == j {
+                return .identity
+            } else {
+                return .zero
+            }
+        }
+    }
+}
+
 // TODO merge with PowerSeries.exp .
 // must handle Int overflow...
 public func exp<n, K>(_ A: SquareMatrix<n, K>) -> SquareMatrix<n, K> where K: Field, K: NormedSpace {
