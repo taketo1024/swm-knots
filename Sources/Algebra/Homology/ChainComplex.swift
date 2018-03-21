@@ -81,7 +81,7 @@ public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable
             
             let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toBasisElement: toBasisIndex]
             let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
-                map.appliedTo(x).flatMap { (y, a) -> MatrixComponent<R>? in
+                map.applied(to: x).flatMap { (y, a) -> MatrixComponent<R>? in
                     toIndex[y].flatMap{ i in (i, j, a) } // nil if toIndex[y] == nil
                 }
             }
@@ -103,8 +103,8 @@ public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable
                 print("----------")
                 print("C\(i1) : \(b1)\n")
                 for s in b1 {
-                    let x = d1.appliedTo(s)
-                    let y = d2.appliedTo(x)
+                    let x = d1.applied(to: s)
+                    let y = d2.applied(to: x)
                     print("\t\(s) ->\t\(x) ->\t\(y)")
                 }
                 print()

@@ -21,8 +21,8 @@ public extension ChainComplex {
             let (f1, f2) = (C1.boundaryMap(i), C2.boundaryMap(i))
             let map = C.BoundaryMap { c in
                 switch c {
-                case let ._1(a): return FreeModule( f1.appliedTo(a).map{ (a, r) in (._1(a), r) } )
-                case let ._2(b): return FreeModule( f2.appliedTo(b).map{ (b, r) in (._2(b), r) } )
+                case let ._1(a): return FreeModule( f1.applied(to: a).map{ (a, r) in (._1(a), r) } )
+                case let ._2(b): return FreeModule( f2.applied(to: b).map{ (b, r) in (._2(b), r) } )
                 }
             }
             

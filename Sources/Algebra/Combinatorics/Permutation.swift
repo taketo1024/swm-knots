@@ -49,12 +49,12 @@ public struct Permutation: Map {
         return elements[i] ?? i
     }
     
-    public func appliedTo(_ i: Int) -> Int {
+    public func applied(to i: Int) -> Int {
         return self[i]
     }
     
-    public func appliedTo(_ I: [Int]) -> [Int] {
-        return I.map{ appliedTo($0) }
+    public func applied(to I: [Int]) -> [Int] {
+        return I.map{ applied(to: $0) }
     }
     
     public var signature: Int {

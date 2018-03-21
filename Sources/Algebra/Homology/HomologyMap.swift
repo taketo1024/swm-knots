@@ -28,8 +28,8 @@ public struct _HomologyMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R
         self.shift = shift
     }
     
-    public func appliedTo(_ x: _HomologyClass<T, A, R>) -> _HomologyClass<T, B, R> {
-        return _HomologyClass(chainMap.appliedTo(x.representative), to)
+    public func applied(to x: _HomologyClass<T, A, R>) -> _HomologyClass<T, B, R> {
+        return _HomologyClass(chainMap.applied(to: x.representative), to)
     }
     
     public static func ==(lhs: _HomologyMap<T, A, B, R>, rhs: _HomologyMap<T, A, B, R>) -> Bool {

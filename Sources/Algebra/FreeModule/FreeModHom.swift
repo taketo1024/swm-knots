@@ -5,14 +5,14 @@ public struct FreeModuleHom<A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Modu
     public typealias Domain    = FreeModule<A, R>
     public typealias Codomain  = FreeModule<B, R>
     
-    private let map: (A) -> Codomain
+    private let f: (A) -> Codomain
     
     public init(_ f: @escaping (A) -> Codomain) {
-        self.map = f
+        self.f = f
     }
     
     public init<n, m>(from: [A], to: [B], matrix: Matrix<n, m, R>) {
-        self.map = { a in
+        self.f = { a in
             if let j = from.index(of: a) {
                 return Codomain(zip(to, matrix.colVector(j).grid))
             } else {
@@ -21,14 +21,14 @@ public struct FreeModuleHom<A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Modu
         }
     }
     
-    public func appliedTo(_ a: A) -> Codomain {
-        return map(a)
+    public func applied(to a: A) -> Codomain {
+        return f(a)
     }
     
-    public func appliedTo(_ m: Domain) -> Codomain {
+    public func applied(to m: Domain) -> Codomain {
         var d: [B : R] = [:]
         for (a, r) in m {
-            for (b, s) in self.appliedTo(a) {
+            for (b, s) in self.applied(to: a) {
                 d[b] = d[b, default: .zero] + r * s
             }
         }
@@ -48,29 +48,29 @@ public struct FreeModuleHom<A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Modu
     }
     
     public static func +(f: FreeModuleHom<A, B, R>, g: FreeModuleHom<A, B, R>) -> FreeModuleHom<A, B, R> {
-        return FreeModuleHom { a in f.appliedTo(a) + g.appliedTo(a) }
+        return FreeModuleHom { a in f.applied(to: a) + g.applied(to: a) }
     }
     
     public prefix static func -(f: FreeModuleHom<A, B, R>) -> FreeModuleHom<A, B, R> {
-        return FreeModuleHom { a in -f.appliedTo(a) }
+        return FreeModuleHom { a in -f.applied(to: a) }
     }
     
     public static func *(r: R, f: FreeModuleHom<A, B, R>) -> FreeModuleHom<A, B, R> {
-        return FreeModuleHom { a in r * f.appliedTo(a) }
+        return FreeModuleHom { a in r * f.applied(to: a) }
     }
     
     public static func *(f: FreeModuleHom<A, B, R>, r: R) -> FreeModuleHom<A, B, R> {
-        return FreeModuleHom { a in f.appliedTo(a) * r }
+        return FreeModuleHom { a in f.applied(to: a) * r }
     }
     
     public static func ∘<C>(g: FreeModuleHom<B, C, R>, f: FreeModuleHom<A, B, R>) -> FreeModuleHom<A, C, R> {
-        return FreeModuleHom<A, C, R> { a in g.appliedTo(f.appliedTo(a)) }
+        return FreeModuleHom<A, C, R> { a in g.applied(to: f.applied(to: a)) }
     }
     
     public static func ⊗<C, D>(f: FreeModuleHom<A, B, R>, g: FreeModuleHom<C, D, R>) -> FreeModuleHom<Tensor<A, C>, Tensor<B, D>, R> {
         return FreeModuleHom<Tensor<A, C>, Tensor<B, D>, R> { t in
             let (a, b) = (t._1, t._2)
-            return f.appliedTo(a) ⊗ g.appliedTo(b)
+            return f.applied(to: a) ⊗ g.applied(to: b)
         }
     }
     

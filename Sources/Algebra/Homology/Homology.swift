@@ -53,7 +53,7 @@ public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
         self._summands = (0 ..< H._summands.count).map { i in
             let summand = H[i]
             let subSummands = summand.structure.summands.map{ ss in
-                SimpleModuleStructure.Summand( map.appliedTo(ss.generator), ss.divisor )
+                SimpleModuleStructure.Summand( map.applied(to: ss.generator), ss.divisor )
             }
             let str = SimpleModuleStructure(subSummands, factorizer)
             return Summand(self, str)
