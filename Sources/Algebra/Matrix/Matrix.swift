@@ -208,6 +208,12 @@ public extension Matrix where R: NormedSpace {
     }
 }
 
+public extension Matrix where R == RealNumber {
+    public var asComplex: Matrix<n, m, ComplexNumber> {
+        return Matrix<n, m, ComplexNumber>(grid: grid.map{ ComplexNumber($0) })
+    }
+}
+
 public extension Matrix where R == ComplexNumber {
     public var realPart: Matrix<n, m, RealNumber> {
         return Matrix<n, m, RealNumber>(grid: grid.map{ $0.real })
