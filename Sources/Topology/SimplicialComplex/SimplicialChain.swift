@@ -9,7 +9,7 @@
 import Foundation
 import SwiftyAlgebra
 
-public typealias SimplicialChain<R: Ring>   = FreeModule<Simplex, R>
+public typealias SimplicialChain<R: Ring> = FreeModule<Simplex, R>
 public extension SimplicialChain where A == Simplex {
     public func boundary() -> SimplicialChain<R> {
         return self.reduce(SimplicialChain<R>.zero) { (res, next) -> SimplicialChain<R> in
