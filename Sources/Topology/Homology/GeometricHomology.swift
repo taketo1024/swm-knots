@@ -35,7 +35,7 @@ public extension CochainComplex where T == Ascending {
     public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where Dual<C.Cell> == A {
         let cochain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap) in
             let from = K.cells(ofDim: i)
-            let map = BoundaryMap { d in FreeModule(K.coboundary(of: d, R.self)) }
+            let map = BoundaryMap { (d: Dual<C.Cell>) in FreeModule(K.coboundary(of: d, R.self)) }
             return (from.map{ Dual($0) }, map)
         }
         self.init(name: K.name, cochain)
@@ -46,7 +46,7 @@ public extension CochainComplex where T == Ascending {
             let from = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
             let to   = K.cells(ofDim: i + 1).subtract(L.cells(ofDim: i + 1))
             
-            let map = BoundaryMap { d in
+            let map = BoundaryMap { (d: Dual<C.Cell>) in
                 let c = K.coboundary(of: d, R.self)
                 let vals = c.filter{ (d, _) in to.contains( d.base ) }
                 return FreeModule(vals)

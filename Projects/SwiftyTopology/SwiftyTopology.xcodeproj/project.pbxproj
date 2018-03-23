@@ -349,7 +349,6 @@
 				DDB6C0AB2053D545001313FD /* Vertex.swift in Sources */,
 				DDB6C0AD2053D545001313FD /* GeometricCell.swift in Sources */,
 				DDB6C0B32053D545001313FD /* SimplicialComplexExamples.swift in Sources */,
-				DDB6C0BE2053D545001313FD /* ChainContractor.swift in Sources */,
 				DDB6C0B42053D545001313FD /* SimplicialMap.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

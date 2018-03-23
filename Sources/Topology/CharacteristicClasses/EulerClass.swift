@@ -31,7 +31,7 @@ public extension SimplicialComplex {
         
         if top.isFree && top.rank == 1 {
             let u = top.generator(0).representative
-            let e = d.asCochainMap(R.self).appliedTo(u)  // the Euler class of M
+            let e = d.asCochainMap(R.self).applied(to: u)  // the Euler class of M
             return CohomologyClass(e, Cohomology(self, R.self))
         } else {
             return nil

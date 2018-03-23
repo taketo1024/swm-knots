@@ -11,24 +11,14 @@ import SwiftyAlgebra
 
 // TODO clean up the clutters.
 
-public extension GeometricComplexMap {
-    public func asChainMap<R: EuclideanRing>(_ type: R.Type) -> ChainMap<ComplexType.Cell, ComplexType.Cell, R> {
-        return ChainMap(self, R.self)
-    }
-    
-    public func asCochainMap<R: EuclideanRing>(_ type: R.Type) -> CochainMap<Dual<ComplexType.Cell>, Dual<ComplexType.Cell>, R> {
-        return CochainMap(self, R.self)
-    }
-}
-
 public extension ChainMap where T == Descending {
     
     // f: K1 -> K2  ==> f_*: C(K1) -> C(K2)
     //                          s |-> f(s)
     public init<F: GeometricComplexMap>(_ f: F, _ type: R.Type) where A == F.ComplexType.Cell, B == F.ComplexType.Cell {
         typealias Cell = F.ComplexType.Cell
-        self.init { s -> Codomain in
-            let t = f.appliedTo(s)
+        self.init { (s: Cell) -> Codomain in
+            let t = f.applied(to: s)
             return (s.dim == t.dim) ? Codomain(t) : Codomain.zero
         }
     }
@@ -44,7 +34,7 @@ public extension CochainMap where T == Ascending {
         self.init { (g: Dual<Cell>) -> Codomain in
             let i = g.degree
             let ss = f.domain.cells(ofDim: i).flatMap { (s: Cell) -> (Dual<Cell>, R)? in
-                let t = f.appliedTo(s)
+                let t = f.applied(to: s)
                 return (g.pair(t) == 1) ? (Dual(s), .identity) : nil
             }
             return Codomain(ss)
