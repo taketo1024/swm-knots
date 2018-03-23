@@ -28,7 +28,15 @@ public extension Map {
 
 public extension Map where Domain == Codomain {
     public static var identity: Self {
-        return Self{ x in x }
+        return Self { x in x }
+    }
+    
+    public func composed(with f: Self) -> Self {
+        return Self { x in self.applied(to: f.applied(to: x)) }
+    }
+    
+    public static func ∘(g: Self, f: Self) -> Self {
+        return g.composed(with: f)
     }
 }
 
@@ -63,3 +71,24 @@ public struct SetMap<X: SetType, Y: SetType>: Map {
         return g.composed(with: f)
     }
 }
+
+public protocol End: Map, Monoid where Domain == Codomain {
+    func composed(with f: Self) -> Self
+    static func ∘(g: Self, f: Self) -> Self
+}
+
+public extension End {
+    public static var identity: Self {
+        return Self { x in x }
+    }
+    
+    public static func *(g: Self, f: Self) -> Self {
+        return g.composed(with: f)
+    }
+    
+    public static func ∘(g: Self, f: Self) -> Self {
+        return g.composed(with: f)
+    }
+}
+
+public protocol Aut: End, Group { }
