@@ -18,6 +18,24 @@ public protocol FiniteDimVectorSpace: VectorSpace {
 
 public protocol _LinearMap: _ModuleHom, VectorSpace where Domain: VectorSpace, Codomain: VectorSpace { }
 
+public extension _LinearMap where Domain: FiniteDimVectorSpace, Codomain: FiniteDimVectorSpace {
+    public init(matrix: DynamicMatrix<CoeffRing>) {
+        self.init{ v in
+            let x = DynamicVector(dim: Domain.dim, grid: v.standardCoordinates)
+            let y = matrix * x
+            return zip(y.grid, Codomain.standardBasis).sum { (a, w) in a * w }
+        }
+    }
+    
+    public var asMatrix: DynamicMatrix<CoeffRing> {
+        let comps = Domain.standardBasis.enumerated().flatMap { (j, v) -> [MatrixComponent<CoeffRing>] in
+            let w = self.applied(to: v)
+            return w.standardCoordinates.enumerated().map { (i, a) in (i, j, a) }
+        }
+        return DynamicMatrix(rows: Codomain.dim, cols: Domain.dim, components: comps)
+    }
+}
+
 public struct LinearMap<V: VectorSpace, W: VectorSpace>: _LinearMap where V.CoeffRing == W.CoeffRing {
     public typealias CoeffRing = V.CoeffRing
     public typealias Domain = V
@@ -53,12 +71,6 @@ public extension _LinearEnd {
     public func bracket(_ g: Self) -> Self {
         let f = self
         return f ∘ g - g ∘ f
-    }
-}
-
-public extension _LinearEnd where Domain: FiniteDimVectorSpace {
-    public var asMatrix: Matrix<_1, _1, CoeffRing> {
-        fatalError("TODO")
     }
 }
 
