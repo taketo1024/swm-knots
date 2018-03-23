@@ -50,8 +50,8 @@ public extension SimplicialComplex {
     }
     
     public func identifyVertices(_ table: [Vertex : Vertex]) -> SimplicialComplex {
-        let map = SimplicialMap(from: self) { v in table[v] ?? v }
-        return map.image
+        let map = SimplicialMap { v in table[v] ?? v }
+        return map.image(of: self)
     }
     
     public static func +(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
@@ -149,8 +149,8 @@ public extension SimplicialComplex {
     public static func /(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
         let vs = Set(K2.vertices)
         let v0 = vs.anyElement!
-        let map = SimplicialMap(from: K1) { v in vs.contains(v) ? v0 : v }
-        return map.image.named("\(K1.name) / \(K2.name)")
+        let map = SimplicialMap { v in vs.contains(v) ? v0 : v }
+        return map.image(of: K1).named("\(K1.name) / \(K2.name)")
     }
     
     public static func ∩(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
@@ -167,8 +167,8 @@ public extension SimplicialComplex {
     public static func ∨(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
         let (v1, v2) = (K1.vertices[0], K2.vertices[0])
         let K = K1 + K2
-        let map = SimplicialMap(from: K, [v2 : v1])
-        return map.image.named("\(K1.name) ∨ \(K2.name)")
+        let map = SimplicialMap([v2 : v1])
+        return map.image(of: K).named("\(K1.name) ∨ \(K2.name)")
     }
     
     public static func ∧(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
