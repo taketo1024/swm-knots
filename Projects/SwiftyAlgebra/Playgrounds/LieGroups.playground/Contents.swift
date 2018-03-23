@@ -10,13 +10,22 @@ typealias Q = RationalNumber
 typealias R = RealNumber
 typealias C = ComplexNumber
 
-typealias GL = GeneralLinearGroup
-typealias SL = SpecialLinearGroup
-typealias O  = OrthogonalGroup
-typealias U  = UnitaryGroup
+typealias GL  = GeneralLinearGroup
+typealias SL  = SpecialLinearGroup
+typealias O   = OrthogonalGroup
+typealias SO  = SpecialOrthogonalGroup
+typealias U   = UnitaryGroup
+typealias SU  = SpecialUnitaryGroup
+typealias Sp  = SymplecticGroup
+typealias USp = UnitarySymplecticGroup
 
-typealias gl = GeneralLinearLieAlgebra
-typealias sl = SpecialLinearLieAlgebra
+typealias gl  = GeneralLinearLieAlgebra
+typealias sl  = SpecialLinearLieAlgebra
+typealias o   = OrthogonalLieAlgebra
+typealias u   = UnitaryLieAlgebra
+typealias su  = SpecialUnitaryLieAlgebra
+typealias sp  = SymplecticLieAlgebra
+typealias usp = UnitarySymplecticLieAlgebra
 
 typealias n = _2
 
@@ -35,4 +44,5 @@ let (E, F, H) = (basis[0], basis[1], basis[2])
 
 let B = sl<_2, R>.killingForm
 print(B.asMatrix.detailDescription)
+
 
