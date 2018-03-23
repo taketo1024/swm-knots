@@ -92,7 +92,11 @@ public extension _ChainMap where B == Sum<A, A> {
 }
 
 public extension ChainMap where T == Descending {
-    public func dualMap(domainChainComplex C: ChainComplex<A, R>) -> CochainMap<Dual<B>, Dual<A>, R> {
+    
+    // f: C1 -> C2  ==>  f^*: Hom(C1, R) <- Hom(C1, R) , pullback
+    //                        g∘f        <- g
+
+    public func dual(domain C: ChainComplex<A, R>) -> CochainMap<Dual<B>, Dual<A>, R> {
         return CochainMap { (d: Dual<B>) -> FreeModule<Dual<A>, R> in
             let i = d.degree
             let values = C.chainBasis(i).flatMap { s -> (Dual<A>, R)? in

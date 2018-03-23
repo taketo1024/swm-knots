@@ -37,9 +37,9 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
         self.H1 = _Homology(chain1)
         self.H2 = _Homology(chain2)
         
-        self.map0  = _HomologyMap(from: H0, to: H1, inducedFrom: map0)
-        self.map1  = _HomologyMap(from: H1, to: H2, inducedFrom: map1)
-        self.delta = _HomologyMap(from: H2, to: H0, inducedFrom: delta)
+        self.map0  = _HomologyMap.induced(from: map0,  codomainStructure: H1)
+        self.map1  = _HomologyMap.induced(from: map1,  codomainStructure: H2)
+        self.delta = _HomologyMap.induced(from: delta, codomainStructure: H0)
         
         self.topDegree    = Swift.max(chain0.topDegree, chain1.topDegree, chain2.topDegree)
         self.bottomDegree = Swift.min(chain0.offset,    chain1.offset,    chain2.offset)

@@ -25,39 +25,12 @@ public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Asc
 public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>: AlgebraicStructure {
     public typealias Cycle = FreeModule<A, R>
     
-    public let name: String
-    public let topDegree: Int
-    public let offset: Int
-    
-    private let chainComplex: _ChainComplex<T, A, R>?
+    public let chainComplex: _ChainComplex<T, A, R>
     private var _summands: [Summand?]
     
     public init(_ chainComplex: _ChainComplex<T, A, R>) {
-        self.name = chainComplex.name
-        self.topDegree = chainComplex.topDegree
-        self.offset = chainComplex.offset
-        
         self.chainComplex = chainComplex
         self._summands = Array(repeating: nil, count: chainComplex.topDegree - chainComplex.offset + 1) // lazy init
-    }
-    
-    // TODO
-    public init(name: String, _ H: _Homology<T, A, R>, _ map: _ChainMap<T, A, A, R>, _ factorizer: @escaping (FreeModule<A, R>) -> [R]) {
-        self.name = name
-        self.topDegree = H.topDegree
-        self.offset = H.offset
-        
-        self.chainComplex = nil
-        self._summands = []
-        
-        self._summands = (0 ..< H._summands.count).map { i in
-            let summand = H[i]
-            let subSummands = summand.structure.summands.map{ ss in
-                SimpleModuleStructure.Summand( map.applied(to: ss.generator), ss.divisor )
-            }
-            let str = SimpleModuleStructure(subSummands, factorizer)
-            return Summand(self, str)
-        }
     }
     
     public subscript(i: Int) -> Summand {
@@ -72,6 +45,18 @@ public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
             _summands[i - offset] = g
             return g
         }
+    }
+    
+    public var name: String {
+        return chainComplex.name
+    }
+    
+    public var offset: Int {
+        return chainComplex.offset
+    }
+    
+    public var topDegree: Int {
+        return chainComplex.topDegree
     }
     
     public static func ==(a: _Homology<T, A, R>, b: _Homology<T, A, R>) -> Bool {
@@ -91,7 +76,7 @@ public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
     }
     
     private func generateSummand(_ i: Int) -> Summand {
-        let C = chainComplex!
+        let C = chainComplex
         let basis = C.chainBasis(i)
         let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(T.descending ? i + 1 : i - 1))
         let (E1, E2) = (A1.eliminate(), A2.eliminate())

@@ -25,6 +25,7 @@ public typealias   ChainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Desc
 public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Ascending,  A, R>
 
 public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
+    public typealias Chain = FreeModule<A, R>
     public typealias ChainBasis = [A]
     public typealias BoundaryMap = FreeModuleHom<A, A, R>
     
@@ -39,6 +40,14 @@ public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable
         self.chain = chain
         self.matrices = _ChainComplex<T, A, R>.makeMatrices(chain)
         self.offset = offset
+    }
+    
+    public var isEmpty: Bool {
+        return chain.isEmpty
+    }
+    
+    public var validDegrees: [Int] {
+        return isEmpty ? [] : (offset ... topDegree).toArray()
     }
     
     public var topDegree: Int {
@@ -123,5 +132,30 @@ public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable
     
     public var description: String {
         return chain.description
+    }
+}
+
+public extension ChainComplex where T == Descending {
+    public var dual: CochainComplex<Dual<A>, R> {
+        typealias D = CochainComplex<Dual<A>, R>
+        let cochain = validDegrees.map{ (i) -> (D.ChainBasis, D.BoundaryMap) in
+            let next = chainBasis(i + 1)
+            let map = boundaryMap(i + 1)
+            
+            let dBasis = chainBasis(i).map{ Dual($0) }
+            let dMap  = D.BoundaryMap { (f: Dual<A>) in
+                let x = f.base
+                let e = R(intValue: (-1).pow(f.degree + 1))
+                
+                let vals = next.flatMap { y -> (Dual<A>, R)? in
+                    let r = map.applied(to: y)[x]
+                    return (r != .zero) ? (Dual(y), e * r) : nil
+                }
+                return D.Chain(vals)
+            }
+            return (dBasis, dMap)
+        }
+        
+        return D(name: name, cochain)
     }
 }

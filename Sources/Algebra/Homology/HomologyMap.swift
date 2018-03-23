@@ -18,18 +18,18 @@ public struct _HomologyMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R
     
     private let f: (Domain) -> Codomain
     
-    public init(from: _Homology<T, A, R>, to: _Homology<T, B, R>, inducedFrom chainMap: _ChainMap<T, A, B, R>) {
-        self.init { x in
-            _HomologyClass(chainMap.applied(to: x.representative), to)
-        }
-    }
-    
     public init(_ f: @escaping (_HomologyClass<T, A, R>) -> _HomologyClass<T, B, R>) {
         self.f = f
     }
     
     public func applied(to x: _HomologyClass<T, A, R>) -> _HomologyClass<T, B, R> {
         return f(x)
+    }
+    
+    public static func induced(from chainMap: _ChainMap<T, A, B, R>, codomainStructure H: _Homology<T, B, R>) -> _HomologyMap<T, A, B, R> {
+        return _HomologyMap { x in
+            _HomologyClass(chainMap.applied(to: x.representative), H)
+        }
     }
 }
 
