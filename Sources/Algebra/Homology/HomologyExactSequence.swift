@@ -65,10 +65,6 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
         return sequence[seqIndex(i, n)]
     }
     
-    public subscript(k: Int) -> Object? {
-        return sequence[k]
-    }
-    
     internal var degrees: [Int] {
         return T.descending
             ? (bottomDegree ... topDegree).reversed().toArray()
@@ -150,6 +146,13 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
     }
     
     @discardableResult
+    public mutating func solve(column i: Int, debug: Bool = false) -> [Object?] {
+        return (bottomDegree ... topDegree).map { n in
+            self.solve(column: i, degree: n, debug: debug)
+        }
+    }
+    
+    @discardableResult
     public mutating func solve(debug: Bool = false) -> [Object?] {
         return sequence.solve(debug: debug)
     }
@@ -164,7 +167,7 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
     }
     
     public func makeIterator() -> AnyIterator<Object?> {
-        let lazy = (0 ..< length).lazy.map{ k in self[k] }
+        let lazy = (0 ..< length).lazy.map{ k in self.sequence[k] }
         return AnyIterator(lazy.makeIterator())
     }
     

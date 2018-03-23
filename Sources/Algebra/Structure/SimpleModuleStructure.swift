@@ -24,10 +24,6 @@ public final class SimpleModuleStructure<A: FreeModuleBase, R: EuclideanRing>: M
     public  let summands: [Summand]
     private let factorizer: (FreeModule<A, R>) -> [R]
     
-    public convenience init(_ summands: [Summand]) {
-        self.init(summands, {_ in fatalError()})
-    }
-    
     public init(_ summands: [Summand], _ factorizer: @escaping (FreeModule<A, R>) -> [R]) {
         self.summands = summands
         self.factorizer = factorizer
@@ -196,10 +192,15 @@ public typealias AbstractSimpleModuleStructure<R: EuclideanRing> = SimpleModuleS
 
 public extension AbstractSimpleModuleStructure where A == Int {
     public convenience init(rank r: Int, torsions: [R] = []) {
+        let t = torsions.count
         let summands = (0 ..< r).map{ i in Summand(i, .zero) }
             + torsions.enumerated().map{ (i, d) in Summand(FreeModule(i + r), d) }
         
-        self.init(summands)
+        let factorizer = { (x: FreeModule<A, R>) in
+            (0 ..< r).map{ i in x[i] } + (0 ..< t).map{ i in x[t + i] % torsions[i] }
+        }
+        
+        self.init(summands, factorizer)
     }
     
     public static func invariantFactorDecomposition(rank r: Int, relationMatrix B: ComputationalMatrix<R>) -> AbstractSimpleModuleStructure<R> {
