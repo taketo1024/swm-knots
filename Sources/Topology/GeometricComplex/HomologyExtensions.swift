@@ -33,12 +33,6 @@ public extension ChainMap where T == Descending {
     }
 }
 
-public extension CochainMap where T == Ascending {
-    public static func induced<F: GeometricComplexMap>(from f: F, domain: ChainComplex<F.ComplexType.Cell, R>) -> CochainMap<A, B, R> where A == Dual<F.ComplexType.Cell>, B == Dual<F.ComplexType.Cell> {
-        return ChainMap.induced(from: f).dual(domain: domain)
-    }
-}
-
 public extension Homology where T == Descending {
     public convenience init<C: GeometricComplex>(_ K: C, _ L: C? = nil) where A == C.Cell {
         self.init(ChainComplex(K, L))
@@ -59,6 +53,6 @@ public extension HomologyMap where T == Descending {
 
 public extension CohomologyMap where T == Ascending {
     public static func induced<F: GeometricComplexMap>(from f: F, domainComplex: ChainComplex<F.ComplexType.Cell, R>, domainStructure H: Cohomology<A, R>) -> CohomologyMap<A, B, R> where A == Dual<F.ComplexType.Cell>, B == Dual<F.ComplexType.Cell> {
-        return CohomologyMap.induced(from: CochainMap.induced(from: f, domain: domainComplex), codomainStructure: H)
+        return CohomologyMap.induced(from: ChainMap.induced(from: f).dual(domain: domainComplex), codomainStructure: H)
     }
 }

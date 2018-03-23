@@ -60,4 +60,43 @@ class SimplicialHomologyExSeqTests: XCTestCase {
         XCTAssert(h[1].isFree && h[1].rank == 2)
         XCTAssert(h[2].isFree && h[2].rank == 1)
     }
+
+    func test3() {
+        let n = 2
+        let D = SimplicialComplex.ball(dim: n)
+        let S = D.boundary.named("S^\(n-1)")
+        
+        var E = CohomologyExactSequence.pair(D, S, Z.self)
+        
+        E.fill(column: 1)
+        E.fill(column: 2)
+        
+        let h = E.solve(column: 0).map{ $0! }
+        print(E.detailDescription)
+        
+        XCTAssert(h[0].isTrivial)
+        XCTAssert(h[1].isTrivial)
+        XCTAssert(h[2].isFree && h[2].rank == 1)
+    }
+    
+    func test4() {
+        let n = 2
+        let X = SimplicialComplex.torus(dim: n)
+        let s = X.cells(ofDim: n)[0]
+        
+        let A = (X - s).named("A")
+        let B = s.asComplex.named("B")
+        
+        var E = CohomologyExactSequence.MayerVietoris(X, A, B, Z.self)
+
+        E.fill(column: 1)
+        E.fill(column: 2)
+        
+        let h = E.solve(column: 0).map{ $0! }
+        print(E.detailDescription)
+        
+        XCTAssert(h[0].isFree && h[0].rank == 1)
+        XCTAssert(h[1].isFree && h[1].rank == 2)
+        XCTAssert(h[2].isFree && h[2].rank == 1)
+    }
 }

@@ -126,8 +126,8 @@
 			children = (
 				DDB20B602053CF22004F7AFE /* SwiftyTopologyTests.swift */,
 				DDB6C0972053D4BA001313FD /* SimplicialHomologyTests.swift */,
-				149745FB2064B81A00329DFB /* SimplicialHomologyExSeqTests.swift */,
 				149745EE2064A29800329DFB /* SimplicialCohomologyTests.swift */,
+				149745FB2064B81A00329DFB /* SimplicialHomologyExSeqTests.swift */,
 				DDB20B622053CF22004F7AFE /* Info.plist */,
 			);
 			path = SwiftyTopologyTests;
