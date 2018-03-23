@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol MatrixLieAlgebra: LieAlgebra {
+public protocol MatrixLieAlgebra: FiniteDimLieAlgebra {
     associatedtype Size: _Int
     
     // MEMO: Usually ElementRing == CoeffRing,
@@ -35,8 +35,12 @@ public extension MatrixLieAlgebra {
         self.init(Matrix(generator: g))
     }
     
+public static var dim: Int { fatalError("TODO") }
+public static var standardBasis: [Self] { fatalError("TODO") }
+public var standardCoordinates: [CoeffRing] { fatalError("TODO") }
+    
     public var size: Int {
-        return matrix.rows
+        return Size.intValue
     }
     
     public var trace: ElementRing {
