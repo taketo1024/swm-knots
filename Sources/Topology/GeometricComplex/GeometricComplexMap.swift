@@ -11,7 +11,4 @@ import SwiftyAlgebra
 
 public protocol GeometricComplexMap: Map where Domain == ComplexType.Cell, Codomain == ComplexType.Cell {
     associatedtype ComplexType: GeometricComplex
-    var domain:   ComplexType { get }
-    var codomain: ComplexType? { get }
-    var image:    ComplexType { get }
 }
