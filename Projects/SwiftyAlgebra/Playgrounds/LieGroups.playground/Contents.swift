@@ -3,6 +3,13 @@
 import Foundation
 import SwiftyAlgebra
 
+// Aliases populary used in Math.
+
+typealias Z = IntegerNumber
+typealias Q = RationalNumber
+typealias R = RealNumber
+typealias C = ComplexNumber
+
 typealias GL = GeneralLinearGroup
 typealias SL = SpecialLinearGroup
 typealias O  = OrthogonalGroup
@@ -13,11 +20,19 @@ typealias sl = SpecialLinearLieAlgebra
 
 typealias n = _2
 
-let i = 𝐂.imaginaryUnit
-let X = gl<n, CC
+/*
+let i = C.imaginaryUnit
+let X = gl<n, C>(0, 2 + i, -2 + i, 0)
 let g = exp(X)
 
 print(X.detailDescription, "\n")
 print(g.detailDescription, "\n")
 print(U<n>.contains(g))
+*/
+
+let basis = sl<_2, R>.standardBasis
+let (E, F, H) = (basis[0], basis[1], basis[2])
+
+let B = sl<_2, R>.killingForm
+print(B.asMatrix.detailDescription)
 
