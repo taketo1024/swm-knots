@@ -268,6 +268,7 @@ public extension ChainContractor {
     }
     
     public var contractedCochainComplex: CochainComplex<Dual<Simplex>, R> {
+<<<<<<< HEAD
         typealias CC = CochainComplex<Dual<S>, R>
         let chain = K.validDims.map{ (i) -> (CC.ChainBasis, CC.BoundaryMap) in
             let from = generators.filter { s in s.dim == i }
@@ -285,8 +286,13 @@ public extension ChainContractor {
         }
         
         return CC(name: K.name, chain)
+=======
+        return contractedChainComplex.dual
+>>>>>>> [WIP] fix tests and others.
     }
     
+    /* TODO use CellularComplex
+     
     public var homologyGroup: Homology<Simplex, R> {
         let H = Homology(contractedChainComplex)
         let map = ChainMap { s in self.g(s) }
@@ -329,6 +335,7 @@ public extension ChainContractor {
         }
         return Cohomology(name: K.name, H, map, factorizer)
     }
+ */
 }
 
 extension String: Error {}

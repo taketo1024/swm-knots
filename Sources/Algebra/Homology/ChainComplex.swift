@@ -145,7 +145,7 @@ public extension ChainComplex where T == Descending {
             let dBasis = chainBasis(i).map{ Dual($0) }
             let dMap  = D.BoundaryMap { (f: Dual<A>) in
                 let x = f.base
-                let e = R(intValue: (-1).pow(f.degree + 1))
+                let e = R(from: (-1).pow(f.degree + 1))
                 
                 let vals = next.flatMap { y -> (Dual<A>, R)? in
                     let r = map.applied(to: y)[x]
