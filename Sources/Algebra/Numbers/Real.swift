@@ -90,7 +90,8 @@ public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByFloatL
     }
     
     public var description: String {
-        return value.description
+        let res = value.description
+        return res.hasSuffix(".0") ? String(res.dropLast(2)) : res
     }
     
     public static var symbol: String {
