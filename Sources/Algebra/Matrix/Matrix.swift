@@ -118,6 +118,10 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         return Matrix<n, m, R> { _,_ in 0 }
     }
     
+    public static func unit(_ i0: Int, _ j0: Int) -> Matrix<n, m, R> {
+        return Matrix { (i, j) in (i, j) == (i0, j0) ? 1 : 0 }
+    }
+    
     public static func ==(a: Matrix<n, m, R>, b: Matrix<n, m, R>) -> Bool {
         assert((a.rows, a.cols) == (b.rows, b.cols), "Mismatching matrix size.")
         return a.grid == b.grid
