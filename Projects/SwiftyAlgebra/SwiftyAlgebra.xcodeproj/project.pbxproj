@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		140BCD511EBA3F8A00D7CE74 /* ChainComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */; };
 		140E80A01ECDEA8E00B89719 /* combinatorics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140E809F1ECDEA8E00B89719 /* combinatorics.swift */; };
-		140F4FAF1F96F66400C4C039 /* random.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140F4FAE1F96F66400C4C039 /* random.swift */; };
+		140F4FAF1F96F66400C4C039 /* Randomable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140F4FAE1F96F66400C4C039 /* Randomable.swift */; };
 		1410C1131FB1EC9E00CEE47D /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1410C1121FB1EC9E00CEE47D /* Array.swift */; };
 		1410C1151FB203AE00CEE47D /* EchelonEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1410C1141FB203AE00CEE47D /* EchelonEliminator.swift */; };
 		1410C1171FB203CC00CEE47D /* HermiteEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1410C1161FB203CC00CEE47D /* HermiteEliminator.swift */; };
@@ -37,8 +37,7 @@
 		1424F5071EB997780052581F /* Rational.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4E91EB997780052581F /* Rational.swift */; };
 		1424F5081EB997780052581F /* Real.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4EA1EB997780052581F /* Real.swift */; };
 		1424F50D1EB997780052581F /* PolynomialFactorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F11EB997780052581F /* PolynomialFactorization.swift */; };
-		1424F50E1EB997780052581F /* IntTypeParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F31EB997780052581F /* IntTypeParameter.swift */; };
-		1424F50F1EB997780052581F /* PolynomialTypeParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F41EB997780052581F /* PolynomialTypeParameter.swift */; };
+		1424F50E1EB997780052581F /* TypeParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F31EB997780052581F /* TypeParameters.swift */; };
 		1424F5111EB997780052581F /* optable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1424F4F71EB997780052581F /* optable.swift */; };
 		14360F911FB130350075133E /* ComputationalMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14360F901FB130350075133E /* ComputationalMatrix.swift */; };
 		14360F931FB148C30075133E /* MatrixEliminator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14360F921FB148C30075133E /* MatrixEliminator.swift */; };
@@ -55,13 +54,19 @@
 		147D98031EB9B06900C736AC /* IntegerFactorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98021EB9B06900C736AC /* IntegerFactorization.swift */; };
 		147D98061EB9B26200C736AC /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147D98051EB9B26200C736AC /* Dictionary.swift */; };
 		148B41151FAF765000E59134 /* SimpleModuleStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148B41141FAF765000E59134 /* SimpleModuleStructure.swift */; };
-		1499CD011F236328009C3C99 /* CustomOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1499CD001F236328009C3C99 /* CustomOperations.swift */; };
+		1499CD011F236328009C3C99 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1499CD001F236328009C3C99 /* CustomOperators.swift */; };
 		14B2FB8C1ED8FBA000C182EB /* ComputationalMatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B2FB8B1ED8FBA000C182EB /* ComputationalMatrixTests.swift */; };
 		14D261321EE44DB4006775E2 /* AlgebraicStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261311EE44DB4006775E2 /* AlgebraicStructure.swift */; };
 		14D261341EE4614E006775E2 /* Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D261331EE4614E006775E2 /* Set.swift */; };
+		14FC8FF5206200D000D472D0 /* OrthogonalLieAlgebra.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14FC8FF4206200D000D472D0 /* OrthogonalLieAlgebra.swift */; };
+		14FC8FF72062015600D472D0 /* UnitaryLieAlgebra.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14FC8FF62062015600D472D0 /* UnitaryLieAlgebra.swift */; };
+		14FC8FF920621AB600D472D0 /* SymplecticLieAlgebra.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14FC8FF820621AB600D472D0 /* SymplecticLieAlgebra.swift */; };
 		DD119BC21FE2271E00FB4758 /* ExactSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD119BC11FE2271E00FB4758 /* ExactSequence.swift */; };
 		DD17AFF31FE37F3A00AA5924 /* ChainComplexOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD17AFF21FE37F3A00AA5924 /* ChainComplexOperations.swift */; };
 		DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B16EF1ECECC5500EC6C2A /* debug.swift */; };
+		DD475046205B980B00C75440 /* UnitaryGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD475045205B980B00C75440 /* UnitaryGroup.swift */; };
+		DD475048205BA73F00C75440 /* SymplecticGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD475047205BA73F00C75440 /* SymplecticGroup.swift */; };
+		DD4E16F920614E53004B040C /* NormedSpace.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E16F820614E53004B040C /* NormedSpace.swift */; };
 		DD4E23292056496100BB0CAD /* PowerSeries.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E23282056496100BB0CAD /* PowerSeries.swift */; };
 		DD4E539B1FE374F300C75F7E /* FreeModuleBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */; };
 		DD5EE31A205699C3007309EF /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5EE319205699C3007309EF /* main.swift */; };
@@ -69,13 +74,23 @@
 		DD6092882053EF4000ABD84F /* MPolynomial.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6092872053EF4000ABD84F /* MPolynomial.swift */; };
 		DD60928C20541A5E00ABD84F /* Expression.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD60928B20541A5E00ABD84F /* Expression.swift */; };
 		DD61259A1F31AA2500FD5533 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6125991F31AA2500FD5533 /* Cache.swift */; };
+		DD63B03C205B911E00FAAC42 /* Complex.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD63B03B205B911E00FAAC42 /* Complex.swift */; };
 		DD6AF9CB20542499000FC818 /* IntList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6AF9CA20542499000FC818 /* IntList.swift */; };
 		DD6AF9CD205424D2000FC818 /* SymmetricPolynomial.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6AF9CC205424D2000FC818 /* SymmetricPolynomial.swift */; };
 		DD90ACC91F763553001AFC9C /* PolynomialIdeal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */; };
 		DD9B56C720566A9B00215EA6 /* MultiplicativeSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9B56C620566A9B00215EA6 /* MultiplicativeSequence.swift */; };
 		DD9B56C9205671A300215EA6 /* BernoulliNumbers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9B56C8205671A300215EA6 /* BernoulliNumbers.swift */; };
+		DD9E9310205D5E3A002C0ADB /* SquareMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9E930F205D5E3A002C0ADB /* SquareMatrix.swift */; };
+		DD9E9312205D5ED7002C0ADB /* Vector.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9E9311205D5ED7002C0ADB /* Vector.swift */; };
+		DD9E9314205D65F1002C0ADB /* VectorSpace.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9E9313205D65F1002C0ADB /* VectorSpace.swift */; };
+		DD9E9316205D68DD002C0ADB /* GeneralLinearLieAlgebra.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9E9315205D68DD002C0ADB /* GeneralLinearLieAlgebra.swift */; };
 		DDB7217A205622DD0001428F /* Permutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB72179205622DD0001428F /* Permutation.swift */; };
 		DDB7217E205633FB0001428F /* AlternatingGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB7217D205633FB0001428F /* AlternatingGroup.swift */; };
+		DDC0125A205BB06A00FF525E /* Quaternion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC01259205BB06A00FF525E /* Quaternion.swift */; };
+		DDC0125C205C0EA200FF525E /* MatrixLieAlgebra.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC0125B205C0EA200FF525E /* MatrixLieAlgebra.swift */; };
+		DDF1DE0D205B6C520097885E /* GeneralLinearGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF1DE0C205B6C520097885E /* GeneralLinearGroup.swift */; };
+		DDF1DE10205B767E0097885E /* MatrixGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF1DE0F205B767E0097885E /* MatrixGroup.swift */; };
+		DDF1DE14205B8E9B0097885E /* OrthogonalGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF1DE13205B8E9B0097885E /* OrthogonalGroup.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,7 +118,7 @@
 /* Begin PBXFileReference section */
 		140BCD501EBA3F8A00D7CE74 /* ChainComplex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChainComplex.swift; sourceTree = "<group>"; };
 		140E809F1ECDEA8E00B89719 /* combinatorics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = combinatorics.swift; sourceTree = "<group>"; };
-		140F4FAE1F96F66400C4C039 /* random.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = random.swift; sourceTree = "<group>"; };
+		140F4FAE1F96F66400C4C039 /* Randomable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Randomable.swift; sourceTree = "<group>"; };
 		1410C1121FB1EC9E00CEE47D /* Array.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Array.swift; sourceTree = "<group>"; };
 		1410C1141FB203AE00CEE47D /* EchelonEliminator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EchelonEliminator.swift; sourceTree = "<group>"; };
 		1410C1161FB203CC00CEE47D /* HermiteEliminator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HermiteEliminator.swift; sourceTree = "<group>"; };
@@ -134,8 +149,7 @@
 		1424F4E91EB997780052581F /* Rational.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Rational.swift; sourceTree = "<group>"; };
 		1424F4EA1EB997780052581F /* Real.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Real.swift; sourceTree = "<group>"; };
 		1424F4F11EB997780052581F /* PolynomialFactorization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolynomialFactorization.swift; sourceTree = "<group>"; };
-		1424F4F31EB997780052581F /* IntTypeParameter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntTypeParameter.swift; sourceTree = "<group>"; };
-		1424F4F41EB997780052581F /* PolynomialTypeParameter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolynomialTypeParameter.swift; sourceTree = "<group>"; };
+		1424F4F31EB997780052581F /* TypeParameters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeParameters.swift; sourceTree = "<group>"; };
 		1424F4F71EB997780052581F /* optable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = optable.swift; sourceTree = "<group>"; };
 		14360F901FB130350075133E /* ComputationalMatrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComputationalMatrix.swift; sourceTree = "<group>"; };
 		14360F921FB148C30075133E /* MatrixEliminator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixEliminator.swift; sourceTree = "<group>"; };
@@ -158,13 +172,20 @@
 		14929C981ED9BFE5006ACAC5 /* Matrices.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Matrices.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		14929C991ED9BFE5006ACAC5 /* Numbers.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Numbers.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		14929C9A1ED9BFE5006ACAC5 /* Permutations.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Permutations.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		1499CD001F236328009C3C99 /* CustomOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomOperations.swift; sourceTree = "<group>"; };
+		1499CD001F236328009C3C99 /* CustomOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomOperators.swift; sourceTree = "<group>"; };
 		14B2FB8B1ED8FBA000C182EB /* ComputationalMatrixTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComputationalMatrixTests.swift; sourceTree = "<group>"; };
 		14D261311EE44DB4006775E2 /* AlgebraicStructure.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlgebraicStructure.swift; sourceTree = "<group>"; };
 		14D261331EE4614E006775E2 /* Set.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Set.swift; sourceTree = "<group>"; };
+		14FC8FF4206200D000D472D0 /* OrthogonalLieAlgebra.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrthogonalLieAlgebra.swift; sourceTree = "<group>"; };
+		14FC8FF62062015600D472D0 /* UnitaryLieAlgebra.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnitaryLieAlgebra.swift; sourceTree = "<group>"; };
+		14FC8FF820621AB600D472D0 /* SymplecticLieAlgebra.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SymplecticLieAlgebra.swift; sourceTree = "<group>"; };
 		DD119BC11FE2271E00FB4758 /* ExactSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExactSequence.swift; sourceTree = "<group>"; };
+		DD15E2C5205F6B870013EB32 /* LieGroups.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = LieGroups.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		DD17AFF21FE37F3A00AA5924 /* ChainComplexOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainComplexOperations.swift; sourceTree = "<group>"; };
 		DD3B16EF1ECECC5500EC6C2A /* debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
+		DD475045205B980B00C75440 /* UnitaryGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnitaryGroup.swift; sourceTree = "<group>"; };
+		DD475047205BA73F00C75440 /* SymplecticGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymplecticGroup.swift; sourceTree = "<group>"; };
+		DD4E16F820614E53004B040C /* NormedSpace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NormedSpace.swift; sourceTree = "<group>"; };
 		DD4E23282056496100BB0CAD /* PowerSeries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerSeries.swift; sourceTree = "<group>"; };
 		DD4E539A1FE374F200C75F7E /* FreeModuleBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeModuleBase.swift; sourceTree = "<group>"; };
 		DD5EE317205699C3007309EF /* App */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = App; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -173,13 +194,23 @@
 		DD60928B20541A5E00ABD84F /* Expression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expression.swift; sourceTree = "<group>"; };
 		DD60928D20541E6000ABD84F /* MPolynomials.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MPolynomials.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		DD6125991F31AA2500FD5533 /* Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
+		DD63B03B205B911E00FAAC42 /* Complex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Complex.swift; sourceTree = "<group>"; };
 		DD6AF9CA20542499000FC818 /* IntList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntList.swift; sourceTree = "<group>"; };
 		DD6AF9CC205424D2000FC818 /* SymmetricPolynomial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymmetricPolynomial.swift; sourceTree = "<group>"; };
 		DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolynomialIdeal.swift; sourceTree = "<group>"; };
 		DD9B56C620566A9B00215EA6 /* MultiplicativeSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplicativeSequence.swift; sourceTree = "<group>"; };
 		DD9B56C8205671A300215EA6 /* BernoulliNumbers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BernoulliNumbers.swift; sourceTree = "<group>"; };
+		DD9E930F205D5E3A002C0ADB /* SquareMatrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquareMatrix.swift; sourceTree = "<group>"; };
+		DD9E9311205D5ED7002C0ADB /* Vector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vector.swift; sourceTree = "<group>"; };
+		DD9E9313205D65F1002C0ADB /* VectorSpace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VectorSpace.swift; sourceTree = "<group>"; };
+		DD9E9315205D68DD002C0ADB /* GeneralLinearLieAlgebra.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralLinearLieAlgebra.swift; sourceTree = "<group>"; };
 		DDB72179205622DD0001428F /* Permutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permutation.swift; sourceTree = "<group>"; };
 		DDB7217D205633FB0001428F /* AlternatingGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlternatingGroup.swift; sourceTree = "<group>"; };
+		DDC01259205BB06A00FF525E /* Quaternion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Quaternion.swift; sourceTree = "<group>"; };
+		DDC0125B205C0EA200FF525E /* MatrixLieAlgebra.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixLieAlgebra.swift; sourceTree = "<group>"; };
+		DDF1DE0C205B6C520097885E /* GeneralLinearGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralLinearGroup.swift; sourceTree = "<group>"; };
+		DDF1DE0F205B767E0097885E /* MatrixGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixGroup.swift; sourceTree = "<group>"; };
+		DDF1DE13205B8E9B0097885E /* OrthogonalGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrthogonalGroup.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -260,9 +291,10 @@
 				144CFE481EEA88F20023E6EC /* Matrix */,
 				14A365721F27636600D23C87 /* FreeModule */,
 				14A365731F27638300D23C87 /* Polynomial */,
-				1424F4DF1EB997780052581F /* Combinatorics */,
+				DD4951C1205B60F900516ED0 /* SymmetricGroup */,
 				147D98071EBA0C0C00C736AC /* Homology */,
 				14546DA91FDF9DB800898326 /* Structure */,
+				1424F4DF1EB997780052581F /* Combinatorics */,
 				1424F4EF1EB997780052581F /* Computation */,
 				1424F4F21EB997780052581F /* Meta */,
 				147D98041EB9B24900C736AC /* Extensions */,
@@ -276,6 +308,7 @@
 			isa = PBXGroup;
 			children = (
 				14D261331EE4614E006775E2 /* Set.swift */,
+				1424F4E61EB997780052581F /* Map.swift */,
 				1424F4DD1EB997780052581F /* Monoid.swift */,
 				1424F4DB1EB997780052581F /* Group.swift */,
 				1424F4D81EB997780052581F /* AdditiveGroup.swift */,
@@ -283,7 +316,8 @@
 				1424F4D91EB997780052581F /* EuclideanRing.swift */,
 				1424F4DA1EB997780052581F /* Field.swift */,
 				1424F4DC1EB997780052581F /* Module.swift */,
-				1424F4E61EB997780052581F /* Map.swift */,
+				DD9E9313205D65F1002C0ADB /* VectorSpace.swift */,
+				DD4E16F820614E53004B040C /* NormedSpace.swift */,
 			);
 			path = Abstract;
 			sourceTree = "<group>";
@@ -291,11 +325,10 @@
 		1424F4DF1EB997780052581F /* Combinatorics */ = {
 			isa = PBXGroup;
 			children = (
+				DD6AF9CA20542499000FC818 /* IntList.swift */,
 				140E809F1ECDEA8E00B89719 /* combinatorics.swift */,
 				DDB72179205622DD0001428F /* Permutation.swift */,
 				DD9B56C8205671A300215EA6 /* BernoulliNumbers.swift */,
-				1424F4E21EB997780052581F /* SymmetricGroup.swift */,
-				DDB7217D205633FB0001428F /* AlternatingGroup.swift */,
 			);
 			path = Combinatorics;
 			sourceTree = "<group>";
@@ -306,6 +339,8 @@
 				1424F4E81EB997780052581F /* Integer.swift */,
 				1424F4E91EB997780052581F /* Rational.swift */,
 				1424F4EA1EB997780052581F /* Real.swift */,
+				DD63B03B205B911E00FAAC42 /* Complex.swift */,
+				DDC01259205BB06A00FF525E /* Quaternion.swift */,
 				145F46001EEAF0CC0045CDB2 /* Z_2.swift */,
 			);
 			path = Numbers;
@@ -323,8 +358,9 @@
 		1424F4F21EB997780052581F /* Meta */ = {
 			isa = PBXGroup;
 			children = (
-				1424F4F31EB997780052581F /* IntTypeParameter.swift */,
-				1424F4F41EB997780052581F /* PolynomialTypeParameter.swift */,
+				1424F4F31EB997780052581F /* TypeParameters.swift */,
+				1499CD001F236328009C3C99 /* CustomOperators.swift */,
+				140F4FAE1F96F66400C4C039 /* Randomable.swift */,
 			);
 			path = Meta;
 			sourceTree = "<group>";
@@ -332,13 +368,11 @@
 		1424F4F51EB997780052581F /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				140F4FAE1F96F66400C4C039 /* random.swift */,
 				DD3B16EF1ECECC5500EC6C2A /* debug.swift */,
 				1424F4F71EB997780052581F /* optable.swift */,
 				145339BF1EC7D67100F014F4 /* Ref.swift */,
 				DD6125991F31AA2500FD5533 /* Cache.swift */,
 				DD60928B20541A5E00ABD84F /* Expression.swift */,
-				1499CD001F236328009C3C99 /* CustomOperations.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -347,13 +381,10 @@
 			isa = PBXGroup;
 			children = (
 				1424F4E11EB997780052581F /* Matrix.swift */,
-				14360F901FB130350075133E /* ComputationalMatrix.swift */,
-				14360F921FB148C30075133E /* MatrixEliminator.swift */,
-				145B10D41FB19B03004EC11E /* MatrixEliminationResult.swift */,
-				1410C1141FB203AE00CEE47D /* EchelonEliminator.swift */,
-				1410C1161FB203CC00CEE47D /* HermiteEliminator.swift */,
-				1410C1181FB203E200CEE47D /* DiagonalEliminator.swift */,
-				1410C11A1FB2040900CEE47D /* SmithEliminator.swift */,
+				DD9E930F205D5E3A002C0ADB /* SquareMatrix.swift */,
+				DD9E9311205D5ED7002C0ADB /* Vector.swift */,
+				DDF1DE0E205B75E90097885E /* MatrixGroup */,
+				DD4951C4205B693000516ED0 /* Computation */,
 			);
 			path = Matrix;
 			sourceTree = "<group>";
@@ -404,6 +435,7 @@
 				1414D8551EE0F927001A1D42 /* Polynomials.playground */,
 				DD60928D20541E6000ABD84F /* MPolynomials.playground */,
 				14929C941ED9BFE5006ACAC5 /* AlgebraicExtensions.playground */,
+				DD15E2C5205F6B870013EB32 /* LieGroups.playground */,
 			);
 			path = Playgrounds;
 			sourceTree = "<group>";
@@ -423,13 +455,35 @@
 			children = (
 				1424F4E31EB997780052581F /* Polynominal.swift */,
 				DD90ACC81F763553001AFC9C /* PolynomialIdeal.swift */,
-				DD6AF9CA20542499000FC818 /* IntList.swift */,
 				DD6092872053EF4000ABD84F /* MPolynomial.swift */,
 				DD6AF9CC205424D2000FC818 /* SymmetricPolynomial.swift */,
 				DD4E23282056496100BB0CAD /* PowerSeries.swift */,
 				DD9B56C620566A9B00215EA6 /* MultiplicativeSequence.swift */,
 			);
 			path = Polynomial;
+			sourceTree = "<group>";
+		};
+		DD4951C1205B60F900516ED0 /* SymmetricGroup */ = {
+			isa = PBXGroup;
+			children = (
+				1424F4E21EB997780052581F /* SymmetricGroup.swift */,
+				DDB7217D205633FB0001428F /* AlternatingGroup.swift */,
+			);
+			path = SymmetricGroup;
+			sourceTree = "<group>";
+		};
+		DD4951C4205B693000516ED0 /* Computation */ = {
+			isa = PBXGroup;
+			children = (
+				14360F901FB130350075133E /* ComputationalMatrix.swift */,
+				14360F921FB148C30075133E /* MatrixEliminator.swift */,
+				145B10D41FB19B03004EC11E /* MatrixEliminationResult.swift */,
+				1410C1141FB203AE00CEE47D /* EchelonEliminator.swift */,
+				1410C1161FB203CC00CEE47D /* HermiteEliminator.swift */,
+				1410C1181FB203E200CEE47D /* DiagonalEliminator.swift */,
+				1410C11A1FB2040900CEE47D /* SmithEliminator.swift */,
+			);
+			path = Computation;
 			sourceTree = "<group>";
 		};
 		DD5EE318205699C3007309EF /* App */ = {
@@ -445,6 +499,23 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DDF1DE0E205B75E90097885E /* MatrixGroup */ = {
+			isa = PBXGroup;
+			children = (
+				DDF1DE0F205B767E0097885E /* MatrixGroup.swift */,
+				DDF1DE0C205B6C520097885E /* GeneralLinearGroup.swift */,
+				DDF1DE13205B8E9B0097885E /* OrthogonalGroup.swift */,
+				DD475045205B980B00C75440 /* UnitaryGroup.swift */,
+				DD475047205BA73F00C75440 /* SymplecticGroup.swift */,
+				DDC0125B205C0EA200FF525E /* MatrixLieAlgebra.swift */,
+				DD9E9315205D68DD002C0ADB /* GeneralLinearLieAlgebra.swift */,
+				14FC8FF4206200D000D472D0 /* OrthogonalLieAlgebra.swift */,
+				14FC8FF62062015600D472D0 /* UnitaryLieAlgebra.swift */,
+				14FC8FF820621AB600D472D0 /* SymplecticLieAlgebra.swift */,
+			);
+			path = MatrixGroup;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -585,6 +656,8 @@
 				14360F911FB130350075133E /* ComputationalMatrix.swift in Sources */,
 				14360F931FB148C30075133E /* MatrixEliminator.swift in Sources */,
 				1410C1131FB1EC9E00CEE47D /* Array.swift in Sources */,
+				DD4E16F920614E53004B040C /* NormedSpace.swift in Sources */,
+				DD475046205B980B00C75440 /* UnitaryGroup.swift in Sources */,
 				DD4E23292056496100BB0CAD /* PowerSeries.swift in Sources */,
 				144AD2911EC21A4500E23890 /* Homology.swift in Sources */,
 				DD119BC21FE2271E00FB4758 /* ExactSequence.swift in Sources */,
@@ -594,25 +667,31 @@
 				14D261341EE4614E006775E2 /* Set.swift in Sources */,
 				140BCD511EBA3F8A00D7CE74 /* ChainComplex.swift in Sources */,
 				1424F5011EB997780052581F /* Matrix.swift in Sources */,
-				1499CD011F236328009C3C99 /* CustomOperations.swift in Sources */,
+				1499CD011F236328009C3C99 /* CustomOperators.swift in Sources */,
 				14546DB71FDFCE5100898326 /* HomologyMap.swift in Sources */,
 				145F46011EEAF0CC0045CDB2 /* Z_2.swift in Sources */,
 				147D98061EB9B26200C736AC /* Dictionary.swift in Sources */,
-				1424F50E1EB997780052581F /* IntTypeParameter.swift in Sources */,
+				1424F50E1EB997780052581F /* TypeParameters.swift in Sources */,
+				DD9E9316205D68DD002C0ADB /* GeneralLinearLieAlgebra.swift in Sources */,
 				DD4E539B1FE374F300C75F7E /* FreeModuleBase.swift in Sources */,
 				1410C1191FB203E200CEE47D /* DiagonalEliminator.swift in Sources */,
 				14546DAB1FDF9DD200898326 /* GroupStructure.swift in Sources */,
 				DD17AFF31FE37F3A00AA5924 /* ChainComplexOperations.swift in Sources */,
+				DDC0125C205C0EA200FF525E /* MatrixLieAlgebra.swift in Sources */,
 				1424F4FF1EB997780052581F /* Ring.swift in Sources */,
 				DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */,
 				145339C01EC7D67100F014F4 /* Ref.swift in Sources */,
 				1424F5061EB997780052581F /* Integer.swift in Sources */,
+				DDC0125A205BB06A00FF525E /* Quaternion.swift in Sources */,
+				DDF1DE14205B8E9B0097885E /* OrthogonalGroup.swift in Sources */,
+				DD9E9314205D65F1002C0ADB /* VectorSpace.swift in Sources */,
 				1424F5001EB997780052581F /* FreeModule.swift in Sources */,
 				DD90ACC91F763553001AFC9C /* PolynomialIdeal.swift in Sources */,
 				1424F5041EB997780052581F /* FreeModHom.swift in Sources */,
 				DD9B56C9205671A300215EA6 /* BernoulliNumbers.swift in Sources */,
 				1410C1171FB203CC00CEE47D /* HermiteEliminator.swift in Sources */,
 				145B10D51FB19B03004EC11E /* MatrixEliminationResult.swift in Sources */,
+				DD475048205BA73F00C75440 /* SymplecticGroup.swift in Sources */,
 				14D261321EE44DB4006775E2 /* AlgebraicStructure.swift in Sources */,
 				DD60928C20541A5E00ABD84F /* Expression.swift in Sources */,
 				DDB7217E205633FB0001428F /* AlternatingGroup.swift in Sources */,
@@ -625,22 +704,29 @@
 				1410C11B1FB2040900CEE47D /* SmithEliminator.swift in Sources */,
 				141417311ECE984800B167CB /* Sequence.swift in Sources */,
 				1424F4FE1EB997780052581F /* Monoid.swift in Sources */,
-				1424F50F1EB997780052581F /* PolynomialTypeParameter.swift in Sources */,
 				147D98031EB9B06900C736AC /* IntegerFactorization.swift in Sources */,
+				DDF1DE10205B767E0097885E /* MatrixGroup.swift in Sources */,
 				147D965D1F30759F00967992 /* ChainMap.swift in Sources */,
 				DD6AF9CB20542499000FC818 /* IntList.swift in Sources */,
 				1424F50D1EB997780052581F /* PolynomialFactorization.swift in Sources */,
 				1424F5031EB997780052581F /* Polynominal.swift in Sources */,
+				DD63B03C205B911E00FAAC42 /* Complex.swift in Sources */,
 				1424F4FD1EB997780052581F /* Module.swift in Sources */,
 				1424F5111EB997780052581F /* optable.swift in Sources */,
 				1424F5021EB997780052581F /* SymmetricGroup.swift in Sources */,
 				DDB7217A205622DD0001428F /* Permutation.swift in Sources */,
 				1424F4FC1EB997780052581F /* Group.swift in Sources */,
 				DD9B56C720566A9B00215EA6 /* MultiplicativeSequence.swift in Sources */,
+				14FC8FF72062015600D472D0 /* UnitaryLieAlgebra.swift in Sources */,
+				14FC8FF920621AB600D472D0 /* SymplecticLieAlgebra.swift in Sources */,
+				DDF1DE0D205B6C520097885E /* GeneralLinearGroup.swift in Sources */,
 				146A296E1F1DA32400531AA2 /* HomologyClass.swift in Sources */,
-				140F4FAF1F96F66400C4C039 /* random.swift in Sources */,
+				140F4FAF1F96F66400C4C039 /* Randomable.swift in Sources */,
+				DD9E9310205D5E3A002C0ADB /* SquareMatrix.swift in Sources */,
+				14FC8FF5206200D000D472D0 /* OrthogonalLieAlgebra.swift in Sources */,
 				1410C1151FB203AE00CEE47D /* EchelonEliminator.swift in Sources */,
 				14546DAF1FDFA69400898326 /* ModuleStructure.swift in Sources */,
+				DD9E9312205D5ED7002C0ADB /* Vector.swift in Sources */,
 				148B41151FAF765000E59134 /* SimpleModuleStructure.swift in Sources */,
 				DD6AF9CD205424D2000FC818 /* SymmetricPolynomial.swift in Sources */,
 			);

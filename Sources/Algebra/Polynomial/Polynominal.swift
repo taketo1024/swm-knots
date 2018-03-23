@@ -52,9 +52,19 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
         return i < coeffs.count ? coeffs[i] : 0
     }
     
-    public func apply(_ x: K) -> K {
-        return (0 ... degree).reduce(0) { (sum, i) -> K in
-            sum + (coeffs[i] * (x ** i))
+    // Horner's method
+    // see: https://en.wikipedia.org/wiki/Horner%27s_method
+    public func evaluate(_ x: K) -> K {
+        return (0 ..< degree).reversed().reduce(leadCoeff) { (res, i) in
+            coeff(i) + x * res
+        }
+    }
+    
+    // MEMO: more generally, this could be done with any superring of K.
+    public func evaluate<n>(_ x: SquareMatrix<n, K>) -> SquareMatrix<n, K> {
+        typealias M = SquareMatrix<n, K>
+        return (0 ..< degree).reversed().reduce(leadCoeff * M.identity) { (res, i) -> M in
+            M(scalar: coeff(i)) + x * res // <- the compiler complains that this is too complex...
         }
     }
     

@@ -14,7 +14,7 @@ public struct FreeModuleHom<A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Modu
     public init<n, m>(from: [A], to: [B], matrix: Matrix<n, m, R>) {
         self.map = { a in
             if let j = from.index(of: a) {
-                return Codomain(zip(to, matrix.colArray(j)))
+                return Codomain(zip(to, matrix.colVector(j).grid))
             } else {
                 return Codomain.zero
             }

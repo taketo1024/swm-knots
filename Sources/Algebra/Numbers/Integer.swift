@@ -12,13 +12,25 @@ extension IntegerNumber: EuclideanRing {
     }
     
     public var degree: Int {
-        return abs(self)
+        return Swift.abs(self)
+    }
+    
+    public var abs: IntegerNumber {
+        return Swift.abs(self)
     }
     
     public var inverse: IntegerNumber? {
-        return (abs(self) == 1) ? self : nil
+        return (self.abs == 1) ? self : nil
     }
     
+    public var isEven: Bool {
+        return (self % 2 == 0)
+    }
+    
+    public var sign: IntegerNumber {
+        return isEven ? 1 : -1
+    }
+
     public static func eucDiv(_ a: IntegerNumber, _ b: IntegerNumber) -> (q: IntegerNumber, r: IntegerNumber) {
         let q = a / b
         return (q: q, r: a - q * b)
@@ -39,10 +51,6 @@ extension IntegerNumber: EuclideanRing {
         default:
             return (0 ..< n).reduce(1){ (res, _) in res * self }
         }
-    }
-    
-    public var isEven: Bool {
-        return (self % 2 == 0)
     }
 }
 

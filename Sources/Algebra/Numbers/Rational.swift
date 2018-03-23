@@ -1,14 +1,18 @@
 import Foundation
 
-public struct RationalNumber: Field {
-    fileprivate let p, q: IntegerNumber
+public struct RationalNumber: Field, Comparable {
+    internal let p, q: IntegerNumber
+    
+    public init(rationalValue r: RationalNumber) {
+        self.init(r.p, r.q)
+    }
     
     public init(_ p: IntegerNumber, _ q: IntegerNumber) {
         guard q != 0 else {
             fatalError("Given 0 for the dominator of a RationalNumber")
         }
         
-        let d = abs(gcd(p, q)) * (q / abs(q))
+        let d = gcd(p, q).abs * q.sign
         if d == 1 {
             (self.p, self.q) = (p, q)
         } else {
@@ -22,6 +26,10 @@ public struct RationalNumber: Field {
     
     public init(_ n: IntegerNumber) {
         self.init(intValue: n)
+    }
+    
+    public var abs: RationalNumber {
+        return (p >= 0) == (q >= 0) ? self : -self
     }
     
     public var inverse: RationalNumber? {
@@ -58,6 +66,10 @@ public struct RationalNumber: Field {
     
     public static func / (a: RationalNumber, b: RationalNumber) -> RationalNumber {
         return RationalNumber(a.p * b.q, a.q * b.p)
+    }
+    
+    public static func <(lhs: RationalNumber, rhs: RationalNumber) -> Bool {
+        return lhs.p * rhs.q < rhs.p * lhs.q
     }
     
     public var description: String {

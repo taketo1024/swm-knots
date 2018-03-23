@@ -155,16 +155,6 @@ public struct MatrixEliminationResultWrapper<n: _Int, m: _Int, R: EuclideanRing>
     public var diagonal: [R] {
         return res.diagonal
     }
-    
-    public var kernelBasis: [ColVector<m, R>] {
-        let matrix = res.kernelMatrix.asMatrix() as Matrix<m, Dynamic, R>
-        return (0 ..< matrix.cols).map{ matrix.colVector($0) }
-    }
-    
-    public var imageBasis: [ColVector<n, R>] {
-        let matrix = res.imageMatrix.asMatrix() as Matrix<n, Dynamic, R>
-        return (0 ..< matrix.cols).map{ matrix.colVector($0) }
-    }
 }
 
 public extension MatrixEliminationResultWrapper where n == m {

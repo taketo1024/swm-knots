@@ -1,12 +1,5 @@
 import Foundation
 
-public typealias ColVector<n: _Int, R: Ring>    = Matrix<n, _1, R>
-public typealias RowVector<m: _Int, R: Ring>    = Matrix<_1, m, R>
-public typealias SquareMatrix<n: _Int, R: Ring> = Matrix<n, n, R>
-public typealias DynamicMatrix<R: Ring>         = Matrix<Dynamic, Dynamic, R>
-public typealias DynamicColVector<R: Ring>      = Matrix<Dynamic, _1, R>
-public typealias DynamicRowVector<R: Ring>      = Matrix<_1, Dynamic, R>
-
 public typealias MatrixComponent<R> = (row: Int, col: Int, value: R)
 
 public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
@@ -16,73 +9,78 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     public let cols: Int
     public var grid: [R]
     
-    // Root Initializer
-    private init(_ rows: Int, _ cols: Int, _ grid: [R]) {
+    // 1. Initialize by Grid.
+    public init(grid: [R]) {
+        let (rows, cols) = (n.intValue, m.intValue)
+        
         self.rows = rows
         self.cols = cols
-        self.grid = grid
-    }
-    
-    // 1. Initialize by Grid.
-    public init(rows r: Int? = nil, cols c: Int? = nil, grid g: [R]) {
-        let (rows, cols) = Matrix.determineSize(r, c)
         
-        let grid = { () -> [R] in
-            let (k, l) = (g.count, rows * cols)
+        self.grid = { () -> [R] in
+            let (k, l) = (grid.count, rows * cols)
             if  k == l {
-                return g
+                return grid
             } else if k < l {
-                return g + Array(repeating: R.zero, count: l - k)
+                return grid + Array(repeating: R.zero, count: l - k)
             } else {
-                return g[0 ..< l].toArray()
+                return grid[0 ..< l].toArray()
             }
         }()
-        
-        self.init(rows, cols, grid)
+    }
+    
+    public init(_ grid: R...) {
+        self.init(grid: grid)
     }
     
     // 2. Initialize by Generator.
-    public init(rows r: Int? = nil, cols c: Int? = nil, generator g: (Int, Int) -> R) {
-        let (rows, cols) = Matrix.determineSize(r, c)
+    public init(generator g: (Int, Int) -> R) {
+        let (rows, cols) = (n.intValue, m.intValue)
         let grid = (0 ..< rows * cols).map { (index: Int) -> R in
             let (i, j) = index /% cols
             return g(i, j)
         }
-        
-        self.init(rows, cols, grid)
+        self.init(grid: grid)
     }
     
     // 3. Initialize by Components.
-    public init(rows r: Int? = nil, cols c: Int? = nil, components: [MatrixComponent<R>]) {
-        let (rows, cols) = Matrix.determineSize(r, c)
+    public init(components: [MatrixComponent<R>]) {
+        let (rows, cols) = (n.intValue, m.intValue)
         var grid = Array(repeating: R.zero, count: rows * cols)
         for (i, j, a) in components {
             grid[(i * cols) + j] = a
         }
-        
-        self.init(rows, cols, grid)
+        self.init(grid: grid)
     }
     
     // Convenience Initializer 1.
-    public init(_ grid: R...) {
-        self.init(rows: nil, cols: nil, grid: grid)
+    public init(fill a: R) {
+        self.init() { (_, _) in a }
     }
     
     // Convenience Initializer 2.
-    public init(rows r: Int? = nil, cols c: Int? = nil, fill: R = .zero) {
-        let (rows, cols) = Matrix.determineSize(r, c)
-        let grid = Array(repeating: fill, count: rows * cols)
-        self.init(rows, cols, grid)
+    public init(diagonal d: [R]) {
+        self.init() { (i, j) in (i == j && i < d.count) ? d[i] : .zero }
     }
     
     // Convenience Initializer 3.
-    public init(rows r: Int? = nil, cols c: Int? = nil, diagonal: [R]) {
-        let (rows, cols) = Matrix.determineSize(r, c)
-        var grid = Array(repeating: R.zero, count: rows * cols)
-        for (i, a) in diagonal.enumerated() {
-            grid[(i * cols) + i] = a
+    public init(scalar a: R) {
+        self.init() { (i, j) in (i == j) ? a : .zero }
+    }
+    
+    // Block Matrix [A, B; C, D]
+    public init<n1, n2, m1, m2>(_ A: Matrix<n1, m1, R>, _ B: Matrix<n1, m2, R>, _ C: Matrix<n2, m1, R>, _ D: Matrix<n2, m2, R>) {
+        let (n1, n2, m1, m2) = (n1.intValue, n2.intValue, m1.intValue, m2.intValue)
+        assert(n1 + n2 == n.intValue)
+        assert(m1 + m2 == m.intValue)
+        self.init() { (i, j) in
+            switch (i, j) {
+            case (i, j) where i <  n1 && j <  m1: return A[i, j]
+            case (i, j) where i >= n1 && j <  m1: return B[i - n1, j]
+            case (i, j) where i <  n1 && j >= m1: return C[i, j - m1]
+            case (i, j) where i >= n1 && j >= m1: return D[i - n1, j - m1]
+            default: return .zero
+            }
         }
-        self.init(rows, cols, grid)
     }
     
     @_transparent
@@ -113,42 +111,31 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     
     public static func +(a: Matrix<n, m, R>, b: Matrix<n, m, R>) -> Matrix<n, m, R> {
         assert((a.rows, a.cols) == (b.rows, b.cols), "Mismatching matrix size.")
-        return Matrix(rows: a.rows, cols: a.cols) { (i, j) in a[i, j] + b[i, j] }
+        return Matrix { (i, j) in a[i, j] + b[i, j] }
     }
     
     public prefix static func -(a: Matrix<n, m, R>) -> Matrix<n, m, R> {
-        return Matrix(rows: a.rows, cols: a.cols) { (i, j) in -a[i, j] }
+        return Matrix { (i, j) in -a[i, j] }
     }
     
     public static func *(r: R, a: Matrix<n, m, R>) -> Matrix<n, m, R> {
-        return Matrix(rows: a.rows, cols: a.cols) { (i, j) in r * a[i, j] }
+        return Matrix { (i, j) in r * a[i, j] }
     }
     
     public static func *(a: Matrix<n, m, R>, r: R) -> Matrix<n, m, R> {
-        return Matrix(rows: a.rows, cols: a.cols) { (i, j) in a[i, j] * r }
+        return Matrix { (i, j) in a[i, j] * r }
     }
     
     @_inlineable
     public static func * <p>(a: Matrix<n, m, R>, b: Matrix<m, p, R>) -> Matrix<n, p, R> {
-        assert(a.cols == b.rows, "Mismatching matrix size.")
-        return Matrix<n, p, R>(rows: a.rows, cols: b.cols) { (i, k) in
+        return Matrix<n, p, R> { (i, k) in
             (0 ..< a.cols).sum { j in a[i, j] * b[j, k] }
         }
     }
     
     public var transposed: Matrix<m, n, R> {
-        return Matrix<m, n, R>(rows: cols, cols: rows) { (i, j) in self[j, i] }
+        return Matrix<m, n, R> { (i, j) in self[j, i] }
     }
-    
-    // --TODO delete
-    public func rowArray(_ i: Int) -> [R] {
-        return (0 ..< cols).map{ j in self[i, j] }
-    }
-    
-    public func colArray(_ j: Int) -> [R] {
-        return (0 ..< rows).map{ i in self[i, j] }
-    }
-    // --TODO
     
     public func rowVector(_ i: Int) -> RowVector<m, R> {
         return submatrix(rowRange: i ..< i + 1)
@@ -167,18 +154,17 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
     
     public func submatrix<k: _Int, l: _Int>(_ rowRange: CountableRange<Int>, _ colRange: CountableRange<Int>) -> Matrix<k, l, R> {
-        let (r, c) = (rowRange, colRange)
-        return Matrix<k, l, R>(rows: r.upperBound - r.lowerBound, cols: c.upperBound - c.lowerBound) { (i, j) in
-            self[i + r.lowerBound, j + c.lowerBound]
+        return Matrix<k, l, R> { (i, j) in
+            self[i + rowRange.lowerBound, j + colRange.lowerBound]
         }
     }
     
-    public var asDynamic: DynamicMatrix<R> {
-        if let A = self as? DynamicMatrix<R> {
-            return A
-        } else {
-            return DynamicMatrix<R>(rows: rows, cols: cols, grid: grid)
-        }
+    public var components: [MatrixComponent<R>] {
+        return self.filter{ (_, _, a) in a != .zero }
+    }
+    
+    public var asComputational: ComputationalMatrix<R> {
+        return ComputationalMatrix(rows: rows, cols: cols, components: components)
     }
     
     public var hashValue: Int {
@@ -202,27 +188,7 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
     
     public static var symbol: String {
-        return "M(\((n.self == Dynamic.self ? "?" : "\(n.intValue)")), \((m.self == Dynamic.self ? "?" : "\(m.intValue)")); \(R.symbol))"
-    }
-    
-    private static func determineSize(_ rows: Int?, _ cols: Int?) -> (rows: Int, cols: Int) {
-        // true: determined, false: not determined
-        switch (!(n.self is Dynamic.Type), !(m.self is Dynamic.Type), rows != nil, cols != nil) {
-        case (true, true, _, _):
-            assert(rows == nil || rows! == n.intValue, "rows mismatch with type-parameter")
-            assert(cols == nil || cols! == m.intValue, "cols mismatch with type-parameter")
-            return (n.intValue, m.intValue)
-        case (false, false, true, true):
-            return (rows!, cols!)
-        case (true, false, _, true):
-            assert(rows == nil || rows! == n.intValue, "rows mismatch with type-parameter")
-            return (n.intValue, cols!)
-        case (false, true, true, _):
-            assert(cols == nil || cols! == m.intValue, "cols mismatch with type-parameter")
-            return (rows!, m.intValue)
-        default:
-            fatalError("Matrix size indeterminable.")
-        }
+        return "M(\(n.intValue), \(m.intValue)); \(R.symbol))"
     }
 }
 
@@ -247,52 +213,33 @@ public extension Matrix where R: EuclideanRing {
     }
 }
 
-public extension Matrix where m == _1 {
-    public subscript(index: Int) -> R {
-        @_transparent
-        get { return self[index, 0] }
-        
-        @_transparent
-        set { self[index, 0] = newValue }
+// TODO conditional conformance
+public extension Matrix where R: NormedSpace {
+    public var norm: RealNumber {
+        return sqrt( self.sum { (_, _, a) in a.norm ** 2 } )
+    }
+    
+    public var maxNorm: RealNumber {
+        return self.reduce(.zero) { (res, e) in Swift.max(res, e.2.norm) }
     }
 }
 
-public extension Matrix where n == _1 {
-    public subscript(index: Int) -> R {
-        @_transparent
-        get { return self[0, index] }
-        
-        @_transparent
-        set { self[0, index] = newValue }
+public extension Matrix where R == RealNumber {
+    public var asComplex: Matrix<n, m, ComplexNumber> {
+        return Matrix<n, m, ComplexNumber>(grid: grid.map{ ComplexNumber($0) })
     }
 }
 
-// TODO: conform to Ring after conditional conformance is supported.
-public extension Matrix where n == m {
-    public static var identity: Matrix<n, n, R> {
-        assert(n.self != Dynamic.self)
-        return identity(size: n.intValue)
+public extension Matrix where R == ComplexNumber {
+    public var realPart: Matrix<n, m, RealNumber> {
+        return Matrix<n, m, RealNumber>(grid: grid.map{ $0.real })
     }
     
-    public static func identity(size: Int) -> Matrix<n, n, R> {
-        return Matrix<n, n, R> (rows: size, cols: size) { $0 == $1 ? 1 : 0 }
+    public var imaginaryPart: Matrix<n, m, RealNumber> {
+        return Matrix<n, m, RealNumber>(grid: grid.map{ $0.imaginary })
     }
     
-    public static func ** (a: Matrix<n, n, R>, k: Int) -> Matrix<n, n, R> {
-        return k == 0 ? Matrix.identity(size: a.rows) : a * (a ** (k - 1))
-    }
-}
-
-public extension Matrix where n == m, R: EuclideanRing {
-    public var determinant: R {
-        return eliminate().determinant
-    }
-    
-    public var isInvertible: Bool {
-        return determinant.isInvertible
-    }
-    
-    public var inverse: Matrix<n, n, R>? {
-        return eliminate().inverse
+    public var adjoint: Matrix<m, n, R> {
+        return Matrix<m, n, R> { (i, j) in self[j, i].conjugate }
     }
 }

@@ -16,7 +16,7 @@ public func primes(upTo n: IntegerNumber) -> [IntegerNumber] {
     }
     
     var result: [IntegerNumber] = []
-    var seive = primes + Array( (primes.last ?? 1) + 1 ... abs(n) )
+    var seive = primes + Array( (primes.last ?? 1) + 1 ... n.abs )
     
     while let a = seive.first {
         seive = seive.filter{ $0 % a > 0 }
@@ -35,7 +35,7 @@ public extension IntegerNumber {
         
         var result: [IntegerNumber] = []
         
-        let a = abs(self)
+        let a = self.abs
         let m = Int(sqrt(Double(a)))
         
         for d in 1...m {
