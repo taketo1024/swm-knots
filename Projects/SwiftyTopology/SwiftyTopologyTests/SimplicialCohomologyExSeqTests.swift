@@ -10,7 +10,7 @@ import XCTest
 import SwiftyAlgebra
 @testable import SwiftyTopology
 
-class SimplicialHomologyExSeqTests: XCTestCase {
+class SimplicialCohomologyExSeqTests: XCTestCase {
     
     typealias H<R: EuclideanRing> = Homology<Simplex, R>
     
@@ -23,18 +23,18 @@ class SimplicialHomologyExSeqTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    
     func test_pair_DS() {
         let n = 2
         let D = SimplicialComplex.ball(dim: n)
         let S = D.boundary.named("S^\(n-1)")
         
-        var E = HomologyExactSequence.pair(D, S, Z.self)
+        var E = CohomologyExactSequence.pair(D, S, Z.self)
         
-        E.fill(column: 0)
         E.fill(column: 1)
+        E.fill(column: 2)
         
-        let h = E.solve(column: 2).map{ $0! }
+        let h = E.solve(column: 0).map{ $0! }
+        print(E.detailDescription)
         
         XCTAssert(h[0].isTrivial)
         XCTAssert(h[1].isTrivial)
@@ -49,18 +49,19 @@ class SimplicialHomologyExSeqTests: XCTestCase {
         let A = (X - s).named("A")
         let B = s.asComplex.named("B")
         
-        var E = HomologyExactSequence.MayerVietoris(X, A, B, Z.self)
-        
-        E.fill(column: 0)
+        var E = CohomologyExactSequence.MayerVietoris(X, A, B, Z.self)
+
         E.fill(column: 1)
+        E.fill(column: 2)
         
-        let h = E.solve(column: 2).map{ $0! }
+        let h = E.solve(column: 0).map{ $0! }
+        print(E.detailDescription)
         
         XCTAssert(h[0].isFree && h[0].rank == 1)
         XCTAssert(h[1].isFree && h[1].rank == 2)
         XCTAssert(h[2].isFree && h[2].rank == 1)
     }
-
+    
     func test_MV_RP2() {
         let n = 2
         let X = SimplicialComplex.realProjectiveSpace(dim: n)
@@ -68,15 +69,15 @@ class SimplicialHomologyExSeqTests: XCTestCase {
         
         let A = (X - s).named("A")
         let B = s.asComplex.named("B")
-        var E = HomologyExactSequence.MayerVietoris(X, A, B, Z.self)
-
-        E.fill(column: 0)
+        var E = CohomologyExactSequence.MayerVietoris(X, A, B, Z.self)
+        
         E.fill(column: 1)
-
-        let h = E.solve(column: 2).map{ $0! }
+        E.fill(column: 2)
+        
+        let h = E.solve(column: 0).map{ $0! }
         
         XCTAssert(h[0].isFree && h[0].rank == 1)
-        XCTAssert(h[1].summands.count == 1 && h[1].torsion(0) == 2)
-        XCTAssert(h[2].isTrivial)
+        XCTAssert(h[1].isTrivial)
+        XCTAssert(h[2].summands.count == 1 && h[2].torsion(0) == 2)
     }
 }
