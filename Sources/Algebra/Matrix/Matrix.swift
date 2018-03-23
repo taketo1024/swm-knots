@@ -9,13 +9,10 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     public let cols: Int
     public var grid: [R]
     
-    // 1. Initialize by Grid.
-    public init(grid: [R]) {
-        let (rows, cols) = (n.intValue, m.intValue)
-        
+    // Root initializer, accepts both static/dynamic size.
+    internal init(_ rows: Int, _ cols: Int, _ grid: [R]) {
         self.rows = rows
         self.cols = cols
-        
         self.grid = { () -> [R] in
             let (k, l) = (grid.count, rows * cols)
             if  k == l {
@@ -28,28 +25,45 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         }()
     }
     
+    internal init(_ rows: Int, _ cols: Int, _ g: (Int, Int) -> R) {
+        let grid = (0 ..< rows * cols).map { (index: Int) -> R in
+            let (i, j) = index /% cols
+            return g(i, j)
+        }
+        self.init(rows, cols, grid)
+    }
+    
+    internal init(_ rows: Int, _ cols: Int, _ components: [MatrixComponent<R>]) {
+        var grid = Array(repeating: R.zero, count: rows * cols)
+        for (i, j, a) in components {
+            grid[(i * cols) + j] = a
+        }
+        self.init(rows, cols, grid)
+    }
+    
+    // 1. Initialize by Grid.
+    public init(grid: [R]) {
+        assert(!n.isDynamic && !m.isDynamic)
+        let (rows, cols) = (n.intValue, m.intValue)
+        self.init(rows, cols, grid)
+    }
+    
     public init(_ grid: R...) {
         self.init(grid: grid)
     }
     
     // 2. Initialize by Generator.
     public init(generator g: (Int, Int) -> R) {
+        assert(!n.isDynamic && !m.isDynamic)
         let (rows, cols) = (n.intValue, m.intValue)
-        let grid = (0 ..< rows * cols).map { (index: Int) -> R in
-            let (i, j) = index /% cols
-            return g(i, j)
-        }
-        self.init(grid: grid)
+        self.init(rows, cols, g)
     }
     
     // 3. Initialize by Components.
     public init(components: [MatrixComponent<R>]) {
+        assert(!n.isDynamic && !m.isDynamic)
         let (rows, cols) = (n.intValue, m.intValue)
-        var grid = Array(repeating: R.zero, count: rows * cols)
-        for (i, j, a) in components {
-            grid[(i * cols) + j] = a
-        }
-        self.init(grid: grid)
+        self.init(rows, cols, components)
     }
     
     // Convenience Initializer 1.
@@ -111,30 +125,30 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     
     public static func +(a: Matrix<n, m, R>, b: Matrix<n, m, R>) -> Matrix<n, m, R> {
         assert((a.rows, a.cols) == (b.rows, b.cols), "Mismatching matrix size.")
-        return Matrix { (i, j) in a[i, j] + b[i, j] }
+        return Matrix(a.rows, a.cols) { (i, j) in a[i, j] + b[i, j] }
     }
     
     public prefix static func -(a: Matrix<n, m, R>) -> Matrix<n, m, R> {
-        return Matrix { (i, j) in -a[i, j] }
+        return Matrix(a.rows, a.cols) { (i, j) in -a[i, j] }
     }
     
     public static func *(r: R, a: Matrix<n, m, R>) -> Matrix<n, m, R> {
-        return Matrix { (i, j) in r * a[i, j] }
+        return Matrix(a.rows, a.cols) { (i, j) in r * a[i, j] }
     }
     
     public static func *(a: Matrix<n, m, R>, r: R) -> Matrix<n, m, R> {
-        return Matrix { (i, j) in a[i, j] * r }
+        return Matrix(a.rows, a.cols) { (i, j) in a[i, j] * r }
     }
     
-    @_inlineable
     public static func * <p>(a: Matrix<n, m, R>, b: Matrix<m, p, R>) -> Matrix<n, p, R> {
-        return Matrix<n, p, R> { (i, k) in
+        assert(a.cols == b.rows)
+        return Matrix<n, p, R>(a.rows, b.cols) { (i, k) in
             (0 ..< a.cols).sum { j in a[i, j] * b[j, k] }
         }
     }
     
     public var transposed: Matrix<m, n, R> {
-        return Matrix<m, n, R> { (i, j) in self[j, i] }
+        return Matrix<m, n, R>(cols, rows) { (i, j) in self[j, i] }
     }
     
     public func rowVector(_ i: Int) -> RowVector<m, R> {
@@ -154,7 +168,8 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
     
     public func submatrix<k: _Int, l: _Int>(_ rowRange: CountableRange<Int>, _ colRange: CountableRange<Int>) -> Matrix<k, l, R> {
-        return Matrix<k, l, R> { (i, j) in
+        let (rows, cols) = (rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound)
+        return Matrix<k, l, R>(rows, cols) { (i, j) in
             self[i + rowRange.lowerBound, j + colRange.lowerBound]
         }
     }
@@ -188,7 +203,23 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
     
     public static var symbol: String {
-        return "M(\(n.intValue), \(m.intValue)); \(R.symbol))"
+        return "M(\(n.isDynamic ? "D" : String(n.intValue)), \(m.isDynamic ? "D" : String(m.intValue)); \(R.symbol))"
+    }
+}
+
+public typealias DynamicMatrix<R: Ring> = Matrix<Dynamic, Dynamic, R>
+
+public extension Matrix where n == Dynamic, m == Dynamic {
+    internal init(rows: Int, cols: Int, grid: [R]) {
+        self.init(rows, cols, grid)
+    }
+    
+    internal init(rows: Int, cols: Int, generator g: (Int, Int) -> R) {
+        self.init(rows, cols, g)
+    }
+    
+    internal init(rows: Int, cols: Int, components: [MatrixComponent<R>]) {
+        self.init(rows, cols, components)
     }
 }
 
