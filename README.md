@@ -10,11 +10,10 @@ You can run the playgrounds under the project.  
 
 ![ss2.png](doc/ss2.png)
 
-Or you can run on REPL by:  
+## Using Mathematical Symbols
 
-```
-$ make repl
-```
+We make use of mathematical symbols such as sets 𝐙, 𝐐, 𝐑, 𝐂 and operators ⊕, ⊗ etc. Copy the folder `CodeSnippets` to `~/Library/Xcode/UserData/` then you can quickly input these symbols by the completion of Xcode.
+
 ![ss3.png](doc/ss3.png)
 
 ## Examples
@@ -22,10 +21,8 @@ $ make repl
 ### Rational Numbers
 
 ```swift
-typealias Q = 𝐐
-
-let a = Q(4, 5)  // 4/5
-let b = Q(3, 2)  // 3/2
+let a = 𝐐(4, 5)  // 4/5
+let b = 𝐐(3, 2)  // 3/2
 
 a + b  // 23/10
 a * b  // 6/5
@@ -35,8 +32,7 @@ b / a  // 15/8
 ### Matrices (type safe)
 
 ```swift
-typealias Z = 𝐙
-typealias M = Matrix<_2, _2, Z>
+typealias M = Matrix<_2, _2, 𝐙> // Matrix of integers with fixed size 2×2.
 
 let a = M(1, 2, 3, 4)  // [1, 2; 3, 4]
 let b = M(2, 1, 1, 2)  // [2, 1; 1, 2]
@@ -66,11 +62,10 @@ t[2]  // 4
 ### Polynomials
 
 ```swift
-typealias Q = 𝐐
-typealias Qx = Polynominal<Q>
+typealias P = Polynominal<𝐐>
 
-let f = Qx(0, 2, -3, 1) // x^3 − 3x^2 + 2x
-let g = Qx(6, -5, 1)    // x^2 − 5x + 6
+let f = P(0, 2, -3, 1) // x^3 − 3x^2 + 2x
+let g = P(6, -5, 1)    // x^2 − 5x + 6
     
 f + g  // x^3 - 2x^2 - 3x + 6
 f * g  // x^5 - 8x^4 + 23x^3 - 28x^2 + 12x
@@ -111,20 +106,18 @@ F_5.printMulTable()
 ### Algebraic Extension
 
 ```swift
-// Construct an algebraic extension over Q:
-// K = Q(√2) = Q[x]/(x^2 - 2).
-
-typealias Q = 𝐐
+// Construct an algebraic extension over 𝐐:
+// K = 𝐐(√2) = 𝐐[x]/(x^2 - 2).
 
 struct p: _Polynomial {                            // p = x^2 - 2, as a struct
-    typealias K = Q
-    static let value = Polynomial<Q>(-2, 0, 1)
+    typealias K = 𝐐
+    static let value = Polynomial<𝐐>(-2, 0, 1)
 }
 
 typealias I = PolynomialIdeal<p>                   // I = (x^2 - 2)
-typealias K = QuotientField<Polynomial<Q>, I>      // K = Q[x]/I
+typealias K = QuotientField<Polynomial<𝐐>, I>      // K = 𝐐[x]/I
 
-let a = Polynomial<Q>(0, 1).asQuotient(in: K.self) // a = x mod I
+let a = Polynomial<𝐐>(0, 1).asQuotient(in: K.self) // a = x mod I
 a * a == 2                                         // true!
 ```
 
@@ -132,29 +125,29 @@ a * a == 2                                         // true!
 
 ```swift
 let S2 = SimplicialComplex.sphere(dim: 2)
-let H = Homology(S2, Z.self)
-print("H(S^2; Z) =", H.detailDescription, "\n")
+let H = Homology(S2, 𝐙.self)
+print("H(S^2; 𝐙) =", H.detailDescription, "\n")
 ```
 
 ```
-H(S^2; Z) = {
-  0 : Z,    [(v1)],
+H(S^2; 𝐙) = {
+  0 : 𝐙,    [(v1)],
   1 : 0,    [],
-  2 : Z,    [-1(v0, v2, v3) + -1(v0, v1, v2) + (v1, v2, v3) + (v0, v1, v3)]
+  2 : 𝐙,    [-1(v0, v2, v3) + -1(v0, v1, v2) + (v1, v2, v3) + (v0, v1, v3)]
 }
 ```
 
 ```swift
 let RP2 = SimplicialComplex.realProjectiveSpace(dim: 2)
 let H = Homology(RP2, 𝐙₂.self)
-print("H(RP^2; Z/2) =", H.detailDescription, "\n")
+print("H(RP^2; 𝐙₂) =", H.detailDescription, "\n")
 ```
 
 ```
-H(RP^2; Z/2) = {
-  0 : Z/2,    [(v1)],
-  1 : Z/2,    [(v0, v1) + (v1, v2) + (v0, v3) + (v2, v3)],
-  2 : Z/2,    [(v0, v2, v3) + (v3, v4, v5) + (v2, v3, v5) + (v1, v2, v5) + (v0, v4, v5) + (v1, v3, v4) + (v0, v1, v5) + (v1, v2, v4) + (v0, v2, v4) + (v0, v1, v3)]
+H(RP^2; 𝐙₂) = {
+  0 : 𝐙₂,    [(v1)],
+  1 : 𝐙₂,    [(v0, v1) + (v1, v2) + (v0, v3) + (v2, v3)],
+  2 : 𝐙₂,    [(v0, v2, v3) + (v3, v4, v5) + (v2, v3, v5) + (v1, v2, v5) + (v0, v4, v5) + (v1, v3, v4) + (v0, v1, v5) + (v1, v2, v4) + (v0, v2, v4) + (v0, v1, v3)]
 }
 ```
 

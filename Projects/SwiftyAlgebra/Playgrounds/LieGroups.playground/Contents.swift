@@ -14,7 +14,7 @@ typealias sl = SpecialLinearLieAlgebra
 typealias n = _2
 
 let i = 𝐂.imaginaryUnit
-let X = gl<n, 𝐂>(0, 2 + i, -2 + i, 0)
+let X = gl<n, CC
 let g = exp(X)
 
 print(X.detailDescription, "\n")
