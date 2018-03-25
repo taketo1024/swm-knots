@@ -70,7 +70,7 @@ class HomologyTests: XCTestCase {
     
     func test_H_D3_Z2() {
         let K = SimplicialComplex.ball(dim: 3)
-        let h  = H(K, Z_2.self)
+        let h  = H(K, 𝐙₂.self)
         XCTAssert(h[0].isFree && h[0].rank == 1)
         XCTAssert(h[1].isTrivial)
         XCTAssert(h[2].isTrivial)
@@ -78,7 +78,7 @@ class HomologyTests: XCTestCase {
     
     func test_H_S2_Z2() {
         let K = SimplicialComplex.sphere(dim: 2)
-        let h  = H(K, Z_2.self)
+        let h  = H(K, 𝐙₂.self)
         XCTAssert(h[0].isFree && h[0].rank == 1)
         XCTAssert(h[1].isTrivial)
         XCTAssert(h[2].isFree && h[2].rank == 1)
@@ -87,7 +87,7 @@ class HomologyTests: XCTestCase {
     func test_H_D3_S2_Z2() {
         let K = SimplicialComplex.ball(dim: 3)
         let L = K.skeleton(2)
-        let h  = H(K, L, Z_2.self)
+        let h  = H(K, L, 𝐙₂.self)
         XCTAssert(h[0].isTrivial)
         XCTAssert(h[1].isTrivial)
         XCTAssert(h[2].isTrivial)
@@ -96,7 +96,7 @@ class HomologyTests: XCTestCase {
     
     func test_H_T2_Z2() {
         let K = SimplicialComplex.torus(dim: 2)
-        let h  = H(K, Z_2.self)
+        let h  = H(K, 𝐙₂.self)
         XCTAssert(h[0].isFree && h[0].rank == 1)
         XCTAssert(h[1].isFree && h[1].rank == 2)
         XCTAssert(h[2].isFree && h[2].rank == 1)
@@ -104,7 +104,7 @@ class HomologyTests: XCTestCase {
     
     func test_H_RP2_Z2() {
         let K = SimplicialComplex.realProjectiveSpace(dim: 2)
-        let h  = H(K, Z_2.self)
+        let h  = H(K, 𝐙₂.self)
         XCTAssert(h[0].isFree && h[0].rank == 1)
         XCTAssert(h[1].isFree && h[1].rank == 1)
         XCTAssert(h[2].isFree && h[2].rank == 1)
@@ -196,7 +196,7 @@ class HomologyTests: XCTestCase {
     
     func test_cH_D3_Z2() {
         let K = SimplicialComplex.ball(dim: 3)
-        let h  = cH(K, Z_2.self)
+        let h  = cH(K, 𝐙₂.self)
         XCTAssert(h[0].isFree && h[0].rank == 1)
         XCTAssert(h[1].isTrivial)
         XCTAssert(h[2].isTrivial)
@@ -204,7 +204,7 @@ class HomologyTests: XCTestCase {
     
     func test_cH_S2_Z2() {
         let K = SimplicialComplex.sphere(dim: 2)
-        let h  = cH(K, Z_2.self)
+        let h  = cH(K, 𝐙₂.self)
         XCTAssert(h[0].isFree && h[0].rank == 1)
         XCTAssert(h[1].isTrivial)
         XCTAssert(h[2].isFree && h[2].rank == 1)
@@ -213,7 +213,7 @@ class HomologyTests: XCTestCase {
     func test_cH_D3_S2_Z2() {
         let K = SimplicialComplex.ball(dim: 3)
         let L = K.skeleton(2)
-        let h  = cH(K, L, Z_2.self)
+        let h  = cH(K, L, 𝐙₂.self)
         XCTAssert(h[0].isTrivial)
         XCTAssert(h[1].isTrivial)
         XCTAssert(h[2].isTrivial)
@@ -222,7 +222,7 @@ class HomologyTests: XCTestCase {
     
     func test_cH_T2_Z2() {
         let K = SimplicialComplex.torus(dim: 2)
-        let h  = cH(K, Z_2.self)
+        let h  = cH(K, 𝐙₂.self)
         XCTAssert(h[0].isFree && h[0].rank == 1)
         XCTAssert(h[1].isFree && h[1].rank == 2)
         XCTAssert(h[2].isFree && h[2].rank == 1)
@@ -230,7 +230,7 @@ class HomologyTests: XCTestCase {
     
     func test_cH_RP2_Z2() {
         let K = SimplicialComplex.realProjectiveSpace(dim: 2)
-        let h  = cH(K, Z_2.self)
+        let h  = cH(K, 𝐙₂.self)
         XCTAssert(h[0].isFree && h[0].rank == 1)
         XCTAssert(h[1].isFree && h[1].rank == 1)
         XCTAssert(h[2].isFree && h[2].rank == 1)

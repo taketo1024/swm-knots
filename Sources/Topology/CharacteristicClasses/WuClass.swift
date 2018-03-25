@@ -10,8 +10,8 @@ import Foundation
 import SwiftyAlgebra
 
 public extension SimplicialComplex {
-    public func WuClass(_ p: Int) -> CohomologyClass<Dual<Simplex>, Z_2>? {
-        guard let μ = orientationClass(Z_2.self) else {
+    public func WuClass(_ p: Int) -> CohomologyClass<Dual<Simplex>, 𝐙₂>? {
+        guard let μ = orientationClass(𝐙₂.self) else {
             return nil
         }
         
@@ -21,9 +21,9 @@ public extension SimplicialComplex {
         // Aim: compute (x_i)'s.
         //
         // Let p + q = n,
-        //     H^q =: <b_1, ..., b_k> ( H^q ~= (H^q)^* ~= H^p, since Z_2: field)
+        //     H^q =: <b_1, ..., b_k> ( H^q ~= (H^q)^* ~= H^p, since 𝐙₂: field)
         
-        let cH = Cohomology(self, Z_2.self)
+        let cH = Cohomology(self, 𝐙₂.self)
         let n = cH.topDegree
         let q = n - p
         
@@ -68,11 +68,11 @@ public extension SimplicialComplex {
         return x.sum { (i, _, x_i) in x_i * a[i] }
     }
     
-    public var WuClasses: [CohomologyClass<Dual<Simplex>, Z_2>] {
+    public var WuClasses: [CohomologyClass<Dual<Simplex>, 𝐙₂>] {
         return validDims.flatMap { i in WuClass(i) }
     }
     
-    public var totalWuClass: CohomologyClass<Dual<Simplex>, Z_2> {
+    public var totalWuClass: CohomologyClass<Dual<Simplex>, 𝐙₂> {
         return WuClasses.sumAll()
     }
 }

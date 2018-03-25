@@ -9,15 +9,15 @@
 import Foundation
 
 public struct UnitaryLieAlgebra<n: _Int>: MatrixLieAlgebra {
-    public typealias CoeffRing   = RealNumber // MEMO: not a C-vec sp.
-    public typealias ElementRing = ComplexNumber
+    public typealias CoeffRing   = 𝐑 // MEMO: not a C-vec sp.
+    public typealias ElementRing = 𝐂
     
-    public let matrix: SquareMatrix<n, ComplexNumber>
-    public init(_ matrix: SquareMatrix<n, ComplexNumber>) {
+    public let matrix: SquareMatrix<n, 𝐂>
+    public init(_ matrix: SquareMatrix<n, 𝐂>) {
         self.matrix = matrix
     }
 
-    public static func contains(_ X: GeneralLinearLieAlgebra<n, ComplexNumber>) -> Bool {
+    public static func contains(_ X: GeneralLinearLieAlgebra<n, 𝐂>) -> Bool {
         return X.matrix.isSkewHermitian
     }
     
@@ -27,15 +27,15 @@ public struct UnitaryLieAlgebra<n: _Int>: MatrixLieAlgebra {
 }
 
 public struct SpecialUnitaryLieAlgebra<n: _Int>: MatrixLieAlgebra {
-    public typealias CoeffRing   = RealNumber // MEMO: not a C-vec sp.
-    public typealias ElementRing = ComplexNumber
+    public typealias CoeffRing   = 𝐑 // MEMO: not a C-vec sp.
+    public typealias ElementRing = 𝐂
 
-    public let matrix: SquareMatrix<n, ComplexNumber>
-    public init(_ matrix: SquareMatrix<n, ComplexNumber>) {
+    public let matrix: SquareMatrix<n, 𝐂>
+    public init(_ matrix: SquareMatrix<n, 𝐂>) {
         self.matrix = matrix
     }
 
-    public static func contains(_ g: GeneralLinearLieAlgebra<n, ComplexNumber>) -> Bool {
+    public static func contains(_ g: GeneralLinearLieAlgebra<n, 𝐂>) -> Bool {
         return UnitaryLieAlgebra.contains(g) && SpecialLinearLieAlgebra.contains(g)
     }
 }

@@ -37,8 +37,8 @@ public struct SymplecticGroup<n: _Int, K: Field>: MatrixGroup {
 // see: https://en.wikipedia.org/wiki/Symplectic_group#Sp(n)
 
 public struct UnitarySymplecticGroup<n: _Int>: MatrixGroup {
-    public let matrix: SquareMatrix<n, ComplexNumber>
-    public init(_ matrix: SquareMatrix<n, ComplexNumber>) {
+    public let matrix: SquareMatrix<n, 𝐂>
+    public init(_ matrix: SquareMatrix<n, 𝐂>) {
         assert(n.intValue.isEven)
         self.matrix = matrix
     }
@@ -47,7 +47,7 @@ public struct UnitarySymplecticGroup<n: _Int>: MatrixGroup {
         return UnitarySymplecticGroup(SymplecticGroup.standardSymplecticMatrix.matrix)
     }
     
-    public static func contains(_ g: GeneralLinearGroup<n, ComplexNumber>) -> Bool {
+    public static func contains(_ g: GeneralLinearGroup<n, 𝐂>) -> Bool {
         return SymplecticGroup.contains(g) && UnitaryGroup<n>.contains(g)
     }
     

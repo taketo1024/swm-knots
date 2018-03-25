@@ -9,15 +9,15 @@
 import Foundation
 
 public struct OrthogonalLieAlgebra<n: _Int>: MatrixLieAlgebra {
-    public typealias CoeffRing   = RealNumber
-    public typealias ElementRing = RealNumber
+    public typealias CoeffRing   = 𝐑
+    public typealias ElementRing = 𝐑
 
-    public let matrix: SquareMatrix<n, RealNumber>
-    public init(_ matrix: SquareMatrix<n, RealNumber>) {
+    public let matrix: SquareMatrix<n, 𝐑>
+    public init(_ matrix: SquareMatrix<n, 𝐑>) {
         self.matrix = matrix
     }
 
-    public static func contains(_ X: GeneralLinearLieAlgebra<n, RealNumber>) -> Bool {
+    public static func contains(_ X: GeneralLinearLieAlgebra<n, 𝐑>) -> Bool {
         return X.matrix.isSkewSymmetric
     }
     

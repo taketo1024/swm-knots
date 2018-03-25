@@ -90,7 +90,7 @@ public extension SimplicialCochain where A == Dual<Simplex> {
     }
 }
 
-public extension SimplicialCochain where A == Dual<Simplex>, R == Z_2 {
+public extension SimplicialCochain where A == Dual<Simplex>, R == 𝐙₂ {
     
     // Steenrod's cup-n product.
     // The formula is given here: https://arxiv.org/abs/math/0110314

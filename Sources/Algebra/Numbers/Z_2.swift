@@ -8,7 +8,9 @@
 
 import Foundation
 
-public struct Z_2: Field {
+public typealias 𝐙₂ = FiniteField_2
+
+public struct FiniteField_2: Field {
     public let value: UInt8
     
     public init(_ value: UInt8) {
@@ -19,28 +21,28 @@ public struct Z_2: Field {
         self.init(UInt8(truncatingIfNeeded: value))
     }
     
-    public var inverse: Z_2? {
+    public var inverse: 𝐙₂? {
         return (value == 1) ? self : nil
     }
     
-    public static var zero: Z_2 {
-        return Z_2(0)
+    public static var zero: 𝐙₂ {
+        return 𝐙₂(0)
     }
     
-    public static func ==(a: Z_2, b: Z_2) -> Bool {
+    public static func ==(a: 𝐙₂, b: 𝐙₂) -> Bool {
         return a.value == b.value
     }
     
-    public static func +(a: Z_2, b: Z_2) -> Z_2 {
-        return Z_2(a.value ^ b.value)
+    public static func +(a: 𝐙₂, b: 𝐙₂) -> 𝐙₂ {
+        return 𝐙₂(a.value ^ b.value)
     }
     
-    public static prefix func -(a: Z_2) -> Z_2 {
+    public static prefix func -(a: 𝐙₂) -> 𝐙₂ {
         return a
     }
     
-    public static func *(a: Z_2, b: Z_2) -> Z_2 {
-        return Z_2(a.value * b.value)
+    public static func *(a: 𝐙₂, b: 𝐙₂) -> 𝐙₂ {
+        return 𝐙₂(a.value * b.value)
     }
     
     public var hashValue: Int {
@@ -52,7 +54,7 @@ public struct Z_2: Field {
     }
     
     public static var symbol: String {
-        return "Z/2"
+        return "𝐙₂"
     }
     
 }

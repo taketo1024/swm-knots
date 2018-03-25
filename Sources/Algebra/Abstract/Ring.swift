@@ -1,8 +1,8 @@
 import Foundation
 
 public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
-    associatedtype IntegerLiteralType = IntegerNumber
-    init(intValue: IntegerNumber)
+    associatedtype IntegerLiteralType = 𝐙
+    init(intValue: 𝐙)
     var inverse: Self? { get }
     var isInvertible: Bool { get }
     var normalizeUnit: Self { get }
@@ -11,7 +11,7 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
 
 public extension Ring {
     // required init from `ExpressibleByIntegerLiteral`
-    public init(integerLiteral value: IntegerNumber) {
+    public init(integerLiteral value: 𝐙) {
         self.init(intValue: value)
     }
     
@@ -43,7 +43,7 @@ public extension Ring {
 public protocol Subring: Ring, AdditiveSubgroup, Submonoid where Super: Ring {}
 
 public extension Subring {
-    public init(intValue: IntegerNumber) {
+    public init(intValue: 𝐙) {
         self.init( Super.init(intValue: intValue) )
     }
 

@@ -1,13 +1,13 @@
 import Foundation
 
-public typealias IntegerNumber = Int
+public typealias 𝐙 = Int
 
-extension IntegerNumber: EuclideanRing {
-    public init(intValue n: IntegerNumber) {
+extension 𝐙: EuclideanRing {
+    public init(intValue n: 𝐙) {
         self.init(n)
     }
     
-    public var normalizeUnit: IntegerNumber {
+    public var normalizeUnit: 𝐙 {
         return (self > 0) ? 1 : -1
     }
     
@@ -15,11 +15,11 @@ extension IntegerNumber: EuclideanRing {
         return Swift.abs(self)
     }
     
-    public var abs: IntegerNumber {
+    public var abs: 𝐙 {
         return Swift.abs(self)
     }
     
-    public var inverse: IntegerNumber? {
+    public var inverse: 𝐙? {
         return (self.abs == 1) ? self : nil
     }
     
@@ -27,21 +27,21 @@ extension IntegerNumber: EuclideanRing {
         return (self % 2 == 0)
     }
     
-    public var sign: IntegerNumber {
+    public var sign: 𝐙 {
         return isEven ? 1 : -1
     }
 
-    public static func eucDiv(_ a: IntegerNumber, _ b: IntegerNumber) -> (q: IntegerNumber, r: IntegerNumber) {
+    public static func eucDiv(_ a: 𝐙, _ b: 𝐙) -> (q: 𝐙, r: 𝐙) {
         let q = a / b
         return (q: q, r: a - q * b)
     }
     
     public static var symbol: String {
-        return "Z"
+        return "𝐙"
     }
     
     // TODO remove `**`
-    public func pow(_ n: IntegerNumber) -> IntegerNumber {
+    public func pow(_ n: 𝐙) -> 𝐙 {
         assert(n >= 0)
         switch  self {
         case 1:
@@ -55,19 +55,19 @@ extension IntegerNumber: EuclideanRing {
 }
 
 public struct IntegerIdeal<n: _Int>: EuclideanIdeal {
-    public typealias Super = IntegerNumber
+    public typealias Super = 𝐙
     
-    public static var generator: IntegerNumber {
+    public static var generator: 𝐙 {
         return n.intValue
     }
     
-    public let a: IntegerNumber
+    public let a: 𝐙
     
-    public init(_ a: IntegerNumber) {
+    public init(_ a: 𝐙) {
         self.a = a
     }
     
-    public var asSuper: IntegerNumber {
+    public var asSuper: 𝐙 {
         return a
     }
 }
@@ -81,7 +81,7 @@ public struct IntegerQuotientRing<n: _Int>: _QuotientRing, FiniteSetType {
         self.a = Sub.reduced(a)
     }
     
-    public var representative: IntegerNumber {
+    public var representative: 𝐙 {
         return a
     }
     
@@ -108,7 +108,7 @@ public struct IntegerQuotientField<n: _Prime>: Field, _QuotientRing, FiniteSetTy
         self.a = Sub.reduced(a)
     }
     
-    public var representative: IntegerNumber {
+    public var representative: 𝐙 {
         return a
     }
     

@@ -9,12 +9,12 @@
 import Foundation
 
 public struct UnitaryGroup<n: _Int>: MatrixGroup {
-    public let matrix: SquareMatrix<n, ComplexNumber>
-    public init(_ matrix: SquareMatrix<n, ComplexNumber>) {
+    public let matrix: SquareMatrix<n, 𝐂>
+    public init(_ matrix: SquareMatrix<n, 𝐂>) {
         self.matrix = matrix
     }
 
-    public static func contains(_ g: GeneralLinearGroup<n, ComplexNumber>) -> Bool {
+    public static func contains(_ g: GeneralLinearGroup<n, 𝐂>) -> Bool {
         return g.matrix.isUnitary
     }
     
@@ -24,12 +24,12 @@ public struct UnitaryGroup<n: _Int>: MatrixGroup {
 }
 
 public struct SpecialUnitaryGroup<n: _Int>: MatrixGroup {
-    public let matrix: SquareMatrix<n, ComplexNumber>
-    public init(_ matrix: SquareMatrix<n, ComplexNumber>) {
+    public let matrix: SquareMatrix<n, 𝐂>
+    public init(_ matrix: SquareMatrix<n, 𝐂>) {
         self.matrix = matrix
     }
 
-    public static func contains(_ g: GeneralLinearGroup<n, ComplexNumber>) -> Bool {
+    public static func contains(_ g: GeneralLinearGroup<n, 𝐂>) -> Bool {
         return UnitaryGroup.contains(g) && SpecialLinearGroup.contains(g)
     }
 }

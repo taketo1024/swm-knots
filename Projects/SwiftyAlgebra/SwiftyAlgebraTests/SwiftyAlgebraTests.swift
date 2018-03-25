@@ -9,9 +9,9 @@
 import XCTest
 @testable import SwiftyAlgebra
 
-internal typealias Z = IntegerNumber
-internal typealias Q = RationalNumber
-internal typealias R = RealNumber
+internal typealias Z = 𝐙
+internal typealias Q = 𝐐
+internal typealias R = 𝐑
 
 class SwiftyAlgebraTests: XCTestCase {
     

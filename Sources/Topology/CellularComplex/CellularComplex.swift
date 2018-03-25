@@ -12,10 +12,10 @@ import SwiftyAlgebra
 public typealias CellularChain<R: Ring> = FreeModule<CellularCell, R>
 
 public struct CellularCell: GeometricCell {
-    public let simplices: SimplicialChain<IntegerNumber>
-    internal let boundary: CellularChain<IntegerNumber>
+    public let simplices: SimplicialChain<𝐙>
+    internal let boundary: CellularChain<𝐙>
     
-    internal init(_ simplices: SimplicialChain<IntegerNumber>, _ boundary: CellularChain<IntegerNumber>) {
+    internal init(_ simplices: SimplicialChain<𝐙>, _ boundary: CellularChain<𝐙>) {
         assert(!simplices.basis.isEmpty)
         assert({
             let n = simplices.basis[0].dim
@@ -85,12 +85,12 @@ public struct CellularComplex: GeometricComplex {
     
     @discardableResult
     public mutating func appendVertex(_ v: Vertex) -> CellularCell {
-        let c = SimplicialChain<IntegerNumber>(Simplex(v))
+        let c = SimplicialChain<𝐙>(Simplex(v))
         return appendCell(simplices: c)
     }
     
     @discardableResult
-    public mutating func appendCell(simplices: SimplicialChain<IntegerNumber>, attachedAlong boundary: CellularChain<IntegerNumber> = .zero) -> CellularCell {
+    public mutating func appendCell(simplices: SimplicialChain<𝐙>, attachedAlong boundary: CellularChain<𝐙> = .zero) -> CellularCell {
         if !simplices.basis.forAll({ underlyingComplex.contains($0) }) {
             let K = SimplicialComplex(cells: simplices.basis )
             self.underlyingComplex = self.underlyingComplex + K

@@ -86,19 +86,19 @@ public extension MatrixGroup {
     }
 }
 
-public extension MatrixGroup where CoeffRing == ComplexNumber {
+public extension MatrixGroup where CoeffRing == 𝐂 {
     public var adjoint: Self {
         return Self(matrix.adjoint)
     }
     
     // A + iB -> (A, -B; B, A)
-    public func asReal<m: _Int>() -> GeneralLinearGroup<m, RealNumber> {
+    public func asReal<m: _Int>() -> GeneralLinearGroup<m, 𝐑> {
         let n = size
         assert(m.intValue == 2 * n)
         
         let (A, B) = (matrix.realPart, matrix.imaginaryPart)
         
-        return GeneralLinearGroup<m, RealNumber> { (i, j) in
+        return GeneralLinearGroup<m, 𝐑> { (i, j) in
             if i < n, j < n {
                 return A[i, j]
             } else if i < n, j >= n {

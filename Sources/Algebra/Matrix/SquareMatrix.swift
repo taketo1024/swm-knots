@@ -91,7 +91,7 @@ public extension SquareMatrix where n == m, R: EuclideanRing {
     }
 }
 
-public extension SquareMatrix where n == m, R == ComplexNumber {
+public extension SquareMatrix where n == m, R == 𝐂 {
     public var isHermitian: Bool {
         if size <= 1 {
             return true

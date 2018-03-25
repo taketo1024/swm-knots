@@ -11,8 +11,8 @@ import SwiftyAlgebra
 
 // TODO absract up to GeometricComplex
 public extension SimplicialComplex {
-    public var eulerClass: CohomologyClass<Dual<Simplex>, IntegerNumber>? {
-        return eulerClass(IntegerNumber.self)
+    public var eulerClass: CohomologyClass<Dual<Simplex>, 𝐙>? {
+        return eulerClass(𝐙.self)
     }
     
     public func eulerClass<R: EuclideanRing>(_ type: R.Type) -> CohomologyClass<Dual<Simplex>, R>? {
@@ -39,7 +39,7 @@ public extension SimplicialComplex {
     }
 }
 
-public func e(_ M: SimplicialComplex) -> CohomologyClass<Dual<Simplex>, IntegerNumber> {
+public func e(_ M: SimplicialComplex) -> CohomologyClass<Dual<Simplex>, 𝐙> {
     return M.eulerClass!
 }
 

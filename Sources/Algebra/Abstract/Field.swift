@@ -1,11 +1,11 @@
 import Foundation
 
 public protocol Field: EuclideanRing {
-    init(rationalValue r: RationalNumber)
+    init(rationalValue r: 𝐐)
 }
 
 public extension Field {
-    public init(rationalValue r: RationalNumber) {
+    public init(rationalValue r: 𝐐) {
         fatalError("TODO")
     }
     

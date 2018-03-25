@@ -8,54 +8,56 @@
 
 import Foundation
 
+public typealias 𝐂 = ComplexNumber
+
 public struct ComplexNumber: Field, NormedSpace, ExpressibleByFloatLiteral {
     public typealias FloatLiteralType = Double
     
-    private let x: RealNumber
-    private let y: RealNumber
+    private let x: 𝐑
+    private let y: 𝐑
     
     public init(intValue x: Int) {
-        self.init(RealNumber(x), 0)
+        self.init(𝐑(x), 0)
     }
     
     public init(floatLiteral x: Double) {
-        self.init(RealNumber(x))
+        self.init(𝐑(x))
     }
     
-    public init(rationalValue r: RationalNumber) {
-        self.init(RealNumber(r), 0)
+    public init(rationalValue r: 𝐐) {
+        self.init(𝐑(r), 0)
     }
     
-    public init(_ x: RealNumber) {
+    public init(_ x: 𝐑) {
         self.init(x, 0)
     }
     
-    public init(_ x: RealNumber, _ y: RealNumber) {
+    public init(_ x: 𝐑, _ y: 𝐑) {
         self.x = x
         self.y = y
     }
     
-    public init(r: RealNumber, θ: RealNumber) {
+    public init(r: 𝐑, θ: 𝐑) {
         self.init(r * cos(θ), r * sin(θ))
     }
     
-    public static var imaginaryUnit: ComplexNumber {
-        return ComplexNumber(0, 1)
+    public static var imaginaryUnit: 𝐂 {
+        return 𝐂(0, 1)
     }
     
-    public var real: RealNumber {
+    public var real: 𝐑 {
         return x
     }
     
-    public var imaginary: RealNumber {
+    public var imaginary: 𝐑 {
         return y
     }
     
-    public var norm: RealNumber {
+    public var norm: 𝐑 {
         return sqrt(x * x + y * y)
     }
     
-    public var arg: RealNumber {
+    public var arg: 𝐑 {
         let r = self.norm
         if(r == 0) {
             return 0
@@ -65,29 +67,29 @@ public struct ComplexNumber: Field, NormedSpace, ExpressibleByFloatLiteral {
         return (y >= 0) ? t : 2 * π - t
     }
     
-    public var conjugate: ComplexNumber {
-        return ComplexNumber(x, -y)
+    public var conjugate: 𝐂 {
+        return 𝐂(x, -y)
     }
 
-    public var inverse: ComplexNumber? {
+    public var inverse: 𝐂? {
         let r2 = x * x + y * y
-        return r2 == 0 ? nil : ComplexNumber(x / r2, -y / r2)
+        return r2 == 0 ? nil : 𝐂(x / r2, -y / r2)
     }
     
-    public static func ==(lhs: ComplexNumber, rhs: ComplexNumber) -> Bool {
+    public static func ==(lhs: 𝐂, rhs: 𝐂) -> Bool {
         return (lhs.x == rhs.x) && (lhs.y == rhs.y)
     }
     
-    public static func +(a: ComplexNumber, b: ComplexNumber) -> ComplexNumber {
-        return ComplexNumber(a.x + b.x, a.y + b.y)
+    public static func +(a: 𝐂, b: 𝐂) -> 𝐂 {
+        return 𝐂(a.x + b.x, a.y + b.y)
     }
     
-    public static prefix func -(a: ComplexNumber) -> ComplexNumber {
-        return ComplexNumber(-a.x, -a.y)
+    public static prefix func -(a: 𝐂) -> 𝐂 {
+        return 𝐂(-a.x, -a.y)
     }
     
-    public static func *(a: ComplexNumber, b: ComplexNumber) -> ComplexNumber {
-        return ComplexNumber(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x)
+    public static func *(a: 𝐂, b: 𝐂) -> 𝐂 {
+        return 𝐂(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x)
     }
     
     public var hashValue: Int {
@@ -102,6 +104,6 @@ public struct ComplexNumber: Field, NormedSpace, ExpressibleByFloatLiteral {
     }
     
     public static var symbol: String {
-        return "C"
+        return "𝐂"
     }
 }

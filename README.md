@@ -22,7 +22,7 @@ $ make repl
 ### Rational Numbers
 
 ```swift
-typealias Q = RationalNumber
+typealias Q = 𝐐
 
 let a = Q(4, 5)  // 4/5
 let b = Q(3, 2)  // 3/2
@@ -35,7 +35,7 @@ b / a  // 15/8
 ### Matrices (type safe)
 
 ```swift
-typealias Z = IntegerNumber
+typealias Z = 𝐙
 typealias M = Matrix<_2, _2, Z>
 
 let a = M(1, 2, 3, 4)  // [1, 2; 3, 4]
@@ -66,7 +66,7 @@ t[2]  // 4
 ### Polynomials
 
 ```swift
-typealias Q = RationalNumber
+typealias Q = 𝐐
 typealias Qx = Polynominal<Q>
 
 let f = Qx(0, 2, -3, 1) // x^3 − 3x^2 + 2x
@@ -114,7 +114,7 @@ F_5.printMulTable()
 // Construct an algebraic extension over Q:
 // K = Q(√2) = Q[x]/(x^2 - 2).
 
-typealias Q = RationalNumber
+typealias Q = 𝐐
 
 struct p: _Polynomial {                            // p = x^2 - 2, as a struct
     typealias K = Q
@@ -146,7 +146,7 @@ H(S^2; Z) = {
 
 ```swift
 let RP2 = SimplicialComplex.realProjectiveSpace(dim: 2)
-let H = Homology(RP2, Z_2.self)
+let H = Homology(RP2, 𝐙₂.self)
 print("H(RP^2; Z/2) =", H.detailDescription, "\n")
 ```
 

@@ -8,10 +8,10 @@
 
 import Foundation
 
-private var B: [RationalNumber] = [1]
+private var B: [𝐐] = [1]
 
 // see: https://en.wikipedia.org/wiki/Bernoulli_number#Recursive_definition
-public func BernoulliNumber(_ n: Int) -> RationalNumber {
+public func BernoulliNumber(_ n: Int) -> 𝐐 {
     if n < B.count {
         return B[n]
     }
@@ -22,7 +22,7 @@ public func BernoulliNumber(_ n: Int) -> RationalNumber {
     }
     
     let b = (0 ..< n).sum { k in
-        -RationalNumber(n.factorial, k.factorial * (n - k).factorial * (n - k + 1)) * BernoulliNumber(k)
+        -𝐐(n.factorial, k.factorial * (n - k).factorial * (n - k + 1)) * BernoulliNumber(k)
     }
     B.append(b)
     
