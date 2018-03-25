@@ -27,9 +27,6 @@
 		DDB6C0B82053D545001313FD /* SimplicialChainOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C0892053D280001313FD /* SimplicialChainOperations.swift */; };
 		DDB6C0B92053D545001313FD /* SimplicialCohomologyRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C08A2053D280001313FD /* SimplicialCohomologyRing.swift */; };
 		DDB6C0BA2053D545001313FD /* SimplicialExactSequences.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C08E2053D280001313FD /* SimplicialExactSequences.swift */; };
-		DDB6C0BB2053D545001313FD /* EulerClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C0802053D280001313FD /* EulerClass.swift */; };
-		DDB6C0BC2053D545001313FD /* StiefelWhitneyClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C0812053D280001313FD /* StiefelWhitneyClass.swift */; };
-		DDB6C0BD2053D545001313FD /* WuClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C0822053D280001313FD /* WuClass.swift */; };
 		DDB6C0BE2053D545001313FD /* ChainContractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C0912053D280001313FD /* ChainContractor.swift */; };
 /* End PBXBuildFile section */
 
@@ -339,19 +336,16 @@
 			files = (
 				DDB6C0B82053D545001313FD /* SimplicialChainOperations.swift in Sources */,
 				DDB6C0BA2053D545001313FD /* SimplicialExactSequences.swift in Sources */,
-				DDB6C0BC2053D545001313FD /* StiefelWhitneyClass.swift in Sources */,
 				DDB6C0B02053D545001313FD /* GeometricComplexExtensions.swift in Sources */,
 				DDB6C0B72053D545001313FD /* GeometricHomologyMap.swift in Sources */,
 				DDB6C0AE2053D545001313FD /* GeometricComplex.swift in Sources */,
 				DDB6C0B52053D545001313FD /* CellularComplex.swift in Sources */,
 				DDB6C0B62053D545001313FD /* GeometricHomology.swift in Sources */,
 				DDB6C0B12053D545001313FD /* SimplicialComplex.swift in Sources */,
-				DDB6C0BD2053D545001313FD /* WuClass.swift in Sources */,
 				DDB6C0AF2053D545001313FD /* GeometricComplexMap.swift in Sources */,
 				DDB6C0AC2053D545001313FD /* Simplex.swift in Sources */,
 				DDB6C0B92053D545001313FD /* SimplicialCohomologyRing.swift in Sources */,
 				DDB6C0B22053D545001313FD /* SimplicialComplexOperations.swift in Sources */,
-				DDB6C0BB2053D545001313FD /* EulerClass.swift in Sources */,
 				DDB6C0AB2053D545001313FD /* Vertex.swift in Sources */,
 				DDB6C0AD2053D545001313FD /* GeometricCell.swift in Sources */,
 				DDB6C0B32053D545001313FD /* SimplicialComplexExamples.swift in Sources */,

@@ -22,7 +22,7 @@ public struct SimplicialComplex: GeometricComplex {
     public init<S: Sequence>(name: String? = nil, cells: S, filterMaximalCells: Bool = false) where S.Iterator.Element == Simplex {
         self.name = name ?? "_"
         self.maximalCells = filterMaximalCells ? SimplicialComplex.filterMaximalCells(cells) : cells.toArray()
-        self.vertices = maximalCells.reduce([]){ (set, s) in set.union(s.vertices) }.unique().sorted()
+        self.vertices = maximalCells.reduce(Set<Vertex>()){ (set, s) in set.union(s.vertices) }.sorted()
         self.dim = maximalCells.reduce(-1){ (res, s) in max(res, s.dim) }
     }
     
