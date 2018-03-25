@@ -91,7 +91,7 @@ public extension SquareMatrix where n == m, R: EuclideanRing {
     }
 }
 
-public extension SquareMatrix where n == m, R == ComplexNumber {
+public extension SquareMatrix where n == m, R == 𝐂 {
     public var isHermitian: Bool {
         if size <= 1 {
             return true
@@ -152,7 +152,7 @@ public func exp<n, K>(_ A: SquareMatrix<n, K>) -> SquareMatrix<n, K> where K: Fi
     while true {
         n  = n + 1
         An = An * A
-        cn = cn / K(intValue: n)
+        cn = cn / K(from: n)
         
         let Bn = cn * An
         if Bn.maxNorm.value < e {

@@ -89,7 +89,7 @@ class MatrixTests: XCTestCase {
         XCTAssertEqual(a, M(2,1,4,3))
     }
     
-    private func M(align: ComputationalMatrixAlignment = .Rows, _ xs: Int...) -> ComputationalMatrix<Z> {
+    private func M<R: Ring>(align: ComputationalMatrixAlignment = .Rows, _ xs: R...) -> ComputationalMatrix<R> {
         return ComputationalMatrix(rows: 2, cols: 2, grid: xs)
     }
 }

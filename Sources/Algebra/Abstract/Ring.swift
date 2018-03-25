@@ -1,8 +1,8 @@
 import Foundation
 
 public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
-    associatedtype IntegerLiteralType = IntegerNumber
-    init(intValue: IntegerNumber)
+    associatedtype IntegerLiteralType = Int
+    init(from: 𝐙)
     var inverse: Self? { get }
     var isInvertible: Bool { get }
     var normalizeUnit: Self { get }
@@ -11,8 +11,8 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
 
 public extension Ring {
     // required init from `ExpressibleByIntegerLiteral`
-    public init(integerLiteral value: IntegerNumber) {
-        self.init(intValue: value)
+    public init(integerLiteral n: Int) {
+        self.init(from: n)
     }
     
     public var isInvertible: Bool {
@@ -24,11 +24,11 @@ public extension Ring {
     }
     
     public static var zero: Self {
-        return Self(intValue: 0)
+        return Self(from: 0)
     }
     
     public static var identity: Self {
-        return Self(intValue: 1)
+        return Self(from: 1)
     }
     
     public static func **(a: Self, n: Int) -> Self {
@@ -43,8 +43,8 @@ public extension Ring {
 public protocol Subring: Ring, AdditiveSubgroup, Submonoid where Super: Ring {}
 
 public extension Subring {
-    public init(intValue: IntegerNumber) {
-        self.init( Super.init(intValue: intValue) )
+    public init(from n: 𝐙) {
+        self.init( Super.init(from: n) )
     }
 
     public var inverse: Self? {
@@ -52,11 +52,11 @@ public extension Subring {
     }
     
     public static var zero: Self {
-        return Self.init(intValue: 0)
+        return Self.init(from: 0)
     }
     
     public static var identity: Self {
-        return Self.init(intValue: 1)
+        return Self.init(from: 1)
     }
 }
 
@@ -85,8 +85,8 @@ public extension Ideal {
 public protocol _ProductRing: Ring, AdditiveProductGroup where Left: Ring, Right: Ring {}
 
 public extension _ProductRing {
-    public init(intValue a: Int) {
-        self.init(Left(intValue: a), Right(intValue: a))
+    public init(from a: 𝐙) {
+        self.init(Left(from: a), Right(from: a))
     }
     
     public var inverse: Self? {
@@ -121,8 +121,8 @@ public struct ProductRing<R1: Ring, R2: Ring>: _ProductRing {
 public protocol _QuotientRing: Ring, AdditiveQuotientGroup where Sub: Ideal {}
 
 public extension _QuotientRing where Base == Sub.Super {
-    public init(intValue n: Int) {
-        self.init(Base(intValue: n))
+    public init(from n: 𝐙) {
+        self.init(Base(from: n))
     }
     
     public var inverse: Self? {

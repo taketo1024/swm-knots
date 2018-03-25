@@ -1,7 +1,9 @@
 import Foundation
 
+public typealias 𝐑 = RealNumber
+
 public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByFloatLiteral {
-    public typealias Super = ComplexNumber
+    public typealias Super = 𝐂
     public typealias FloatLiteralType = Double
     
     internal let value: Double
@@ -11,11 +13,11 @@ public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByFloatL
         self.init(x)
     }
     
-    public init(intValue x: Int) {
+    public init(from x: 𝐙) {
         self.init(x)
     }
     
-    public init(rationalValue r: RationalNumber) {
+    public init(from r: 𝐐) {
         self.init(r)
     }
     
@@ -23,7 +25,7 @@ public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByFloatL
         self.init(Double(x))
     }
     
-    public init(_ r: RationalNumber) {
+    public init(_ r: 𝐐) {
         self.init(Double(r.p) / Double(r.q))
     }
     
@@ -36,38 +38,38 @@ public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByFloatL
         self.error = error
     }
     
-    public init(_ z: ComplexNumber) {
-        assert(RealNumber.contains(z))
+    public init(_ z: 𝐂) {
+        assert(𝐑.contains(z))
         self.init(z.real.value)
     }
     
-    public var norm: RealNumber {
-        return RealNumber( sqrt(value * value) )
+    public var norm: 𝐑 {
+        return 𝐑( sqrt(value * value) )
     }
     
-    public var inverse: RealNumber? {
+    public var inverse: 𝐑? {
         // 1/(x + e) ~ 1/x - (1/x^2)e + ...
-        return RealNumber(1/value, error / (value * value))
+        return 𝐑(1/value, error / (value * value))
     }
     
-    public static func ==(a: RealNumber, b: RealNumber) -> Bool {
+    public static func ==(a: 𝐑, b: 𝐑) -> Bool {
 //        print(fabs(a.value - b.value), "<=", max(a.error, b.error), ":", fabs(a.value - b.value) < max(a.error, b.error))
         return fabs(a.value - b.value) <= max(a.error, b.error)
     }
     
-    public static func +(a: RealNumber, b: RealNumber) -> RealNumber {
-        return RealNumber(a.value + b.value, a.error + b.error)
+    public static func +(a: 𝐑, b: 𝐑) -> 𝐑 {
+        return 𝐑(a.value + b.value, a.error + b.error)
     }
     
-    public static prefix func -(a: RealNumber) -> RealNumber {
-        return RealNumber(-a.value, a.error)
+    public static prefix func -(a: 𝐑) -> 𝐑 {
+        return 𝐑(-a.value, a.error)
     }
     
-    public static func *(a: RealNumber, b: RealNumber) -> RealNumber {
-        return RealNumber(a.value * b.value, a.error * fabs(b.value) + b.error * fabs(a.value))
+    public static func *(a: 𝐑, b: 𝐑) -> 𝐑 {
+        return 𝐑(a.value * b.value, a.error * fabs(b.value) + b.error * fabs(a.value))
     }
     
-    public static func <(lhs: RealNumber, rhs: RealNumber) -> Bool {
+    public static func <(lhs: 𝐑, rhs: 𝐑) -> Bool {
         return lhs.value < rhs.value
     }
     
@@ -75,11 +77,11 @@ public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByFloatL
         return value
     }
     
-    public var asSuper: ComplexNumber {
-        return ComplexNumber(self, .zero)
+    public var asSuper: 𝐂 {
+        return 𝐂(self, .zero)
     }
     
-    public static func contains(_ z: ComplexNumber) -> Bool {
+    public static func contains(_ z: 𝐂) -> Bool {
         return z.imaginary == .zero
     }
     
@@ -92,40 +94,40 @@ public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByFloatL
     }
     
     public static var symbol: String {
-        return "R"
+        return "𝐑"
     }
 }
 
-public let π = RealNumber(Double.pi)
+public let π = 𝐑(Double.pi)
 
-public func exp(_ x: RealNumber) -> RealNumber {
-    return RealNumber(exp(x.value))
+public func exp(_ x: 𝐑) -> 𝐑 {
+    return 𝐑(exp(x.value))
 }
 
-public func sin(_ x: RealNumber) -> RealNumber {
-    return RealNumber(sin(x.value))
+public func sin(_ x: 𝐑) -> 𝐑 {
+    return 𝐑(sin(x.value))
 }
 
-public func cos(_ x: RealNumber) -> RealNumber {
-    return RealNumber(cos(x.value))
+public func cos(_ x: 𝐑) -> 𝐑 {
+    return 𝐑(cos(x.value))
 }
 
-public func tan(_ x: RealNumber) -> RealNumber {
-    return RealNumber(tan(x.value))
+public func tan(_ x: 𝐑) -> 𝐑 {
+    return 𝐑(tan(x.value))
 }
 
-public func asin(_ x: RealNumber) -> RealNumber {
-    return RealNumber(asin(x.value))
+public func asin(_ x: 𝐑) -> 𝐑 {
+    return 𝐑(asin(x.value))
 }
 
-public func acos(_ x: RealNumber) -> RealNumber {
-    return RealNumber(acos(x.value))
+public func acos(_ x: 𝐑) -> 𝐑 {
+    return 𝐑(acos(x.value))
 }
 
-public func atan(_ x: RealNumber) -> RealNumber {
-    return RealNumber(atan(x.value))
+public func atan(_ x: 𝐑) -> 𝐑 {
+    return 𝐑(atan(x.value))
 }
 
-public func sqrt(_ x: RealNumber) -> RealNumber {
-    return RealNumber(sqrt(x.value))
+public func sqrt(_ x: 𝐑) -> 𝐑 {
+    return 𝐑(sqrt(x.value))
 }

@@ -12,9 +12,9 @@ public struct PowerSeries<K: Field>: Ring, Module {
     public typealias CoeffRing = K
     public let coeffs: (Int) -> K
     
-    public init(intValue n: Int) {
+    public init(from n: 𝐙) {
         self.init() { i in
-            (i == 0) ? K(intValue: n) : .zero
+            (i == 0) ? K(from: n) : .zero
         }
     }
     
@@ -121,7 +121,7 @@ public struct PowerSeries<K: Field>: Ring, Module {
 public extension PowerSeries {
     public static var exponential: PowerSeries<K> {
         return PowerSeries { n in
-            1 / K(intValue: n.factorial)
+            1 / K(from: n.factorial)
         }
     }
     

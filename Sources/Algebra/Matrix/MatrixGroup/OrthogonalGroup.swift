@@ -9,12 +9,12 @@
 import Foundation
 
 public struct OrthogonalGroup<n: _Int>: MatrixGroup {
-    public let matrix: SquareMatrix<n, RealNumber>
-    public init(_ matrix: SquareMatrix<n, RealNumber>) {
+    public let matrix: SquareMatrix<n, 𝐑>
+    public init(_ matrix: SquareMatrix<n, 𝐑>) {
         self.matrix = matrix
     }
 
-    public static func contains(_ g: GeneralLinearGroup<n, RealNumber>) -> Bool {
+    public static func contains(_ g: GeneralLinearGroup<n, 𝐑>) -> Bool {
         return g.matrix.isOrthogonal
     }
     
@@ -24,12 +24,12 @@ public struct OrthogonalGroup<n: _Int>: MatrixGroup {
 }
 
 public struct SpecialOrthogonalGroup<n: _Int>: MatrixGroup {
-    public let matrix: SquareMatrix<n, RealNumber>
-    public init(_ matrix: SquareMatrix<n, RealNumber>) {
+    public let matrix: SquareMatrix<n, 𝐑>
+    public init(_ matrix: SquareMatrix<n, 𝐑>) {
         self.matrix = matrix
     }
 
-    public static func contains(_ g: GeneralLinearGroup<n, RealNumber>) -> Bool {
+    public static func contains(_ g: GeneralLinearGroup<n, 𝐑>) -> Bool {
         return OrthogonalGroup.contains(g) && SpecialLinearGroup.contains(g)
     }
     

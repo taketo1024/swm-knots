@@ -10,10 +10,6 @@ import XCTest
 import SwiftyAlgebra
 @testable import SwiftyTopology
 
-internal typealias Z = IntegerNumber
-internal typealias Q = RationalNumber
-internal typealias R = RealNumber
-
 class SwiftyTopologyTests: XCTestCase {
     
     override func setUp() {

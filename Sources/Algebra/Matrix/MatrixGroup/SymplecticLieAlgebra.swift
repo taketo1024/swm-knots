@@ -43,17 +43,17 @@ public struct SymplecticLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
 // see: https://en.wikipedia.org/wiki/Symplectic_group#Sp(n)
 
 public struct UnitarySymplecticLieAlgebra<n: _Int>: MatrixLieAlgebra {
-    public typealias CoeffRing = RealNumber
-    public typealias ElementRing = ComplexNumber
+    public typealias CoeffRing = 𝐑
+    public typealias ElementRing = 𝐂
     
-    public let matrix: SquareMatrix<n, ComplexNumber>
-    public init(_ matrix: SquareMatrix<n, ComplexNumber>) {
+    public let matrix: SquareMatrix<n, 𝐂>
+    public init(_ matrix: SquareMatrix<n, 𝐂>) {
         assert(n.intValue.isEven)
         self.matrix = matrix
     }
     
-    public static func contains(_ X: GeneralLinearLieAlgebra<n, ComplexNumber>) -> Bool {
-        return SymplecticLieAlgebra<n, ComplexNumber>.contains(X) && UnitaryLieAlgebra<n>.contains(X)
+    public static func contains(_ X: GeneralLinearLieAlgebra<n, 𝐂>) -> Bool {
+        return SymplecticLieAlgebra<n, 𝐂>.contains(X) && UnitaryLieAlgebra<n>.contains(X)
     }
     
     public static var symbol: String  {

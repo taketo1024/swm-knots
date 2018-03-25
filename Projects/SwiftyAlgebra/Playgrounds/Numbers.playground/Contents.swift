@@ -3,18 +3,11 @@
 import Foundation
 import SwiftyAlgebra
 
-// Aliases populary used in Math.
-
-typealias Z = IntegerNumber
-typealias Q = RationalNumber
-typealias R = RealNumber
-typealias C = ComplexNumber
-
 // Rational Number Sample.
 
 do {
-    let a = Q(4, 5)
-    let b = Q(3, 2)
+    let a = 𝐐(4, 5)
+    let b = 𝐐(3, 2)
     a + b
     a * b
 }
@@ -22,7 +15,7 @@ do {
 // Complex Number Sample.
 
 do {
-    let i = C.imaginaryUnit
+    let i = 𝐂.imaginaryUnit
     let a = 4 + 5 * i
     let b = 3 + 2 * i
     a + b

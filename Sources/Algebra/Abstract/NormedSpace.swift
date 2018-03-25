@@ -10,5 +10,5 @@ import Foundation
 
 // MEMO: not made as a subprotocol of VectorSpace
 public protocol NormedSpace {
-    var norm: RealNumber { get }
+    var norm: 𝐑 { get }
 }

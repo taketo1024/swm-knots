@@ -8,8 +8,8 @@
 
 import Foundation
 
-public extension IntegerNumber {
-    public var factorial: IntegerNumber {
+public extension 𝐙 {
+    public var factorial: 𝐙 {
         if self < 0 {
             fatalError("factorial of negative number.")
         }

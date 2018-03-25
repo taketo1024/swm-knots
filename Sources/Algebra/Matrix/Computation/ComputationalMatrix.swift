@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal typealias ComputationSpecializedRing = IntegerNumber
+internal typealias ComputationSpecializedRing = 𝐙
 
 public enum ComputationalMatrixAlignment {
     case Rows

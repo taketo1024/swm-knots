@@ -15,7 +15,7 @@ public extension GeometricComplex {
     }
     
     public func eulerNumber<R: EuclideanRing>(_ type: R.Type) -> R {
-        return R(intValue: eulerNumber)
+        return R(from: eulerNumber)
     }
     
     public var isOrientable: Bool {
@@ -30,11 +30,11 @@ public extension GeometricComplex {
         return orientationCycle(relativeTo: L, R.self) != nil
     }
     
-    public var orientationCycle: FreeModule<Cell, IntegerNumber>? {
+    public var orientationCycle: FreeModule<Cell, 𝐙>? {
         return orientationClass?.representative
     }
     
-    public func orientationCycle(relativeTo L: Self) -> FreeModule<Cell, IntegerNumber>? {
+    public func orientationCycle(relativeTo L: Self) -> FreeModule<Cell, 𝐙>? {
         return orientationClass(relativeTo:L)?.representative
     }
     
@@ -42,12 +42,12 @@ public extension GeometricComplex {
         return orientationClass(relativeTo: L, R.self)?.representative
     }
     
-    public var orientationClass: HomologyClass<Cell, IntegerNumber>? {
-        return orientationClass(IntegerNumber.self)
+    public var orientationClass: HomologyClass<Cell, 𝐙>? {
+        return orientationClass(𝐙.self)
     }
     
-    public func orientationClass(relativeTo L: Self) -> HomologyClass<Cell, IntegerNumber>? {
-        return orientationClass(relativeTo: L, IntegerNumber.self)
+    public func orientationClass(relativeTo L: Self) -> HomologyClass<Cell, 𝐙>? {
+        return orientationClass(relativeTo: L, 𝐙.self)
     }
     
     public func orientationClass<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> HomologyClass<Cell, R>? {

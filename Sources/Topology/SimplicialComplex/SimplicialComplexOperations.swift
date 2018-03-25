@@ -246,7 +246,7 @@ public extension SimplicialComplex {
         for i in K.validDims.reversed() {
             let bcells = SdK.cells(ofDim: n - i)
             let dcells = K.cells(ofDim: i).map { s -> CellularCell in
-                let chain: SimplicialChain<IntegerNumber> = {
+                let chain: SimplicialChain<𝐙> = {
                     let b = s2b[s]!
                     let star = SimplicialComplex(cells: bcells.filter{ (bcell) in
                         bcell.contains(b) && bcell.vertices.forAll{ b2s[$0]!.contains(s) }
@@ -256,7 +256,7 @@ public extension SimplicialComplex {
                 }()
                 
                 let z = chain.boundary()
-                let boundary = CellularChain( K.cofaces(ofCell: s).map{ t -> (CellularCell, IntegerNumber) in
+                let boundary = CellularChain( K.cofaces(ofCell: s).map{ t -> (CellularCell, 𝐙) in
                     let dcell = s2d[t]!
                     
                     let t0 = dcell.simplices.basis[0] // take any simplex to detect orientation

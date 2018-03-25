@@ -2,8 +2,8 @@ import Foundation
 
 
 // cf. https://en.wikipedia.org/wiki/Factorization_of_polynomials#Obtaining_linear_factors
-public func factorize(_ p: Polynomial<RationalNumber>) -> [Polynomial<RationalNumber>] {
-    typealias Q = RationalNumber
+public func factorize(_ p: Polynomial<𝐐>) -> [Polynomial<𝐐>] {
+    typealias Q = 𝐐
     
     if p.degree == 0 {
         return [p]

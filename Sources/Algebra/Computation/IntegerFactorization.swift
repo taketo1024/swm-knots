@@ -8,14 +8,14 @@
 
 import Foundation
 
-private var primes: [IntegerNumber] = []
+private var primes: [𝐙] = []
 
-public func primes(upTo n: IntegerNumber) -> [IntegerNumber] {
+public func primes(upTo n: 𝐙) -> [𝐙] {
     if let last = primes.last, n <= last {
         return primes.filter{ $0 <= n }
     }
     
-    var result: [IntegerNumber] = []
+    var result: [𝐙] = []
     var seive = primes + Array( (primes.last ?? 1) + 1 ... n.abs )
     
     while let a = seive.first {
@@ -27,13 +27,13 @@ public func primes(upTo n: IntegerNumber) -> [IntegerNumber] {
     return result
 }
 
-public extension IntegerNumber {
-    public var divisors: [IntegerNumber] {
+public extension 𝐙 {
+    public var divisors: [𝐙] {
         if self == 0 {
             return []
         }
         
-        var result: [IntegerNumber] = []
+        var result: [𝐙] = []
         
         let a = self.abs
         let m = Int(sqrt(Double(a)))
@@ -48,8 +48,8 @@ public extension IntegerNumber {
         return result.sorted()
     }
     
-    public var primeFactors: [IntegerNumber] {
-        var result: [IntegerNumber] = []
+    public var primeFactors: [𝐙] {
+        var result: [𝐙] = []
         var q = self
         
         let ps = primes(upTo: self)

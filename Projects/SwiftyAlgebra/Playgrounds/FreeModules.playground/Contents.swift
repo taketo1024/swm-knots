@@ -5,15 +5,11 @@ import SwiftyAlgebra
 
 // Aliases populary used in Math.
 
-typealias Z = IntegerNumber
-typealias Q = RationalNumber
-typealias R = RealNumber
-
-typealias M = FreeModule<String, Z>
+typealias M = FreeModule<String, 𝐙>
 
 let domain   = ["a", "b", "c", "d"]
 let codomain = ["x", "y", "z"]
-let matrix = Matrix<_3, _4, Z>(
+let matrix = Matrix<_3, _4, 𝐙>(
     1, 2, 1,  1,
     2, 0, 2, -1,
     1, 3, 3,  2

@@ -53,7 +53,7 @@ public extension CohomologyClass where T == Ascending, A == Dual<Simplex> {
     }
 }
 
-public extension CohomologyClass where T == Ascending, A == Dual<Simplex>, R == Z_2 {
+public extension CohomologyClass where T == Ascending, A == Dual<Simplex>, R == 𝐙₂ {
     public func Sq(_ i: Int) -> CohomologyClass<A, R> {
         if let H = structure {
             let a = self.representative

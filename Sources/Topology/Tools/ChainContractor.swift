@@ -273,7 +273,7 @@ public extension ChainContractor {
             let from = generators.filter { s in s.dim == i }
             let map  = CC.BoundaryMap { d in
                 let s = d.base
-                let e = R(intValue: (-1).pow(d.degree + 1))
+                let e = R(from: (-1).pow(d.degree + 1))
                 let to = self.generators.filter { s in s.dim == i + 1 }
                 let vals = to.flatMap { t -> (Dual<S>, R)? in
                     let a = self.d(t)[s]

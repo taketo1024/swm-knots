@@ -4,16 +4,10 @@ import Foundation
 import SwiftyAlgebra
 import SwiftyTopology
 
-// Aliases populary used in Math.
-
-typealias Z = IntegerNumber
-typealias Q = RationalNumber
-typealias R = RealNumber
-
 // Coeff Ring
-typealias G = Z
-//typealias G = Z_2
-//typealias G = Q
+typealias R = 𝐙
+//typealias R = 𝐙₂
+//typealias R = 𝐐
 
 do {
     let n = 2
@@ -23,7 +17,7 @@ do {
     let A = (X - s).named("A")
     let B = s.asComplex.named("B")
     
-    var E = HomologyExactSequence.MayerVietoris(X, A, B, G.self)
+    var E = HomologyExactSequence.MayerVietoris(X, A, B, R.self)
     
     E.fill(column: 0)
     E.fill(column: 1)
@@ -41,7 +35,7 @@ do {
     let n = 2
     let D = SimplicialComplex.ball(dim: n)
     let S = D.boundary.named("S^\(n-1)")
-    var E = CohomologyExactSequence(D, S, Z.self)
+    var E = CohomologyExactSequence(D, S, R.self)
     
     E.fill(column: 0)
     E.fill(column: 1)
@@ -63,7 +57,7 @@ do {
     let A = (X - s).named("A")
     let B = s.asComplex.named("B")
     
-    var E = CohomologyExactSequence.MayerVietoris(X, A, B, G.self)
+    var E = CohomologyExactSequence.MayerVietoris(X, A, B, R.self)
     
     E.fill(column: 1)
     E.fill(column: 2)

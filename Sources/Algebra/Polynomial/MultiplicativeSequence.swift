@@ -31,7 +31,7 @@ public struct MultiplicativeSequence<K: Field>: CustomStringConvertible {
     }
 }
 
-public extension MultiplicativeSequence where K == RationalNumber {
+public extension MultiplicativeSequence where K == 𝐐 {
     public static var HirzebruchL: MultiplicativeSequence<K> {
         let B = BernoulliNumber
         let f = PowerSeries<K> { n in

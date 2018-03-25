@@ -19,22 +19,22 @@ public extension Randomable {
     }
 }
 
-extension IntegerNumber: Randomable {
-    public static func rand(_ lowerBound: Int, _ upperBound: Int) -> IntegerNumber {
+extension 𝐙: Randomable {
+    public static func rand(_ lowerBound: Int, _ upperBound: Int) -> 𝐙 {
         if lowerBound < upperBound {
-            return IntegerNumber(arc4random()) % (upperBound - lowerBound) + lowerBound
+            return 𝐙(arc4random()) % (upperBound - lowerBound) + lowerBound
         } else {
             return 0
         }
     }
 }
 
-extension RationalNumber: Randomable {
-    public static func rand(_ lowerBound: Int, _ upperBound: Int) -> RationalNumber {
+extension 𝐐: Randomable {
+    public static func rand(_ lowerBound: Int, _ upperBound: Int) -> 𝐐 {
         if lowerBound < upperBound {
-            let q = IntegerNumber.rand(1, 10)
-            let p = IntegerNumber.rand(q * lowerBound, q * upperBound)
-            return RationalNumber(p, q)
+            let q = 𝐙.rand(1, 10)
+            let p = 𝐙.rand(q * lowerBound, q * upperBound)
+            return 𝐐(p, q)
         } else {
             return 0
         }

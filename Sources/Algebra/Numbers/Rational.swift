@@ -1,15 +1,25 @@
 import Foundation
 
+public typealias 𝐐 = RationalNumber
+
 public struct RationalNumber: Field, Comparable {
-    internal let p, q: IntegerNumber
+    internal let p, q: 𝐙
     
-    public init(rationalValue r: RationalNumber) {
+    public init(from n: 𝐙) {
+        self.init(n, 1)
+    }
+    
+    public init(from r: 𝐐) {
         self.init(r.p, r.q)
     }
     
-    public init(_ p: IntegerNumber, _ q: IntegerNumber) {
+    public init(_ n: 𝐙) {
+        self.init(from: n)
+    }
+    
+    public init(_ p: 𝐙, _ q: 𝐙) {
         guard q != 0 else {
-            fatalError("Given 0 for the dominator of a RationalNumber")
+            fatalError("Given 0 for the dominator of a 𝐐")
         }
         
         let d = gcd(p, q).abs * q.sign
@@ -20,55 +30,47 @@ public struct RationalNumber: Field, Comparable {
         }
     }
     
-    public init(intValue n: IntegerNumber) {
-        self.init(n, 1)
-    }
-    
-    public init(_ n: IntegerNumber) {
-        self.init(intValue: n)
-    }
-    
-    public var abs: RationalNumber {
+    public var abs: 𝐐 {
         return (p >= 0) == (q >= 0) ? self : -self
     }
     
-    public var inverse: RationalNumber? {
-        return (p != 0) ? RationalNumber(q, p) : nil
+    public var inverse: 𝐐? {
+        return (p != 0) ? 𝐐(q, p) : nil
     }
     
-    public var numerator: IntegerNumber {
+    public var numerator: 𝐙 {
         return p
     }
     
-    public var denominator: IntegerNumber {
+    public var denominator: 𝐙 {
         return q
     }
     
-    public static func == (a: RationalNumber, b: RationalNumber) -> Bool {
+    public static func == (a: 𝐐, b: 𝐐) -> Bool {
         return a.p * b.q == a.q * b.p
     }
     
-    public static func + (a: RationalNumber, b: RationalNumber) -> RationalNumber {
-        return RationalNumber(a.p * b.q + a.q * b.p, a.q * b.q)
+    public static func + (a: 𝐐, b: 𝐐) -> 𝐐 {
+        return 𝐐(a.p * b.q + a.q * b.p, a.q * b.q)
     }
     
-    public static prefix func - (a: RationalNumber) -> RationalNumber {
-        return RationalNumber(-a.p, a.q)
+    public static prefix func - (a: 𝐐) -> 𝐐 {
+        return 𝐐(-a.p, a.q)
     }
     
-    public static func - (a: RationalNumber, b: RationalNumber) -> RationalNumber {
-        return RationalNumber(a.p * b.q - a.q * b.p, a.q * b.q)
+    public static func - (a: 𝐐, b: 𝐐) -> 𝐐 {
+        return 𝐐(a.p * b.q - a.q * b.p, a.q * b.q)
     }
     
-    public static func * (a: RationalNumber, b: RationalNumber) -> RationalNumber {
-        return RationalNumber(a.p * b.p, a.q * b.q)
+    public static func * (a: 𝐐, b: 𝐐) -> 𝐐 {
+        return 𝐐(a.p * b.p, a.q * b.q)
     }
     
-    public static func / (a: RationalNumber, b: RationalNumber) -> RationalNumber {
-        return RationalNumber(a.p * b.q, a.q * b.p)
+    public static func / (a: 𝐐, b: 𝐐) -> 𝐐 {
+        return 𝐐(a.p * b.q, a.q * b.p)
     }
     
-    public static func <(lhs: RationalNumber, rhs: RationalNumber) -> Bool {
+    public static func <(lhs: 𝐐, rhs: 𝐐) -> Bool {
         return lhs.p * rhs.q < rhs.p * lhs.q
     }
     
@@ -80,7 +82,7 @@ public struct RationalNumber: Field, Comparable {
     }
     
     public static var symbol: String {
-        return "Q"
+        return "𝐐"
     }
     
     public var hashValue: Int {

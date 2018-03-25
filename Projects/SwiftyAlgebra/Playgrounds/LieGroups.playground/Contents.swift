@@ -3,13 +3,6 @@
 import Foundation
 import SwiftyAlgebra
 
-// Aliases populary used in Math.
-
-typealias Z = IntegerNumber
-typealias Q = RationalNumber
-typealias R = RealNumber
-typealias C = ComplexNumber
-
 typealias GL = GeneralLinearGroup
 typealias SL = SpecialLinearGroup
 typealias O  = OrthogonalGroup
@@ -20,8 +13,8 @@ typealias sl = SpecialLinearLieAlgebra
 
 typealias n = _2
 
-let i = C.imaginaryUnit
-let X = gl<n, C>(0, 2 + i, -2 + i, 0)
+let i = 𝐂.imaginaryUnit
+let X = gl<n, CC
 let g = exp(X)
 
 print(X.detailDescription, "\n")
