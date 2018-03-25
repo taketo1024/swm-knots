@@ -3,12 +3,6 @@
 import Foundation
 import SwiftyAlgebra
 
-// Aliases populary used in Math.
-
-typealias Z = IntegerNumber
-typealias Q = RationalNumber
-typealias R = RealNumber
-
 // Permutation Example.
 
 typealias P = Permutation

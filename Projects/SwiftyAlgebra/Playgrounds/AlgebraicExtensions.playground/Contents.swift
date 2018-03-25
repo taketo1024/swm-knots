@@ -3,24 +3,18 @@
 import Foundation
 import SwiftyAlgebra
 
-// Aliases populary used in Math.
-
-typealias Z = IntegerNumber
-typealias Q = RationalNumber
-typealias R = RealNumber
-
 // Construct an algebraic extension over Q:
-// K = Q(√2) = Q[x]/(x^2 - 2).
+// K = 𝐐(√2) = 𝐐[x]/(x^2 - 2).
 
 do {
     struct p: _Polynomial {                            // p = x^2 - 2, as a struct
-        typealias K = Q
-        static let value = Polynomial<Q>(-2, 0, 1)
+        typealias K = 𝐐
+        static let value = Polynomial<𝐐>(-2, 0, 1)
     }
     
     typealias I = PolynomialIdeal<p>                   // I = (x^2 - 2), static
-    typealias K = QuotientField<Polynomial<Q>, I>      // K = Q[x]/I
+    typealias K = QuotientField<Polynomial<𝐐>, I>      // K = Q[x]/I
     
-    let a = Polynomial<Q>(0, 1).asQuotient(in: K.self) // a = x mod I
+    let a = Polynomial<𝐐>(0, 1).asQuotient(in: K.self) // a = x mod I
     a * a == 2
 }

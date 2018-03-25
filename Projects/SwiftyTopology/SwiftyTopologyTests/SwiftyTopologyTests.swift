@@ -10,10 +10,6 @@ import XCTest
 import SwiftyAlgebra
 @testable import SwiftyTopology
 
-internal typealias Z = 𝐙
-internal typealias Q = 𝐐
-internal typealias R = 𝐑
-
 class SwiftyTopologyTests: XCTestCase {
     
     override func setUp() {
