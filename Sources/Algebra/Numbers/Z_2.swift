@@ -17,8 +17,12 @@ public struct FiniteField_2: Field {
         self.value = value & 1
     }
     
-    public init(intValue value: Int) {
+    public init(from value: 𝐙) {
         self.init(UInt8(truncatingIfNeeded: value))
+    }
+    
+    public init(from r: 𝐐) {
+        self.init( r.p == 0 ? 0 : 1 )
     }
     
     public var inverse: 𝐙₂? {

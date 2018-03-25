@@ -14,8 +14,8 @@ public struct MPolynomial<K: Field>: Ring, Module {
     // e.g. [(2, 1, 3) : 5] -> 5 * x^2 * y * z^3
     private let coeffs: [IntList : K]
     
-    public init(intValue n: Int) {
-        self.init(K(intValue: n))
+    public init(from n: 𝐙) {
+        self.init(K(from: n))
     }
     
     public init(_ a: K) {

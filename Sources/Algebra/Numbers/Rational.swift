@@ -5,8 +5,16 @@ public typealias 𝐐 = RationalNumber
 public struct RationalNumber: Field, Comparable {
     internal let p, q: 𝐙
     
-    public init(rationalValue r: 𝐐) {
+    public init(from n: 𝐙) {
+        self.init(n, 1)
+    }
+    
+    public init(from r: 𝐐) {
         self.init(r.p, r.q)
+    }
+    
+    public init(_ n: 𝐙) {
+        self.init(from: n)
     }
     
     public init(_ p: 𝐙, _ q: 𝐙) {
@@ -20,14 +28,6 @@ public struct RationalNumber: Field, Comparable {
         } else {
             (self.p, self.q) = (p / d, q / d)
         }
-    }
-    
-    public init(intValue n: 𝐙) {
-        self.init(n, 1)
-    }
-    
-    public init(_ n: 𝐙) {
-        self.init(intValue: n)
     }
     
     public var abs: 𝐐 {

@@ -15,7 +15,7 @@ public extension GeometricComplex {
     }
     
     public func eulerNumber<R: EuclideanRing>(_ type: R.Type) -> R {
-        return R(intValue: eulerNumber)
+        return R(from: eulerNumber)
     }
     
     public var isOrientable: Bool {

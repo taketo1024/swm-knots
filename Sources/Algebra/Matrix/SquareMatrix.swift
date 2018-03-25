@@ -152,7 +152,7 @@ public func exp<n, K>(_ A: SquareMatrix<n, K>) -> SquareMatrix<n, K> where K: Fi
     while true {
         n  = n + 1
         An = An * A
-        cn = cn / K(intValue: n)
+        cn = cn / K(from: n)
         
         let Bn = cn * An
         if Bn.maxNorm.value < e {

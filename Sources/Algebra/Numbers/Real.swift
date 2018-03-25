@@ -13,11 +13,11 @@ public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByFloatL
         self.init(x)
     }
     
-    public init(intValue x: Int) {
+    public init(from x: 𝐙) {
         self.init(x)
     }
     
-    public init(rationalValue r: 𝐐) {
+    public init(from r: 𝐐) {
         self.init(r)
     }
     

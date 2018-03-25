@@ -3,7 +3,7 @@ import Foundation
 public typealias 𝐙 = Int
 
 extension 𝐙: EuclideanRing {
-    public init(intValue n: 𝐙) {
+    public init(from n: 𝐙) {
         self.init(n)
     }
     

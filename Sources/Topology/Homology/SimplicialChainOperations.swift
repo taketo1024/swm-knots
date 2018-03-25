@@ -39,7 +39,7 @@ public extension SimplicialCochain where A == Dual<Simplex> {
                 
                 let s = s1 ∪ s2 // MEMO: this simplex may not be a member of the simplicial complex.
                 let (n1, n2) = (s1.dim, s2.dim)
-                let e = R(intValue: (-1).pow(n1 * n2))
+                let e = R(from: (-1).pow(n1 * n2))
                 
                 return (Dual(s), e * self[d1] * f[d2])
             } else {
@@ -62,7 +62,7 @@ public extension SimplicialCochain where A == Dual<Simplex> {
             
             let (s1, s2) = (Simplex(s.sortedVertices[0 ... j]), Simplex(s.sortedVertices[j ... i]))
             if s1 == f.base {
-                let e = R(intValue: (-1).pow(s1.dim * s2.dim))
+                let e = R(from: (-1).pow(s1.dim * s2.dim))
                 return (s2, e)
             } else {
                 return nil

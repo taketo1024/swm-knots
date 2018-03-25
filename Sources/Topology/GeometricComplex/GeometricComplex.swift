@@ -56,7 +56,7 @@ public extension GeometricComplex {
     
     public func coboundary<R: Ring>(of d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R> {
         let s = d.base
-        let e = R(intValue: (-1).pow(d.degree + 1))
+        let e = R(from: (-1).pow(d.degree + 1))
         let vals = cells(ofDim: d.degree + 1).flatMap{ t -> (Dual<Cell>, R)? in
             let a = t.boundary(R.self)[s]
             return (a != .zero) ? (Dual(t), e * a) : nil

@@ -31,7 +31,7 @@ public struct CellularCell: GeometricCell {
     }
     
     public func boundary<R: Ring>(_ type: R.Type) -> FreeModule<CellularCell, R> {
-        return boundary.mapValues{ R(intValue: $0) }
+        return boundary.mapValues{ R(from: $0) }
     }
     
     public var hashValue: Int {

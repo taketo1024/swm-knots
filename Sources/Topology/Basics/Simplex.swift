@@ -96,7 +96,7 @@ public struct Simplex: GeometricCell, Comparable {
     
     public func boundary<R: Ring>(_ type: R.Type) -> SimplicialChain<R> {
         let values: [(Simplex, R)] = faces().enumerated().map { (i, t) -> (Simplex, R) in
-            let e = R(intValue: (-1).pow(i))
+            let e = R(from: (-1).pow(i))
             return (t, e)
         }
         return SimplicialChain(values)

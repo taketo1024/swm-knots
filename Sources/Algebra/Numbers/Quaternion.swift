@@ -21,7 +21,7 @@ public struct Quaternion: Ring, ExpressibleByFloatLiteral {
     private let z: 𝐑
     private let w: 𝐑
 
-    public init(intValue x: Int) {
+    public init(from x: 𝐙) {
         self.init(𝐑(x))
     }
     

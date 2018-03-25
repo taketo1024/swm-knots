@@ -16,7 +16,7 @@ public struct ComplexNumber: Field, NormedSpace, ExpressibleByFloatLiteral {
     private let x: 𝐑
     private let y: 𝐑
     
-    public init(intValue x: Int) {
+    public init(from x: 𝐙) {
         self.init(𝐑(x), 0)
     }
     
@@ -24,7 +24,7 @@ public struct ComplexNumber: Field, NormedSpace, ExpressibleByFloatLiteral {
         self.init(𝐑(x))
     }
     
-    public init(rationalValue r: 𝐐) {
+    public init(from r: 𝐐) {
         self.init(𝐑(r), 0)
     }
     
