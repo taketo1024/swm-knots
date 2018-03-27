@@ -31,3 +31,6 @@ let g = exp(X)
 print(X.detailDescription, "\n")
 print(g.detailDescription, "\n")
 print(U<n>.contains(g))
+
+let B = sl<_2, 𝐑>.killingForm
+print(B.asMatrix.detailDescription)
