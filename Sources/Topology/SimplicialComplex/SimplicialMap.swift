@@ -51,7 +51,7 @@ public struct SimplicialMap: GeometricComplexMap {
         return identity
     }
     
-    public static var diagonal: SimplicialMap {
+    public static func diagonal(from: SimplicialComplex) -> SimplicialMap {
         return SimplicialMap { (v: Vertex) in v × v }
     }
     

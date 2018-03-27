@@ -35,7 +35,7 @@ public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable
     internal let offset: Int
     
     // root initializer
-    public init(name: String? = nil, _ chain: [(ChainBasis, BoundaryMap)], offset: Int = 0) {
+    public init(name: String? = nil, chain: [(ChainBasis, BoundaryMap)], offset: Int = 0) {
         self.name = name ?? "_"
         self.chain = chain
         self.matrices = _ChainComplex<T, A, R>.makeMatrices(chain)
@@ -79,7 +79,7 @@ public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable
     }
     
     public func shifted(_ d: Int) -> _ChainComplex<T, A, R> {
-        return _ChainComplex.init(name: "\(name)[\(d)]", chain, offset: offset + d)
+        return _ChainComplex.init(name: "\(name)[\(d)]", chain: chain, offset: offset + d)
     }
     
     internal static func makeMatrices(_ chain: [(ChainBasis, BoundaryMap)]) -> [ComputationalMatrix<R>] {
@@ -156,6 +156,6 @@ public extension ChainComplex where T == Descending {
             return (dBasis, dMap)
         }
         
-        return D(name: name, cochain)
+        return D(name: name, chain: cochain)
     }
 }

@@ -86,7 +86,7 @@ public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: R
 }
 
 public extension _ChainMap where B == Sum<A, A> {
-    public static var diagonal: _ChainMap<T, A, Sum<A, A>, R> {
+    public static func diagonal(from: _ChainComplex<T, A, R>) -> _ChainMap<T, A, Sum<A, A>, R> {
         return _ChainMap( FreeModuleHom.diagonal )
     }
 }

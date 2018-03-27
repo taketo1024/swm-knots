@@ -21,7 +21,7 @@ public extension ChainComplex {
             return (basis, map)
         }
         
-        return _ChainComplex<T, Sum<A, B>, R>(name: "\(C1.name) ⊕ \(C2.name)", chain)
+        return _ChainComplex<T, Sum<A, B>, R>(name: "\(C1.name) ⊕ \(C2.name)", chain: chain)
     }
     
     public static func ⊗<B>(C1: _ChainComplex<T, A, R>, C2: _ChainComplex<T, B, R>) -> _ChainComplex<T, Tensor<A, B>, R> {
@@ -49,7 +49,7 @@ public extension ChainComplex {
             return (from, map)
         }
         
-        return _ChainComplex<T, Tensor<A, B>, R>(name: "\(C1.name) ⊗ \(C2.name)", chain)
+        return _ChainComplex<T, Tensor<A, B>, R>(name: "\(C1.name) ⊗ \(C2.name)", chain: chain)
     }
 }
 
