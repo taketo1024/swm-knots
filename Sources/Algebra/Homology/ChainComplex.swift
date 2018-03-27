@@ -141,19 +141,18 @@ public extension ChainComplex where T == Descending {
     public var dual: CochainComplex<Dual<A>, R> {
         typealias D = CochainComplex<Dual<A>, R>
         let cochain = validDegrees.map{ (i) -> (D.ChainBasis, D.BoundaryMap) in
+            let e = R(from: (-1).pow(i + 1))
+            
+            let current = chainBasis(i)
             let next = chainBasis(i + 1)
-            let map = boundaryMap(i + 1)
+            let matrix = boundaryMatrix(i + 1).transpose()
             
             let dBasis = chainBasis(i).map{ Dual($0) }
             let dMap  = D.BoundaryMap { (f: Dual<A>) in
-                let x = f.base
-                let e = R(from: (-1).pow(f.degree + 1))
-                
-                let vals = next.flatMap { y -> (Dual<A>, R)? in
-                    let r = map.applied(to: y)[x]
-                    return (r != .zero) ? (Dual(y), e * r) : nil
-                }
-                return D.Chain(vals)
+                let j = current.index(of: f.base)!
+                let col = matrix.components(ofCol: j)
+                let elements = col.map { (i, _, r) in (Dual(next[i]), e * r) }
+                return D.Chain(elements)
             }
             return (dBasis, dMap)
         }
