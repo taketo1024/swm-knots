@@ -28,7 +28,7 @@ class SimplicialCohomologyExSeqTests: XCTestCase {
         let D = SimplicialComplex.ball(dim: n)
         let S = D.boundary.named("S^\(n-1)")
         
-        var E = CohomologyExactSequence.pair(D, S, Z.self)
+        var E = CohomologyExactSequence.pair(D, S, 𝐙.self)
         
         E.fill(column: 1)
         E.fill(column: 2)
@@ -49,7 +49,7 @@ class SimplicialCohomologyExSeqTests: XCTestCase {
         let A = (X - s).named("A")
         let B = s.asComplex.named("B")
         
-        var E = CohomologyExactSequence.MayerVietoris(X, A, B, Z.self)
+        var E = CohomologyExactSequence.MayerVietoris(X, A, B, 𝐙.self)
 
         E.fill(column: 1)
         E.fill(column: 2)
@@ -69,7 +69,7 @@ class SimplicialCohomologyExSeqTests: XCTestCase {
         
         let A = (X - s).named("A")
         let B = s.asComplex.named("B")
-        var E = CohomologyExactSequence.MayerVietoris(X, A, B, Z.self)
+        var E = CohomologyExactSequence.MayerVietoris(X, A, B, 𝐙.self)
         
         E.fill(column: 1)
         E.fill(column: 2)

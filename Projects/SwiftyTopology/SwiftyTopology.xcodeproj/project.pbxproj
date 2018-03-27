@@ -7,10 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		148608712069F3090078DFA4 /* SimplicialExactSequences.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C08E2053D280001313FD /* SimplicialExactSequences.swift */; };
+		148608722069F3210078DFA4 /* SimplicialChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C0892053D280001313FD /* SimplicialChain.swift */; };
 		149745EF2064A29800329DFB /* SimplicialCohomologyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149745EE2064A29800329DFB /* SimplicialCohomologyTests.swift */; };
 		149745F12064A4CB00329DFB /* HomologyExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C0852053D280001313FD /* HomologyExtensions.swift */; };
 		149745FC2064B81A00329DFB /* SimplicialHomologyExSeqTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149745FB2064B81A00329DFB /* SimplicialHomologyExSeqTests.swift */; };
-		149745FD2064BA3C00329DFB /* SimplicialExactSequences.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C08E2053D280001313FD /* SimplicialExactSequences.swift */; };
 		149745FF2064CCC400329DFB /* SimplicialCohomologyExSeqTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149745FE2064CCC400329DFB /* SimplicialCohomologyExSeqTests.swift */; };
 		DDB20B5C2053CF22004F7AFE /* SwiftyTopology.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DDB20B522053CF22004F7AFE /* SwiftyTopology.framework */; };
 		DDB20B612053CF22004F7AFE /* SwiftyTopologyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB20B602053CF22004F7AFE /* SwiftyTopologyTests.swift */; };
@@ -28,7 +29,6 @@
 		DDB6C0B42053D545001313FD /* SimplicialMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C08F2053D280001313FD /* SimplicialMap.swift */; };
 		DDB6C0B52053D545001313FD /* CellularComplex.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C07E2053D280001313FD /* CellularComplex.swift */; };
 		DDB6C0B92053D545001313FD /* SimplicialCohomologyRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C08A2053D280001313FD /* SimplicialCohomologyRing.swift */; };
-		DDB6C0BA2053D545001313FD /* SimplicialExactSequences.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6C08E2053D280001313FD /* SimplicialExactSequences.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -331,12 +331,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DDB6C0BA2053D545001313FD /* SimplicialExactSequences.swift in Sources */,
+				148608722069F3210078DFA4 /* SimplicialChain.swift in Sources */,
 				DDB6C0B02053D545001313FD /* GeometricComplexExtensions.swift in Sources */,
 				DDB6C0AE2053D545001313FD /* GeometricComplex.swift in Sources */,
 				DDB6C0B52053D545001313FD /* CellularComplex.swift in Sources */,
 				DDB6C0B12053D545001313FD /* SimplicialComplex.swift in Sources */,
 				DDB6C0AF2053D545001313FD /* GeometricComplexMap.swift in Sources */,
+				148608712069F3090078DFA4 /* SimplicialExactSequences.swift in Sources */,
 				DDB6C0AC2053D545001313FD /* Simplex.swift in Sources */,
 				DDB6C0B92053D545001313FD /* SimplicialCohomologyRing.swift in Sources */,
 				DDB6C0B22053D545001313FD /* SimplicialComplexOperations.swift in Sources */,
@@ -345,7 +346,6 @@
 				DDB6C0AD2053D545001313FD /* GeometricCell.swift in Sources */,
 				DDB6C0B32053D545001313FD /* SimplicialComplexExamples.swift in Sources */,
 				DDB6C0B42053D545001313FD /* SimplicialMap.swift in Sources */,
-				149745FD2064BA3C00329DFB /* SimplicialExactSequences.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

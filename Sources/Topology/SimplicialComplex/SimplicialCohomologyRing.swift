@@ -60,7 +60,7 @@ public extension SimplicialCohomologyClass where T == Ascending, A == Dual<Simpl
 }
 
 public extension SimplicialCohomologyClass where T == Ascending, A == Dual<Simplex>, R == 𝐙₂ {
-    public func Sq(_ i: Int) -> SimplicialCohomologyClass<A, R> {
+    public func Sq(_ i: Int) -> SimplicialCohomologyClass<R> {
         if let H = structure {
             let a = self.representative
             return SimplicialCohomologyClass( a.Sq(i), H )

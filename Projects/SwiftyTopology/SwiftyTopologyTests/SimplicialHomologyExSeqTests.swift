@@ -29,7 +29,7 @@ class SimplicialHomologyExSeqTests: XCTestCase {
         let D = SimplicialComplex.ball(dim: n)
         let S = D.boundary.named("S^\(n-1)")
         
-        var E = HomologyExactSequence.pair(D, S, Z.self)
+        var E = HomologyExactSequence.pair(D, S, 𝐙.self)
         
         E.fill(column: 0)
         E.fill(column: 1)
@@ -49,7 +49,7 @@ class SimplicialHomologyExSeqTests: XCTestCase {
         let A = (X - s).named("A")
         let B = s.asComplex.named("B")
         
-        var E = HomologyExactSequence.MayerVietoris(X, A, B, Z.self)
+        var E = HomologyExactSequence.MayerVietoris(X, A, B, 𝐙.self)
         
         E.fill(column: 0)
         E.fill(column: 1)
@@ -68,7 +68,7 @@ class SimplicialHomologyExSeqTests: XCTestCase {
         
         let A = (X - s).named("A")
         let B = s.asComplex.named("B")
-        var E = HomologyExactSequence.MayerVietoris(X, A, B, Z.self)
+        var E = HomologyExactSequence.MayerVietoris(X, A, B, 𝐙.self)
 
         E.fill(column: 0)
         E.fill(column: 1)
