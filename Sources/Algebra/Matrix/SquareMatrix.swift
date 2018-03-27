@@ -13,6 +13,7 @@ public typealias SquareMatrix<n: _Int, R: Ring> = Matrix<n, n, R>
 // TODO: conform to Ring after conditional conformance is supported.
 public extension SquareMatrix where n == m {
     public static var identity: Matrix<n, n, R> {
+        assert(!n.isDynamic)
         return Matrix<n, n, R> { $0 == $1 ? 1 : 0 }
     }
     
@@ -121,6 +122,7 @@ public extension SquareMatrix where n == m, R == 𝐂 {
 
 public extension SquareMatrix where n == m {
     public static var standardSymplecticMatrix: SquareMatrix<n, R> {
+        assert(!n.isDynamic)
         assert(n.intValue.isEven)
         
         let m = n.intValue / 2

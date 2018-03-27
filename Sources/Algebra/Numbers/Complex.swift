@@ -99,6 +99,7 @@ public struct ComplexNumber: Field, NormedSpace, ExpressibleByFloatLiteral {
     
     public var description: String {
         return (x != 0 && y != 0) ? "\(x) + \(y)i" :
+                         (y == 1) ? "i" :
                          (y != 0) ? "\(y)i"
                                   : "\(x)"
     }

@@ -3,21 +3,34 @@
 import Foundation
 import SwiftyAlgebra
 
-typealias GL = GeneralLinearGroup
-typealias SL = SpecialLinearGroup
-typealias O  = OrthogonalGroup
-typealias U  = UnitaryGroup
+// Aliases populary used in Math.
 
-typealias gl = GeneralLinearLieAlgebra
-typealias sl = SpecialLinearLieAlgebra
+typealias GL  = GeneralLinearGroup
+typealias SL  = SpecialLinearGroup
+typealias O   = OrthogonalGroup
+typealias SO  = SpecialOrthogonalGroup
+typealias U   = UnitaryGroup
+typealias SU  = SpecialUnitaryGroup
+typealias Sp  = SymplecticGroup
+typealias USp = UnitarySymplecticGroup
+
+typealias gl  = GeneralLinearLieAlgebra
+typealias sl  = SpecialLinearLieAlgebra
+typealias o   = OrthogonalLieAlgebra
+typealias u   = UnitaryLieAlgebra
+typealias su  = SpecialUnitaryLieAlgebra
+typealias sp  = SymplecticLieAlgebra
+typealias usp = UnitarySymplecticLieAlgebra
 
 typealias n = _2
 
 let i = 𝐂.imaginaryUnit
-let X = gl<n, CC
+let X = gl<n, 𝐂>(0, 2 + i, -2 + i, 0)
 let g = exp(X)
 
 print(X.detailDescription, "\n")
 print(g.detailDescription, "\n")
 print(U<n>.contains(g))
 
+let B = sl<_2, 𝐑>.killingForm
+print(B.asMatrix.detailDescription)

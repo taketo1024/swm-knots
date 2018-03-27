@@ -17,6 +17,25 @@ public struct GeneralLinearLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
         self.matrix = matrix
     }
     
+    public static var dim: Int {
+        let n = Size.intValue
+        return n * n
+    }
+    
+    public static var standardBasis: [GeneralLinearLieAlgebra<n, K>] {
+        let n = Size.intValue
+        return (0 ..< n).flatMap { i in
+            (0 ..< n).map { j in GeneralLinearLieAlgebra(Matrix.unit(i, j)) }
+        }
+    }
+    
+    public var standardCoordinates: [CoeffRing] {
+        let n = size
+        return (0 ..< n).flatMap { i in
+            (0 ..< n).map { j in matrix[i, j] }
+        }
+    }
+    
     public static func contains(_ g: GeneralLinearLieAlgebra<n, K>) -> Bool {
         return true
     }
@@ -33,6 +52,41 @@ public struct SpecialLinearLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
     public let matrix: SquareMatrix<n, K>
     public init(_ matrix: SquareMatrix<n, K>) {
         self.matrix = matrix
+    }
+    
+    public static var dim: Int {
+        let n = Size.intValue
+        return n * n - 1
+    }
+    
+    public static var standardBasis: [SpecialLinearLieAlgebra<n, K>] {
+        typealias 𝔤 = SpecialLinearLieAlgebra<n, K>
+        
+        let E = SquareMatrix<n, K>.unit
+        let n = Size.intValue
+        
+        return
+            (0 ..< n).flatMap { i -> [𝔤] in
+                (0 ..< n).flatMap { j -> 𝔤? in
+                    (i != j) ? 𝔤(E(i, j)) : nil
+                }
+            }
+            +
+            (0 ..< n - 1).map { i -> 𝔤 in
+                𝔤(E(i, i) - E(n - 1, n - 1))
+            }
+    }
+    
+    public var standardCoordinates: [CoeffRing] {
+        let n = size
+        return
+            (0 ..< n).flatMap { i -> [CoeffRing] in
+                (0 ..< n).flatMap { j -> CoeffRing? in
+                    (i != j) ? matrix[i, j] : nil
+                }
+            }
+            +
+            (0 ..< n - 1).map { i in matrix[i, i] }
     }
     
     public static func contains(_ g: GeneralLinearLieAlgebra<n, K>) -> Bool {

@@ -8,15 +8,7 @@
 
 import Foundation
 
-public protocol LieAlgebra: VectorSpace {
-    func bracket(_ Y: Self) -> Self
-}
-
-public func bracket<𝔤: LieAlgebra>(_ X: 𝔤, _ Y: 𝔤) -> 𝔤 {
-    return X.bracket(Y)
-}
-
-public protocol MatrixLieAlgebra: LieAlgebra {
+public protocol MatrixLieAlgebra: FiniteDimLieAlgebra {
     associatedtype Size: _Int
     
     // MEMO: Usually ElementRing == CoeffRing,
@@ -44,7 +36,7 @@ public extension MatrixLieAlgebra {
     }
     
     public var size: Int {
-        return matrix.rows
+        return Size.intValue
     }
     
     public var trace: ElementRing {

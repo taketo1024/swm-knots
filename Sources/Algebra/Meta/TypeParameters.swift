@@ -2,6 +2,11 @@ import Foundation
 
 public protocol _Int {
     static var intValue: Int { get }
+    static var isDynamic: Bool { get }
+}
+
+public extension _Int {
+    public static var isDynamic: Bool { return false }
 }
 
 public protocol _Prime: _Int {}
@@ -16,6 +21,11 @@ public struct _6 : _Int   { public static let intValue = 6 }
 public struct _7 : _Prime { public static let intValue = 7 }
 public struct _8 : _Int   { public static let intValue = 8 }
 public struct _9 : _Int   { public static let intValue = 9 }
+
+public struct Dynamic : _Int {
+    public static var intValue: Int { fatalError() }
+    public static var isDynamic: Bool { return true }
+}
 
 public protocol _Polynomial {
     associatedtype K: Field
