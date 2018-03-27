@@ -61,6 +61,20 @@ public struct Simplex: GeometricCell, Comparable {
         }
     }
     
+    public func subsimplicices(dim k: Int) -> [Simplex] {
+        guard 0 <= k && k <= dim else {
+            return []
+        }
+        
+        if k == dim {
+            return [self]
+        } else if k == 0 {
+            return vertices.map{ v in Simplex(v) }
+        } else {
+            return (dim + 1).choose(k + 1).map { I in Simplex(vertexSet: vertices, indices: I) }
+        }
+    }
+    
     public var isEmpty: Bool {
         return dim == -1
     }
@@ -71,19 +85,6 @@ public struct Simplex: GeometricCell, Comparable {
     
     public func contains(_ s: Simplex) -> Bool {
         return s.unorderedVertices.isSubset(of: self.unorderedVertices)
-    }
-    
-    public func allSubsimplices() -> [Simplex] {
-        var queue = [self]
-        var i = 0
-        while(i < queue.count) {
-            let s = queue[i]
-            if s.dim > 0 {
-                queue += queue[i].faces()
-            }
-            i += 1
-        }
-        return queue.unique()
     }
     
     public func subtract(_ s: Simplex) -> Simplex {

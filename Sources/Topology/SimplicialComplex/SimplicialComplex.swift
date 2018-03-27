@@ -17,13 +17,14 @@ public struct SimplicialComplex: GeometricComplex {
     
     public let vertices: [Vertex]
     public let maximalCells: [Simplex]
-    private let _table = Cache<[[Simplex]]>()
+    private let allCells: [Cache<[Simplex]>]
     
     public init<S: Sequence>(name: String? = nil, cells: S, filterMaximalCells: Bool = false) where S.Iterator.Element == Simplex {
         self.name = name ?? "_"
         self.maximalCells = filterMaximalCells ? SimplicialComplex.filterMaximalCells(cells) : cells.toArray()
         self.vertices = maximalCells.reduce(Set<Vertex>()){ (set, s) in set.union(s.vertices) }.sorted()
         self.dim = maximalCells.reduce(-1){ (res, s) in max(res, s.dim) }
+        self.allCells = (0 ..< dim + 1).map{ _ in Cache() }
     }
     
     public init(name: String? = nil, cells: Simplex...) {
@@ -35,15 +36,32 @@ public struct SimplicialComplex: GeometricComplex {
     }
     
     public func skeleton(_ i: Int) -> SimplicialComplex {
-        if validDims.contains(i) {
-            return SimplicialComplex(name: "\(self.name)_(\(i))", cells: table[i])
-        } else {
-            return SimplicialComplex.empty
+        guard validDims.contains(i) else {
+            return .empty
         }
+        
+        let cells = maximalCells.flatMap { s -> [Simplex] in
+            (s.dim > i) ? s.subsimplicices(dim: i) : [s]
+        }.unique()
+        
+        return SimplicialComplex(name: "\(self.name)_(\(i))", cells: cells)
     }
     
     public func cells(ofDim i: Int) -> [Simplex] {
-        return validDims.contains(i) ? table[i] : []
+        guard validDims.contains(i) else {
+            return []
+        }
+        
+        if let cells = allCells[i].value {
+            return cells
+        }
+            
+        let cells = maximalCells.flatMap { s -> [Simplex] in
+            s.subsimplicices(dim: i)
+        }.unique()
+        
+        allCells[i].value = cells
+        return cells
     }
     
     public func cofaces(ofCell s: Simplex) -> [Simplex] {
@@ -54,25 +72,6 @@ public struct SimplicialComplex: GeometricComplex {
         var K = self
         K.name = name
         return K
-    }
-    
-    internal var table: [[Simplex]] {
-        if let table = _table.value {
-            return table
-        }
-        
-        let set = maximalCells.reduce( Set<Simplex>() ){ (set, cell) in
-            set.union( cell.allSubsimplices() )
-        }
-        
-        var table: [[Simplex]] = (0 ... dim).map{_ in []}
-        for s in set {
-            table[s.dim].append(s)
-        }
-        table = table.map{ list in list.sorted() }
-        
-        _table.value = table
-        return table
     }
     
     static public func filterMaximalCells<S: Sequence>(_ _cells: S) -> [Simplex] where S.Element == Simplex {

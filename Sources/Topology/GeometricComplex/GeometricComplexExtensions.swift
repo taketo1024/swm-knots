@@ -51,7 +51,7 @@ public extension GeometricComplex {
     }
     
     public func orientationClass<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> HomologyClass<Cell, R>? {
-        let H = (L == nil) ? Homology(self, R.self) : Homology(self, L!, R.self)
+        let H = Homology(geometricComplex: self, relativeTo: L, R.self)
         let top = H[dim]
         
         if top.isFree && top.rank == 1 {

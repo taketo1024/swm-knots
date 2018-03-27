@@ -16,20 +16,12 @@ public extension ChainComplex {
         let degree = max(C1.topDegree, C2.topDegree)
         
         let chain = (offset ... degree).map { i -> (C.ChainBasis, C.BoundaryMap) in
-            let basis: C.ChainBasis = C1.chainBasis(i).map{ a in Sum(a) } + C2.chainBasis(i).map{ b in Sum(b) }
-            
-            let (f1, f2) = (C1.boundaryMap(i), C2.boundaryMap(i))
-            let map = C.BoundaryMap { c in
-                switch c {
-                case let ._1(a): return FreeModule( f1.appliedTo(a).map{ (a, r) in (._1(a), r) } )
-                case let ._2(b): return FreeModule( f2.appliedTo(b).map{ (b, r) in (._2(b), r) } )
-                }
-            }
-            
+            let basis: C.ChainBasis = C1.chainBasis(i).map{ a in ._1(a) } + C2.chainBasis(i).map{ b in ._2(b) }
+            let map = C1.boundaryMap(i) ⊕ C2.boundaryMap(i)
             return (basis, map)
         }
         
-        return _ChainComplex<T, Sum<A, B>, R>(name: "\(C1.name) ⊕ \(C2.name)", chain)
+        return _ChainComplex<T, Sum<A, B>, R>(name: "\(C1.name) ⊕ \(C2.name)", chain: chain)
     }
     
     public static func ⊗<B>(C1: _ChainComplex<T, A, R>, C2: _ChainComplex<T, B, R>) -> _ChainComplex<T, Tensor<A, B>, R> {
@@ -57,7 +49,7 @@ public extension ChainComplex {
             return (from, map)
         }
         
-        return _ChainComplex<T, Tensor<A, B>, R>(name: "\(C1.name) ⊗ \(C2.name)", chain)
+        return _ChainComplex<T, Tensor<A, B>, R>(name: "\(C1.name) ⊗ \(C2.name)", chain: chain)
     }
 }
 

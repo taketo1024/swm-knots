@@ -10,35 +10,45 @@ import Foundation
 
 public protocol ChainType {
     static var descending: Bool { get }
-    static func target(_ i: Int) -> Int
+    static var degree: Int { get }
 }
 public struct Descending : ChainType {    // for ChainComplex / Homology
     public static let descending = true
-    public static func target(_ i: Int) -> Int { return i - 1 }
+    public static var degree: Int { return -1 }
 }
 public struct Ascending : ChainType {
     public static let descending = false
-    public static func target(_ i: Int) -> Int { return i + 1 }
+    public static var degree: Int { return +1 }
 }
 
 public typealias   ChainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Descending, A, R>
 public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Ascending,  A, R>
 
-public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
+public class _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
+    public typealias Chain = FreeModule<A, R>
     public typealias ChainBasis = [A]
     public typealias BoundaryMap = FreeModuleHom<A, A, R>
     
     public let name: String
+    
     internal let chain: [(basis: ChainBasis, map: BoundaryMap)]
-    internal let matrices: [ComputationalMatrix<R>]
     internal let offset: Int
+    internal var matrices: [ComputationalMatrix<R>?]
     
     // root initializer
-    public init(name: String? = nil, _ chain: [(ChainBasis, BoundaryMap)], offset: Int = 0) {
+    public init(name: String? = nil, chain: [(ChainBasis, BoundaryMap)], offset: Int = 0) {
         self.name = name ?? "_"
         self.chain = chain
-        self.matrices = _ChainComplex<T, A, R>.makeMatrices(chain)
+        self.matrices = Array(repeating: nil, count: chain.count)
         self.offset = offset
+    }
+    
+    public var isEmpty: Bool {
+        return chain.isEmpty
+    }
+    
+    public var validDegrees: [Int] {
+        return isEmpty ? [] : (offset ... topDegree).toArray()
     }
     
     public var topDegree: Int {
@@ -56,7 +66,13 @@ public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable
     public func boundaryMatrix(_ i: Int) -> ComputationalMatrix<R> {
         switch i {
         case (offset ... topDegree):
-            return matrices[i - offset]
+            if let A = matrices[i - offset] {
+                return A
+            }
+            
+            let A = makeMatrix(i)
+            matrices[i - offset] = A
+            return A
             
         case topDegree + 1 where T.descending:
             return .zero(rows: chainBasis(topDegree).count, cols: 0)
@@ -69,30 +85,25 @@ public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable
         }
     }
     
-    public func shifted(_ d: Int) -> _ChainComplex<T, A, R> {
-        return _ChainComplex.init(name: "\(name)[\(d)]", chain, offset: offset + d)
+    internal func makeMatrix(_ i: Int) -> ComputationalMatrix<R> {
+        let (from, to, map) = (chainBasis(i), chainBasis(i + T.degree), boundaryMap(i))
+        let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toBasisElement: toBasisIndex]
+        let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
+            map.applied(to: x).flatMap { (y, a) -> MatrixComponent<R>? in
+                toIndex[y].flatMap{ i in (i, j, a) } // nil if toIndex[y] == nil
+            }
+        }
+        
+        return ComputationalMatrix(rows: to.count, cols: from.count, components: components)
     }
     
-    internal static func makeMatrices(_ chain: [(ChainBasis, BoundaryMap)]) -> [ComputationalMatrix<R>] {
-        return chain.enumerated().map { (i, c) in
-            let (from, map) = c
-            let next = T.target(i)
-            let to = (0 ..< chain.count).contains(next) ? chain[next].0 : []
-            
-            let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toBasisElement: toBasisIndex]
-            let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
-                map.appliedTo(x).flatMap { (y, a) -> MatrixComponent<R>? in
-                    toIndex[y].flatMap{ i in (i, j, a) } // nil if toIndex[y] == nil
-                }
-            }
-            
-            return ComputationalMatrix(rows: to.count, cols: from.count, components: components)
-        }
+    public func shifted(_ d: Int) -> _ChainComplex<T, A, R> {
+        return _ChainComplex.init(name: "\(name)[\(d)]", chain: chain, offset: offset + d)
     }
     
     public func assertComplex(debug: Bool = false) {
         (offset ... topDegree).forEach { i1 in
-            let i2 = T.target(i1)
+            let i2 = i1 + T.degree
             let b1 = chainBasis(i1)
             let (d1, d2) = (boundaryMap(i1), boundaryMap(i2))
             let (m1, m2) = (boundaryMatrix(i1), boundaryMatrix(i2))
@@ -103,8 +114,8 @@ public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable
                 print("----------")
                 print("C\(i1) : \(b1)\n")
                 for s in b1 {
-                    let x = d1.appliedTo(s)
-                    let y = d2.appliedTo(x)
+                    let x = d1.applied(to: s)
+                    let y = d2.applied(to: x)
                     print("\t\(s) ->\t\(x) ->\t\(y)")
                 }
                 print()
@@ -123,5 +134,29 @@ public struct _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable
     
     public var description: String {
         return chain.description
+    }
+}
+
+public extension ChainComplex where T == Descending {
+    public var dual: CochainComplex<Dual<A>, R> {
+        typealias D = CochainComplex<Dual<A>, R>
+        let cochain = validDegrees.map{ (i) -> (D.ChainBasis, D.BoundaryMap) in
+            let e = R(from: (-1).pow(i + 1))
+            
+            let current = chainBasis(i)
+            let next = chainBasis(i + 1)
+            let matrix = boundaryMatrix(i + 1).transpose()
+            
+            let dBasis = chainBasis(i).map{ Dual($0) }
+            let dMap  = D.BoundaryMap { (f: Dual<A>) in
+                let j = current.index(of: f.base)!
+                let col = matrix.components(ofCol: j)
+                let elements = col.map { (i, _, r) in (Dual(next[i]), e * r) }
+                return D.Chain(elements)
+            }
+            return (dBasis, dMap)
+        }
+        
+        return D(name: name, chain: cochain)
     }
 }

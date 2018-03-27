@@ -42,3 +42,43 @@ public extension Field {
 }
 
 public protocol Subfield: Field, Subring {}
+
+// TODO merge with QuotientRing using conditional conformance `where I: MaximalIdeal`
+// public struct QuotientField<R, I>: Field, _QuotientRing where I: Ideal, R == I.Super {
+public struct QuotientField<R, I>: Field, _QuotientRing where I: Ideal, R == I.Super {
+    public typealias Sub = I
+    
+    internal let r: R
+    
+    public init(_ r: R) {
+        self.r = I.reduced(r)
+    }
+    
+    public var representative: R {
+        return r
+    }
+}
+
+public protocol _FieldHom: _RingHom where Domain: Field, Codomain: Field {}
+
+public struct FieldHom<X: Field, Y: Field>: _FieldHom {
+    public typealias Domain = X
+    public typealias Codomain = Y
+    
+    private let f: (X) -> Y
+    public init(_ f: @escaping (X) -> Y) {
+        self.f = f
+    }
+    
+    public func applied(to x: X) -> Y {
+        return f(x)
+    }
+    
+    public func composed<W>(with f: FieldHom<W, X>) -> FieldHom<W, Y> {
+        return FieldHom<W, Y> { x in self.applied(to: f.applied(to: x)) }
+    }
+    
+    public static func ∘<Z>(g: FieldHom<Y, Z>, f: FieldHom<X, Y>) -> FieldHom<X, Z> {
+        return g.composed(with: f)
+    }
+}

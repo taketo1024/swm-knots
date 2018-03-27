@@ -9,9 +9,7 @@
 import Foundation
 import SwiftyAlgebra
 
-public typealias SimplicialChain<R: Ring>   = FreeModule<Simplex, R>
-public typealias SimplicialCochain<R: Ring> = FreeModule<Dual<Simplex>, R>
-
+public typealias SimplicialChain<R: Ring> = FreeModule<Simplex, R>
 public extension SimplicialChain where A == Simplex {
     public func boundary() -> SimplicialChain<R> {
         return self.reduce(SimplicialChain<R>.zero) { (res, next) -> SimplicialChain<R> in
@@ -21,14 +19,8 @@ public extension SimplicialChain where A == Simplex {
     }
 }
 
+public typealias SimplicialCochain<R: Ring> = FreeModule<Dual<Simplex>, R>
 public extension SimplicialCochain where A == Dual<Simplex> {
-    public func coboundary(in K: SimplicialComplex) -> SimplicialCochain<R> {
-        return self.reduce(SimplicialCochain<R>.zero) { (res, next) -> SimplicialCochain<R> in
-            let (d, r) = next
-            return res + r * K.coboundary(of: d, R.self)
-        }
-    }
-    
     public func cup(_ f: SimplicialCochain<R>) -> SimplicialCochain<R> {
         typealias D = Dual<Simplex>
         

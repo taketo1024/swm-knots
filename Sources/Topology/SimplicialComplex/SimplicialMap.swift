@@ -14,50 +14,48 @@ public struct SimplicialMap: GeometricComplexMap {
     public typealias Domain      = Simplex
     public typealias Codomain    = Simplex
     
-    public var domain:   SimplicialComplex
-    public var codomain: SimplicialComplex?
-    private let map: (Vertex) -> Vertex
+    private let map: (Simplex) -> Simplex
     
-    public init(from: SimplicialComplex, to: SimplicialComplex? = nil, _ map: @escaping (Vertex) -> Vertex) {
-        self.domain = from
-        self.codomain = to
-        self.map = map
+    public init(_ f: @escaping (Vertex) -> Vertex) {
+        self.init() { (s: Simplex) in
+            Simplex(s.vertices.map(f).unique())
+        }
     }
     
-    public init(from: SimplicialComplex, to: SimplicialComplex? = nil, _ map: [Vertex: Vertex]) {
-        self.init(from: from, to: to, { v in map[v] ?? v })
+    public init(_ f: @escaping (Simplex) -> Simplex) {
+        self.map = f
     }
     
-    public init(from: SimplicialComplex, to: SimplicialComplex? = nil, _ map: [(Vertex, Vertex)]) {
-        self.init(from: from, to: to, Dictionary(pairs: map))
+    public init(_ map: [Vertex: Vertex]) {
+        self.init { v in map[v] ?? v }
     }
     
-    public var image: SimplicialComplex {
-        let cells = domain.maximalCells.map { s in self.appliedTo(s) }.unique()
+    public func image(of K: SimplicialComplex) -> SimplicialComplex {
+        let cells = K.maximalCells.map { s in self.applied(to: s) }.unique()
         return SimplicialComplex(cells: cells, filterMaximalCells: true)
     }
     
-    public func appliedTo(_ x: Vertex) -> Vertex {
-        return map(x)
+    public func applied(to v: Vertex) -> Vertex {
+        return map(Simplex(v)).vertices[0]
     }
     
-    public func appliedTo(_ s: Simplex) -> Simplex {
-        return Simplex(s.vertices.map{ self.appliedTo($0) }.unique())
+    public func applied(to s: Simplex) -> Simplex {
+        return map(s)
     }
     
-    public static func identity(from: SimplicialComplex) -> SimplicialMap {
-        return SimplicialMap(from: from, to: from) { v in v }
+    public static var identity: SimplicialMap {
+        return SimplicialMap { (s: Simplex) in s }
     }
     
     public static func inclusion(from: SimplicialComplex, to: SimplicialComplex) -> SimplicialMap {
-        return SimplicialMap(from: from, to: to) { v in v }
+        return identity
     }
     
     public static func diagonal(from: SimplicialComplex) -> SimplicialMap {
-        return SimplicialMap(from: from) { v in v × v }
+        return SimplicialMap { (v: Vertex) in v × v }
     }
     
-    public static func projection(from: SimplicialComplex, _ i: Int) -> SimplicialMap {
-        return SimplicialMap(from: from) { v in v.components[i] }
+    public static func projection(_ i: Int) -> SimplicialMap {
+        return SimplicialMap { (v: Vertex) in v.components[i] }
     }
 }

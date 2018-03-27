@@ -12,85 +12,95 @@ public typealias   ChainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _Ch
 public typealias CochainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Ascending,  A, B, R>
 
 // TODO conform Module<R>
-public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: Ring>: Map {
+public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: Ring>: _ModuleHom {
+    public typealias CoeffRing = R
     public typealias Domain   = FreeModule<A, R>
     public typealias Codomain = FreeModule<B, R>
     
-    public let shift: Int
-    internal let map: FreeModuleHom<A, B, R>
+    internal let f: FreeModuleHom<A, B, R>
     
-    public init(shift: Int = 0, _ map: @escaping (A) -> Codomain) {
-        self.shift = shift
-        self.map = FreeModuleHom(map)
+    public init(_ f: @escaping (A) -> Codomain) {
+        self.init(FreeModuleHom(f))
     }
     
-    public init(from: _ChainComplex<T, A, R>, to: _ChainComplex<T, B, R>, shift: Int = 0, _ f: @escaping (A) -> Codomain) {
-        self.init(shift: shift, f)
+    public init(_ f: @escaping (Domain) -> Codomain) {
+        self.init(FreeModuleHom(f))
     }
     
-    public func appliedTo(_ a: A) -> FreeModule<B, R> {
-        return map.appliedTo(a)
+    public init(_ f: FreeModuleHom<A, B, R>) {
+        self.f = f
     }
     
-    public func appliedTo(_ x: FreeModule<A, R>) -> FreeModule<B, R> {
-        return map.appliedTo(x)
+    public func applied(to a: A) -> FreeModule<B, R> {
+        return f.applied(to: a)
+    }
+    
+    public func applied(to x: FreeModule<A, R>) -> FreeModule<B, R> {
+        return f.applied(to: x)
+    }
+    
+    public static func ∘<C>(g: _ChainMap<T, B, C, R>, f: _ChainMap<T, A, B, R>) -> _ChainMap<T, A, C, R> {
+        return _ChainMap<T, A, C, R>(g.f ∘ f.f)
+    }
+    
+    public static func ⊕<A2, B2>(f1: _ChainMap<T, A, B, R>, f2: _ChainMap<T, A2, B2, R>) -> _ChainMap<T, Sum<A, A2>, Sum<B, B2>, R> {
+        return _ChainMap<T, Sum<A, A2>, Sum<B, B2>, R>( f1.f ⊕ f2.f )
     }
     
     public func assertChainMap(from: _ChainComplex<T, A, R>, to: _ChainComplex<T, B, R>, debug: Bool = false) {
-        (min(from.offset, to.offset) ... max(from.topDegree, to.topDegree)).forEach { i1 in
+        (min(from.offset, to.offset) ... max(from.topDegree, to.topDegree)).forEach { i in
             
-            //        f1
-            //  C_i1 ----> C'_i1
-            //    |          |
-            //  d1|    c     |d2
-            //    v          v
-            //  C_i2 ----> C'_i2
-            //        f2
+            //          f
+            //   C[i] -----> C'[i]
+            //     |          |
+            //   d1|          |d2
+            //     v          v
+            //  C[i-1] ---> C'[i-1]
+            //          f
             
-            let b1 = from.chainBasis(i1)
-            let (d1, d2) = (from.boundaryMap(i1), to.boundaryMap(i1 + shift))
-            
+            let basis = from.chainBasis(i)
             if debug {
-                print("----------")
-                print("C\(i1) -> C'\(i1 + shift)")
-                print("----------")
-                print("C\(i1) : \(b1)\n")
-                
-                for a in b1 {
-                    let x1 =  map.appliedTo(a)
-                    let y1 = d2.appliedTo(x1)
-                    let x2 = d1.appliedTo(a)
-                    let y2 =  map.appliedTo(x2)
-                    
-                    print("\td2 ∘ f1: \(a) ->\t\(x1) ->\t\(y1)")
-                    print("\tf2 ∘ d1: \(a) ->\t\(x2) ->\t\(y2)")
-                    print()
-                }
+                print("C\(i) : \(basis)\n")
             }
             
-            assert( (d2 ∘ map).equals(map ∘ d1, forElements: b1.map{ FreeModule($0) } ) )
+            let d1 = from.boundaryMap(i)
+            
+            for a in basis {
+                let x1 = f.applied(to: a)
+                let d2 = to.boundaryMap(x1.degree)
+                let x2 = d2.applied(to: x1)
+                
+                let y1 = d1.applied(to: a)
+                let y2 = f.applied(to: y1)
+                
+                if debug {
+                    print("\td2 ∘ f1: \(a) ->\t\(x1) ->\t\(x2)")
+                    print("\tf2 ∘ d1: \(a) ->\t\(y1) ->\t\(y2)")
+                    print()
+                }
+                
+                assert(x2 == y2)
+            }
         }
     }
-    
-    public static func +(f1: _ChainMap<T, A, B, R>, f2: _ChainMap<T, A, B, R>) -> _ChainMap<T, A, B, R> {
-        return _ChainMap{ a in f1.appliedTo(a) + f2.appliedTo(a) }
-    }
-    
-    public static prefix func -(f: _ChainMap<T, A, B, R>) -> _ChainMap<T, A, B, R> {
-        return _ChainMap{ a in -f.appliedTo(a) }
-    }
-    
-    public static func ⊕<C>(f1: _ChainMap<T, A, B, R>, f2: _ChainMap<T, A, C, R>) -> _ChainMap<T, A, Sum<B, C>, R> {
-        return _ChainMap<T, A, Sum<B, C>, R> { a in f1.appliedTo(a) ⊕ f2.appliedTo(a) }
+}
+
+public extension _ChainMap where B == Sum<A, A> {
+    public static func diagonal(from: _ChainComplex<T, A, R>) -> _ChainMap<T, A, Sum<A, A>, R> {
+        return _ChainMap( FreeModuleHom.diagonal )
     }
 }
 
 public extension ChainMap where T == Descending {
-    public func dualMap(domainChainComplex C: ChainComplex<A, R>) -> CochainMap<Dual<B>, Dual<A>, R> {
+    
+    // f: C1 -> C2  ==>  f^*: Hom(C1, R) <- Hom(C1, R) , pullback
+    //                        g∘f        <- g
+
+    public func dual(domain C: ChainComplex<A, R>) -> CochainMap<Dual<B>, Dual<A>, R> {
         return CochainMap { (d: Dual<B>) -> FreeModule<Dual<A>, R> in
             let i = d.degree
             let values = C.chainBasis(i).flatMap { s -> (Dual<A>, R)? in
-                let a = self.appliedTo(s)[d.base]
+                let a = self.applied(to: s)[d.base]
                 return (a != .zero) ? (Dual(s), a) : nil
             }
             return FreeModule(values)

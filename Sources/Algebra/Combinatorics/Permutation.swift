@@ -14,6 +14,11 @@ public struct Permutation: Map {
     
     internal var elements: [Int : Int]
     
+    public init(_ f: @escaping (Int) -> Int) {
+        let elements = (0...).lazy.map{ i in (i, f(i)) }.prefix{ (_, j) in j >= 0 }
+        self.init(Dictionary(pairs: elements))
+    }
+    
     public init(_ elements: [Int: Int]) {
         assert(Set(elements.keys) == Set(elements.values))
         self.elements = elements.filter{ (k, v) in k != v }
@@ -49,12 +54,12 @@ public struct Permutation: Map {
         return elements[i] ?? i
     }
     
-    public func appliedTo(_ i: Int) -> Int {
+    public func applied(to i: Int) -> Int {
         return self[i]
     }
     
-    public func appliedTo(_ I: [Int]) -> [Int] {
-        return I.map{ appliedTo($0) }
+    public func applied(to I: [Int]) -> [Int] {
+        return I.map{ applied(to: $0) }
     }
     
     public var signature: Int {

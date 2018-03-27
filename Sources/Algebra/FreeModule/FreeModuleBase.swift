@@ -16,13 +16,11 @@ public extension FreeModuleBase {
     public var degree: Int { return 1 }
 }
 
+// Default Bases
 extension Int:    FreeModuleBase { }
 extension String: FreeModuleBase { }
 
 // Derived Bases
-
-public typealias DualFreeModule<A: FreeModuleBase, R: Ring> = FreeModule<Dual<A>, R>
-
 public struct Dual<A: FreeModuleBase>: FreeModuleBase {
     public let base: A
     public init(_ a: A) {
@@ -50,32 +48,9 @@ public struct Dual<A: FreeModuleBase>: FreeModuleBase {
     }
 }
 
-public extension FreeModule {
-    public func evaluate(_ f: FreeModule<Dual<A>, R>) -> R {
-        return self.reduce(.zero) { (res, next) -> R in
-            let (a, r) = next
-            return res + r * f[Dual(a)]
-        }
-    }
-    
-    public func evaluate<B>(_ b: FreeModule<B, R>) -> R where A == Dual<B> {
-        return b.reduce(.zero) { (res, next) -> R in
-            let (a, r) = next
-            return res + r * self[Dual(a)]
-        }
-    }
-}
-
-// Direct Sum
-
-public typealias DirectSumFreeModule<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = FreeModule<Sum<A, B>, R>
-
 public enum Sum<A: FreeModuleBase, B: FreeModuleBase>: FreeModuleBase {
     case _1(_: A)
     case _2(_: B)
-    
-    public init(_ a: A) { self = ._1(a) }
-    public init(_ b: B) { self = ._2(b) }
     
     public var degree: Int {
         switch self {
@@ -107,39 +82,7 @@ public enum Sum<A: FreeModuleBase, B: FreeModuleBase>: FreeModuleBase {
     }
 }
 
-public func ⊕<A, B, R>(x: FreeModule<A, R>, y: FreeModule<B, R>) -> DirectSumFreeModule<A, B, R> {
-    let elements =
-        x.map { (a, r) -> (Sum<A, B>, R) in
-            (Sum._1(a), r)
-        } + y.map { (b, r) -> (Sum<A, B>, R) in
-            (Sum._2(b), r)
-        }
-    
-    return FreeModule(elements)
-}
-
-public func pr1<A, B, R>(_ x: DirectSumFreeModule<A, B, R>) -> FreeModule<A, R> {
-    return FreeModule( x.flatMap{ (c, r) -> (A, R)? in
-        switch c {
-        case let ._1(a): return (a, r)
-        default:         return nil
-        }
-    })
-}
-
-public func pr2<A, B, R>(_ x: DirectSumFreeModule<A, B, R>) -> FreeModule<B, R> {
-    return FreeModule( x.flatMap{ (c, r) -> (B, R)? in
-        switch c {
-        case let ._2(b): return (b, r)
-        default:         return nil
-        }
-    })
-}
-
 // Tensor Product
-
-public typealias TensorProductFreeModule<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = FreeModule<Tensor<A, B>, R>
-
 public struct Tensor<A: FreeModuleBase, B: FreeModuleBase>: FreeModuleBase {
     public let _1: A
     public let _2: B
@@ -167,11 +110,4 @@ public struct Tensor<A: FreeModuleBase, B: FreeModuleBase>: FreeModuleBase {
 
 public func ⊗<A, B>(a: A, b: B) -> Tensor<A, B> {
     return Tensor(a, b)
-}
-
-public func ⊗<A, B, R>(x: FreeModule<A, R>, y: FreeModule<B, R>) -> TensorProductFreeModule<A, B, R> {
-    let elements = x.basis.allCombinations(with: y.basis).map{ (a, b) -> (Tensor<A, B>, R) in
-        return (a ⊗ b, x[a] * y[b])
-    }
-    return FreeModule(elements)
 }

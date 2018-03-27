@@ -56,14 +56,6 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         sort()
     }
     
-    public var components: [MatrixComponent<R>] {
-        return table.flatMap { (i, list) -> [MatrixComponent<R>] in
-            list.map{ (j, a) -> MatrixComponent<R> in
-                (align == .Rows) ? (i, j, a) : (j, i, a)
-            }
-        }
-    }
-    
     internal func set(_ i: Int, _ j: Int, _ a: R) {
         if (align == .Rows) {
             assert(0 <= i && i < rows)
@@ -108,6 +100,16 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
         
         sort()
+    }
+    
+    public func components(ofRow i: Int) -> [MatrixComponent<R>] {
+        switchAlignment(.Rows)
+        return table[i].map { $0.map{ (j, r) in (i, j, r) } } ?? []
+    }
+    
+    public func components(ofCol j: Int) -> [MatrixComponent<R>] {
+        switchAlignment(.Cols)
+        return table[j].map { $0.map{ (i, r) in (i, j, r) } } ?? []
     }
     
     @discardableResult

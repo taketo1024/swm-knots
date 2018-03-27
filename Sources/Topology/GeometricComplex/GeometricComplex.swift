@@ -22,13 +22,6 @@ public protocol GeometricComplex: CustomStringConvertible {
     func skeleton(_ dim: Int) -> Self
     
     func boundaryMap<R: Ring>(_ i: Int, _ type: R.Type) -> FreeModuleHom<Cell, Cell, R>
-    
-    // MEMO would better write (if possible)
-    //
-    // extension<G> Dual<G.Cell> {
-    //   func coboundary<R>(in: G, _ type: R.Type) -> ... {
-    //
-    func coboundary<R: Ring>(of d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R>
 }
 
 public extension GeometricComplex {
@@ -52,16 +45,6 @@ public extension GeometricComplex {
         return FreeModuleHom { s in
             (s.dim == i) ? s.boundary(R.self) : .zero
         }
-    }
-    
-    public func coboundary<R: Ring>(of d: Dual<Cell>, _ type: R.Type) -> FreeModule<Dual<Cell>, R> {
-        let s = d.base
-        let e = R(from: (-1).pow(d.degree + 1))
-        let vals = cells(ofDim: d.degree + 1).flatMap{ t -> (Dual<Cell>, R)? in
-            let a = t.boundary(R.self)[s]
-            return (a != .zero) ? (Dual(t), e * a) : nil
-        }
-        return FreeModule(vals)
     }
     
     public var description: String {

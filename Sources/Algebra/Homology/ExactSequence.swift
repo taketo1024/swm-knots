@@ -51,7 +51,7 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
             else { return nil }
         
         let comps = from.generators.enumerated().flatMap { (j, z) -> [MatrixComponent<R>] in
-            let w = map.appliedTo(z)
+            let w = map.applied(to: z)
             let vec = to.factorize(w)
             return vec.enumerated().map{ (i, a) in (i, j, a) }
         }
@@ -240,8 +240,8 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         
         // Im ⊂ Ker
         for x in M0.generators {
-            let y = f0.appliedTo(x)
-            let z = f1.appliedTo(y)
+            let y = f0.applied(to: x)
+            let z = f1.applied(to: y)
             
             log("\t\(x) ->\t\(y) ->\t\(z)", d)
             assert(M2.elementIsZero(z))

@@ -37,9 +37,9 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
         self.H1 = _Homology(chain1)
         self.H2 = _Homology(chain2)
         
-        self.map0  = _HomologyMap(from: H0, to: H1, inducedFrom: map0)
-        self.map1  = _HomologyMap(from: H1, to: H2, inducedFrom: map1)
-        self.delta = _HomologyMap(from: H2, to: H0, inducedFrom: delta)
+        self.map0  = _HomologyMap.induced(from: map0,  codomainStructure: H1)
+        self.map1  = _HomologyMap.induced(from: map1,  codomainStructure: H2)
+        self.delta = _HomologyMap.induced(from: delta, codomainStructure: H0)
         
         self.topDegree    = Swift.max(chain0.topDegree, chain1.topDegree, chain2.topDegree)
         self.bottomDegree = Swift.min(chain0.offset,    chain1.offset,    chain2.offset)
@@ -63,10 +63,6 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
     public subscript(i: Int, n: Int) -> Object? {
         assert((0 ..< 3).contains(i))
         return sequence[seqIndex(i, n)]
-    }
-    
-    public subscript(k: Int) -> Object? {
-        return sequence[k]
     }
     
     internal var degrees: [Int] {
@@ -135,9 +131,9 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
     }
     
     private func _makeMap<X, Y>(_ h0: _Homology<T, X, R>.Summand, _ f: _HomologyMap<T, X, Y, R>, _ h1: _Homology<T, Y, R>.Summand) -> ExactSequence<R>.Map {
-        return ExactSequence<R>.Map { i in
+        return ExactSequence<R>.Map { (i: Int) in
             let z = h0.generator(i)
-            let w = f.appliedTo(z)
+            let w = f.applied(to: z)
             let n = h1.summands.count
             return FreeModule( zip( 0 ..< n, h1.factorize(w.representative) ) )
         }
@@ -147,6 +143,13 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
     public mutating func solve(column i: Int, degree n: Int, debug: Bool = false) -> Object? {
         sequence.solve(seqIndex(i, n), debug: debug)
         return self[i, n]
+    }
+    
+    @discardableResult
+    public mutating func solve(column i: Int, debug: Bool = false) -> [Object?] {
+        return (bottomDegree ... topDegree).map { n in
+            self.solve(column: i, degree: n, debug: debug)
+        }
     }
     
     @discardableResult
@@ -164,7 +167,7 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
     }
     
     public func makeIterator() -> AnyIterator<Object?> {
-        let lazy = (0 ..< length).lazy.map{ k in self[k] }
+        let lazy = (0 ..< length).lazy.map{ k in self.sequence[k] }
         return AnyIterator(lazy.makeIterator())
     }
     
