@@ -10,7 +10,7 @@ import Foundation
 import SwiftyAlgebra
 
 public extension ChainComplex where T == Descending {
-    public init<C: GeometricComplex>(geometricComplex K: C, relativeTo L: C?, _ type: R.Type) where A == C.Cell {
+    public convenience init<C: GeometricComplex>(geometricComplex K: C, relativeTo L: C?, _ type: R.Type) where A == C.Cell {
         let name = (L == nil) ? K.name : "\(K.name), \(L!.name)"
         let chain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap) in
             let basis = (L == nil)
@@ -22,14 +22,13 @@ public extension ChainComplex where T == Descending {
         self.init(name: name, chain: chain)
     }
     
-    public init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == C.Cell {
+    public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == C.Cell {
         self.init(geometricComplex: K, relativeTo: nil, R.self)
     }
     
-    public init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where A == C.Cell {
+    public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where A == C.Cell {
         self.init(geometricComplex: K, relativeTo: L, R.self)
     }
-    
 }
 
 public extension ChainMap where T == Descending {
@@ -39,6 +38,13 @@ public extension ChainMap where T == Descending {
             let t = f.applied(to: s)
             return (s.dim == t.dim) ? Codomain(t) : Codomain.zero
         }
+    }
+}
+
+public extension CochainMap where T == Ascending {
+    public static func induced<F: GeometricComplexMap>(from f: F, domainComplex: ChainComplex<F.ComplexType.Cell, R>, _ type: R.Type) -> CochainMap<A, B, R> where A == Dual<F.ComplexType.Cell>, B == Dual<F.ComplexType.Cell> {
+        typealias Cell = F.ComplexType.Cell
+        return ChainMap.induced(from: f, R.self).dual(domain: domainComplex)
     }
 }
 
