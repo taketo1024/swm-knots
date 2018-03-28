@@ -126,6 +126,6 @@ public extension PowerSeries {
     }
     
     public static func geometricSeries(_ r: K) -> PowerSeries<K> {
-        return PowerSeries { n in r ** n }
+        return PowerSeries { n in r.pow(n) }
     }
 }

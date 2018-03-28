@@ -40,7 +40,6 @@ extension 𝐙: EuclideanRing {
         return "𝐙"
     }
     
-    // TODO remove `**`
     public func pow(_ n: 𝐙) -> 𝐙 {
         assert(n >= 0)
         switch  self {
@@ -49,7 +48,7 @@ extension 𝐙: EuclideanRing {
         case -1:
             return n.isEven ? 1 : -1
         default:
-            return (0 ..< n).reduce(1){ (res, _) in res * self }
+            return (0 ..< n).reduce(1){ (res, _) in self * res }
         }
     }
 }

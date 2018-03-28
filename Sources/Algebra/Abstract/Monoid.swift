@@ -3,11 +3,13 @@ import Foundation
 public protocol Monoid: SetType {
     static func * (a: Self, b: Self) -> Self
     static var identity: Self { get }
+    func pow(_ n: 𝐙) -> Self
 }
 
 public extension Monoid {
-    public static func ** (a: Self, b: Int) -> Self {
-        return b == 0 ? .identity : a * (a ** (b - 1))
+    public func pow(_ n: 𝐙) -> Self {
+        assert(n >= 0)
+        return (0 ..< n).reduce(.identity){ (res, _) in self * res }
     }
 }
 

@@ -31,10 +31,6 @@ public extension Ring {
         return Self(from: 1)
     }
     
-    public static func **(a: Self, n: Int) -> Self {
-        return (0 ..< n).reduce(.identity){ (res, _) in res * a }
-    }
-    
     public static var isField: Bool {
         return false
     }

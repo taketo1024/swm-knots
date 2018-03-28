@@ -21,14 +21,11 @@ public extension Field {
         return a * b.inverse!
     }
     
-    public static func ** (a: Self, b: Int) -> Self {
-        switch b {
-        case let n where n > 0:
-            return a * (a ** (n - 1))
-        case let n where n < 0:
-            return a.inverse! * (a ** (n + 1))
-        default:
-            return .identity
+    public func pow(_ n: Int) -> Self {
+        if n >= 0 {
+            return (0 ..< n).reduce(.identity){ (res, _) in self * res }
+        } else {
+            return (0 ..< -n).reduce(.identity){ (res, _) in inverse! * res }
         }
     }
     
