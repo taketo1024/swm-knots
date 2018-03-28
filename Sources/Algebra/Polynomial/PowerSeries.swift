@@ -105,7 +105,7 @@ public struct PowerSeries<K: Field>: Ring, Module {
     }
     
     public var description: String {
-        return Expression.terms("+", (0 ..< 5).map{ n in (coeff(n), "x", n) }) + " ..."
+        return Format.terms("+", (0 ..< 5).map{ n in (coeff(n), "x", n) }) + " ..."
     }
     
     public static var symbol: String {

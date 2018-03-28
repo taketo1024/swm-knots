@@ -145,20 +145,7 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
     }
     
     public var description: String {
-        let res = coeffs.enumerated().flatMap {
-            (n: Int, a: K) -> String? in
-            switch(a, n) {
-            case ( 0, _): return nil
-            case ( _, 0): return "\(a)"
-            case ( 1, 1): return "x"
-            case (-1, 1): return "-x"
-            case ( _, 1): return "\(a)x"
-            case ( 1, _): return "x^\(n)"
-            case (-1, _): return "-x^\(n)"
-            default: return "\(a)x^\(n)"
-            }
-            }.reversed().joined(separator: " + ")
-        return res.isEmpty ? "0" : res
+        return Format.terms("+", coeffs.enumerated().reversed().map{(n, a) in (a, "x", n)}, skipZero: true)
     }
     
     public static var symbol: String {
