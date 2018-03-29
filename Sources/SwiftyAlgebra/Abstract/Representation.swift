@@ -9,15 +9,15 @@
 import Foundation
 
 public protocol Representation: Map {
-    associatedtype VectorSpace
+    associatedtype BaseVectorSpace: VectorSpace
 }
 
-public protocol _GroupRepresentation: Representation, _GroupHom where Codomain == LinearAut<VectorSpace> { }
+public protocol _GroupRepresentation: Representation, _GroupHom where Codomain == LinearAut<BaseVectorSpace> { }
 
 public struct GroupRepresentation<G: Group, V: VectorSpace>: _GroupRepresentation {
     public typealias Domain   = G
     public typealias Codomain = LinearAut<V>
-    public typealias VectorSpace = V
+    public typealias BaseVectorSpace = V
     
     private let f: (G) -> LinearAut<V>
     public init(_ f: @escaping (G) -> LinearAut<V>) {
@@ -33,13 +33,13 @@ public struct GroupRepresentation<G: Group, V: VectorSpace>: _GroupRepresentatio
     }
 }
 
-public protocol _LieAlgebraRepresentation: Representation, _LieAlgebraHom where Codomain == LinearEnd<VectorSpace> { }
+public protocol _LieAlgebraRepresentation: Representation, _LieAlgebraHom where Codomain == LinearEnd<BaseVectorSpace> { }
 
 public struct LieAlgebraRepresentation<𝔤: LieAlgebra, V: VectorSpace>: _LieAlgebraRepresentation where 𝔤.CoeffRing == V.CoeffRing {
     public typealias CoeffRing = 𝔤.CoeffRing
     public typealias Domain   = 𝔤
     public typealias Codomain = LinearEnd<V>
-    public typealias VectorSpace = V
+    public typealias BaseVectorSpace = V
 
     private let f: (𝔤) -> LinearEnd<V>
     public init(_ f: @escaping (𝔤) -> LinearEnd<V>) {
