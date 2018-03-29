@@ -24,6 +24,7 @@ public struct Format {
             case "7": return "⁷"
             case "8": return "⁸"
             case "9": return "⁹"
+            case "-": return "⁻"
             default: return c
             }
         } )
