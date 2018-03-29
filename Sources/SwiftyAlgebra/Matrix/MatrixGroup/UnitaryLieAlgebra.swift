@@ -29,36 +29,43 @@ public struct UnitaryLieAlgebra<n: _Int>: MatrixLieAlgebra {
         let E = SquareMatrix<n, ComplexNumber>.unit
         let ι = ComplexNumber.imaginaryUnit
         
-        return
+        let A =
             (0 ..< n - 1).flatMap{ i -> [𝔤] in
                 (i + 1 ..< n).map { j -> 𝔤 in
                     𝔤(E(i, j) - E(j, i))
                 }
             }
-            +
+        let B =
             (0 ..< n - 1).flatMap{ i -> [𝔤] in
                 (i + 1 ..< n).map { j -> 𝔤 in
                     𝔤(ι * (E(i, j) + E(j, i)))
                 }
             }
-            +
+        let C =
             (0 ..< n).map{ i -> 𝔤 in
                 𝔤(ι * E(i, i))
             }
+        
+        return A + B + C
     }
     
     public var standardCoordinates: [RealNumber] {
         let n = size
-        return
+        
+        let x1 =
             (0 ..< n - 1).flatMap{ i -> [RealNumber] in
                 (i + 1 ..< n).map { j -> RealNumber in matrix[i, j].real }
             }
-            +
+        
+        let x2 =
             (0 ..< n - 1).flatMap{ i -> [RealNumber] in
                 (i + 1 ..< n).map { j -> RealNumber in matrix[i, j].imaginary }
             }
-            +
+        
+        let x3 =
             (0 ..< n).map{ i -> RealNumber in matrix[i, i].imaginary }
+        
+        return x1 + x2 + x3
     }
     
     public static func contains(_ X: GeneralLinearLieAlgebra<n, 𝐂>) -> Bool {
@@ -91,36 +98,45 @@ public struct SpecialUnitaryLieAlgebra<n: _Int>: MatrixLieAlgebra {
         let E = SquareMatrix<n, ComplexNumber>.unit
         let ι = ComplexNumber.imaginaryUnit
         
-        return
+        let A =
             (0 ..< n - 1).flatMap{ i -> [𝔤] in
                 (i + 1 ..< n).map { j -> 𝔤 in
                     𝔤(E(i, j) - E(j, i))
                 }
             }
-            +
+        
+        let B =
             (0 ..< n - 1).flatMap{ i -> [𝔤] in
                 (i + 1 ..< n).map { j -> 𝔤 in
                     𝔤(ι * (E(i, j) + E(j, i)))
                 }
             }
-            +
+        
+        let C =
             (0 ..< n - 1).map{ i -> 𝔤 in
                 𝔤(ι * (E(i, i) - E(n - 1, n - 1)))
             }
+        
+        return A + B + C
     }
     
     public var standardCoordinates: [RealNumber] {
         let n = size
-        return
+        
+        let x1 =
             (0 ..< n - 1).flatMap{ i -> [RealNumber] in
                 (i + 1 ..< n).map { j -> RealNumber in matrix[i, j].real }
             }
-            +
+        
+        let x2 =
             (0 ..< n - 1).flatMap{ i -> [RealNumber] in
                 (i + 1 ..< n).map { j -> RealNumber in matrix[i, j].imaginary }
             }
-            +
+                
+        let x3 =
             (0 ..< n - 1).map{ i -> RealNumber in matrix[i, i].imaginary }
+        
+        return x1 + x2 + x3
     }
     
     public static func contains(_ g: GeneralLinearLieAlgebra<n, 𝐂>) -> Bool {
