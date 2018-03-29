@@ -89,7 +89,7 @@ public class _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable,
         let (from, to, map) = (chainBasis(i), chainBasis(i + T.degree), boundaryMap(i))
         let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toBasisElement: toBasisIndex]
         let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
-            map.applied(to: x).flatMap { (y, a) -> MatrixComponent<R>? in
+            map.applied(to: x).compactMap { (y, a) -> MatrixComponent<R>? in
                 toIndex[y].flatMap{ i in (i, j, a) } // nil if toIndex[y] == nil
             }
         }

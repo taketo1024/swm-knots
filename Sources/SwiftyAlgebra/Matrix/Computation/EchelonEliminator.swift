@@ -66,7 +66,7 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     private func pivotCandidates() -> [(Int, R)] {
         // Take (i, a)'s from table = [ i : [ (j, a) ] ]
         // where (i >= targetRow && j == targetCol)
-        return target.table.flatMap{ (i, list) -> (Int, R)? in
+        return target.table.compactMap{ (i, list) -> (Int, R)? in
             let (j, a) = list.first!
             return (i >= targetRow && j == targetCol) ? (i, a) : nil
         }

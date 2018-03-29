@@ -41,7 +41,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     public convenience init(rows: Int, cols: Int, grid: [R], align: ComputationalMatrixAlignment = .Rows) {
-        let components = grid.enumerated().flatMap{ (k, a) -> MatrixComponent<R>? in
+        let components = grid.enumerated().compactMap{ (k, a) -> MatrixComponent<R>? in
             (a != .zero) ? (k / cols, k % cols, a) : nil
         }
         self.init(rows: rows, cols: cols, components: components, align: align)
@@ -137,7 +137,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             let table = self.table
                 .filter { (i, _) in rowRange.contains(i) }
                 .map{ (i, list) in (i - rowRange.lowerBound,
-                                    list.flatMap{ (j, a) in colRange.contains(j) ? (j - colRange.lowerBound, a) : nil }) }
+                                    list.compactMap{ (j, a) in colRange.contains(j) ? (j - colRange.lowerBound, a) : nil }) }
             
             return ComputationalMatrix(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound, align, Dictionary(pairs: table))
             
@@ -145,7 +145,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             let table = self.table
                 .filter { (j, _) in colRange.contains(j) }
                 .map{ (j, list) in (j - colRange.lowerBound,
-                                    list.flatMap{ (i, a) in rowRange.contains(i) ? (i - rowRange.lowerBound, a) : nil }) }
+                                    list.compactMap{ (i, a) in rowRange.contains(i) ? (i - rowRange.lowerBound, a) : nil }) }
             
             return ComputationalMatrix(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound, align, Dictionary(pairs: table))
         }
@@ -160,7 +160,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     public var diagonal: [R] {
-        return table.keys.sorted().flatMap { i -> R? in
+        return table.keys.sorted().compactMap { i -> R? in
             table[i]!.first.flatMap{ (j, a) -> R? in (i == j) ? a : nil }
         }
     }

@@ -155,7 +155,7 @@ public extension SimplicialComplex {
     
     public static func ∩(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
         let cells = K1.maximalCells.flatMap { s -> [Simplex] in
-            K2.maximalCells.flatMap{ t -> Simplex? in
+            K2.maximalCells.compactMap{ t -> Simplex? in
                 let x = s ∩ t
                 return (x.dim >= 0) ? x : nil
             }

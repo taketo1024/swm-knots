@@ -117,7 +117,7 @@ public struct MPolynomial<K: Field>: Ring, Module {
         let (sub, sup) = (Format.sub, Format.sup)
         
         func toTerm(_ I: IntList) -> String {
-            return I.elements.enumerated().flatMap { (i, n) -> String? in
+            return I.elements.enumerated().compactMap { (i, n) -> String? in
                 if n > 0 {
                     return (n > 1) ? "x\(sub(i+1))\(sup(n))" : "x\(sub(i+1))"
                 } else {

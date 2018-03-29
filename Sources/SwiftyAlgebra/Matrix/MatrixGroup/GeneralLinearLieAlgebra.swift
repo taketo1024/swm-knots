@@ -67,7 +67,7 @@ public struct SpecialLinearLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
         
         return
             (0 ..< n).flatMap { i -> [𝔤] in
-                (0 ..< n).flatMap { j -> 𝔤? in
+                (0 ..< n).compactMap { j -> 𝔤? in
                     (i != j) ? 𝔤(E(i, j)) : nil
                 }
             }
@@ -81,7 +81,7 @@ public struct SpecialLinearLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
         let n = size
         return
             (0 ..< n).flatMap { i -> [CoeffRing] in
-                (0 ..< n).flatMap { j -> CoeffRing? in
+                (0 ..< n).compactMap { j -> CoeffRing? in
                     (i != j) ? matrix[i, j] : nil
                 }
             }
