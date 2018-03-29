@@ -30,4 +30,32 @@ public extension Array {
         }
         return nil
     }
+    
+    public func dropLast(while predicate: (Element) throws -> Bool) rethrows -> ArraySlice<Element> {
+        let rev = self.reversed().enumerated()
+        for (i, a) in rev {
+            let p: Bool
+            do {
+                p = try predicate(a)
+            } catch let e {
+                throw e
+            }
+            if !p {
+                return i == 0 ? ArraySlice(self) : self[0 ..< count - i]
+            }
+        }
+        return ArraySlice([])
+    }
+}
+
+public extension Array where Element: Equatable {
+    @discardableResult
+    public mutating func remove(element: Element) -> Bool {
+        if let i = index(of: element) {
+            remove(at: i)
+            return true
+        } else {
+            return false
+        }
+    }
 }
