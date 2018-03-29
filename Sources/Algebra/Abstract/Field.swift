@@ -21,14 +21,6 @@ public extension Field {
         return a * b.inverse!
     }
     
-    public func pow(_ n: Int) -> Self {
-        if n >= 0 {
-            return (0 ..< n).reduce(.identity){ (res, _) in self * res }
-        } else {
-            return (0 ..< -n).reduce(.identity){ (res, _) in inverse! * res }
-        }
-    }
-    
     public static func eucDiv(_ a: Self, _ b: Self) -> (q: Self, r: Self) {
         return (a/b, 0)
     }
