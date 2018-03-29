@@ -94,14 +94,11 @@ public struct Quaternion: Ring, ExpressibleByFloatLiteral {
     }
     
     public static func *(a: 𝐇, b: 𝐇) -> 𝐇 {
-        // memo: writing `a.x * b.x - a.y * b.y - ...`
-        //       would prevent the compile from passing...
-        return 𝐇(
-            a.x * b.x + -a.y * b.y - a.z * b.z - a.w * b.w,
-            a.x * b.y + a.y * b.x + a.z * b.w - a.w * b.z,
-            a.x * b.z - a.y * b.w + a.z * b.x + a.w * b.y,
-            a.x * b.w + a.y * b.z - a.z * b.y - a.w * b.x
-        )
+        let x = a.x * b.x - (a.y * b.y + a.z * b.z + a.w * b.w)
+        let y = a.x * b.y +  a.y * b.x + a.z * b.w - a.w * b.z
+        let z = a.x * b.z + -a.y * b.w + a.z * b.x + a.w * b.y
+        let w = a.x * b.w +  a.y * b.z - a.z * b.y - a.w * b.x
+        return 𝐇(x, y, z, w)
     }
     
     public var hashValue: Int {
