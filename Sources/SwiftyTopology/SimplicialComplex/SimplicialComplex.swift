@@ -11,6 +11,7 @@ import SwiftyAlgebra
 
 public struct SimplicialComplex: GeometricComplex {
     public typealias Cell = Simplex
+    public typealias Map = SimplicialMap
     
     public var name: String
     public let dim: Int

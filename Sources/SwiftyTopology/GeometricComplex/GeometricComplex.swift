@@ -9,8 +9,9 @@
 import Foundation
 import SwiftyAlgebra
 
-public protocol GeometricComplex: CustomStringConvertible {
+public protocol GeometricComplex: CustomStringConvertible where Map.Complex == Self {
     associatedtype Cell: GeometricCell
+    associatedtype Map: GeometricComplexMap
     
     var name: String { get }
     var dim: Int { get }

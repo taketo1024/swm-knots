@@ -10,7 +10,7 @@ import Foundation
 import SwiftyAlgebra
 
 public struct SimplicialMap: GeometricComplexMap {
-    public typealias ComplexType = SimplicialComplex
+    public typealias Complex = SimplicialComplex
     public typealias Domain      = Simplex
     public typealias Codomain    = Simplex
     

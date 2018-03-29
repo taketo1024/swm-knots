@@ -49,7 +49,8 @@ public struct CellularCell: GeometricCell {
 
 public struct CellularComplex: GeometricComplex {
     public typealias Cell = CellularCell
-    
+    public typealias Map = CellularMap
+
     public internal(set) var underlyingComplex: SimplicialComplex
     internal var table: [[CellularCell]]
     
@@ -158,3 +159,25 @@ public extension CellularComplex {
     }
 }
 
+// TODO 
+public struct CellularMap: GeometricComplexMap {
+    public typealias Domain = CellularCell
+    public typealias Codomain = CellularCell
+    public typealias Complex = CellularComplex
+    
+    public init(_ f: @escaping (CellularCell) -> CellularCell) {
+        fatalError()
+    }
+    
+    public func applied(to x: CellularCell) -> CellularCell {
+        fatalError()
+    }
+    
+    public static func inclusion(from: CellularComplex, to: CellularComplex) -> CellularMap {
+        fatalError()
+    }
+    
+    public static func diagonal(from: CellularComplex) -> CellularMap {
+        fatalError()
+    }
+}
