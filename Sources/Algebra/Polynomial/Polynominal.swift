@@ -6,24 +6,30 @@ import Foundation
 // make `K: Ring`, and conform to `EuclideanRing` only when `K: Field`
 public struct Polynomial<K: Field>: EuclideanRing, Module {
     public typealias CoeffRing = K
-    public let coeffs: [K]
+    internal let coeffs: [K]
     
     public init(from n: 𝐙) {
         let a = K(from: n)
-        self.init([a])
+        self.init(coeffs: [a])
+    }
+    
+    public init(coeffs: [K]) {
+        assert(coeffs.count > 0)
+        if coeffs.last! == .zero {
+            let dropped = coeffs.dropLast{ $0 == K.zero }.toArray()
+            self.coeffs = dropped.isEmpty ? [.zero] : dropped
+        } else {
+            self.coeffs = coeffs
+        }
+    }
+    
+    public init(_ coeffs: K...) {
+        self.init(coeffs: coeffs)
     }
     
     public init(degree: Int, gen: ((Int) -> K)) {
         let coeffs = (0 ... degree).map(gen)
-        self.init(coeffs)
-    }
-    
-    public init(_ coeffs: K...) {
-        self.init(coeffs)
-    }
-    
-    public init(_ coeffs: [K]) {
-        self.coeffs = coeffs
+        self.init(coeffs: coeffs)
     }
     
     public var normalizeUnit: Polynomial<K> {
@@ -31,13 +37,7 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
     }
     
     public var degree: Int {
-        let n = coeffs.count - 1
-        for i in 0 ..< n {
-            if coeffs[n - i] != 0 {
-                return n - i
-            }
-        }
-        return 0
+        return coeffs.count - 1
     }
     
     public var inverse: Polynomial<K>? {
@@ -68,8 +68,8 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
         }
     }
     
-    public func map(_ f: ((K) -> K)) -> Polynomial<K> {
-        return Polynomial<K>.init(coeffs.map(f))
+    public func mapCoeffs(_ f: ((K) -> K)) -> Polynomial<K> {
+        return Polynomial<K>(coeffs: coeffs.map(f))
     }
     
     public var derivative: Polynomial<K> {
@@ -80,7 +80,7 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
     
     public func toMonic() -> Polynomial<K> {
         let a = leadCoeff
-        return self.map{ $0 / a }
+        return self.mapCoeffs{ $0 / a }
     }
     
     public static var indeterminate: Polynomial<K> {
@@ -98,8 +98,9 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
             if n < 0 {
                 return (0, f)
             } else {
+                let x = Polynomial<K>.indeterminate
                 let a = f.leadCoeff / g.leadCoeff
-                let q = Monomial(degree: n, coeff: a)
+                let q = a * x.pow(n)
                 let r = f - q * g
                 return (q, r)
             }
@@ -124,7 +125,7 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
     }
     
     public static prefix func - (f: Polynomial<K>) -> Polynomial<K> {
-        return f.map { -$0 }
+        return f.mapCoeffs { -$0 }
     }
     
     public static func * (f: Polynomial<K>, g: Polynomial<K>) -> Polynomial<K> {
@@ -137,11 +138,11 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
     }
     
     public static func * (r: K, f: Polynomial<K>) -> Polynomial<K> {
-        return f.map { r * $0 }
+        return f.mapCoeffs { r * $0 }
     }
     
     public static func * (f: Polynomial<K>, r: K) -> Polynomial<K> {
-        return f.map { $0 * r }
+        return f.mapCoeffs { $0 * r }
     }
     
     public var description: String {
@@ -157,6 +158,3 @@ public struct Polynomial<K: Field>: EuclideanRing, Module {
     }
 }
 
-public func Monomial<K>(degree d: Int, coeff a: K) -> Polynomial<K> {
-    return Polynomial(degree: d) { $0 == d ? a : 0 }
-}
