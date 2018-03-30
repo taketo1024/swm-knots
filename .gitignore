@@ -1,5 +1,5 @@
+.DS_Store
+/.build
+/.Packages
 xcuserdata
-*.swiftdoc
-*.swiftmodule
-*.dylib
 profile-result.txt

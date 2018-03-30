@@ -45,8 +45,6 @@
 		149745EE2064A29800329DFB /* SimplicialCohomologyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimplicialCohomologyTests.swift; sourceTree = "<group>"; };
 		149745FB2064B81A00329DFB /* SimplicialHomologyExSeqTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimplicialHomologyExSeqTests.swift; sourceTree = "<group>"; };
 		149745FE2064CCC400329DFB /* SimplicialCohomologyExSeqTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimplicialCohomologyExSeqTests.swift; sourceTree = "<group>"; };
-		DD478C372053D01700FCF6B7 /* Homology.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Homology.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		DD478C382053D01700FCF6B7 /* Homology2.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Homology2.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		DDB20B522053CF22004F7AFE /* SwiftyTopology.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftyTopology.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDB20B552053CF22004F7AFE /* SwiftyTopology.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftyTopology.h; sourceTree = "<group>"; };
 		DDB20B562053CF22004F7AFE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -56,9 +54,6 @@
 		DDB6C07B2053D280001313FD /* Simplex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Simplex.swift; sourceTree = "<group>"; };
 		DDB6C07C2053D280001313FD /* Vertex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vertex.swift; sourceTree = "<group>"; };
 		DDB6C07E2053D280001313FD /* CellularComplex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellularComplex.swift; sourceTree = "<group>"; };
-		DDB6C0802053D280001313FD /* EulerClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EulerClass.swift; sourceTree = "<group>"; };
-		DDB6C0812053D280001313FD /* StiefelWhitneyClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StiefelWhitneyClass.swift; sourceTree = "<group>"; };
-		DDB6C0822053D280001313FD /* WuClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WuClass.swift; sourceTree = "<group>"; };
 		DDB6C0842053D280001313FD /* GeometricComplex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometricComplex.swift; sourceTree = "<group>"; };
 		DDB6C0852053D280001313FD /* HomologyExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomologyExtensions.swift; sourceTree = "<group>"; };
 		DDB6C0872053D280001313FD /* GeometricComplexExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometricComplexExtensions.swift; sourceTree = "<group>"; };
@@ -69,7 +64,6 @@
 		DDB6C08D2053D280001313FD /* SimplicialComplexOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialComplexOperations.swift; sourceTree = "<group>"; };
 		DDB6C08E2053D280001313FD /* SimplicialExactSequences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialExactSequences.swift; sourceTree = "<group>"; };
 		DDB6C08F2053D280001313FD /* SimplicialMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialMap.swift; sourceTree = "<group>"; };
-		DDB6C0912053D280001313FD /* ChainContractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainContractor.swift; sourceTree = "<group>"; };
 		DDB6C0922053D2F9001313FD /* GeometricComplexMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometricComplexMap.swift; sourceTree = "<group>"; };
 		DDB6C0942053D31C001313FD /* GeometricCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometricCell.swift; sourceTree = "<group>"; };
 		DDB6C0972053D4BA001313FD /* SimplicialHomologyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplicialHomologyTests.swift; sourceTree = "<group>"; };
@@ -94,13 +88,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DD0136B8206DBF2D00AA634B /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				DDB20B602053CF22004F7AFE /* SwiftyTopologyTests.swift */,
+				DDB6C0972053D4BA001313FD /* SimplicialHomologyTests.swift */,
+				149745EE2064A29800329DFB /* SimplicialCohomologyTests.swift */,
+				149745FB2064B81A00329DFB /* SimplicialHomologyExSeqTests.swift */,
+				149745FE2064CCC400329DFB /* SimplicialCohomologyExSeqTests.swift */,
+			);
+			name = Sources;
+			path = ../../../Tests/SwiftyTopologyTests;
+			sourceTree = "<group>";
+		};
 		DDB20B482053CF21004F7AFE = {
 			isa = PBXGroup;
 			children = (
 				DDB20B542053CF22004F7AFE /* SwiftyTopology */,
 				DDB20B5F2053CF22004F7AFE /* SwiftyTopologyTests */,
 				DDB20B532053CF22004F7AFE /* Products */,
-				DDB20B752053CFB9004F7AFE /* Playgrounds */,
 			);
 			sourceTree = "<group>";
 		};
@@ -126,23 +132,10 @@
 		DDB20B5F2053CF22004F7AFE /* SwiftyTopologyTests */ = {
 			isa = PBXGroup;
 			children = (
-				DDB20B602053CF22004F7AFE /* SwiftyTopologyTests.swift */,
-				DDB6C0972053D4BA001313FD /* SimplicialHomologyTests.swift */,
-				149745EE2064A29800329DFB /* SimplicialCohomologyTests.swift */,
-				149745FB2064B81A00329DFB /* SimplicialHomologyExSeqTests.swift */,
-				149745FE2064CCC400329DFB /* SimplicialCohomologyExSeqTests.swift */,
+				DD0136B8206DBF2D00AA634B /* Sources */,
 				DDB20B622053CF22004F7AFE /* Info.plist */,
 			);
 			path = SwiftyTopologyTests;
-			sourceTree = "<group>";
-		};
-		DDB20B752053CFB9004F7AFE /* Playgrounds */ = {
-			isa = PBXGroup;
-			children = (
-				DD478C372053D01700FCF6B7 /* Homology.playground */,
-				DD478C382053D01700FCF6B7 /* Homology2.playground */,
-			);
-			path = Playgrounds;
 			sourceTree = "<group>";
 		};
 		DDB6C0792053D280001313FD /* Sources */ = {
@@ -152,11 +145,9 @@
 				DDB6C0832053D280001313FD /* GeometricComplex */,
 				DDB6C0882053D280001313FD /* SimplicialComplex */,
 				DDB6C07D2053D280001313FD /* CellularComplex */,
-				DDB6C07F2053D280001313FD /* CharacteristicClasses */,
-				DDB6C0902053D280001313FD /* Tools */,
 			);
 			name = Sources;
-			path = ../../../Sources/Topology;
+			path = ../../../Sources/SwiftyTopology;
 			sourceTree = "<group>";
 		};
 		DDB6C07A2053D280001313FD /* Basics */ = {
@@ -174,16 +165,6 @@
 				DDB6C07E2053D280001313FD /* CellularComplex.swift */,
 			);
 			path = CellularComplex;
-			sourceTree = "<group>";
-		};
-		DDB6C07F2053D280001313FD /* CharacteristicClasses */ = {
-			isa = PBXGroup;
-			children = (
-				DDB6C0802053D280001313FD /* EulerClass.swift */,
-				DDB6C0812053D280001313FD /* StiefelWhitneyClass.swift */,
-				DDB6C0822053D280001313FD /* WuClass.swift */,
-			);
-			path = CharacteristicClasses;
 			sourceTree = "<group>";
 		};
 		DDB6C0832053D280001313FD /* GeometricComplex */ = {
@@ -210,14 +191,6 @@
 				DDB6C08E2053D280001313FD /* SimplicialExactSequences.swift */,
 			);
 			path = SimplicialComplex;
-			sourceTree = "<group>";
-		};
-		DDB6C0902053D280001313FD /* Tools */ = {
-			isa = PBXGroup;
-			children = (
-				DDB6C0912053D280001313FD /* ChainContractor.swift */,
-			);
-			path = Tools;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
