@@ -28,7 +28,9 @@ extension 𝐙: EuclideanRing {
     }
     
     public var sign: 𝐙 {
-        return isEven ? 1 : -1
+        return (self >  0) ? 1 :
+               (self == 0) ? 0 :
+                            -1
     }
 
     public static func eucDiv(_ a: 𝐙, _ b: 𝐙) -> (q: 𝐙, r: 𝐙) {
