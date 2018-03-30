@@ -251,7 +251,7 @@ public extension Matrix where R: EuclideanRing {
 // TODO conditional conformance
 public extension Matrix where R: NormedSpace {
     public var norm: 𝐑 {
-        return sqrt( self.sum { (_, _, a) in a.norm ** 2 } )
+        return sqrt( self.sum { (_, _, a) in a.norm.pow(2) } )
     }
     
     public var maxNorm: 𝐑 {

@@ -33,7 +33,7 @@ public extension Monoid {
     }
     
     public static func printExpTable(values: [Self], upTo n: Int) {
-        printTable("^", rows: values, cols: Array(0 ... n)) { $0 ** $1 }
+        printTable("^", rows: values, cols: Array(0 ... n)) { $0.pow($1) }
     }
 }
 

@@ -23,7 +23,7 @@ public struct PolynomialIdeal<p: _Polynomial>: EuclideanIdeal {
     }
     
     public init(_ coeffs: K...) {
-        self.init(Super.init(coeffs))
+        self.init(Super(coeffs: coeffs))
     }
     
     public var asSuper: Polynomial<K> {

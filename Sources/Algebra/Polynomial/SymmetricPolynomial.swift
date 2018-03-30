@@ -80,7 +80,7 @@ public struct SymmetricPolynomial<K: Field>: Subring, Submodule {
             // then p = s1^c1 * s2^c2 * ... * sk^ck  is a sym. poly. with leadDeg = i.
             
             let c = (0 ..< I.length).map{ j in (j < n) ? I[j] - I[j + 1] : I[j]  }
-            let p = c.enumerated().map{ (j, cj) in s(n, j + 1) ** cj }.multiplyAll()
+            let p = c.enumerated().map{ (j, cj) in s(n, j + 1).pow(cj) }.multiplyAll()
             
             f = f - a * p
             g = g + a * MPolynomial(IntList(c))

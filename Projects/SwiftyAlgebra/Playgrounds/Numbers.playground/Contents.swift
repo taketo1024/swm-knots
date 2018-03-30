@@ -4,6 +4,7 @@ import Foundation
 import SwiftyAlgebra
 
 // Rational Number Sample.
+5.pow(3)
 
 do {
     let a = 𝐐(4, 5)

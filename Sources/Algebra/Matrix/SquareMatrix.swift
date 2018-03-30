@@ -58,9 +58,10 @@ public extension SquareMatrix where n == m {
     public var isOrthogonal: Bool {
         return self.transposed * self == .identity
     }
-
-    public static func ** (a: Matrix<n, n, R>, k: Int) -> Matrix<n, n, R> {
-        return k == 0 ? .identity : a * (a ** (k - 1))
+    
+    public func pow(_ n: 𝐙) -> SquareMatrix<n, R> {
+        assert(n >= 0)
+        return (0 ..< n).reduce(.identity){ (res, _) in self * res }
     }
 }
 

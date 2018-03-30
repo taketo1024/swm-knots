@@ -10,12 +10,6 @@
 
 import Foundation
 
-precedencegroup ExponentiativePrecedence {
-    associativity: right
-    higherThan: MultiplicationPrecedence
-}
-
-infix operator **: ExponentiativePrecedence
 infix operator /%: MultiplicationPrecedence
 infix operator ∩: MultiplicationPrecedence
 infix operator ∪: MultiplicationPrecedence

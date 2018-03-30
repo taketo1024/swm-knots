@@ -114,7 +114,7 @@ public struct MPolynomial<K: Field>: Ring, Module {
     }
     
     public var description: String {
-        let (sub, sup) = (Expression.sub, Expression.sup)
+        let (sub, sup) = (Format.sub, Format.sup)
         
         func toTerm(_ I: IntList) -> String {
             return I.elements.enumerated().flatMap { (i, n) -> String? in

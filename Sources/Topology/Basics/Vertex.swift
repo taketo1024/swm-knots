@@ -15,6 +15,9 @@ private var productList: [String: Vertex] = [:]
 public struct Vertex: SetType, Comparable {
     public let id: Int
     public let label: String
+    
+    // TODO Vertex should be abstract.
+    //      Extract product structure.
     private let _components: [Vertex] // for product-vertex
     
     private init(_ label: String, _ components: [Vertex]) {
@@ -30,7 +33,7 @@ public struct Vertex: SetType, Comparable {
     }
     
     public init(prefix: String = "v") {
-        self.init("\(prefix)\(list.count)")
+        self.init(Format.symbol(prefix, list.count))
     }
     
     public var hashValue: Int {
@@ -68,7 +71,7 @@ public struct Vertex: SetType, Comparable {
         if let v = productList[key] {
             return v
         } else {
-            let label = "v(\(components.map{"\($0.id)"}.joined(separator: ",")))"
+            let label = "v\(components.map{ Format.sub($0.id) }.joined(separator: ","))"
             let v = Vertex(label, components)
             productList[key] = v
             return v

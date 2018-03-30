@@ -3,7 +3,7 @@ import Foundation
 public typealias 𝐐 = RationalNumber
 
 public struct RationalNumber: Field, Comparable {
-    internal let p, q: 𝐙
+    internal let p, q: 𝐙  // memo: (p, q) coprime, q > 0.
     
     public init(from n: 𝐙) {
         self.init(n, 1)
@@ -22,11 +22,13 @@ public struct RationalNumber: Field, Comparable {
             fatalError("Given 0 for the dominator of a 𝐐")
         }
         
-        let d = gcd(p, q).abs * q.sign
-        if d == 1 {
+        let d = gcd(p, q).abs
+        
+        if d == 1 && q > 0 {
             (self.p, self.q) = (p, q)
         } else {
-            (self.p, self.q) = (p / d, q / d)
+            let D = d * q.sign
+            (self.p, self.q) = (p / D, q / D)
         }
     }
     
@@ -47,7 +49,7 @@ public struct RationalNumber: Field, Comparable {
     }
     
     public static func == (a: 𝐐, b: 𝐐) -> Bool {
-        return a.p * b.q == a.q * b.p
+        return (a.p, a.q) == (b.p, b.q)
     }
     
     public static func + (a: 𝐐, b: 𝐐) -> 𝐐 {
@@ -58,16 +60,8 @@ public struct RationalNumber: Field, Comparable {
         return 𝐐(-a.p, a.q)
     }
     
-    public static func - (a: 𝐐, b: 𝐐) -> 𝐐 {
-        return 𝐐(a.p * b.q - a.q * b.p, a.q * b.q)
-    }
-    
     public static func * (a: 𝐐, b: 𝐐) -> 𝐐 {
         return 𝐐(a.p * b.p, a.q * b.q)
-    }
-    
-    public static func / (a: 𝐐, b: 𝐐) -> 𝐐 {
-        return 𝐐(a.p * b.q, a.q * b.p)
     }
     
     public static func <(lhs: 𝐐, rhs: 𝐐) -> Bool {

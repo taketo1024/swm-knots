@@ -21,17 +21,6 @@ public extension Field {
         return a * b.inverse!
     }
     
-    public static func ** (a: Self, b: Int) -> Self {
-        switch b {
-        case let n where n > 0:
-            return a * (a ** (n - 1))
-        case let n where n < 0:
-            return a.inverse! * (a ** (n + 1))
-        default:
-            return .identity
-        }
-    }
-    
     public static func eucDiv(_ a: Self, _ b: Self) -> (q: Self, r: Self) {
         return (a/b, 0)
     }
