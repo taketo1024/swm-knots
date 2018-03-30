@@ -10,6 +10,76 @@ You can run the playgrounds under the project.  
 
 ![ss2.png](doc/ss2.png)
 
+## Creating Your Own Project
+
+### 1. Initialize a Package
+
+```
+$ mkdir YourProject
+$ cd YourProject
+$ swift package init --type executable
+```
+
+### 2. Edit `Package.swift`
+
+```diff
+ // swift-tools-version:4.0
+ // The swift-tools-version declares the minimum version of Swift required to build this package.
+ 
+ import PackageDescription
+ 
+ let package = Package(
+     name: "YourProject",
+     dependencies: [
+         // Dependencies declare other packages that this package depends on.
+-        // .package(url: /* package url */, from: "1.0.0"),
++        .package(url: "https://github.com/taketo1024/SwiftyAlgebra.git", from: "0.1.0"),
+     ],
+     targets: [
+         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
+         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
+         .target(
+             name: "YourProject",
+-            dependencies: []),
++            dependencies: ["SwiftyAlgebra", "SwiftyTopology"]),
+     ]
+ )
+```
+
+### 3. Edit `Sources/YourProject/main.swift`
+
+```swift
+import SwiftyAlgebra
+import SwiftyTopology
+
+let S2 = SimplicialComplex.sphere(dim: 2)
+let H = Homology(S2, 𝐙.self)
+
+print(S2.detailDescription)
+print(H.detailDescription)
+```
+
+### 4. Run
+
+```
+$ swift run
+```
+
+```
+S^2 {
+    0: v₁, v₂, v₃, v₀
+    1: (v₁, v₂), (v₁, v₃), (v₂, v₃), (v₀, v₂), (v₀, v₃), (v₀, v₁)
+    2: (v₁, v₂, v₃), (v₀, v₂, v₃), (v₀, v₁, v₃), (v₀, v₁, v₂)
+}
+H(S^2; 𝐙) = {
+    0 : 𝐙,  [v₀],
+    1 : 0,  [],
+    2 : 𝐙,  [(v₀, v₂, v₃) + -1(v₁, v₂, v₃) + -1(v₀, v₁, v₃) + (v₀, v₁, v₂)]
+}
+```
+
+You can use this [Sample Project](https://github.com/taketo1024/SwiftyAlgebra-sample) for a template.
+
 ## Using Mathematical Symbols
 
 We make use of mathematical symbols such as sets 𝐙, 𝐐, 𝐑, 𝐂 and operators ⊕, ⊗ etc. Copy the folder `CodeSnippets` to `~/Library/Xcode/UserData/` then you can quickly input these symbols by the completion of Xcode.
