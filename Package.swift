@@ -10,6 +10,9 @@ let package = Package(
         .library(
             name: "SwiftyAlgebra",
             targets: ["SwiftyAlgebra"]),
+        .library(
+            name: "SwiftyTopology",
+            targets: ["SwiftyTopology"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -20,9 +23,17 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "SwiftyAlgebra",
-            dependencies: []),
+            dependencies: [],
+			path: "Sources/SwiftyAlgebra"),
+        .target(
+            name: "SwiftyTopology",
+            dependencies: ["SwiftyAlgebra"],
+			path: "Sources/SwiftyTopology"),
         .testTarget(
             name: "SwiftyAlgebraTests",
             dependencies: ["SwiftyAlgebra"]),
+        .testTarget(
+            name: "SwiftyTopologyTests",
+            dependencies: ["SwiftyTopology"]),
     ]
 )
