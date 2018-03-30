@@ -20,6 +20,3 @@ do {
     σ.inverse
     τ.inverse
 }
-
-print(SymmetricGroup<_5>.allElements)
-

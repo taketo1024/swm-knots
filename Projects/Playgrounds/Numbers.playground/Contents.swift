@@ -4,7 +4,6 @@ import Foundation
 import SwiftyAlgebra
 
 // Rational Number Sample.
-5.pow(3)
 
 do {
     let a = 𝐐(4, 5)
@@ -31,7 +30,7 @@ typealias Z_4 = IntegerQuotientRing<_4>
 do {
     let x: Z_4 = 3
     x + x == 2
-    x * 3 == 1
+//    x * 3 == 1 // TODO: gotta fix.
     
     Z_4.printAddTable()
     Z_4.printMulTable()
@@ -48,7 +47,3 @@ do {
     F_5.printMulTable()
     F_5.printExpTable()
 }
-
-//let (x, y, z, w) = (1, 2, 3, 4)
-//let a = x * x - y * y - z * z - w * w
-//print(a)

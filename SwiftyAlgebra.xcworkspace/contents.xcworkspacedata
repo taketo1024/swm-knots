@@ -23,9 +23,6 @@
          location = "group:MPolynomials.playground">
       </FileRef>
       <FileRef
-         location = "group:FreeModules.playground">
-      </FileRef>
-      <FileRef
          location = "group:Permutations.playground">
       </FileRef>
       <FileRef

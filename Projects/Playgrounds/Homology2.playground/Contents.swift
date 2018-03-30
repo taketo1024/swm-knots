@@ -35,7 +35,7 @@ do {
     let n = 2
     let D = SimplicialComplex.ball(dim: n)
     let S = D.boundary.named("S^\(n-1)")
-    var E = CohomologyExactSequence(D, S, R.self)
+    var E = CohomologyExactSequence.pair(D, S, R.self)
     
     E.fill(column: 0)
     E.fill(column: 1)
