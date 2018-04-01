@@ -32,22 +32,6 @@ public extension Field {
 
 public protocol Subfield: Field, Subring {}
 
-// TODO merge with QuotientRing using conditional conformance `where I: MaximalIdeal`
-// public struct QuotientField<R, I>: Field, _QuotientRing where I: Ideal, R == I.Super {
-public struct QuotientField<R, I>: Field, _QuotientRing where I: Ideal, R == I.Super {
-    public typealias Sub = I
-    
-    internal let r: R
-    
-    public init(_ r: R) {
-        self.r = I.reduced(r)
-    }
-    
-    public var representative: R {
-        return r
-    }
-}
-
 public protocol _FieldHom: _RingHom where Domain: Field, Codomain: Field {}
 
 public struct FieldHom<X: Field, Y: Field>: _FieldHom {
