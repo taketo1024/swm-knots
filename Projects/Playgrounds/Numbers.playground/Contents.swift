@@ -37,7 +37,7 @@ do {
     Z_4.printMulTable()
 }
 
-typealias F_5 = IntegerQuotientField<_5>
+typealias F_5 = IntegerQuotientRing<_5>
 
 do {
     let x: F_5 = 2
