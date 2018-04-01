@@ -26,8 +26,3 @@ public struct Dynamic : _Int {
     public static var intValue: Int { fatalError() }
     public static var isDynamic: Bool { return true }
 }
-
-public protocol _Polynomial {
-    associatedtype K: Field
-    static var value: Polynomial<K> { get }
-}

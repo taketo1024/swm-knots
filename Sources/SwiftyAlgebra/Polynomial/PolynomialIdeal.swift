@@ -8,6 +8,13 @@
 
 import Foundation
 
+public protocol _Polynomial {
+    associatedtype K: Field
+    static var value: Polynomial<K> { get }
+}
+
+public protocol _IrreduciblePolynomial: _Polynomial {}
+
 public struct PolynomialIdeal<p: _Polynomial>: EuclideanIdeal {
     public typealias K = p.K
     public typealias Super = Polynomial<K>
@@ -30,3 +37,7 @@ public struct PolynomialIdeal<p: _Polynomial>: EuclideanIdeal {
         return a
     }
 }
+
+extension PolynomialIdeal: MaximalIdeal where p: _IrreduciblePolynomial {}
+
+public typealias AlgebraicExtension<K, p: _IrreduciblePolynomial> = QuotientRing<Polynomial<K>, PolynomialIdeal<p>> where K == p.K
