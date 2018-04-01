@@ -44,7 +44,7 @@ public final class SmithEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         }
         
         // now `a0` divides all other elements.
-        if a0.normalizeUnit != 1 {
+        if a0.normalizeUnit != .identity {
             apply(.MulRow(at: i0, by: a0.normalizeUnit))
         }
         

@@ -42,7 +42,7 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
             let (q, r) = a /% a0
             apply(.AddRow(at: i0, to: i, mul: -q))
             
-            if r != 0 {
+            if r != .zero {
                 return false
             }
         }

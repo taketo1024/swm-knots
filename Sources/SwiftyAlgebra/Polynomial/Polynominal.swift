@@ -37,7 +37,7 @@ public struct Polynomial<R: Ring>: Ring, Module {
     }
     
     public var inverse: Polynomial<R>? {
-        return (degree == 0 && self != 0) ? Polynomial<R>(coeff(0).inverse!) : nil
+        return (degree == 0 && self != .zero) ? Polynomial<R>(coeff(0).inverse!) : nil
     }
     
     public var leadCoeff: R {
@@ -45,7 +45,7 @@ public struct Polynomial<R: Ring>: Ring, Module {
     }
     
     public func coeff(_ i: Int) -> R {
-        return i < coeffs.count ? coeffs[i] : 0
+        return i < coeffs.count ? coeffs[i] : .zero
     }
     
     // Horner's method
@@ -75,7 +75,7 @@ public struct Polynomial<R: Ring>: Ring, Module {
     }
     
     public static var indeterminate: Polynomial<R> {
-        return Polynomial<R>(0, 1)
+        return Polynomial<R>(.zero, .identity)
     }
     
     public static func == (f: Polynomial<R>, g: Polynomial<R>) -> Bool {
@@ -94,7 +94,7 @@ public struct Polynomial<R: Ring>: Ring, Module {
     public static func * (f: Polynomial<R>, g: Polynomial<R>) -> Polynomial<R> {
         return Polynomial<R>(degree: f.degree + g.degree) {
             (k: Int) in
-            (max(0, k - g.degree) ... min(k, f.degree)).reduce(0) {
+            (max(0, k - g.degree) ... min(k, f.degree)).reduce(.zero) {
                 (res:R, i:Int) in res + f.coeff(i) * g.coeff(k - i)
             }
         }
@@ -129,7 +129,7 @@ extension Polynomial: EuclideanRing where R: Field {
     }
     
     public static func eucDiv<K: Field>(_ f: Polynomial<K>, _ g: Polynomial<K>) -> (q: Polynomial<K>, r: Polynomial<K>) {
-        if g == 0 {
+        if g == .zero {
             fatalError("divide by 0")
         }
         
@@ -137,7 +137,7 @@ extension Polynomial: EuclideanRing where R: Field {
             let n = f.degree - g.degree
             
             if n < 0 {
-                return (0, f)
+                return (.zero, f)
             } else {
                 let x = Polynomial<K>.indeterminate
                 let a = f.leadCoeff / g.leadCoeff
@@ -149,7 +149,7 @@ extension Polynomial: EuclideanRing where R: Field {
         
         return (0 ... max(0, f.degree - g.degree))
             .reversed()
-            .reduce( (0, f) ) { (result: (Polynomial<K>, Polynomial<K>), degree: Int) in
+            .reduce( (.zero, f) ) { (result: (Polynomial<K>, Polynomial<K>), degree: Int) in
                 let (q, r) = result
                 let m = eucDivMonomial(r, g)
                 return (q + m.q, m.r)

@@ -1,7 +1,6 @@
 import Foundation
 
-public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
-    associatedtype IntegerLiteralType = Int
+public protocol Ring: AdditiveGroup, Monoid {
     init(from: 𝐙)
     var inverse: Self? { get }
     var isInvertible: Bool { get }
@@ -10,11 +9,6 @@ public protocol Ring: AdditiveGroup, Monoid, ExpressibleByIntegerLiteral {
 }
 
 public extension Ring {
-    // required init from `ExpressibleByIntegerLiteral`
-    public init(integerLiteral n: Int) {
-        self.init(from: n)
-    }
-    
     public var isInvertible: Bool {
         return (inverse != nil)
     }
@@ -174,7 +168,7 @@ extension QuotientRing: EuclideanRing where I: MaximalIdeal {
     }
     
     public static func eucDiv(_ a: QuotientRing<R, I>, _ b: QuotientRing<R, I>) -> (q: QuotientRing<R, I>, r: QuotientRing<R, I>) {
-        return (a * b.inverse!, 0)
+        return (a * b.inverse!, .zero)
     }
 }
 

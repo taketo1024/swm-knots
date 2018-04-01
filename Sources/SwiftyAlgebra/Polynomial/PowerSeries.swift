@@ -121,7 +121,7 @@ public struct PowerSeries<K: Field>: Ring, Module {
 public extension PowerSeries {
     public static var exponential: PowerSeries<K> {
         return PowerSeries { n in
-            1 / K(from: n.factorial)
+            K(from: n.factorial).inverse!
         }
     }
     

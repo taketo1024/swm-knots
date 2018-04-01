@@ -2,8 +2,13 @@ import Foundation
 
 public typealias 𝐐 = RationalNumber
 
-public struct RationalNumber: Field, Comparable {
+public struct RationalNumber: Field, Comparable, ExpressibleByIntegerLiteral {
+    public typealias IntegerLiteralType = Int
     internal let p, q: 𝐙  // memo: (p, q) coprime, q > 0.
+    
+    public init(integerLiteral n: Int) {
+        self.init(n)
+    }
     
     public init(from n: 𝐙) {
         self.init(n, 1)

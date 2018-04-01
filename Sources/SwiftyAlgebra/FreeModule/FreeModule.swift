@@ -8,7 +8,7 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
     
     // root initializer
     public init(_ elements: [A : R]) {
-        self.elements = elements.filter{ $0.value != 0 }
+        self.elements = elements.filter{ $0.value != .zero }
     }
     
     public init<S: Sequence>(_ elements: S) where S.Element == (A, R) {
@@ -28,7 +28,7 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
     
     // generates a basis element
     public init(_ a: A) {
-        self.init(a, 1)
+        self.init(a, .identity)
     }
     
     public init(_ a: A, _ r: R) {

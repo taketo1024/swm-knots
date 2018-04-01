@@ -21,12 +21,24 @@ public struct Quaternion: Ring, ExpressibleByFloatLiteral {
     private let z: 𝐑
     private let w: 𝐑
 
-    public init(from x: 𝐙) {
-        self.init(𝐑(x))
+    public init(integerLiteral n: Int) {
+        self.init(n)
     }
     
     public init(floatLiteral x: Double) {
         self.init(𝐑(x))
+    }
+    
+    public init(from x: 𝐙) {
+        self.init(x)
+    }
+    
+    public init(_ x: 𝐙) {
+        self.init(𝐑(x), 0, 0, 0)
+    }
+    
+    public init(_ x: 𝐐) {
+        self.init(𝐑(x), 0, 0, 0)
     }
     
     public init(_ x: 𝐑) {

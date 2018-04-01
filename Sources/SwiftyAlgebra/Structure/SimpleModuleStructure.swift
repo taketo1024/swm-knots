@@ -71,7 +71,7 @@ public final class SimpleModuleStructure<A: FreeModuleBase, R: EuclideanRing>: M
     }
     
     public func elementIsZero(_ z: FreeModule<A, R>) -> Bool {
-        return factorize(z).forAll{ $0 == 0 }
+        return factorize(z).forAll{ $0 == .zero }
     }
     
     public func elementsAreEqual(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {

@@ -130,8 +130,8 @@ public struct MPolynomial<K: Field>: Ring, Module {
             let a = self.coeff(i)
             let x = toTerm(i)
             switch a {
-            case  1: return x
-            case -1: return "-\(x)"
+            case  .identity: return x
+            case -.identity: return "-\(x)"
             default: return "\(a)\(x)"
             }
         }.joined(separator: " + ")

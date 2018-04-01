@@ -115,11 +115,11 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
     
     public static var zero: Matrix<n, m, R> {
-        return Matrix<n, m, R> { _,_ in 0 }
+        return Matrix<n, m, R> { _,_ in .zero }
     }
     
     public static func unit(_ i0: Int, _ j0: Int) -> Matrix<n, m, R> {
-        return Matrix { (i, j) in (i, j) == (i0, j0) ? 1 : 0 }
+        return Matrix { (i, j) in (i, j) == (i0, j0) ? .identity : .zero }
     }
     
     public static func ==(a: Matrix<n, m, R>, b: Matrix<n, m, R>) -> Bool {

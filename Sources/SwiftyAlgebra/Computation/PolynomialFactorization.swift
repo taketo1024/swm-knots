@@ -20,9 +20,9 @@ public func factorize(_ p: Polynomial<𝐐>) -> [Polynomial<𝐐>] {
     for b1 in an.divisors {
         for b0 in a0.divisors.flatMap({[$0, -$0]}) {
             let q0 = Polynomial<Q>(Q(b1), Q(b0)) // b1x - b0
-            while q != 1 {
+            while q != .identity {
                 let (q1, r) = q /% q0
-                if r == 0 {
+                if r == .zero {
                     q = q1
                     result.append(q0)
                 } else {
@@ -31,7 +31,7 @@ public func factorize(_ p: Polynomial<𝐐>) -> [Polynomial<𝐐>] {
             }
         }
     }
-    if(q != 1) {
+    if(q != .identity) {
         result.append(q)
     }
     

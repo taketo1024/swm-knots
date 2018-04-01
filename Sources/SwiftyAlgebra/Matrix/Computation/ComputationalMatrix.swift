@@ -248,7 +248,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
                 let (a0, a1) = (p0.pointee.1, p1.pointee.1)
                 let value = r * a0 + a1
                 
-                if value != 0 {
+                if value != .zero {
                     result.append( (j0, value) )
                 }
                 
@@ -262,7 +262,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
                 let a0 = p0.pointee.1
                 let value = r * a0
                 
-                if value != 0 {
+                if value != .zero {
                     result.append( (j0, r * a0) )
                 }
                 

@@ -10,22 +10,35 @@ import Foundation
 
 public typealias 𝐂 = ComplexNumber
 
-public struct ComplexNumber: Field, NormedSpace, ExpressibleByFloatLiteral {
+public struct ComplexNumber: Field, NormedSpace, ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
+    public typealias IntegerLiteralType = Int
     public typealias FloatLiteralType = Double
     
     private let x: 𝐑
     private let y: 𝐑
     
-    public init(from x: 𝐙) {
-        self.init(𝐑(x), 0)
+    public init(integerLiteral n: Int) {
+        self.init(n)
     }
     
     public init(floatLiteral x: Double) {
         self.init(𝐑(x))
     }
     
+    public init(from x: 𝐙) {
+        self.init(x)
+    }
+    
     public init(from r: 𝐐) {
-        self.init(𝐑(r), 0)
+        self.init(r)
+    }
+    
+    public init(_ x: 𝐙) {
+        self.init(𝐑(x), 0)
+    }
+    
+    public init(_ x: 𝐐) {
+        self.init(𝐑(x), 0)
     }
     
     public init(_ x: 𝐑) {

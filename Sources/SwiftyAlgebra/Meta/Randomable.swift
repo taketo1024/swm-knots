@@ -70,8 +70,8 @@ public extension Matrix where R: Randomable, n == m {
             switch Int.rand(6) {
             case 0: A.addRow(at: i, to: j, multipliedBy: R.rand(1, 2))
             case 1: A.addCol(at: i, to: j, multipliedBy: R.rand(1, 2))
-            case 2: A.multiplyRow(at: i, by: -1)
-            case 3: A.multiplyCol(at: i, by: -1)
+            case 2: A.multiplyRow(at: i, by: -.identity)
+            case 3: A.multiplyCol(at: i, by: -.identity)
             case 4: A.swapRows(i, j)
             case 5: A.swapCols(i, j)
             default: ()

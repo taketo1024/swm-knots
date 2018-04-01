@@ -48,7 +48,7 @@ public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminatio
                 * colOps.multiply { $0.determinant }.inverse!
                 * diagonal.multiplyAll()
         } else {
-            return 0
+            return .zero
         }
     }()
     

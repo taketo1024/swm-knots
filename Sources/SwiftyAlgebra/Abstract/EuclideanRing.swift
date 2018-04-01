@@ -22,7 +22,7 @@ public extension EuclideanRing {
 
 public func gcd<R: EuclideanRing>(_ a: R, _ b: R) -> R {
     switch b {
-    case 0:
+    case .zero:
         return a
     default:
         return gcd(b, a % b)
@@ -38,7 +38,7 @@ public func bezout<R: EuclideanRing>(_ a: R, _ b: R) -> (x: R, y: R, r: R) {
     
     func euclid(_ a: R, _ b: R, _ qs: [R]) -> (qs: [R], r: R) {
         switch b {
-        case 0:
+        case .zero:
             return (qs, a)
         default:
             let (q, r) = a /% b
@@ -49,10 +49,10 @@ public func bezout<R: EuclideanRing>(_ a: R, _ b: R) -> (x: R, y: R, r: R) {
     let (qs, r) = euclid(a, b, [])
     
     let m = qs.reduce(M.identity) { (m: M, q: R) -> M in
-        m * M(0, 1, 1, -q)
+        m * M(.zero, .identity, .identity, -q)
     }
     
-    return (x: m[0, 0], y: m[0, 1], r: r)
+    return (x: m[.zero, .zero], y: m[.zero, .identity], r: r)
 }
 
 public protocol EuclideanIdeal: Ideal where Super: EuclideanRing {

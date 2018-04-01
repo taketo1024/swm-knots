@@ -37,7 +37,13 @@ extension IntegerIdeal: MaximalIdeal where n: _Prime {}
 
 public typealias IntegerQuotientRing<n: _Int> = QuotientRing<𝐙, IntegerIdeal<n>>
 
-extension IntegerQuotientRing: FiniteSetType where R == 𝐙, I: _IntegerIdeal {
+extension IntegerQuotientRing: FiniteSetType, ExpressibleByIntegerLiteral where R == 𝐙, I: _IntegerIdeal {
+    public typealias IntegerLiteralType = Int
+    
+    public init(integerLiteral n: Int) {
+        self.init(n)
+    }
+
     public static var allElements: [QuotientRing<R, I>] {
         return (0 ..< I._n.intValue).map{ QuotientRing($0) }
     }

@@ -14,7 +14,7 @@ public typealias SquareMatrix<n: _Int, R: Ring> = Matrix<n, n, R>
 public extension SquareMatrix where n == m {
     public static var identity: Matrix<n, n, R> {
         assert(!n.isDynamic)
-        return Matrix<n, n, R> { $0 == $1 ? 1 : 0 }
+        return Matrix<n, n, R> { $0 == $1 ? .identity : .zero }
     }
     
     public var size: Int {

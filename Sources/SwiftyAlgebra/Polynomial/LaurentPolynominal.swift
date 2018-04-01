@@ -75,7 +75,7 @@ public struct LaurentPolynomial<K: Field>: Ring, Module {
     }
     
     public static var indeterminate: LaurentPolynomial<K> {
-        return LaurentPolynomial<K>(0, 1)
+        return LaurentPolynomial<K>(.zero, .identity)
     }
     
     public static func == (f: LaurentPolynomial<K>, g: LaurentPolynomial<K>) -> Bool {

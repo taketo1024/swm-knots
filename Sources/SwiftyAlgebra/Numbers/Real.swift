@@ -2,12 +2,17 @@ import Foundation
 
 public typealias 𝐑 = RealNumber
 
-public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByFloatLiteral {
+public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
     public typealias Super = 𝐂
+    public typealias IntegerLiteralType = Int
     public typealias FloatLiteralType = Double
     
     internal let value: Double
     public let error: Double
+    
+    public init(integerLiteral n: Int) {
+        self.init(n)
+    }
     
     public init(floatLiteral x: Double) {
         self.init(x)

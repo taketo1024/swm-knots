@@ -54,19 +54,19 @@ public struct Format {
     
     public static func term<R: Ring>(_ a: R, _ x: String, _ n: Int = 1, skipZero: Bool = false) -> String {
         switch (a, n) {
-        case ( 0, _): return skipZero ? "" : "0"
-        case ( _, 0): return "\(a)"
-        case ( 1, 1): return "\(x)"
-        case (-1, 1): return "-\(x)"
-        case ( _, 1): return "\(a)\(x)"
-        case ( 1, _): return "\(x)\(sup(n))"
-        case (-1, _): return "-\(x)\(sup(n))"
-        default:      return "\(a)\(x)\(sup(n))"
+        case ( .zero, _):             return skipZero ? "" : "0"
+        case ( _, .zero):             return "\(a)"
+        case ( .identity, .identity): return "\(x)"
+        case (-.identity, .identity): return "-\(x)"
+        case ( _, .identity):         return "\(a)\(x)"
+        case ( .identity, _):         return "\(x)\(sup(n))"
+        case (-.identity, _):         return "-\(x)\(sup(n))"
+        default:                      return "\(a)\(x)\(sup(n))"
         }
     }
     
     public static func terms<R: Ring>(_ op: String, _ terms: [(R, String, Int)], skipZero: Bool = false) -> String {
-        let ts = terms.flatMap{ (a, x, n) -> String? in
+        let ts = terms.compactMap{ (a, x, n) -> String? in
             let t = term(a, x, n, skipZero: skipZero)
             return (skipZero && t.isEmpty) ? nil : t
         }.joined(separator: " \(op) ")
