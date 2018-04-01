@@ -152,21 +152,8 @@ public extension _LinearEnd {
     }
 }
 
-// TODO use typealias + conditional conformance instead.
-public struct LinearEnd<V: VectorSpace>: _LinearEnd {
-    public typealias CoeffRing = V.CoeffRing
-    public typealias Domain = V
-    public typealias Codomain = V
-    
-    private let f: (V) -> V
-    public init(_ f: @escaping (V) -> V) {
-        self.f = f
-    }
-    
-    public func applied(to x: V) -> V {
-        return f(x)
-    }
-}
+public typealias LinearEnd<V: VectorSpace> = LinearMap<V, V>
+extension LinearEnd: _LinearEnd where V == W {}
 
 public protocol _LinearAut: Aut where Domain: VectorSpace {}
 
