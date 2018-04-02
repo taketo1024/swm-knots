@@ -13,8 +13,6 @@ public protocol _Polynomial {
     static var value: Polynomial<CoeffRing> { get }
 }
 
-public protocol _IrreduciblePolynomial: _Polynomial {}
-
 // memo: Supports only Field-coeffs.
 public struct PolynomialIdeal<p: _Polynomial>: EuclideanIdeal where p.CoeffRing: Field {
     public typealias R = p.CoeffRing
@@ -36,6 +34,6 @@ public struct PolynomialIdeal<p: _Polynomial>: EuclideanIdeal where p.CoeffRing:
     }
 }
 
-extension PolynomialIdeal: MaximalIdeal where p: _IrreduciblePolynomial {}
+public protocol _IrreduciblePolynomial: _Polynomial {}
 
-public typealias AlgebraicExtension<K: Field, p: _IrreduciblePolynomial> = QuotientRing<Polynomial<K>, PolynomialIdeal<p>> where K == p.CoeffRing
+extension PolynomialIdeal: MaximalIdeal where p: _IrreduciblePolynomial {}
