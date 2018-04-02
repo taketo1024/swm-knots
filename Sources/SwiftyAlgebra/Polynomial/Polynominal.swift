@@ -156,3 +156,10 @@ extension Polynomial: EuclideanRing where R: Field {
         }
     }
 }
+
+extension Polynomial: ExpressibleByIntegerLiteral where R: ExpressibleByIntegerLiteral {
+    public typealias IntegerLiteralType = R.IntegerLiteralType
+    public init(integerLiteral n: IntegerLiteralType) {
+        self.init(R(integerLiteral: n))
+    }
+}
