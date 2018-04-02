@@ -9,13 +9,6 @@
 import Foundation
 
 public extension 𝐙 {
-    public var factorial: 𝐙 {
-        if self < 0 {
-            fatalError("factorial of negative number.")
-        }
-        return (self == 0) ? 1 : self * (self - 1).factorial
-    }
-    
     // TODO use IntList
     public func choose(_ k: Int) -> [[Int]] {
         let n = self

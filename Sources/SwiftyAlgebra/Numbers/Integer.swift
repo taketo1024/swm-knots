@@ -33,15 +33,6 @@ extension 𝐙: EuclideanRing {
                             -1
     }
 
-    public static func eucDiv(_ a: 𝐙, _ b: 𝐙) -> (q: 𝐙, r: 𝐙) {
-        let q = a / b
-        return (q: q, r: a - q * b)
-    }
-    
-    public static var symbol: String {
-        return "𝐙"
-    }
-    
     public func pow(_ n: 𝐙) -> 𝐙 {
         assert(n >= 0)
         switch  self {
@@ -52,5 +43,21 @@ extension 𝐙: EuclideanRing {
         default:
             return (0 ..< n).reduce(1){ (res, _) in self * res }
         }
+    }
+    
+    public var factorial: 𝐙 {
+        if self < 0 {
+            fatalError("factorial of negative number.")
+        }
+        return (self == 0) ? 1 : self * (self - 1).factorial
+    }
+    
+    public static func eucDiv(_ a: 𝐙, _ b: 𝐙) -> (q: 𝐙, r: 𝐙) {
+        let q = a / b
+        return (q: q, r: a - q * b)
+    }
+    
+    public static var symbol: String {
+        return "𝐙"
     }
 }

@@ -12,7 +12,17 @@ public extension Group {
             return (0 ..< -n).reduce(.identity){ (res, _) in inverse * res }
         }
     }
+}
 
+public protocol Subgroup: Submonoid where Super: Group {}
+
+public extension Subgroup {
+    public var inverse: Self {
+        return Self(self.asSuper.inverse)
+    }
+}
+
+public extension Group {
     public static func formsSubgroup<S: Sequence>(_ elements: S) -> Bool where S.Element == Self {
         let list = Array(elements)
         let n = list.count
@@ -79,14 +89,6 @@ public extension Group where Self: FiniteSetType {
         return unions
             .sorted{ $0.count < $1.count }
             .map{ FiniteSubgroupStructure(allElements: $0) }
-    }
-}
-
-public protocol Subgroup: Submonoid where Super: Group {}
-
-public extension Subgroup {
-    public var inverse: Self {
-        return Self(self.asSuper.inverse)
     }
 }
 
