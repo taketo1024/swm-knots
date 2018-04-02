@@ -18,33 +18,21 @@ public extension Submodule where CoeffRing == Super.CoeffRing {
     }
 }
 
-public protocol _ProductModule: Module, AdditiveProductGroup where Left: Module, Right: Module {}
+public typealias ProductModule<X: Module, Y: Module> = AdditiveProductGroup<X, Y>
 
-public extension _ProductModule where Left.CoeffRing == CoeffRing, Right.CoeffRing == CoeffRing {
-    static func * (r: CoeffRing, a: Self) -> Self {
-        return Self(r * a._1, r * a._2)
+extension ProductModule: Module where X: Module, Y: Module, X.CoeffRing == Y.CoeffRing {
+    public typealias CoeffRing = X.CoeffRing
+    
+    public static func * (r: CoeffRing, a: ProductModule<X, Y>) -> ProductModule<X, Y> {
+        return ProductModule(r * a._1, r * a._2)
     }
     
-    static func * (a: Self, r: CoeffRing) -> Self {
-        return Self(a._1 * r, a._2 * r)
+    public static func * (a: ProductModule<X, Y>, r: CoeffRing) -> ProductModule<X, Y> {
+        return ProductModule(a._1 * r, a._2 * r)
     }
     
     public static var symbol: String {
-        return "\(Left.symbol)⊕\(Right.symbol)"
-    }
-}
-
-public struct ProductModule<M1: Module, M2: Module>: _ProductModule where M1.CoeffRing == M2.CoeffRing {
-    public typealias Left = M1
-    public typealias Right = M2
-    public typealias CoeffRing = M1.CoeffRing
-    
-    public let _1: M1
-    public let _2: M2
-    
-    public init(_ m1: M1, _ m2: M2) {
-        self._1 = m1
-        self._2 = m2
+        return "\(X.symbol)⊕\(Y.symbol)"
     }
 }
 

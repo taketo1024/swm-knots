@@ -28,19 +28,19 @@ public extension AdditiveSubgroup {
     }
 }
 
-public protocol AdditiveProductGroup: AdditiveGroup, _ProductSet where Left: AdditiveGroup, Right: AdditiveGroup {}
+public typealias AdditiveProductGroup<X: AdditiveGroup, Y: AdditiveGroup> = ProductSet<X, Y>
 
-public extension AdditiveProductGroup {
-    public static var zero: Self {
-        return Self(Left.zero, Right.zero)
+extension AdditiveProductGroup: AdditiveGroup where X: AdditiveGroup, Y: AdditiveGroup {
+    public static var zero: AdditiveProductGroup<X, Y> {
+        return AdditiveProductGroup(X.zero, Y.zero)
     }
     
-    public static func + (a: Self, b: Self) -> Self {
-        return Self(a._1 + b._1, a._2 + b._2)
+    public static func + (a: AdditiveProductGroup<X, Y>, b: AdditiveProductGroup<X, Y>) -> AdditiveProductGroup<X, Y> {
+        return AdditiveProductGroup(a._1 + b._1, a._2 + b._2)
     }
     
-    public static prefix func - (a: Self) -> Self {
-        return Self(-a._1, -a._2)
+    public static prefix func - (a: AdditiveProductGroup<X, Y>) -> AdditiveProductGroup<X, Y> {
+        return AdditiveProductGroup(-a._1, -a._2)
     }
 }
 

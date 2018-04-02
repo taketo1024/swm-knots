@@ -92,26 +92,11 @@ public extension Group where Self: FiniteSet {
     }
 }
 
-// abstract protocol
-public protocol _ProductGroup: Group, _ProductMonoid where Left: Group, Right: Group {}
+public typealias ProductGroup<X: Group, Y: Group> = ProductMonoid<X, Y>
 
-public extension _ProductGroup {
-    public var inverse: Self {
-        return Self(_1.inverse, _2.inverse)
-    }
-}
-
-// concrete struct
-public struct ProductGroup<G1: Group, G2: Group>: _ProductGroup {
-    public typealias Left = G1
-    public typealias Right = G2
-    
-    public let _1: G1
-    public let _2: G2
-    
-    public init(_ g1: G1, _ g2: G2) {
-        self._1 = g1
-        self._2 = g2
+extension ProductGroup: Group where X: Group, Y: Group {
+    public var inverse: ProductGroup<X, Y> {
+        return ProductGroup(_1.inverse, _2.inverse)
     }
 }
 

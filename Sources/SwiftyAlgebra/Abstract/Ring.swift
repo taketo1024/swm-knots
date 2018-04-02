@@ -80,39 +80,26 @@ public extension Ideal {
     }
 }
 
-public protocol _ProductRing: Ring, AdditiveProductGroup where Left: Ring, Right: Ring {}
+public typealias ProductRing<X: Ring, Y: Ring> = AdditiveProductGroup<X, Y>
 
-public extension _ProductRing {
+extension ProductRing: Ring where X: Ring, Y: Ring {
     public init(from a: 𝐙) {
-        self.init(Left(from: a), Right(from: a))
+        self.init(X(from: a), Y(from: a))
     }
     
-    public var inverse: Self? {
-        return _1.inverse.flatMap{ r1 in _2.inverse.flatMap{ r2 in Self(r1, r2) }  }
+    public var inverse: ProductRing<X, Y>? {
+        return _1.inverse.flatMap{ r1 in _2.inverse.flatMap{ r2 in ProductRing(r1, r2) }  }
     }
     
-    public static var zero: Self {
-        return Self(Left.zero, Right.zero)
+    public static var zero: ProductRing<X, Y> {
+        return ProductRing(X.zero, Y.zero)
     }
-    public static var identity: Self {
-        return Self(Left.identity, Right.identity)
+    public static var identity: ProductRing<X, Y> {
+        return ProductRing(X.identity, Y.identity)
     }
     
-    public static func * (a: Self, b: Self) -> Self {
-        return Self(a._1 * b._1, a._2 * b._2)
-    }
-}
-
-public struct ProductRing<R1: Ring, R2: Ring>: _ProductRing {
-    public typealias Left = R1
-    public typealias Right = R2
-    
-    public let _1: R1
-    public let _2: R2
-    
-    public init(_ r1: R1, _ r2: R2) {
-        self._1 = r1
-        self._2 = r2
+    public static func * (a: ProductRing<X, Y>, b: ProductRing<X, Y>) -> ProductRing<X, Y> {
+        return ProductRing(a._1 * b._1, a._2 * b._2)
     }
 }
 
