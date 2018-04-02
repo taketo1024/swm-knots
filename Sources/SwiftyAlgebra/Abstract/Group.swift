@@ -102,6 +102,18 @@ extension ProductGroup: Group where X: Group, Y: Group {
 
 public protocol NormalSubgroup: Subgroup{}
 
+public struct ModSubgroupRelation<H: Subgroup>: EquivalenceRelation {
+    public typealias Base = H.Super
+    
+    public static func isEquivalent(_ x: H.Super, _ y: H.Super) -> Bool {
+        return H.contains(x * y.inverse)
+    }
+}
+
+public typealias QuotientGroup<G, H: Subgroup> = QuotientSet<G, ModSubgroupRelation<H>> where G == H.Super
+
+extension QuotientGroup: Group where X: Group,
+
 // abstract protocol
 public protocol _QuotientGroup: Group, _QuotientSet {
     associatedtype Sub: NormalSubgroup

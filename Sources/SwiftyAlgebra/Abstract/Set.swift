@@ -79,30 +79,36 @@ public struct ProductSet<X: SetType, Y: SetType>: SetType {
     }
 }
 
-public protocol _QuotientSet: SetType {
+public protocol EquivalenceRelation {
     associatedtype Base: SetType
-    
-    init(_ g: Base)
-    var representative: Base { get }
-    static func isEquivalent(_ a: Base, _ b: Base) -> Bool
+    static func isEquivalent(_ x: Base, _ y: Base) -> Bool
 }
 
-public extension _QuotientSet {
-    public static func == (a: Self, b: Self) -> Bool {
-        return isEquivalent(a.representative, b.representative)
+public struct QuotientSet<X, Rel: EquivalenceRelation>: SetType where X == Rel.Base {
+    internal let x: X
+    public init(_ x: X) {
+        self.x = x
     }
-
+    
+    public var representative: X {
+        return x
+    }
+    
+    public static func isEquivalent(_ x: X, _ y: X) -> Bool {
+        return Rel.isEquivalent(x, y)
+    }
+    
     public var description: String {
-        return "\(representative)"
+        return "[\(x)]"
     }
     
     public static var symbol: String {
-        return "\(Base.symbol)/~"
+        return "\(X.symbol)/~"
     }
 }
 
 public extension SetType {
-    public func asQuotient<Q: _QuotientSet>(in: Q.Type) -> Q where Q.Base == Self {
-        return Q.init(self)
+    public func asQuotient<Rel: EquivalenceRelation>(with: Rel.Type) -> QuotientSet<Self, Rel> {
+        return Quotient(self)
     }
 }
