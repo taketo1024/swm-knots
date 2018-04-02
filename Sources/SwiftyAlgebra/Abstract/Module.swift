@@ -36,37 +36,16 @@ extension ProductModule: Module where X: Module, Y: Module, X.CoeffRing == Y.Coe
     }
 }
 
-public protocol _QuotientModule: Module, AdditiveQuotientGroup where Sub: Submodule {}
+public typealias QuotientModule<M, N: Submodule> = AdditiveQuotientGroup<M, N> where M == N.Super
 
-public extension _QuotientModule where Base == Sub.Super, CoeffRing == Sub.CoeffRing, CoeffRing == Sub.Super.CoeffRing {
-    public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
-        return Sub.contains( a - b )
+extension QuotientModule: Module where Sub: Submodule {
+    public typealias CoeffRing = Base.CoeffRing
+    
+    public static func * (r: CoeffRing, a: QuotientModule<Base, Sub>) -> QuotientModule<Base, Sub> {
+        return QuotientModule(r * a.representative)
     }
     
-    static func * (r: CoeffRing, a: Self) -> Self {
-        return Self(r * a.representative)
-    }
-    
-    static func * (a: Self, r: CoeffRing) -> Self {
-        return Self(a.representative * r)
-    }
-    
-    public var hashValue: Int {
-        return representative.hashValue // must assure `representative` is unique.
-    }
-}
-
-public struct QuotientModule<M, N>: _QuotientModule where N: Submodule, M == N.Super, M.CoeffRing == N.CoeffRing {
-    public typealias CoeffRing = M.CoeffRing
-    public typealias Sub = N
-    
-    internal let m: M
-    
-    public init(_ m: M) {
-        self.m = m // TODO reduce
-    }
-    
-    public var representative: M {
-        return m
+    public static func * (a: QuotientModule<Base, Sub>, r: CoeffRing) -> QuotientModule<Base, Sub> {
+        return QuotientModule(a.representative * r)
     }
 }

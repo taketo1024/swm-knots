@@ -79,36 +79,36 @@ public struct ProductSet<X: SetType, Y: SetType>: SetType {
     }
 }
 
-public protocol EquivalenceRelation {
+// MEMO When "parametrized extension" is supported, we could defile:
+//
+//   struct QuotientSet<X: Base, Rel: EquivalenceRelation>
+//
+// and override in subtypes as:
+//
+//   public typealias QuotientGroup<G, H: NormalSubgroup> = QuotientSet<G, ModSubgroupRelation<H>> where G == H.Super
+//   extension<H: NormalSubgroup> QuotientGroup where X == H.Super, Rel == ModSubgroupRelation<H> { ... }
+//
+// see: https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#parameterized-extensions
+
+public protocol _QuotientSet {
     associatedtype Base: SetType
+    init (_ x: Base)
+    var representative: Base { get }
     static func isEquivalent(_ x: Base, _ y: Base) -> Bool
 }
 
-public struct QuotientSet<X, Rel: EquivalenceRelation>: SetType where X == Rel.Base {
-    internal let x: X
-    public init(_ x: X) {
-        self.x = x
-    }
-    
-    public var representative: X {
-        return x
-    }
-    
-    public static func isEquivalent(_ x: X, _ y: X) -> Bool {
-        return Rel.isEquivalent(x, y)
-    }
-    
+public extension _QuotientSet {
     public var description: String {
-        return "[\(x)]"
+        return representative.description
     }
     
     public static var symbol: String {
-        return "\(X.symbol)/~"
+        return "\(Base.symbol)/~"
     }
 }
 
 public extension SetType {
-    public func asQuotient<Rel: EquivalenceRelation>(with: Rel.Type) -> QuotientSet<Self, Rel> {
-        return Quotient(self)
+    public func asQuotient<Q: _QuotientSet>(in: Q) -> Q where Self == Q.Base {
+        return Q(self)
     }
 }

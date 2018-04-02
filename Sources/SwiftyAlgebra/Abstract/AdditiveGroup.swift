@@ -44,25 +44,30 @@ extension AdditiveProductGroup: AdditiveGroup where X: AdditiveGroup, Y: Additiv
     }
 }
 
-public protocol AdditiveQuotientGroup: AdditiveGroup, _QuotientSet {
-    associatedtype Sub: AdditiveSubgroup
-}
-
-public extension AdditiveQuotientGroup where Base == Sub.Super {
+public struct AdditiveQuotientGroup<Base, Sub: AdditiveSubgroup>: AdditiveGroup, _QuotientSet where Base == Sub.Super {
+    private let x: Base
+    public init(_ x: Base) {
+        self.x = x
+    }
+    
+    public var representative: Base {
+        return x
+    }
+    
     public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
         return Sub.contains( a - b )
     }
     
-    public static var zero: Self {
-        return Self(Base.zero)
+    public static var zero: AdditiveQuotientGroup<Base, Sub> {
+        return AdditiveQuotientGroup(Base.zero)
     }
     
-    public static func + (a: Self, b: Self) -> Self {
-        return Self(a.representative + b.representative)
+    public static func + (a: AdditiveQuotientGroup<Base, Sub>, b: AdditiveQuotientGroup<Base, Sub>) -> AdditiveQuotientGroup<Base, Sub> {
+        return AdditiveQuotientGroup(a.x + b.x)
     }
     
-    public static prefix func - (a: Self) -> Self {
-        return Self(-a.representative)
+    public static prefix func - (a: AdditiveQuotientGroup<Base, Sub>) -> AdditiveQuotientGroup<Base, Sub> {
+        return AdditiveQuotientGroup(-a.x)
     }
     
     public static var symbol: String {

@@ -103,59 +103,36 @@ extension ProductRing: Ring where X: Ring, Y: Ring {
     }
 }
 
-public protocol _QuotientRing: Ring, AdditiveQuotientGroup where Sub: Ideal {}
+public typealias QuotientRing<R, I: Ideal> = AdditiveQuotientGroup<R, I> where R == I.Super
 
-public extension _QuotientRing where Base == Sub.Super {
-    public init(from n: 𝐙) {
-        self.init(Base(from: n))
+// MEMO cannot directly write `QuotientRing: Ring` for some reason. (Swift 4.1)
+
+extension QuotientRing: Monoid where Sub: Ideal, Base == Sub.Super {
+    public var inverse: QuotientRing<Base, Sub>? {
+        return Sub.inverseInQuotient(representative).map{ QuotientRing($0) }
     }
     
-    public var inverse: Self? {
-        return Sub.inverseInQuotient(representative).map{ Self($0) }
-    }
-    
-    public static var zero: Self {
-        return Self(.zero)
-    }
-    
-    public static var identity: Self {
-        return Self(.identity)
-    }
-    
-    public static func * (a: Self, b: Self) -> Self {
-        return Self(a.representative * b.representative)
-    }
-    
-    public var hashValue: Int {
-        return representative.hashValue // must assure `representative` is unique.
+    public static func * (a: QuotientRing<Base, Sub>, b: QuotientRing<Base, Sub>) -> QuotientRing<Base, Sub> {
+        return QuotientRing(a.representative * b.representative)
     }
 }
 
-public struct QuotientRing<R, I>: _QuotientRing where I: Ideal, R == I.Super {
-    public typealias Sub = I
-    
-    internal let r: R
-    
-    public init(_ r: R) {
-        self.r = I.reduced(r)
-    }
-    
-    public var representative: R {
-        return r
+extension QuotientRing: Ring where Sub: Ideal, Base == Sub.Super {
+    public init(from n: 𝐙) {
+        self.init(Base(from: n))
     }
 }
 
 public protocol MaximalIdeal: Ideal {}
 
-// memo `QuotientRing: Field where I: MaximalIdeal` causes error...
-extension QuotientRing: EuclideanRing where I: MaximalIdeal {
+extension QuotientRing: EuclideanRing where Sub: MaximalIdeal {
     public var degree: Int {
         return self == .zero ? 0 : 1
     }
     
-    public static func eucDiv(_ a: QuotientRing<R, I>, _ b: QuotientRing<R, I>) -> (q: QuotientRing<R, I>, r: QuotientRing<R, I>) {
+    public static func eucDiv(_ a: QuotientRing<Base, Sub>, _ b: QuotientRing<Base, Sub>) -> (q: QuotientRing<Base, Sub>, r: QuotientRing<Base, Sub>) {
         return (a * b.inverse!, .zero)
     }
 }
 
-extension QuotientRing: Field where I: MaximalIdeal {}
+extension QuotientRing: Field where Sub: MaximalIdeal {}

@@ -102,53 +102,8 @@ extension ProductGroup: Group where X: Group, Y: Group {
 
 public protocol NormalSubgroup: Subgroup{}
 
-public struct ModSubgroupRelation<H: Subgroup>: EquivalenceRelation {
-    public typealias Base = H.Super
-    
-    public static func isEquivalent(_ x: H.Super, _ y: H.Super) -> Bool {
-        return H.contains(x * y.inverse)
-    }
-}
-
-public typealias QuotientGroup<G, H: Subgroup> = QuotientSet<G, ModSubgroupRelation<H>> where G == H.Super
-
-extension QuotientGroup: Group where X: Group,
-
-// abstract protocol
-public protocol _QuotientGroup: Group, _QuotientSet {
-    associatedtype Sub: NormalSubgroup
-}
-
-public extension _QuotientGroup where Base == Sub.Super {
-    
-    public static var identity: Self {
-        return Self(Base.identity)
-    }
-    
-    public var inverse: Self {
-        return Self(representative.inverse)
-    }
-    
-    public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
-        return Sub.contains(a * b.inverse)
-    }
-    
-    public static func * (a: Self, b: Self) -> Self {
-        return Self(a.representative * b.representative)
-    }
-
-    public static var symbol: String {
-        return "\(Base.symbol)/\(Sub.symbol)"
-    }
-}
-
-// concrete struct
-public struct QuotientGroup<G, H>: _QuotientGroup where H: NormalSubgroup, G == H.Super {
-    public typealias Base = G
-    public typealias Sub = H
-    
-    internal let g: G
-    
+public struct QuotientGroup<G, H: NormalSubgroup>: Group, _QuotientSet where G == H.Super {
+    private let g: G
     public init(_ g: G) {
         self.g = g
     }
@@ -157,7 +112,23 @@ public struct QuotientGroup<G, H>: _QuotientGroup where H: NormalSubgroup, G == 
         return g
     }
     
-    public var hashValue: Int {
-        return Sub.contains(representative) ? 0 : 1 // might have efficiency issues.
+    public static func isEquivalent(_ x: G, _ y: G) -> Bool {
+        return H.contains(x * y.inverse)
+    }
+    
+    public static var identity: QuotientGroup<G, H> {
+        return QuotientGroup(G.identity)
+    }
+    
+    public var inverse: QuotientGroup<G, H> {
+        return QuotientGroup(g.inverse)
+    }
+    
+    public static func * (a: QuotientGroup<G, H>, b: QuotientGroup<G, H>) -> QuotientGroup<G, H> {
+        return QuotientGroup(a.g * b.g)
+    }
+    
+    public static var symbol: String {
+        return "\(G.symbol)/\(H.symbol)"
     }
 }
