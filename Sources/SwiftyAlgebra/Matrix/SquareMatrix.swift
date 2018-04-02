@@ -10,8 +10,11 @@ import Foundation
 
 public typealias SquareMatrix<n: _Int, R: Ring> = Matrix<n, n, R>
 
-// TODO: conform to Ring after conditional conformance is supported.
-public extension SquareMatrix where n == m {
+extension SquareMatrix: Ring where n == m {
+    public init(from n : 𝐙) {
+        self.init(scalar: R(from: n))
+    }
+    
     public static var identity: Matrix<n, n, R> {
         assert(!n.isDynamic)
         return Matrix<n, n, R> { $0 == $1 ? .identity : .zero }
@@ -23,6 +26,24 @@ public extension SquareMatrix where n == m {
     
     public var trace: R {
         return (0 ..< rows).sum { i in self[i, i] }
+    }
+    
+    public var determinant: R {
+        print("warn: computing determinant for a general ring.")
+        return Permutation.allPermutations(ofLength: size).sum { s in
+            let e = R(from: s.signature)
+            let term = (0 ..< size).multiply { i in self[i, s[i]] }
+            print("\t", e, term)
+            return e * term
+        }
+    }
+    
+    public var isInvertible: Bool {
+        return determinant.isInvertible
+    }
+    
+    public var inverse: Matrix<n, n, R>? {
+        fatalError("matrix-inverse not yet supported for a general ring.")
     }
     
     public var isZero: Bool {
@@ -73,10 +94,6 @@ public extension SquareMatrix where n == m, R: EuclideanRing {
         case 2: return self[0, 0] * self[1, 1] - self[1, 0] * self[0, 1]
         default: return eliminate().determinant
         }
-    }
-    
-    public var isInvertible: Bool {
-        return determinant.isInvertible
     }
     
     public var inverse: Matrix<n, n, R>? {

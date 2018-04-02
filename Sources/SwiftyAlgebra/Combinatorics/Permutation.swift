@@ -62,11 +62,11 @@ public struct Permutation: Map {
         return I.map{ applied(to: $0) }
     }
     
+    // memo: the number of transpositions in it's decomposition.
     public var signature: Int {
+        // the sign of a cyclic-perm of length l (l >= 2) is (-1)^{l - 1}
         let decomp = cyclicDecomposition
-        return decomp.reduce(1){ (sgn, p) in
-            sgn * ( p.elements.count % 2 == 0 ? 1 : -1 )
-        }
+        return decomp.multiply { p in (-1).pow( p.elements.count - 1) }
     }
     
     public var cyclicDecomposition: [Permutation] {
