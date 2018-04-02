@@ -123,6 +123,13 @@ extension QuotientRing: Ring where Sub: Ideal, Base == Sub.Super {
     }
 }
 
+extension QuotientRing: ExpressibleByIntegerLiteral where Base: ExpressibleByIntegerLiteral {
+    public typealias IntegerLiteralType = Base.IntegerLiteralType
+    public init(integerLiteral value: Base.IntegerLiteralType) {
+        self.init(Base(integerLiteral: value))
+    }
+}
+
 public protocol MaximalIdeal: Ideal {}
 
 extension QuotientRing: EuclideanRing where Sub: MaximalIdeal {
