@@ -8,31 +8,6 @@
 
 import Foundation
 
-public protocol Representation: Map {
-    associatedtype BaseVectorSpace: VectorSpace
-}
-
-public protocol _GroupRepresentation: Representation, _GroupHom where Codomain == LinearAut<BaseVectorSpace> { }
-
-public struct GroupRepresentation<G: Group, V: VectorSpace>: _GroupRepresentation {
-    public typealias Domain   = G
-    public typealias Codomain = LinearAut<V>
-    public typealias BaseVectorSpace = V
-    
-    private let f: (G) -> LinearAut<V>
-    public init(_ f: @escaping (G) -> LinearAut<V>) {
-        self.f = f
-    }
-    
-    public subscript(g: G) -> LinearAut<V> {
-        return f(g)
-    }
-    
-    public func applied(to g: G) -> LinearAut<V> {
-        return f(g)
-    }
-}
-
 public protocol _LieAlgebraRepresentation: Representation, _LieAlgebraHom where Codomain == LinearEnd<BaseVectorSpace> { }
 
 public struct LieAlgebraRepresentation<𝔤: LieAlgebra, V: VectorSpace>: _LieAlgebraRepresentation where 𝔤.CoeffRing == V.CoeffRing {
