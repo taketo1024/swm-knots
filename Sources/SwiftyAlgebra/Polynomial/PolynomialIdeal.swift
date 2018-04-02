@@ -9,35 +9,33 @@
 import Foundation
 
 public protocol _Polynomial {
-    associatedtype K: Field
-    static var value: Polynomial<K> { get }
+    associatedtype CoeffRing: Ring
+    static var value: Polynomial<CoeffRing> { get }
 }
 
 public protocol _IrreduciblePolynomial: _Polynomial {}
 
-public struct PolynomialIdeal<p: _Polynomial>: EuclideanIdeal {
-    public typealias K = p.K
-    public typealias Super = Polynomial<K>
+// memo: Supports only Field-coeffs.
+public struct PolynomialIdeal<p: _Polynomial>: EuclideanIdeal where p.CoeffRing: Field {
+    public typealias R = p.CoeffRing
+    public typealias CoeffRing = R
+    public typealias Super = Polynomial<R>
     
-    public static var generator: Polynomial<K> {
+    public static var generator: Polynomial<R> {
         return p.value
     }
     
-    public let a: Polynomial<K>
+    public let a: Polynomial<R>
     
-    public init(_ a: Polynomial<K>) {
+    public init(_ a: Polynomial<R>) {
         self.a = a
     }
     
-    public init(_ coeffs: K...) {
-        self.init(Super(coeffs: coeffs))
-    }
-    
-    public var asSuper: Polynomial<K> {
+    public var asSuper: Polynomial<R> {
         return a
     }
 }
 
 extension PolynomialIdeal: MaximalIdeal where p: _IrreduciblePolynomial {}
 
-public typealias AlgebraicExtension<K, p: _IrreduciblePolynomial> = QuotientRing<Polynomial<K>, PolynomialIdeal<p>> where K == p.K
+public typealias AlgebraicExtension<K: Field, p: _IrreduciblePolynomial> = QuotientRing<Polynomial<K>, PolynomialIdeal<p>> where K == p.CoeffRing
