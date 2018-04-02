@@ -57,29 +57,29 @@ public extension SetType {
     }
 }
 
-public struct ProductSet<X: SetType, Y: SetType>: SetType {
-    public let _1: X
-    public let _2: Y
+public struct ProductSet<Left: SetType, Right: SetType>: SetType {
+    public let left : Left
+    public let right: Right
     
-    public init(_ x: X, _ y: Y) {
-        self._1 = x
-        self._2 = y
+    public init(_ x: Left, _ y: Right) {
+        self.left  = x
+        self.right = y
     }
     
-    public static func == (a: ProductSet<X, Y>, b: ProductSet<X, Y>) -> Bool {
-        return (a._1, a._2) == (b._1, b._2)
+    public static func == (a: ProductSet<Left, Right>, b: ProductSet<Left, Right>) -> Bool {
+        return (a.left, a.right) == (b.left, b.right)
     }
     
     public var hashValue: Int {
-        return (_1.hashValue &* 31) &+ _2.hashValue
+        return (left.hashValue &* 31) &+ right.hashValue
     }
     
     public var description: String {
-        return "(\(_1), \(_2))"
+        return "(\(left), \(right))"
     }
     
     public static var symbol: String {
-        return "\(X.symbol)×\(Y.symbol)"
+        return "\(Left.symbol)×\(Right.symbol)"
     }
 }
 

@@ -82,24 +82,25 @@ public extension Ideal {
 
 public typealias ProductRing<X: Ring, Y: Ring> = AdditiveProductGroup<X, Y>
 
-extension ProductRing: Ring where X: Ring, Y: Ring {
+extension ProductRing: Ring where Left: Ring, Right: Ring {
     public init(from a: 𝐙) {
-        self.init(X(from: a), Y(from: a))
+        self.init(Left(from: a), Right(from: a))
     }
     
-    public var inverse: ProductRing<X, Y>? {
-        return _1.inverse.flatMap{ r1 in _2.inverse.flatMap{ r2 in ProductRing(r1, r2) }  }
+    public var inverse: ProductRing<Left, Right>? {
+        return left.inverse.flatMap{ r1 in right.inverse.flatMap{ r2 in ProductRing(r1, r2) }  }
     }
     
-    public static var zero: ProductRing<X, Y> {
-        return ProductRing(X.zero, Y.zero)
-    }
-    public static var identity: ProductRing<X, Y> {
-        return ProductRing(X.identity, Y.identity)
+    public static var zero: ProductRing<Left, Right> {
+        return ProductRing(.zero, .zero)
     }
     
-    public static func * (a: ProductRing<X, Y>, b: ProductRing<X, Y>) -> ProductRing<X, Y> {
-        return ProductRing(a._1 * b._1, a._2 * b._2)
+    public static var identity: ProductRing<Left, Right> {
+        return ProductRing(.identity, .identity)
+    }
+    
+    public static func * (a: ProductRing<Left, Right>, b: ProductRing<Left, Right>) -> ProductRing<Left, Right> {
+        return ProductRing(a.left * b.left, a.right * b.right)
     }
 }
 

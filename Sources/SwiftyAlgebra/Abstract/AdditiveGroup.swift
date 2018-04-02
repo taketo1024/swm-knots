@@ -30,17 +30,17 @@ public extension AdditiveSubgroup {
 
 public typealias AdditiveProductGroup<X: AdditiveGroup, Y: AdditiveGroup> = ProductSet<X, Y>
 
-extension AdditiveProductGroup: AdditiveGroup where X: AdditiveGroup, Y: AdditiveGroup {
-    public static var zero: AdditiveProductGroup<X, Y> {
-        return AdditiveProductGroup(X.zero, Y.zero)
+extension AdditiveProductGroup: AdditiveGroup where Left: AdditiveGroup, Right: AdditiveGroup {
+    public static var zero: AdditiveProductGroup<Left, Right> {
+        return AdditiveProductGroup(.zero, .zero)
     }
     
-    public static func + (a: AdditiveProductGroup<X, Y>, b: AdditiveProductGroup<X, Y>) -> AdditiveProductGroup<X, Y> {
-        return AdditiveProductGroup(a._1 + b._1, a._2 + b._2)
+    public static func + (a: AdditiveProductGroup<Left, Right>, b: AdditiveProductGroup<Left, Right>) -> AdditiveProductGroup<Left, Right> {
+        return AdditiveProductGroup(a.left + b.left, a.right + b.right)
     }
     
-    public static prefix func - (a: AdditiveProductGroup<X, Y>) -> AdditiveProductGroup<X, Y> {
-        return AdditiveProductGroup(-a._1, -a._2)
+    public static prefix func - (a: AdditiveProductGroup<Left, Right>) -> AdditiveProductGroup<Left, Right> {
+        return AdditiveProductGroup(-a.left, -a.right)
     }
 }
 

@@ -27,12 +27,12 @@ public extension Submonoid {
 
 public typealias ProductMonoid<X: Monoid, Y: Monoid> = ProductSet<X, Y>
 
-extension ProductMonoid: Monoid where X: Monoid, Y: Monoid {
-    public static var identity: ProductMonoid<X, Y> {
-        return ProductMonoid(X.identity, Y.identity)
+extension ProductMonoid: Monoid where Left: Monoid, Right: Monoid {
+    public static var identity: ProductMonoid<Left, Right> {
+        return ProductMonoid(.identity, .identity)
     }
     
-    public static func * (a: ProductMonoid<X, Y>, b: ProductMonoid<X, Y>) -> ProductMonoid<X, Y> {
-        return ProductMonoid(a._1 * b._1, a._2 * b._2)
+    public static func * (a: ProductMonoid<Left, Right>, b: ProductMonoid<Left, Right>) -> ProductMonoid<Left, Right> {
+        return ProductMonoid(a.left * b.left, a.right * b.right)
     }
 }

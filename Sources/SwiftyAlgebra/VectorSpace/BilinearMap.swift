@@ -17,7 +17,7 @@ public protocol _BilinearMap: Map, VectorSpace where Left: VectorSpace, Right: V
 
 public extension _BilinearMap {
     public init(_ f: @escaping (Left, Right) -> Codomain) {
-        self.init{ (v: ProductVectorSpace) in f(v._1, v._2) }
+        self.init{ (v: ProductVectorSpace) in f(v.left, v.right) }
     }
     
     public subscript(x: Left, y: Right) -> Codomain {
@@ -67,7 +67,7 @@ public typealias BilinearForm<V: VectorSpace> = BilinearMap<V, V, AsVectorSpace<
 
 public extension BilinearForm where V1 == V2, W == AsVectorSpace<V1.CoeffRing> {
     public init(_ f: @escaping (Left, Right) -> R) {
-        self.init{ (v: ProductVectorSpace) in AsVectorSpace( f(v._1, v._2) ) }
+        self.init{ (v: ProductVectorSpace) in AsVectorSpace( f(v.left, v.right) ) }
     }
 }
 

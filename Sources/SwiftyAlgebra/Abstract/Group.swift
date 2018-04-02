@@ -94,9 +94,9 @@ public extension Group where Self: FiniteSet {
 
 public typealias ProductGroup<X: Group, Y: Group> = ProductMonoid<X, Y>
 
-extension ProductGroup: Group where X: Group, Y: Group {
-    public var inverse: ProductGroup<X, Y> {
-        return ProductGroup(_1.inverse, _2.inverse)
+extension ProductGroup: Group where Left: Group, Right: Group {
+    public var inverse: ProductGroup<Left, Right> {
+        return ProductGroup(left.inverse, right.inverse)
     }
 }
 

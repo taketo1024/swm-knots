@@ -20,19 +20,19 @@ public extension Submodule where CoeffRing == Super.CoeffRing {
 
 public typealias ProductModule<X: Module, Y: Module> = AdditiveProductGroup<X, Y>
 
-extension ProductModule: Module where X: Module, Y: Module, X.CoeffRing == Y.CoeffRing {
-    public typealias CoeffRing = X.CoeffRing
+extension ProductModule: Module where Left: Module, Right: Module, Left.CoeffRing == Right.CoeffRing {
+    public typealias CoeffRing = Left.CoeffRing
     
-    public static func * (r: CoeffRing, a: ProductModule<X, Y>) -> ProductModule<X, Y> {
-        return ProductModule(r * a._1, r * a._2)
+    public static func * (r: CoeffRing, a: ProductModule<Left, Right>) -> ProductModule<Left, Right> {
+        return ProductModule(r * a.left, r * a.right)
     }
     
-    public static func * (a: ProductModule<X, Y>, r: CoeffRing) -> ProductModule<X, Y> {
-        return ProductModule(a._1 * r, a._2 * r)
+    public static func * (a: ProductModule<Left, Right>, r: CoeffRing) -> ProductModule<Left, Right> {
+        return ProductModule(a.left * r, a.right * r)
     }
     
     public static var symbol: String {
-        return "\(X.symbol)⊕\(Y.symbol)"
+        return "\(Left.symbol)⊕\(Right.symbol)"
     }
 }
 
