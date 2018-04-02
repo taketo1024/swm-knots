@@ -66,6 +66,10 @@ public struct ProductSet<X: SetType, Y: SetType>: SetType {
         self._2 = y
     }
     
+    public static func == (a: ProductSet<X, Y>, b: ProductSet<X, Y>) -> Bool {
+        return (a._1, a._2) == (b._1, b._2)
+    }
+    
     public var hashValue: Int {
         return (_1.hashValue &* 31) &+ _2.hashValue
     }
@@ -90,7 +94,7 @@ public struct ProductSet<X: SetType, Y: SetType>: SetType {
 //
 // see: https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#parameterized-extensions
 
-public protocol _QuotientSet {
+public protocol _QuotientSet: SetType {
     associatedtype Base: SetType
     init (_ x: Base)
     var representative: Base { get }
@@ -102,13 +106,11 @@ public extension _QuotientSet {
         return representative.description
     }
     
+    public static func == (a: Self, b: Self) -> Bool {
+        return isEquivalent(a.representative, b.representative)
+    }
+    
     public static var symbol: String {
         return "\(Base.symbol)/~"
-    }
-}
-
-public extension SetType {
-    public func asQuotient<Q: _QuotientSet>(in: Q) -> Q where Self == Q.Base {
-        return Q(self)
     }
 }
