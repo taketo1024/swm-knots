@@ -12,7 +12,7 @@ public extension AdditiveGroup {
     }
 }
 
-public protocol AdditiveSubgroup: AdditiveGroup, SubsetType where Super: AdditiveGroup {}
+public protocol AdditiveSubgroup: AdditiveGroup, Subset where Super: AdditiveGroup {}
 
 public extension AdditiveSubgroup {
     public static var zero: Self {
@@ -28,7 +28,7 @@ public extension AdditiveSubgroup {
     }
 }
 
-public protocol AdditiveProductGroup: AdditiveGroup, ProductSetType where Left: AdditiveGroup, Right: AdditiveGroup {}
+public protocol AdditiveProductGroup: AdditiveGroup, _ProductSet where Left: AdditiveGroup, Right: AdditiveGroup {}
 
 public extension AdditiveProductGroup {
     public static var zero: Self {
@@ -44,7 +44,7 @@ public extension AdditiveProductGroup {
     }
 }
 
-public protocol AdditiveQuotientGroup: AdditiveGroup, QuotientSetType {
+public protocol AdditiveQuotientGroup: AdditiveGroup, _QuotientSet {
     associatedtype Sub: AdditiveSubgroup
 }
 

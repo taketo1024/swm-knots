@@ -50,7 +50,7 @@ public extension Group {
     }
 }
 
-public extension Group where Self: FiniteSetType {
+public extension Group where Self: FiniteSet {
     public static func cyclicSubgroup(generator: Self) -> FiniteSubgroupStructure<Self> {
         var g = generator
         var set = Set([identity])
@@ -116,7 +116,7 @@ public struct ProductGroup<G1: Group, G2: Group>: _ProductGroup {
 }
 
 // abstract protocol
-public protocol _QuotientGroup: Group, QuotientSetType {
+public protocol _QuotientGroup: Group, _QuotientSet {
     associatedtype Sub: Subgroup
 }
 

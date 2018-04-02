@@ -21,7 +21,7 @@ public extension AdditiveGroup {
     }
 }
 
-public extension AdditiveGroup where Self: FiniteSetType {
+public extension AdditiveGroup where Self: FiniteSet {
     public static func printAddTable() {
         printAddTable(values: allElements)
     }
@@ -37,7 +37,7 @@ public extension Monoid {
     }
 }
 
-public extension Monoid where Self: FiniteSetType {
+public extension Monoid where Self: FiniteSet {
     public static func printMulTable() {
         printMulTable(values: allElements)
     }

@@ -13,7 +13,7 @@ public extension Monoid {
     }
 }
 
-public protocol Submonoid: Monoid, SubsetType where Super: Monoid {}
+public protocol Submonoid: Monoid, Subset where Super: Monoid {}
 
 public extension Submonoid {
     static var identity: Self {
@@ -25,7 +25,7 @@ public extension Submonoid {
     }
 }
 
-public protocol _ProductMonoid: Monoid, ProductSetType where Left: Monoid, Right: Monoid {}
+public protocol _ProductMonoid: Monoid, _ProductSet where Left: Monoid, Right: Monoid {}
 
 public extension _ProductMonoid {
     public static var identity: Self {

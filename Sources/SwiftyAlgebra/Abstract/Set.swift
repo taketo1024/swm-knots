@@ -8,21 +8,13 @@
 
 import Foundation
 
+// MEMO: since `Set` is already used in Foundation.
 public protocol SetType: Hashable, CustomStringConvertible {
     var detailDescription: String { get }
     static var symbol: String { get }
 }
 
 public extension SetType {
-    public func asSubset<S: SubsetType>(of: S.Type) -> S where S.Super == Self {
-        assert(S.contains(self), "\(S.self) does not contain \(self).")
-        return S.init(self)
-    }
-    
-    public func asQuotient<Q: QuotientSetType>(in: Q.Type) -> Q where Q.Base == Self {
-        return Q.init(self)
-    }
-    
     public var detailDescription: String {
         return description
     }
@@ -32,19 +24,19 @@ public extension SetType {
     }
 }
 
-public protocol FiniteSetType: SetType {
+public protocol FiniteSet: SetType {
     static var allElements: [Self] { get }
     static var countElements: Int { get }
 }
 
-public protocol SubsetType: SetType {
+public protocol Subset: SetType {
     associatedtype Super: SetType
     init(_ g: Super)
     var asSuper: Super { get }
     static func contains(_ g: Super) -> Bool
 }
 
-public extension SubsetType {
+public extension Subset {
     public static func == (a: Self, b: Self) -> Bool {
         return a.asSuper == b.asSuper
     }
@@ -58,7 +50,14 @@ public extension SubsetType {
     }
 }
 
-public protocol ProductSetType: SetType {
+public extension SetType {
+    public func asSubset<S: Subset>(of: S.Type) -> S where S.Super == Self {
+        assert(S.contains(self), "\(S.self) does not contain \(self).")
+        return S.init(self)
+    }
+}
+
+public protocol _ProductSet: SetType {
     associatedtype Left: SetType
     associatedtype Right: SetType
     var _1: Left  { get }
@@ -66,7 +65,7 @@ public protocol ProductSetType: SetType {
     init(_ a1: Left, _ a2: Right)
 }
 
-public extension ProductSetType {
+public extension _ProductSet {
     public static func == (a: Self, b: Self) -> Bool {
         return (a._1 == b._1) && (a._2 == b._2)
     }
@@ -84,7 +83,7 @@ public extension ProductSetType {
     }
 }
 
-public struct ProductSet<S1: SetType, S2: SetType>: ProductSetType {
+public struct ProductSet<S1: SetType, S2: SetType>: _ProductSet {
     public typealias Left = S1
     public typealias Right = S2
     
@@ -97,7 +96,7 @@ public struct ProductSet<S1: SetType, S2: SetType>: ProductSetType {
     }
 }
 
-public protocol QuotientSetType: SetType {
+public protocol _QuotientSet: SetType {
     associatedtype Base: SetType
     
     init(_ g: Base)
@@ -105,7 +104,7 @@ public protocol QuotientSetType: SetType {
     static func isEquivalent(_ a: Base, _ b: Base) -> Bool
 }
 
-public extension QuotientSetType {
+public extension _QuotientSet {
     public static func == (a: Self, b: Self) -> Bool {
         return isEquivalent(a.representative, b.representative)
     }
@@ -116,5 +115,11 @@ public extension QuotientSetType {
     
     public static var symbol: String {
         return "\(Base.symbol)/~"
+    }
+}
+
+public extension SetType {
+    public func asQuotient<Q: _QuotientSet>(in: Q.Type) -> Q where Q.Base == Self {
+        return Q.init(self)
     }
 }
