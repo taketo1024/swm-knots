@@ -80,8 +80,6 @@ public extension Ideal {
     }
 }
 
-public protocol MaximalIdeal: Ideal {}
-
 public protocol _ProductRing: Ring, AdditiveProductGroup where Left: Ring, Right: Ring {}
 
 public extension _ProductRing {
@@ -160,8 +158,9 @@ public struct QuotientRing<R, I>: _QuotientRing where I: Ideal, R == I.Super {
     }
 }
 
-// memo `QuotientRing: Field where I: MaximalIdeal` causes error...
+public protocol MaximalIdeal: Ideal {}
 
+// memo `QuotientRing: Field where I: MaximalIdeal` causes error...
 extension QuotientRing: EuclideanRing where I: MaximalIdeal {
     public var degree: Int {
         return self == .zero ? 0 : 1

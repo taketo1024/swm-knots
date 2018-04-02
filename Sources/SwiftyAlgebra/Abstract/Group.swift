@@ -115,9 +115,11 @@ public struct ProductGroup<G1: Group, G2: Group>: _ProductGroup {
     }
 }
 
+public protocol NormalSubgroup: Subgroup{}
+
 // abstract protocol
 public protocol _QuotientGroup: Group, _QuotientSet {
-    associatedtype Sub: Subgroup
+    associatedtype Sub: NormalSubgroup
 }
 
 public extension _QuotientGroup where Base == Sub.Super {
@@ -144,7 +146,7 @@ public extension _QuotientGroup where Base == Sub.Super {
 }
 
 // concrete struct
-public struct QuotientGroup<G, H>: _QuotientGroup where H: Subgroup, G == H.Super {
+public struct QuotientGroup<G, H>: _QuotientGroup where H: NormalSubgroup, G == H.Super {
     public typealias Base = G
     public typealias Sub = H
     
