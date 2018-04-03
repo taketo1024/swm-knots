@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol _AdditiveGroupHom: Map, AdditiveGroup where Domain: AdditiveGroup, Codomain: AdditiveGroup {}
+public protocol _AdditiveGroupHom: MapType, AdditiveGroup where Domain: AdditiveGroup, Codomain: AdditiveGroup {}
 
 public extension _AdditiveGroupHom {
     static var zero: Self {

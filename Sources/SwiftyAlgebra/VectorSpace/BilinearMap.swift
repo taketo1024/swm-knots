@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol _BilinearMap: Map, VectorSpace where Left: VectorSpace, Right: VectorSpace, Domain == ProductVectorSpace<Left, Right>, Codomain: VectorSpace, CoeffRing == Left.CoeffRing, Left.CoeffRing == Right.CoeffRing, Domain.CoeffRing == Codomain.CoeffRing {
+public protocol _BilinearMap: MapType, VectorSpace where Left: VectorSpace, Right: VectorSpace, Domain == ProductVectorSpace<Left, Right>, Codomain: VectorSpace, CoeffRing == Left.CoeffRing, Left.CoeffRing == Right.CoeffRing, Domain.CoeffRing == Codomain.CoeffRing {
     associatedtype Left
     associatedtype Right
     init(_ f: @escaping (Left, Right) -> Codomain)

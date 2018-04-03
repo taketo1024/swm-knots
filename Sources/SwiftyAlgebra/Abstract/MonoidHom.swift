@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol _MonoidHom: Map where Domain: Monoid, Codomain: Monoid {}
+public protocol _MonoidHom: MapType where Domain: Monoid, Codomain: Monoid {}
 
 public struct MonoidHom<X: Monoid, Y: Monoid>: _MonoidHom {
     public typealias Domain = X

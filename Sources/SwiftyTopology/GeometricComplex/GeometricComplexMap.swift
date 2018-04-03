@@ -9,7 +9,7 @@
 import Foundation
 import SwiftyAlgebra
 
-public protocol GeometricComplexMap: Map where Complex.Map == Self, Domain == Complex.Cell, Codomain == Complex.Cell {
+public protocol GeometricComplexMap: MapType where Complex.Map == Self, Domain == Complex.Cell, Codomain == Complex.Cell {
     associatedtype Complex: GeometricComplex
     
     static func inclusion(from: Complex, to: Complex) -> Self

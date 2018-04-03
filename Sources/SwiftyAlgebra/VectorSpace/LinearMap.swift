@@ -65,7 +65,7 @@ public extension LinearMap where V: FiniteDimVectorSpace, W: FiniteDimVectorSpac
     }
 }
 
-public protocol _LinearEnd: _LinearMap, End, LieAlgebra {}
+public protocol _LinearEnd: _LinearMap, EndType, LieAlgebra {}
 
 public extension _LinearEnd {
     public func bracket(_ g: Self) -> Self {
@@ -77,7 +77,7 @@ public extension _LinearEnd {
 public typealias LinearEnd<V: VectorSpace> = LinearMap<V, V>
 extension LinearEnd: _LinearEnd where V == W {}
 
-public protocol _LinearAut: Aut where Domain: VectorSpace {}
+public protocol _LinearAut: AutType where Domain: VectorSpace {}
 
 public struct LinearAut<V: VectorSpace>: _LinearAut {
     public typealias Domain = V

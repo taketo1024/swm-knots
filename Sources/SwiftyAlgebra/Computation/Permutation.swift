@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct Permutation: Map {
+public struct Permutation: MapType {
     public typealias Domain = Int
     public typealias Codomain = Int
     

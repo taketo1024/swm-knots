@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol _RingHom: Map where Domain: Ring, Codomain: Ring {}
+public protocol _RingHom: MapType where Domain: Ring, Codomain: Ring {}
 
 public struct RingHom<X: Ring, Y: Ring>: _RingHom {
     public typealias Domain = X

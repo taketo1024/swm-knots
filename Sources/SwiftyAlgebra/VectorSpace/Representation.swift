@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol Representation: Map {
+public protocol Representation: MapType {
     associatedtype BaseVectorSpace: VectorSpace
 }
 
