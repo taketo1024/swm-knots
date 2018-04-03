@@ -17,3 +17,4 @@ public protocol FiniteDimVectorSpace: VectorSpace {
 }
 
 public typealias ProductVectorSpace<X: VectorSpace, Y: VectorSpace> = ProductModule<X, Y>
+extension ProductVectorSpace: VectorSpace where Left: VectorSpace, Right: VectorSpace, Left.CoeffRing == Right.CoeffRing {}

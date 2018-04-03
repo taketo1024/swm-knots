@@ -8,77 +8,137 @@
 
 import Foundation
 
-public protocol _BilinearMap: MapType, VectorSpace where Left: VectorSpace, Right: VectorSpace, Domain == ProductVectorSpace<Left, Right>, Codomain: VectorSpace, CoeffRing == Left.CoeffRing, Left.CoeffRing == Right.CoeffRing, Domain.CoeffRing == Codomain.CoeffRing {
-    associatedtype Left
-    associatedtype Right
-    init(_ f: @escaping (Left, Right) -> Codomain)
-    subscript(x: Left, y: Right) -> Codomain { get }
+public protocol BilinearMapType: MapType, VectorSpace
+  where Domain: ProductSetType,
+        Domain.Left: VectorSpace,
+        Domain.Right: VectorSpace,
+        Codomain: VectorSpace,
+        CoeffRing == Domain.Left.CoeffRing,
+        CoeffRing == Domain.Right.CoeffRing,
+        CoeffRing == Codomain.CoeffRing {
+    
+    init(_ f: @escaping (Domain.Left, Domain.Right) -> Codomain)
+    func applied(to: (Domain.Left, Domain.Right)) -> Codomain
 }
 
-public extension _BilinearMap {
-    public init(_ f: @escaping (Left, Right) -> Codomain) {
-        self.init{ (v: ProductVectorSpace) in f(v.left, v.right) }
+public extension BilinearMapType {
+    public init(_ f: @escaping (Domain.Left, Domain.Right) -> Codomain) {
+        self.init { (v: Domain) in f(v.left, v.right) }
     }
     
-    public subscript(x: Left, y: Right) -> Codomain {
-        return self.applied(to: ProductVectorSpace(x, y))
+    public func applied(to v: (Domain.Left, Domain.Right)) -> Codomain {
+        return applied(to: Domain(v.0, v.1))
+    }
+    
+    public static var zero: Self {
+        return Self{ v in .zero }
+    }
+    
+    public static func +(f: Self, g: Self) -> Self {
+        return Self { v in f.applied(to: v) + g.applied(to: v) }
+    }
+    
+    public static prefix func -(f: Self) -> Self {
+        return Self { v in -f.applied(to: v) }
+    }
+    
+    public static func *(r: CoeffRing, f: Self) -> Self {
+        return Self { v in r * f.applied(to: v) }
+    }
+    
+    public static func *(f: Self, r: CoeffRing) -> Self {
+        return Self { v in f.applied(to: v) * r }
     }
 }
 
-public struct BilinearMap<V1: VectorSpace, V2: VectorSpace, W: VectorSpace>: _BilinearMap where V1.CoeffRing == V2.CoeffRing, V1.CoeffRing == W.CoeffRing {
-    public typealias R = V1.CoeffRing
-    public typealias CoeffRing = R
-    public typealias Left = V1
-    public typealias Right = V2
+public struct BilinearMap<V1: VectorSpace, V2: VectorSpace, W: VectorSpace>: BilinearMapType where V1.CoeffRing == V2.CoeffRing, V1.CoeffRing == W.CoeffRing {
+    public typealias CoeffRing = V1.CoeffRing
     public typealias Domain = ProductVectorSpace<V1, V2>
     public typealias Codomain = W
     
-    private let f: (ProductVectorSpace<V1, V2>) -> W
-    public init(_ f: @escaping (ProductVectorSpace<V1, V2>) -> W) {
-        self.f = f
+    private let fnc: (ProductVectorSpace<V1, V2>) -> W
+    public init(_ fnc: @escaping (ProductVectorSpace<V1, V2>) -> W) {
+        self.fnc = fnc
     }
     
     public func applied(to v: ProductVectorSpace<V1, V2>) -> W {
-        return f(v)
+        return fnc(v)
+    }
+}
+
+public protocol BilinearFormType: BilinearMapType where Domain.Left == Domain.Right, Codomain == AsVectorSpace<CoeffRing> {
+    init(_ f: @escaping (Domain.Left, Domain.Right) -> CoeffRing)
+    subscript(x: Domain.Left, y: Domain.Right) -> CoeffRing { get }
+}
+
+public extension BilinearFormType {
+    public init(_ f: @escaping (Domain.Left, Domain.Right) -> CoeffRing) {
+        self.init{ v in AsVectorSpace( f(v.left, v.right) ) }
     }
     
-    public static func +(a: BilinearMap<V1, V2, W>, b: BilinearMap<V1, V2, W>) -> BilinearMap<V1, V2, W> {
-        return BilinearMap { (v: ProductVectorSpace) in a.f(v) + b.f(v) }
+    public subscript(x: Domain.Left, y: Domain.Right) -> CoeffRing {
+        return self.applied(to: (x, y)).value
     }
-    
-    public static prefix func -(a: BilinearMap<V1, V2, W>) -> BilinearMap<V1, V2, W> {
-        return BilinearMap { (v: ProductVectorSpace) in -a.f(v) }
-    }
-    
-    public static func *(r: R, a: BilinearMap<V1, V2, W>) -> BilinearMap<V1, V2, W> {
-        return BilinearMap { (v: ProductVectorSpace) in r * a.f(v) }
-    }
-    
-    public static func *(a: BilinearMap<V1, V2, W>, r: R) -> BilinearMap<V1, V2, W> {
-        return BilinearMap { (v: ProductVectorSpace) in a.f(v) * r }
-    }
-    
-    public static var zero: BilinearMap<V1, V2, W> {
-        return BilinearMap{ (v1, v2) in .zero }
+}
+
+public extension BilinearFormType where Domain.Left: FiniteDimVectorSpace {
+    public var asMatrix: DynamicMatrix<CoeffRing> {
+        typealias V = Domain.Left
+        
+        let n = V.dim
+        let basis = V.standardBasis
+        
+        return DynamicMatrix(rows: n, cols: n) { (i, j) in
+            let (v, w) = (basis[i], basis[j])
+            return self.applied(to: (v, w)).value
+        }
     }
 }
 
 public typealias BilinearForm<V: VectorSpace> = BilinearMap<V, V, AsVectorSpace<V.CoeffRing>>
 
-public extension BilinearForm where V1 == V2, W == AsVectorSpace<V1.CoeffRing> {
-    public init(_ f: @escaping (Left, Right) -> R) {
-        self.init{ (v: ProductVectorSpace) in AsVectorSpace( f(v.left, v.right) ) }
-    }
-}
+extension BilinearMap: BilinearFormType where Domain.Left == Domain.Right, Codomain == AsVectorSpace<Domain.CoeffRing> {}
 
-public extension BilinearForm where V1: FiniteDimVectorSpace, V1 == V2, W == AsVectorSpace<V1.CoeffRing> {
-    public var asMatrix: DynamicMatrix<R> {
-        let n = V1.dim
-        let basis = V1.standardBasis
-        
-        return DynamicMatrix(rows: n, cols: n) { (i, j) in
-            let (v, w) = (basis[i], basis[j])
-            return self[v, w].value
-        }
-    }
-}
+
+
+
+// MEMO This causes Segmentation Fault for some reason...
+
+//public typealias BilinearMap<V1: VectorSpace, V2: VectorSpace, W: VectorSpace> = Map<ProductVectorSpace<V1, V2>, W> where
+//    V1.CoeffRing == V2.CoeffRing,
+//    V1.CoeffRing == W.CoeffRing
+//
+//extension BilinearMap: VectorSpace, BilinearMapType
+//  where Domain: ProductSetType & VectorSpace,
+//        Domain.Left: VectorSpace,
+//        Domain.Right: VectorSpace,
+//        Codomain: VectorSpace,
+//        Domain.CoeffRing == Codomain.CoeffRing,
+//        Domain.CoeffRing == Domain.Left.CoeffRing,
+//        Domain.CoeffRing == Domain.Right.CoeffRing {
+//}
+
+//public typealias BilinearForm<V: VectorSpace> = BilinearMap<V, V, AsVectorSpace<V.CoeffRing>>
+//
+//extension BilinearForm: BilinearFormType
+//  where Domain: ProductSetType & VectorSpace,
+//        Domain.Left: VectorSpace,
+//        Domain.Left == Domain.Right,
+//        Domain.CoeffRing == Domain.Left.CoeffRing,
+//        Codomain == AsVectorSpace<Domain.CoeffRing> {
+//}
+
+//public struct BilinearForm<V: VectorSpace>: BilinearFormType {
+//    public typealias CoeffRing = V.CoeffRing
+//    public typealias Domain = ProductVectorSpace<V, V>
+//    public typealias Codomain = AsVectorSpace<V.CoeffRing>
+//
+//    internal let fnc: (Domain) -> Codomain
+//    public init(_ fnc: @escaping (Domain) -> Codomain) {
+//        self.fnc = fnc
+//    }
+//
+//    public func applied(to x: Domain) -> Codomain {
+//        return fnc(x)
+//    }
+//}

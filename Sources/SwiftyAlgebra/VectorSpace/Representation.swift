@@ -8,27 +8,13 @@
 
 import Foundation
 
-public protocol Representation: MapType {
-    associatedtype BaseVectorSpace: VectorSpace
+public protocol Representation: MapType where Codomain: LinearEndType, Codomain.Domain == BaseVectorSpace {
+    associatedtype BaseVectorSpace
+    subscript(_ x: Domain) -> Codomain { get }
 }
 
-public protocol _GroupRepresentation: Representation, GroupHomType where Codomain == LinearAut<BaseVectorSpace> { }
-
-public struct GroupRepresentation<G: Group, V: VectorSpace>: _GroupRepresentation {
-    public typealias Domain   = G
-    public typealias Codomain = LinearAut<V>
-    public typealias BaseVectorSpace = V
-    
-    private let f: (G) -> LinearAut<V>
-    public init(_ f: @escaping (G) -> LinearAut<V>) {
-        self.f = f
-    }
-    
-    public subscript(g: G) -> LinearAut<V> {
-        return f(g)
-    }
-    
-    public func applied(to g: G) -> LinearAut<V> {
-        return f(g)
+extension Representation {
+    public subscript(_ x: Domain) -> Codomain {
+        return applied(to: x)
     }
 }

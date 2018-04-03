@@ -8,9 +8,9 @@
 
 import Foundation
 
-public protocol _LinearMap: ModuleHomType, VectorSpace where Domain: VectorSpace, Codomain: VectorSpace { }
+public protocol LinearMapType: ModuleHomType, VectorSpace where Domain: VectorSpace, Codomain: VectorSpace { }
 
-public extension _LinearMap where Domain: FiniteDimVectorSpace, Codomain: FiniteDimVectorSpace {
+public extension LinearMapType where Domain: FiniteDimVectorSpace, Codomain: FiniteDimVectorSpace {
     public init(matrix: DynamicMatrix<CoeffRing>) {
         self.init{ v in
             let x = DynamicVector(dim: Domain.dim, grid: v.standardCoordinates)
@@ -36,90 +36,22 @@ public extension _LinearMap where Domain: FiniteDimVectorSpace, Codomain: Finite
     }
 }
 
-public struct LinearMap<V: VectorSpace, W: VectorSpace>: _LinearMap where V.CoeffRing == W.CoeffRing {
-    public typealias CoeffRing = V.CoeffRing
-    public typealias Domain = V
-    public typealias Codomain = W
-    
-    private let f: (V) -> W
-    public init(_ f: @escaping (V) -> W) {
-        self.f = f
-    }
-    
-    public func applied(to x: V) -> W {
-        return f(x)
-    }
-    
-    public func composed<U>(with f: LinearMap<U, V>) -> LinearMap<U, W> {
-        return LinearMap<U, W> { x in self.applied(to: f.applied(to: x)) }
-    }
-    
-    public static func ∘<X>(g: LinearMap<W, X>, f: LinearMap<V, W>) -> LinearMap<V, X> {
-        return g.composed(with: f)
-    }
-}
+public typealias LinearMap<Domain: VectorSpace, Codomain: VectorSpace> = ModuleHom<Domain, Codomain> where Domain.CoeffRing == Codomain.CoeffRing
+extension LinearMap: VectorSpace, LinearMapType where Domain: VectorSpace, Codomain: VectorSpace, Domain.CoeffRing == Codomain.CoeffRing { }
 
-public extension LinearMap where V: FiniteDimVectorSpace, W: FiniteDimVectorSpace {
-    public var asMatrix: Matrix<Dynamic, Dynamic, CoeffRing> {
-        fatalError()
-    }
-}
+public protocol LinearEndType: LinearMapType, EndType, LieAlgebra {}
 
-public protocol _LinearEnd: _LinearMap, EndType, LieAlgebra {}
-
-public extension _LinearEnd {
+public extension LinearEndType {
     public func bracket(_ g: Self) -> Self {
         let f = self
         return f ∘ g - g ∘ f
     }
 }
 
-public typealias LinearEnd<V: VectorSpace> = LinearMap<V, V>
-extension LinearEnd: _LinearEnd where V == W {}
+public typealias LinearEnd<Domain: VectorSpace> = LinearMap<Domain, Domain>
+extension Map: LinearEndType, LieAlgebra where Domain == Codomain, Domain: VectorSpace { }
 
-public protocol _LinearAut: AutType where Domain: VectorSpace {}
+public protocol LinearAutType: AutType where Domain: VectorSpace { }
 
-public struct LinearAut<V: VectorSpace>: _LinearAut {
-    public func composed(with f: LinearAut<V>) -> LinearAut<V> {
-        fatalError()
-    }
-    
-    public static func ∘ (g: LinearAut<V>, f: LinearAut<V>) -> LinearAut<V> {
-        fatalError()
-    }
-    
-    public init(_ g: LinearMap<V, V>) {
-        fatalError()
-    }
-    
-    public var asSuper: LinearMap<V, V> {
-        fatalError()
-    }
-    
-    public static func contains(_ g: LinearMap<V, V>) -> Bool {
-        fatalError()
-    }
-    
-    public typealias Domain = V
-    public typealias Codomain = V
-    public typealias Super = LinearEnd<V>
-    
-    fileprivate let f: (V) -> V
-    public init(_ f: @escaping (V) -> V) {
-        self.f = f
-    }
-    
-    public func applied(to x: V) -> V {
-        return f(x)
-    }
-    
-    public var inverse: LinearAut<V> {
-        fatalError("Cannot find inverse for general linear aut.")
-    }
-}
-
-public extension LinearAut where V: FiniteDimVectorSpace {
-    public var inverse: LinearAut<V> {
-        fatalError("TODO")
-    }
-}
+public typealias LinearAut<Domain: VectorSpace> = Aut<Domain>
+extension LinearAut: LinearAutType where Domain: VectorSpace { }

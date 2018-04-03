@@ -61,3 +61,10 @@ public struct AsVectorSpace<K: Field>: FiniteDimVectorSpace {
         return value.description
     }
 }
+
+extension AsVectorSpace: ExpressibleByIntegerLiteral where K: ExpressibleByIntegerLiteral {
+    public typealias IntegerLiteralType = K.IntegerLiteralType
+    public init(integerLiteral value: IntegerLiteralType) {
+        self.init( K(integerLiteral: value) )
+    }
+}
