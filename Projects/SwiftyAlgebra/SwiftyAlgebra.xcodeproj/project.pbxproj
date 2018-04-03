@@ -94,6 +94,7 @@
 		DDB6E4BE20737C8C000248B3 /* MapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6E4BD20737C8C000248B3 /* MapTests.swift */; };
 		DDB6E4C020737ECE000248B3 /* MonoidTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6E4BF20737ECE000248B3 /* MonoidTests.swift */; };
 		DDB6E4C42073B260000248B3 /* GroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6E4C32073B260000248B3 /* GroupTests.swift */; };
+		DDB6E4C62073B549000248B3 /* AdditiveGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6E4C52073B549000248B3 /* AdditiveGroupTests.swift */; };
 		DDB7217A205622DD0001428F /* Permutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB72179205622DD0001428F /* Permutation.swift */; };
 		DDB7217E205633FB0001428F /* AlternatingGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB7217D205633FB0001428F /* AlternatingGroup.swift */; };
 		DDC0125A205BB06A00FF525E /* Quaternion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC01259205BB06A00FF525E /* Quaternion.swift */; };
@@ -215,6 +216,7 @@
 		DDB6E4BD20737C8C000248B3 /* MapTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapTests.swift; sourceTree = "<group>"; };
 		DDB6E4BF20737ECE000248B3 /* MonoidTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MonoidTests.swift; sourceTree = "<group>"; };
 		DDB6E4C32073B260000248B3 /* GroupTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroupTests.swift; sourceTree = "<group>"; };
+		DDB6E4C52073B549000248B3 /* AdditiveGroupTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdditiveGroupTests.swift; sourceTree = "<group>"; };
 		DDB72179205622DD0001428F /* Permutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permutation.swift; sourceTree = "<group>"; };
 		DDB7217D205633FB0001428F /* AlternatingGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlternatingGroup.swift; sourceTree = "<group>"; };
 		DDC01259205BB06A00FF525E /* Quaternion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Quaternion.swift; sourceTree = "<group>"; };
@@ -537,6 +539,7 @@
 				DDB6E4BD20737C8C000248B3 /* MapTests.swift */,
 				DDB6E4BF20737ECE000248B3 /* MonoidTests.swift */,
 				DDB6E4C32073B260000248B3 /* GroupTests.swift */,
+				DDB6E4C52073B549000248B3 /* AdditiveGroupTests.swift */,
 			);
 			path = Abstract;
 			sourceTree = "<group>";
@@ -770,6 +773,7 @@
 				1420EAE61EEAC46300336620 /* MatrixEliminationTests.swift in Sources */,
 				DDB6E4C020737ECE000248B3 /* MonoidTests.swift in Sources */,
 				14B2FB8C1ED8FBA000C182EB /* ComputationalMatrixTests.swift in Sources */,
+				DDB6E4C62073B549000248B3 /* AdditiveGroupTests.swift in Sources */,
 				DDB6E4C42073B260000248B3 /* GroupTests.swift in Sources */,
 				1424F4CB1EB9976C0052581F /* SwiftyAlgebraTests.swift in Sources */,
 			);
