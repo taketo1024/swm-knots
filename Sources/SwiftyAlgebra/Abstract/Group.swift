@@ -132,3 +132,11 @@ public struct QuotientGroup<G, H: NormalSubgroup>: Group, QuotientSetType where 
         return "\(G.symbol)/\(H.symbol)"
     }
 }
+
+public protocol GroupHomType: MonoidHomType where Domain: Group, Codomain: Group {}
+
+public typealias GroupHom<G: Group, H: Group> = MonoidHom<G, H>
+extension GroupHom: GroupHomType where Domain: Group, Codomain: Group {}
+
+public typealias GroupAut<G: Group> = Aut<G>
+extension GroupAut: GroupHomType where Domain: Group {}

@@ -9,15 +9,10 @@
 import Foundation
 
 public protocol SetType: Hashable, CustomStringConvertible {
-    var detailDescription: String { get }
     static var symbol: String { get }
 }
 
 public extension SetType {
-    public var detailDescription: String {
-        return description
-    }
-    
     public static var symbol: String {
         return String(describing: self)
     }

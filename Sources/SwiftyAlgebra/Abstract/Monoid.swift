@@ -36,3 +36,10 @@ extension ProductMonoid: Monoid where Left: Monoid, Right: Monoid {
         return ProductMonoid(a.left * b.left, a.right * b.right)
     }
 }
+
+// MEMO: Mathematically, we must also require that `MonoidHomType` presereves the Monoid structure.
+
+public protocol MonoidHomType: MapType where Domain: Monoid, Codomain: Monoid {}
+
+public typealias MonoidHom<X: Monoid, Y: Monoid> = Map<X, Y>
+extension MonoidHom: MonoidHomType where Domain: Monoid, Codomain: Monoid {}

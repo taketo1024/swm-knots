@@ -32,26 +32,7 @@ public extension Field {
 
 public protocol Subfield: Field, Subring {}
 
-public protocol _FieldHom: _RingHom where Domain: Field, Codomain: Field {}
+public protocol FieldHomType: RingHomType where Domain: Field, Codomain: Field {}
 
-public struct FieldHom<X: Field, Y: Field>: _FieldHom {
-    public typealias Domain = X
-    public typealias Codomain = Y
-    
-    private let f: (X) -> Y
-    public init(_ f: @escaping (X) -> Y) {
-        self.f = f
-    }
-    
-    public func applied(to x: X) -> Y {
-        return f(x)
-    }
-    
-    public func composed<W>(with f: FieldHom<W, X>) -> FieldHom<W, Y> {
-        return FieldHom<W, Y> { x in self.applied(to: f.applied(to: x)) }
-    }
-    
-    public static func ∘<Z>(g: FieldHom<Y, Z>, f: FieldHom<X, Y>) -> FieldHom<X, Z> {
-        return g.composed(with: f)
-    }
-}
+public typealias FieldHom<Domain: Field, Codomain: Field> = Map<Domain, Codomain>
+extension FieldHom: FieldHomType where Domain: Field, Codomain: Field {}

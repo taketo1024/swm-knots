@@ -1,9 +1,10 @@
 import Foundation
 
 public protocol AdditiveGroup: SetType {
+    static var zero: Self { get }
     static func + (a: Self, b: Self) -> Self
     prefix static func - (x: Self) -> Self
-    static var zero: Self { get }
+    static func -(a: Self, b: Self) -> Self
 }
 
 public extension AdditiveGroup {
@@ -74,3 +75,22 @@ public struct AdditiveQuotientGroup<Base, Sub: AdditiveSubgroup>: AdditiveGroup,
         return "\(Base.symbol)/\(Sub.symbol)"
     }
 }
+
+public protocol AdditiveGroupHomType: MapType, AdditiveGroup where Domain: AdditiveGroup, Codomain: AdditiveGroup {}
+
+public extension AdditiveGroupHomType {
+    public static var zero: Self {
+        return Self { _ in .zero }
+    }
+    
+    public static func + (f: Self, g: Self) -> Self {
+        return Self { x in f.applied(to: x) + g.applied(to: x) }
+    }
+    
+    public prefix static func - (f: Self) -> Self {
+        return Self { x in -f.applied(to: x) }
+    }
+}
+
+public typealias AdditiveGroupHom<X: AdditiveGroup, Y: AdditiveGroup> = Map<X, Y>
+extension AdditiveGroupHom: AdditiveGroup, AdditiveGroupHomType where Domain: AdditiveGroup, Codomain: AdditiveGroup {}

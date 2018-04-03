@@ -49,3 +49,20 @@ extension QuotientModule: Module where Sub: Submodule {
         return QuotientModule(a.representative * r)
     }
 }
+
+public protocol ModuleHomType: AdditiveGroupHomType, Module where Domain: Module, Codomain: Module, Self.CoeffRing == Domain.CoeffRing, Domain.CoeffRing == Codomain.CoeffRing {}
+
+public extension ModuleHomType {
+    public static func *(r: CoeffRing, f: Self) -> Self {
+        return Self { x in r * f.applied(to: x) }
+    }
+    
+    public static func *(f: Self, r: CoeffRing) -> Self {
+        return Self { x in f.applied(to: x) * r }
+    }
+}
+
+public typealias ModuleHom<X: Module, Y: Module> = AdditiveGroupHom<X, Y> where X.CoeffRing == Y.CoeffRing
+extension ModuleHom: Module, ModuleHomType where Domain: Module, Codomain: Module, Domain.CoeffRing == Codomain.CoeffRing {
+    public typealias CoeffRing = Domain.CoeffRing
+}

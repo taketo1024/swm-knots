@@ -108,19 +108,17 @@ public typealias QuotientRing<R, I: Ideal> = AdditiveQuotientGroup<R, I> where R
 
 // MEMO cannot directly write `QuotientRing: Ring` for some reason. (Swift 4.1)
 
-extension QuotientRing: Monoid where Sub: Ideal, Base == Sub.Super {
+extension QuotientRing: Monoid, Ring where Sub: Ideal, Base == Sub.Super {
+    public init(from n: 𝐙) {
+        self.init(Base(from: n))
+    }
+    
     public var inverse: QuotientRing<Base, Sub>? {
         return Sub.inverseInQuotient(representative).map{ QuotientRing($0) }
     }
     
     public static func * (a: QuotientRing<Base, Sub>, b: QuotientRing<Base, Sub>) -> QuotientRing<Base, Sub> {
         return QuotientRing(a.representative * b.representative)
-    }
-}
-
-extension QuotientRing: Ring where Sub: Ideal, Base == Sub.Super {
-    public init(from n: 𝐙) {
-        self.init(Base(from: n))
     }
 }
 
@@ -144,3 +142,8 @@ extension QuotientRing: EuclideanRing where Sub: MaximalIdeal {
 }
 
 extension QuotientRing: Field where Sub: MaximalIdeal {}
+
+public protocol RingHomType: AdditiveGroupHomType where Domain: Ring, Codomain: Ring {}
+
+public typealias RingHom<R1: Ring, R2: Ring> = AdditiveGroupHom<R1, R2>
+extension RingHom: RingHomType where Domain: Ring, Codomain: Ring {}

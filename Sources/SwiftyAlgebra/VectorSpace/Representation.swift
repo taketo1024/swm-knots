@@ -12,7 +12,7 @@ public protocol Representation: MapType {
     associatedtype BaseVectorSpace: VectorSpace
 }
 
-public protocol _GroupRepresentation: Representation, _GroupHom where Codomain == LinearAut<BaseVectorSpace> { }
+public protocol _GroupRepresentation: Representation, GroupHomType where Codomain == LinearAut<BaseVectorSpace> { }
 
 public struct GroupRepresentation<G: Group, V: VectorSpace>: _GroupRepresentation {
     public typealias Domain   = G

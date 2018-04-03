@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol _LinearMap: _ModuleHom, VectorSpace where Domain: VectorSpace, Codomain: VectorSpace { }
+public protocol _LinearMap: ModuleHomType, VectorSpace where Domain: VectorSpace, Codomain: VectorSpace { }
 
 public extension _LinearMap where Domain: FiniteDimVectorSpace, Codomain: FiniteDimVectorSpace {
     public init(matrix: DynamicMatrix<CoeffRing>) {
