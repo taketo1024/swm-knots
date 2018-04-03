@@ -8,7 +8,6 @@
 
 import Foundation
 
-// MEMO: since `Set` is already used in Foundation.
 public protocol SetType: Hashable, CustomStringConvertible {
     var detailDescription: String { get }
     static var symbol: String { get }
@@ -24,19 +23,19 @@ public extension SetType {
     }
 }
 
-public protocol FiniteSet: SetType {
+public protocol FiniteSetType: SetType {
     static var allElements: [Self] { get }
     static var countElements: Int { get }
 }
 
-public protocol Subset: SetType {
+public protocol SubsetType: SetType {
     associatedtype Super: SetType
     init(_ g: Super)
     var asSuper: Super { get }
     static func contains(_ g: Super) -> Bool
 }
 
-public extension Subset {
+public extension SubsetType {
     public static func == (a: Self, b: Self) -> Bool {
         return a.asSuper == b.asSuper
     }
@@ -51,22 +50,23 @@ public extension Subset {
 }
 
 public extension SetType {
-    public func asSubset<S: Subset>(of: S.Type) -> S where S.Super == Self {
+    public func asSubset<S: SubsetType>(of: S.Type) -> S where S.Super == Self {
         assert(S.contains(self), "\(S.self) does not contain \(self).")
         return S.init(self)
     }
 }
 
-public struct ProductSet<Left: SetType, Right: SetType>: SetType {
-    public let left : Left
-    public let right: Right
+public protocol ProductSetType: SetType {
+    associatedtype Left: SetType
+    associatedtype Right: SetType
     
-    public init(_ x: Left, _ y: Right) {
-        self.left  = x
-        self.right = y
-    }
-    
-    public static func == (a: ProductSet<Left, Right>, b: ProductSet<Left, Right>) -> Bool {
+    init(_ x: Left, _ y: Right)
+    var left:  Left  { get }
+    var right: Right { get }
+}
+
+public extension ProductSetType {
+    public static func == (a: Self, b: Self) -> Bool {
         return (a.left, a.right) == (b.left, b.right)
     }
     
@@ -83,25 +83,35 @@ public struct ProductSet<Left: SetType, Right: SetType>: SetType {
     }
 }
 
+public struct ProductSet<Left: SetType, Right: SetType>: ProductSetType {
+    public let left : Left
+    public let right: Right
+    
+    public init(_ x: Left, _ y: Right) {
+        self.left  = x
+        self.right = y
+    }
+}
+
 // MEMO When "parametrized extension" is supported, we could defile:
 //
 //   struct QuotientSet<X: Base, Rel: EquivalenceRelation>
 //
-// and override in subtypes as:
+// and extend as subtypes like:
 //
 //   public typealias QuotientGroup<G, H: NormalSubgroup> = QuotientSet<G, ModSubgroupRelation<H>> where G == H.Super
 //   extension<H: NormalSubgroup> QuotientGroup where X == H.Super, Rel == ModSubgroupRelation<H> { ... }
 //
 // see: https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#parameterized-extensions
 
-public protocol _QuotientSet: SetType {
+public protocol QuotientSetType: SetType {
     associatedtype Base: SetType
     init (_ x: Base)
     var representative: Base { get }
     static func isEquivalent(_ x: Base, _ y: Base) -> Bool
 }
 
-public extension _QuotientSet {
+public extension QuotientSetType {
     public var description: String {
         return representative.description
     }

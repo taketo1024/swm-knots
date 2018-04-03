@@ -12,7 +12,7 @@ public extension AdditiveGroup {
     }
 }
 
-public protocol AdditiveSubgroup: AdditiveGroup, Subset where Super: AdditiveGroup {}
+public protocol AdditiveSubgroup: AdditiveGroup, SubsetType where Super: AdditiveGroup {}
 
 public extension AdditiveSubgroup {
     public static var zero: Self {
@@ -44,7 +44,7 @@ extension AdditiveProductGroup: AdditiveGroup where Left: AdditiveGroup, Right: 
     }
 }
 
-public struct AdditiveQuotientGroup<Base, Sub: AdditiveSubgroup>: AdditiveGroup, _QuotientSet where Base == Sub.Super {
+public struct AdditiveQuotientGroup<Base, Sub: AdditiveSubgroup>: AdditiveGroup, QuotientSetType where Base == Sub.Super {
     private let x: Base
     public init(_ x: Base) {
         self.x = x

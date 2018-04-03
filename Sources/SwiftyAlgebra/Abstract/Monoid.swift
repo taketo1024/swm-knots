@@ -13,7 +13,7 @@ public extension Monoid {
     }
 }
 
-public protocol Submonoid: Monoid, Subset where Super: Monoid {}
+public protocol Submonoid: Monoid, SubsetType where Super: Monoid {}
 
 public extension Submonoid {
     static var identity: Self {

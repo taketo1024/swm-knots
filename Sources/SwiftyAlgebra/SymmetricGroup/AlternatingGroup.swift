@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct AlternatingGroup<n: _Int>: Subgroup, FiniteSet {
+public struct AlternatingGroup<n: _Int>: Subgroup, FiniteSetType {
     public typealias Super = SymmetricGroup<n>
     
     private let g: Super

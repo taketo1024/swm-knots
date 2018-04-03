@@ -40,7 +40,7 @@ extension IntegerIdeal: MaximalIdeal where n: _Prime {}
 
 public typealias IntegerQuotientRing<n: _Int> = QuotientRing<𝐙, IntegerIdeal<n>>
 
-extension IntegerQuotientRing: FiniteSet where Base == 𝐙, Sub: _IntegerIdeal {
+extension IntegerQuotientRing: FiniteSetType where Base == 𝐙, Sub: _IntegerIdeal {
     public static var allElements: [QuotientRing<Base, Sub>] {
         return (0 ..< Sub._n.intValue).map{ QuotientRing($0) }
     }
