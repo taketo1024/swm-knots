@@ -48,3 +48,7 @@ do {
     F_5.printMulTable()
     F_5.printExpTable()
 }
+
+//let (x, y, z, w) = (1, 2, 3, 4)
+//let a = x * x - y * y - z * z - w * w
+//print(a)
