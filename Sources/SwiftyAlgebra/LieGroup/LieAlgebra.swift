@@ -35,7 +35,7 @@ public extension FiniteDimLieAlgebra {
     public static var killingForm: BilinearForm<Self> {
         let ad = adjointRepresentation
         return BilinearForm { (X: Self, Y: Self) -> CoeffRing in
-            (ad[X] * ad[Y]).trace
+            (ad[X] ∘ ad[Y]).trace
         }
     }
 }

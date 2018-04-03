@@ -80,6 +80,26 @@ extension LinearEnd: _LinearEnd where V == W {}
 public protocol _LinearAut: AutType where Domain: VectorSpace {}
 
 public struct LinearAut<V: VectorSpace>: _LinearAut {
+    public func composed(with f: LinearAut<V>) -> LinearAut<V> {
+        fatalError()
+    }
+    
+    public static func ∘ (g: LinearAut<V>, f: LinearAut<V>) -> LinearAut<V> {
+        fatalError()
+    }
+    
+    public init(_ g: LinearMap<V, V>) {
+        fatalError()
+    }
+    
+    public var asSuper: LinearMap<V, V> {
+        fatalError()
+    }
+    
+    public static func contains(_ g: LinearMap<V, V>) -> Bool {
+        fatalError()
+    }
+    
     public typealias Domain = V
     public typealias Codomain = V
     public typealias Super = LinearEnd<V>
