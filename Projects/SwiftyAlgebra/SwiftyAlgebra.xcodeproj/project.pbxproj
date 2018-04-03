@@ -98,6 +98,7 @@
 		DDB6E4C82073B679000248B3 /* RingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6E4C72073B679000248B3 /* RingTests.swift */; };
 		DDB6E4CA2073BB70000248B3 /* ModuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6E4C92073BB70000248B3 /* ModuleTests.swift */; };
 		DDB6E4CC2073C237000248B3 /* EuclideanRingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6E4CB2073C237000248B3 /* EuclideanRingTests.swift */; };
+		DDB6E4CF2073C322000248B3 /* IntegerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB6E4CE2073C322000248B3 /* IntegerTests.swift */; };
 		DDB7217A205622DD0001428F /* Permutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB72179205622DD0001428F /* Permutation.swift */; };
 		DDB7217E205633FB0001428F /* AlternatingGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB7217D205633FB0001428F /* AlternatingGroup.swift */; };
 		DDC0125A205BB06A00FF525E /* Quaternion.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC01259205BB06A00FF525E /* Quaternion.swift */; };
@@ -223,6 +224,7 @@
 		DDB6E4C72073B679000248B3 /* RingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RingTests.swift; sourceTree = "<group>"; };
 		DDB6E4C92073BB70000248B3 /* ModuleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModuleTests.swift; sourceTree = "<group>"; };
 		DDB6E4CB2073C237000248B3 /* EuclideanRingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EuclideanRingTests.swift; sourceTree = "<group>"; };
+		DDB6E4CE2073C322000248B3 /* IntegerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntegerTests.swift; sourceTree = "<group>"; };
 		DDB72179205622DD0001428F /* Permutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permutation.swift; sourceTree = "<group>"; };
 		DDB7217D205633FB0001428F /* AlternatingGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlternatingGroup.swift; sourceTree = "<group>"; };
 		DDC01259205BB06A00FF525E /* Quaternion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Quaternion.swift; sourceTree = "<group>"; };
@@ -492,6 +494,7 @@
 			isa = PBXGroup;
 			children = (
 				DDB6E4BA207376D0000248B3 /* Abstract */,
+				DDB6E4CD2073C30C000248B3 /* Numbers */,
 				1424F4CA1EB9976C0052581F /* SwiftyAlgebraTests.swift */,
 				144AD28E1EC13D9E00E23890 /* MatrixEliminationTests.swift */,
 				14B2FB8B1ED8FBA000C182EB /* ComputationalMatrixTests.swift */,
@@ -551,6 +554,14 @@
 				DDB6E4C92073BB70000248B3 /* ModuleTests.swift */,
 			);
 			path = Abstract;
+			sourceTree = "<group>";
+		};
+		DDB6E4CD2073C30C000248B3 /* Numbers */ = {
+			isa = PBXGroup;
+			children = (
+				DDB6E4CE2073C322000248B3 /* IntegerTests.swift */,
+			);
+			path = Numbers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -779,6 +790,7 @@
 			files = (
 				DDB6E4BC20737708000248B3 /* SetTests.swift in Sources */,
 				DDB6E4BE20737C8C000248B3 /* MapTests.swift in Sources */,
+				DDB6E4CF2073C322000248B3 /* IntegerTests.swift in Sources */,
 				DDB6E4C82073B679000248B3 /* RingTests.swift in Sources */,
 				DDB6E4CA2073BB70000248B3 /* ModuleTests.swift in Sources */,
 				1420EAE61EEAC46300336620 /* MatrixEliminationTests.swift in Sources */,
