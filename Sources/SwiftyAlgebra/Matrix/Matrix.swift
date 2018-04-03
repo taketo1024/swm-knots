@@ -211,19 +211,23 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
 }
 
-public typealias DynamicMatrix<R: Ring> = Matrix<Dynamic, Dynamic, R>
-
-public extension Matrix where n == Dynamic, m == Dynamic {
-    internal init(rows: Int, cols: Int, grid: [R]) {
-        self.init(rows, cols, grid)
+extension Matrix: VectorSpace, FiniteDimVectorSpace where R: Field {
+    public static var dim: Int {
+        assert(!n.isDynamic && !m.isDynamic)
+        return n.intValue * m.intValue
     }
     
-    internal init(rows: Int, cols: Int, generator g: (Int, Int) -> R) {
-        self.init(rows, cols, g)
+    public static var standardBasis: [Matrix<n, m, R>] {
+        assert(!n.isDynamic && !m.isDynamic)
+        return (0 ..< n.intValue).flatMap { i -> [Matrix<n, m, R>] in
+            (0 ..< m.intValue).map { j -> Matrix<n, m, R> in
+                Matrix.unit(i, j)
+            }
+        }
     }
     
-    internal init(rows: Int, cols: Int, components: [MatrixComponent<R>]) {
-        self.init(rows, cols, components)
+    public var standardCoordinates: [R] {
+        return grid
     }
 }
 
@@ -275,5 +279,21 @@ public extension Matrix where R == 𝐂 {
     
     public var adjoint: Matrix<m, n, R> {
         return Matrix<m, n, R> { (i, j) in self[j, i].conjugate }
+    }
+}
+
+public typealias DynamicMatrix<R: Ring> = Matrix<Dynamic, Dynamic, R>
+
+public extension Matrix where n == Dynamic, m == Dynamic {
+    internal init(rows: Int, cols: Int, grid: [R]) {
+        self.init(rows, cols, grid)
+    }
+    
+    internal init(rows: Int, cols: Int, generator g: (Int, Int) -> R) {
+        self.init(rows, cols, g)
+    }
+    
+    internal init(rows: Int, cols: Int, components: [MatrixComponent<R>]) {
+        self.init(rows, cols, components)
     }
 }

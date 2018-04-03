@@ -23,17 +23,11 @@ public struct GeneralLinearLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
     }
     
     public static var standardBasis: [GeneralLinearLieAlgebra<n, K>] {
-        let n = Size.intValue
-        return (0 ..< n).flatMap { i in
-            (0 ..< n).map { j in GeneralLinearLieAlgebra(Matrix.unit(i, j)) }
-        }
+        return SquareMatrix<n, K>.standardBasis.map{ GeneralLinearLieAlgebra($0) }
     }
     
     public var standardCoordinates: [CoeffRing] {
-        let n = size
-        return (0 ..< n).flatMap { i in
-            (0 ..< n).map { j in matrix[i, j] }
-        }
+        return matrix.grid
     }
     
     public static func contains(_ g: GeneralLinearLieAlgebra<n, K>) -> Bool {
