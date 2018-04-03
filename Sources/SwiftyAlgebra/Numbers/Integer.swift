@@ -52,7 +52,8 @@ extension 𝐙: EuclideanRing {
         return (self == 0) ? 1 : self * (self - 1).factorial
     }
     
-    public static func eucDiv(_ a: 𝐙, _ b: 𝐙) -> (q: 𝐙, r: 𝐙) {
+    public func eucDiv(by b: 𝐙) -> (q: 𝐙, r: 𝐙) {
+        let a = self
         let q = a / b
         return (q: q, r: a - q * b)
     }

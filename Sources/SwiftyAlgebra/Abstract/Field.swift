@@ -17,12 +17,12 @@ public extension Field {
         return self == .zero ? 0 : 1
     }
     
-    public static func / (a: Self, b: Self) -> Self {
-        return a * b.inverse!
+    public func eucDiv(by b: Self) -> (q: Self, r: Self) {
+        return (self / b, .zero)
     }
     
-    public static func eucDiv(_ a: Self, _ b: Self) -> (q: Self, r: Self) {
-        return (a/b, .zero)
+    public static func / (a: Self, b: Self) -> Self {
+        return a * b.inverse!
     }
     
     public static var isField: Bool {

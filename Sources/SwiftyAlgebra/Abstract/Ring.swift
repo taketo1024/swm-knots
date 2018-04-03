@@ -131,17 +131,7 @@ extension QuotientRing: ExpressibleByIntegerLiteral where Base: ExpressibleByInt
 
 public protocol MaximalIdeal: Ideal {}
 
-extension QuotientRing: EuclideanRing where Sub: MaximalIdeal {
-    public var degree: Int {
-        return self == .zero ? 0 : 1
-    }
-    
-    public static func eucDiv(_ a: QuotientRing<Base, Sub>, _ b: QuotientRing<Base, Sub>) -> (q: QuotientRing<Base, Sub>, r: QuotientRing<Base, Sub>) {
-        return (a * b.inverse!, .zero)
-    }
-}
-
-extension QuotientRing: Field where Sub: MaximalIdeal {}
+extension QuotientRing: EuclideanRing, Field where Sub: MaximalIdeal {}
 
 public protocol RingHomType: AdditiveGroupHomType where Domain: Ring, Codomain: Ring {}
 

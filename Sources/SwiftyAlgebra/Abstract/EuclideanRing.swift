@@ -2,21 +2,23 @@ import Foundation
 
 public protocol EuclideanRing: Ring {
     var degree: Int { get }
-    static func eucDiv(_ a: Self, _ b: Self) -> (q: Self, r: Self)
+    func eucDiv(by b: Self) -> (q: Self, r: Self) // override point
+    static func /% (a: Self, b: Self) -> (q: Self, r: Self)
+    static func / (a: Self, b: Self) -> Self
     static func % (a: Self, b: Self) -> Self
 }
 
 public extension EuclideanRing {
+    public static func /% (_ a: Self, b: Self) -> (q: Self, r: Self) {
+        return a.eucDiv(by: b)
+    }
+    
     public static func / (_ a: Self, b: Self) -> Self {
-        return Self.eucDiv(a, b).q
+        return a.eucDiv(by: b).q
     }
     
     public static func % (_ a: Self, b: Self) -> Self {
-        return Self.eucDiv(a, b).r
-    }
-    
-    public static func /% (_ a: Self, b: Self) -> (q: Self, r: Self) {
-        return Self.eucDiv(a, b)
+        return a.eucDiv(by: b).r
     }
 }
 
@@ -30,7 +32,7 @@ public func gcd<R: EuclideanRing>(_ a: R, _ b: R) -> R {
 }
 
 public func lcm<R: EuclideanRing>(_ a: R, _ b: R) -> R {
-    return R.eucDiv(a * b, gcd(a, b)).q
+    return (a * b) / gcd(a, b)
 }
 
 public func bezout<R: EuclideanRing>(_ a: R, _ b: R) -> (x: R, y: R, r: R) {

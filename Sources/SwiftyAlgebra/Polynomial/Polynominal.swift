@@ -128,18 +128,21 @@ extension Polynomial: EuclideanRing where R: Field {
         return self.mapCoeffs{ $0 / a }
     }
     
-    public static func eucDiv<K: Field>(_ f: Polynomial<K>, _ g: Polynomial<K>) -> (q: Polynomial<K>, r: Polynomial<K>) {
+    public func eucDiv(by g: Polynomial<R>) -> (q: Polynomial<R>, r: Polynomial<R>) {
+        typealias A = Polynomial<R>
+        
+        let f = self
         if g == .zero {
             fatalError("divide by 0")
         }
         
-        func eucDivMonomial(_ f: Polynomial<K>, _ g: Polynomial<K>) -> (q: Polynomial<K>, r: Polynomial<K>) {
+        func eucDivMonomial(_ f: A, _ g: A) -> (q: A, r: A) {
             let n = f.degree - g.degree
             
             if n < 0 {
                 return (.zero, f)
             } else {
-                let x = Polynomial<K>.indeterminate
+                let x = A.indeterminate
                 let a = f.leadCoeff / g.leadCoeff
                 let q = a * x.pow(n)
                 let r = f - q * g
@@ -149,7 +152,7 @@ extension Polynomial: EuclideanRing where R: Field {
         
         return (0 ... max(0, f.degree - g.degree))
             .reversed()
-            .reduce( (.zero, f) ) { (result: (Polynomial<K>, Polynomial<K>), degree: Int) in
+            .reduce( (.zero, f) ) { (result: (A, A), degree: Int) in
                 let (q, r) = result
                 let m = eucDivMonomial(r, g)
                 return (q + m.q, m.r)
