@@ -66,3 +66,52 @@ public typealias ModuleHom<X: Module, Y: Module> = AdditiveGroupHom<X, Y> where 
 extension ModuleHom: Module, ModuleHomType where Domain: Module, Codomain: Module, Domain.CoeffRing == Codomain.CoeffRing {
     public typealias CoeffRing = Domain.CoeffRing
 }
+
+// a Ring considered as a Module over itself.
+public struct AsModule<R: Ring>: Module {
+    public typealias CoeffRing = R
+    
+    public let value: R
+    public init(_ x: R) {
+        self.value = x
+    }
+    
+    public static var zero: AsModule<R> {
+        return AsModule(.zero)
+    }
+    
+    public static func ==(lhs: AsModule<R>, rhs: AsModule<R>) -> Bool {
+        return lhs.value == rhs.value
+    }
+    
+    public static func +(a: AsModule<R>, b: AsModule<R>) -> AsModule<R> {
+        return AsModule(a.value + b.value)
+    }
+    
+    public static prefix func -(x: AsModule<R>) -> AsModule<R> {
+        return AsModule(-x.value)
+    }
+    
+    public static func *(m: AsModule<R>, r: R) -> AsModule<R> {
+        return AsModule(m.value * r)
+    }
+    
+    public static func *(r: R, m: AsModule<R>) -> AsModule<R> {
+        return AsModule(r * m.value)
+    }
+    
+    public var hashValue: Int {
+        return value.hashValue
+    }
+    
+    public var description: String {
+        return value.description
+    }
+}
+
+extension AsModule: ExpressibleByIntegerLiteral where R: ExpressibleByIntegerLiteral {
+    public typealias IntegerLiteralType = R.IntegerLiteralType
+    public init(integerLiteral value: IntegerLiteralType) {
+        self.init( R(integerLiteral: value) )
+    }
+}

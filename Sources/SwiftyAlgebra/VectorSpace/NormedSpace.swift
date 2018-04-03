@@ -13,7 +13,7 @@ public protocol NormedSpace {
     var norm: 𝐑 { get }
 }
 
-extension AsVectorSpace: NormedSpace where K: NormedSpace {
+extension AsVectorSpace: NormedSpace where R: NormedSpace {
     public var norm: 𝐑 {
         return value.norm
     }

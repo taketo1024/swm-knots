@@ -58,7 +58,6 @@
 		1494767D2071B7B4002736D1 /* LieGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1494767C2071B7B4002736D1 /* LieGroup.swift */; };
 		1494768B2071BFF0002736D1 /* LinearMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1494768A2071BFF0002736D1 /* LinearMap.swift */; };
 		1494768D2071C028002736D1 /* BilinearMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1494768C2071C028002736D1 /* BilinearMap.swift */; };
-		1494768F2071C056002736D1 /* AsVectorSpace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1494768E2071C056002736D1 /* AsVectorSpace.swift */; };
 		14974605206500BA00329DFB /* Representation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14974604206500BA00329DFB /* Representation.swift */; };
 		14974607206501D900329DFB /* LieAlgebra.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14974606206501D900329DFB /* LieAlgebra.swift */; };
 		1499CD011F236328009C3C99 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1499CD001F236328009C3C99 /* CustomOperators.swift */; };
@@ -178,7 +177,6 @@
 		1494767C2071B7B4002736D1 /* LieGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LieGroup.swift; sourceTree = "<group>"; };
 		1494768A2071BFF0002736D1 /* LinearMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearMap.swift; sourceTree = "<group>"; };
 		1494768C2071C028002736D1 /* BilinearMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BilinearMap.swift; sourceTree = "<group>"; };
-		1494768E2071C056002736D1 /* AsVectorSpace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsVectorSpace.swift; sourceTree = "<group>"; };
 		14974604206500BA00329DFB /* Representation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Representation.swift; sourceTree = "<group>"; };
 		14974606206501D900329DFB /* LieAlgebra.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LieAlgebra.swift; sourceTree = "<group>"; };
 		1499CD001F236328009C3C99 /* CustomOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomOperators.swift; sourceTree = "<group>"; };
@@ -428,7 +426,6 @@
 				DD9E9313205D65F1002C0ADB /* VectorSpace.swift */,
 				1494768A2071BFF0002736D1 /* LinearMap.swift */,
 				1494768C2071C028002736D1 /* BilinearMap.swift */,
-				1494768E2071C056002736D1 /* AsVectorSpace.swift */,
 				DD4E16F820614E53004B040C /* NormedSpace.swift */,
 				14974604206500BA00329DFB /* Representation.swift */,
 			);
@@ -691,7 +688,6 @@
 				DDC0125C205C0EA200FF525E /* MatrixLieAlgebra.swift in Sources */,
 				1424F4FF1EB997780052581F /* Ring.swift in Sources */,
 				DD3B16F01ECECC5600EC6C2A /* debug.swift in Sources */,
-				1494768F2071C056002736D1 /* AsVectorSpace.swift in Sources */,
 				14974607206501D900329DFB /* LieAlgebra.swift in Sources */,
 				145339C01EC7D67100F014F4 /* Ref.swift in Sources */,
 				1424F5061EB997780052581F /* Integer.swift in Sources */,

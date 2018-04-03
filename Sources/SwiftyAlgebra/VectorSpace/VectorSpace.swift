@@ -18,3 +18,19 @@ public protocol FiniteDimVectorSpace: VectorSpace {
 
 public typealias ProductVectorSpace<X: VectorSpace, Y: VectorSpace> = ProductModule<X, Y>
 extension ProductVectorSpace: VectorSpace where Left: VectorSpace, Right: VectorSpace, Left.CoeffRing == Right.CoeffRing {}
+
+public typealias AsVectorSpace<R: Field> = AsModule<R>
+
+extension AsVectorSpace: VectorSpace, FiniteDimVectorSpace where R: Field {
+    public static var dim: Int {
+        return 1
+    }
+    
+    public static var standardBasis: [AsVectorSpace<R>] {
+        return [AsVectorSpace(.identity)]
+    }
+    
+    public var standardCoordinates: [R] {
+        return [value]
+    }
+}
