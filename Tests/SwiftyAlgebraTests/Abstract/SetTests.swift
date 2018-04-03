@@ -9,46 +9,46 @@
 import XCTest
 @testable import SwiftyAlgebra
 
-fileprivate struct A: SetType {
-    public let value: Int
-    public var description: String {
-        return value.description
-    }
-}
-
-fileprivate struct B: SubsetType {
-    public typealias Super = A
-    
-    private let a: A
-    init(_ a: A) {
-        self.a = a
-    }
-    
-    var asSuper: A {
-        return a
-    }
-    
-    static func contains(_ a: A) -> Bool {
-        return a.value % 2 == 0
-    }
-}
-
-fileprivate struct C: FiniteSetType {
-    static var allElements: [C] {
-        return [C()]
-    }
-    
-    static var countElements: Int {
-        return 1
-    }
-    
-    var description: String {
-        return "c"
-    }
-}
-
 class SetTests: XCTestCase {
     
+    private struct A: SetType {
+        let value: Int
+        var description: String {
+            return value.description
+        }
+    }
+    
+    private struct B: SubsetType {
+        typealias Super = A
+        
+        let a: A
+        init(_ a: A) {
+            self.a = a
+        }
+        
+        var asSuper: A {
+            return a
+        }
+        
+        static func contains(_ a: A) -> Bool {
+            return a.value % 2 == 0
+        }
+    }
+    
+    private struct C: FiniteSetType {
+        static var allElements: [C] {
+            return [C()]
+        }
+        
+        static var countElements: Int {
+            return 1
+        }
+        
+        var description: String {
+            return ""
+        }
+    }
+
     func testSymbol() {
         XCTAssertEqual(A.symbol, "A")
     }
