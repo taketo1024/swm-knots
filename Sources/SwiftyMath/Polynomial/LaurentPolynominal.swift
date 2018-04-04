@@ -2,21 +2,21 @@ import Foundation
 
 // TODO common implementation among all polynomial types...
 
-public struct LaurentPolynomial<K: Field>: Ring, Module {
-    public typealias CoeffRing = K
+public struct LaurentPolynomial<R: Ring>: Ring, Module {
+    public typealias CoeffRing = R
     
-    internal let coeffs: [K]
+    internal let coeffs: [R]
     public let lowerDegree: Int
     
     public init(from n: 𝐙) {
-        let a = K(from: n)
+        let a = R(from: n)
         self.init(a)
     }
     
-    public init(lowerDegree: Int, coeffs: [K]) {
+    public init(lowerDegree: Int, coeffs: [R]) {
         assert(coeffs.count > 0)
         
-        func normalized(_ d: Int, _ coeffs: [K]) -> (Int, [K]) {
+        func normalized(_ d: Int, _ coeffs: [R]) -> (Int, [R]) {
             if coeffs.count == 0 {
                 return (d, [.zero])
             } else if coeffs.first! == .zero {
@@ -33,17 +33,21 @@ public struct LaurentPolynomial<K: Field>: Ring, Module {
         (self.lowerDegree, self.coeffs) = normalized(lowerDegree, coeffs)
     }
     
-    public init(_ coeffs: K...) {
+    public init(_ coeffs: R...) {
         self.init(lowerDegree: 0, coeffs: coeffs)
     }
     
-    public init(lowerDegree: Int, upperDegree: Int, gen: ((Int) -> K)) {
+    public init(lowerDegree: Int, upperDegree: Int, gen: ((Int) -> R)) {
         let coeffs = (lowerDegree ... upperDegree).map(gen)
         self.init(lowerDegree: lowerDegree, coeffs: coeffs)
     }
     
-    public var normalizeUnit: LaurentPolynomial<K> {
-        return LaurentPolynomial(leadCoeff.inverse!)
+    public var normalizeUnit: LaurentPolynomial<R> {
+        if let a = leadCoeff.inverse {
+            return LaurentPolynomial(a)
+        } else {
+            return LaurentPolynomial(.identity)
+        }
     }
     
     public var upperDegree: Int {
@@ -54,7 +58,7 @@ public struct LaurentPolynomial<K: Field>: Ring, Module {
         return upperDegree - lowerDegree
     }
     
-    public var inverse: LaurentPolynomial<K>? {
+    public var inverse: LaurentPolynomial<R>? {
         if span == 0, let a = leadCoeff.inverse {
             return LaurentPolynomial(lowerDegree: -lowerDegree, coeffs: [a])
         } else {
@@ -62,36 +66,36 @@ public struct LaurentPolynomial<K: Field>: Ring, Module {
         }
     }
     
-    public var leadCoeff: K {
+    public var leadCoeff: R {
         return coeff(upperDegree)
     }
     
-    public func coeff(_ i: Int) -> K {
+    public func coeff(_ i: Int) -> R {
         return (lowerDegree ... upperDegree).contains(i) ? coeffs[i - lowerDegree] : .zero
     }
     
-    public func mapCoeffs(_ f: ((K) -> K)) -> LaurentPolynomial<K> {
+    public func mapCoeffs(_ f: ((R) -> R)) -> LaurentPolynomial<R> {
         return LaurentPolynomial(lowerDegree: lowerDegree, coeffs: coeffs.map(f))
     }
     
-    public static var indeterminate: LaurentPolynomial<K> {
-        return LaurentPolynomial<K>(.zero, .identity)
+    public static var indeterminate: LaurentPolynomial<R> {
+        return LaurentPolynomial<R>(.zero, .identity)
     }
     
-    public static func == (f: LaurentPolynomial<K>, g: LaurentPolynomial<K>) -> Bool {
+    public static func == (f: LaurentPolynomial<R>, g: LaurentPolynomial<R>) -> Bool {
         return (f.lowerDegree == g.lowerDegree) && f.coeffs == g.coeffs
     }
     
-    public static func + (f: LaurentPolynomial<K>, g: LaurentPolynomial<K>) -> LaurentPolynomial<K> {
+    public static func + (f: LaurentPolynomial<R>, g: LaurentPolynomial<R>) -> LaurentPolynomial<R> {
         let (d, D) = (min(f.lowerDegree, g.lowerDegree), max(f.upperDegree, g.upperDegree))
         return LaurentPolynomial(lowerDegree: d, upperDegree: D) { f.coeff($0) + g.coeff($0) }
     }
     
-    public static prefix func - (f: LaurentPolynomial<K>) -> LaurentPolynomial<K> {
+    public static prefix func - (f: LaurentPolynomial<R>) -> LaurentPolynomial<R> {
         return f.mapCoeffs { -$0 }
     }
     
-    public static func * (f: LaurentPolynomial<K>, g: LaurentPolynomial<K>) -> LaurentPolynomial<K> {
+    public static func * (f: LaurentPolynomial<R>, g: LaurentPolynomial<R>) -> LaurentPolynomial<R> {
         let (d, D) = (f.lowerDegree + g.lowerDegree, f.upperDegree + g.upperDegree)
         return LaurentPolynomial(lowerDegree: d, upperDegree: D) { k in
             (max(f.lowerDegree, k - g.upperDegree) ... min(k - g.lowerDegree, f.upperDegree)).sum {
@@ -100,11 +104,11 @@ public struct LaurentPolynomial<K: Field>: Ring, Module {
         }
     }
     
-    public static func * (r: K, f: LaurentPolynomial<K>) -> LaurentPolynomial<K> {
+    public static func * (r: R, f: LaurentPolynomial<R>) -> LaurentPolynomial<R> {
         return f.mapCoeffs { r * $0 }
     }
     
-    public static func * (f: LaurentPolynomial<K>, r: K) -> LaurentPolynomial<K> {
+    public static func * (f: LaurentPolynomial<R>, r: R) -> LaurentPolynomial<R> {
         return f.mapCoeffs { $0 * r }
     }
     
@@ -113,7 +117,7 @@ public struct LaurentPolynomial<K: Field>: Ring, Module {
     }
     
     public static var symbol: String {
-        return "\(K.symbol)[x, x⁻¹]"
+        return "\(R.symbol)[x, x⁻¹]"
     }
     
     public var hashValue: Int {
