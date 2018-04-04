@@ -2,6 +2,8 @@ import Foundation
 
 public typealias 𝐙 = Int
 
+fileprivate var _primes: [𝐙] = []
+
 extension 𝐙: EuclideanRing {
     public init(from n: 𝐙) {
         self.init(n)
@@ -56,6 +58,58 @@ extension 𝐙: EuclideanRing {
         let a = self
         let q = a / b
         return (q: q, r: a - q * b)
+    }
+    
+    public static func primes(upto n: 𝐙) -> [𝐙] {
+        if let last = _primes.last, n <= last {
+            return _primes.filter{ $0 <= n }
+        }
+        
+        var result: [𝐙] = []
+        var seive = _primes + Array( (_primes.last ?? 1) + 1 ... n.abs )
+        
+        while let a = seive.first {
+            seive = seive.filter{ $0 % a > 0 }
+            result.append(a)
+        }
+        
+        _primes = result
+        return result
+    }
+    
+    public var divisors: [𝐙] {
+        if self == 0 {
+            return []
+        }
+        
+        var result: [𝐙] = []
+        
+        let a = self.abs
+        let m = Int(sqrt(Double(a)))
+        
+        for d in 1...m {
+            if a % d == 0 {
+                result.append(d)
+                result.append(a/d)
+            }
+        }
+        
+        return result.sorted()
+    }
+    
+    public var primeFactors: [𝐙] {
+        var result: [𝐙] = []
+        var q = self
+        
+        let ps = 𝐙.primes(upto: self)
+        for p in ps {
+            while q % p == 0 {
+                q /= p
+                result.append(p)
+            }
+        }
+        
+        return result
     }
     
     public static var symbol: String {
