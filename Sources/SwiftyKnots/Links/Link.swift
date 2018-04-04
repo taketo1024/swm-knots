@@ -32,13 +32,15 @@ public struct Link: CustomStringConvertible {
      * see: http://katlas.math.toronto.edu/wiki/Planar_Diagrams
      */
     
+    public let name: String
     internal let junctions: [Junction]
     
-    internal init(_ junctions: [Junction]) {
+    internal init(name: String, junctions: [Junction]) {
+        self.name = name
         self.junctions = junctions
     }
     
-    public init(planarCode: (Int, Int, Int, Int) ...) {
+    public init(name: String? = nil, planarCode: (Int, Int, Int, Int) ...) {
         
         // generate edges.
         
@@ -96,11 +98,11 @@ public struct Link: CustomStringConvertible {
             }
         }
         
-        self.init(junctions)
+        self.init(name: (name ?? "L"), junctions: junctions)
     }
     
     public static var empty: Link {
-        return Link([])
+        return Link(name: "∅", junctions: [])
     }
     
     public static var unknot: Link {
@@ -110,7 +112,7 @@ public struct Link: CustomStringConvertible {
         e0.to   = J
         e1.from = J
         e1.to   = J
-        return Link([J])
+        return Link(name: "○", junctions: [J])
     }
     
     private var allEdges: Set<Edge> {
@@ -132,26 +134,29 @@ public struct Link: CustomStringConvertible {
             e.to   = copiedJuncs[ junctions.index(of: orig.to  )! ]
         }
         
-        return Link(copiedJuncs)
+        return Link(name: name, junctions: copiedJuncs)
     }
     
-    public var components: Int {
-        var queue = allEdges
-        var res = 0
+    public var components: [Component] {
+        var queue = allEdges.sorted()
+        var comps = [Component]()
         
         while !queue.isEmpty {
-            res += 1
-            var e = queue.anyElement!
+            var c = [Edge]()
+            var e = queue.first!
             var J = e.to!
             
             while queue.contains(e) {
-                queue.remove(e)
+                queue.remove(element: e)
+                c.append(e)
                 e = J.adjacent(e)
                 J = e.opposite(J)
             }
+            
+            comps.append(Component(c))
         }
         
-        return res
+        return comps
     }
     
     public var crossingNumber: Int {
@@ -185,7 +190,7 @@ public struct Link: CustomStringConvertible {
         for e in cL2.allEdges {
             e.id += D
         }
-        return Link(cL1.junctions + cL2.junctions)
+        return Link(name: "\(L1.name) + \(L2.name)", junctions: cL1.junctions + cL2.junctions)
     }
     
     /*
@@ -269,7 +274,7 @@ public struct Link: CustomStringConvertible {
         }
         
         public static func ==(e1: Edge, e2: Edge) -> Bool {
-            return e1 === e2
+            return e1.id == e2.id
         }
         
         public static func <(e1: Link.Edge, e2: Link.Edge) -> Bool {
@@ -282,6 +287,23 @@ public struct Link: CustomStringConvertible {
         
         public var description: String {
             return "\(id)"
+        }
+    }
+    
+    public class Component: Equatable, CustomStringConvertible {
+        public static func == (a: Component, b: Component) -> Bool {
+            return a.edges == b.edges
+        }
+        
+        public var description: String {
+            return "(\(edges.map{ "\($0)" }.joined(separator: "-")))"
+        }
+        
+        public let edges: [Edge]
+        internal init(_ edges: [Edge]) {
+            assert(edges.count >= 2)
+//            assert(edges.first!.from == edges.last!.to)
+            self.edges = edges.sorted()
         }
     }
     

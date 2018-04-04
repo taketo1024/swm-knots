@@ -15,10 +15,10 @@ import SwiftyMath
 
 public extension Link {
     public static var HopfLink: Link {
-        return Link(planarCode: (4,1,3,2), (2,3,1,4))
+        return Link(name: "L2a1", planarCode: (4,1,3,2), (2,3,1,4))
     }
     public static var trefoil: Link {
-        return Link(planarCode: (1,4,2,5), (3,6,4,1), (5,2,6,3))
+        return Link(name: "3₁", planarCode: (1,4,2,5), (3,6,4,1), (5,2,6,3))
     }
 }
 

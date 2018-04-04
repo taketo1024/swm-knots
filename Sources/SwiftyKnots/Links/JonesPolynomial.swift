@@ -22,8 +22,8 @@ public extension Link {
             let pair = splicedPair(at: i)
             return A * pair.0._KauffmanBracket(normalized: b) + A.pow(-1) * pair.1._KauffmanBracket(normalized: b)
         } else {
-            let n = b ? components - 1 : components
-            return ( -A.pow(2) - A.pow(-2) ).pow(n)
+            let n = components.count
+            return ( -A.pow(2) - A.pow(-2) ).pow(b ? n - 1 : n)
         }
     }
     
