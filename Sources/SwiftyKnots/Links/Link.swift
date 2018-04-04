@@ -160,7 +160,15 @@ public struct Link: CustomStringConvertible {
     }
     
     public var crossingNumber: Int {
-        return junctions.sum { J in J.isCrossing ? 1 : 0 }
+        return junctions.count { J in J.isCrossing }
+    }
+    
+    public var crossingNumber⁺: Int {
+        return junctions.count { J in J.crossingSign == 1 }
+    }
+    
+    public var crossingNumber⁻: Int {
+        return junctions.count { J in J.crossingSign == -1 }
     }
     
     public var writhe: Int {

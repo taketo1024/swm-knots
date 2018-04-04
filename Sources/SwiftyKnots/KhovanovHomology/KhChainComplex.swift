@@ -15,10 +15,10 @@ public extension KhChainComplex where T == Ascending, A == KhTensorElement, R: E
         typealias C = CochainComplex<KhTensorElement, R>
         
         let name = "CKh(\(L.name); \(R.symbol))"
-        let n = L.crossingNumber
+        let (n, n⁺, n⁻) = (L.crossingNumber, L.crossingNumber⁺, L.crossingNumber⁻)
         
         let all = LinkSpliceState.all(n).map { s in
-            KhChainSummand(link: L, state: s)
+            KhChainSummand(link: L, state: s, shift: n⁺ - 2 * n⁻ + s.degree)
         }
         
         let stTable = Dictionary(pairs: all.map{ C in (C.state, C) })
@@ -38,7 +38,7 @@ public extension KhChainComplex where T == Ascending, A == KhTensorElement, R: E
             
             return (chainBasis, boundaryMap)
         }
-        self.init(name: name, chain: chain)
+        self.init(name: name, chain: chain, offset: -n⁻)
     }
     
 }
@@ -61,7 +61,7 @@ private func map<R: EuclideanRing>(_ x: KhTensorElement, from: KhChainSummand, t
             factor.remove(at: i2)
             factor.remove(at: i1)
             factor.insert(e, at: j)
-            return FreeModule( KhTensorElement(factor, to.state) )
+            return FreeModule( KhTensorElement(factor, to.state, to.shift) )
         } else {
             return .zero
         }
@@ -77,7 +77,7 @@ private func map<R: EuclideanRing>(_ x: KhTensorElement, from: KhChainSummand, t
             factor.remove(at: i)
             factor.insert(e1, at: j1)
             factor.insert(e2, at: j2)
-            return FreeModule( KhTensorElement(factor, to.state) )
+            return FreeModule( KhTensorElement(factor, to.state, to.shift) )
         }
     default:
         fatalError()

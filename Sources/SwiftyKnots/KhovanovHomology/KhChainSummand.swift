@@ -13,51 +13,53 @@ public struct KhChainSummand: Equatable, CustomStringConvertible {
     public let state: LinkSpliceState
     public let components: [Link.Component]
     public let basis: [KhTensorElement]
-    public let shifted: Int
+    public let shift: Int
     
-    public init(link L: Link, state: LinkSpliceState, shifted: Int = 0) {
+    public init(link L: Link, state: LinkSpliceState, shift: Int = 0) {
         let spliced = L.spliced(by: state)
         let comps = spliced.components
-        let basis = KhChainSummand.generate(state: state, power: comps.count)
+        let basis = KhChainSummand.generateBasis(state, comps.count, shift)
         
         self.link = spliced
         self.state = state
         self.components = comps
         self.basis = basis
-        self.shifted = shifted
+        self.shift = shift
     }
     
-    internal static func generate(state: LinkSpliceState, power n: Int) -> [KhTensorElement] {
+    internal static func generateBasis(_ state: LinkSpliceState, _ power: Int, _ shift: Int) -> [KhTensorElement] {
         typealias E = KhTensorElement.E
-        return (0 ..< n).reduce([[]]) { (res, _) -> [[E]] in
+        return (0 ..< power).reduce([[]]) { (res, _) -> [[E]] in
             res.flatMap{ factors -> [[E]] in
                 [factors + [.I], factors + [.X]]
             }
-        }.map{ KhTensorElement.init($0, state) }
+        }.map{ KhTensorElement.init($0, state, shift) }
         .sorted()
     }
 
     public static func ==(B1: KhChainSummand, B2: KhChainSummand) -> Bool {
-        return B1.basis == B2.basis && B1.shifted == B2.shifted
+        return B1.basis == B2.basis && B1.shift == B2.shift
     }
     
     public var description: String {
         let n = Int( log2( Double(basis.count) ) )
-        return Format.term(1, "V", n) + (shifted != 0 ? "{\(shifted)}" : "") + Format.sub(state.description)
+        return Format.term(1, "V", n) + (shift != 0 ? "{\(shift)}" : "") + Format.sub(state.description)
     }
 }
 
 public struct KhTensorElement: FreeModuleBase, Comparable {
     internal let factors: [E]
     internal let state: LinkSpliceState
+    internal let shift: Int
     
-    internal init(_ factors: [E], _ state: LinkSpliceState) {
+    internal init(_ factors: [E], _ state: LinkSpliceState, _ shift: Int) {
         self.factors = factors
         self.state = state
+        self.shift = shift
     }
     
     public var degree: Int {
-        return factors.sum{ e in e.degree }
+        return factors.sum{ e in e.degree } + shift
     }
     
     public static func ==(b1: KhTensorElement, b2: KhTensorElement) -> Bool {
