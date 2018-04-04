@@ -4,21 +4,16 @@
 
 The aim of this project is to understand Mathematics by realizing abstract concepts as codes. Mathematical axioms correspond to `protocol`s, and objects satisfying some axioms correspond to `struct`s.
 
-## How to Build / Run
+# Getting Started
 
-With [Xcode](https://developer.apple.com/xcode/) installed, type:
+## Swift REPL
+
+With [Xcode](https://developer.apple.com/xcode/) installed, you can run SwiftyMath on Swift REPL by:
 
 ```
 $ swift build 
+$ swift -I .build/debug/ -L .build/debug/ -ldSwiftyMath
 ```
-
-To activate playgrounds, type:
-
-```
-$ swift package generate-xcodeproj
-```
-
-Open `SwiftyMath.xcworkspace` and press ▶️  to build the framework.
 
 ![ss2](doc/ss2.png)
 

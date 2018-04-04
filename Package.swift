@@ -16,6 +16,10 @@ let package = Package(
         .library(
             name: "SwiftyKnots",
             targets: ["SwiftyKnots"]),
+        .library(
+            name: "dSwiftyMath",
+			type: .dynamic,
+            targets: ["SwiftyMath", "SwiftyTopology", "SwiftyKnots"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -50,7 +54,6 @@ let package = Package(
         .testTarget(
             name: "SwiftyKnotsTests",
             dependencies: ["SwiftyKnots"]),
-
 
     ]
 )
