@@ -74,7 +74,7 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
 }
 
 public final class RowEchelonEliminationResult<R: EuclideanRing>: MatrixEliminationResult<R> {
-    public override var rank: Int {
+    internal override func _rank() -> Int {
         return result.table.count
     }
 }

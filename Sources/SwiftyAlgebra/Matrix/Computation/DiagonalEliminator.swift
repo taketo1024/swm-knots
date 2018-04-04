@@ -31,15 +31,15 @@ public final class DiagonalEliminator<R: EuclideanRing>: MatrixEliminator<R> {
 }
 
 public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminationResult<R> {
-    public override lazy var diagonal: [R] = { [unowned self] in
+    internal override func _diagonal() -> [R] {
         return result.diagonal
-    }()
+    }
     
-    public override var rank: Int {
+    internal override func _rank() -> Int {
         return diagonal.count
     }
     
-    public override lazy var determinant: R = { [unowned self] in
+    internal override func _determinant() -> R {
         assert(result.rows == result.cols)
         assert(diagonal.forAll{ $0 == .identity })
         
@@ -50,13 +50,13 @@ public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminatio
         } else {
             return .zero
         }
-    }()
+    }
     
-    public override lazy var inverse: ComputationalMatrix<R>? = {
+    internal override func _inverse() -> ComputationalMatrix<R>? {
         assert(result.rows == result.cols)
         assert(determinant.isInvertible)
         return (rank == result.rows) ? right * left : nil
-    }()
+    }
     
     // The matrix made by the basis of Ker(A).
     // Z = (z1, ..., zk) , k = col(A) - rank(A).
@@ -64,9 +64,9 @@ public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminatio
     // P * A * Q = [D_r; O_k]
     // =>  Z := Q[:, r ..< m], then A * Z = O_k
     
-    public override lazy var kernelMatrix: ComputationalMatrix<R> = { [unowned self] in
+    internal override func _kernelMatrix() -> ComputationalMatrix<R> {
         return right.submatrix(colRange: rank ..< result.cols)
-    }()
+    }
     
     // The matrix made by the basis of Im(A).
     // B = (b1, ..., br) , r = rank(A)
@@ -75,10 +75,10 @@ public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminatio
     // => D is the imageMatrix with basis P.
     // => P^-1 * D is the imageMatrix with the standard basis.
     
-    public override lazy var imageMatrix: ComputationalMatrix<R> = { [unowned self] in
+    internal override func _imageMatrix() -> ComputationalMatrix<R> {
         let A = _leftInverse(restrictedToCols: 0 ..< rank)
         return A * result.submatrix(0 ..< rank, 0 ..< rank)
-    }()
+    }
     
     // T: The basis transition matrix from (ei) to (zi),
     // i.e. T * zi = ei.
@@ -89,7 +89,7 @@ public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminatio
     //
     // T = Q^-1[r ..< m, :]  gives  T * Z = I_k.
     
-    public override lazy var kernelTransitionMatrix: ComputationalMatrix<R> = { [unowned self] in
+    internal override func _kernelTransitionMatrix() -> ComputationalMatrix<R> {
         return _rightInverse(restrictedToRows: rank ..< result.cols)
-    }()
+    }
 }
