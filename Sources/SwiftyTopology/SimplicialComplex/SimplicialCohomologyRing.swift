@@ -1,13 +1,13 @@
 //
 //  SimplicialCohomologyRing.swift
-//  SwiftyAlgebra
+//  SwiftyMath
 //
 //  Created by Taketo Sano on 2018/02/10.
 //  Copyright © 2018年 Taketo Sano. All rights reserved.
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 public typealias SimplicialHomology<R: EuclideanRing> = Homology<Simplex, R>
 public typealias SimplicialHomologyClass<R: EuclideanRing> = HomologyClass<Simplex, R>

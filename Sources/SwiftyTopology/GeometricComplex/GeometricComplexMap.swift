@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 public protocol GeometricComplexMap: MapType where Complex.Map == Self, Domain == Complex.Cell, Codomain == Complex.Cell {
     associatedtype Complex: GeometricComplex

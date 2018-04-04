@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 public protocol GeometricCell: FreeModuleBase {
     var dim: Int { get }

@@ -1,13 +1,13 @@
 //
 //  HomologyTests.swift
-//  SwiftyAlgebraTests
+//  SwiftyMathTests
 //
 //  Created by Taketo Sano on 2017/11/10.
 //  Copyright © 2017年 Taketo Sano. All rights reserved.
 //
 
 import XCTest
-import SwiftyAlgebra
+import SwiftyMath
 @testable import SwiftyTopology
 
 class SimplicialCohomologyExSeqTests: XCTestCase {

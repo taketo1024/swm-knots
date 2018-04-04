@@ -1,13 +1,13 @@
 //
 //  GeometricComplex.swift
-//  SwiftyAlgebra
+//  SwiftyMath
 //
 //  Created by Taketo Sano on 2017/05/28.
 //  Copyright © 2017年 Taketo Sano. All rights reserved.
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 public protocol GeometricComplex: CustomStringConvertible where Map.Complex == Self {
     associatedtype Cell: GeometricCell

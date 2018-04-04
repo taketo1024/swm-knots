@@ -1,13 +1,13 @@
 //
 //  OrientationClass.swift
-//  SwiftyAlgebra
+//  SwiftyMath
 //
 //  Created by Taketo Sano on 2018/02/12.
 //  Copyright © 2018年 Taketo Sano. All rights reserved.
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 public extension GeometricComplex {
     public var eulerNumber: Int {

@@ -1,13 +1,13 @@
 //
 //  SimplicialComplexOperations.swift
-//  SwiftyAlgebra
+//  SwiftyMath
 //
 //  Created by Taketo Sano on 2017/11/06.
 //  Copyright © 2017年 Taketo Sano. All rights reserved.
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 // Operations
 public extension SimplicialComplex {

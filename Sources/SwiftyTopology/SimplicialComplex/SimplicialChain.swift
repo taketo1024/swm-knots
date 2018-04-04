@@ -1,13 +1,13 @@
 //
 //  SimplicialChainOperations.swift
-//  SwiftyAlgebra
+//  SwiftyMath
 //
 //  Created by Taketo Sano on 2018/02/10.
 //  Copyright © 2018年 Taketo Sano. All rights reserved.
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 public typealias SimplicialChain<R: Ring> = FreeModule<Simplex, R>
 public extension SimplicialChain where A == Simplex {

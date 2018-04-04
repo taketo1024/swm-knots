@@ -1,7 +1,7 @@
 //: Playground - noun: a place where people can play
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 // Rational Number Sample.
 

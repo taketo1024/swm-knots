@@ -1,13 +1,13 @@
 //
 //  CellularComplex.swift
-//  SwiftyAlgebra
+//  SwiftyMath
 //
 //  Created by Taketo Sano on 2017/07/26.
 //  Copyright © 2017年 Taketo Sano. All rights reserved.
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 public typealias CellularChain<R: Ring> = FreeModule<CellularCell, R>
 
