@@ -2,7 +2,7 @@ import Foundation
 
 public typealias 𝐐 = RationalNumber
 
-public struct RationalNumber: Field, Comparable, ExpressibleByIntegerLiteral {
+public struct RationalNumber: Field, NormedSpace, Comparable, ExpressibleByIntegerLiteral {
     public typealias IntegerLiteralType = Int
     internal let p, q: 𝐙  // memo: (p, q) coprime, q > 0.
     
@@ -37,8 +37,16 @@ public struct RationalNumber: Field, Comparable, ExpressibleByIntegerLiteral {
         }
     }
     
+    public var sign: 𝐙 {
+        return p.sign
+    }
+    
     public var abs: 𝐐 {
         return (p >= 0) == (q >= 0) ? self : -self
+    }
+    
+    public var norm: 𝐑 {
+        return 𝐑(from: abs)
     }
     
     public var inverse: 𝐐? {

@@ -9,6 +9,10 @@ extension 𝐙: EuclideanRing {
         self.init(n)
     }
     
+    public var inverse: 𝐙? {
+        return (self.abs == 1) ? self : nil
+    }
+    
     public var normalizeUnit: 𝐙 {
         return (self > 0) ? 1 : -1
     }
@@ -17,24 +21,20 @@ extension 𝐙: EuclideanRing {
         return Swift.abs(self)
     }
     
-    public var abs: 𝐙 {
-        return Swift.abs(self)
+    public var sign: 𝐙 {
+        return (self >  0) ? 1 :
+               (self == 0) ? 0 :
+                            -1
     }
     
-    public var inverse: 𝐙? {
-        return (self.abs == 1) ? self : nil
+    public var abs: 𝐙 {
+        return (self >= 0) ? self : -self
     }
     
     public var isEven: Bool {
         return (self % 2 == 0)
     }
     
-    public var sign: 𝐙 {
-        return (self >  0) ? 1 :
-               (self == 0) ? 0 :
-                            -1
-    }
-
     public func pow(_ n: 𝐙) -> 𝐙 {
         switch  self {
         case 1:

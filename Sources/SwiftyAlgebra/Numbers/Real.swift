@@ -48,13 +48,23 @@ public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByIntege
         self.init(z.real.value)
     }
     
+    public var sign: 𝐙 {
+        return (value >  0) ? 1 :
+               (value == 0) ? 0 :
+                             -1
+    }
+    
+    public var abs: 𝐑 {
+        return 𝐑(Swift.abs(value))
+    }
+    
     public var norm: 𝐑 {
-        return 𝐑( sqrt(value * value) )
+        return abs
     }
     
     public var inverse: 𝐑? {
         // 1/(x + e) ~ 1/x - (1/x^2)e + ...
-        return 𝐑(1/value, error / (value * value))
+        return (value != 0) ? 𝐑(1/value, error / (value * value)) : nil
     }
     
     public static func ==(a: 𝐑, b: 𝐑) -> Bool {
