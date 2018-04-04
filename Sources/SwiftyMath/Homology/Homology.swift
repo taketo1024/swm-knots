@@ -25,10 +25,12 @@ public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Asc
 public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>: AlgebraicStructure {
     public typealias Cycle = FreeModule<A, R>
     
+    public let name: String
     public let chainComplex: _ChainComplex<T, A, R>
     private var _summands: [Summand?]
     
-    public init(_ chainComplex: _ChainComplex<T, A, R>) {
+    public init(name: String? = nil, chainComplex: _ChainComplex<T, A, R>) {
+        self.name = name ?? "\(T.descending ? "H" : "cH")(\(chainComplex.name))"
         self.chainComplex = chainComplex
         self._summands = Array(repeating: nil, count: chainComplex.topDegree - chainComplex.offset + 1) // lazy init
     }
@@ -47,10 +49,6 @@ public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
         }
     }
     
-    public var name: String {
-        return chainComplex.name
-    }
-    
     public var offset: Int {
         return chainComplex.offset
     }
@@ -64,11 +62,11 @@ public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
     }
     
     public var description: String {
-        return (T.descending ? "H" : "cH") + "(\(name); \(R.symbol))"
+        return name
     }
     
     public var detailDescription: String {
-        return (T.descending ? "H" : "cH") + "(\(name); \(R.symbol)) = {\n"
+        return name + " = {\n"
             + (offset ... topDegree).map{ i in (i, self[i]) }
                 .map{ (i, g) in "\t\(i) : \(g.detailDescription)"}
                 .joined(separator: ",\n")

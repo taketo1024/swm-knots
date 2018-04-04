@@ -33,9 +33,9 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
                 _ chain1: _ChainComplex<T, B, R>, _ map1 : _ChainMap<T, B, C, R>,
                 _ chain2: _ChainComplex<T, C, R>, _ delta: _ChainMap<T, C, A, R>) {
         
-        self.H0 = _Homology(chain0)
-        self.H1 = _Homology(chain1)
-        self.H2 = _Homology(chain2)
+        self.H0 = _Homology(chainComplex: chain0)
+        self.H1 = _Homology(chainComplex: chain1)
+        self.H2 = _Homology(chainComplex: chain2)
         
         self.map0  = _HomologyMap.induced(from: map0,  codomainStructure: H1)
         self.map1  = _HomologyMap.induced(from: map1,  codomainStructure: H2)

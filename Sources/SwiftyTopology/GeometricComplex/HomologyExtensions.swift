@@ -11,7 +11,7 @@ import SwiftyMath
 
 public extension ChainComplex where T == Descending {
     public convenience init<C: GeometricComplex>(geometricComplex K: C, relativeTo L: C?, _ type: R.Type) where A == C.Cell {
-        let name = (L == nil) ? K.name : "\(K.name), \(L!.name)"
+        let name = "C(\(K.name)\( L != nil ? ", \(L!.name)" : ""); \(R.symbol))"
         let chain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap) in
             let basis = (L == nil)
                 ? K.cells(ofDim: i)
@@ -50,7 +50,8 @@ public extension CochainMap where T == Ascending {
 
 public extension Homology where T == Descending {
     public convenience init<C: GeometricComplex>(geometricComplex K: C, relativeTo L: C?, _ type: R.Type) where A == C.Cell {
-        self.init(ChainComplex(geometricComplex: K, relativeTo: L, R.self))
+        let name = "H(\(K.name)\( L != nil ? ", \(L!.name)" : ""); \(R.symbol))"
+        self.init(name: name, chainComplex: ChainComplex(geometricComplex: K, relativeTo: L, R.self))
     }
     
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == C.Cell {
@@ -64,7 +65,8 @@ public extension Homology where T == Descending {
 
 public extension Cohomology where T == Ascending {
     public convenience init<C: GeometricComplex>(geometricComplex K: C, relativeTo L: C?, _ type: R.Type) where A == Dual<C.Cell> {
-        self.init(ChainComplex(geometricComplex: K, relativeTo: L, R.self).dual)
+        let name = "cH(\(K.name)\( L != nil ? ", \(L!.name)" : ""); \(R.symbol))"
+        self.init(name: name, chainComplex: ChainComplex(geometricComplex: K, relativeTo: L, R.self).dual)
     }
     
     public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == Dual<C.Cell> {

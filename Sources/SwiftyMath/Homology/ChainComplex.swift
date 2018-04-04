@@ -37,7 +37,7 @@ public class _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable,
     
     // root initializer
     public init(name: String? = nil, chain: [(ChainBasis, BoundaryMap)], offset: Int = 0) {
-        self.name = name ?? "_"
+        self.name = name ?? (T.descending ? "C" : "C*")
         self.chain = chain
         self.matrices = Array(repeating: nil, count: chain.count)
         self.offset = offset
@@ -133,11 +133,11 @@ public class _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable,
     }
     
     public var description: String {
-        return (T.descending ? "C" : "cC") + "(\(name); \(R.symbol))"
+        return name
     }
     
     public var detailDescription: String {
-        return description + " = {\n"
+        return name + " = {\n"
             + (offset ... topDegree).map{ i in "\t\(i) : \(chainBasis(i))"}.joined(separator: ",\n")
             + "\n}"
     }
@@ -163,6 +163,6 @@ public extension ChainComplex where T == Descending {
             return (dBasis, dMap)
         }
         
-        return D(name: name, chain: cochain)
+        return D(name: "\(name)*", chain: cochain)
     }
 }
