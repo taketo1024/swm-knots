@@ -13,6 +13,9 @@ class SetTests: XCTestCase {
     
     private struct A: SetType {
         let value: Int
+        init(_ a: Int) {
+            self.value = a
+        }
         var description: String {
             return value.description
         }
@@ -54,17 +57,17 @@ class SetTests: XCTestCase {
     }
     
     func testEquality() {
-        let a1 = A(value: 1)
-        let a2 = A(value: 2)
+        let a1 = A(1)
+        let a2 = A(2)
         XCTAssertTrue(a1 == a1)
         XCTAssertTrue(a1 != a2)
     }
     
     func testSubsetType() {
-        let b = B(A(value: 0))
+        let b = B(A(0))
         XCTAssertEqual(b.description, "0")
-        XCTAssertTrue(B.contains(A(value: 0)))
-        XCTAssertFalse(B.contains(A(value: 1)))
+        XCTAssertTrue(B.contains(A(0)))
+        XCTAssertFalse(B.contains(A(1)))
     }
     
     func testFiniteSetType() {
@@ -74,8 +77,8 @@ class SetTests: XCTestCase {
     
     func testProductSet() {
         typealias P = ProductSet<A, A>
-        let a1 = P(A(value: 1), A(value: 2))
-        let a2 = P(A(value: 3), A(value: 4))
+        let a1 = P(A(1), A(2))
+        let a2 = P(A(3), A(4))
         XCTAssertEqual(P.symbol, "A×A")
         XCTAssertEqual(a1.description, "(1, 2)")
         XCTAssertEqual(a1, a1)

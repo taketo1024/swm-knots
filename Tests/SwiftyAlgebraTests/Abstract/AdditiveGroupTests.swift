@@ -12,20 +12,23 @@ import XCTest
 class AdditiveGroupTests: XCTestCase {
     private struct A: AdditiveGroup {
         let value: Int
+        init(_ a: Int) {
+            self.value = a
+        }
         var description: String {
             return value.description
         }
         
         static func + (a: A, b: A) -> A {
-            return A(value: a.value + b.value)
+            return A(a.value + b.value)
         }
         
         static var zero: A {
-            return A(value: 0)
+            return A(0)
         }
         
         static prefix func - (x: A) -> A {
-            return A(value: -x.value)
+            return A(-x.value)
         }
     }
     
@@ -48,31 +51,31 @@ class AdditiveGroupTests: XCTestCase {
     }
     
     func testSum() {
-        let a = A(value: 3)
-        let b = A(value: 4)
-        XCTAssertEqual(a + b, A(value: 7))
+        let a = A(3)
+        let b = A(4)
+        XCTAssertEqual(a + b, A(7))
     }
     
     func testZero() {
         let e = A.zero
-        let a = A(value: 3)
+        let a = A(3)
         XCTAssertEqual(a + e, a)
         XCTAssertEqual(e + a, a)
     }
     
     func testNegative() {
-        let a = A(value: 3)
-        XCTAssertEqual(-a, A(value: -3))
+        let a = A(3)
+        XCTAssertEqual(-a, A(-3))
     }
     
     func testSubgroupSum() {
-        let a = B(A(value: 3))
-        let b = B(A(value: 4))
-        XCTAssertEqual(a + b, B(A(value: 7)))
+        let a = B(A(3))
+        let b = B(A(4))
+        XCTAssertEqual(a + b, B(A(7)))
     }
     
     func testSubgroupZero() {
-        let a = B(A(value: 3))
+        let a = B(A(3))
         let e = B.zero
         XCTAssertEqual(e + e, e)
         XCTAssertEqual(a + e, a)
@@ -80,20 +83,20 @@ class AdditiveGroupTests: XCTestCase {
     }
     
     func testSubgroupNegative() {
-        let a = B(A(value: 3))
-        XCTAssertEqual(-a, B(A(value: -3)))
+        let a = B(A(3))
+        XCTAssertEqual(-a, B(A(-3)))
     }
     
     func testAdditiveProductGroupSum() {
         typealias P = AdditiveProductGroup<A, A>
-        let a = P(A(value: 1), A(value: 2))
-        let b = P(A(value: 3), A(value: 4))
-        XCTAssertEqual(a + b, P(A(value: 4), A(value: 6)))
+        let a = P(A(1), A(2))
+        let b = P(A(3), A(4))
+        XCTAssertEqual(a + b, P(A(4), A(6)))
     }
     
     func testAdditiveProductGroupZero() {
         typealias P = AdditiveProductGroup<A, A>
-        let a = P(A(value: 1), A(value: 2))
+        let a = P(A(1), A(2))
         let e = P.zero
         XCTAssertEqual(e + e, e)
         XCTAssertEqual(a + e, a)
@@ -102,20 +105,20 @@ class AdditiveGroupTests: XCTestCase {
     
     func testAdditiveProductGroupNegative() {
         typealias P = AdditiveProductGroup<A, A>
-        let a = P(A(value: 3), A(value: 4))
-        XCTAssertEqual(-a, P(A(value: -3), A(value: -4)))
+        let a = P(A(3), A(4))
+        XCTAssertEqual(-a, P(A(-3), A(-4)))
     }
     
     func testAdditiveQuotientGroupSum() {
         typealias Q = AdditiveQuotientGroup<A, B>
-        let a = Q(A(value: 1))
-        let b = Q(A(value: 2))
-        XCTAssertEqual(a + b, Q(A(value: 0)))
+        let a = Q(A(1))
+        let b = Q(A(2))
+        XCTAssertEqual(a + b, Q(A(0)))
     }
     
     func testAdditiveQuotientGroupZero() {
         typealias Q = AdditiveQuotientGroup<A, B>
-        let a = Q(A(value: 1))
+        let a = Q(A(1))
         let e = Q.zero
         XCTAssertEqual(e + e, e)
         XCTAssertEqual(a + e, a)
@@ -124,14 +127,14 @@ class AdditiveGroupTests: XCTestCase {
     
     func testAdditiveQuotientGroupNegative() {
         typealias Q = AdditiveQuotientGroup<A, B>
-        let a = Q(A(value: 1))
-        XCTAssertEqual(-a, Q(A(value: 2)))
+        let a = Q(A(1))
+        XCTAssertEqual(-a, Q(A(2)))
     }
     
     func testAdditiveGroupHom() {
         typealias F = AdditiveGroupHom<A, A>
-        let f = F { a in A(value: a.value * 2) }
-        let a = A(value: 3)
-        XCTAssertEqual(f.applied(to: a), A(value: 6))
+        let f = F { a in A(a.value * 2) }
+        let a = A(3)
+        XCTAssertEqual(f.applied(to: a), A(6))
     }
 }

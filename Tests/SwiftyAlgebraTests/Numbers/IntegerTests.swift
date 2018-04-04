@@ -11,71 +11,73 @@ import XCTest
 
 class IntegerTests: XCTestCase {
     
+    typealias A = 𝐙
+    
     func testSum() {
-        let a = 𝐙(1)
-        let b = 𝐙(2)
-        XCTAssertEqual(a + b, 𝐙(3))
+        let a = A(1)
+        let b = A(2)
+        XCTAssertEqual(a + b, A(3))
     }
     
     func testZero() {
-        let a = 𝐙(3)
-        XCTAssertEqual(a + 𝐙.zero, a)
-        XCTAssertEqual(𝐙.zero + a, a)
+        let a = A(3)
+        XCTAssertEqual(a + A.zero, a)
+        XCTAssertEqual(A.zero + a, a)
     }
 
     func testNeg() {
-        let a = 𝐙(3)
-        XCTAssertEqual(-a, 𝐙(-3))
+        let a = A(3)
+        XCTAssertEqual(-a, A(-3))
     }
 
     func testMul() {
-        let a = 𝐙(3)
-        let b = 𝐙(2)
-        XCTAssertEqual(a * b, 𝐙(6))
+        let a = A(3)
+        let b = A(2)
+        XCTAssertEqual(a * b, A(6))
     }
     
     func testId() {
-        let a = 𝐙(3)
-        let e = 𝐙.identity
+        let a = A(3)
+        let e = A.identity
         XCTAssertEqual(a * e, a)
         XCTAssertEqual(e * a, a)
     }
     
     func testPow() {
-        let a = 𝐙(2)
-        XCTAssertEqual(a.pow(0), 𝐙.identity)
+        let a = A(2)
+        XCTAssertEqual(a.pow(0), A.identity)
         XCTAssertEqual(a.pow(1), a)
-        XCTAssertEqual(a.pow(2), 𝐙(4))
-        XCTAssertEqual(a.pow(3), 𝐙(8))
+        XCTAssertEqual(a.pow(2), A(4))
+        XCTAssertEqual(a.pow(3), A(8))
         
-        let b = 𝐙(-1)
-        XCTAssertEqual(b.pow(0), 𝐙.identity)
-        XCTAssertEqual(b.pow(-1), 𝐙(-1))
-        XCTAssertEqual(b.pow(-2), 𝐙(1))
-        XCTAssertEqual(b.pow(-3), 𝐙(-1))
+        let b = A(-1)
+        XCTAssertEqual(b.pow(0), A.identity)
+        XCTAssertEqual(b.pow(-1), A(-1))
+        XCTAssertEqual(b.pow(-2), A(1))
+        XCTAssertEqual(b.pow(-3), A(-1))
     }
     
     func testIsEven() {
-        XCTAssertTrue(𝐙(2).isEven)
-        XCTAssertFalse(𝐙(3).isEven)
+        XCTAssertTrue(A(2).isEven)
+        XCTAssertFalse(A(3).isEven)
     }
     
     func testSign() {
-        XCTAssertEqual(𝐙(13).sign, 1)
-        XCTAssertEqual( 𝐙(0).sign, 0)
-        XCTAssertEqual(𝐙(-4).sign, -1)
+        XCTAssertEqual(A(13).sign, 1)
+        XCTAssertEqual( A(0).sign, 0)
+        XCTAssertEqual(A(-4).sign, -1)
     }
     
     func testEucDiv() {
-        let a = 𝐙(7)
-        let b = 𝐙(3)
+        let a = A(7)
+        let b = A(3)
         let (q, r) = a.eucDiv(by: b)
-        XCTAssertEqual(q, 𝐙(2))
-        XCTAssertEqual(r, 𝐙(1))
+        XCTAssertEqual(q, A(2))
+        XCTAssertEqual(r, A(1))
     }
     
     func testPrimes() {
-        let ps = 𝐙.primes(upto: 20)
+        let ps = A.primes(upto: 20)
         XCTAssertEqual(ps, [2, 3, 5, 7, 11, 13, 17, 19])
     }
 
