@@ -12,7 +12,11 @@ import Foundation
 
 public struct Format {
     public static func sup(_ i: Int) -> String {
-        return String( String(i).map { c in
+        return sup(String(i))
+    }
+    
+    public static func sup(_ s: String) -> String {
+        return String( s.map { c in
             switch c {
             case "0": return "⁰"
             case "1": return "¹"
@@ -31,7 +35,11 @@ public struct Format {
     }
     
     public static func sub(_ i: Int) -> String {
-        return String( String(i).map { c in
+        return sub(String(i))
+    }
+    
+    public static func sub(_ s: String) -> String {
+        return String( s.map { c in
             switch c {
             case "0": return "₀"
             case "1": return "₁"
@@ -53,15 +61,16 @@ public struct Format {
     }
     
     public static func term<R: Ring>(_ a: R, _ x: String, _ n: Int = 1, skipZero: Bool = false) -> String {
+        let (o, e) = (R.zero, R.identity)
         switch (a, n) {
-        case ( .zero, _):             return skipZero ? "" : "0"
-        case ( _, .zero):             return "\(a)"
-        case ( .identity, .identity): return "\(x)"
-        case (-.identity, .identity): return "-\(x)"
-        case ( _, .identity):         return "\(a)\(x)"
-        case ( .identity, _):         return "\(x)\(sup(n))"
-        case (-.identity, _):         return "-\(x)\(sup(n))"
-        default:                      return "\(a)\(x)\(sup(n))"
+        case ( o, _): return skipZero ? "" : "0"
+        case ( _, 0): return "\(a)"
+        case ( e, 1): return "\(x)"
+        case (-e, 1): return "-\(x)"
+        case ( _, 1): return "\(a)\(x)"
+        case ( e, _): return "\(x)\(sup(n))"
+        case (-e, _): return "-\(x)\(sup(n))"
+        default:      return "\(a)\(x)\(sup(n))"
         }
     }
     
