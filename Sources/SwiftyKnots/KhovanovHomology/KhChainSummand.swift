@@ -11,24 +11,20 @@ import SwiftyMath
 public struct KhChainSummand: Equatable, CustomStringConvertible {
     public let link: Link
     public let state: LinkSpliceState
+    public let components: [Link.Component]
     public let basis: [KhTensorElement]
     public let shifted: Int
     
     public init(link L: Link, state: LinkSpliceState, shifted: Int = 0) {
         let spliced = L.spliced(by: state)
-        let basis = KhChainSummand.generate(state: state, power: spliced.components)
-        self.init(link: spliced, state: state, basis: basis, shifted: shifted)
-    }
-    
-    internal init(link: Link, state: LinkSpliceState, basis: [KhTensorElement], shifted: Int) {
-        self.link = link
+        let comps = spliced.components
+        let basis = KhChainSummand.generate(state: state, power: comps.count)
+        
+        self.link = spliced
         self.state = state
+        self.components = comps
         self.basis = basis
         self.shifted = shifted
-    }
-    
-    public func shift(_ n: Int) -> KhChainSummand {
-        return KhChainSummand(link: link, state: state, basis: basis, shifted: shifted + n)
     }
     
     internal static func generate(state: LinkSpliceState, power n: Int) -> [KhTensorElement] {
@@ -47,7 +43,7 @@ public struct KhChainSummand: Equatable, CustomStringConvertible {
     
     public var description: String {
         let n = Int( log2( Double(basis.count) ) )
-        return Format.term(1, "A", n) + (shifted != 0 ? "{\(shifted)}" : "")
+        return Format.term(1, "V", n) + (shifted != 0 ? "{\(shifted)}" : "") + Format.sub(state.description)
     }
 }
 
@@ -62,20 +58,6 @@ public struct KhTensorElement: FreeModuleBase, Comparable {
     
     public var degree: Int {
         return factors.sum{ e in e.degree }
-    }
-    
-    internal func μ(at: (Int, Int), to: Int) -> KhTensorElement {
-//        let (i, j) = at
-//        let (e1, e2) = (factors[i], factors[j])
-        //        switch (e1, e2) {
-        //        case (.I, .I):
-        //        }
-        fatalError()
-    }
-    
-    internal func Δ(at i: Int, _ newState: LinkSpliceState) -> [KhTensorElement] {
-        //        let (e1, e2) =
-        fatalError()
     }
     
     public static func ==(b1: KhTensorElement, b2: KhTensorElement) -> Bool {
@@ -100,7 +82,7 @@ public struct KhTensorElement: FreeModuleBase, Comparable {
     }
     
     public var description: String {
-        return "(\(factors.map{ "\($0)" }.joined(separator: "⊗")))\(Format.sub(state.description))"
+        return "(" + factors.map{ "\($0)" }.joined(separator: "⊗") + ")" + Format.sub(state.description)
     }
     
     enum E: Equatable, Comparable {
@@ -116,6 +98,21 @@ public struct KhTensorElement: FreeModuleBase, Comparable {
         
         static func <(e1: E, e2: E) -> Bool {
             return e1.degree < e2.degree
+        }
+        
+        static func μ(_ e1: E, _ e2: E) -> E? {
+            switch (e1, e2) {
+            case (.I, .I): return .I
+            case (.I, .X), (.X, .I): return .X
+            case (.X, .X): return nil
+            }
+        }
+        
+        static func Δ(_ e: E) -> [(E, E)] {
+            switch e {
+            case .I: return [(.I, .X), (.X, .I)]
+            case .X: return [(.X, .X)]
+            }
         }
     }
 }
