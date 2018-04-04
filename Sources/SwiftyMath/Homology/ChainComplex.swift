@@ -133,7 +133,13 @@ public class _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable,
     }
     
     public var description: String {
-        return chain.description
+        return (T.descending ? "C" : "cC") + "(\(name); \(R.symbol))"
+    }
+    
+    public var detailDescription: String {
+        return description + " = {\n"
+            + (offset ... topDegree).map{ i in "\t\(i) : \(chainBasis(i))"}.joined(separator: ",\n")
+            + "\n}"
     }
 }
 
