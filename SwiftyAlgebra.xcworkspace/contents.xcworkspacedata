@@ -2,13 +2,10 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:Projects/SwiftyAlgebra/SwiftyAlgebra.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:Projects/SwiftyTopology/SwiftyTopology.xcodeproj">
+      location = "group:SwiftyAlgebra.xcodeproj">
    </FileRef>
    <Group
-      location = "group:Projects/Playgrounds"
+      location = "group:Playgrounds"
       name = "Playgrounds">
       <FileRef
          location = "group:Numbers.playground">
@@ -20,16 +17,13 @@
          location = "group:Polynomials.playground">
       </FileRef>
       <FileRef
-         location = "group:MPolynomials.playground">
-      </FileRef>
-      <FileRef
          location = "group:Permutations.playground">
       </FileRef>
       <FileRef
-         location = "group:LieGroups.playground">
+         location = "group:AlgebraicExtensions.playground">
       </FileRef>
       <FileRef
-         location = "group:AlgebraicExtensions.playground">
+         location = "group:LieGroups.playground">
       </FileRef>
       <FileRef
          location = "group:Homology.playground">
@@ -38,10 +32,4 @@
          location = "group:Homology2.playground">
       </FileRef>
    </Group>
-   <FileRef
-      location = "group:README.md">
-   </FileRef>
-   <FileRef
-      location = "group:LICENSE">
-   </FileRef>
 </Workspace>
