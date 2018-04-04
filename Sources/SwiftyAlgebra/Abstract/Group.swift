@@ -139,4 +139,4 @@ public typealias GroupHom<G: Group, H: Group> = MonoidHom<G, H>
 extension GroupHom: GroupHomType where Domain: Group, Codomain: Group {}
 
 public typealias GroupAut<G: Group> = Aut<G>
-extension GroupAut: GroupHomType where Domain: Group {}
+extension GroupAut: MonoidHomType, GroupHomType where Domain: Group {}
