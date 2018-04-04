@@ -13,6 +13,9 @@ let package = Package(
         .library(
             name: "SwiftyTopology",
             targets: ["SwiftyTopology"]),
+        .library(
+            name: "SwiftyKnots",
+            targets: ["SwiftyKnots"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -25,15 +28,29 @@ let package = Package(
             name: "SwiftyMath",
             dependencies: [],
 			path: "Sources/SwiftyMath"),
+
+        .testTarget(
+            name: "SwiftyMathTests",
+            dependencies: ["SwiftyMath"]),
+
         .target(
             name: "SwiftyTopology",
             dependencies: ["SwiftyMath"],
 			path: "Sources/SwiftyTopology"),
-        .testTarget(
-            name: "SwiftyMathTests",
-            dependencies: ["SwiftyMath"]),
+
         .testTarget(
             name: "SwiftyTopologyTests",
             dependencies: ["SwiftyTopology"]),
+
+        .target(
+            name: "SwiftyKnots",
+            dependencies: ["SwiftyMath"],
+			path: "Sources/SwiftyKnots"),
+
+        .testTarget(
+            name: "SwiftyKnotsTests",
+            dependencies: ["SwiftyKnots"]),
+
+
     ]
 )
