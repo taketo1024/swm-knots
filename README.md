@@ -12,13 +12,15 @@ With [Xcode](https://developer.apple.com/xcode/) installed, type:
 $ swift run
 ```
 
-To activate playgrounds, first type:
+To activate playgrounds, type:
 
 ```
 $ swift package generate-xcodeproj
 ```
 
-then open `SwiftyMath.xcworkspace` and press ▶️  to build the framework. 
+Open `SwiftyMath.xcworkspace` and press ▶️  to build the framework.
+
+![ss2](doc/ss2.png)
 
 ## Creating Your Own Project
 
