@@ -68,6 +68,12 @@ class IntegerTests: XCTestCase {
         XCTAssertEqual(A(-4).sign, -1)
     }
     
+    func testAbs() {
+        XCTAssertEqual(A(13).abs, 13)
+        XCTAssertEqual( A(0).abs, 0)
+        XCTAssertEqual(A(-4).abs, 4)
+    }
+    
     func testEucDiv() {
         let a = A(7)
         let b = A(3)

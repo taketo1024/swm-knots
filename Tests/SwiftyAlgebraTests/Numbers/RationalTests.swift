@@ -91,10 +91,25 @@ class RationalTests: XCTestCase {
         XCTAssertTrue(a < b)
     }
     
+    func testSign() {
+        let a = A(4, 5)
+        let b = A(-4, 5)
+        XCTAssertEqual(a.sign, 1)
+        XCTAssertEqual(b.sign, -1)
+        XCTAssertEqual(A.zero, 0)
+    }
+
     func testAbs() {
         let a = A(4, 5)
         let b = A(-4, 5)
         XCTAssertEqual(a.abs, a)
         XCTAssertEqual(b.abs, a)
+    }
+    
+    func testNorm() {
+        let a = A(4, 5)
+        let b = A(-4, 5)
+        XCTAssertEqual(a.norm, 0.8)
+        XCTAssertEqual(b.norm, 0.8)
     }
 }
