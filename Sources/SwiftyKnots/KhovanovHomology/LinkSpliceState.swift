@@ -56,7 +56,7 @@ public struct LinkSpliceState: Equatable, Comparable, Hashable, CustomStringConv
     }
     
     public static func all(_ n: Int) -> [LinkSpliceState] {
-        return (0 ..< 2.pow(n)).map{ LinkSpliceState($0, n) }
+        return (0 ..< 2.pow(n)).map{ LinkSpliceState($0, n) }.sorted()
     }
     
     public static func ==(a: LinkSpliceState, b: LinkSpliceState) -> Bool {
@@ -74,5 +74,19 @@ public struct LinkSpliceState: Equatable, Comparable, Hashable, CustomStringConv
     public var description: String {
         let str = String(bits, radix: 2)
         return Array(repeating: "0", count: length - str.count) + str
+    }
+}
+
+public extension Link {
+    public func spliced(by state: LinkSpliceState) -> Link {
+        var L = self.copy()
+        for (i, s) in state.enumerated {
+            if s == 0 {
+                L.spliceA(at: i)
+            } else {
+                L.spliceB(at: i)
+            }
+        }
+        return L
     }
 }

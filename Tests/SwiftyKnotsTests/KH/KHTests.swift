@@ -11,11 +11,9 @@ import SwiftyMath
 
 class KHTests: XCTestCase {
     
-    typealias A = LaurentPolynomial<𝐐>
-    
     func testTrefoil() {
         let L = Link.trefoil
-        let CKh = L.KhovanovChainComplex
+        let CKh = KhChainComplex<𝐐>(L)
         print(CKh.detailDescription)
     }
 }
