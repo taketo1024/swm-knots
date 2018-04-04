@@ -15,4 +15,10 @@ public extension KhHomology where T == Ascending, A == KhTensorElement, R: Eucli
         let C = KhChainComplex(L, R.self)
         self.init(name: name, chainComplex: C)
     }
+    
+    public var bigradedSummands: [(Int, Int, SimpleModuleStructure<KhTensorElement, R>.Summand)] {
+        return (offset ... topDegree).flatMap { i in
+            self[i].summands.map { s in (i, s.generator.degree, s) }
+        }
+    }
 }
