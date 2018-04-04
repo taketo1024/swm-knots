@@ -46,6 +46,12 @@ public extension Array {
         }
         return ArraySlice([])
     }
+    
+    public func replaced(at i: Int, with e: Element) -> [Element] {
+        var a = self
+        a[i] = e
+        return a
+    }
 }
 
 public extension Array where Element: Equatable {
