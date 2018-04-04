@@ -229,7 +229,7 @@ public struct Link: CustomStringConvertible {
     }
     
     public var description: String {
-        return junctions.isEmpty ? "" : junctions.description
+        return "L{ \(junctions.map{ $0.description }.joined(separator: ", ")) }"
     }
     
     public class Edge: Equatable, Comparable, Hashable, CustomStringConvertible {
