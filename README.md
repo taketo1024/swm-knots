@@ -57,13 +57,11 @@ $ swift package init --type executable
 
 ```swift
 import SwiftyMath
-import SwiftyTopology
 
-let S2 = SimplicialComplex.sphere(dim: 2)
-let H = Homology(S2, 𝐙.self)
+let a = 𝐐(4, 5)  // 4/5
+let b = 𝐐(3, 2)  // 3/2
 
-print(S2.detailDescription)
-print(H.detailDescription)
+print(a + b)     // 23/10
 ```
 
 ### 4. Run
@@ -71,18 +69,8 @@ print(H.detailDescription)
 ```
 $ swift run
 ```
-
 ```
-S^2 {
-    0: v₁, v₂, v₃, v₀
-    1: (v₁, v₂), (v₁, v₃), (v₂, v₃), (v₀, v₂), (v₀, v₃), (v₀, v₁)
-    2: (v₁, v₂, v₃), (v₀, v₂, v₃), (v₀, v₁, v₃), (v₀, v₁, v₂)
-}
-H(S^2; 𝐙) = {
-    0 : 𝐙,  [v₀],
-    1 : 0,  [],
-    2 : 𝐙,  [(v₀, v₂, v₃) + -1(v₁, v₂, v₃) + -1(v₀, v₁, v₃) + (v₀, v₁, v₂)]
-}
+ 23/10
 ```
 
 ## Using Mathematical Symbols
@@ -137,7 +125,7 @@ t[2]  // 4
 ### Polynomials
 
 ```swift
-typealias P = Polynominal<𝐐>
+typealias P = Polynomial<𝐐>
 
 let f = P(0, 2, -3, 1) // x^3 − 3x^2 + 2x
 let g = P(6, -5, 1)    // x^2 − 5x + 6
@@ -156,12 +144,12 @@ typealias Z_4 = IntegerQuotientRing<_4>
 Z_4.printAddTable()
 ```
 ```
-+	|	0	1	2	3
++   |   0   1   2   3
 ----------------------
-0	|	0	1	2	3
-1	|	1	2	3	0
-2	|	2	3	0	1
-3	|	3	0	1	2
+0   |   0   1   2   3
+1   |   1   2   3   0
+2   |   2   3   0   1
+3   |   3   0   1   2
 ```
 
 ```swift
@@ -169,16 +157,16 @@ typealias F_5 = IntegerQuotientField<_5>
 F_5.printMulTable()
 ```
 ```
-*	|	0	1	2	3	4
+*   |   0   1   2   3   4
 --------------------------
-0	|	0	0	0	0	0
-1	|	0	1	2	3	4
-2	|	0	2	4	1	3
-3	|	0	3	1	4	2
-4	|	0	4	3	2	1
+0   |   0   0   0   0   0
+1   |   0   1   2   3   4
+2   |   0   2   4   1   3
+3   |   0   3   1   4   2
+4   |   0   4   3   2   1
 ```
 
-### Mathic Extension
+### Algebraic Extension
 
 ```swift
 // Construct an algebraic extension over 𝐐:
@@ -199,6 +187,9 @@ a * a == 2                                         // true!
 ### Homology, Cohomology
 
 ```swift
+import SwiftyMath
+import SwiftyTopology
+
 let S2 = SimplicialComplex.sphere(dim: 2)
 let H = Homology(S2, 𝐙.self)
 print("H(S^2; 𝐙) =", H.detailDescription, "\n")
