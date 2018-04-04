@@ -8,80 +8,59 @@
 import Foundation
 
 public struct LinkSpliceState: Equatable, Comparable, Hashable, CustomStringConvertible {
-    // MEMO (bits: 5, len: 5) <-> 00101 <-> [1, 0, 1, 0, 0]
-    private let bits: Int // in binary
-    public let length: Int
-    public let degree: Int
-    
-    private init(_ bits: Int, _ length: Int) {
+    public let bits: [UInt8]
+    public init(_ bits: [UInt8]) {
         self.bits = bits
-        self.length = length
-        self.degree = {
-            var v = bits
-            var d = 0
-            while v != 0 {
-                if v & 1 == 1 {
-                    d += 1
-                }
-                v >>= 1
-            }
-            return d
-        }()
     }
     
-    public var enumerated: [(index: Int, bit: Int)] {
-        return (0 ..< length).map{ i in (i, bits >> i & 1)}
+    public var length: Int {
+        return bits.count
     }
     
-    public func diff(_ s: LinkSpliceState) -> (index: Int, sign: Int) {
-        assert( (self.degree - s.degree).abs == 1 )
-        
-        var b1 = self.bits
-        var b2 = s.bits
-        var sign = 1
-        
-        for i in (0 ..< length) {
-            if b1 & 1 != b2 & 1 {
-                return (i, sign)
+    public var degree: Int {
+        return bits.count { $0 == 1 }
+    }
+    
+    public var next: [(sign: Int, state: LinkSpliceState)] {
+        return (0 ..< length).compactMap { i -> (Int, LinkSpliceState)? in
+            if bits[i] == 0 {
+                let sgn = (-1).pow( bits[0 ..< i].count{ $0 == 1 } )
+                let next = bits.replaced(at: i, with: 1)
+                return (sgn, LinkSpliceState(next))
+            } else {
+                return nil
             }
-            
-            if b1 & 1 == 1 {
-                sign *= (-1)
-            }
-            b1 >>= 1
-            b2 >>= 1
         }
-        
-        fatalError()
     }
     
     public static func all(_ n: Int) -> [LinkSpliceState] {
-        return (0 ..< 2.pow(n)).map{ LinkSpliceState($0, n) }.sorted()
+        return (0 ..< n).reduce([[]]) { (res, _) -> [[UInt8]] in
+            res.map{ $0 + [0] } + res.map{ $0 + [1] }
+        }.map{ LinkSpliceState($0) }.sorted()
     }
     
     public static func ==(a: LinkSpliceState, b: LinkSpliceState) -> Bool {
-        return (a.bits, a.length) == (b.bits, b.length)
+        return a.bits == b.bits
     }
     
     public static func <(a: LinkSpliceState, b: LinkSpliceState) -> Bool {
-        return a.degree < b.degree || (a.degree == b.degree && a.bits > b.bits)
+        return a.degree < b.degree || (a.degree == b.degree && b.bits.lexicographicallyPrecedes(a.bits))
     }
     
     public var hashValue: Int {
-        return bits
+        return bits.reduce(0) { (res, b) in 2 &* res &+ Int(b) }
     }
     
     public var description: String {
-        let str = String(bits, radix: 2)
-        return Array(repeating: "0", count: length - str.count) + str
+        return bits.map{ "\($0)" }.joined()
     }
 }
 
 public extension Link {
     public func spliced(by state: LinkSpliceState) -> Link {
         var L = self.copy()
-        for (i, s) in state.enumerated {
-            if s == 0 {
+        for (i, b) in state.bits.enumerated() {
+            if b == 0 {
                 L.spliceA(at: i)
             } else {
                 L.spliceB(at: i)
