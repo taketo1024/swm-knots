@@ -28,9 +28,7 @@ let i = 𝐂.imaginaryUnit
 let X = gl<n, 𝐂>(0, 2 + i, -2 + i, 0)
 let g = exp(X)
 
-print(X.detailDescription, "\n")
-print(g.detailDescription, "\n")
-print(U<n>.contains(g))
+U<n>.contains(g)
 
 let B = sl<_2, 𝐑>.killingForm
 print(B.asMatrix.detailDescription)

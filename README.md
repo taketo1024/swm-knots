@@ -1,5 +1,7 @@
 # SwiftyMath
 
+![ss1](doc/ss1.png)
+
 The aim of this project is to understand Mathematics by realizing abstract concepts as codes. Mathematical axioms correspond to `protocol`s, and objects satisfying some axioms correspond to `struct`s.
 
 ## How to Build / Run
