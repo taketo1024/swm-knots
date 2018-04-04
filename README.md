@@ -9,7 +9,7 @@ The aim of this project is to understand Mathematics by realizing abstract conce
 With [Xcode](https://developer.apple.com/xcode/) installed, type:
 
 ```
-$ swift run
+$ swift build 
 ```
 
 To activate playgrounds, type:
