@@ -57,6 +57,23 @@ public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
         return chainComplex.topDegree
     }
     
+    public func bettiNumer(_ i: Int) -> Int {
+        return self[i].rank
+    }
+    
+    public var eulerCharacteristic: Int {
+        return (offset ... topDegree).sum{ i in (-1).pow(i) * bettiNumer(i) }
+    }
+    
+    public var gradedEulerCharacteristic: LaurentPolynomial<R> {
+        let q = LaurentPolynomial<R>.indeterminate
+        return (offset ... topDegree).sum { i -> LaurentPolynomial<R> in
+            R(from: (-1).pow(i)) * self[i].summands.sum { s -> LaurentPolynomial<R> in
+                s.isFree ? q.pow(s.generator.degree) : .zero
+            }
+        }
+    }
+
     public static func ==(a: _Homology<T, A, R>, b: _Homology<T, A, R>) -> Bool {
         return (a.offset == b.offset) && (a.topDegree == b.topDegree) && (a.offset ... a.topDegree).forAll { i in a[i] == b[i] }
     }
@@ -157,15 +174,5 @@ public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>:
         public var detailDescription: String {
             return structure.detailDescription
         }
-    }
-}
-
-public extension Homology where T == Descending {
-    public func bettiNumer(i: Int) -> Int {
-        return self[i].rank
-    }
-    
-    public var eulerNumber: Int {
-        return (0 ... topDegree).reduce(0){ $0 + (-1).pow($1) * bettiNumer(i: $1) }
     }
 }
