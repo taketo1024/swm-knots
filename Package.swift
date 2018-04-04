@@ -4,12 +4,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "SwiftyAlgebra",
+    name: "SwiftyMath",
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
-            name: "SwiftyAlgebra",
-            targets: ["SwiftyAlgebra"]),
+            name: "SwiftyMath",
+            targets: ["SwiftyMath"]),
         .library(
             name: "SwiftyTopology",
             targets: ["SwiftyTopology"]),
@@ -22,16 +22,16 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
-            name: "SwiftyAlgebra",
+            name: "SwiftyMath",
             dependencies: [],
-			path: "Sources/SwiftyAlgebra"),
+			path: "Sources/SwiftyMath"),
         .target(
             name: "SwiftyTopology",
-            dependencies: ["SwiftyAlgebra"],
+            dependencies: ["SwiftyMath"],
 			path: "Sources/SwiftyTopology"),
         .testTarget(
-            name: "SwiftyAlgebraTests",
-            dependencies: ["SwiftyAlgebra"]),
+            name: "SwiftyMathTests",
+            dependencies: ["SwiftyMath"]),
         .testTarget(
             name: "SwiftyTopologyTests",
             dependencies: ["SwiftyTopology"]),

@@ -1,14 +1,22 @@
-# Swifty Algebra
+# SwiftyMath
 
-A Swift playground for [Abstract Algebra](https://en.wikipedia.org/wiki/Abstract_algebra).
-This project is intended to understand Algebra by implementing abstract concepts and playing with concrete objects such as Numbers, Matrices, Polynomials, etc.
+The aim of this project is to understand Mathematics by realizing abstract concepts as codes. Mathematical axioms correspond to `protocol`s, and objects satisfying some axioms correspond to `struct`s.
 
 ## How to Build / Run
 
-Open `SwiftyAlgebra.xcworkspace` and press ▶️ to build the framework. 
-You can run the playgrounds under the project.  
+With [Xcode](https://developer.apple.com/xcode/) installed, type:
 
-![ss2.png](doc/ss2.png)
+```
+$ swift run
+```
+
+To activate playgrounds, first type:
+
+```
+$ swift package generate-xcodeproj
+```
+
+then open `SwiftyMath.xcworkspace` and press ▶️  to build the framework. 
 
 ## Creating Your Own Project
 
@@ -33,7 +41,7 @@ $ swift package init --type executable
      dependencies: [
          // Dependencies declare other packages that this package depends on.
 -        // .package(url: /* package url */, from: "1.0.0"),
-+        .package(url: "https://github.com/taketo1024/SwiftyAlgebra.git", from: "0.1.0"),
++        .package(url: "https://github.com/taketo1024/SwiftyMath.git", from: "0.1.0"),
      ],
      targets: [
          // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -41,7 +49,7 @@ $ swift package init --type executable
          .target(
              name: "YourProject",
 -            dependencies: []),
-+            dependencies: ["SwiftyAlgebra", "SwiftyTopology"]),
++            dependencies: ["SwiftyMath", "SwiftyTopology"]),
      ]
  )
 ```
@@ -49,7 +57,7 @@ $ swift package init --type executable
 ### 3. Edit `Sources/YourProject/main.swift`
 
 ```swift
-import SwiftyAlgebra
+import SwiftyMath
 import SwiftyTopology
 
 let S2 = SimplicialComplex.sphere(dim: 2)
@@ -77,8 +85,6 @@ H(S^2; 𝐙) = {
     2 : 𝐙,  [(v₀, v₂, v₃) + -1(v₁, v₂, v₃) + -1(v₀, v₁, v₃) + (v₀, v₁, v₂)]
 }
 ```
-
-You can use this [Sample Project](https://github.com/taketo1024/SwiftyAlgebra-sample) for a template.
 
 ## Using Mathematical Symbols
 
@@ -173,7 +179,7 @@ F_5.printMulTable()
 4	|	0	4	3	2	1
 ```
 
-### Algebraic Extension
+### Mathic Extension
 
 ```swift
 // Construct an algebraic extension over 𝐐:
@@ -227,4 +233,4 @@ H(RP^2; 𝐙₂) = {
 2. [Swift で数学のススメ](https://www.slideshare.net/taketo1024/swift-79828803)
 
 ## License
-**Swifty Algebra** is licensed under [CC0 1.0 Universal](LICENSE).
+**Swifty Math** is licensed under [CC0 1.0 Universal](LICENSE).

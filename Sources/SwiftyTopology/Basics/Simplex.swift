@@ -1,13 +1,13 @@
 //
 //  Simplex.swift
-//  SwiftyAlgebra
+//  SwiftyMath
 //
 //  Created by Taketo Sano on 2017/05/03.
 //  Copyright © 2017年 Taketo Sano. All rights reserved.
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 public struct Simplex: GeometricCell, Comparable {
     public let vertices: [Vertex]          // vertices in input order.

@@ -7,8 +7,11 @@
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
-public protocol GeometricComplexMap: Map where Domain == ComplexType.Cell, Codomain == ComplexType.Cell {
-    associatedtype ComplexType: GeometricComplex
+public protocol GeometricComplexMap: MapType where Complex.Map == Self, Domain == Complex.Cell, Codomain == Complex.Cell {
+    associatedtype Complex: GeometricComplex
+    
+    static func inclusion(from: Complex, to: Complex) -> Self
+    static func diagonal(from: Complex) -> Self
 }

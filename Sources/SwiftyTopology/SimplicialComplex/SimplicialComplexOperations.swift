@@ -1,13 +1,13 @@
 //
 //  SimplicialComplexOperations.swift
-//  SwiftyAlgebra
+//  SwiftyMath
 //
 //  Created by Taketo Sano on 2017/11/06.
 //  Copyright © 2017年 Taketo Sano. All rights reserved.
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 // Operations
 public extension SimplicialComplex {
@@ -155,7 +155,7 @@ public extension SimplicialComplex {
     
     public static func ∩(K1: SimplicialComplex, K2: SimplicialComplex) -> SimplicialComplex {
         let cells = K1.maximalCells.flatMap { s -> [Simplex] in
-            K2.maximalCells.flatMap{ t -> Simplex? in
+            K2.maximalCells.compactMap{ t -> Simplex? in
                 let x = s ∩ t
                 return (x.dim >= 0) ? x : nil
             }

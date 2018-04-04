@@ -1,16 +1,16 @@
 //
 //  SimplicialMap.swift
-//  SwiftyAlgebra
+//  SwiftyMath
 //
 //  Created by Taketo Sano on 2017/11/05.
 //  Copyright © 2017年 Taketo Sano. All rights reserved.
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 public struct SimplicialMap: GeometricComplexMap {
-    public typealias ComplexType = SimplicialComplex
+    public typealias Complex = SimplicialComplex
     public typealias Domain      = Simplex
     public typealias Codomain    = Simplex
     

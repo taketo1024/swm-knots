@@ -1,13 +1,13 @@
 //
 //  Vertex.swift
-//  SwiftyAlgebra
+//  SwiftyMath
 //
 //  Created by Taketo Sano on 2017/05/27.
 //  Copyright © 2017年 Taketo Sano. All rights reserved.
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 private var list: [Vertex] = []
 private var productList: [String: Vertex] = [:]

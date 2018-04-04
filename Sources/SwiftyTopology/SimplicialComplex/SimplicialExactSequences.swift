@@ -1,13 +1,13 @@
 //
 //  SimplicialExactSequences.swift
-//  SwiftyAlgebra
+//  SwiftyMath
 //
 //  Created by Taketo Sano on 2017/12/13.
 //  Copyright © 2017年 Taketo Sano. All rights reserved.
 //
 
 import Foundation
-import SwiftyAlgebra
+import SwiftyMath
 
 public extension HomologyExactSequence where T == Descending, A == Simplex, B == Simplex, C == Simplex {
     public static func pair(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<A, B, C, R> {
