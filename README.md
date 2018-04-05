@@ -8,11 +8,22 @@ The aim of this project is to understand Mathematics by realizing abstract conce
 
 ## Swift REPL
 
-With [Xcode](https://developer.apple.com/xcode/) installed, you can run SwiftyMath on Swift REPL by:
+With [Xcode](https://developer.apple.com/xcode/) installed, you can run SwiftyMath on the Swift-REPL by:
 
 ```
 $ swift build 
 $ swift -I .build/debug/ -L .build/debug/ -ldSwiftyMath
+```
+
+Try something like:
+
+```swift
+:set set print-decls false // suppress print-decl
+import SwiftyMath
+
+typealias F5 = IntegerQuotientRing<_5>
+F5.printAddTable()
+F5.printMulTable()
 ```
 
 ![ss2](doc/ss2.png)
