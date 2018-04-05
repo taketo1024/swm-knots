@@ -16,30 +16,22 @@ public extension KhHomology where T == Ascending, A == KhTensorElement, R: Eucli
         self.init(name: name, chainComplex: C)
     }
     
-    public var bigradedSummands: [(i: Int, j: Int, SimpleModuleStructure<KhTensorElement, R>.Summand)] {
-        return (offset ... topDegree).flatMap { i in
-            self[i].summands.map { s in (i, s.generator.degree, s) }
-        }
+    public subscript(i: Int, j: Int) -> Summand {
+        let ss = self[i].summands.filter{ s in s.degree == j }
+        let f = { (x: FreeModule<A, R>) -> [R] in [] } // TODO
+        let str = SimpleModuleStructure(ss, f)
+        return Summand(self, str)
     }
     
     public func printSummands() {
-        let summands = bigradedSummands
-        if summands.isEmpty {
+        let cols = (offset ... topDegree).toArray()
+        let degs = cols.flatMap{ i in self[i].summands.map{ $0.degree} }.unique()
+        
+        guard let j0 = degs.min(), let j1 = degs.max() else {
             return
         }
         
-        let table = summands.group{ $0.i }.mapValues { list in
-            list.group{ $0.j }.mapValues{ $0.map{ $0.2 } }
-        }
-        
-        let I = summands.map{ $0.i }.unique()
-        let cols = (I.min()! ... I.max()!).toArray()
-        
-        let J = summands.map{ $0.j }.unique()
-        let rows = (J.min()! ... J.max()!).reversed().toArray()
-        
-        printTable("j\\i", rows: rows, cols: cols) { (j, i) in
-            table[i]?[j].flatMap{ String($0.count) } ?? ""
-        }
+        let rows = (j0 ... j1).filter{ ($0 - j0).isEven }.reversed().toArray()
+        printTable("j\\i", rows: rows, cols: cols) { (j, i) in self[i, j] }
     }
 }

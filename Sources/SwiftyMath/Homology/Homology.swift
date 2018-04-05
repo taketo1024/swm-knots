@@ -110,12 +110,12 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
         internal var homology: _Homology<T, A, R> // FIXME circular reference!
         public let structure: SimpleModuleStructure<A, R>
         
-        internal init(_ H: _Homology<T, A, R>, _ structure: SimpleModuleStructure<A, R>) {
+        public init(_ H: _Homology<T, A, R>, _ structure: SimpleModuleStructure<A, R>) {
             self.homology = H
             self.structure = structure
         }
         
-        internal static func zero(_ H: _Homology<T, A, R>) -> Summand {
+        public static func zero(_ H: _Homology<T, A, R>) -> Summand {
             return Summand(H, SimpleModuleStructure.zeroModule)
         }
         
