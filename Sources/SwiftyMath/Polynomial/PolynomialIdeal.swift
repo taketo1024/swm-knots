@@ -15,22 +15,10 @@ public protocol _Polynomial {
 
 // memo: Supports only Field-coeffs.
 public struct PolynomialIdeal<p: _Polynomial>: EuclideanIdeal where p.CoeffRing: Field {
-    public typealias R = p.CoeffRing
-    public typealias CoeffRing = R
-    public typealias Super = Polynomial<R>
-    
-    public static var generator: Polynomial<R> {
+    public typealias CoeffRing = p.CoeffRing
+    public typealias Super = Polynomial<CoeffRing>
+    public static var mod: Polynomial<CoeffRing> {
         return p.value
-    }
-    
-    public let a: Polynomial<R>
-    
-    public init(_ a: Polynomial<R>) {
-        self.a = a
-    }
-    
-    public var asSuper: Polynomial<R> {
-        return a
     }
 }
 

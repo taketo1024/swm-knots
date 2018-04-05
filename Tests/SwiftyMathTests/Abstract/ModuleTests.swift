@@ -29,7 +29,7 @@ class ModuleTests: XCTestCase {
             return a.value % 4 == 0
         }
         
-        static func reduced(_ a: A) -> A {
+        static func normalizedInQuotient(_ a: A) -> A {
             return A(a.value % 4)
         }
         

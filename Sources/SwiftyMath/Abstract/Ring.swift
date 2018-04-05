@@ -61,12 +61,19 @@ public extension Subring {
 public protocol Ideal: AdditiveSubgroup where Super: Ring {
     static func * (r: Super, a: Self) -> Self
     static func * (m: Self, r: Super) -> Self
-    
-    static func reduced(_ a: Super) -> Super
     static func inverseInQuotient(_ r: Super) -> Super?
 }
 
+// MEMO: Usually Ideals are only used as a TypeParameter for a QuotientRing.
 public extension Ideal {
+    public init(_ x: Super) {
+        fatalError()
+    }
+    
+    public var asSuper: Super {
+        fatalError()
+    }
+    
     public static func * (a: Self, b: Self) -> Self {
         return Self(a.asSuper * b.asSuper)
     }
@@ -79,6 +86,8 @@ public extension Ideal {
         return Self(a.asSuper * r)
     }
 }
+
+public protocol MaximalIdeal: Ideal {}
 
 public typealias ProductRing<X: Ring, Y: Ring> = AdditiveProductGroup<X, Y>
 
@@ -114,7 +123,11 @@ extension QuotientRing: Monoid, Ring where Sub: Ideal, Base == Sub.Super {
     }
     
     public var inverse: QuotientRing<Base, Sub>? {
-        return Sub.inverseInQuotient(representative).map{ QuotientRing($0) }
+        if let inv = Sub.inverseInQuotient(representative) {
+            return QuotientRing(inv)
+        } else {
+            return nil
+        }
     }
     
     public static func * (a: QuotientRing<Base, Sub>, b: QuotientRing<Base, Sub>) -> QuotientRing<Base, Sub> {
@@ -128,8 +141,6 @@ extension QuotientRing: ExpressibleByIntegerLiteral where Base: ExpressibleByInt
         self.init(Base(integerLiteral: value))
     }
 }
-
-public protocol MaximalIdeal: Ideal {}
 
 extension QuotientRing: EuclideanRing, Field where Sub: MaximalIdeal {}
 

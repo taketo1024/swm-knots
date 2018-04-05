@@ -15,21 +15,11 @@ class RingTests: XCTestCase {
     private struct B: Ideal {
         typealias Super = A
         
-        let a: A
-        
-        init(_ a: A) {
-            self.a = a
-        }
-        
-        var asSuper: A {
-            return a
-        }
-        
         static func contains(_ a: A) -> Bool {
             return a % 4 == 0
         }
         
-        static func reduced(_ a: A) -> A {
+        static func normalizedInQuotient(_ a: A) -> A {
             return a % 4
         }
         

@@ -13,7 +13,9 @@ public extension AdditiveGroup {
     }
 }
 
-public protocol AdditiveSubgroup: AdditiveGroup, SubsetType where Super: AdditiveGroup {}
+public protocol AdditiveSubgroup: AdditiveGroup, SubsetType where Super: AdditiveGroup {
+    static func normalizedInQuotient(_ a: Super) -> Super
+}
 
 public extension AdditiveSubgroup {
     public static var zero: Self {
@@ -26,6 +28,10 @@ public extension AdditiveSubgroup {
     
     prefix static func - (a: Self) -> Self {
         return Self(-a.asSuper)
+    }
+    
+    public static func normalizedInQuotient(_ a: Super) -> Super {
+        return a
     }
 }
 
@@ -48,7 +54,7 @@ extension AdditiveProductGroup: AdditiveGroup where Left: AdditiveGroup, Right: 
 public struct AdditiveQuotientGroup<Base, Sub: AdditiveSubgroup>: AdditiveGroup, QuotientSetType where Base == Sub.Super {
     private let x: Base
     public init(_ x: Base) {
-        self.x = x
+        self.x = Sub.normalizedInQuotient(x)
     }
     
     public var representative: Base {

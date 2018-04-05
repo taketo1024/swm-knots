@@ -58,26 +58,26 @@ public func bezout<R: EuclideanRing>(_ a: R, _ b: R) -> (x: R, y: R, r: R) {
 }
 
 public protocol EuclideanIdeal: Ideal where Super: EuclideanRing {
-    static var generator: Super { get }
+    static var mod: Super { get }
 }
 
 public extension EuclideanIdeal {
-    static func reduced(_ a: Super) -> Super {
-        return a % generator
+    static func normalizedInQuotient(_ a: Super) -> Super {
+        return a % mod
     }
     
     static func contains(_ a: Super) -> Bool {
-        return a % generator == .zero
+        return a % mod == .zero
     }
     
     static func inverseInQuotient(_ r: Super) -> Super? {
         // find: a * r + b * m = u (u: unit)
         // then: r^-1 = u^-1 * a (mod m)
-        let (a, _, u) = bezout(r, generator)
+        let (a, _, u) = bezout(r, mod)
         return u.inverse.map{ inv in inv * a }
     }
     
     static var symbol: String {
-        return "(\(generator))"
+        return "(\(mod))"
     }
 }

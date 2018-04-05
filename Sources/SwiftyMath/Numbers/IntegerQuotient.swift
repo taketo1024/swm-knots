@@ -14,25 +14,13 @@ public typealias 𝐙₂ = IntegerQuotientRing<_2>
 // see: https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#parameterized-extensions
 
 public protocol _IntegerIdeal: EuclideanIdeal {
-    associatedtype _n: _Int
+    associatedtype n: _Int
 }
 
 public struct IntegerIdeal<n: _Int>: _IntegerIdeal {
     public typealias Super = 𝐙
-    public typealias _n = n
-    
-    public static var generator: 𝐙 {
+    public static var mod: 𝐙 {
         return n.intValue
-    }
-    
-    public let a: 𝐙
-    
-    public init(_ a: 𝐙) {
-        self.a = a
-    }
-    
-    public var asSuper: 𝐙 {
-        return a
     }
 }
 
@@ -42,10 +30,10 @@ public typealias IntegerQuotientRing<n: _Int> = QuotientRing<𝐙, IntegerIdeal<
 
 extension IntegerQuotientRing: FiniteSetType where Base == 𝐙, Sub: _IntegerIdeal {
     public static var allElements: [QuotientRing<Base, Sub>] {
-        return (0 ..< Sub._n.intValue).map{ QuotientRing($0) }
+        return (0 ..< Sub.mod).map{ QuotientRing($0) }
     }
     
     public static var countElements: Int {
-        return Sub._n.intValue
+        return Sub.mod
     }
 }
