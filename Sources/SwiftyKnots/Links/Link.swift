@@ -324,8 +324,8 @@ public struct Link: CustomStringConvertible {
     
     public class Junction: Equatable, Comparable, CustomStringConvertible {
         public enum Mode {
-            case X⁺ // 0 - 2 is above 1 - 3
             case X⁻ // 0 - 2 is below 1 - 3
+            case X⁺ // 0 - 2 is above 1 - 3
             case V  // 0 - 3 || 1 - 2
             case H  // 0 - 1 || 2 - 3
             
@@ -390,29 +390,26 @@ public struct Link: CustomStringConvertible {
             }
             
             return s(edge0.goesIn(to: self))
-                * s(edge1.goesIn(to: self))
-                * s(mode == .X⁺)
+                 * s(edge1.goesIn(to: self))
+                 * s(mode == .X⁺)
         }
         
         public func changeCrossing() {
             switch mode {
-            case .X⁺: mode = .X⁻
             case .X⁻: mode = .X⁺
+            case .X⁺: mode = .X⁻
             default: ()
             }
         }
         
+        // MEMO assumed that the initial state is X⁻.
         public func spliceA() {
-            switch mode {
-            case .X⁺: mode = .V
-            case .X⁻: mode = .H
-            default: fatalError()
-            }
+            mode = .H
         }
         
+        // MEMO assumed that the initial state is X⁻.
         public func spliceB() {
-            changeCrossing()
-            spliceA()
+            mode = .V
         }
         
         private func reorientEgdes(startingFrom e0: Edge) {

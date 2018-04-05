@@ -9,112 +9,133 @@ import Foundation
 import SwiftyMath
 
 public struct KhChainSummand: Equatable, CustomStringConvertible {
-    public let link: Link
     public let state: LinkSpliceState
-    public let components: [Link.Component]
-    public let basis: [KhTensorElement]
+    public let basis: [KhBasisElement]
     public let shift: Int
     
     public init(link L: Link, state: LinkSpliceState, shift: Int = 0) {
-        let spliced = L.spliced(by: state)
-        let comps = spliced.components
-        let basis = KhChainSummand.generateBasis(state, comps.count, shift)
-        
-        self.link = spliced
         self.state = state
-        self.components = comps
-        self.basis = basis
+        self.basis = KhBasisElement.generate(L, state, shift)
         self.shift = shift
     }
     
-    internal static func generateBasis(_ state: LinkSpliceState, _ power: Int, _ shift: Int) -> [KhTensorElement] {
-        typealias E = KhTensorElement.E
-        return (0 ..< power).reduce([[]]) { (res, _) -> [[E]] in
-            res.flatMap{ factors -> [[E]] in
-                [factors + [.I], factors + [.X]]
-            }
-        }.map{ KhTensorElement.init($0, state, shift) }
-        .sorted()
-    }
-
     public static func ==(B1: KhChainSummand, B2: KhChainSummand) -> Bool {
-        return B1.basis == B2.basis && B1.shift == B2.shift
+        return B1.basis == B2.basis
     }
     
     public var description: String {
-        let n = Int( log2( Double(basis.count) ) )
-        return Format.term(1, "V", n) + (shift != 0 ? "{\(shift)}" : "") + Format.sub(state.description)
+        let n = basis.anyElement?.tensorFactors.count ?? 0
+        let s = shift + state.degree
+        return Format.term(1, "V", n) + "{\(s)}" + Format.sub(state.description)
     }
 }
 
-public struct KhTensorElement: BasisElementType, Comparable {
-    internal let factors: [E]
-    internal let state: LinkSpliceState
-    internal let shift: Int
+public struct KhBasisElement: BasisElementType, Comparable {
+    internal let tensorFactors: [E]
+    internal let link: Link
+    public let state: LinkSpliceState
+    public let shift: Int
     
-    internal init(_ factors: [E], _ state: LinkSpliceState, _ shift: Int) {
-        self.factors = factors
+    internal init(_ tensorFactors: [E], _ link: Link, _ state: LinkSpliceState, _ shift: Int) {
+        self.tensorFactors = tensorFactors
+        self.link = link
         self.state = state
         self.shift = shift
     }
     
+    public static func generate(_ link: Link, _ state: LinkSpliceState, _ shift: Int) -> [KhBasisElement] {
+        let spliced = link.spliced(by: state)
+        let n = spliced.components.count
+        
+        return (0 ..< n).reduce([[]]) { (res, _) -> [[E]] in
+            res.flatMap{ factors -> [[E]] in
+                [factors + [.I], factors + [.X]]
+            }
+        }.map{ factors in KhBasisElement.init(factors, spliced, state, shift) }
+        .sorted()
+    }
+    
     public var degree: Int {
-        return factors.sum{ e in e.degree } + shift
+        return tensorFactors.sum{ e in e.degree } + state.degree + shift
     }
     
-    public static func ==(b1: KhTensorElement, b2: KhTensorElement) -> Bool {
-        return b1.state == b2.state && b1.factors == b2.factors
+    public func transit<R: EuclideanRing>(_ μ: (E, E) -> [E], _ Δ: (E) -> [(E, E)]) -> FreeModule<KhBasisElement, R> {
+        return state.next.sum { (sgn, state) -> FreeModule<KhBasisElement, R> in
+            R(from: sgn) * transit(to: state, μ, Δ)
+        }
     }
     
-    public static func <(b1: KhTensorElement, b2: KhTensorElement) -> Bool {
+    public func transit<R: EuclideanRing>(to state: LinkSpliceState, _ μ: (E, E) -> [E], _ Δ: (E) -> [(E, E)]) -> FreeModule<KhBasisElement, R> {
+        let spliced = link.spliced(by: state) // maybe creating too much copies...
+        let (c1, c2) = (link.components, spliced.components)
+        let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
+        
+        switch (d1.count, d2.count) {
+        case (2, 1): // apply μ
+            let (i1, i2, j) = (c1.index(of: d1[0])!, c1.index(of: d1[1])!, c2.index(of: d2[0])!)
+            let (e1, e2) = (tensorFactors[i1], tensorFactors[i2])
+            
+            return μ(e1, e2).sum { e in
+                var factor = tensorFactors
+                factor.remove(at: i2)
+                factor.remove(at: i1)
+                factor.insert(e, at: j)
+                return FreeModule( KhBasisElement(factor, spliced, state, shift) )
+            }
+            
+        case (1, 2): // apply Δ
+            let (i, j1, j2) = (c1.index(of: d1[0])!, c2.index(of: d2[0])!, c2.index(of: d2[1])!)
+            let e = tensorFactors[i]
+            
+            return Δ(e).sum { (e1, e2) -> FreeModule<KhBasisElement, R> in
+                var factor = tensorFactors
+                factor.remove(at: i)
+                factor.insert(e1, at: j1)
+                factor.insert(e2, at: j2)
+                return FreeModule( KhBasisElement(factor, spliced, state, shift) )
+            }
+        default: fatalError()
+        }
+    }
+    
+    public static func ==(b1: KhBasisElement, b2: KhBasisElement) -> Bool {
+        return b1.state == b2.state && b1.tensorFactors == b2.tensorFactors
+    }
+    
+    public static func <(b1: KhBasisElement, b2: KhBasisElement) -> Bool {
         return (b1.state < b2.state)
             || (b1.state == b2.state
                 && (b1.degree < b2.degree
                     || (b1.degree == b2.degree
-                        && b1.factors.lexicographicallyPrecedes(b2.factors)
+                        && b1.tensorFactors.lexicographicallyPrecedes(b2.tensorFactors)
                     )
                 )
         )
     }
     
     public var hashValue: Int {
-        return factors.reduce(0) { (res, e) in
+        return tensorFactors.reduce(0) { (res, e) in
             res &<< 2 | (e == .I ? 2 : 1)
         }
     }
     
     public var description: String {
-        return "(" + factors.map{ "\($0)" }.joined(separator: "⊗") + ")" + Format.sub(state.description)
+        return "(" + tensorFactors.map{ "\($0)" }.joined(separator: "⊗") + ")" + Format.sub(state.description)
     }
     
-    enum E: Equatable, Comparable {
+    public enum E: Equatable, Comparable {
         case I
         case X
         
-        var degree: Int {
+        public var degree: Int {
             switch self {
             case .I: return +1
             case .X: return -1
             }
         }
         
-        static func <(e1: E, e2: E) -> Bool {
+        public static func <(e1: E, e2: E) -> Bool {
             return e1.degree < e2.degree
-        }
-        
-        static func μ(_ e1: E, _ e2: E) -> E? {
-            switch (e1, e2) {
-            case (.I, .I): return .I
-            case (.I, .X), (.X, .I): return .X
-            case (.X, .X): return nil
-            }
-        }
-        
-        static func Δ(_ e: E) -> [(E, E)] {
-            switch e {
-            case .I: return [(.I, .X), (.X, .I)]
-            case .X: return [(.X, .X)]
-            }
         }
     }
 }
