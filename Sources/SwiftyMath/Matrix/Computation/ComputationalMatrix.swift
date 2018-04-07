@@ -385,6 +385,10 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return Matrix(grid: generateGrid())
     }
     
+    public func asDynamicMatrix() -> DynamicMatrix<R> {
+        return DynamicMatrix(rows: rows, cols: cols, grid: generateGrid())
+    }
+    
     public var description: String {
         return "CMatrix<\(rows), \(cols)> [ " + table.flatMap { (i, list) in
             list.map{ (j, a) in "\( align == .Rows ? (i, j, a) : (j, i, a) )"}

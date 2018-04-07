@@ -199,11 +199,19 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
     
     public var detailDescription: String {
-        return "[\t" + (0 ..< rows).map({ i in
-            return (0 ..< cols).map({ j in
-                return "\(self[i, j])"
-            }).joined(separator: ",\t")
-        }).joined(separator: "\n\t") + "]"
+        if (rows, cols) == (0, 0) {
+            return "[]"
+        } else if rows == 0 {
+            return "[" + String(repeating: "\t,", count: cols - 1) + "\t]"
+        } else if cols == 0 {
+            return "[" + String(repeating: "\t;", count: rows - 1) + "\t]"
+        } else {
+            return "[\t" + (0 ..< rows).map({ i in
+                return (0 ..< cols).map({ j in
+                    return "\(self[i, j])"
+                }).joined(separator: ",\t")
+            }).joined(separator: "\n\t") + "]"
+        }
     }
     
     public static var symbol: String {
