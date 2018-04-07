@@ -45,7 +45,7 @@ public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByIntege
     
     public init(_ z: 𝐂) {
         assert(𝐑.contains(z))
-        self.init(z.real.value)
+        self.init(z.realPart.value)
     }
     
     public var sign: 𝐙 {
@@ -88,6 +88,14 @@ public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByIntege
         return lhs.value < rhs.value
     }
     
+    public var sqrt: 𝐑 {
+        return 𝐑(value.squareRoot())
+    }
+    
+    public static prefix func √(x: 𝐑) -> 𝐑 {
+        return x.sqrt
+    }
+    
     public var asDouble: Double {
         return value
     }
@@ -97,7 +105,7 @@ public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByIntege
     }
     
     public static func contains(_ z: 𝐂) -> Bool {
-        return z.imaginary == .zero
+        return z.imaginaryPart == .zero
     }
     
     public var hashValue: Int {
@@ -142,8 +150,4 @@ public func acos(_ x: 𝐑) -> 𝐑 {
 
 public func atan(_ x: 𝐑) -> 𝐑 {
     return 𝐑(atan(x.value))
-}
-
-public func sqrt(_ x: 𝐑) -> 𝐑 {
-    return 𝐑(sqrt(x.value))
 }

@@ -54,16 +54,16 @@ public struct UnitaryLieAlgebra<n: _Int>: MatrixLieAlgebra {
         
         let x1 =
             (0 ..< n - 1).flatMap{ i -> [RealNumber] in
-                (i + 1 ..< n).map { j -> RealNumber in matrix[i, j].real }
+                (i + 1 ..< n).map { j -> RealNumber in matrix[i, j].realPart }
             }
         
         let x2 =
             (0 ..< n - 1).flatMap{ i -> [RealNumber] in
-                (i + 1 ..< n).map { j -> RealNumber in matrix[i, j].imaginary }
+                (i + 1 ..< n).map { j -> RealNumber in matrix[i, j].imaginaryPart }
             }
         
         let x3 =
-            (0 ..< n).map{ i -> RealNumber in matrix[i, i].imaginary }
+            (0 ..< n).map{ i -> RealNumber in matrix[i, i].imaginaryPart }
         
         return x1 + x2 + x3
     }
@@ -125,16 +125,16 @@ public struct SpecialUnitaryLieAlgebra<n: _Int>: MatrixLieAlgebra {
         
         let x1 =
             (0 ..< n - 1).flatMap{ i -> [RealNumber] in
-                (i + 1 ..< n).map { j -> RealNumber in matrix[i, j].real }
+                (i + 1 ..< n).map { j -> RealNumber in matrix[i, j].realPart }
             }
         
         let x2 =
             (0 ..< n - 1).flatMap{ i -> [RealNumber] in
-                (i + 1 ..< n).map { j -> RealNumber in matrix[i, j].imaginary }
+                (i + 1 ..< n).map { j -> RealNumber in matrix[i, j].imaginaryPart }
             }
                 
         let x3 =
-            (0 ..< n - 1).map{ i -> RealNumber in matrix[i, i].imaginary }
+            (0 ..< n - 1).map{ i -> RealNumber in matrix[i, i].imaginaryPart }
         
         return x1 + x2 + x3
     }

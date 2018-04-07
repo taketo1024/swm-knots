@@ -254,7 +254,7 @@ public extension Matrix where R: EuclideanRing {
 
 extension Matrix: NormedSpace where R: NormedSpace {
     public var norm: 𝐑 {
-        return sqrt( self.sum { (_, _, a) in a.norm.pow(2) } )
+        return √( sum { (_, _, a) in a.norm.pow(2) } )
     }
     
     public var maxNorm: 𝐑 {
@@ -270,11 +270,11 @@ public extension Matrix where R == 𝐑 {
 
 public extension Matrix where R == 𝐂 {
     public var realPart: Matrix<n, m, 𝐑> {
-        return Matrix<n, m, 𝐑>(grid: grid.map{ $0.real })
+        return Matrix<n, m, 𝐑>(grid: grid.map{ $0.realPart })
     }
     
     public var imaginaryPart: Matrix<n, m, 𝐑> {
-        return Matrix<n, m, 𝐑>(grid: grid.map{ $0.imaginary })
+        return Matrix<n, m, 𝐑>(grid: grid.map{ $0.imaginaryPart })
     }
     
     public var adjoint: Matrix<m, n, R> {

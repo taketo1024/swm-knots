@@ -58,16 +58,20 @@ public struct ComplexNumber: Field, NormedSpace, ExpressibleByIntegerLiteral, Ex
         return 𝐂(0, 1)
     }
     
-    public var real: 𝐑 {
+    public var realPart: 𝐑 {
         return x
     }
     
-    public var imaginary: 𝐑 {
+    public var imaginaryPart: 𝐑 {
         return y
     }
     
+    public var abs: 𝐑 {
+        return √(x * x + y * y)
+    }
+    
     public var norm: 𝐑 {
-        return sqrt(x * x + y * y)
+        return abs
     }
     
     public var arg: 𝐑 {
