@@ -86,7 +86,7 @@ $ swift run
 
 ## Using Mathematical Symbols
 
-We make use of mathematical symbols such as sets 𝐙, 𝐐, 𝐑, 𝐂 and operators ⊕, ⊗ etc. Copy the folder `CodeSnippets` to `~/Library/Xcode/UserData/` then you can quickly input these symbols by the completion of Xcode.
+We make use of mathematical symbols such as sets 𝐙, 𝐐, 𝐑, 𝐂 and operators ⊕, ⊗ etc. Copy the folder `CodeSnippets` to `~/Library/Developer/Xcode/UserData/` then you can quickly input these symbols by the completion of Xcode.
 
 ![ss3.png](doc/ss3.png)
 

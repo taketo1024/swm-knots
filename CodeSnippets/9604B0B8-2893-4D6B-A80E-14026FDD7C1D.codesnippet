@@ -3,24 +3,22 @@
 <plist version="1.0">
 <dict>
 	<key>IDECodeSnippetCompletionPrefix</key>
-	<string>wedge</string>
+	<string>pi</string>
 	<key>IDECodeSnippetCompletionScopes</key>
 	<array>
 		<string>CodeExpression</string>
 	</array>
 	<key>IDECodeSnippetContents</key>
-	<string>∧</string>
+	<string>π</string>
 	<key>IDECodeSnippetIdentifier</key>
-	<string>96150247-4C7B-4524-87C1-E4E95AD5DCC8</string>
+	<string>9604B0B8-2893-4D6B-A80E-14026FDD7C1D</string>
 	<key>IDECodeSnippetLanguage</key>
 	<string>Xcode.SourceCodeLanguage.Swift</string>
-	<key>IDECodeSnippetSummary</key>
-	<string>wedge</string>
 	<key>IDECodeSnippetTitle</key>
-	<string>Math op ∧</string>
+	<string>Math gk π</string>
 	<key>IDECodeSnippetUserSnippet</key>
 	<true/>
 	<key>IDECodeSnippetVersion</key>
-	<integer>2</integer>
+	<integer>0</integer>
 </dict>
 </plist>
