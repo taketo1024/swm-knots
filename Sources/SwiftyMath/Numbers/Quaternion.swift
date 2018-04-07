@@ -13,7 +13,8 @@ import Foundation
 
 public typealias 𝐇 = Quaternion
 
-public struct Quaternion: Ring, ExpressibleByFloatLiteral {
+public struct Quaternion: Ring, NormedSpace, ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
+    public typealias IntegerLiteralType = 𝐙
     public typealias FloatLiteralType = Double
     
     private let x: 𝐑
@@ -82,6 +83,10 @@ public struct Quaternion: Ring, ExpressibleByFloatLiteral {
     
     public var abs: 𝐑 {
         return √(x * x + y * y + z * z + w * w)
+    }
+    
+    public var norm: 𝐑 {
+        return abs
     }
     
     public var conjugate: 𝐇 {
