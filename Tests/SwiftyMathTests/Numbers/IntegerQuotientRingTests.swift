@@ -37,6 +37,12 @@ class IntegerQuotientRingTests: XCTestCase {
         XCTAssertEqual(-a, A(1))
     }
     
+    func testIntLiteralSum() {
+        let a = A(2)
+        let b = a + 1
+        XCTAssertEqual(b, A(3))
+    }
+    
     func testMul() {
         let a = A(2)
         let b = A(3)
@@ -63,6 +69,12 @@ class IntegerQuotientRingTests: XCTestCase {
 
         let o = A.zero
         XCTAssertNil(o.inverse)
+    }
+    
+    func testIntLiteralMul() {
+        let a = A(2)
+        let b: A = a * 3
+        XCTAssertEqual(b, A(2))
     }
     
     func testPow() {
