@@ -108,10 +108,3 @@ public struct AsModule<R: Ring>: Module {
         return value.description
     }
 }
-
-extension AsModule: ExpressibleByIntegerLiteral where R: ExpressibleByIntegerLiteral {
-    public typealias IntegerLiteralType = R.IntegerLiteralType
-    public init(integerLiteral value: IntegerLiteralType) {
-        self.init( R(integerLiteral: value) )
-    }
-}
