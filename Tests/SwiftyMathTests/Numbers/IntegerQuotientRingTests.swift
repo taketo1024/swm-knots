@@ -73,7 +73,7 @@ class IntegerQuotientRingTests: XCTestCase {
     
     func testIntLiteralMul() {
         let a = A(2)
-        let b: A = a * 3
+        let b = a * 3
         XCTAssertEqual(b, A(2))
     }
     
