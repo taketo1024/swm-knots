@@ -8,21 +8,32 @@
 
 import Foundation
 
+private var randInit = false
+public extension Double {
+    public static func random() -> Double {
+        if !randInit {
+            srand48(time(nil))
+            randInit = true
+        }
+        return drand48()
+    }
+}
+
 public protocol Randomable {
-    static func rand(_ upperBound: Int) -> Self
-    static func rand(_ lowerBound: Int, _ upperBound: Int) -> Self
+    static func random(_ upperBound: Int) -> Self
+    static func random(_ lowerBound: Int, _ upperBound: Int) -> Self
 }
 
 public extension Randomable {
-    public static func rand(_ upperBound: Int) -> Self {
-        return rand(0, upperBound)
+    public static func random(_ upperBound: Int) -> Self {
+        return random(0, upperBound)
     }
 }
 
 extension 𝐙: Randomable {
-    public static func rand(_ lowerBound: Int, _ upperBound: Int) -> 𝐙 {
+    public static func random(_ lowerBound: Int, _ upperBound: Int) -> 𝐙 {
         if lowerBound < upperBound {
-            return 𝐙(arc4random()) % (upperBound - lowerBound) + lowerBound
+            return 𝐙(Double.random() * Double(upperBound - lowerBound + 1)) + lowerBound
         } else {
             return 0
         }
@@ -30,10 +41,10 @@ extension 𝐙: Randomable {
 }
 
 extension 𝐐: Randomable {
-    public static func rand(_ lowerBound: Int, _ upperBound: Int) -> 𝐐 {
+    public static func random(_ lowerBound: Int, _ upperBound: Int) -> 𝐐 {
         if lowerBound < upperBound {
-            let q = 𝐙.rand(1, 10)
-            let p = 𝐙.rand(q * lowerBound, q * upperBound)
+            let q = 𝐙.random(1, 10)
+            let p = 𝐙.random(q * lowerBound, q * upperBound)
             return 𝐐(p, q)
         } else {
             return 0
@@ -43,11 +54,11 @@ extension 𝐐: Randomable {
 
 // TODO conditional conformance - Matrix: Randomable
 public extension Matrix where R: Randomable {
-    public static func rand(_ lowerBound: Int, _ upperBound: Int) -> Matrix<n, m, R> {
-        return Matrix { (_, _) in  R.rand(lowerBound, upperBound) }
+    public static func random(_ lowerBound: Int, _ upperBound: Int) -> Matrix<n, m, R> {
+        return Matrix { (_, _) in  R.random(lowerBound, upperBound) }
     }
     
-    public static func rand(rank r: Int, shuffle s: Int = 50) -> Matrix<n, m, R> {
+    public static func random(rank r: Int, shuffle s: Int = 50) -> Matrix<n, m, R> {
         let A = Matrix<n, m, R>{ (i, j) in (i == j && i < r) ? .identity : .zero }
         let P = Matrix<n, n, R>.randRegular(shuffle: s)
         let Q = Matrix<m, m, R>.randRegular(shuffle: s)
@@ -61,15 +72,15 @@ public extension Matrix where R: Randomable, n == m {
         let A = ComputationalMatrix<R>.identity(s)
         
         for _ in 0 ..< shuffle {
-            let i = Int.rand(0, A.rows)
-            let j = Int.rand(0, A.cols)
+            let i = Int.random(0, A.rows)
+            let j = Int.random(0, A.cols)
             if i == j {
                 continue
             }
             
-            switch Int.rand(6) {
-            case 0: A.addRow(at: i, to: j, multipliedBy: R.rand(1, 2))
-            case 1: A.addCol(at: i, to: j, multipliedBy: R.rand(1, 2))
+            switch Int.random(6) {
+            case 0: A.addRow(at: i, to: j, multipliedBy: R.random(1, 2))
+            case 1: A.addCol(at: i, to: j, multipliedBy: R.random(1, 2))
             case 2: A.multiplyRow(at: i, by: -.identity)
             case 3: A.multiplyCol(at: i, by: -.identity)
             case 4: A.swapRows(i, j)
