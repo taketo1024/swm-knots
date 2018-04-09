@@ -14,7 +14,11 @@ public struct AlgebraicExtension<K: Field, p: IrrPolynomialTP>: QuotientRingType
     private let p: Base
     
     public init(from n: 𝐙) {
-        self.init(Polynomial(from: n))
+        self.init(Polynomial(K(from: n)))
+    }
+    
+    public init(from q: 𝐐) {
+        self.init(Polynomial(K(from: q)))
     }
     
     public init(_ x: K) {
