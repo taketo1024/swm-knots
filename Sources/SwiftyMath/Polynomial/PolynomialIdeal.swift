@@ -8,13 +8,15 @@
 
 import Foundation
 
-public protocol _Polynomial {
+public protocol PolynomialTP {
     associatedtype CoeffRing: Ring
     static var value: Polynomial<CoeffRing> { get }
 }
 
+public protocol IrrPolynomialTP: PolynomialTP {}
+
 // memo: Supports only Field-coeffs.
-public struct PolynomialIdeal<p: _Polynomial>: EuclideanIdeal where p.CoeffRing: Field {
+public struct PolynomialIdeal<p: PolynomialTP>: EuclideanIdeal where p.CoeffRing: Field {
     public typealias CoeffRing = p.CoeffRing
     public typealias Super = Polynomial<CoeffRing>
     public static var mod: Polynomial<CoeffRing> {
@@ -22,6 +24,4 @@ public struct PolynomialIdeal<p: _Polynomial>: EuclideanIdeal where p.CoeffRing:
     }
 }
 
-public protocol _IrreduciblePolynomial: _Polynomial {}
-
-extension PolynomialIdeal: MaximalIdeal where p: _IrreduciblePolynomial {}
+extension PolynomialIdeal: MaximalIdeal where p: IrrPolynomialTP {}
