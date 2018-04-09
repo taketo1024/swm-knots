@@ -10,6 +10,10 @@ import Foundation
 
 public typealias SquareMatrix<n: _Int, R: Ring> = Matrix<n, n, R>
 
+public typealias Matrix2<R: Ring> = SquareMatrix<_2, R>
+public typealias Matrix3<R: Ring> = SquareMatrix<_3, R>
+public typealias Matrix4<R: Ring> = SquareMatrix<_4, R>
+
 extension SquareMatrix: Ring where n == m {
     public init(from n : 𝐙) {
         self.init(scalar: R(from: n))
