@@ -51,7 +51,33 @@ extension AdditiveProductGroup: AdditiveGroup where Left: AdditiveGroup, Right: 
     }
 }
 
-public struct AdditiveQuotientGroup<Base, Sub: AdditiveSubgroup>: AdditiveGroup, QuotientSetType where Base == Sub.Super {
+public protocol AdditiveQuotientGroupType: QuotientSetType, AdditiveGroup where Base == Sub.Super {
+    associatedtype Sub: AdditiveSubgroup
+}
+
+public extension AdditiveQuotientGroupType {
+    public static var zero: Self {
+        return Self(Base.zero)
+    }
+    
+    public static func + (a: Self, b: Self) -> Self {
+        return Self(a.representative + b.representative)
+    }
+    
+    public static prefix func - (a: Self) -> Self {
+        return Self(-a.representative)
+    }
+    
+    public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
+        return Sub.contains( a - b )
+    }
+    
+    public static var symbol: String {
+        return "\(Base.symbol)/\(Sub.symbol)"
+    }
+}
+
+public struct AdditiveQuotientGroup<Base, Sub: AdditiveSubgroup>: AdditiveQuotientGroupType where Base == Sub.Super {
     private let x: Base
     public init(_ x: Base) {
         self.x = Sub.normalizedInQuotient(x)
@@ -59,26 +85,6 @@ public struct AdditiveQuotientGroup<Base, Sub: AdditiveSubgroup>: AdditiveGroup,
     
     public var representative: Base {
         return x
-    }
-    
-    public static func isEquivalent(_ a: Base, _ b: Base) -> Bool {
-        return Sub.contains( a - b )
-    }
-    
-    public static var zero: AdditiveQuotientGroup<Base, Sub> {
-        return AdditiveQuotientGroup(Base.zero)
-    }
-    
-    public static func + (a: AdditiveQuotientGroup<Base, Sub>, b: AdditiveQuotientGroup<Base, Sub>) -> AdditiveQuotientGroup<Base, Sub> {
-        return AdditiveQuotientGroup(a.x + b.x)
-    }
-    
-    public static prefix func - (a: AdditiveQuotientGroup<Base, Sub>) -> AdditiveQuotientGroup<Base, Sub> {
-        return AdditiveQuotientGroup(-a.x)
-    }
-    
-    public static var symbol: String {
-        return "\(Base.symbol)/\(Sub.symbol)"
     }
 }
 

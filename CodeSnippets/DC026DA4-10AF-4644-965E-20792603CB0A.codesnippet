@@ -6,21 +6,21 @@
 	<string>cup</string>
 	<key>IDECodeSnippetCompletionScopes</key>
 	<array>
-		<string>All</string>
+		<string>CodeExpression</string>
 	</array>
 	<key>IDECodeSnippetContents</key>
 	<string>∪</string>
 	<key>IDECodeSnippetIdentifier</key>
 	<string>DC026DA4-10AF-4644-965E-20792603CB0A</string>
 	<key>IDECodeSnippetLanguage</key>
-	<string>Xcode.SourceCodeLanguage.Generic</string>
+	<string>Xcode.SourceCodeLanguage.Swift</string>
 	<key>IDECodeSnippetSummary</key>
 	<string>cup</string>
 	<key>IDECodeSnippetTitle</key>
-	<string>Math ∪</string>
+	<string>Math op ∪</string>
 	<key>IDECodeSnippetUserSnippet</key>
 	<true/>
 	<key>IDECodeSnippetVersion</key>
-	<integer>0</integer>
+	<integer>2</integer>
 </dict>
 </plist>

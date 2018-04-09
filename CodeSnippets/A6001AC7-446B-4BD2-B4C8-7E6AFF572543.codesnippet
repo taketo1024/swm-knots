@@ -6,21 +6,21 @@
 	<string>oplus</string>
 	<key>IDECodeSnippetCompletionScopes</key>
 	<array>
-		<string>All</string>
+		<string>CodeExpression</string>
 	</array>
 	<key>IDECodeSnippetContents</key>
 	<string>⊕</string>
 	<key>IDECodeSnippetIdentifier</key>
 	<string>A6001AC7-446B-4BD2-B4C8-7E6AFF572543</string>
 	<key>IDECodeSnippetLanguage</key>
-	<string>Xcode.SourceCodeLanguage.Generic</string>
+	<string>Xcode.SourceCodeLanguage.Swift</string>
 	<key>IDECodeSnippetSummary</key>
 	<string>For direct sum of modules/vec sps.</string>
 	<key>IDECodeSnippetTitle</key>
-	<string>Math ⊕</string>
+	<string>Math op ⊕</string>
 	<key>IDECodeSnippetUserSnippet</key>
 	<true/>
 	<key>IDECodeSnippetVersion</key>
-	<integer>0</integer>
+	<integer>2</integer>
 </dict>
 </plist>

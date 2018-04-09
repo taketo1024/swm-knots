@@ -9,6 +9,10 @@ public struct Polynomial<R: Ring>: Ring, Module {
         self.init(coeffs: [a])
     }
     
+    public init(_ a: R) {
+        self.init(coeffs: a)
+    }
+    
     public init(coeffs: [R]) {
         assert(coeffs.count > 0)
         if coeffs.last! == .zero {
@@ -19,7 +23,7 @@ public struct Polynomial<R: Ring>: Ring, Module {
         }
     }
     
-    public init(_ coeffs: R...) {
+    public init(coeffs: R...) {
         self.init(coeffs: coeffs)
     }
     
@@ -75,7 +79,7 @@ public struct Polynomial<R: Ring>: Ring, Module {
     }
     
     public static var indeterminate: Polynomial<R> {
-        return Polynomial<R>(.zero, .identity)
+        return Polynomial<R>(coeffs: .zero, .identity)
     }
     
     public static func == (f: Polynomial<R>, g: Polynomial<R>) -> Bool {
@@ -157,12 +161,5 @@ extension Polynomial: EuclideanRing where R: Field {
                 let m = eucDivMonomial(r, g)
                 return (q + m.q, m.r)
         }
-    }
-}
-
-extension Polynomial: ExpressibleByIntegerLiteral where R: ExpressibleByIntegerLiteral {
-    public typealias IntegerLiteralType = R.IntegerLiteralType
-    public init(integerLiteral n: IntegerLiteralType) {
-        self.init(R(integerLiteral: n))
     }
 }

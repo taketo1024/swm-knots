@@ -11,23 +11,10 @@ import Foundation
 import XCTest
 @testable import SwiftyMath
 
-private extension ComputationalMatrix {
-    convenience init(_ r: Int, _ c: Int, _ g: [R]) {
-        self.init(rows: r, cols: c, grid: g)
-    }
-}
-
 class MatrixEliminationTests: XCTestCase {
     
-    typealias M<R: EuclideanRing> = ComputationalMatrix<R>
-    override func setUp() {
-        super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-    
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
+    private func M<R: Ring>(_ rows: Int, _ cols: Int, _ grid: [R]) -> ComputationalMatrix<R> {
+        return ComputationalMatrix(rows: rows, cols: cols, grid: grid)
     }
     
     func testElimination_Z55_regular() {
@@ -93,22 +80,22 @@ class MatrixEliminationTests: XCTestCase {
     }
     
     func testElimination_Q55_regular() {
-        let A = M(5, 5, [𝐐(-3, 1), 𝐐(0, 1), 𝐐(0, 1), 𝐐(-9, 2), 𝐐(0, 1), 𝐐(10, 3), 𝐐(2, 1), 𝐐(0, 1), 𝐐(-15, 2), 𝐐(6, 1), 𝐐(-10, 3), 𝐐(-2, 1), 𝐐(0, 1), 𝐐(15, 2), 𝐐(-10, 1), 𝐐(0, 1), 𝐐(0, 1), 𝐐(3, 4), 𝐐(-5, 1), 𝐐(0, 1), 𝐐(0, 1), 𝐐(0, 1), 𝐐(1, 1), 𝐐(0, 1), 𝐐(0, 1)])
+        let A = M(5, 5, [-3./1, 0./1, 0./1, -9./2, 0./1, 10./3, 2./1, 0./1, -15./2, 6./1, -10./3, -2./1, 0./1, 15./2, -10./1, 0./1, 0./1, 3./4, -5./1, 0./1, 0./1, 0./1, 1./1, 0./1, 0./1])
         let E = SmithEliminator(A.copy()).run()
         
         XCTAssertEqual(E.result,
-                       M<𝐐>(5, 5, [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1]))
+                       M(5, 5, [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1]))
         
         XCTAssertEqual(E.left * A * E.right, E.result)
         XCTAssertEqual(E.leftInverse * E.result * E.rightInverse, A)
     }
     
     func testElimination_Q55_rank3() {
-        let A = M(5, 5, [𝐐(1, 1), 𝐐(1, 1), 𝐐(0, 1), 𝐐(8, 3), 𝐐(10, 3), 𝐐(-3, 1), 𝐐(0, 1), 𝐐(0, 1), 𝐐(-3, 1), 𝐐(-5, 1), 𝐐(2, 1), 𝐐(0, 1), 𝐐(10, 3), 𝐐(2, 1), 𝐐(16, 3), 𝐐(79, 8), 𝐐(0, 1), 𝐐(395, 24), 𝐐(79, 8), 𝐐(79, 3), 𝐐(7, 2), 𝐐(0, 1), 𝐐(35, 6), 𝐐(7, 2), 𝐐(28, 3)])
+        let A = M(5, 5, [1./1, 1./1, 0./1, 8./3, 10./3, -3./1, 0./1, 0./1, -3./1, -5./1, 2./1, 0./1, 10./3, 2./1, 16./3, 79./8, 0./1, 395./24, 79./8, 79./3, 7./2, 0./1, 35./6, 7./2, 28./3])
         let E = SmithEliminator(A.copy()).run()
         
         XCTAssertEqual(E.result,
-                       M<𝐐>(5, 5, [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+                       M(5, 5, [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
         
         XCTAssertEqual(E.left * A * E.right, E.result)
         XCTAssertEqual(E.leftInverse * E.result * E.rightInverse, A)

@@ -25,6 +25,11 @@ class RationalTests: XCTestCase {
         XCTAssertEqual(a, A(5, 1))
     }
     
+    func testRationalDivOp() {
+        let a = 2./3
+        XCTAssertEqual(a, A(2, 3))
+    }
+    
     func testSum() {
         let a = A(3, 2)
         let b = A(4, 5)

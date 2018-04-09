@@ -96,3 +96,9 @@ public struct RationalNumber: Field, NormedSpace, Comparable, ExpressibleByInteg
         return (p.hashValue &* 31) &+ q.hashValue
     }
 }
+
+extension 𝐙 {
+    public static func ./(a: 𝐙, b: 𝐙) -> 𝐐 {
+        return 𝐐(a, b)
+    }
+}

@@ -13,14 +13,14 @@
 	<key>IDECodeSnippetIdentifier</key>
 	<string>67EE1276-07F6-4D97-BE60-B93FA58DDDBC</string>
 	<key>IDECodeSnippetLanguage</key>
-	<string>Xcode.SourceCodeLanguage.Generic</string>
+	<string>Xcode.SourceCodeLanguage.Swift</string>
 	<key>IDECodeSnippetSummary</key>
 	<string>Quaternions</string>
 	<key>IDECodeSnippetTitle</key>
-	<string>Math 𝐇</string>
+	<string>Math bold 𝐇</string>
 	<key>IDECodeSnippetUserSnippet</key>
 	<true/>
 	<key>IDECodeSnippetVersion</key>
-	<integer>0</integer>
+	<integer>2</integer>
 </dict>
 </plist>
