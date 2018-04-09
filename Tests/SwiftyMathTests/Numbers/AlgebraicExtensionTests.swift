@@ -34,8 +34,8 @@ class AlgebraicExtensionTests: XCTestCase {
     }
     
     func testFromRational() {
-        let a = A(from: 𝐐(2, 3))
-        XCTAssertEqual(a, A(𝐐(2, 3)))
+        let a = A(from: 2./3)
+        XCTAssertEqual(a, A(2./3))
     }
     
     func testSum() {
@@ -77,10 +77,10 @@ class AlgebraicExtensionTests: XCTestCase {
     }
     
     func testInv() {
-        XCTAssertEqual(α.inverse!, A(Polynomial(coeffs: 0, 𝐐(1, 2))))
+        XCTAssertEqual(α.inverse!, A(1./2) * α)
         
         let a = 1 + 3 * α
-        XCTAssertEqual(a.inverse!, A(Polynomial(coeffs: 𝐐(-1, 17), 𝐐(3, 17))))
+        XCTAssertEqual(a.inverse!, A(-1./17) + A(3./17) * α)
 
         let o = A.zero
         XCTAssertNil(o.inverse)
@@ -92,8 +92,8 @@ class AlgebraicExtensionTests: XCTestCase {
         XCTAssertEqual(a.pow(1), 1 + 2 * α)
         XCTAssertEqual(a.pow(2), 9 + 4 * α)
         
-        XCTAssertEqual(a.pow(-1), A(Polynomial(coeffs: 𝐐(-1, 7), 𝐐(2, 7))))
-        XCTAssertEqual(a.pow(-2), A(Polynomial(coeffs: 𝐐(9, 49), 𝐐(-4, 49))))
+        XCTAssertEqual(a.pow(-1), A(-1./7) + A(2./7) * α)
+        XCTAssertEqual(a.pow(-2), A(9./49) + A(-4./49) * α)
 
     }
 }
