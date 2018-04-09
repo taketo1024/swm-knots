@@ -11,16 +11,10 @@ import Foundation
 import XCTest
 @testable import SwiftyMath
 
-class MatrixTests: XCTestCase {
+class ComputationalMatrixTests: XCTestCase {
     
-    override func setUp() {
-        super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-    
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
+    private func M<R: Ring>(align: ComputationalMatrixAlignment = .Rows, _ xs: R...) -> ComputationalMatrix<R> {
+        return ComputationalMatrix(rows: 2, cols: 2, grid: xs)
     }
     
     public func testSwitchFromRow() {
@@ -87,9 +81,5 @@ class MatrixTests: XCTestCase {
         let a = M(1,2,3,4)
         a.swapCols(0, 1)
         XCTAssertEqual(a, M(2,1,4,3))
-    }
-    
-    private func M<R: Ring>(align: ComputationalMatrixAlignment = .Rows, _ xs: R...) -> ComputationalMatrix<R> {
-        return ComputationalMatrix(rows: 2, cols: 2, grid: xs)
     }
 }
