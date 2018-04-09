@@ -113,27 +113,43 @@ extension ProductRing: Ring where Left: Ring, Right: Ring {
     }
 }
 
-public typealias QuotientRing<R, I: Ideal> = AdditiveQuotientGroup<R, I> where R == I.Super
+public protocol QuotientRingType: AdditiveQuotientGroupType, Ring where Sub: Ideal {}
 
-// MEMO cannot directly write `QuotientRing: Ring` for some reason. (Swift 4.1)
-
-extension QuotientRing: Monoid, Ring where Sub: Ideal, Base == Sub.Super {
+public extension QuotientRingType {
     public init(from n: 𝐙) {
         self.init(Base(from: n))
     }
     
-    public var inverse: QuotientRing<Base, Sub>? {
+    public var inverse: Self? {
         if let inv = Sub.inverseInQuotient(representative) {
-            return QuotientRing(inv)
+            return Self(inv)
         } else {
             return nil
         }
     }
     
-    public static func * (a: QuotientRing<Base, Sub>, b: QuotientRing<Base, Sub>) -> QuotientRing<Base, Sub> {
-        return QuotientRing(a.representative * b.representative)
+    public static var zero: Self {
+        return Self(Base.zero)
+    }
+    
+    public static func + (a: Self, b: Self) -> Self {
+        return Self(a.representative + b.representative)
+    }
+    
+    public static prefix func - (a: Self) -> Self {
+        return Self(-a.representative)
+    }
+    
+    public static func * (a: Self, b: Self) -> Self {
+        return Self(a.representative * b.representative)
     }
 }
+
+public typealias QuotientRing<R, I: Ideal> = AdditiveQuotientGroup<R, I> where R == I.Super
+
+extension QuotientRing: Monoid, Ring, QuotientRingType where Sub: Ideal, Base == Sub.Super {}
+
+extension QuotientRing: EuclideanRing, Field where Sub: MaximalIdeal {}
 
 extension QuotientRing: ExpressibleByIntegerLiteral where Base: ExpressibleByIntegerLiteral {
     public typealias IntegerLiteralType = Base.IntegerLiteralType
@@ -141,8 +157,6 @@ extension QuotientRing: ExpressibleByIntegerLiteral where Base: ExpressibleByInt
         self.init(Base(integerLiteral: value))
     }
 }
-
-extension QuotientRing: EuclideanRing, Field where Sub: MaximalIdeal {}
 
 public protocol RingHomType: AdditiveGroupHomType where Domain: Ring, Codomain: Ring {}
 
