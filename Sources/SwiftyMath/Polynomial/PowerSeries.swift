@@ -63,7 +63,7 @@ public struct PowerSeries<K: Field>: Ring, Module {
     }
     
     public func polynomial(upTo degree: Int) -> Polynomial<K> {
-        return Polynomial(degree: degree) { i in coeff(i) }
+        return Polynomial(coeffs: (0 ... degree).map{ i in coeff(i) } )
     }
     
     public func evaluate(_ x: K, upTo degree: Int) -> K {
