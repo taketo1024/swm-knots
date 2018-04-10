@@ -16,4 +16,8 @@ public extension Dictionary {
     public init<S: Sequence>(keys: S, generator: (Key) -> Value) where S.Element == Key {
         self.init(pairs: keys.map{ ($0, generator($0))} )
     }
+    
+    public func mapPairs<K, V>(_ transform: (Key, Value) -> (K, V)) -> [K : V] {
+        return Dictionary<K, V>(pairs: self.map{ (k, v) in transform(k, v) })
+    }
 }

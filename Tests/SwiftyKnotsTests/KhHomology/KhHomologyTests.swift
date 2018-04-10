@@ -16,7 +16,7 @@ class KhHomologyTests: XCTestCase {
         let J = L.unnormalizedJonesPolynomial
         
         let Kh = KhHomology(L, 𝐐.self)
-        let χ = Kh.gradedEulerCharacteristic
+        let χ = Kh.gradedEulerCharacteristic.withSymbol("q")
         
         XCTAssertEqual(χ, J)
     }

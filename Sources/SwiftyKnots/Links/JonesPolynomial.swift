@@ -16,7 +16,7 @@ public extension Link {
     }
     
     private func _KauffmanBracket(normalized b: Bool) -> LaurentPolynomial<𝐐> {
-        let A = LaurentPolynomial<𝐐>.indeterminate
+        let A = LaurentPolynomial<𝐐>.indeterminate(symbol: "A")
         if let J = junctions.first(where: {$0.isCrossing}) {
             let i = junctions.index(of: J)!
             let pair = splicedPair(at: i)
@@ -38,9 +38,9 @@ public extension Link {
     }
     
     public func _JonesPolynomial(normalized b: Bool) -> LaurentPolynomial<𝐐> {
-        let A = LaurentPolynomial<𝐐>.indeterminate
+        let A = LaurentPolynomial<𝐐>.indeterminate(symbol: "A")
         let f = (-A).pow( -3 * writhe ) * _KauffmanBracket(normalized: b)
-        let J = LaurentPolynomial(lowerDegree: -f.upperDegree/2, upperDegree: -f.lowerDegree/2) { i in
+        let J = LaurentPolynomial(symbol: "q", degreeRange: -f.upperDegree/2 ... -f.lowerDegree/2) { i in
             𝐐(from: (-1).pow(i)) * f.coeff(-2 * i)
         }
         return J
