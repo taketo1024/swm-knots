@@ -88,6 +88,40 @@ public struct AdditiveQuotientGroup<Base, Sub: AdditiveSubgroup>: AdditiveQuotie
     }
 }
 
+public struct AsMulGroup<G: AdditiveGroup>: Group {
+    private let g: G
+    public init(_ g: G) {
+        self.g = g
+    }
+    
+    public var inverse: AsMulGroup<G> {
+        return AsMulGroup(-g)
+    }
+    
+    public static func * (a: AsMulGroup<G>, b: AsMulGroup<G>) -> AsMulGroup<G> {
+        return AsMulGroup(a.g + b.g)
+    }
+    
+    public static var identity: AsMulGroup<G> {
+        return AsMulGroup(G.zero)
+    }
+    
+    public var description: String {
+        return g.description
+    }
+    
+    public static var symbol: String {
+        return G.symbol
+    }
+}
+
+extension AsMulGroup: ExpressibleByIntegerLiteral where G: ExpressibleByIntegerLiteral {
+    public typealias IntegerLiteralType = G.IntegerLiteralType
+    public init(integerLiteral value: IntegerLiteralType) {
+        self.init(G(integerLiteral: value))
+    }
+}
+
 public protocol AdditiveGroupHomType: MapType, AdditiveGroup where Domain: AdditiveGroup, Codomain: AdditiveGroup {}
 
 public extension AdditiveGroupHomType {
