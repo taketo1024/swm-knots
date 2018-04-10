@@ -11,6 +11,11 @@ public typealias LaurentPolynomial<R: Ring> = _Polynomial<LaurentPolynomialType,
 
 public struct _Polynomial<T: PolynomialType, R: Ring>: Ring, Module {
     public typealias CoeffRing = R
+    
+    // MEMO: We may put `symbol` as a type parameter,
+    // but creating a struct for each symbol would be a nuisance.
+    public let symbol: String
+    
     internal let coeffs: [Int : R]
     
     public init(from n: 𝐙) {
@@ -22,26 +27,31 @@ public struct _Polynomial<T: PolynomialType, R: Ring>: Ring, Module {
         self.init(coeffs: [0 : a])
     }
     
-    public init(coeffs: [Int : R]) {
+    public init(symbol: String = "x", coeffs: [Int : R]) {
         assert( !(T.isNormal && coeffs.contains{ (i, a) in i < 0 && a != .zero } ) )
+        self.symbol = symbol
         self.coeffs = coeffs.filter{ (_, a) in a != .zero }
     }
     
-    public init(lowerDegree: Int = 0, coeffs: [R]) {
+    public init(symbol: String = "x", lowerDegree: Int = 0, coeffs: [R]) {
         let dict = Dictionary(pairs: coeffs.enumerated().map{ (i, a) in (i + lowerDegree, a) })
-        self.init(coeffs: dict)
+        self.init(symbol: symbol, coeffs: dict)
     }
     
-    public init(lowerDegree: Int = 0, coeffs: R...) {
-        self.init(lowerDegree: lowerDegree, coeffs: coeffs)
+    public init(symbol: String = "x", lowerDegree: Int = 0, coeffs: R...) {
+        self.init(symbol: symbol, lowerDegree: lowerDegree, coeffs: coeffs)
     }
     
-    public init(degreeRange: CountableClosedRange<Int>, gen: ((Int) -> R)) {
-        self.init(lowerDegree: degreeRange.lowerBound, coeffs: degreeRange.map(gen))
+    public init(symbol: String = "x", degreeRange: CountableClosedRange<Int>, gen: ((Int) -> R)) {
+        self.init(symbol: symbol, lowerDegree: degreeRange.lowerBound, coeffs: degreeRange.map(gen))
+    }
+    
+    public static func indeterminate(symbol: String) -> _Polynomial<T, R> {
+        return _Polynomial(symbol: symbol, coeffs: [1: .identity])
     }
     
     public static var indeterminate: _Polynomial<T, R> {
-        return _Polynomial(coeffs: [1: .identity])
+        return indeterminate(symbol: "x")
     }
     
     public var lowerDegree: Int {
@@ -72,33 +82,37 @@ public struct _Polynomial<T: PolynomialType, R: Ring>: Ring, Module {
         return leadCoeff == .identity
     }
     
+    public var isConst: Bool {
+        return (upperDegree, lowerDegree) == (0, 0)
+    }
+    
     public var constTerm: R {
         return coeff(0)
     }
     
     public func mapCoeffs(_ f: ((R) -> R)) -> _Polynomial<T, R> {
-        return _Polynomial(coeffs: coeffs.mapValues(f))
+        return _Polynomial(symbol: symbol, coeffs: coeffs.mapValues(f))
     }
     
     public var normalizeUnit: _Polynomial<T, R> {
         if let a = leadCoeff.inverse {
-            return _Polynomial(a)
+            return _Polynomial(symbol: symbol, coeffs: a)
         } else {
-            return _Polynomial(.identity)
+            return _Polynomial(symbol: symbol, coeffs: .identity)
         }
     }
     
     public var inverse: _Polynomial<T, R>? {
         if T.isNormal, degree == 0, let a = constTerm.inverse {
-            return _Polynomial(a)
+            return _Polynomial(symbol: symbol, coeffs: a)
         } else if !T.isNormal, lowerDegree == upperDegree, let a = leadCoeff.inverse {
-            return _Polynomial(coeffs: [-degree : a])
+            return _Polynomial(symbol: symbol, coeffs: [-degree : a])
         }
         return nil
     }
     
     public var derivative: _Polynomial<T, R> {
-        return _Polynomial(coeffs: coeffs.mapPairs { (i, a) -> (Int, R) in
+        return _Polynomial(symbol: symbol, coeffs: coeffs.mapPairs { (i, a) -> (Int, R) in
             (i - 1, R(from: i) * a)
         })
     }
@@ -124,15 +138,18 @@ public struct _Polynomial<T: PolynomialType, R: Ring>: Ring, Module {
     }
     
     public static func == (f: _Polynomial<T, R>, g: _Polynomial<T, R>) -> Bool {
-        return f.coeffs == g.coeffs
+        return (f.isConst && g.isConst || f.symbol == g.symbol) && f.coeffs == g.coeffs
     }
     
     public static func + (f: _Polynomial<T, R>, g: _Polynomial<T, R>) -> _Polynomial<T, R> {
+        assert(f.isConst || g.isConst || f.symbol == g.symbol)
+        let symbol = f.isConst ? g.symbol : f.symbol
+        
         let degs = Set(f.coeffs.keys).union(g.coeffs.keys)
         let coeffs = Dictionary(keys: degs) { i in
             f.coeff(i) + g.coeff(i)
         }
-        return _Polynomial(coeffs: coeffs)
+        return _Polynomial(symbol: symbol, coeffs: coeffs)
     }
     
     public static prefix func - (f: _Polynomial<T, R>) -> _Polynomial<T, R> {
@@ -140,6 +157,9 @@ public struct _Polynomial<T: PolynomialType, R: Ring>: Ring, Module {
     }
     
     public static func * (f: _Polynomial<T, R>, g: _Polynomial<T, R>) -> _Polynomial<T, R> {
+        assert(f.isConst || g.isConst || f.symbol == g.symbol)
+        let symbol = f.isConst ? g.symbol : f.symbol
+        
         let kRange = (f.lowerDegree + g.lowerDegree ... f.upperDegree + g.upperDegree)
         let coeffs = kRange.map { k -> (Int, R) in
             let iRange = max(f.lowerDegree, k - g.upperDegree) ... min(k - g.lowerDegree, f.upperDegree)
@@ -148,7 +168,7 @@ public struct _Polynomial<T: PolynomialType, R: Ring>: Ring, Module {
             }
             return (k, a)
         }
-        return _Polynomial(coeffs: Dictionary(pairs: coeffs))
+        return _Polynomial(symbol: symbol, coeffs: Dictionary(pairs: coeffs))
     }
     
     public static func * (r: R, f: _Polynomial<T, R>) -> _Polynomial<T, R> {
@@ -159,16 +179,8 @@ public struct _Polynomial<T: PolynomialType, R: Ring>: Ring, Module {
         return f.mapCoeffs { $0 * r }
     }
     
-    public func description(descending: Bool) -> String {
-        var degs = coeffs.keys.sorted()
-        if descending {
-            degs.reverse()
-        }
-        return Format.terms("+", degs.map{ i in (coeff(i), "x", i)} )
-    }
-    
     public var description: String {
-        return description(descending: false)
+        return Format.terms("+", coeffs.keys.sorted().map{ i in (coeff(i), symbol, i)} )
     }
     
     public static var symbol: String {
@@ -202,7 +214,7 @@ extension _Polynomial: EuclideanRing where T == NormalPolynomialType, R: Field {
             if n < 0 {
                 return (.zero, f)
             } else {
-                let x = A.indeterminate
+                let x = A.indeterminate(symbol: symbol)
                 let a = f.leadCoeff / g.leadCoeff
                 let q = a * x.pow(n)
                 let r = f - q * g
