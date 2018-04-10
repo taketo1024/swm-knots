@@ -40,7 +40,7 @@ public extension Link {
     public func _JonesPolynomial(normalized b: Bool) -> LaurentPolynomial<𝐐> {
         let A = LaurentPolynomial<𝐐>.indeterminate
         let f = (-A).pow( -3 * writhe ) * _KauffmanBracket(normalized: b)
-        let J = LaurentPolynomial(lowerDegree: -f.upperDegree/2, upperDegree: -f.lowerDegree/2) { i in
+        let J = LaurentPolynomial(degreeRange: -f.upperDegree/2 ... -f.lowerDegree/2) { i in
             𝐐(from: (-1).pow(i)) * f.coeff(-2 * i)
         }
         return J

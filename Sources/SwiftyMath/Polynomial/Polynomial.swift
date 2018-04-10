@@ -1,11 +1,13 @@
 import Foundation
 
-public protocol PolynomialType {}
-public struct NormalPolynomialType: PolynomialType {}
-public struct LaurentPolynomialType: PolynomialType {}
+public protocol PolynomialType {
+    static var isNormal: Bool { get }
+}
+public struct NormalPolynomialType : PolynomialType { public static var isNormal = true  }
+public struct LaurentPolynomialType: PolynomialType { public static var isNormal = false }
 
-public typealias Polynomial<R: Ring> = _Polynomial<NormalPolynomialType, R>
-//public typealias LaurentPolynomial<R: Ring> = _Polynomial<NormalPolynomialType, R>
+public typealias        Polynomial<R: Ring> = _Polynomial<NormalPolynomialType , R>
+public typealias LaurentPolynomial<R: Ring> = _Polynomial<LaurentPolynomialType, R>
 
 public struct _Polynomial<T: PolynomialType, R: Ring>: Ring, Module {
     public typealias CoeffRing = R
@@ -21,16 +23,21 @@ public struct _Polynomial<T: PolynomialType, R: Ring>: Ring, Module {
     }
     
     public init(coeffs: [Int : R]) {
+        assert( !(T.isNormal && coeffs.contains{ (i, a) in i < 0 && a != .zero } ) )
         self.coeffs = coeffs.filter{ (_, a) in a != .zero }
     }
     
-    public init(coeffs: [R]) {
-        let dict = Dictionary(pairs: coeffs.enumerated().map{ (i, a) in (i, a) })
+    public init(lowerDegree: Int = 0, coeffs: [R]) {
+        let dict = Dictionary(pairs: coeffs.enumerated().map{ (i, a) in (i + lowerDegree, a) })
         self.init(coeffs: dict)
     }
     
-    public init(coeffs: R...) {
-        self.init(coeffs: coeffs)
+    public init(lowerDegree: Int = 0, coeffs: R...) {
+        self.init(lowerDegree: lowerDegree, coeffs: coeffs)
+    }
+    
+    public init(degreeRange: CountableClosedRange<Int>, gen: ((Int) -> R)) {
+        self.init(lowerDegree: degreeRange.lowerBound, coeffs: degreeRange.map(gen))
     }
     
     public static var indeterminate: _Polynomial<T, R> {
@@ -82,9 +89,9 @@ public struct _Polynomial<T: PolynomialType, R: Ring>: Ring, Module {
     }
     
     public var inverse: _Polynomial<T, R>? {
-        if T.self == NormalPolynomialType.self, degree == 0, let a = constTerm.inverse {
+        if T.isNormal, degree == 0, let a = constTerm.inverse {
             return _Polynomial(a)
-        } else if T.self == LaurentPolynomialType.self, lowerDegree == upperDegree, let a = leadCoeff.inverse {
+        } else if !T.isNormal, lowerDegree == upperDegree, let a = leadCoeff.inverse {
             return _Polynomial(coeffs: [-degree : a])
         }
         return nil
@@ -165,7 +172,7 @@ public struct _Polynomial<T: PolynomialType, R: Ring>: Ring, Module {
     }
     
     public static var symbol: String {
-        return "\(R.symbol)[x]"
+        return T.isNormal ? "\(R.symbol)[x]" : "\(R.symbol)[x, x⁻¹]"
     }
     
     public var hashValue: Int {
