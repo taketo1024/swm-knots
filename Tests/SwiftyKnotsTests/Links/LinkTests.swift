@@ -32,7 +32,7 @@ class LinkTests: XCTestCase {
         XCTAssertEqual(O.components.count, 2)
         XCTAssertEqual(O.crossingNumber, 2)
         XCTAssertEqual(O.writhe, -2)
-        XCTAssertEqual(O.JonesPolynomial, A(coeffs: [-5: 1, -1: 1]) )
+        XCTAssertEqual(O.JonesPolynomial, A(symbol: "q", coeffs: [-5: 1, -1: 1]) )
     }
 
     func testTrefoil() {
@@ -40,6 +40,6 @@ class LinkTests: XCTestCase {
         XCTAssertEqual(O.components.count, 1)
         XCTAssertEqual(O.crossingNumber, 3)
         XCTAssertEqual(O.writhe, -3)
-        XCTAssertEqual(O.JonesPolynomial, A(coeffs: [-8: -1, -6: 1, -2: 1]))
+        XCTAssertEqual(O.JonesPolynomial, A(symbol: "q", coeffs: [-8: -1, -6: 1, -2: 1]))
     }
 }

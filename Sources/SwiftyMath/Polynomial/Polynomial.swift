@@ -94,6 +94,10 @@ public struct _Polynomial<T: PolynomialType, R: Ring>: Ring, Module {
         return _Polynomial(symbol: symbol, coeffs: coeffs.mapValues(f))
     }
     
+    public func withSymbol(_ symbol: String) -> _Polynomial<T, R> {
+        return _Polynomial(symbol: symbol, coeffs: coeffs)
+    }
+    
     public var normalizeUnit: _Polynomial<T, R> {
         if let a = leadCoeff.inverse {
             return _Polynomial(symbol: symbol, coeffs: a)
