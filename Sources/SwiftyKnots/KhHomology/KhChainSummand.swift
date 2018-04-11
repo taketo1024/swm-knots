@@ -47,7 +47,7 @@ public struct KhChainSummand: Equatable, CustomStringConvertible {
     }
 }
 
-public struct KhTensorElement: FreeModuleBase, Comparable {
+public struct KhTensorElement: BasisElementType, Comparable {
     internal let factors: [E]
     internal let state: LinkSpliceState
     internal let shift: Int

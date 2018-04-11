@@ -20,7 +20,7 @@ import Foundation
 // See: https://en.wikipedia.org/wiki/Free_presentation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
-public final class SimpleModuleStructure<A: FreeModuleBase, R: EuclideanRing>: ModuleStructure<R> {
+public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: ModuleStructure<R> {
     public  let summands: [Summand]
     private let factorizer: (FreeModule<A, R>) -> [R]
     

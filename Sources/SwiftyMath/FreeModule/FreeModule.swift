@@ -1,6 +1,6 @@
 import Foundation
 
-public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
+public struct FreeModule<A: BasisElementType, R: Ring>: Module, Sequence {
     public typealias CoeffRing = R
     public typealias Basis = [A]
     

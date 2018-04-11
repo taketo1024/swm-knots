@@ -18,11 +18,11 @@ import Foundation
 //   H_i = (R/(a_1) ⊕ ... ⊕ R/(a_t)) ⊕ (R ⊕ ... ⊕ R)
 //
 
-public typealias   Homology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Descending, A, R>
-public typealias Cohomology<A: FreeModuleBase, R: EuclideanRing> = _Homology<Ascending, A, R>
+public typealias   Homology<A: BasisElementType, R: EuclideanRing> = _Homology<Descending, A, R>
+public typealias Cohomology<A: BasisElementType, R: EuclideanRing> = _Homology<Ascending, A, R>
 
 // TODO abstract as `GradedModule`
-public final class _Homology<T: ChainType, A: FreeModuleBase, R: EuclideanRing>: AlgebraicStructure {
+public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing>: AlgebraicStructure {
     public typealias Cycle = FreeModule<A, R>
     
     public let name: String

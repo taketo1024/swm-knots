@@ -8,11 +8,11 @@
 
 import Foundation
 
-public typealias   ChainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Descending, A, B, R>
-public typealias CochainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Ascending,  A, B, R>
+public typealias   ChainMap<A: BasisElementType, B: BasisElementType, R: Ring> = _ChainMap<Descending, A, B, R>
+public typealias CochainMap<A: BasisElementType, B: BasisElementType, R: Ring> = _ChainMap<Ascending,  A, B, R>
 
 // TODO conform Module<R>
-public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: Ring>: ModuleHomType {
+public struct _ChainMap<T: ChainType, A: BasisElementType, B: BasisElementType, R: Ring>: ModuleHomType {
     public typealias CoeffRing = R
     public typealias Domain   = FreeModule<A, R>
     public typealias Codomain = FreeModule<B, R>

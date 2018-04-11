@@ -1,5 +1,5 @@
 //
-//  FreeModuleBase.swift
+//  BasisElementType.swift
 //  SwiftyMath
 //
 //  Created by Taketo Sano on 2017/12/15.
@@ -8,20 +8,20 @@
 
 import Foundation
 
-public protocol FreeModuleBase: SetType {
+public protocol BasisElementType: SetType {
     var degree: Int { get }
 }
 
-public extension FreeModuleBase {
+public extension BasisElementType {
     public var degree: Int { return 1 }
 }
 
 // Default Bases
-extension Int:    FreeModuleBase { }
-extension String: FreeModuleBase { }
+extension Int:    BasisElementType { }
+extension String: BasisElementType { }
 
 // Derived Bases
-public struct Dual<A: FreeModuleBase>: FreeModuleBase {
+public struct Dual<A: BasisElementType>: BasisElementType {
     public let base: A
     public init(_ a: A) {
         base = a
