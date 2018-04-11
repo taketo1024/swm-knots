@@ -10,10 +10,15 @@ import Foundation
 
 public protocol BasisElementType: SetType {
     var degree: Int { get }
+    var dual: Dual<Self> { get }
 }
 
 public extension BasisElementType {
     public var degree: Int { return 1 }
+    
+    public var dual: Dual<Self> {
+        return Dual(self)
+    }
 }
 
 // Default Bases
@@ -45,5 +50,37 @@ public struct Dual<A: BasisElementType>: BasisElementType {
     
     public var description: String {
         return "\(base)*"
+    }
+}
+
+public struct Tensor<A: BasisElementType>: BasisElementType {
+    public let factors: [A]
+    public init(_ factors: [A]) {
+        self.factors = factors
+    }
+    
+    public var degree: Int {
+        return factors.sum { $0.degree }
+    }
+    
+    public static func ⊗(t1: Tensor<A>, t2: Tensor<A>) -> Tensor<A> {
+        return Tensor(t1.factors + t2.factors)
+    }
+    
+    public static func generateBasis(from basis: [A], pow n: Int) -> [Tensor<A>] {
+        return (0 ..< n).reduce([[]]) { (res, _) -> [[A]] in
+            res.flatMap{ (factors: [A]) -> [[A]] in
+                basis.map{ x in factors + [x] }
+            }
+        }.map{ factors in Tensor(factors) }
+    }
+    
+    public var description: String {
+        return factors.map{ $0.description }.joined(separator: " ⊗ ")
+    }
+    
+    public var hashValue: Int {
+        let p = 31
+        return factors.reduce(0){ (res, f) in res &* p &+ f.hashValue }
     }
 }
