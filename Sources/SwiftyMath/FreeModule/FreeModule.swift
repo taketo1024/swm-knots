@@ -104,6 +104,8 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module, Sequence {
     }
 }
 
+extension FreeModule: VectorSpace where R: Field {}
+
 public func pair<A, R>(_ x: FreeModule<A, R>, _ y: FreeModule<Dual<A>, R>) -> R {
     return x.reduce(.zero) { (res, next) -> R in
         let (a, r) = next

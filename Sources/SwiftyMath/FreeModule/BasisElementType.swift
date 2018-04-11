@@ -27,7 +27,7 @@ public struct AbstractBasisElement: BasisElementType, Comparable {
         self.index = index
     }
     
-    public static func basis(_ size: Int) -> [AbstractBasisElement] {
+    public static func generateBasis(_ size: Int) -> [AbstractBasisElement] {
         return (0 ..< size).map{ AbstractBasisElement($0) }
     }
     
@@ -72,6 +72,10 @@ public struct Tensor<A: BasisElementType>: BasisElementType {
     public let factors: [A]
     public init(_ factors: [A]) {
         self.factors = factors
+    }
+    
+    public init(_ factors: A ...) {
+        self.init(factors)
     }
     
     public var degree: Int {
