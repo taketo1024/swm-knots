@@ -87,20 +87,6 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
         return FreeModule<A, R>(a.elements.mapValues{ $0 * r })
     }
     
-    public static func ⊕<B>(x: FreeModule<A, R>, y: FreeModule<B, R>) -> FreeModule<Sum<A, B>, R> {
-        let elements = x.map { (a, r) -> (Sum<A, B>, R) in (Sum._1(a), r) }
-                     + y.map { (b, r) -> (Sum<A, B>, R) in (Sum._2(b), r) }
-
-        return FreeModule<Sum<A, B>, R>(elements)
-    }
-    
-    public static func ⊗<B>(x: FreeModule<A, R>, y: FreeModule<B, R>) -> FreeModule<Tensor<A, B>, R> {
-        let elements = x.basis.allCombinations(with: y.basis).map{ (a, b) -> (Tensor<A, B>, R) in
-            return (a ⊗ b, x[a] * y[b])
-        }
-        return FreeModule<Tensor<A, B>, R>(elements)
-    }
-    
     public var description: String {
         let list = (A.self == Int.self)
             ? self.map { (a, r) in (r == .identity) ? "e\(a)" : "\(r)e\(a)" }
