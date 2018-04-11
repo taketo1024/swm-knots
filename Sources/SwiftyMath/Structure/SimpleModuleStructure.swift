@@ -188,26 +188,26 @@ public extension SimpleModuleStructure {
     }
 }
 
-public typealias AbstractSimpleModuleStructure<R: EuclideanRing> = SimpleModuleStructure<Int, R>
+public typealias AbstractSimpleModuleStructure<R: EuclideanRing> = SimpleModuleStructure<AbstractBasisElement, R>
 
-public extension AbstractSimpleModuleStructure where A == Int {
+public extension AbstractSimpleModuleStructure where A == AbstractBasisElement {
     public convenience init(rank r: Int, torsions: [R] = []) {
         let t = torsions.count
-        let summands = (0 ..< r).map{ i in Summand(i, .zero) }
-            + torsions.enumerated().map{ (i, d) in Summand(FreeModule(i + r), d) }
+        let summands = (0 ..< r).map{ i in Summand(A(i), .zero) }
+            + torsions.enumerated().map{ (i, d) in Summand(FreeModule(A(i + r)), d) }
         
         let factorizer = { (x: FreeModule<A, R>) in
-            (0 ..< r).map{ i in x[i] } + (0 ..< t).map{ i in x[t + i] % torsions[i] }
+            (0 ..< r).map{ i in x[A(i)] } + (0 ..< t).map{ i in x[A(t + i)] % torsions[i] }
         }
         
         self.init(summands, factorizer)
     }
     
     public static func invariantFactorDecomposition(rank r: Int, relationMatrix B: ComputationalMatrix<R>) -> AbstractSimpleModuleStructure<R> {
-            return invariantFactorDecomposition(generators: (0 ..< r).toArray(),
-                                                generatingMatrix: ComputationalMatrix.identity(r),
-                                                relationMatrix: B,
-                                                transitionMatrix: ComputationalMatrix.identity(r))
+        return invariantFactorDecomposition(generators: (0 ..< r).map{ A($0) },
+                                            generatingMatrix: ComputationalMatrix.identity(r),
+                                            relationMatrix: B,
+                                            transitionMatrix: ComputationalMatrix.identity(r))
     }
     
     public static func ⊕(a: AbstractSimpleModuleStructure<R>, b: AbstractSimpleModuleStructure<R>) -> AbstractSimpleModuleStructure<R> {

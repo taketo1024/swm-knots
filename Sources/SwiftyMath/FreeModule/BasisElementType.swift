@@ -21,9 +21,24 @@ public extension BasisElementType {
     }
 }
 
-// Default Bases
-extension Int:    BasisElementType { }
-extension String: BasisElementType { }
+public struct AbstractBasisElement: BasisElementType, Comparable {
+    public let index: Int
+    public init(_ index: Int) {
+        self.index = index
+    }
+    
+    public static func basis(_ size: Int) -> [AbstractBasisElement] {
+        return (0 ..< size).map{ AbstractBasisElement($0) }
+    }
+    
+    public static func < (e1: AbstractBasisElement, e2: AbstractBasisElement) -> Bool {
+        return e1.index < e2.index
+    }
+    
+    public var description: String {
+        return "e\(Format.sub(index))"
+    }
+}
 
 // Derived Bases
 public struct Dual<A: BasisElementType>: BasisElementType {
@@ -76,7 +91,7 @@ public struct Tensor<A: BasisElementType>: BasisElementType {
     }
     
     public var description: String {
-        return factors.map{ $0.description }.joined(separator: " ⊗ ")
+        return factors.map{ $0.description }.joined(separator: "⊗")
     }
     
     public var hashValue: Int {
