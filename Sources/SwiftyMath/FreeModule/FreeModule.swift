@@ -44,10 +44,14 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module, Sequence {
     }
     
     public var basis: Basis {
-        return elements.keys.toArray()
+        return elements.keys.sorted().toArray()
     }
     
-    public func factorize(by list: Basis) -> [R] {
+    public var components: [R] {
+        return elements.keys.sorted().map{ self[$0] }
+    }
+    
+    public func factorize(by list: [A]) -> [R] {
         return list.map{ self[$0] }
     }
     
@@ -88,11 +92,7 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module, Sequence {
     }
     
     public var description: String {
-        let list = (A.self == Int.self)
-            ? self.map { (a, r) in (r == .identity) ? "e\(a)" : "\(r)e\(a)" }
-            : self.map { (a, r) in (r == .identity) ? "\(a)" : "\(r)\(a)" }
-        
-        return list.isEmpty ? "0" : list.joined(separator: " + ")
+        return Format.terms("+", basis.map { a in (self[a], a.description, 1) })
     }
     
     public static var symbol: String {
