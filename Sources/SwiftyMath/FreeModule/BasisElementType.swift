@@ -21,25 +21,6 @@ public extension BasisElementType {
     }
 }
 
-public struct AbstractBasisElement: BasisElementType {
-    public let index: Int
-    public init(_ index: Int) {
-        self.index = index
-    }
-    
-    public static func generateBasis(_ size: Int) -> [AbstractBasisElement] {
-        return (0 ..< size).map{ AbstractBasisElement($0) }
-    }
-    
-    public static func < (e1: AbstractBasisElement, e2: AbstractBasisElement) -> Bool {
-        return e1.index < e2.index
-    }
-    
-    public var description: String {
-        return "e\(Format.sub(index))"
-    }
-}
-
 // Derived Bases
 public struct Dual<A: BasisElementType>: BasisElementType {
     public let base: A
