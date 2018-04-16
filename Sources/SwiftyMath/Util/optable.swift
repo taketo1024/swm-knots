@@ -1,6 +1,6 @@
 import Foundation
 
-public func printTable<T1, T2>(_ symbol: String, rows: [T1], cols: [T2], op: (T1, T2) -> T1) {
+public func printTable<T1, T2, T3>(_ symbol: String, rows: [T1], cols: [T2], op: (T1, T2) -> T3) {
     let head = (0 ..< cols.count).reduce("\(symbol)\t|") { (res, j) in
         "\(res)\t\(cols[j])"
     }

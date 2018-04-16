@@ -40,7 +40,7 @@ public struct Link: CustomStringConvertible {
         self.junctions = junctions
     }
     
-    public init(name: String? = nil, planarCode: (Int, Int, Int, Int) ...) {
+    public init(name: String? = nil, planarCode: [(Int, Int, Int, Int)]) {
         
         // generate edges.
         
@@ -73,10 +73,13 @@ public struct Link: CustomStringConvertible {
             let nextE: Edge
             let nextJ: Junction
             
-            if let J = junctions.first(where: { $0.edge1 == e } ) {
+            let match1 = { (J: Junction) in J != e.from && J.edge1 == e }
+            let match3 = { (J: Junction) in J != e.from && J.edge3 == e }
+
+            if let J = junctions.first(where: match1) {
                 nextJ = J
                 nextE = J.edge3
-            } else if let J = junctions.first(where: { $0.edge3 == e } ) {
+            } else if let J = junctions.first(where: match3) {
                 nextJ = J
                 nextE = J.edge1
             } else {
@@ -99,6 +102,10 @@ public struct Link: CustomStringConvertible {
         }
         
         self.init(name: (name ?? "L"), junctions: junctions)
+    }
+    
+    public init(name: String? = nil, planarCode: (Int, Int, Int, Int) ...) {
+        self.init(name: name, planarCode: planarCode)
     }
     
     public static var empty: Link {
