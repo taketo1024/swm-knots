@@ -20,8 +20,28 @@ public struct FreeModuleHom<A: BasisElementType, B: BasisElementType, R: Ring>: 
         }
     }
     
+    public init<n, m>(from: [A], to: [B], matrix: Matrix<n, m, R>) {
+        assert(from.count == matrix.cols)
+        assert(  to.count == matrix.rows)
+        
+        self.init { (a: A) -> Codomain in
+            guard let j = from.index(of: a) else {
+                return .zero
+            }
+            return Codomain(basis: to, vector: matrix.colVector(j))
+        }
+    }
+    
     public init(_ f: @escaping (Domain) -> Codomain) {
         self.f = f
+    }
+    
+    public func asMatrix(from: [A], to: [B]) -> DynamicMatrix<CoeffRing> {
+        let comps = from.enumerated().flatMap { (j, a) -> [MatrixComponent<CoeffRing>] in
+            let w = self.applied(to: a)
+            return w.factorize(by: to).enumerated().map { (i, a) in (i, j, a) }
+        }
+        return DynamicMatrix(rows: to.count, cols: from.count, components: comps)
     }
     
     public func applied(to a: A) -> Codomain {
