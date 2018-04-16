@@ -12,10 +12,10 @@ import Foundation
 // Each instance corresponds to a homology-class of the given cycle,
 // that lives in the homology-group defined by the given structure.
 
-public typealias   HomologyClass<A: FreeModuleBase, R: EuclideanRing> = _HomologyClass<Descending, A, R>
-public typealias CohomologyClass<A: FreeModuleBase, R: EuclideanRing> = _HomologyClass<Ascending, A, R>
+public typealias   HomologyClass<A: BasisElementType, R: EuclideanRing> = _HomologyClass<Descending, A, R>
+public typealias CohomologyClass<A: BasisElementType, R: EuclideanRing> = _HomologyClass<Ascending, A, R>
 
-public struct _HomologyClass<T: ChainType, A: FreeModuleBase, R: EuclideanRing>: Module {
+public struct _HomologyClass<T: ChainType, A: BasisElementType, R: EuclideanRing>: Module {
     public typealias CoeffRing = R
     public typealias Structure = _Homology<T, A, R>
     public typealias Cycle = Structure.Cycle // = FreeModule<A, R>

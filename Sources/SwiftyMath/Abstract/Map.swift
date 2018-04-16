@@ -25,12 +25,6 @@ public extension MapType {
     }
 }
 
-public extension MapType where Domain == Codomain {
-    public static var identity: Self {
-        return Self{ x in x }
-    }
-}
-
 public struct Map<Domain: SetType, Codomain: SetType>: MapType {
     internal let fnc: (Domain) -> Codomain
     public init(_ fnc: @escaping (Domain) -> Codomain) {
@@ -42,9 +36,9 @@ public struct Map<Domain: SetType, Codomain: SetType>: MapType {
     }
     
     public func composed<X>(with f: Map<X, Domain>) -> Map<X, Codomain> {
-        return Map<X, Codomain> { x in self.fnc( f.fnc(x) ) }
+        return Map<X, Codomain> { x in self.applied(to: f.applied(to: x) ) }
     }
-    
+
     public static func ∘<X>(g: Map<Domain, Codomain>, f: Map<X, Domain>) -> Map<X, Codomain> {
         return g.composed(with: f)
     }
@@ -56,8 +50,32 @@ public protocol EndType: MapType where Domain == Codomain {
     static func ∘(g: Self, f: Self) -> Self
 }
 
+public extension EndType {
+    public static var identity: Self {
+        return Self{ x in x }
+    }
+
+// MEMO: these causes EXC_BAD_ACCESS for some reason...
+//
+//    public func composed(with g: Self) -> Self {
+//        return Self { x in self.applied(to: g.applied(to: x)) }
+//    }
+//
+//    public static func ∘(g: Self, f: Self) -> Self {
+//        return g.composed(with: f)
+//    }
+}
+
 public typealias End<Domain: SetType> = Map<Domain, Domain>
 extension End: EndType where Domain == Codomain { }
+
+//public extension Array where Element: EndType {
+//    func composed() -> Element {
+//        return self.reduce(Element.identity) {
+//            (res, f) in res.composed(with: f)
+//        }
+//    }
+//}
 
 public protocol AutType: SubsetType, EndType, Group where Super: EndType, Domain == Super.Domain {}
 
@@ -109,7 +127,7 @@ public struct Aut<Domain: SetType>: AutType {
     }
     
     public func composed(with f: Aut<Domain>) -> Aut<Domain> {
-        return Aut( { x in self.map.fnc(f.map.fnc(x)) } )
+        return Aut( { x in self.applied(to: f.applied(to: x)) } )
     }
 
     public static func ∘ (g: Aut<Domain>, f: Aut<Domain>) -> Aut<Domain> {

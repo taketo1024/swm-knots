@@ -38,6 +38,10 @@ public struct CellularCell: GeometricCell {
         return 0 // TODO
     }
     
+    public static func < (lhs: CellularCell, rhs: CellularCell) -> Bool {
+        return lhs != rhs // TODO
+    }
+    
     public static func ==(a: CellularCell, b: CellularCell) -> Bool {
         return a.simplices == b.simplices
     }

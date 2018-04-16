@@ -8,11 +8,11 @@
 
 import Foundation
 
-public typealias   ChainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Descending, A, B, R>
-public typealias CochainMap<A: FreeModuleBase, B: FreeModuleBase, R: Ring> = _ChainMap<Ascending,  A, B, R>
+public typealias   ChainMap<A: BasisElementType, B: BasisElementType, R: Ring> = _ChainMap<Descending, A, B, R>
+public typealias CochainMap<A: BasisElementType, B: BasisElementType, R: Ring> = _ChainMap<Ascending,  A, B, R>
 
 // TODO conform Module<R>
-public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: Ring>: ModuleHomType {
+public struct _ChainMap<T: ChainType, A: BasisElementType, B: BasisElementType, R: Ring>: ModuleHomType {
     public typealias CoeffRing = R
     public typealias Domain   = FreeModule<A, R>
     public typealias Codomain = FreeModule<B, R>
@@ -41,10 +41,6 @@ public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: R
     
     public static func ∘<C>(g: _ChainMap<T, B, C, R>, f: _ChainMap<T, A, B, R>) -> _ChainMap<T, A, C, R> {
         return _ChainMap<T, A, C, R>(g.f ∘ f.f)
-    }
-    
-    public static func ⊕<A2, B2>(f1: _ChainMap<T, A, B, R>, f2: _ChainMap<T, A2, B2, R>) -> _ChainMap<T, Sum<A, A2>, Sum<B, B2>, R> {
-        return _ChainMap<T, Sum<A, A2>, Sum<B, B2>, R>( f1.f ⊕ f2.f )
     }
     
     public func assertChainMap(from: _ChainComplex<T, A, R>, to: _ChainComplex<T, B, R>, debug: Bool = false) {
@@ -82,12 +78,6 @@ public struct _ChainMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: R
                 assert(x2 == y2)
             }
         }
-    }
-}
-
-public extension _ChainMap where B == Sum<A, A> {
-    public static func diagonal(from: _ChainComplex<T, A, R>) -> _ChainMap<T, A, Sum<A, A>, R> {
-        return _ChainMap( FreeModuleHom.diagonal )
     }
 }
 

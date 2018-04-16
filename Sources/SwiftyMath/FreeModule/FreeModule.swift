@@ -1,6 +1,6 @@
 import Foundation
 
-public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
+public struct FreeModule<A: BasisElementType, R: Ring>: Module, Sequence {
     public typealias CoeffRing = R
     public typealias Basis = [A]
     
@@ -44,10 +44,14 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
     }
     
     public var basis: Basis {
-        return elements.keys.toArray()
+        return elements.keys.sorted().toArray()
     }
     
-    public func factorize(by list: Basis) -> [R] {
+    public var components: [R] {
+        return elements.keys.sorted().map{ self[$0] }
+    }
+    
+    public func factorize(by list: [A]) -> [R] {
         return list.map{ self[$0] }
     }
     
@@ -87,26 +91,8 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
         return FreeModule<A, R>(a.elements.mapValues{ $0 * r })
     }
     
-    public static func ⊕<B>(x: FreeModule<A, R>, y: FreeModule<B, R>) -> FreeModule<Sum<A, B>, R> {
-        let elements = x.map { (a, r) -> (Sum<A, B>, R) in (Sum._1(a), r) }
-                     + y.map { (b, r) -> (Sum<A, B>, R) in (Sum._2(b), r) }
-
-        return FreeModule<Sum<A, B>, R>(elements)
-    }
-    
-    public static func ⊗<B>(x: FreeModule<A, R>, y: FreeModule<B, R>) -> FreeModule<Tensor<A, B>, R> {
-        let elements = x.basis.allCombinations(with: y.basis).map{ (a, b) -> (Tensor<A, B>, R) in
-            return (a ⊗ b, x[a] * y[b])
-        }
-        return FreeModule<Tensor<A, B>, R>(elements)
-    }
-    
     public var description: String {
-        let list = (A.self == Int.self)
-            ? self.map { (a, r) in (r == .identity) ? "e\(a)" : "\(r)e\(a)" }
-            : self.map { (a, r) in (r == .identity) ? "\(a)" : "\(r)\(a)" }
-        
-        return list.isEmpty ? "0" : list.joined(separator: " + ")
+        return Format.terms("+", basis.map { a in (self[a], a.description, 1) })
     }
     
     public static var symbol: String {
@@ -117,6 +103,8 @@ public struct FreeModule<A: FreeModuleBase, R: Ring>: Module, Sequence {
         return (self == .zero) ? 0 : 1
     }
 }
+
+extension FreeModule: VectorSpace where R: Field {}
 
 public func pair<A, R>(_ x: FreeModule<A, R>, _ y: FreeModule<Dual<A>, R>) -> R {
     return x.reduce(.zero) { (res, next) -> R in

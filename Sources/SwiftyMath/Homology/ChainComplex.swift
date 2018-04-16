@@ -21,10 +21,10 @@ public struct Ascending : ChainType {
     public static var degree: Int { return +1 }
 }
 
-public typealias   ChainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Descending, A, R>
-public typealias CochainComplex<A: FreeModuleBase, R: Ring> = _ChainComplex<Ascending,  A, R>
+public typealias   ChainComplex<A: BasisElementType, R: Ring> = _ChainComplex<Descending, A, R>
+public typealias CochainComplex<A: BasisElementType, R: Ring> = _ChainComplex<Ascending,  A, R>
 
-public class _ChainComplex<T: ChainType, A: FreeModuleBase, R: Ring>: Equatable, CustomStringConvertible {
+public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatable, CustomStringConvertible {
     public typealias Chain = FreeModule<A, R>
     public typealias ChainBasis = [A]
     public typealias BoundaryMap = FreeModuleHom<A, A, R>

@@ -8,10 +8,10 @@
 
 import Foundation
 
-public typealias   HomologyMap<A: FreeModuleBase, B: FreeModuleBase, R: EuclideanRing> = _HomologyMap<Descending, A, B, R>
-public typealias CohomologyMap<A: FreeModuleBase, B: FreeModuleBase, R: EuclideanRing> = _HomologyMap<Ascending,  A, B, R>
+public typealias   HomologyMap<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = _HomologyMap<Descending, A, B, R>
+public typealias CohomologyMap<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = _HomologyMap<Ascending,  A, B, R>
 
-public struct _HomologyMap<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, R: EuclideanRing>: ModuleHomType {
+public struct _HomologyMap<T: ChainType, A: BasisElementType, B: BasisElementType, R: EuclideanRing>: ModuleHomType {
     public typealias CoeffRing = R
     public typealias Domain   = _HomologyClass<T, A, R>
     public typealias Codomain = _HomologyClass<T, B, R>
