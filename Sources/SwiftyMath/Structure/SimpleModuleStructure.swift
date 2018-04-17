@@ -50,20 +50,16 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
         return summands.filter{ $0.isFree }.count
     }
     
+    public var torsionCoeffs: [R] {
+        return summands.filter{ !$0.isFree }.map{ $0.divisor }
+    }
+    
     public var generators: [FreeModule<A, R>] {
         return summands.map{ $0.generator }
     }
     
     public func generator(_ i: Int) -> FreeModule<A, R> {
         return summands[i].generator
-    }
-    
-    public func torsion(_ i: Int) -> R {
-        return summands[i].divisor
-    }
-    
-    public var torsions: [R] {
-        return summands.filter{ !$0.isFree }.map{ $0.divisor }
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
@@ -211,7 +207,10 @@ public extension AbstractSimpleModuleStructure where A == AbstractBasisElement {
     }
     
     public static func ⊕(a: AbstractSimpleModuleStructure<R>, b: AbstractSimpleModuleStructure<R>) -> AbstractSimpleModuleStructure<R> {
-        return AbstractSimpleModuleStructure(rank: a.rank + b.rank, torsions: a.torsions + b.torsions)
+        return AbstractSimpleModuleStructure(
+            rank: a.rank + b.rank,
+            torsions: a.torsionCoeffs + b.torsionCoeffs
+        )
     }
 }
 

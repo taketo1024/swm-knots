@@ -93,14 +93,14 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
     private func generateSummand(_ i: Int) -> Summand {
         let C = chainComplex
         let basis = C.chainBasis(i)
-        let (A1, A2) = (C.boundaryMatrix(i), C.boundaryMatrix(T.descending ? i + 1 : i - 1))
-        let (E1, E2) = (A1.eliminate(), A2.eliminate())
+        let (Ain, Aout) = (C.boundaryMatrix(i - T.degree), C.boundaryMatrix(i))
+        let (Ein, Eout) = (Ain.eliminate(), Aout.eliminate())
         
         let S = SimpleModuleStructure.invariantFactorDecomposition(
             generators:       basis,
-            generatingMatrix: E1.kernelMatrix,
-            relationMatrix:   E2.imageMatrix,
-            transitionMatrix: E1.kernelTransitionMatrix
+            generatingMatrix: Eout.kernelMatrix,
+            relationMatrix:   Ein.imageMatrix,
+            transitionMatrix: Eout.kernelTransitionMatrix
         )
 
         return Summand(self, S)
@@ -131,6 +131,10 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
             return structure.rank
         }
         
+        public var torsionCoeffs: [R] {
+            return structure.torsionCoeffs
+        }
+        
         public var summands: [SimpleModuleStructure<A, R>.Summand] {
             return structure.summands
         }
@@ -141,10 +145,6 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
         
         public var generators: [_HomologyClass<T, A, R>] {
             return (0 ..< summands.count).map{ i in generator(i) }
-        }
-        
-        public func torsion(_ i: Int) -> R {
-            return structure.torsion(i)
         }
         
         public var zero: _HomologyClass<T, A, R> {
