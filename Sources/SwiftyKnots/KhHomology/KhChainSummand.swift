@@ -32,13 +32,15 @@ public struct KhChainSummand: Equatable, CustomStringConvertible {
 
 public struct KhBasisElement: BasisElementType, Comparable {
     internal let tensorFactors: [E]
-    internal let link: Link
+    internal let originalLink: Link
+    internal let splicedLink: Link
     public let state: LinkSpliceState
     public let shift: Int
     
-    internal init(_ tensorFactors: [E], _ link: Link, _ state: LinkSpliceState, _ shift: Int) {
+    internal init(_ tensorFactors: [E], _ originalLink: Link, _ splicedLink: Link, _ state: LinkSpliceState, _ shift: Int) {
         self.tensorFactors = tensorFactors
-        self.link = link
+        self.originalLink = originalLink
+        self.splicedLink = splicedLink
         self.state = state
         self.shift = shift
     }
@@ -51,7 +53,7 @@ public struct KhBasisElement: BasisElementType, Comparable {
             res.flatMap{ factors -> [[E]] in
                 [factors + [.I], factors + [.X]]
             }
-        }.map{ factors in KhBasisElement.init(factors, spliced, state, shift) }
+        }.map{ factors in KhBasisElement.init(factors, link, spliced, state, shift) }
         .sorted()
     }
     
@@ -66,8 +68,10 @@ public struct KhBasisElement: BasisElementType, Comparable {
     }
     
     public func transit<R: EuclideanRing>(to state: LinkSpliceState, _ μ: (E, E) -> [E], _ Δ: (E) -> [(E, E)]) -> FreeModule<KhBasisElement, R> {
-        let spliced = link.spliced(by: state) // maybe creating too much copies...
-        let (c1, c2) = (link.components, spliced.components)
+        
+        let next = originalLink.spliced(by: state) // maybe creating too much copies...
+        
+        let (c1, c2) = (splicedLink.components, next.components)
         let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
         
         switch (d1.count, d2.count) {
@@ -80,7 +84,7 @@ public struct KhBasisElement: BasisElementType, Comparable {
                 factor.remove(at: i2)
                 factor.remove(at: i1)
                 factor.insert(e, at: j)
-                return FreeModule( KhBasisElement(factor, spliced, state, shift) )
+                return FreeModule( KhBasisElement(factor, originalLink, next, state, shift) )
             }
             
         case (1, 2): // apply Δ
@@ -92,7 +96,7 @@ public struct KhBasisElement: BasisElementType, Comparable {
                 factor.remove(at: i)
                 factor.insert(e1, at: j1)
                 factor.insert(e2, at: j2)
-                return FreeModule( KhBasisElement(factor, spliced, state, shift) )
+                return FreeModule( KhBasisElement(factor, originalLink, next, state, shift) )
             }
         default: fatalError()
         }

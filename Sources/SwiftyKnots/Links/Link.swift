@@ -402,14 +402,20 @@ public struct Link: CustomStringConvertible {
             }
         }
         
-        // MEMO assumed that the initial state is X⁻.
         public func spliceA() {
-            mode = .H
+            switch mode {
+            case .X⁺: mode = .V
+            case .X⁻: mode = .H
+            default: fatalError()
+            }
         }
         
-        // MEMO assumed that the initial state is X⁻.
         public func spliceB() {
-            mode = .V
+            switch mode {
+            case .X⁺: mode = .H
+            case .X⁻: mode = .V
+            default: fatalError()
+            }
         }
         
         private func reorientEgdes(startingFrom e0: Edge) {
