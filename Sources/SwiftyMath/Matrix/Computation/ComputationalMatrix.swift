@@ -136,16 +136,24 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         case .Rows:
             let table = self.table
                 .filter { (i, _) in rowRange.contains(i) }
-                .map{ (i, list) in (i - rowRange.lowerBound,
-                                    list.compactMap{ (j, a) in colRange.contains(j) ? (j - colRange.lowerBound, a) : nil }) }
+                .compactMap{ (i, list) -> (Int, [(Int, R)])? in
+                    let l = list.compactMap{ (j, a) in
+                        colRange.contains(j) ? (j - colRange.lowerBound, a) : nil
+                    }
+                    return !l.isEmpty ? (i - rowRange.lowerBound, l) : nil
+                }
             
             return ComputationalMatrix(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound, align, Dictionary(pairs: table))
             
         case .Cols:
             let table = self.table
                 .filter { (j, _) in colRange.contains(j) }
-                .map{ (j, list) in (j - colRange.lowerBound,
-                                    list.compactMap{ (i, a) in rowRange.contains(i) ? (i - rowRange.lowerBound, a) : nil }) }
+                .compactMap{ (j, list) -> (Int, [(Int, R)])? in
+                    let l = list.compactMap{ (i, a) in
+                        rowRange.contains(i) ? (i - rowRange.lowerBound, a) : nil
+                    }
+                    return !l.isEmpty ? (j - colRange.lowerBound, l) : nil
+                }
             
             return ComputationalMatrix(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound, align, Dictionary(pairs: table))
         }
@@ -396,13 +404,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     public var detailDescription: String {
-        let grid = generateGrid()
-        let elements = (0 ..< rows).map({ i -> [String] in
-            return (0 ..< cols).map({ j -> String in
-                return "\(grid[(i * cols) + j])"
-            })
-        })
-        return "[\t\(elements.map{ $0.joined(separator: ",\t") }.joined(separator: "\n\t"))]"
+        return asDynamicMatrix().detailDescription
     }
 }
 
