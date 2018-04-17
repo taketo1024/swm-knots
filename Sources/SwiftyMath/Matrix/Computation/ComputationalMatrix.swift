@@ -159,6 +159,11 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
+    public func mapValues<R2>(_ f: (R) -> R2) -> ComputationalMatrix<R2> {
+        let mapped = table.mapValues { $0.map{ ($0, f($1)) } }
+        return ComputationalMatrix<R2>(rows, cols, align, mapped)
+    }
+    
     public var isZero: Bool {
         return table.isEmpty
     }
