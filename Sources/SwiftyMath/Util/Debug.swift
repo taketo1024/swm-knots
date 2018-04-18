@@ -8,9 +8,15 @@
 
 import Foundation
 
-private let precision = 1000.0
+public enum DebugFlag {
+    case MatrixElim
+}
+
+private var flags = Set<DebugFlag>()
 
 public class Debug {
+    private static let precision = 1000.0
+    
     public static func measure<T>(_ f: () -> T) -> T {
         return measure("", f)
     }
@@ -28,12 +34,17 @@ public class Debug {
         return f()
     }
     
-    public static func log(_ msg: @autoclosure () -> String, _ b: Bool) {
-        if b { print(msg()) }
+    public static func setFlag(_ flag: DebugFlag) {
+        flags.insert(flag)
     }
-}
-
-// TODO remove
-public func log(_ msg: @autoclosure () -> String, _ b: Bool) {
-    Debug.log(msg, b)
+    
+    public static func unsetFlag(_ flag: DebugFlag) {
+        flags.remove(flag)
+    }
+    
+    public static func log(_ flag: DebugFlag, _ msg: @autoclosure () -> String) {
+        if _isDebugAssertConfiguration() && flags.contains(flag) {
+            print(msg())
+        }
+    }
 }

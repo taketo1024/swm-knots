@@ -22,13 +22,11 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     internal var target: ComputationalMatrix<R>
     internal var rowOps: [ElementaryOperation]
     internal var colOps: [ElementaryOperation]
-    internal var debug: Bool
     
-    public required init(_ target: ComputationalMatrix<R>, debug: Bool = false) {
+    public required init(_ target: ComputationalMatrix<R>) {
         self.target = target
         self.rowOps = []
         self.colOps = []
-        self.debug = debug
     }
     
     public var rows: Int {
@@ -73,7 +71,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     }
     
     internal func run(_ eliminator: MatrixEliminator.Type) {
-        let e = eliminator.init(target, debug: debug)
+        let e = eliminator.init(target)
         e.run()
         rowOps += e.rowOps
         colOps += e.colOps
@@ -81,7 +79,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     
     internal func runTranpose(_ eliminator: MatrixEliminator.Type) {
         transpose()
-        let e = eliminator.init(target, debug: debug)
+        let e = eliminator.init(target)
         e.run()
         rowOps += e.colOps.map{ s in s.transpose }
         colOps += e.rowOps.map{ s in s.transpose }
@@ -114,13 +112,9 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     }
     
     func log(_ msg: @autoclosure () -> String) {
-        if debug {
-            if rows < 20 && cols < 20 {
-                print(msg(), "\n", target.detailDescription, "\n")
-            } else {
-                print(msg(), "\n\t", target, "\n")
-            }
-        }
+        Debug.log(.MatrixElim, msg)
+        Debug.log(.MatrixElim, target.detailDescription)
+        Debug.log(.MatrixElim, "\n")
     }
     
     public var description: String {

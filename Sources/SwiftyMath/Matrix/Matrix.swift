@@ -241,16 +241,16 @@ extension Matrix: VectorSpace, FiniteDimVectorSpace where R: Field {
 
 public extension Matrix where R: EuclideanRing {
     // MEMO use computational Matrix for more direct manipulation.
-    public func eliminate(form: MatrixForm = .Diagonal, debug: Bool = false) -> MatrixEliminationResultWrapper<n, m, R> {
+    public func eliminate(form: MatrixForm = .Diagonal) -> MatrixEliminationResultWrapper<n, m, R> {
         let cmatrix = ComputationalMatrix(self)
         let eliminator = { () -> MatrixEliminator<R> in
             switch form {
-            case .RowEchelon: return RowEchelonEliminator(cmatrix, debug: debug)
-            case .ColEchelon: return ColEchelonEliminator(cmatrix, debug: debug)
-            case .RowHermite: return RowHermiteEliminator(cmatrix, debug: debug)
-            case .ColHermite: return ColHermiteEliminator(cmatrix, debug: debug)
-            case .Diagonal:   return DiagonalEliminator  (cmatrix, debug: debug)
-            case .Smith:      return SmithEliminator     (cmatrix, debug: debug)
+            case .RowEchelon: return RowEchelonEliminator(cmatrix)
+            case .ColEchelon: return ColEchelonEliminator(cmatrix)
+            case .RowHermite: return RowHermiteEliminator(cmatrix)
+            case .ColHermite: return ColHermiteEliminator(cmatrix)
+            case .Diagonal:   return DiagonalEliminator  (cmatrix)
+            case .Smith:      return SmithEliminator     (cmatrix)
             default: fatalError()
             }
         }()
