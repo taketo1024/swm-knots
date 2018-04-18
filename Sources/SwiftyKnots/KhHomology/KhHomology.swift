@@ -39,7 +39,7 @@ public extension KhHomology where T == Ascending, A == KhBasisElement, R: Euclid
         }
     }
     
-    public func printTable() {
+    public func printTable(detail: Bool = false) {
         let cols = (offset ... topDegree).toArray()
         let degs = cols.flatMap{ i in self[i].summands.map{ $0.degree} }.unique()
         
@@ -51,6 +51,16 @@ public extension KhHomology where T == Ascending, A == KhBasisElement, R: Euclid
         Format.printTable("j\\i", rows: rows, cols: cols) { (j, i) -> String in
             let s = self[i, j]
             return s.isTrivial ? "" : "\(s)"
+        }
+        
+        if detail {
+            for (i, j) in validDegrees {
+                print((i, j))
+                for s in self[i, j].summands {
+                    print("\t", s, "\t", s.generator)
+                }
+                print()
+            }
         }
     }
 
