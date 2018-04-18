@@ -35,7 +35,7 @@ public extension KhHomology where T == Ascending, A == KhBasisElement, R: Euclid
     
     public var validDegrees: [(Int, Int)] {
         return (offset ... topDegree).flatMap { i in
-            self[i].summands.map { s in (i, s.generator.degree) }
+            self[i].summands.map{ $0.generator.degree }.unique().sorted().map{ j in (i, j) }
         }
     }
     
