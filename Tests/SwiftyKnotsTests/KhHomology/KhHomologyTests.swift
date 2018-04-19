@@ -11,6 +11,12 @@ import SwiftyMath
 
 class KhHomologyTests: XCTestCase {
     
+    func test() {
+        let L = Link.HopfLink
+        let H = L.KhHomology(𝐐.self)
+        H.printTable()
+    }
+    
     func test3_1() {
         let L = Link.Rolfsen(3, 1)
         assert(L)
@@ -29,7 +35,7 @@ class KhHomologyTests: XCTestCase {
     func assert(_ L: Link) {
         let J = L.unnormalizedJonesPolynomial
         
-        let Kh = KhHomology(L, 𝐐.self)
+        let Kh = L.KhHomology(𝐐.self)
         let χ = Kh.gradedEulerCharacteristic.withSymbol("q")
         
         XCTAssertEqual(χ, J)

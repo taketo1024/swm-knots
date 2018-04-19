@@ -8,17 +8,15 @@
 import Foundation
 import SwiftyMath
 
-public typealias KhChainComplex<R: EuclideanRing> = CochainComplex<KhTensorElement, R>
-
-public extension KhChainComplex where T == Ascending, A == KhTensorElement, R: EuclideanRing {
-    public convenience init(_ L: Link, _ type: R.Type) {
+public extension Link {
+    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type) -> CochainComplex<KhTensorElement, R> {
         typealias C = CochainComplex<KhTensorElement, R>
         
-        let name = "CKh(\(L.name); \(R.symbol))"
-        let (n, n⁺, n⁻) = (L.crossingNumber, L.crossingNumber⁺, L.crossingNumber⁻)
+        let name = "CKh(\(self.name); \(R.symbol))"
+        let (n, n⁺, n⁻) = (crossingNumber, crossingNumber⁺, crossingNumber⁻)
         
         let all = LinkSpliceState.all(n).map { s in
-            (s, KhTensorElement.generateBasis(link: L, state: s, shift: n⁺ - 2 * n⁻))
+            (s, KhTensorElement.generateBasis(link: self, state: s, shift: n⁺ - 2 * n⁻))
         }
         
         let degList = all.group { (s, _) in s.degree }
@@ -32,6 +30,7 @@ public extension KhChainComplex where T == Ascending, A == KhTensorElement, R: E
             
             return (chainBasis, boundaryMap)
         }
-        self.init(name: name, chain: chain, offset: -n⁻)
+        
+        return CochainComplex(name: name, chain: chain, offset: -n⁻)
     }
 }

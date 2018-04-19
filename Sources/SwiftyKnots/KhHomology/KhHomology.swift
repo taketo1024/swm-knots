@@ -8,14 +8,16 @@
 import Foundation
 import SwiftyMath
 
+public extension Link {
+    public func KhHomology<R: EuclideanRing>(_ type: R.Type) -> Cohomology<KhTensorElement, R> {
+        let name = "Kh(\(self.name); \(R.symbol))"
+        let C = self.KhChainComplex(R.self)
+        return Cohomology(name: name, chainComplex: C)
+    }
+}
+
 public typealias KhHomology<R: EuclideanRing> = Cohomology<KhTensorElement, R>
 public extension KhHomology where T == Ascending, A == KhTensorElement, R: EuclideanRing {
-    public convenience init(_ L: Link, _ type: R.Type) {
-        let name = "Kh(\(L.name); \(R.symbol))"
-        let C = KhChainComplex(L, R.self)
-        self.init(name: name, chainComplex: C)
-    }
-    
     public subscript(i: Int, j: Int) -> Summand {
         let filtered = self[i].summands.enumerated().compactMap{ (k, s) in
             (s.degree == j) ? (k, s) : nil
