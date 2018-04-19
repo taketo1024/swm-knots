@@ -8,8 +8,8 @@
 import Foundation
 import SwiftyMath
 
-public typealias KhHomology<R: EuclideanRing> = Cohomology<KhBasisElement, R>
-public extension KhHomology where T == Ascending, A == KhBasisElement, R: EuclideanRing {
+public typealias KhHomology<R: EuclideanRing> = Cohomology<KhTensorElement, R>
+public extension KhHomology where T == Ascending, A == KhTensorElement, R: EuclideanRing {
     public convenience init(_ L: Link, _ type: R.Type) {
         let name = "Kh(\(L.name); \(R.symbol))"
         let C = KhChainComplex(L, R.self)
@@ -81,6 +81,7 @@ public extension KhHomology where T == Ascending, A == KhBasisElement, R: Euclid
 //        print(prev, "\t->\t[", this, "]\t->\t", next, "\n")
         
         func matrix(from: Summand, to: Summand) -> ComputationalMatrix<R> {
+            let (μL, ΔL) = (KhBasisElement.μL, KhBasisElement.ΔL)
             let grid = from.generators.flatMap { g -> [R] in
                 let x = g.representative
                 let y = x.sum { (e, r) in
@@ -162,19 +163,5 @@ public extension KhHomology where T == Ascending, A == KhBasisElement, R: Euclid
                 }
             } ?? "?"
         }
-    }
-}
-
-private func μL(_ e1: KhBasisElement.E, _ e2: KhBasisElement.E) -> [KhBasisElement.E] {
-    switch (e1, e2) {
-    case (.I, .I), (.I, .X), (.X, .I): return []
-    case (.X, .X): return [.I]
-    }
-}
-
-private func ΔL(_ e: KhBasisElement.E) -> [(KhBasisElement.E, KhBasisElement.E)] {
-    switch e {
-    case .I: return []
-    case .X: return [(.I, .I)]
     }
 }
