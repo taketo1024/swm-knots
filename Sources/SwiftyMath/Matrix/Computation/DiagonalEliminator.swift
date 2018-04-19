@@ -13,20 +13,18 @@ public final class DiagonalEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         return DiagonalEliminationResult.self
     }
     
-    override func iteration() -> Bool {
-        if target.isDiagonal {
-            return true
-        }
-        
+    override func isDone() -> Bool {
+        return target.isDiagonal && target.diagonal.forAll({ $0.normalizeUnit == .identity })
+    }
+    
+    override func iteration() {
         run(RowHermiteEliminator.self)
         
-        if target.isDiagonal {
-            return true
+        if isDone() {
+            return
         }
         
         run(ColHermiteEliminator.self)
-
-        return false
     }
 }
 

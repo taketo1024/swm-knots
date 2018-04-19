@@ -18,16 +18,16 @@ public final class RowHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         rank = target.table.count
     }
     
+    override func isDone() -> Bool {
+        return targetRow >= rank || targetCol >= cols
+    }
+    
     @_specialize(where R == ComputationSpecializedRing)
-    internal override func iteration() -> Bool {
-        if targetRow >= rank || targetCol >= cols {
-            return true
-        }
-        
+    internal override func iteration() {
         let a0 = target[targetRow, targetCol]
         if a0 == .zero {
             targetCol += 1
-            return false
+            return
         }
         
         for i in 0 ..< targetRow {
@@ -44,13 +44,17 @@ public final class RowHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         
         targetRow += 1
         targetCol += 1
-        return false
     }
 }
 
 public final class ColHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
-    internal override func iteration() -> Bool {
+    internal var done = false
+    override func isDone() -> Bool {
+        return done
+    }
+    
+    internal override func iteration() {
         runTranpose(RowHermiteEliminator.self)
-        return true
+        done = true
     }
 }

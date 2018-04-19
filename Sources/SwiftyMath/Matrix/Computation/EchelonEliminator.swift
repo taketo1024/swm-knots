@@ -20,17 +20,17 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         target.switchAlignment(.Rows)
     }
     
+    override func isDone() -> Bool {
+        return targetRow >= target.table.count || targetCol >= cols
+    }
+    
     @_specialize(where R == ComputationSpecializedRing)
-    override func iteration() -> Bool {
-        if targetRow >= target.table.count || targetCol >= cols {
-            return true
-        }
-        
+    override func iteration() {
         // find pivot point
         let targetElements = pivotCandidates()
         guard let (i0, a0) = findMin(targetElements) else {
             targetCol += 1
-            return false
+            return
         }
         
         // eliminate target col
@@ -43,7 +43,7 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
             apply(.AddRow(at: i0, to: i, mul: -q))
             
             if r != .zero {
-                return false
+                return
             }
         }
         
@@ -58,8 +58,6 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
         
         targetRow += 1
         targetCol += 1
-        
-        return false
     }
     
     @_specialize(where R == ComputationSpecializedRing)
@@ -80,8 +78,13 @@ public final class RowEchelonEliminationResult<R: EuclideanRing>: MatrixEliminat
 }
 
 public final class ColEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
-    internal override func iteration() -> Bool {
+    internal var done = false
+    override func isDone() -> Bool {
+        return done
+    }
+    
+    internal override func iteration() {
         runTranpose(RowEchelonEliminator.self)
-        return true
+        done = true
     }
 }
