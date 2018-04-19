@@ -39,6 +39,16 @@ public extension KhHomology where T == Ascending, A == KhBasisElement, R: Euclid
         }
     }
     
+    public var isHThin: Bool {
+        let degs = validDegrees
+        if degs.isEmpty { return true }
+        
+        let (i0, j0) = (degs.map{ $0.0 }.min()!, degs.map{ $0.1 }.min()!)
+        return degs.forAll { (i, j) -> Bool in
+            (j == 2 * (i - i0) + j0) || (j == 2 * (i - i0 + 1) + j0)
+        }
+    }
+    
     public func printTable(detail: Bool = false) {
         let cols = (offset ... topDegree).toArray()
         let degs = cols.flatMap{ i in self[i].summands.map{ $0.degree} }.unique()
