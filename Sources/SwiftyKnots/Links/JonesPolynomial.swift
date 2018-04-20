@@ -17,8 +17,8 @@ public extension Link {
     
     private func _KauffmanBracket(normalized b: Bool) -> LaurentPolynomial<𝐐> {
         let A = LaurentPolynomial<𝐐>.indeterminate(symbol: "A")
-        if let J = junctions.first(where: {$0.isCrossing}) {
-            let i = junctions.index(of: J)!
+        if let x = crossings.first(where: {$0.isCrossing}) {
+            let i = crossings.index(of: x)!
             let pair = splicedPair(at: i)
             return A * pair.0._KauffmanBracket(normalized: b) + A.pow(-1) * pair.1._KauffmanBracket(normalized: b)
         } else {

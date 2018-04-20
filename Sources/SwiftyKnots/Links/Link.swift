@@ -33,11 +33,11 @@ public struct Link: CustomStringConvertible {
      */
     
     public let name: String
-    internal let junctions: [Junction]
+    internal let crossings: [Crossing]
     
-    internal init(name: String, junctions: [Junction]) {
+    internal init(name: String, crossings: [Crossing]) {
         self.name = name
-        self.junctions = junctions
+        self.crossings = crossings
     }
     
     public init(name: String? = nil, planarCode: [(Int, Int, Int, Int)]) {
@@ -51,57 +51,57 @@ public struct Link: CustomStringConvertible {
             }
         }
         
-        // generate junctions.
+        // generate crossings.
         
-        let junctions = planarCode.map { c -> Junction in
+        let crossings = planarCode.map { c -> Crossing in
             let (e0, e1, e2, e3) = (edges[c.0]!, edges[c.1]!, edges[c.2]!, edges[c.3]!)
             assert(e0.to == nil)
             assert(e2.from == nil)
             
-            let J = Junction(edges: (e0, e1, e2, e3), mode: .X⁻)
-            e0.to = J
-            e2.from = J
+            let c = Crossing(edges: (e0, e1, e2, e3), mode: .X⁻)
+            e0.to = c
+            e2.from = c
             
-            return J
+            return c
         }
         
         // traverse edges and determine orientation
         
-        var queue = junctions.map{ $0.edge2 }.filter{ $0.to == nil }
+        var queue = crossings.map{ $0.edge2 }.filter{ $0.to == nil }
         while !queue.isEmpty {
             let e = queue.removeFirst()
             let nextE: Edge
-            let nextJ: Junction
+            let nextX: Crossing
             
-            let match1 = { (J: Junction) in J != e.from && J.edge1 == e }
-            let match3 = { (J: Junction) in J != e.from && J.edge3 == e }
+            let match1 = { (x: Crossing) in x != e.from && x.edge1 == e }
+            let match3 = { (x: Crossing) in x != e.from && x.edge3 == e }
 
-            if let J = junctions.first(where: match1) {
-                nextJ = J
-                nextE = J.edge3
-            } else if let J = junctions.first(where: match3) {
-                nextJ = J
-                nextE = J.edge1
+            if let x = crossings.first(where: match1) {
+                nextX = x
+                nextE = x.edge3
+            } else if let x = crossings.first(where: match3) {
+                nextX = x
+                nextE = x.edge1
             } else {
                 fatalError()
             }
             
-            e.to       = nextJ
-            nextE.from = nextJ
+            e.to       = nextX
+            nextE.from = nextX
             
             if nextE.to == nil {
                 queue.insert(nextE, at: 0)
             }
         }
         
-        for J in junctions {
-            J.edges.forEach { e in
+        for x in crossings {
+            x.edges.forEach { e in
                 assert(e.from != nil)
                 assert(e.to   != nil)
             }
         }
         
-        self.init(name: (name ?? "L"), junctions: junctions)
+        self.init(name: (name ?? "L"), crossings: crossings)
     }
     
     public init(name: String? = nil, planarCode: (Int, Int, Int, Int) ...) {
@@ -109,39 +109,37 @@ public struct Link: CustomStringConvertible {
     }
     
     public static var empty: Link {
-        return Link(name: "∅", junctions: [])
+        return Link(name: "∅", crossings: [])
     }
     
     public static var unknot: Link {
         let (e0, e1) = (Edge(0), Edge(1))
-        let J = Junction(edges: (e0, e0, e1, e1), mode: .V)
-        e0.from = J
-        e0.to   = J
-        e1.from = J
-        e1.to   = J
-        return Link(name: "○", junctions: [J])
+        let x = Crossing(edges: (e0, e0, e1, e1), mode: .V)
+        (e0.from, e0.to) = (x, x)
+        (e1.from, e1.to) = (x, x)
+        return Link(name: "○", crossings: [x])
     }
     
     private var allEdges: Set<Edge> {
-        return Set( junctions.flatMap{ J -> [Edge] in J.edges } )
+        return Set( crossings.flatMap{ x -> [Edge] in x.edges } )
     }
     
     public func copy() -> Link {
         let edges = Dictionary(pairs: allEdges.map{ e -> (Int, Edge) in (e.id, e) } )
         
         let copiedEdges = edges.mapValues{ e in Edge(e.id) }
-        let copiedJuncs = junctions.map { J -> Junction in
-            let edges = J.edges.map{ copiedEdges[$0.id]! }
-            return Junction(edges: (edges[0], edges[1], edges[2], edges[3]), mode: J.mode)
+        let copiedCross = crossings.map { x -> Crossing in
+            let edges = x.edges.map{ copiedEdges[$0.id]! }
+            return Crossing(edges: (edges[0], edges[1], edges[2], edges[3]), mode: x.mode)
         }
         
         for (id, e) in copiedEdges {
             let orig = edges[id]!
-            e.from = copiedJuncs[ junctions.index(of: orig.from)! ]
-            e.to   = copiedJuncs[ junctions.index(of: orig.to  )! ]
+            e.from = copiedCross[ crossings.index(of: orig.from)! ]
+            e.to   = copiedCross[ crossings.index(of: orig.to  )! ]
         }
         
-        return Link(name: name, junctions: copiedJuncs)
+        return Link(name: name, crossings: copiedCross)
     }
     
     public var components: [Component] {
@@ -151,13 +149,13 @@ public struct Link: CustomStringConvertible {
         while !queue.isEmpty {
             var c = [Edge]()
             var e = queue.first!
-            var J = e.to!
+            var x = e.to!
             
             while queue.contains(e) {
                 queue.remove(element: e)
                 c.append(e)
-                e = J.adjacent(e)
-                J = e.opposite(J)
+                e = x.adjacent(e)
+                x = e.opposite(x)
             }
             
             comps.append(Component(c))
@@ -167,19 +165,19 @@ public struct Link: CustomStringConvertible {
     }
     
     public var crossingNumber: Int {
-        return junctions.count { J in J.isCrossing }
+        return crossings.count { x in x.isCrossing }
     }
     
     public var crossingNumber⁺: Int {
-        return junctions.count { J in J.crossingSign == 1 }
+        return crossings.count { x in x.crossingSign == 1 }
     }
     
     public var crossingNumber⁻: Int {
-        return junctions.count { J in J.crossingSign == -1 }
+        return crossings.count { x in x.crossingSign == -1 }
     }
     
     public var writhe: Int {
-        return junctions.sum { J in J.crossingSign }
+        return crossings.sum { x in x.crossingSign }
     }
     
     public var reversed: Link {
@@ -192,8 +190,8 @@ public struct Link: CustomStringConvertible {
     
     public var mirrored: Link {
         let L = self.copy()
-        for J in L.junctions {
-            J.changeCrossing()
+        for x in L.crossings {
+            x.changeCrossing()
         }
         return L
     }
@@ -205,7 +203,7 @@ public struct Link: CustomStringConvertible {
         for e in cL2.allEdges {
             e.id += D
         }
-        return Link(name: "\(L1.name) + \(L2.name)", junctions: cL1.junctions + cL2.junctions)
+        return Link(name: "\(L1.name) + \(L2.name)", crossings: cL1.crossings + cL2.crossings)
     }
     
     /*
@@ -216,7 +214,7 @@ public struct Link: CustomStringConvertible {
     
     @discardableResult
     public mutating func spliceA(at n: Int) -> Link {
-        junctions[n].spliceA()
+        crossings[n].spliceA()
         return self
     }
     
@@ -234,7 +232,7 @@ public struct Link: CustomStringConvertible {
     
     @discardableResult
     public mutating func spliceB(at n: Int) -> Link {
-        junctions[n].spliceB()
+        crossings[n].spliceB()
         return self
     }
     
@@ -249,14 +247,14 @@ public struct Link: CustomStringConvertible {
     }
     
     public var description: String {
-        return "L{ \(junctions.map{ $0.description }.joined(separator: ", ")) }"
+        return "L{ \(crossings.map{ $0.description }.joined(separator: ", ")) }"
     }
     
     public class Edge: Equatable, Comparable, Hashable, CustomStringConvertible {
         public internal(set) var id: Int
         
-        public weak var from: Junction! = nil
-        public weak var to  : Junction! = nil
+        public weak var from: Crossing! = nil
+        public weak var to  : Crossing! = nil
         
         internal init(_ id: Int) {
             self.id = id
@@ -268,15 +266,15 @@ public struct Link: CustomStringConvertible {
             from = tmp
         }
         
-        public func goesIn(to v: Junction) -> Bool {
+        public func goesIn(to v: Crossing) -> Bool {
             return to == v
         }
         
-        public func goesOut(from v: Junction) -> Bool {
+        public func goesOut(from v: Crossing) -> Bool {
             return from == v
         }
         
-        public func opposite(_ v: Junction) -> Junction {
+        public func opposite(_ v: Crossing) -> Crossing {
             return (from == v) ? to : from
         }
         
@@ -322,7 +320,7 @@ public struct Link: CustomStringConvertible {
         }
     }
     
-    public class Junction: Equatable, Comparable, CustomStringConvertible {
+    public class Crossing: Equatable, Comparable, CustomStringConvertible {
         public enum Mode {
             case X⁻ // 0 - 2 is below 1 - 3
             case X⁺ // 0 - 2 is above 1 - 3
@@ -422,11 +420,11 @@ public struct Link: CustomStringConvertible {
             // TODO
         }
         
-        public static func ==(c1: Junction, c2: Junction) -> Bool {
+        public static func ==(c1: Crossing, c2: Crossing) -> Bool {
             return c1 === c2
         }
         
-        public static func <(e1: Junction, e2: Junction) -> Bool {
+        public static func <(e1: Crossing, e2: Crossing) -> Bool {
             return e1.edges.lexicographicallyPrecedes(e2.edges)
         }
         
