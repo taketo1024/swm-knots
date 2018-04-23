@@ -31,8 +31,7 @@ public extension KhHomology where T == Ascending, A == KhTensorElement, R: Eucli
             return indices.map{ k in y[k] }
         }
         
-        let str = SimpleModuleStructure(summands, f)
-        return Summand(self, str)
+        return SimpleModuleStructure(summands, f)
     }
     
     public var validDegrees: [(Int, Int)] {
@@ -84,8 +83,7 @@ public extension KhHomology where T == Ascending, A == KhTensorElement, R: Eucli
         
         func matrix(from: Summand, to: Summand) -> ComputationalMatrix<R> {
             let (μL, ΔL) = (KhBasisElement.μL, KhBasisElement.ΔL)
-            let grid = from.generators.flatMap { g -> [R] in
-                let x = g.representative
+            let grid = from.generators.flatMap { x -> [R] in
                 let y = x.sum { (e, r) in
                     r * e.transit(μL, ΔL)
                 }

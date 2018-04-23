@@ -55,7 +55,7 @@ public extension GeometricComplex {
         let top = H[dim]
         
         if top.isFree && top.rank == 1 {
-            return top.generator(0)
+            return H.homologyClass(top.generator(0))
         } else {
             return nil
         }

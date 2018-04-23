@@ -24,6 +24,7 @@ public typealias Cohomology<A: BasisElementType, R: EuclideanRing> = _Homology<A
 // TODO abstract as `GradedModule`
 public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing>: AlgebraicStructure {
     public typealias Cycle = FreeModule<A, R>
+    public typealias Summand = SimpleModuleStructure<A, R>
     
     public let name: String
     public let chainComplex: _ChainComplex<T, A, R>
@@ -37,7 +38,7 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
     
     public subscript(i: Int) -> Summand {
         guard (offset ... topDegree).contains(i) else {
-            return Summand.zero(self)
+            return Summand.zeroModule
         }
         
         if let g = _summands[i - offset] {
@@ -73,6 +74,10 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
             }
         }
     }
+    
+    public func homologyClass(_ z: Cycle) -> _HomologyClass<T, A, R> {
+        return _HomologyClass(z, self)
+    }
 
     public static func ==(a: _Homology<T, A, R>, b: _Homology<T, A, R>) -> Bool {
         return (a.offset == b.offset) && (a.topDegree == b.topDegree) && (a.offset ... a.topDegree).forAll { i in a[i] == b[i] }
@@ -96,83 +101,11 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
         let (Ain, Aout) = (C.boundaryMatrix(i - T.degree), C.boundaryMatrix(i))
         let (Ein, Eout) = (Ain.eliminate(), Aout.eliminate())
         
-        let S = SimpleModuleStructure.invariantFactorDecomposition(
+        return SimpleModuleStructure.invariantFactorDecomposition(
             generators:       basis,
             generatingMatrix: Eout.kernelMatrix,
             relationMatrix:   Ein.imageMatrix,
             transitionMatrix: Eout.kernelTransitionMatrix
         )
-
-        return Summand(self, S)
-    }
-    
-    public class Summand: AlgebraicStructure {
-        internal var homology: _Homology<T, A, R> // FIXME circular reference!
-        public let structure: SimpleModuleStructure<A, R>
-        
-        public init(_ H: _Homology<T, A, R>, _ structure: SimpleModuleStructure<A, R>) {
-            self.homology = H
-            self.structure = structure
-        }
-        
-        public static func zero(_ H: _Homology<T, A, R>) -> Summand {
-            return Summand(H, SimpleModuleStructure.zeroModule)
-        }
-        
-        public var isTrivial: Bool {
-            return structure.isTrivial
-        }
-        
-        public var isFree: Bool {
-            return structure.isFree
-        }
-        
-        public var rank: Int {
-            return structure.rank
-        }
-        
-        public var torsionCoeffs: [R] {
-            return structure.torsionCoeffs
-        }
-        
-        public var summands: [SimpleModuleStructure<A, R>.Summand] {
-            return structure.summands
-        }
-        
-        public func generator(_ i: Int) -> _HomologyClass<T, A, R> {
-            return _HomologyClass(structure.generator(i), homology)
-        }
-        
-        public var generators: [_HomologyClass<T, A, R>] {
-            return (0 ..< summands.count).map{ i in generator(i) }
-        }
-        
-        public var zero: _HomologyClass<T, A, R> {
-            return _HomologyClass.zero
-        }
-        
-        public func factorize(_ z: Cycle) -> [R] {
-            return structure.factorize(z)
-        }
-        
-        public func cycleIsNullHomologous(_ z: Cycle) -> Bool {
-            return structure.elementIsZero(z)
-        }
-        
-        public func cyclesAreHomologous(_ z1: Cycle, _ z2: Cycle) -> Bool {
-            return cycleIsNullHomologous(z1 - z2)
-        }
-        
-        public static func ==(lhs: _Homology<T, A, R>.Summand, rhs: _Homology<T, A, R>.Summand) -> Bool {
-            return lhs.structure == rhs.structure
-        }
-        
-        public var description: String {
-            return structure.description
-        }
-        
-        public var detailDescription: String {
-            return structure.detailDescription
-        }
     }
 }
