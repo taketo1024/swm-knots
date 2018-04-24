@@ -10,44 +10,38 @@ import Foundation
 
 internal typealias ComputationSpecializedRing = 𝐙
 
-public enum ComputationalMatrixAlignment {
-    case Rows
-    case Cols
-}
-
 public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConvertible {
     public internal(set) var rows: Int
     public internal(set) var cols: Int
     
-    internal var align: ComputationalMatrixAlignment
+    public enum Alignment {
+        case Rows, Cols
+    }
+    
+    internal var align: Alignment
     internal var table:  [Int : [(Int, R)]] // [row : [ (col, R) ]]
     
     internal var eliminationResult: AnyObject? = nil // TODO cache for each form?
     
-    public subscript(i: Int, j: Int) -> R {
-        let (p, q) = (align == .Rows) ? (i, j) : (j, i)
-        return table[p]?.binarySearch(q, { $0.0 })?.element.1 ?? .zero
-    }
-    
-    private init(_ rows: Int, _ cols: Int, _ align: ComputationalMatrixAlignment, _ table: [Int : [(Int, R)]]) {
+    private init(_ rows: Int, _ cols: Int, _ align: Alignment, _ table: [Int : [(Int, R)]]) {
         self.rows = rows
         self.cols = cols
         self.align = align
         self.table = table
     }
     
-    public convenience init<n, m>(_ a: Matrix<n, m, R>, align: ComputationalMatrixAlignment = .Rows) {
+    public convenience init<n, m>(_ a: Matrix<n, m, R>, align: Alignment = .Rows) {
         self.init(rows: a.rows, cols: a.cols, grid: a.grid, align: align)
     }
     
-    public convenience init(rows: Int, cols: Int, grid: [R], align: ComputationalMatrixAlignment = .Rows) {
+    public convenience init(rows: Int, cols: Int, grid: [R], align: Alignment = .Rows) {
         let components = grid.enumerated().compactMap{ (k, a) -> MatrixComponent<R>? in
             (a != .zero) ? MatrixComponent(k / cols, k % cols, a) : nil
         }
         self.init(rows: rows, cols: cols, components: components, align: align)
     }
     
-    public convenience init<S: Sequence>(rows: Int, cols: Int, components: S, align: ComputationalMatrixAlignment = .Rows) where S.Element == MatrixComponent<R> {
+    public convenience init<S: Sequence>(rows: Int, cols: Int, components: S, align: Alignment = .Rows) where S.Element == MatrixComponent<R> {
         self.init(rows, cols, align, [:])
         
         for c in components where c.value != .zero {
@@ -55,6 +49,11 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             (align == .Rows) ? set(i, j, a) : set(j, i, a)
         }
         sort()
+    }
+    
+    public subscript(i: Int, j: Int) -> R {
+        let (p, q) = (align == .Rows) ? (i, j) : (j, i)
+        return table[p]?.binarySearch(q, { $0.0 })?.element.1 ?? .zero
     }
     
     internal func set(_ i: Int, _ j: Int, _ a: R) {
@@ -84,7 +83,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return ComputationalMatrix(rows, cols, align, table)
     }
     
-    public func switchAlignment(_ align: ComputationalMatrixAlignment) {
+    public func switchAlignment(_ align: Alignment) {
         if self.align == align {
             return
         }
@@ -165,8 +164,10 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     public func mapValues<R2>(_ f: (R) -> R2) -> ComputationalMatrix<R2> {
+        typealias M = ComputationalMatrix<R2>
         let mapped = table.mapValues { $0.map{ ($0, f($1)) } }
-        return ComputationalMatrix<R2>(rows, cols, align, mapped)
+        let a = (align == .Rows) ? M.Alignment.Rows : M.Alignment.Cols
+        return M(rows, cols, a, mapped)
     }
     
     public var isZero: Bool {
@@ -355,11 +356,11 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
-    public static func zero(rows: Int, cols: Int, align: ComputationalMatrixAlignment = .Rows) -> ComputationalMatrix<R> {
+    public static func zero(rows: Int, cols: Int, align: Alignment = .Rows) -> ComputationalMatrix<R> {
         return ComputationalMatrix(rows: rows, cols: cols, components: [], align: align)
     }
     
-    public static func identity(_ n: Int, align: ComputationalMatrixAlignment = .Rows) -> ComputationalMatrix<R> {
+    public static func identity(_ n: Int, align: Alignment = .Rows) -> ComputationalMatrix<R> {
         let components = (0 ..< n).map{ i in MatrixComponent(i, i, R.identity)}
         return ComputationalMatrix(rows: n, cols: n, components: components, align: align)
     }
