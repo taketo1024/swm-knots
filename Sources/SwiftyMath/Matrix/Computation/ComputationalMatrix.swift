@@ -11,12 +11,12 @@ import Foundation
 internal typealias ComputationSpecializedRing = 𝐙
 
 public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConvertible {
-    public internal(set) var rows: Int
-    public internal(set) var cols: Int
-    
-    public enum Alignment {
+    public enum Alignment: String, Codable {
         case Rows, Cols
     }
+    
+    public internal(set) var rows: Int
+    public internal(set) var cols: Int
     
     internal var align: Alignment
     internal var table:  [Int : [(Int, R)]] // [row : [ (col, R) ]]
@@ -440,5 +440,26 @@ public extension ComputationalMatrix where R: EuclideanRing{
         let result = eliminator.run()
         eliminationResult = result
         return result
+    }
+}
+
+extension ComputationalMatrix: Codable where R: Codable {
+    enum CodingKeys: String, CodingKey {
+        case rows, cols, grid
+    }
+    
+    public convenience init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let rows = try c.decode(Int.self, forKey: .rows)
+        let cols = try c.decode(Int.self, forKey: .cols)
+        let grid = try c.decode([R].self, forKey: .grid)
+        self.init(rows: rows, cols: cols, grid: grid, align: .Rows)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(rows, forKey: .rows)
+        try c.encode(cols, forKey: .cols)
+        try c.encode(generateGrid(), forKey: .grid)
     }
 }

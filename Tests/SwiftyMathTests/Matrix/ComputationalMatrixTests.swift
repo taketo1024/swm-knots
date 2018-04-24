@@ -130,4 +130,11 @@ class ComputationalMatrixTests: XCTestCase {
         XCTAssertEqual(a.submatrix(0 ..< 1, 0 ..< 1), M11(1))
         XCTAssertEqual(a.submatrix(0 ..< 2, 1 ..< 2), M21(2, 4))
     }
+    
+    public func testEncoding() {
+        let a = M22(1,2,3,4)
+        let d = try! JSONEncoder().encode(a)
+        let b = try! JSONDecoder().decode(ComputationalMatrix<R>.self, from: d)
+        XCTAssertEqual(a, b)
+    }
 }
