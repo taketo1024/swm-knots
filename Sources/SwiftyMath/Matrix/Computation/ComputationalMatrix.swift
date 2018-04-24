@@ -42,7 +42,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     
     public convenience init(rows: Int, cols: Int, grid: [R], align: ComputationalMatrixAlignment = .Rows) {
         let components = grid.enumerated().compactMap{ (k, a) -> MatrixComponent<R>? in
-            (a != .zero) ? (k / cols, k % cols, a) : nil
+            (a != .zero) ? MatrixComponent(k / cols, k % cols, a) : nil
         }
         self.init(rows: rows, cols: cols, components: components, align: align)
     }
@@ -50,7 +50,8 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     public convenience init<S: Sequence>(rows: Int, cols: Int, components: S, align: ComputationalMatrixAlignment = .Rows) where S.Element == MatrixComponent<R> {
         self.init(rows, cols, align, [:])
         
-        for (i, j, a) in components where a != .zero {
+        for c in components where c.value != .zero {
+            let (i, j, a) = (c.row, c.col, c.value)
             (align == .Rows) ? set(i, j, a) : set(j, i, a)
         }
         sort()
@@ -104,12 +105,12 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     
     public func components(ofRow i: Int) -> [MatrixComponent<R>] {
         switchAlignment(.Rows)
-        return table[i].map { $0.map{ (j, r) in (i, j, r) } } ?? []
+        return table[i].map { $0.map{ (j, r) in MatrixComponent(i, j, r) } } ?? []
     }
     
     public func components(ofCol j: Int) -> [MatrixComponent<R>] {
         switchAlignment(.Cols)
-        return table[j].map { $0.map{ (i, r) in (i, j, r) } } ?? []
+        return table[j].map { $0.map{ (i, r) in MatrixComponent(i, j, r) } } ?? []
     }
     
     @discardableResult

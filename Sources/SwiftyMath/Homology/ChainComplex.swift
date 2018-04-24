@@ -90,7 +90,7 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
         let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toBasisElement: toBasisIndex]
         let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
             map.applied(to: x).compactMap { (y, a) -> MatrixComponent<R>? in
-                toIndex[y].flatMap{ i in (i, j, a) } // nil if toIndex[y] == nil
+                toIndex[y].flatMap{ i in MatrixComponent(i, j, a) } // nil if toIndex[y] == nil
             }
         }
         
@@ -157,7 +157,7 @@ public extension ChainComplex where T == Descending {
             let dMap  = D.BoundaryMap { (f: Dual<A>) in
                 let j = current.index(of: f.base)!
                 let col = matrix.components(ofCol: j)
-                let elements = col.map { (i, _, r) in (Dual(next[i]), e * r) }
+                let elements = col.map { c in (next[c.row].dual, e * c.value) }
                 return D.Chain(elements)
             }
             return (dBasis, dMap)
