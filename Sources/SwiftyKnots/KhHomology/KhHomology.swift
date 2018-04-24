@@ -19,7 +19,12 @@ public extension Link {
 public typealias KhHomology<R: EuclideanRing> = Cohomology<KhTensorElement, R>
 public extension KhHomology where T == Ascending, A == KhTensorElement, R: EuclideanRing {
     public subscript(i: Int, j: Int) -> Summand {
-        fatalError() // TODO
+        let s = self[i]
+        let filtered = s.summands.enumerated().compactMap{ (k, s) in
+            (s.degree == j) ? k : nil
+        }
+        
+        return s.subSummands(indices: filtered)
     }
     
     public var validDegrees: [(Int, Int)] {
