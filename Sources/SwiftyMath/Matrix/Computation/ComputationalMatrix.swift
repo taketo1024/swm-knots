@@ -132,31 +132,35 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         assert(0 <= rowRange.lowerBound && rowRange.upperBound <= rows)
         assert(0 <= colRange.lowerBound && colRange.upperBound <= cols)
 
+        return submatrix({i in rowRange.contains(i)}, {j in colRange.contains(j)})
+    }
+    
+    public func submatrix(_ rowCond: (Int) -> Bool, _ colCond: (Int) -> Bool) -> ComputationalMatrix<R> {
+        let (sRows, sCols, iList, jList): (Int, Int, [Int], [Int])
+        
         switch align {
         case .Rows:
-            let table = self.table
-                .filter { (i, _) in rowRange.contains(i) }
-                .compactMap{ (i, list) -> (Int, [(Int, R)])? in
-                    let l = list.compactMap{ (j, a) in
-                        colRange.contains(j) ? (j - colRange.lowerBound, a) : nil
-                    }
-                    return !l.isEmpty ? (i - rowRange.lowerBound, l) : nil
-                }
-            
-            return ComputationalMatrix(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound, align, Dictionary(pairs: table))
-            
+            (iList, jList) = ((0 ..< rows).filter(rowCond), (0 ..< cols).filter(colCond))
+            (sRows, sCols) = (iList.count, jList.count)
         case .Cols:
-            let table = self.table
-                .filter { (j, _) in colRange.contains(j) }
-                .compactMap{ (j, list) -> (Int, [(Int, R)])? in
-                    let l = list.compactMap{ (i, a) in
-                        rowRange.contains(i) ? (i - rowRange.lowerBound, a) : nil
-                    }
-                    return !l.isEmpty ? (j - colRange.lowerBound, l) : nil
-                }
-            
-            return ComputationalMatrix(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound, align, Dictionary(pairs: table))
+            (iList, jList) = ((0 ..< cols).filter(colCond), (0 ..< rows).filter(rowCond))
+            (sRows, sCols) = (jList.count, iList.count)
         }
+        
+        let subTable = table.compactMap{ (i, list) -> (Int, [(Int, R)])? in
+            guard let k = iList.binarySearch(i) else {
+                return nil
+            }
+            let subList = list.compactMap{ (j, a) -> (Int, R)? in
+                guard let l = jList.binarySearch(j) else {
+                    return nil
+                }
+                return (l, a)
+            }
+            return !subList.isEmpty ? (k, subList) : nil
+        }
+        
+        return ComputationalMatrix(sRows, sCols, align, Dictionary(pairs: subTable))
     }
     
     public func mapValues<R2>(_ f: (R) -> R2) -> ComputationalMatrix<R2> {
