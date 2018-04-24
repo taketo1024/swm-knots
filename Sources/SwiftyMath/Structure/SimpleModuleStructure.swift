@@ -136,6 +136,16 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
         return elementIsZero(z1 - z2)
     }
     
+    public func subSummands(_ indices: Int ...) -> SimpleModuleStructure<A, R> {
+        return subSummands(indices: indices)
+    }
+    
+    public func subSummands(indices: [Int]) -> SimpleModuleStructure<A, R> {
+        let sub = indices.map{ summands[$0] }
+        let T = transform.submatrix({ i in indices.contains(i)}, { _ in true })
+        return SimpleModuleStructure(sub, basis, T)
+    }
+    
     public static func ==(a: SimpleModuleStructure<A, R>, b: SimpleModuleStructure<A, R>) -> Bool {
         return a.summands == b.summands
     }
