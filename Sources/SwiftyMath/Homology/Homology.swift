@@ -27,13 +27,40 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
     public typealias Summand = SimpleModuleStructure<A, R>
     
     public let name: String
-    public let chainComplex: _ChainComplex<T, A, R>
+    public let offset: Int
+    public var topDegree: Int
+    
     private var _summands: [Summand?]
+    private var _generator: (Int) -> Summand
     
     public init(name: String? = nil, chainComplex: _ChainComplex<T, A, R>) {
         self.name = name ?? "\(T.descending ? "H" : "cH")(\(chainComplex.name))"
-        self.chainComplex = chainComplex
+        self.offset = chainComplex.offset
+        self.topDegree = chainComplex.topDegree
+        
         self._summands = Array(repeating: nil, count: chainComplex.topDegree - chainComplex.offset + 1) // lazy init
+        self._generator = { i in
+            let basis = chainComplex.chainBasis(i)
+            let (Ain, Aout) = (chainComplex.boundaryMatrix(i - T.degree), chainComplex.boundaryMatrix(i))
+            let (Ein, Eout) = (Ain.eliminate(), Aout.eliminate())
+            
+            let (Z, B, ZT) = (Eout.kernelMatrix, Ein.imageMatrix, Eout.kernelTransitionMatrix)
+            
+            return SimpleModuleStructure(
+                basis:            basis,
+                generatingMatrix: Z,
+                relationMatrix:   B,
+                transitionMatrix: ZT
+            )
+        }
+    }
+    
+    internal init(name: String, offset: Int, topDegree: Int, summands: [Summand]) {
+        self.name = name
+        self.offset = offset
+        self.topDegree = topDegree
+        self._summands = summands
+        self._generator = {_ in fatalError()}
     }
     
     public subscript(i: Int) -> Summand {
@@ -44,18 +71,10 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
         if let g = _summands[i - offset] {
             return g
         } else {
-            let g = generateSummand(i)
+            let g = _generator(i)
             _summands[i - offset] = g
             return g
         }
-    }
-    
-    public var offset: Int {
-        return chainComplex.offset
-    }
-    
-    public var topDegree: Int {
-        return chainComplex.topDegree
     }
     
     public func bettiNumer(_ i: Int) -> Int {
@@ -94,20 +113,28 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
                 .joined(separator: ",\n")
             + "\n}"
     }
+}
+
+extension _Homology: Codable where A: Codable, R: Codable {
+    enum CodingKeys: String, CodingKey {
+        case name, offset, topDegree, summands
+    }
     
-    private func generateSummand(_ i: Int) -> Summand {
-        let C = chainComplex
-        let basis = C.chainBasis(i)
-        let (Ain, Aout) = (C.boundaryMatrix(i - T.degree), C.boundaryMatrix(i))
-        let (Ein, Eout) = (Ain.eliminate(), Aout.eliminate())
-        
-        let (Z, B, ZT) = (Eout.kernelMatrix, Ein.imageMatrix, Eout.kernelTransitionMatrix)
-        
-        return SimpleModuleStructure(
-            basis:            basis,
-            generatingMatrix: Z,
-            relationMatrix:   B,
-            transitionMatrix: ZT
-        )
+    public convenience init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let name = try c.decode(String.self, forKey: .name)
+        let offset = try c.decode(Int.self, forKey: .offset)
+        let topDegree = try c.decode(Int.self, forKey: .topDegree)
+        let summands = try c.decode([Summand].self, forKey: .summands)
+        self.init(name: name, offset: offset, topDegree: topDegree, summands: summands)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        let summands = (offset ... topDegree).map { i in self[i] }
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(name, forKey: .name)
+        try c.encode(offset, forKey: .offset)
+        try c.encode(topDegree, forKey: .topDegree)
+        try c.encode(summands, forKey: .summands)
     }
 }
