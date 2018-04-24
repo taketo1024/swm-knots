@@ -16,7 +16,7 @@
 import Foundation
 import SwiftyMath
 
-public struct Link: CustomStringConvertible {
+public struct Link: Equatable, CustomStringConvertible {
     
     /* Planer Diagram code, represented by crossings:
      *
@@ -421,7 +421,7 @@ public struct Link: CustomStringConvertible {
         }
         
         public static func ==(c1: Crossing, c2: Crossing) -> Bool {
-            return c1 === c2
+            return c1.edges == c2.edges
         }
         
         public static func <(e1: Crossing, e2: Crossing) -> Bool {
@@ -431,5 +431,28 @@ public struct Link: CustomStringConvertible {
         public var description: String {
             return "\(mode)[\(edge0),\(edge1),\(edge2),\(edge3)]"
         }
+    }
+}
+
+extension Link: Codable {
+    enum CodingKeys: String, CodingKey {
+        case name, code
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let name = try c.decode(String.self, forKey: .name)
+        let code = try c.decode([[Int]].self, forKey: .code)
+        self.init(name: name, planarCode: code.map{ l in (l[0], l[1], l[2], l[3]) })
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        // MEMO currently supports only ones generated from planarCode.
+        assert(crossings.forAll{ c in c.mode == .X⁻ })
+        
+        let code = crossings.map{ c in c.edges.map{ $0.id } }
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(name, forKey: .name)
+        try c.encode(code, forKey: .code)
     }
 }
