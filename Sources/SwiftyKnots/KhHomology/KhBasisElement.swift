@@ -12,6 +12,9 @@ public enum KhBasisElement: BasisElementType, Comparable {
     case I
     case X
     
+    public typealias Product = (KhBasisElement, KhBasisElement) -> [KhBasisElement]
+    public typealias Coproduct = (KhBasisElement) -> [(KhBasisElement, KhBasisElement)]
+    
     public var degree: Int {
         switch self {
         case .I: return +1

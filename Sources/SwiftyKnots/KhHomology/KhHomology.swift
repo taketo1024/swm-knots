@@ -9,15 +9,32 @@ import Foundation
 import SwiftyMath
 
 public extension Link {
-    public func KhHomology<R: EuclideanRing>(_ type: R.Type) -> Cohomology<KhTensorElement, R> {
-        let name = "Kh(\(self.name); \(R.symbol))"
-        let C = self.KhChainComplex(R.self)
-        return Cohomology(name: name, chainComplex: C)
+    public func khHomology<R: EuclideanRing>(_ type: R.Type) -> KhHomology<R> {
+        return KhHomology<R>(self)
     }
 }
 
-public typealias KhHomology<R: EuclideanRing> = Cohomology<KhTensorElement, R>
-public extension KhHomology where T == Ascending, A == KhTensorElement, R: EuclideanRing {
+public struct KhHomology<R: EuclideanRing> {
+    public typealias Summand = Cohomology<KhTensorElement, R>.Summand
+    public let link: Link
+    
+    internal let cube: KhCube
+    internal let H: Cohomology<KhTensorElement, R>
+    
+    public init(_ link: Link) {
+        self.link = link
+        
+        let name = "Kh(\(link.name); \(R.symbol))"
+        let (cube, C) = link.KhChainComplex(R.self)
+        
+        self.cube = cube
+        self.H = Cohomology(name: name, chainComplex: C)
+    }
+    
+    public subscript(i: Int) -> Summand {
+        return H[i]
+    }
+
     public subscript(i: Int, j: Int) -> Summand {
         let s = self[i]
         let filtered = s.summands.enumerated().compactMap{ (k, s) in
@@ -27,8 +44,16 @@ public extension KhHomology where T == Ascending, A == KhTensorElement, R: Eucli
         return s.subSummands(indices: filtered)
     }
     
+    public var offset: Int {
+        return H.offset
+    }
+    
+    public var topDegree: Int {
+        return H.topDegree
+    }
+    
     public var validDegrees: [(Int, Int)] {
-        return (offset ... topDegree).flatMap { i in
+        return (H.offset ... H.topDegree).flatMap { i in
             self[i].summands.map{ $0.generator.degree }.unique().sorted().map{ j in (i, j) }
         }
     }
@@ -41,6 +66,14 @@ public extension KhHomology where T == Ascending, A == KhTensorElement, R: Eucli
         return degs.forAll { (i, j) -> Bool in
             (j == 2 * (i - i0) + j0) || (j == 2 * (i - i0 + 1) + j0)
         }
+    }
+    
+    public var eulerCharacteristic: Int {
+        return H.eulerCharacteristic
+    }
+    
+    public var gradedEulerCharacteristic: LaurentPolynomial<R> {
+        return H.gradedEulerCharacteristic
     }
     
     public func printTable(detail: Bool = false) {
@@ -77,9 +110,7 @@ public extension KhHomology where T == Ascending, A == KhTensorElement, R: Eucli
         func matrix(from: Summand, to: Summand) -> ComputationalMatrix<R> {
             let (μL, ΔL) = (KhBasisElement.μL, KhBasisElement.ΔL)
             let grid = from.generators.flatMap { x -> [R] in
-                let y = x.sum { (e, r) in
-                    r * e.transit(μL, ΔL)
-                }
+                let y = cube.map(x, μL, ΔL)
                 return to.factorize(y)
             }
             return ComputationalMatrix(rows: from.generators.count, cols: to.generators.count, grid: grid).transpose()
