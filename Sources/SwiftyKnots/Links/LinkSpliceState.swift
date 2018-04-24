@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct LinkSpliceState: Equatable, Comparable, Hashable, CustomStringConvertible {
+public struct LinkSpliceState: Equatable, Comparable, Hashable, CustomStringConvertible, Codable {
     public let bits: [UInt8]
     public init(_ bits: [UInt8]) {
         self.bits = bits

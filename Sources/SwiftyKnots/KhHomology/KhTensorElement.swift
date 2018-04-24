@@ -8,7 +8,7 @@
 import Foundation
 import SwiftyMath
 
-public struct KhTensorElement: BasisElementType, Comparable {
+public struct KhTensorElement: BasisElementType, Comparable, Codable {
     public let state: LinkSpliceState
     internal let factors: [KhBasisElement]
     public let shift: Int

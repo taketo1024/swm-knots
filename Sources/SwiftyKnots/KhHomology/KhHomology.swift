@@ -15,11 +15,13 @@ public extension Link {
 }
 
 public struct KhHomology<R: EuclideanRing> {
-    public typealias Summand = Cohomology<KhTensorElement, R>.Summand
+    public typealias Inner = Cohomology<KhTensorElement, R>
+    public typealias Summand = Inner.Summand
+    
     public let link: Link
     
     internal let cube: KhCube
-    internal let H: Cohomology<KhTensorElement, R>
+    internal let H: Inner
     
     public init(_ link: Link) {
         self.link = link
@@ -187,5 +189,24 @@ public struct KhHomology<R: EuclideanRing> {
                 }
             } ?? "?"
         }
+    }
+}
+
+extension KhHomology: Codable where R: Codable {
+    enum CodingKeys: String, CodingKey {
+        case link, H
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.link = try c.decode(Link.self, forKey: .link)
+        self.cube = KhCube(link)
+        self.H = try c.decode(Inner.self, forKey: .H)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(link, forKey: .link)
+        try c.encode(H, forKey: .H)
     }
 }

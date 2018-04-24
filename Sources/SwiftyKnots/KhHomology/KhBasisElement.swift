@@ -8,7 +8,7 @@
 import Foundation
 import SwiftyMath
 
-public enum KhBasisElement: BasisElementType, Comparable {
+public enum KhBasisElement: String, BasisElementType, Comparable, Codable {
     case I
     case X
     
