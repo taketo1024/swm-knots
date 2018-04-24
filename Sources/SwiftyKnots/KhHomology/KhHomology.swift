@@ -19,19 +19,7 @@ public extension Link {
 public typealias KhHomology<R: EuclideanRing> = Cohomology<KhTensorElement, R>
 public extension KhHomology where T == Ascending, A == KhTensorElement, R: EuclideanRing {
     public subscript(i: Int, j: Int) -> Summand {
-        let filtered = self[i].summands.enumerated().compactMap{ (k, s) in
-            (s.degree == j) ? (k, s) : nil
-        }
-        
-        let indices  = filtered.map{ $0.0 }
-        let summands = filtered.map{ $0.1 }
-        
-        let f = { (x: FreeModule<A, R>) -> [R] in
-            let y = self[i].factorize(x)
-            return indices.map{ k in y[k] }
-        }
-        
-        return SimpleModuleStructure(summands, f)
+        fatalError() // TODO
     }
     
     public var validDegrees: [(Int, Int)] {
@@ -126,15 +114,15 @@ public extension KhHomology where T == Ascending, A == KhTensorElement, R: Eucli
                 return nil
         }
         
-        let S1 = SimpleModuleStructure.invariantFactorDecomposition(
-            generators:       this.summands.enumerated().filter{ $0.1.isFree }.map{ AbstractBasisElement($0.0) },
+        let S1 = SimpleModuleStructure(
+            basis:            this.summands.enumerated().filter{ $0.1.isFree }.map{ AbstractBasisElement($0.0) },
             generatingMatrix: Eout.0.kernelMatrix,
             relationMatrix:    Ein.0.imageMatrix,
             transitionMatrix: Eout.0.kernelTransitionMatrix
         )
         
-        let S2 = SimpleModuleStructure.invariantFactorDecomposition(
-            generators:       this.summands.enumerated().filter{ !$0.1.isFree }.map{ AbstractBasisElement($0.0) },
+        let S2 = SimpleModuleStructure(
+            basis:            this.summands.enumerated().filter{ !$0.1.isFree }.map{ AbstractBasisElement($0.0) },
             generatingMatrix: Eout.1.kernelMatrix,
             relationMatrix:    Ein.1.imageMatrix,
             transitionMatrix: Eout.1.kernelTransitionMatrix

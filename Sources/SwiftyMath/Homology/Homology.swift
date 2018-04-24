@@ -101,11 +101,13 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
         let (Ain, Aout) = (C.boundaryMatrix(i - T.degree), C.boundaryMatrix(i))
         let (Ein, Eout) = (Ain.eliminate(), Aout.eliminate())
         
-        return SimpleModuleStructure.invariantFactorDecomposition(
-            generators:       basis,
-            generatingMatrix: Eout.kernelMatrix,
-            relationMatrix:   Ein.imageMatrix,
-            transitionMatrix: Eout.kernelTransitionMatrix
+        let (Z, B, ZT) = (Eout.kernelMatrix, Ein.imageMatrix, Eout.kernelTransitionMatrix)
+        
+        return SimpleModuleStructure(
+            basis:            basis,
+            generatingMatrix: Z,
+            relationMatrix:   B,
+            transitionMatrix: ZT
         )
     }
 }
