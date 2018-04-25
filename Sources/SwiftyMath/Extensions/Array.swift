@@ -9,14 +9,14 @@
 import Foundation
 
 public extension Array {
-    public func binarySearch<T: Comparable>(_ needle: T, _ indexer: (Element) -> T) -> (index: Int, element: Element)? {
+    public func binarySearch<T: Comparable>(_ needle: T, _ compare: (Element) -> T) -> (index: Int, element: Element)? {
         var l = 0
         var u = self.count - 1
         
         while l <= u {
             let i = (l + u) / 2
             let a = self[i]
-            let x = indexer(a)
+            let x = compare(a)
             
             if(needle == x) {
                 return (i, a)
@@ -63,5 +63,11 @@ public extension Array where Element: Equatable {
         } else {
             return false
         }
+    }
+}
+
+public extension Array where Element: Comparable {
+    public func binarySearch(_ needle: Element) -> Int? {
+        return binarySearch(needle, { $0 }).map{ $0.index }
     }
 }

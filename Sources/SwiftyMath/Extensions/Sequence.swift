@@ -62,6 +62,12 @@ public extension Sequence {
     }
 }
 
+public extension Sequence where Element: Hashable {
+    public func countMultiplicities() -> [Element : Int] {
+        return self.group{ $0 }.mapValues{ $0.count }
+    }
+}
+
 public extension Sequence where Element: AdditiveGroup {
     @_inlineable public func sumAll() -> Element {
         return sum{ $0 }

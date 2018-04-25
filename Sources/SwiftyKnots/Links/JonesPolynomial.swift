@@ -10,13 +10,13 @@ import SwiftyMath
 
 public extension Link {
     
-    // a polynomial in 𝐐[A, 1/A]
-    public var KauffmanBracket: LaurentPolynomial<𝐐> {
+    // a polynomial in 𝐙[A, 1/A]
+    public var KauffmanBracket: LaurentPolynomial<𝐙> {
         return _KauffmanBracket(normalized: false)
     }
     
-    private func _KauffmanBracket(normalized b: Bool) -> LaurentPolynomial<𝐐> {
-        let A = LaurentPolynomial<𝐐>.indeterminate(symbol: "A")
+    private func _KauffmanBracket(normalized b: Bool) -> LaurentPolynomial<𝐙> {
+        let A = LaurentPolynomial<𝐙>.indeterminate(symbol: "A")
         if let x = crossings.first(where: {$0.isCrossing}) {
             let i = crossings.index(of: x)!
             let pair = splicedPair(at: i)
@@ -28,20 +28,20 @@ public extension Link {
     }
     
     // a polynomial in 𝐐[q, 1/q] where q = -A^{-2}
-    // TODO replace with t = -q^2 = A^{-4} to get J ∈ 𝐐[√t, 1/√t]
-    public var JonesPolynomial: LaurentPolynomial<𝐐> {
+    // TODO replace with t = -q^2 = A^{-4} to get J ∈ 𝐙[√t, 1/√t]
+    public var JonesPolynomial: LaurentPolynomial<𝐙> {
         return _JonesPolynomial(normalized: true)
     }
     
-    public var unnormalizedJonesPolynomial: LaurentPolynomial<𝐐> {
+    public var unnormalizedJonesPolynomial: LaurentPolynomial<𝐙> {
         return _JonesPolynomial(normalized: false)
     }
     
-    public func _JonesPolynomial(normalized b: Bool) -> LaurentPolynomial<𝐐> {
-        let A = LaurentPolynomial<𝐐>.indeterminate(symbol: "A")
+    public func _JonesPolynomial(normalized b: Bool) -> LaurentPolynomial<𝐙> {
+        let A = LaurentPolynomial<𝐙>.indeterminate(symbol: "A")
         let f = (-A).pow( -3 * writhe ) * _KauffmanBracket(normalized: b)
         let J = LaurentPolynomial(symbol: "q", degreeRange: -f.upperDegree/2 ... -f.lowerDegree/2) { i in
-            𝐐(from: (-1).pow(i)) * f.coeff(-2 * i)
+            (-1).pow(i) * f.coeff(-2 * i)
         }
         return J
     }

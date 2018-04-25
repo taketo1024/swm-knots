@@ -22,7 +22,7 @@ public extension LinearMapType where Domain: FiniteDimVectorSpace, Codomain: Fin
     public var asMatrix: DynamicMatrix<CoeffRing> {
         let comps = Domain.standardBasis.enumerated().flatMap { (j, v) -> [MatrixComponent<CoeffRing>] in
             let w = self.applied(to: v)
-            return w.standardCoordinates.enumerated().map { (i, a) in (i, j, a) }
+            return w.standardCoordinates.enumerated().map { (i, a) in MatrixComponent(i, j, a) }
         }
         return DynamicMatrix(rows: Codomain.dim, cols: Domain.dim, components: comps)
     }

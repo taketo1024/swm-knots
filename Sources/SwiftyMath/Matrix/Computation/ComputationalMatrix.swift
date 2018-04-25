@@ -10,50 +10,50 @@ import Foundation
 
 internal typealias ComputationSpecializedRing = 𝐙
 
-public enum ComputationalMatrixAlignment {
-    case Rows
-    case Cols
-}
-
 public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConvertible {
+    public enum Alignment: String, Codable {
+        case Rows, Cols
+    }
+    
     public internal(set) var rows: Int
     public internal(set) var cols: Int
     
-    internal var align: ComputationalMatrixAlignment
+    internal var align: Alignment
     internal var table:  [Int : [(Int, R)]] // [row : [ (col, R) ]]
     
     internal var eliminationResult: AnyObject? = nil // TODO cache for each form?
     
-    public subscript(i: Int, j: Int) -> R {
-        let (p, q) = (align == .Rows) ? (i, j) : (j, i)
-        return table[p]?.binarySearch(q, { $0.0 })?.element.1 ?? .zero
-    }
-    
-    private init(_ rows: Int, _ cols: Int, _ align: ComputationalMatrixAlignment, _ table: [Int : [(Int, R)]]) {
+    private init(_ rows: Int, _ cols: Int, _ align: Alignment, _ table: [Int : [(Int, R)]]) {
         self.rows = rows
         self.cols = cols
         self.align = align
         self.table = table
     }
     
-    public convenience init<n, m>(_ a: Matrix<n, m, R>, align: ComputationalMatrixAlignment = .Rows) {
+    public convenience init<n, m>(_ a: Matrix<n, m, R>, align: Alignment = .Rows) {
         self.init(rows: a.rows, cols: a.cols, grid: a.grid, align: align)
     }
     
-    public convenience init(rows: Int, cols: Int, grid: [R], align: ComputationalMatrixAlignment = .Rows) {
+    public convenience init(rows: Int, cols: Int, grid: [R], align: Alignment = .Rows) {
         let components = grid.enumerated().compactMap{ (k, a) -> MatrixComponent<R>? in
-            (a != .zero) ? (k / cols, k % cols, a) : nil
+            (a != .zero) ? MatrixComponent(k / cols, k % cols, a) : nil
         }
         self.init(rows: rows, cols: cols, components: components, align: align)
     }
     
-    public convenience init<S: Sequence>(rows: Int, cols: Int, components: S, align: ComputationalMatrixAlignment = .Rows) where S.Element == MatrixComponent<R> {
+    public convenience init<S: Sequence>(rows: Int, cols: Int, components: S, align: Alignment = .Rows) where S.Element == MatrixComponent<R> {
         self.init(rows, cols, align, [:])
         
-        for (i, j, a) in components where a != .zero {
+        for c in components where c.value != .zero {
+            let (i, j, a) = (c.row, c.col, c.value)
             (align == .Rows) ? set(i, j, a) : set(j, i, a)
         }
         sort()
+    }
+    
+    public subscript(i: Int, j: Int) -> R {
+        let (p, q) = (align == .Rows) ? (i, j) : (j, i)
+        return table[p]?.binarySearch(q, { $0.0 })?.element.1 ?? .zero
     }
     
     internal func set(_ i: Int, _ j: Int, _ a: R) {
@@ -83,7 +83,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return ComputationalMatrix(rows, cols, align, table)
     }
     
-    public func switchAlignment(_ align: ComputationalMatrixAlignment) {
+    public func switchAlignment(_ align: Alignment) {
         if self.align == align {
             return
         }
@@ -102,14 +102,19 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         sort()
     }
     
+    public var components: [MatrixComponent<R>] {
+        switchAlignment(.Rows)
+        return table.flatMap{ (i, list) in list.map{(j, a) in MatrixComponent(i, j, a)} }
+    }
+    
     public func components(ofRow i: Int) -> [MatrixComponent<R>] {
         switchAlignment(.Rows)
-        return table[i].map { $0.map{ (j, r) in (i, j, r) } } ?? []
+        return table[i].map { $0.map{ (j, r) in MatrixComponent(i, j, r) } } ?? []
     }
     
     public func components(ofCol j: Int) -> [MatrixComponent<R>] {
         switchAlignment(.Cols)
-        return table[j].map { $0.map{ (i, r) in (i, j, r) } } ?? []
+        return table[j].map { $0.map{ (i, r) in MatrixComponent(i, j, r) } } ?? []
     }
     
     @discardableResult
@@ -132,36 +137,42 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         assert(0 <= rowRange.lowerBound && rowRange.upperBound <= rows)
         assert(0 <= colRange.lowerBound && colRange.upperBound <= cols)
 
+        return submatrix({i in rowRange.contains(i)}, {j in colRange.contains(j)})
+    }
+    
+    public func submatrix(_ rowCond: (Int) -> Bool, _ colCond: (Int) -> Bool) -> ComputationalMatrix<R> {
+        let (sRows, sCols, iList, jList): (Int, Int, [Int], [Int])
+        
         switch align {
         case .Rows:
-            let table = self.table
-                .filter { (i, _) in rowRange.contains(i) }
-                .compactMap{ (i, list) -> (Int, [(Int, R)])? in
-                    let l = list.compactMap{ (j, a) in
-                        colRange.contains(j) ? (j - colRange.lowerBound, a) : nil
-                    }
-                    return !l.isEmpty ? (i - rowRange.lowerBound, l) : nil
-                }
-            
-            return ComputationalMatrix(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound, align, Dictionary(pairs: table))
-            
+            (iList, jList) = ((0 ..< rows).filter(rowCond), (0 ..< cols).filter(colCond))
+            (sRows, sCols) = (iList.count, jList.count)
         case .Cols:
-            let table = self.table
-                .filter { (j, _) in colRange.contains(j) }
-                .compactMap{ (j, list) -> (Int, [(Int, R)])? in
-                    let l = list.compactMap{ (i, a) in
-                        rowRange.contains(i) ? (i - rowRange.lowerBound, a) : nil
-                    }
-                    return !l.isEmpty ? (j - colRange.lowerBound, l) : nil
-                }
-            
-            return ComputationalMatrix(rowRange.upperBound - rowRange.lowerBound, colRange.upperBound - colRange.lowerBound, align, Dictionary(pairs: table))
+            (iList, jList) = ((0 ..< cols).filter(colCond), (0 ..< rows).filter(rowCond))
+            (sRows, sCols) = (jList.count, iList.count)
         }
+        
+        let subTable = table.compactMap{ (i, list) -> (Int, [(Int, R)])? in
+            guard let k = iList.binarySearch(i) else {
+                return nil
+            }
+            let subList = list.compactMap{ (j, a) -> (Int, R)? in
+                guard let l = jList.binarySearch(j) else {
+                    return nil
+                }
+                return (l, a)
+            }
+            return !subList.isEmpty ? (k, subList) : nil
+        }
+        
+        return ComputationalMatrix(sRows, sCols, align, Dictionary(pairs: subTable))
     }
     
     public func mapValues<R2>(_ f: (R) -> R2) -> ComputationalMatrix<R2> {
+        typealias M = ComputationalMatrix<R2>
         let mapped = table.mapValues { $0.map{ ($0, f($1)) } }
-        return ComputationalMatrix<R2>(rows, cols, align, mapped)
+        let a = (align == .Rows) ? M.Alignment.Rows : M.Alignment.Cols
+        return M(rows, cols, a, mapped)
     }
     
     public var isZero: Bool {
@@ -350,11 +361,11 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
-    public static func zero(rows: Int, cols: Int, align: ComputationalMatrixAlignment = .Rows) -> ComputationalMatrix<R> {
+    public static func zero(rows: Int, cols: Int, align: Alignment = .Rows) -> ComputationalMatrix<R> {
         return ComputationalMatrix(rows: rows, cols: cols, components: [], align: align)
     }
     
-    public static func identity(_ n: Int, align: ComputationalMatrixAlignment = .Rows) -> ComputationalMatrix<R> {
+    public static func identity(_ n: Int, align: Alignment = .Rows) -> ComputationalMatrix<R> {
         let components = (0 ..< n).map{ i in MatrixComponent(i, i, R.identity)}
         return ComputationalMatrix(rows: n, cols: n, components: components, align: align)
     }
@@ -381,6 +392,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return grid
     }
     
+    // TODO move to FreeModule.init
     public func generateElements<A>(from basis: [A]) -> [FreeModule<A, R>] {
         assert(basis.count <= rows)
         
@@ -402,9 +414,18 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return DynamicMatrix(rows: rows, cols: cols, grid: generateGrid())
     }
     
+    public var density: Double {
+        let c = table.sum{ (_, list) in list.count }
+        return Double(c) / Double(rows * cols)
+    }
+    
+    public var sparsity: Double {
+        return 1.0 - density
+    }
+    
     public var description: String {
         return "CMatrix<\(rows), \(cols)> [ " + table.flatMap { (i, list) in
-            list.map{ (j, a) in "\( align == .Rows ? (i, j, a) : (j, i, a) )"}
+            list.map{ (j, a) in "\(a)" + Format.sub("\(align == .Rows ? (i, j) : (j, i) )") }
         }.joined(separator: ", ") + " ]"
     }
     
@@ -434,5 +455,36 @@ public extension ComputationalMatrix where R: EuclideanRing{
         let result = eliminator.run()
         eliminationResult = result
         return result
+    }
+}
+
+extension ComputationalMatrix: Codable where R: Codable {
+    enum CodingKeys: String, CodingKey {
+        case rows, cols, grid, components
+    }
+    
+    public convenience init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let rows = try c.decode(Int.self, forKey: .rows)
+        let cols = try c.decode(Int.self, forKey: .cols)
+        
+        if c.contains(.grid) {
+            let grid = try c.decode([R].self, forKey: .grid)
+            self.init(rows: rows, cols: cols, grid: grid, align: .Rows)
+        } else {
+            let comps = try c.decode([MatrixComponent<R>].self, forKey: .components)
+            self.init(rows: rows, cols: cols, components: comps, align: .Rows)
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(rows, forKey: .rows)
+        try c.encode(cols, forKey: .cols)
+        if density > 0.5 {
+            try c.encode(generateGrid(), forKey: .grid)
+        } else {
+            try c.encode(components, forKey: .components)
+        }
     }
 }

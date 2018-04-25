@@ -8,9 +8,12 @@
 import Foundation
 import SwiftyMath
 
-public enum KhBasisElement: BasisElementType, Comparable {
+public enum KhBasisElement: String, BasisElementType, Comparable, Codable {
     case I
     case X
+    
+    public typealias Product = (KhBasisElement, KhBasisElement) -> [KhBasisElement]
+    public typealias Coproduct = (KhBasisElement) -> [(KhBasisElement, KhBasisElement)]
     
     public var degree: Int {
         switch self {

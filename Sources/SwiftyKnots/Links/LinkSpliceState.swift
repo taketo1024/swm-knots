@@ -69,3 +69,15 @@ public extension Link {
         return L
     }
 }
+
+extension LinkSpliceState: Codable {
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        self.bits = try c.decode([UInt8].self)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        try c.encode(bits)
+    }
+}

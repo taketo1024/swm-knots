@@ -9,34 +9,58 @@ import Foundation
 import SwiftyMath
 
 public extension Link {
-    public func KhHomology<R: EuclideanRing>(_ type: R.Type) -> Cohomology<KhTensorElement, R> {
-        let name = "Kh(\(self.name); \(R.symbol))"
-        let C = self.KhChainComplex(R.self)
-        return Cohomology(name: name, chainComplex: C)
+    public func khHomology<R: EuclideanRing>(_ type: R.Type) -> KhHomology<R> {
+        return KhHomology<R>(self)
+    }
+    
+    public func khHomology<R: EuclideanRing & Codable>(_ type: R.Type) -> KhHomology<R> {
+        let id = "Kh_\(name)_\(R.symbol)"
+        return Storage.useCache(id) { KhHomology<R>(self) }
     }
 }
 
-public typealias KhHomology<R: EuclideanRing> = Cohomology<KhTensorElement, R>
-public extension KhHomology where T == Ascending, A == KhTensorElement, R: EuclideanRing {
+public struct KhHomology<R: EuclideanRing> {
+    public typealias Inner = Cohomology<KhTensorElement, R>
+    public typealias Summand = Inner.Summand
+    
+    public let link: Link
+    
+    internal let cube: KhCube
+    internal let H: Inner
+    
+    public init(_ link: Link) {
+        self.link = link
+        
+        let name = "Kh(\(link.name); \(R.symbol))"
+        let (cube, C) = link.KhChainComplex(R.self)
+        
+        self.cube = cube
+        self.H = Cohomology(name: name, chainComplex: C)
+    }
+    
+    public subscript(i: Int) -> Summand {
+        return H[i]
+    }
+
     public subscript(i: Int, j: Int) -> Summand {
-        let filtered = self[i].summands.enumerated().compactMap{ (k, s) in
-            (s.degree == j) ? (k, s) : nil
+        let s = self[i]
+        let filtered = s.summands.enumerated().compactMap{ (k, s) in
+            (s.degree == j) ? k : nil
         }
         
-        let indices  = filtered.map{ $0.0 }
-        let summands = filtered.map{ $0.1 }
-        
-        let f = { (x: FreeModule<A, R>) -> [R] in
-            let y = self[i].factorize(x)
-            return indices.map{ k in y[k] }
-        }
-        
-        let str = SimpleModuleStructure(summands, f)
-        return Summand(self, str)
+        return s.subSummands(indices: filtered)
+    }
+    
+    public var offset: Int {
+        return H.offset
+    }
+    
+    public var topDegree: Int {
+        return H.topDegree
     }
     
     public var validDegrees: [(Int, Int)] {
-        return (offset ... topDegree).flatMap { i in
+        return (H.offset ... H.topDegree).flatMap { i in
             self[i].summands.map{ $0.generator.degree }.unique().sorted().map{ j in (i, j) }
         }
     }
@@ -49,6 +73,25 @@ public extension KhHomology where T == Ascending, A == KhTensorElement, R: Eucli
         return degs.forAll { (i, j) -> Bool in
             (j == 2 * (i - i0) + j0) || (j == 2 * (i - i0 + 1) + j0)
         }
+    }
+    
+    public var eulerCharacteristic: Int {
+        return H.eulerCharacteristic
+    }
+    
+    public var gradedEulerCharacteristic: LaurentPolynomial<R> {
+        return H.gradedEulerCharacteristic
+    }
+    
+    public var asCode: String {
+        return validDegrees.map{ (i, j) in
+            let s = self[i, j]
+            let f = (s.rank > 0) ? "0\(Format.sup(s.rank))₍\(Format.sub(i)),\(Format.sub(j))₎" : ""
+            let t = s.torsionCoeffs.countMultiplicities().map{ (d, r) in
+                "\(d)\(Format.sup(r))₍\(Format.sub(i)),\(Format.sub(j))₎"
+            }.joined()
+            return f + t
+        }.joined()
     }
     
     public func printTable(detail: Bool = false) {
@@ -84,11 +127,8 @@ public extension KhHomology where T == Ascending, A == KhTensorElement, R: Eucli
         
         func matrix(from: Summand, to: Summand) -> ComputationalMatrix<R> {
             let (μL, ΔL) = (KhBasisElement.μL, KhBasisElement.ΔL)
-            let grid = from.generators.flatMap { g -> [R] in
-                let x = g.representative
-                let y = x.sum { (e, r) in
-                    r * e.transit(μL, ΔL)
-                }
+            let grid = from.generators.flatMap { x -> [R] in
+                let y = cube.map(x, μL, ΔL)
                 return to.factorize(y)
             }
             return ComputationalMatrix(rows: from.generators.count, cols: to.generators.count, grid: grid).transpose()
@@ -128,15 +168,15 @@ public extension KhHomology where T == Ascending, A == KhTensorElement, R: Eucli
                 return nil
         }
         
-        let S1 = SimpleModuleStructure.invariantFactorDecomposition(
-            generators:       this.summands.enumerated().filter{ $0.1.isFree }.map{ AbstractBasisElement($0.0) },
+        let S1 = SimpleModuleStructure(
+            basis:            this.summands.enumerated().filter{ $0.1.isFree }.map{ AbstractBasisElement($0.0) },
             generatingMatrix: Eout.0.kernelMatrix,
             relationMatrix:    Ein.0.imageMatrix,
             transitionMatrix: Eout.0.kernelTransitionMatrix
         )
         
-        let S2 = SimpleModuleStructure.invariantFactorDecomposition(
-            generators:       this.summands.enumerated().filter{ !$0.1.isFree }.map{ AbstractBasisElement($0.0) },
+        let S2 = SimpleModuleStructure(
+            basis:            this.summands.enumerated().filter{ !$0.1.isFree }.map{ AbstractBasisElement($0.0) },
             generatingMatrix: Eout.1.kernelMatrix,
             relationMatrix:    Ein.1.imageMatrix,
             transitionMatrix: Eout.1.kernelTransitionMatrix
@@ -165,5 +205,24 @@ public extension KhHomology where T == Ascending, A == KhTensorElement, R: Eucli
                 }
             } ?? "?"
         }
+    }
+}
+
+extension KhHomology: Codable where R: Codable {
+    enum CodingKeys: String, CodingKey {
+        case link, H
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.link = try c.decode(Link.self, forKey: .link)
+        self.cube = KhCube(link)
+        self.H = try c.decode(Inner.self, forKey: .H)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(link, forKey: .link)
+        try c.encode(H, forKey: .H)
     }
 }

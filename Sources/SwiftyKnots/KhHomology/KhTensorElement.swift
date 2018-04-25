@@ -8,77 +8,54 @@
 import Foundation
 import SwiftyMath
 
-public struct KhTensorElement: BasisElementType, Comparable {
-    internal let factors: [KhBasisElement]
-    internal let originalLink: Link
-    internal let splicedLink: Link
+public struct KhTensorElement: BasisElementType, Comparable, Codable {
     public let state: LinkSpliceState
-    public let shift: Int
+    internal let factors: [KhBasisElement]
+    public let degree: Int
     
-    internal init(_ factors: [KhBasisElement], _ originalLink: Link, _ splicedLink: Link, _ state: LinkSpliceState, _ shift: Int) {
-        self.factors = factors
-        self.originalLink = originalLink
-        self.splicedLink = splicedLink
-        self.state = state
-        self.shift = shift
-    }
-    
-    public static func generateBasis(link: Link, state: LinkSpliceState, shift: Int) -> [KhTensorElement] {
-        let spliced = link.spliced(by: state)
-        let n = spliced.components.count
-        
+    public static func generateBasis(state: LinkSpliceState, power n: Int, shift: Int) -> [KhTensorElement] {
         return (0 ..< n).reduce([[]]) { (res, _) -> [[KhBasisElement]] in
             res.flatMap{ factors -> [[KhBasisElement]] in
                 [factors + [.I], factors + [.X]]
             }
-        }.map{ factors in KhTensorElement.init(factors, link, spliced, state, shift) }
-        .sorted()
+            }
+            .map{ factors in KhTensorElement.init(state, factors, shift) }
+            .sorted()
     }
     
-    public var degree: Int {
-        return factors.sum{ e in e.degree } + state.degree + shift
+    internal init(_ state: LinkSpliceState, _ factors: [KhBasisElement], _ shift: Int) {
+        self.state = state
+        self.factors = factors
+        self.degree = factors.sum{ e in e.degree } + state.degree + shift
     }
     
-    internal typealias E = KhBasisElement
+    internal var shift: Int {
+        return degree - factors.sum{ e in e.degree } - state.degree
+    }
     
-    internal func transit<R: EuclideanRing>(_ μ: (E, E) -> [E], _ Δ: (E) -> [(E, E)]) -> FreeModule<KhTensorElement, R> {
-        return state.next.sum { (sgn, state) -> FreeModule<KhTensorElement, R> in
-            R(from: sgn) * transit(to: state, μ, Δ)
+    internal func product<R: Ring>(_ μ: KhBasisElement.Product, _ from: (Int, Int), _ to: Int, _ toState: LinkSpliceState) -> FreeModule<KhTensorElement, R> {
+        let (i1, i2) = from
+        let (e1, e2) = (factors[i1], factors[i2])
+        
+        return μ(e1, e2).sum { e in
+            var toFactors = factors
+            toFactors.remove(at: i2)
+            toFactors.remove(at: i1)
+            toFactors.insert(e, at: to)
+            return FreeModule( KhTensorElement(toState, toFactors, shift) )
         }
     }
     
-    internal func transit<R: EuclideanRing>(to state: LinkSpliceState, _ μ: (E, E) -> [E], _ Δ: (E) -> [(E, E)]) -> FreeModule<KhTensorElement, R> {
+    internal func coproduct<R: Ring>(_ Δ: KhBasisElement.Coproduct, _ from: Int, _ to: (Int, Int), _ toState: LinkSpliceState) -> FreeModule<KhTensorElement, R> {
+        let (j1, j2) = to
+        let e = factors[from]
         
-        let next = originalLink.spliced(by: state) // maybe creating too much copies...
-        
-        let (c1, c2) = (splicedLink.components, next.components)
-        let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
-        
-        switch (d1.count, d2.count) {
-        case (2, 1): // apply μ
-            let (i1, i2, j) = (c1.index(of: d1[0])!, c1.index(of: d1[1])!, c2.index(of: d2[0])!)
-            let (e1, e2) = (factors[i1], factors[i2])
-            
-            return μ(e1, e2).sum { e in
-                var factor = factors
-                factor.remove(at: i2)
-                factor.remove(at: i1)
-                factor.insert(e, at: j)
-                return FreeModule( KhTensorElement(factor, originalLink, next, state, shift) )
-            }
-            
-        case (1, 2): // apply Δ
-            let (i, j1, j2) = (c1.index(of: d1[0])!, c2.index(of: d2[0])!, c2.index(of: d2[1])!)
-            let e = factors[i]
-            
-            return Δ(e).sum { (e1, e2) -> FreeModule<KhTensorElement, R> in
-                var factor = factors
-                factor.remove(at: i)
-                factor.insert(e1, at: j1)
-                factor.insert(e2, at: j2)
-                return FreeModule( KhTensorElement(factor, originalLink, next, state, shift) )
-            }
-        default: fatalError()
+        return Δ(e).sum { (e1, e2) -> FreeModule<KhTensorElement, R> in
+            var toFactors = factors
+            toFactors.remove(at: from)
+            toFactors.insert(e1, at: j1)
+            toFactors.insert(e2, at: j2)
+            return FreeModule( KhTensorElement(toState, toFactors, shift) )
         }
     }
     

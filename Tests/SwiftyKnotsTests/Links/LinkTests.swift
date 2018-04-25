@@ -11,7 +11,7 @@ import SwiftyMath
 
 class LinkTests: XCTestCase {
     
-    typealias A = LaurentPolynomial<𝐐>
+    typealias A = LaurentPolynomial<𝐙>
     
     func testEmpty() {
         let e = Link.empty
@@ -73,5 +73,12 @@ class LinkTests: XCTestCase {
         XCTAssertEqual(K.crossingNumber, 3)
         XCTAssertEqual(K.writhe, 3)
         XCTAssertEqual(K.JonesPolynomial, A(symbol: "q", coeffs: [8: -1, 6: 1, 2: 1]))
+    }
+    
+    func testCoding() {
+        let K = Link.trefoil
+        let d = try! JSONEncoder().encode(K)
+        let K2 = try! JSONDecoder().decode(Link.self, from: d)
+        XCTAssertEqual(K, K2)
     }
 }

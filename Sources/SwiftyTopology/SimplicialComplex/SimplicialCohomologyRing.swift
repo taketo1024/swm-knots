@@ -27,7 +27,7 @@ public extension SimplicialCohomologyClass where T == Ascending, A == Dual<Simpl
         assert(H1 == H2)
         
         let x = a.representative.cup(b.representative)
-        return SimplicialCohomologyClass<R>(x, H1)
+        return H1.homologyClass(x)
     }
     
     public static func *(a: SimplicialCohomologyClass<R>, b: SimplicialCohomologyClass<R>) -> SimplicialCohomologyClass<R> {
@@ -51,7 +51,7 @@ public extension SimplicialCohomologyClass where T == Ascending, A == Dual<Simpl
         // TODO check H1, H2 matches.
         
         let y = self.representative.cap(x.representative)
-        return HomologyClass<Simplex, R>(y, H2)
+        return H2.homologyClass(y)
     }
     
     public static func ∩(a: SimplicialCohomologyClass<R>, x: SimplicialHomologyClass<R>) -> SimplicialHomologyClass<R> {
@@ -63,7 +63,7 @@ public extension SimplicialCohomologyClass where T == Ascending, A == Dual<Simpl
     public func Sq(_ i: Int) -> SimplicialCohomologyClass<R> {
         if let H = structure {
             let a = self.representative
-            return SimplicialCohomologyClass( a.Sq(i), H )
+            return H.homologyClass(a.Sq(i))
         } else {
             return .zero
         }

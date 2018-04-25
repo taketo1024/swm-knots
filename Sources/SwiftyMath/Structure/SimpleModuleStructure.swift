@@ -21,21 +21,78 @@ import Foundation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
 public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: ModuleStructure<R> {
-    public  let summands: [Summand]
-    private let factorizer: (FreeModule<A, R>) -> [R]
+    public let summands: [Summand]
     
-    public init(_ summands: [Summand], _ factorizer: @escaping (FreeModule<A, R>) -> [R]) {
+    internal let basis: [A]
+    internal let transform: ComputationalMatrix<R>
+    
+    // root initializer
+    internal init(_ summands: [Summand], _ basis: [A], _ transform: ComputationalMatrix<R>) {
         self.summands = summands
-        self.factorizer = factorizer
+        self.basis = basis
+        self.transform = transform
+        
         super.init()
     }
     
-    public subscript(i: Int) -> Summand {
-        return summands[i]
+    public convenience init(generators: [A], relationMatrix B: ComputationalMatrix<R>) {
+        let I = ComputationalMatrix<R>.identity(generators.count)
+        self.init(basis: generators, generatingMatrix: I, relationMatrix: B, transitionMatrix: I)
+    }
+    
+    public convenience init(basis: [A], generatingMatrix A: ComputationalMatrix<R>, relationMatrix B: ComputationalMatrix<R>, transitionMatrix T: ComputationalMatrix<R>) {
+        
+        assert(A.rows == B.rows)
+        assert(A.rows >= A.cols)  // n ≧ k
+        assert(A.cols >= B.cols)  // k ≧ l
+        
+        let (k, l) = (A.cols, B.cols)
+        
+        // R ∈ M(k, l) : B = A * R.
+        //
+        // R = T * B, since
+        //     T * A = I_k,
+        //     T * B = T * (A * R) = I_k * R = R.
+        //
+        // R gives the structure of the quotient A / B.
+        
+        let R1 = T * B
+        
+        // Retake bases of A and B to obtain the decomposition of M.
+        //
+        //   P' * R * Q' = [D'; O].
+        //   => (B * Q') = (Z * R) * Q' = (Z * P'^-1) * [D; O]
+        //
+        // D gives the relation between the new bases.
+        //
+        // eg)     D = [1,   1,   2,   0]
+        //     A / B =  0  + 0 + Z/2 + Z
+        
+        let E  = R1.eliminate(form: .Smith)
+        
+        let divisors = (E.diagonal + Array(repeating: R.zero, count: k - l)).filter{ $0 != .identity }
+        let s = divisors.count
+        
+        let A2 = A * E.leftInverse.submatrix(colRange: (k - s) ..< k)
+        let generators = A2.generateElements(from: basis)
+        
+        let summands = zip(generators, divisors).map { (z, a) in
+            return SimpleModuleStructure<A, R>.Summand(z, a)
+        }
+        
+        // The transition matrix to A' = (A * P'^-1) is given by
+        //
+        //   T' := P' * T, since
+        //   T' * A' = (P' * T) * (Z * P'^-1) = P' * I_k * P'^-1 = I_k.
+        //
+
+        let T2 = E.left.submatrix(rowRange: (k - s) ..< k) * T
+        
+        self.init(summands, basis, T2)
     }
     
     public static var zeroModule: SimpleModuleStructure<A, R> {
-        return SimpleModuleStructure([], {_ in []})
+        return SimpleModuleStructure([], [], .zero(rows: 0, cols: 0))
     }
     
     public var isTrivial: Bool {
@@ -63,7 +120,12 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
-        return factorizer(z)
+        let n = basis.count
+        let v = transform * ComputationalMatrix(rows: n, cols: 1, grid: z.factorize(by: basis))
+        
+        return summands.enumerated().map { (i, s) in
+            return s.isFree ? v[i, 0] : v[i, 0] % s.divisor
+        }
     }
     
     public func elementIsZero(_ z: FreeModule<A, R>) -> Bool {
@@ -72,6 +134,16 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
     
     public func elementsAreEqual(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {
         return elementIsZero(z1 - z2)
+    }
+    
+    public func subSummands(_ indices: Int ...) -> SimpleModuleStructure<A, R> {
+        return subSummands(indices: indices)
+    }
+    
+    public func subSummands(indices: [Int]) -> SimpleModuleStructure<A, R> {
+        let sub = indices.map{ summands[$0] }
+        let T = transform.submatrix({ i in indices.contains(i)}, { _ in true })
+        return SimpleModuleStructure(sub, basis, T)
     }
     
     public static func ==(a: SimpleModuleStructure<A, R>, b: SimpleModuleStructure<A, R>) -> Bool {
@@ -125,89 +197,16 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
     }
 }
 
-public extension SimpleModuleStructure {
-    public static func invariantFactorDecomposition(generators: [A], generatingMatrix A: ComputationalMatrix<R>, relationMatrix B: ComputationalMatrix<R>, transitionMatrix T: ComputationalMatrix<R>) -> SimpleModuleStructure<A, R> {
-        
-        assert(A.rows == B.rows)
-        assert(A.rows >= A.cols)  // n ≧ k
-        assert(A.cols >= B.cols)  // k ≧ l
-        
-        let (k, l) = (A.cols, B.cols)
-        
-        // R ∈ M(k, l) : Relation from A to B,  B = A * R.
-        //
-        // R = T * B, since
-        //     T * A = I_k,
-        //     T * B = T * (A * R) = I_k * R = R.
-        //
-        // R gives the structure of the quotient A / B.
-        
-        let R1 = T * B
-        
-        // Retake bases of Z and B to obtain the decomposition of H.
-        //
-        //   P' * R * Q' = [D'; O].
-        //   => (B * Q') = (Z * R) * Q' = (Z * P'^-1) * [D; O]
-        //
-        // D gives the relation between the new bases.
-        //
-        // eg)     D = [1,   1,   2,   0]
-        //     A / B =  0  + 0 + Z/2 + Z
-        //
-        // The transition matrix to A' = (A * P'^-1) is given by
-        //
-        //   T' := P' * T, since
-        //   T' * A' = (P' * T) * (Z * P'^-1) = P' * I_k * P'^-1 = I_k.
-        //
-        
-        let E  = R1.eliminate(form: .Smith)
-        
-        let divisors = (E.diagonal + Array(repeating: R.zero, count: k - l)).filter{ $0 != .identity }
-        let s = divisors.count
-        
-        let A2 = A * E.leftInverse.submatrix(colRange: (k - s) ..< k)
-        let T2 = E.left.submatrix(rowRange: (k - s) ..< k) * T
-        
-        // create summands
-        
-        let newGenerators = A2.generateElements(from: generators)
-        let summands = zip(newGenerators, divisors).map { (z, a) in
-            return SimpleModuleStructure<A, R>.Summand(z, a)
-        }
-        
-        let factorizer = { (z: FreeModule<A, R>) -> [R] in
-            let n = generators.count
-            let v = T2 * ComputationalMatrix(rows: n, cols: 1, grid: z.factorize(by: generators))
-            
-            return summands.enumerated().map { (i, s) in
-                return s.isFree ? v[i, 0] : v[i, 0] % s.divisor
-            }
-        }
-        
-        return SimpleModuleStructure(summands, factorizer)
-    }
-}
-
 public typealias AbstractSimpleModuleStructure<R: EuclideanRing> = SimpleModuleStructure<AbstractBasisElement, R>
 
 public extension AbstractSimpleModuleStructure where A == AbstractBasisElement {
     public convenience init(rank r: Int, torsions: [R] = []) {
         let t = torsions.count
-        let summands = (0 ..< r).map{ i in Summand(A(i), .zero) }
-            + torsions.enumerated().map{ (i, d) in Summand(FreeModule(A(i + r)), d) }
-        
-        let factorizer = { (x: FreeModule<A, R>) in
-            (0 ..< r).map{ i in x[A(i)] } + (0 ..< t).map{ i in x[A(t + i)] % torsions[i] }
-        }
-        
-        self.init(summands, factorizer)
-    }
-    
-    public static func invariantFactorDecomposition(rank r: Int, relationMatrix B: ComputationalMatrix<R>) -> AbstractSimpleModuleStructure<R> {
-        return invariantFactorDecomposition(generators: (0 ..< r).map{ A($0) },
-                                            generatingMatrix: ComputationalMatrix.identity(r),
-                                            relationMatrix: B,
-                                            transitionMatrix: ComputationalMatrix.identity(r))
+        let basis = (0 ..< r + t).map{ i in A(i) }
+        let summands = (0 ..< r).map{ i in Summand(basis[i], .zero) }
+            + torsions.enumerated().map{ (i, d) in Summand(basis[i + r], d) }
+        let I = ComputationalMatrix<R>.identity(r + t)
+        self.init(summands, basis, I)
     }
     
     public static func ⊕(a: AbstractSimpleModuleStructure<R>, b: AbstractSimpleModuleStructure<R>) -> AbstractSimpleModuleStructure<R> {
@@ -218,3 +217,42 @@ public extension AbstractSimpleModuleStructure where A == AbstractBasisElement {
     }
 }
 
+extension SimpleModuleStructure: Codable where A: Codable, R: Codable {
+    enum CodingKeys: String, CodingKey {
+        case summands, basis, transform
+    }
+    
+    public convenience init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let summands = try c.decode([Summand].self, forKey: .summands)
+        let basis = try c.decode([A].self, forKey: .basis)
+        let trans = try c.decode(ComputationalMatrix<R>.self, forKey: .transform)
+        self.init(summands, basis, trans)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(summands, forKey: .summands)
+        try c.encode(basis, forKey: .basis)
+        try c.encode(transform, forKey: .transform)
+    }
+}
+
+extension SimpleModuleStructure.Summand: Codable where A: Codable, R: Codable {
+    enum CodingKeys: String, CodingKey {
+        case generator, divisor
+    }
+    
+    public convenience init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let g = try c.decode(FreeModule<A, R>.self, forKey: .generator)
+        let d = try c.decode(R.self, forKey: .divisor)
+        self.init(g, d)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(generator, forKey: .generator)
+        try c.encode(divisor, forKey: .divisor)
+    }
+}

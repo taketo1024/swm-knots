@@ -1,7 +1,5 @@
 import Foundation
 
-public typealias MatrixComponent<R> = (row: Int, col: Int, value: R)
-
 public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     public typealias CoeffRing = R
     
@@ -35,8 +33,8 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     
     internal init(_ rows: Int, _ cols: Int, _ components: [MatrixComponent<R>]) {
         var grid = Array(repeating: R.zero, count: rows * cols)
-        for (i, j, a) in components {
-            grid[(i * cols) + j] = a
+        for c in components {
+            grid[(c.row * cols) + c.col] = c.value
         }
         self.init(rows, cols, grid)
     }
@@ -110,8 +108,8 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         set { grid[gridIndex(i, j)] = newValue }
     }
     
-    public func makeIterator() -> AnyIterator<(Int, Int, R)> {
-        return AnySequence(grid.lazy.enumerated().map{ (index, a) in (index / cols, index % cols, a) }).makeIterator()
+    public func makeIterator() -> AnyIterator<MatrixComponent<R>> {
+        return AnySequence(grid.lazy.enumerated().map{ (index, a) in MatrixComponent(index / cols, index % cols, a) }).makeIterator()
     }
     
     public static var zero: Matrix<n, m, R> {
@@ -179,7 +177,7 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
     
     public var components: [MatrixComponent<R>] {
-        return self.filter{ (_, _, a) in a != .zero }
+        return self.filter{ c in c.value != .zero }
     }
     
     public var asComputational: ComputationalMatrix<R> {
@@ -262,11 +260,11 @@ public extension Matrix where R: EuclideanRing {
 
 extension Matrix: NormedSpace where R: NormedSpace {
     public var norm: 𝐑 {
-        return √( sum { (_, _, a) in a.norm.pow(2) } )
+        return √( sum { c in c.value.norm.pow(2) } )
     }
     
     public var maxNorm: 𝐑 {
-        return self.reduce(.zero) { (res, e) in Swift.max(res, e.2.norm) }
+        return self.reduce(.zero) { (res, c) in Swift.max(res, c.value.norm) }
     }
 }
 

@@ -10,6 +10,7 @@ import Foundation
 
 public enum DebugFlag {
     case MatrixElim
+    case Storage
 }
 
 private var flags = Set<DebugFlag>()
