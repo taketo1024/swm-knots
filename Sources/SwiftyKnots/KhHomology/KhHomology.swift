@@ -12,6 +12,11 @@ public extension Link {
     public func khHomology<R: EuclideanRing>(_ type: R.Type) -> KhHomology<R> {
         return KhHomology<R>(self)
     }
+    
+    public func khHomology<R: EuclideanRing & Codable>(_ type: R.Type) -> KhHomology<R> {
+        let id = "Kh_\(name)_\(R.symbol)"
+        return Storage.useCache(id) { KhHomology<R>(self) }
+    }
 }
 
 public struct KhHomology<R: EuclideanRing> {
