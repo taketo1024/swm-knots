@@ -28,7 +28,11 @@ public struct Format {
             case "7": return "⁷"
             case "8": return "⁸"
             case "9": return "⁹"
+            case "+": return "⁺"
             case "-": return "⁻"
+            case "(": return "⁽"
+            case ")": return "⁾"
+
             default: return c
             }
         } )
@@ -51,6 +55,10 @@ public struct Format {
             case "7": return "₇"
             case "8": return "₈"
             case "9": return "₉"
+            case "+": return "₊"
+            case "-": return "₋"
+            case "(": return "₍"
+            case ")": return "₎"
             default: return c
             }
         } )
