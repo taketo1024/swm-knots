@@ -44,7 +44,7 @@ public class Debug {
     }
     
     public static func log(_ flag: DebugFlag, _ msg: @autoclosure () -> String) {
-        if _isDebugAssertConfiguration() && flags.contains(flag) {
+        if flags.contains(flag) {
             print(msg())
         }
     }
