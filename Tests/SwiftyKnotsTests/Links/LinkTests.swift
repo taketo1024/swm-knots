@@ -11,7 +11,7 @@ import SwiftyMath
 
 class LinkTests: XCTestCase {
     
-    typealias A = LaurentPolynomial<𝐐>
+    typealias A = LaurentPolynomial<𝐙>
     
     func testEmpty() {
         let e = Link.empty
