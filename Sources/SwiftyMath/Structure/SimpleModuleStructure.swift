@@ -79,7 +79,7 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
     }
     
     public override var description: String {
-        return summands.isEmpty ? "0" : summands.map{$0.description}.joined(separator: "⊕")
+        return summands.isEmpty ? "0" : summands.map{$0.description}.joined(separator: " ⊕ ")
     }
     
     public var detailDescription: String {
@@ -106,6 +106,10 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
         
         public var isFree: Bool {
             return divisor == .zero
+        }
+        
+        public var degree: Int {
+            return generator.degree
         }
         
         public static func ==(a: Summand, b: Summand) -> Bool {

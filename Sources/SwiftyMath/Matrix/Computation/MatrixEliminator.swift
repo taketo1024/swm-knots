@@ -50,7 +50,9 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         log("-----Start:\(self)-----")
         
         prepare()
-        while !iteration() {}
+        while !isDone() {
+            iteration()
+        }
         finish()
         
         log("-----Done:\(self), \(rowOps.count + colOps.count) steps)-----")
@@ -62,7 +64,11 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         // override in subclass
     }
     
-    internal func iteration() -> Bool {
+    internal func isDone() -> Bool {
+        fatalError("override in subclass")
+    }
+    
+    internal func iteration() {
         fatalError("override in subclass")
     }
     
