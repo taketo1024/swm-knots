@@ -24,17 +24,17 @@ public struct Storage {
         prepare()
         
         guard let data = try? JSONEncoder().encode(obj) else {
-            log("[error] couldn't encode given data: \(id).")
+            log("[error] couldn't encode given data: \(id)")
             return false
         }
         
         let file = fileURL(id)
         do {
             try data.write(to: file)
-            log("saved data: \(id).")
+            log("saved: \(file.path)")
             return true
         } catch {
-            log("[error] failed to save data: \(id).")
+            log("[error] failed to save data: \(id)")
             return false
         }
     }
@@ -44,12 +44,12 @@ public struct Storage {
         
         let file = fileURL(id)
         guard let data = try? Data(contentsOf: file) else {
-            log("no such data: \(id).")
+            log("no such data: \(id)")
             return nil
         }
         
         guard let obj = try? JSONDecoder().decode(Obj.self, from: data) else {
-            log("[error] broken load: \(id).")
+            log("[error] broken load: \(id)")
             return nil
         }
         
@@ -75,9 +75,9 @@ public struct Storage {
         let file = fileURL(id)
         let fm = FileManager()
         if let _ = try? fm.removeItem(at: file) {
-            log("delete: \(id).")
+            log("delete: \(file.path)")
         } else {
-            log("[error] couldn't delete: \(id).")
+            log("[error] couldn't delete: \(file.path)")
         }
     }
     
@@ -87,7 +87,7 @@ public struct Storage {
 
         do {
             try fm.removeItem(atPath: dir)
-            log("cleared storage.")
+            log("remove: \(dir)")
         } catch {
             log("[error] failed to clear storage.")
         }
