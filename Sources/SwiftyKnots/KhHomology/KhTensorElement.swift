@@ -11,25 +11,26 @@ import SwiftyMath
 public struct KhTensorElement: BasisElementType, Comparable, Codable {
     public let state: LinkSpliceState
     internal let factors: [KhBasisElement]
-    public let shift: Int
-    
-    internal init(_ state: LinkSpliceState, _ factors: [KhBasisElement], _ shift: Int) {
-        self.state = state
-        self.factors = factors
-        self.shift = shift
-    }
+    public let degree: Int
     
     public static func generateBasis(state: LinkSpliceState, power n: Int, shift: Int) -> [KhTensorElement] {
         return (0 ..< n).reduce([[]]) { (res, _) -> [[KhBasisElement]] in
             res.flatMap{ factors -> [[KhBasisElement]] in
                 [factors + [.I], factors + [.X]]
             }
-        }.map{ factors in KhTensorElement.init(state, factors, shift) }
-        .sorted()
+            }
+            .map{ factors in KhTensorElement.init(state, factors, shift) }
+            .sorted()
     }
     
-    public var degree: Int {
-        return factors.sum{ e in e.degree } + state.degree + shift
+    internal init(_ state: LinkSpliceState, _ factors: [KhBasisElement], _ shift: Int) {
+        self.state = state
+        self.factors = factors
+        self.degree = factors.sum{ e in e.degree } + state.degree + shift
+    }
+    
+    internal var shift: Int {
+        return degree - factors.sum{ e in e.degree } - state.degree
     }
     
     internal func product<R: Ring>(_ μ: KhBasisElement.Product, _ from: (Int, Int), _ to: Int, _ toState: LinkSpliceState) -> FreeModule<KhTensorElement, R> {
@@ -37,11 +38,11 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
         let (e1, e2) = (factors[i1], factors[i2])
         
         return μ(e1, e2).sum { e in
-            var factor = factors
-            factor.remove(at: i2)
-            factor.remove(at: i1)
-            factor.insert(e, at: to)
-            return FreeModule( KhTensorElement(toState, factor, shift) )
+            var toFactors = factors
+            toFactors.remove(at: i2)
+            toFactors.remove(at: i1)
+            toFactors.insert(e, at: to)
+            return FreeModule( KhTensorElement(toState, toFactors, shift) )
         }
     }
     
@@ -50,11 +51,11 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
         let e = factors[from]
         
         return Δ(e).sum { (e1, e2) -> FreeModule<KhTensorElement, R> in
-            var factor = factors
-            factor.remove(at: from)
-            factor.insert(e1, at: j1)
-            factor.insert(e2, at: j2)
-            return FreeModule( KhTensorElement(toState, factor, shift) )
+            var toFactors = factors
+            toFactors.remove(at: from)
+            toFactors.insert(e1, at: j1)
+            toFactors.insert(e2, at: j2)
+            return FreeModule( KhTensorElement(toState, toFactors, shift) )
         }
     }
     
