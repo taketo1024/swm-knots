@@ -92,20 +92,6 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         transpose()
     }
     
-    @_specialize(where R == ComputationSpecializedRing)
-    internal func findMin(_ sequence: [(Int, R)]) -> (Int, R)? {
-        var cand: (Int, R)? = nil
-        for (i, a) in sequence {
-            if a.isInvertible {
-                return (i, a)
-            }
-            if cand == nil || a.degree < cand!.1.degree {
-                cand = (i, a)
-            }
-        }
-        return cand
-    }
-    
     internal func apply(_ s: ElementaryOperation) {
         s.apply(to: target)
         s.isRowOperation ? rowOps.append(s) : colOps.append(s)
@@ -119,8 +105,8 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     
     func log(_ msg: @autoclosure () -> String) {
         Debug.log(.MatrixElim, msg)
-        Debug.log(.MatrixElim, target.detailDescription)
-        Debug.log(.MatrixElim, "\n")
+//        Debug.log(.MatrixElim, target.detailDescription)
+//        Debug.log(.MatrixElim, "\n")
     }
     
     public var description: String {

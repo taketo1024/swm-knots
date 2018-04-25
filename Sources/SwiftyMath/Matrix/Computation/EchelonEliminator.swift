@@ -26,14 +26,22 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     
     @_specialize(where R == ComputationSpecializedRing)
     override func iteration() {
+        
         // find pivot point
+        
         let targetElements = pivotCandidates()
-        guard let (i0, a0) = findMin(targetElements) else {
+        
+        guard let (i0, a0) = targetElements.min(by: { (e1, e2) in
+            (e1.1.degree < e2.1.degree) || (e1.1.degree == e2.1.degree && weight(e1.0) < weight(e2.0) )
+        }) else {
             targetCol += 1
             return
         }
         
         // eliminate target col
+        
+        var again = false
+        
         for (i, a) in targetElements {
             if i == i0 {
                 continue
@@ -43,11 +51,16 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
             apply(.AddRow(at: i0, to: i, mul: -q))
             
             if r != .zero {
-                return
+                again = true
             }
         }
         
+        if again {
+            return
+        }
+        
         // final step
+        
         if a0.normalizeUnit != .identity {
             apply(.MulRow(at: i0, by: a0.normalizeUnit))
         }
@@ -68,6 +81,10 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
             let (j, a) = list.first!
             return (i >= targetRow && j == targetCol) ? (i, a) : nil
         }
+    }
+    
+    private func weight(_ i: Int) -> Int {
+        return target.table[i]!.sum{ $0.1.degree }
     }
 }
 

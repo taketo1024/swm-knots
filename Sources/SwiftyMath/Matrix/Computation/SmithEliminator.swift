@@ -26,7 +26,7 @@ public final class SmithEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     @_specialize(where R == ComputationSpecializedRing)
     internal override func iteration() {
         let diagonal = targetDiagonal()
-        guard let (i0, a0) = findMin(diagonal) else {
+        guard let (i0, a0) = diagonal.min(by: {$0.1.degree < $1.1.degree}) else {
             fatalError()
         }
         
