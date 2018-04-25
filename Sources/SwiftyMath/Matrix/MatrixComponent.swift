@@ -17,23 +17,26 @@ public struct MatrixComponent<R: Ring> {
         self.col = col
         self.value = value
     }
-    
-    public enum CodingKeys: String, CodingKey {
+}
+
+extension MatrixComponent: Codable where R: Codable {
+    enum CodingKeys: String, CodingKey {
         case row
         case col
         case value
     }
-}
-
-extension MatrixComponent: Codable where R: Codable {
+    
     public init(from decoder: Decoder) throws {
-        fatalError()
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.row = try c.decode(Int.self, forKey: .row)
+        self.col = try c.decode(Int.self, forKey: .col)
+        self.value = try c.decode(R.self, forKey: .value)
     }
     
     public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(row, forKey: .row)
-        try container.encode(col, forKey: .col)
-        try container.encode(value, forKey: .value)
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(row, forKey: .row)
+        try c.encode(col, forKey: .col)
+        try c.encode(value, forKey: .value)
     }
 }

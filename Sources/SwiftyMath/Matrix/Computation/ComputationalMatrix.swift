@@ -102,6 +102,11 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         sort()
     }
     
+    public var components: [MatrixComponent<R>] {
+        switchAlignment(.Rows)
+        return table.flatMap{ (i, list) in list.map{(j, a) in MatrixComponent(i, j, a)} }
+    }
+    
     public func components(ofRow i: Int) -> [MatrixComponent<R>] {
         switchAlignment(.Rows)
         return table[i].map { $0.map{ (j, r) in MatrixComponent(i, j, r) } } ?? []
@@ -387,6 +392,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         return grid
     }
     
+    // TODO move to FreeModule.init
     public func generateElements<A>(from basis: [A]) -> [FreeModule<A, R>] {
         assert(basis.count <= rows)
         
@@ -406,6 +412,15 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     
     public func asDynamicMatrix() -> DynamicMatrix<R> {
         return DynamicMatrix(rows: rows, cols: cols, grid: generateGrid())
+    }
+    
+    public var density: Double {
+        let c = table.sum{ (_, list) in list.count }
+        return Double(c) / Double(rows * cols)
+    }
+    
+    public var sparsity: Double {
+        return 1.0 - density
     }
     
     public var description: String {
@@ -445,21 +460,31 @@ public extension ComputationalMatrix where R: EuclideanRing{
 
 extension ComputationalMatrix: Codable where R: Codable {
     enum CodingKeys: String, CodingKey {
-        case rows, cols, grid
+        case rows, cols, grid, components
     }
     
     public convenience init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let rows = try c.decode(Int.self, forKey: .rows)
         let cols = try c.decode(Int.self, forKey: .cols)
-        let grid = try c.decode([R].self, forKey: .grid)
-        self.init(rows: rows, cols: cols, grid: grid, align: .Rows)
+        
+        if c.contains(.grid) {
+            let grid = try c.decode([R].self, forKey: .grid)
+            self.init(rows: rows, cols: cols, grid: grid, align: .Rows)
+        } else {
+            let comps = try c.decode([MatrixComponent<R>].self, forKey: .components)
+            self.init(rows: rows, cols: cols, components: comps, align: .Rows)
+        }
     }
     
     public func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(rows, forKey: .rows)
         try c.encode(cols, forKey: .cols)
-        try c.encode(generateGrid(), forKey: .grid)
+        if density > 0.5 {
+            try c.encode(generateGrid(), forKey: .grid)
+        } else {
+            try c.encode(components, forKey: .components)
+        }
     }
 }
