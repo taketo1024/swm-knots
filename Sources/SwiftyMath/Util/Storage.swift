@@ -106,11 +106,11 @@ public struct Storage {
         }
     }
     
-    private static var dir: String {
+    public static var dir: String {
         return !testMode ? NSTemporaryDirectory() + "SwiftyMath/" : NSTemporaryDirectory() + "SwiftyMath_test/"
     }
     
-    private static func fileURL(_ id: String) -> URL {
+    public static func fileURL(_ id: String) -> URL {
         let name = "\(id).json"
         return URL(fileURLWithPath: dir + name)
     }

@@ -15,18 +15,23 @@ import SwiftyMath
 // - Database    http://www.indiana.edu/~knotinfo/homelinks/database_download.html
 
 public extension Link {
-    public static func Rolfsen(_ i: Int, _ j: Int) -> Link {
-        let name = "\(i)\(Format.sub(j))"
-        let code = _Rolfsen[i]![j]!
+    public static var trefoil: Link {
+        return knot(3, 1)
+    }
+    
+    public static func knot(_ n: Int, _ i: Int) -> Link {
+        let name = "\(n)\(Format.sub(i))"
+        let code = _Rolfsen[n]![i]!
         return Link(name: name, planarCode: code)
+    }
+    
+    public static func knots(crossing n: Int) -> [(Int, Link)] {
+        let nums = _Rolfsen[n]!.keys.sorted()
+        return nums.map{ i in (i, knot(n, i)) }
     }
     
     public static var HopfLink: Link {
         return Link(name: "L2a1", planarCode: (4,1,3,2), (2,3,1,4))
-    }
-    
-    public static var trefoil: Link {
-        return Rolfsen(3, 1)
     }
 }
 

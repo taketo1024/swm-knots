@@ -12,17 +12,17 @@ import SwiftyMath
 class KhHomologyTests: XCTestCase {
     
     func test3_1() {
-        let L = Link.Rolfsen(3, 1)
+        let L = Link.knot(3, 1)
         assert(L)
     }
     
     func test4_1() {
-        let L = Link.Rolfsen(4, 1)
+        let L = Link.knot(4, 1)
         assert(L)
     }
     
     func test5_1() {
-        let L = Link.Rolfsen(5, 1)
+        let L = Link.knot(5, 1)
         assert(L)
     }
     
