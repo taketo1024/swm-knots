@@ -425,7 +425,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     
     public var description: String {
         return "CMatrix<\(rows), \(cols)> [ " + table.flatMap { (i, list) in
-            list.map{ (j, a) in "\( align == .Rows ? (i, j, a) : (j, i, a) )"}
+            list.map{ (j, a) in "\(a)" + Format.sub("\(align == .Rows ? (i, j) : (j, i) )") }
         }.joined(separator: ", ") + " ]"
     }
     
