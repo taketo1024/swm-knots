@@ -8,11 +8,11 @@
 
 import Foundation
 
-public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
-    internal var targetRow = 0
-    internal var targetCol = 0
+internal final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
+    var targetRow = 0
+    var targetCol = 0
     
-    internal override var resultType: MatrixEliminationResult<R>.Type {
+    override var resultType: MatrixEliminationResultImpl<R>.Type {
         return RowEchelonEliminationResult.self
     }
     
@@ -88,19 +88,19 @@ public final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     }
 }
 
-public final class RowEchelonEliminationResult<R: EuclideanRing>: MatrixEliminationResult<R> {
-    internal override func _rank() -> Int {
+internal final class RowEchelonEliminationResult<R: EuclideanRing>: MatrixEliminationResultImpl<R> {
+    override func _rank() -> Int {
         return result.table.count
     }
 }
 
-public final class ColEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
-    internal var done = false
+internal final class ColEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R> {
+    var done = false
     override func isDone() -> Bool {
         return done
     }
     
-    internal override func iteration() {
+    override func iteration() {
         runTranpose(RowEchelonEliminator.self)
         done = true
     }

@@ -134,4 +134,11 @@ class MatrixTests: XCTestCase {
         let a = M(1,2,3,4)
         XCTAssertEqual(a.transposed, M(1,3,2,4))
     }
+    
+    func testCodable() {
+        let a = M(1,2,3,4)
+        let d = try! JSONEncoder().encode(a)
+        let b = try! JSONDecoder().decode(M.self, from: d)
+        XCTAssertEqual(a, b)
+    }
 }

@@ -1,5 +1,15 @@
 import Foundation
 
+public enum MatrixForm {
+    case Default
+    case RowEchelon
+    case ColEchelon
+    case RowHermite
+    case ColHermite
+    case Diagonal
+    case Smith
+}
+
 public typealias Matrix<R: Ring> = _Matrix<Dynamic, Dynamic, R>
 
 public struct _Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
@@ -291,7 +301,7 @@ extension _Matrix: VectorSpace, FiniteDimVectorSpace where R: Field {
 }
 
 public extension _Matrix where R: EuclideanRing {
-    public typealias EliminationResult = MatrixEliminationResultWrapper<n, m, R>
+    public typealias EliminationResult = MatrixEliminationResult<n, m, R>
     public func eliminate(form: MatrixForm = .Diagonal) -> EliminationResult {
         let result = impl.copy().eliminate(form: form)
         return EliminationResult(self, result)

@@ -8,8 +8,8 @@
 
 import Foundation
 
-public final class DiagonalEliminator<R: EuclideanRing>: MatrixEliminator<R> {
-    internal override var resultType: MatrixEliminationResult<R>.Type {
+internal final class DiagonalEliminator<R: EuclideanRing>: MatrixEliminator<R> {
+    override var resultType: MatrixEliminationResultImpl<R>.Type {
         return DiagonalEliminationResult.self
     }
     
@@ -33,16 +33,16 @@ public final class DiagonalEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     }
 }
 
-public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminationResult<R> {
-    internal override func _diagonal() -> [R] {
+internal final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminationResultImpl<R> {
+    override func _diagonal() -> [R] {
         return result.table.map{ (_, list) in list.first!.1 }
     }
     
-    internal override func _rank() -> Int {
+    override func _rank() -> Int {
         return diagonal.count
     }
     
-    internal override func _determinant() -> R {
+    override func _determinant() -> R {
         assert(result.rows == result.cols)
         assert(diagonal.forAll{ $0 == .identity })
         
@@ -55,7 +55,7 @@ public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminatio
         }
     }
     
-    internal override func _inverse() -> MatrixImpl<R>? {
+    override func _inverse() -> MatrixImpl<R>? {
         assert(result.rows == result.cols)
         assert(determinant.isInvertible)
         return (rank == result.rows) ? right * left : nil
@@ -67,7 +67,7 @@ public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminatio
     // P * A * Q = [D_r; O_k]
     // =>  Z := Q[:, r ..< m], then A * Z = O_k
     
-    internal override func _kernelMatrix() -> MatrixImpl<R> {
+    override func _kernelMatrix() -> MatrixImpl<R> {
         return right.submatrix(colRange: rank ..< result.cols)
     }
     
@@ -78,7 +78,7 @@ public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminatio
     // => D is the imageMatrix with basis P.
     // => P^-1 * D is the imageMatrix with the standard basis.
     
-    internal override func _imageMatrix() -> MatrixImpl<R> {
+    override func _imageMatrix() -> MatrixImpl<R> {
         let A = _leftInverse(restrictedToCols: 0 ..< rank)
         return A * result.submatrix(0 ..< rank, 0 ..< rank)
     }
@@ -92,7 +92,7 @@ public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminatio
     //
     // T = Q^-1[r ..< m, :]  gives  T * Z = I_k.
     
-    internal override func _kernelTransitionMatrix() -> MatrixImpl<R> {
+    override func _kernelTransitionMatrix() -> MatrixImpl<R> {
         return _rightInverse(restrictedToRows: rank ..< result.cols)
     }
 }

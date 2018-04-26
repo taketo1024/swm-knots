@@ -33,7 +33,5 @@ class KhHomologyTests: XCTestCase {
         let χ = Kh.gradedEulerCharacteristic.withSymbol("q")
         
         XCTAssertEqual(χ, J)
-        
-        Kh.printKhLeeTable()
     }
 }
