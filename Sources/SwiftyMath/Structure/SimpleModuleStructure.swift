@@ -56,7 +56,7 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
         //
         // R gives the structure of the quotient A / B.
         
-        let R1 = T * B
+        var R1 = T * B
         
         // Retake bases of A and B to obtain the decomposition of M.
         //

@@ -104,7 +104,7 @@ public extension SquareMatrix where n == m, R: EuclideanRing {
         case 0: return .identity
         case 1: return self[0, 0]
         case 2: return self[0, 0] * self[1, 1] - self[1, 0] * self[0, 1]
-        default: return eliminate().determinant
+        default: return elimination().determinant
         }
     }
     
@@ -118,7 +118,7 @@ public extension SquareMatrix where n == m, R: EuclideanRing {
             return (det.isInvertible)
                 ? det.inverse! * _Matrix(self[1, 1], -self[0, 1], -self[1, 0], self[0, 0])
                 : nil
-        default: return eliminate().inverse
+        default: return elimination().inverse
         }
     }
 }

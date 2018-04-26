@@ -42,7 +42,7 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
         self._generator = { i in
             let basis = chainComplex.chainBasis(i)
             let (Ain, Aout) = (chainComplex.boundaryMatrix(i - T.degree), chainComplex.boundaryMatrix(i))
-            let (Ein, Eout) = (Ain.eliminate(), Aout.eliminate())
+            let (Ein, Eout) = (Ain.elimination(), Aout.elimination())
             
             let (Z, B, ZT) = (Eout.kernelMatrix, Ein.imageMatrix, Eout.kernelTransitionMatrix)
             

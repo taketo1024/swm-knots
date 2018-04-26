@@ -143,7 +143,7 @@ public struct KhHomology<R: EuclideanRing> {
                 return nil
             }
             
-            let B = A.submatrix(a2 ..< A.rows, a1 ..< A.cols) // freePart
+            var B = A.submatrix(a2 ..< A.rows, a1 ..< A.cols) // freePart
             let C = A.submatrix(0 ..< a2, 0 ..< a1)           // torsionPart
             
             guard C.isZero || (R.self == 𝐙.self && (from.torsionCoeffs + to.torsionCoeffs).forAll{ $0 == R(from: 2) }) else {
@@ -151,8 +151,10 @@ public struct KhHomology<R: EuclideanRing> {
                 return nil
             }
             
-            let X = B.eliminate(form: .Smith)
-            let Y = C.mapValues{ 𝐙₂(from: $0 as! 𝐙)}.eliminate(form: .Smith)
+            var C2 = C.mapValues{ 𝐙₂(from: $0 as! 𝐙)}
+            
+            let X =  B.eliminate(form: .Smith)
+            let Y = C2.eliminate(form: .Smith)
 
             return (X, Y)
         }

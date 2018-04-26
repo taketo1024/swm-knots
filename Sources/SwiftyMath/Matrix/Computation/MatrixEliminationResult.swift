@@ -8,64 +8,64 @@
 import Foundation
 
 public struct MatrixEliminationResult<n: _Int, m: _Int, R: EuclideanRing> {
-    private let res: MatrixEliminationResultImpl<R>
+    internal let impl: MatrixEliminationResultImpl<R>
     
-    internal init<n, m>(_ matrix: _Matrix<n, m, R>, _ res: MatrixEliminationResultImpl<R>) {
-        self.res = res
+    internal init<n, m>(_ matrix: _Matrix<n, m, R>, _ impl: MatrixEliminationResultImpl<R>) {
+        self.impl = impl
     }
     
     public var result: _Matrix<n, m, R> {
-        return _Matrix(res.result)
+        return _Matrix(impl.result)
     }
     
     public var left: _Matrix<n, n, R> {
-        return _Matrix(res.left)
+        return _Matrix(impl.left)
     }
     
     public var leftInverse: _Matrix<n, n, R> {
-        return _Matrix(res.leftInverse)
+        return _Matrix(impl.leftInverse)
     }
     
     public var right: _Matrix<m, m, R> {
-        return _Matrix(res.right)
+        return _Matrix(impl.right)
     }
     
     public var rightInverse: _Matrix<m, m, R> {
-        return _Matrix(res.rightInverse)
+        return _Matrix(impl.rightInverse)
     }
     
     public var rank: Int {
-        return res.rank
+        return impl.rank
     }
     
     public var nullity: Int {
-        return res.nullity
+        return impl.nullity
     }
     
     public var diagonal: [R] {
-        return res.diagonal
+        return impl.diagonal
     }
     
     public var kernelMatrix: _Matrix<m, Dynamic, R> {
-        return _Matrix(res.kernelMatrix)
+        return _Matrix(impl.kernelMatrix)
     }
     
     public var imageMatrix: _Matrix<n, Dynamic, R> {
-        return _Matrix(res.imageMatrix)
+        return _Matrix(impl.imageMatrix)
     }
     
     // The left inverse of kernelMatrix
     public var kernelTransitionMatrix: _Matrix<Dynamic, m, R> {
-        return _Matrix(res.kernelTransitionMatrix)
+        return _Matrix(impl.kernelTransitionMatrix)
     }
 }
 
 public extension MatrixEliminationResult where n == m {
     public var inverse: _Matrix<n, n, R>? {
-        return res.inverse.map{ _Matrix($0) }
+        return impl.inverse.map{ _Matrix($0) }
     }
     
     public var determinant: R {
-        return res.determinant
+        return impl.determinant
     }
 }

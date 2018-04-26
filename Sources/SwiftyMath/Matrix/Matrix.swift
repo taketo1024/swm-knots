@@ -16,6 +16,7 @@ public struct _Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     public typealias CoeffRing = R
     
     internal var impl: MatrixImpl<R>
+    internal var elimCache: Cache<[MatrixForm: AnyObject]> = Cache([:])
     
     internal init(_ impl: MatrixImpl<R>) {
         self.impl = impl
@@ -91,6 +92,7 @@ public struct _Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         if !isKnownUniquelyReferenced(&impl) {
             impl = impl.copy()
         }
+        elimCache = Cache([:])
     }
     
     public subscript(i: Int, j: Int) -> R {
@@ -302,9 +304,23 @@ extension _Matrix: VectorSpace, FiniteDimVectorSpace where R: Field {
 
 public extension _Matrix where R: EuclideanRing {
     public typealias EliminationResult = MatrixEliminationResult<n, m, R>
-    public func eliminate(form: MatrixForm = .Diagonal) -> EliminationResult {
-        let result = impl.copy().eliminate(form: form)
-        return EliminationResult(self, result)
+    
+    @discardableResult
+    public mutating func eliminate(form: MatrixForm = .Diagonal) -> EliminationResult {
+        let e = impl.eliminate(form: form)
+        return EliminationResult(self, e)
+    }
+    
+    public func elimination(form: MatrixForm = .Diagonal) -> EliminationResult {
+        if let res = elimCache.value?[form] as? EliminationResult {
+            return res
+        }
+        
+        let e = impl.copy().eliminate(form: form)
+        let res = EliminationResult(self, e)
+        elimCache.value![form] = (res as AnyObject)
+        
+        return res
     }
 }
 

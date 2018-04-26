@@ -141,4 +141,33 @@ class MatrixTests: XCTestCase {
         let b = try! JSONDecoder().decode(M.self, from: d)
         XCTAssertEqual(a, b)
     }
+    
+    func testMatrixElim() {
+        var a = M(1,2,3,4)
+        a.eliminate()
+        XCTAssertEqual(a, M(1,0,0,2))
+    }
+
+    func testMatrixElimCache() {
+        let a = M(1,2,3,4)
+        
+        XCTAssertNil(a.elimCache.value?[.Diagonal])
+        
+        let e1 = a.elimination(form: .Diagonal)
+        
+        XCTAssertNotNil(a.elimCache.value?[.Diagonal]) // cached
+        
+        let e2 = a.elimination(form: .Diagonal)
+        
+        XCTAssertTrue(e1.impl === e2.impl) // cache is used
+        
+        var b = a
+        
+        XCTAssertNotNil(b.elimCache.value?[.Diagonal]) // cache is copied
+        
+        b[0, 0] = 0
+        
+        XCTAssertNotNil(a.elimCache.value?[.Diagonal]) // cache exists for a
+        XCTAssertNil(b.elimCache.value?[.Diagonal]) // cache is released for b
+    }
 }
