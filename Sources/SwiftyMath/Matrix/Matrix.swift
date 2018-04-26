@@ -140,7 +140,7 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
     
     public var grid: [R] {
-        return impl.generateGrid()
+        return impl.grid
     }
     
     public var components: [MatrixComponent<R>] {

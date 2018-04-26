@@ -25,8 +25,6 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     internal var align: Alignment
     internal var table:  [Int : [(Int, R)]] // [row : [ (col, R) ]]
     
-    internal var eliminationResult: AnyObject? = nil // TODO cache for each form?
-    
     private init(_ rows: Int, _ cols: Int, _ align: Alignment, _ table: [Int : [(Int, R)]]) {
         self.rows = rows
         self.cols = cols
@@ -35,7 +33,7 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     }
     
     public convenience init(rows: Int, cols: Int, align: Alignment = .Rows, grid: [R]) {
-        let components = grid.enumerated().compactMap{ (k, a) -> MatrixComponent<R>? in
+        let components = grid.enumerated().compactMap{ (k, a) -> Component? in
             (a != .zero) ? MatrixComponent(k / cols, k % cols, a) : nil
         }
         self.init(rows: rows, cols: cols, align: align, components: components)
@@ -51,7 +49,7 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         self.init(rows: rows, cols: cols, align: align, components: components)
     }
     
-    public convenience init<S: Sequence>(rows: Int, cols: Int, align: Alignment = .Rows, components: S) where S.Element == MatrixComponent<R> {
+    public convenience init<S: Sequence>(rows: Int, cols: Int, align: Alignment = .Rows, components: S) where S.Element == Component {
         self.init(rows, cols, align, [:])
         
         for c in components where c.value != .zero {
@@ -144,19 +142,31 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         return MatrixImpl(rows: n, cols: n, align: align, components: components)
     }
     
-    public var components: [MatrixComponent<R>] {
-        switchAlignment(.Rows)
-        return table.flatMap{ (i, list) in list.map{(j, a) in MatrixComponent(i, j, a)} }
+    public var components: [Component] {
+        switch align {
+        case .Rows:
+            return table.flatMap{ (i, list) in list.map{(j, a) in MatrixComponent(i, j, a)} }
+        case .Cols:
+            return table.flatMap{ (j, list) in list.map{(i, a) in MatrixComponent(i, j, a)} }
+        }
     }
     
-    public func components(ofRow i: Int) -> [MatrixComponent<R>] {
+    public func components(ofRow i: Int) -> [Component] {
         switchAlignment(.Rows)
         return table[i].map { $0.map{ (j, r) in MatrixComponent(i, j, r) } } ?? []
     }
     
-    public func components(ofCol j: Int) -> [MatrixComponent<R>] {
+    public func components(ofCol j: Int) -> [Component] {
         switchAlignment(.Cols)
         return table[j].map { $0.map{ (i, r) in MatrixComponent(i, j, r) } } ?? []
+    }
+    
+    public var grid: [R] {
+        var grid = Array(repeating: R.zero, count: rows * cols)
+        for c in components {
+            grid[c.row * cols + c.col] = c.value
+        }
+        return grid
     }
     
     @discardableResult
@@ -407,28 +417,6 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         transpose()
     }
     
-    public func generateGrid() -> [R] {
-        var grid = Array(repeating: R.zero, count: rows * cols)
-        switch align {
-        case .Rows:
-            for (i, list) in table {
-                for (j, a) in list {
-                    if i * cols + j >= grid.count {
-                        print(i, j)
-                    }
-                    grid[i * cols + j] = a
-                }
-            }
-        case .Cols:
-            for (j, list) in table {
-                for (i, a) in list {
-                    grid[i * cols + j] = a
-                }
-            }
-        }
-        return grid
-    }
-    
     public var hashValue: Int {
         return 0 // TODO
     }
@@ -442,10 +430,6 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
 
 public extension MatrixImpl where R: EuclideanRing{
     public func eliminate(form: MatrixForm = .Diagonal) -> MatrixEliminationResult<R> {
-        if let res = eliminationResult as? MatrixEliminationResult<R> {
-            return res
-        }
-        
         let eliminator = { () -> MatrixEliminator<R> in
             switch form {
             case .RowEchelon: return RowEchelonEliminator(self)
@@ -458,9 +442,7 @@ public extension MatrixImpl where R: EuclideanRing{
             }
         }()
         
-        let result = eliminator.run()
-        eliminationResult = result
-        return result
+        return eliminator.run()
     }
 }
 
@@ -478,7 +460,7 @@ extension MatrixImpl: Codable where R: Codable {
             let grid = try c.decode([R].self, forKey: .grid)
             self.init(rows: rows, cols: cols, align: .Rows, grid: grid)
         } else {
-            let comps = try c.decode([MatrixComponent<R>].self, forKey: .components)
+            let comps = try c.decode([Component].self, forKey: .components)
             self.init(rows: rows, cols: cols, align: .Rows, components: comps)
         }
     }
@@ -488,7 +470,7 @@ extension MatrixImpl: Codable where R: Codable {
         try c.encode(rows, forKey: .rows)
         try c.encode(cols, forKey: .cols)
         if density > 0.5 {
-            try c.encode(generateGrid(), forKey: .grid)
+            try c.encode(grid, forKey: .grid)
         } else {
             try c.encode(components, forKey: .components)
         }
