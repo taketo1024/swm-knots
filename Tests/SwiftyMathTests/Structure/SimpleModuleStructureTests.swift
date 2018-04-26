@@ -17,7 +17,7 @@ class SimpleModuleStructureTests: XCTestCase {
 
     func testFree() {
         let basis = (0 ..< 3).map{ A($0) }
-        let matrix = ComputationalMatrix<R>.zero(rows: 3, cols: 0)
+        let matrix = Matrix<R>.zero(rows: 3, cols: 0)
         let str = SimpleModuleStructure<A, R>(generators: basis, relationMatrix: matrix)
         XCTAssertEqual(str.rank, 3)
     }
@@ -25,7 +25,7 @@ class SimpleModuleStructureTests: XCTestCase {
     func testRelation() {
         typealias A = AbstractBasisElement
         let basis = (0 ..< 3).map{ A($0) }
-        let matrix = ComputationalMatrix<R>(rows: 3, cols: 2, grid:[1, 0, 0, 2, 0, 0])
+        let matrix = Matrix<R>(rows: 3, cols: 2, grid:[1, 0, 0, 2, 0, 0])
         let str = S(generators: basis, relationMatrix: matrix)
         XCTAssertEqual(str.rank, 1)
         XCTAssertEqual(str.torsionCoeffs, [2])
@@ -36,7 +36,7 @@ class SimpleModuleStructureTests: XCTestCase {
     func testFactorize() {
         typealias A = AbstractBasisElement
         let basis = (0 ..< 3).map{ A($0) }
-        let matrix = ComputationalMatrix<R>(rows: 3, cols: 2, grid:[1, 0, 0, 2, 0, 0])
+        let matrix = Matrix<R>(rows: 3, cols: 2, grid:[1, 0, 0, 2, 0, 0])
         let str = S(generators: basis, relationMatrix: matrix)
         
         let z1 = M(basis: basis, components: [1, 0, 0])
@@ -52,7 +52,7 @@ class SimpleModuleStructureTests: XCTestCase {
     func testSubsummands() {
         typealias A = AbstractBasisElement
         let basis = (0 ..< 3).map{ A($0) }
-        let matrix = ComputationalMatrix<R>(rows: 3, cols: 2, grid:[2, 0, 0, 4, 0, 0])
+        let matrix = Matrix<R>(rows: 3, cols: 2, grid:[2, 0, 0, 4, 0, 0])
         let str = S(generators: basis, relationMatrix: matrix)
         let sub0 = str.subSummands(0)
         let sub1 = str.subSummands(1)

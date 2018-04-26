@@ -11,20 +11,20 @@ import Foundation
 public protocol LinearMapType: ModuleHomType, VectorSpace where Domain: VectorSpace, Codomain: VectorSpace { }
 
 public extension LinearMapType where Domain: FiniteDimVectorSpace, Codomain: FiniteDimVectorSpace {
-    public init(matrix: DynamicMatrix<CoeffRing>) {
+    public init(matrix: Matrix<CoeffRing>) {
         self.init{ v in
-            let x = DynamicVector(dim: Domain.dim, grid: v.standardCoordinates)
+            let x = Vector(v.standardCoordinates)
             let y = matrix * x
             return zip(y.grid, Codomain.standardBasis).sum { (a, w) in a * w }
         }
     }
     
-    public var asMatrix: DynamicMatrix<CoeffRing> {
+    public var asMatrix: Matrix<CoeffRing> {
         let comps = Domain.standardBasis.enumerated().flatMap { (j, v) -> [MatrixComponent<CoeffRing>] in
             let w = self.applied(to: v)
             return w.standardCoordinates.enumerated().map { (i, a) in MatrixComponent(i, j, a) }
         }
-        return DynamicMatrix(rows: Codomain.dim, cols: Domain.dim, components: comps)
+        return Matrix(rows: Codomain.dim, cols: Domain.dim, components: comps)
     }
     
     public var trace: CoeffRing {

@@ -11,28 +11,28 @@ import Foundation
 import XCTest
 @testable import SwiftyMath
 
-class ComputationalMatrixTests: XCTestCase {
+class MatrixImplTests: XCTestCase {
     
     private typealias R = 𝐙
     
-    private func M22(_ xs: R...) -> ComputationalMatrix<R> {
-        return ComputationalMatrix(rows: 2, cols: 2, grid: xs)
+    private func M22(_ xs: R...) -> MatrixImpl<R> {
+        return MatrixImpl(rows: 2, cols: 2, grid: xs)
     }
     
-    private func M22c(_ xs: R...) -> ComputationalMatrix<R> {
-        return ComputationalMatrix(rows: 2, cols: 2, grid: xs, align: .Cols)
+    private func M22c(_ xs: R...) -> MatrixImpl<R> {
+        return MatrixImpl(rows: 2, cols: 2, align: .Cols, grid: xs)
     }
     
-    private func M12(_ xs: R...) -> ComputationalMatrix<R> {
-        return ComputationalMatrix(rows: 1, cols: 2, grid: xs)
+    private func M12(_ xs: R...) -> MatrixImpl<R> {
+        return MatrixImpl(rows: 1, cols: 2, grid: xs)
     }
     
-    private func M21(_ xs: R...) -> ComputationalMatrix<R> {
-        return ComputationalMatrix(rows: 2, cols: 1, grid: xs)
+    private func M21(_ xs: R...) -> MatrixImpl<R> {
+        return MatrixImpl(rows: 2, cols: 1, grid: xs)
     }
     
-    private func M11(_ xs: R...) -> ComputationalMatrix<R> {
-        return ComputationalMatrix(rows: 1, cols: 1, grid: xs)
+    private func M11(_ xs: R...) -> MatrixImpl<R> {
+        return MatrixImpl(rows: 1, cols: 1, grid: xs)
     }
     
     public func testSwitchFromRow() {
@@ -45,12 +45,6 @@ class ComputationalMatrixTests: XCTestCase {
         let a = M22c(1,2,3,4)
         a.switchAlignment(.Rows)
         XCTAssertEqual(a, M22(1,2,3,4))
-    }
-    
-    public func testMul() {
-        let a = M22(1, 2, 3, 4)
-        let b = M22(2, 1, 1, 2)
-        XCTAssertEqual(a * b, M22(4, 5, 10, 11))
     }
     
     public func testAddRow() {
@@ -134,14 +128,14 @@ class ComputationalMatrixTests: XCTestCase {
     public func testEncoding_dense() {
         let a = M22(1,2,3,4) // dense
         let d = try! JSONEncoder().encode(a)
-        let b = try! JSONDecoder().decode(ComputationalMatrix<R>.self, from: d)
+        let b = try! JSONDecoder().decode(MatrixImpl<R>.self, from: d)
         XCTAssertEqual(a, b)
     }
     
     public func testEncoding_sparse() {
         let a = M22(0,2,0,0) // sparse
         let d = try! JSONEncoder().encode(a)
-        let b = try! JSONDecoder().decode(ComputationalMatrix<R>.self, from: d)
+        let b = try! JSONDecoder().decode(MatrixImpl<R>.self, from: d)
         XCTAssertEqual(a, b)
     }
 }

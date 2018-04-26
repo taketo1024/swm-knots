@@ -9,6 +9,10 @@
 import Foundation
 
 public extension Sequence {
+    public func toArray() -> [Element] {
+        return Array(self)
+    }
+    
     public var anyElement: Element? {
         return first { _ in true }
     }
@@ -22,12 +26,24 @@ public extension Sequence {
         return true
     }
     
-    public func toArray() -> [Element] {
-        return Array(self)
-    }
-    
     public func count(where predicate: (Element) -> Bool) -> Int {
         return self.lazy.filter(predicate).count
+    }
+    
+    public func sorted<C: Comparable>(by indexer: (Element) -> C) -> [Element] {
+        return self.sorted{ (e1, e2) in indexer(e1) < indexer(e2) }
+    }
+    
+    public func group<U: Hashable>(by keyGenerator: (Element) -> U) -> [U: [Element]] {
+        return Dictionary(grouping: self, by: keyGenerator)
+    }
+    
+    public func allCombinations<S: Sequence>(with s2: S) -> [(Self.Element, S.Element)] {
+        typealias X = Self.Element
+        typealias Y = S.Element
+        return self.flatMap{ (x) -> [(X, Y)] in
+            s2.map{ (y) -> (X, Y) in (x, y) }
+        }
     }
 }
 
@@ -46,23 +62,7 @@ public extension Sequence where Element: Hashable {
         let set = Set(b)
         return self.filter{ !set.contains($0) }
     }
-}
-
-public extension Sequence {
-    public func group<U: Hashable>(by keyGenerator: (Element) -> U) -> [U: [Element]] {
-        return Dictionary(grouping: self, by: keyGenerator)
-    }
     
-    public func allCombinations<S: Sequence>(with s2: S) -> [(Self.Element, S.Element)] {
-        typealias X = Self.Element
-        typealias Y = S.Element
-        return self.flatMap{ (x) -> [(X, Y)] in
-            s2.map{ (y) -> (X, Y) in (x, y) }
-        }
-    }
-}
-
-public extension Sequence where Element: Hashable {
     public func countMultiplicities() -> [Element : Int] {
         return self.group{ $0 }.mapValues{ $0.count }
     }

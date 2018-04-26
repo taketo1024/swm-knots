@@ -8,10 +8,10 @@
 
 import Foundation
 
-public final class RowHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
-    internal var targetRow = 0
-    internal var targetCol = 0
-    internal var rank = 0
+internal final class RowHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
+    var targetRow = 0
+    var targetCol = 0
+    var rank = 0
 
     override func prepare() {
         run(RowEchelonEliminator.self)
@@ -23,7 +23,7 @@ public final class RowHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    internal override func iteration() {
+    override func iteration() {
         let a0 = target[targetRow, targetCol]
         if a0 == .zero {
             targetCol += 1
@@ -47,13 +47,13 @@ public final class RowHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     }
 }
 
-public final class ColHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
-    internal var done = false
+internal final class ColHermiteEliminator<R: EuclideanRing>: MatrixEliminator<R> {
+    var done = false
     override func isDone() -> Bool {
         return done
     }
     
-    internal override func iteration() {
+    override func iteration() {
         runTranpose(RowHermiteEliminator.self)
         done = true
     }

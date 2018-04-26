@@ -15,6 +15,14 @@ class MatrixTests: XCTestCase {
     typealias C = MatrixComponent<R>
     typealias M = Matrix2<R>
     
+    func testEquality() {
+        let a = M(1,2,3,4)
+        let b = M(1,2,3,4)
+        let c = M(1,3,2,4)
+        XCTAssertEqual(a, b)
+        XCTAssertNotEqual(a, c)
+    }
+    
     func testInitByGenerator() {
         let a = M { (i, j) in i * 10 + j}
         XCTAssertEqual(a, M(0,1,10,11))
@@ -29,10 +37,34 @@ class MatrixTests: XCTestCase {
         let a = M(1,2,3)
         XCTAssertEqual(a, M(1,2,3,0))
     }
+
+    func testSubscript() {
+        let a = M(1,2,0,4)
+        XCTAssertEqual(a[0, 0], 1)
+        XCTAssertEqual(a[0, 1], 2)
+        XCTAssertEqual(a[1, 0], 0)
+        XCTAssertEqual(a[1, 1], 4)
+    }
     
-    func testInitWithTooMuchGrid() {
-        let a = M(1,2,3,4,5,6)
-        XCTAssertEqual(a, M(1,2,3,4))
+    func testSubscriptSet() {
+        var a = M(1,2,0,4)
+        a[0, 0] = 0
+        a[0, 1] = 0
+        a[1, 1] = 2
+        XCTAssertEqual(a[0, 0], 0)
+        XCTAssertEqual(a[0, 1], 0)
+        XCTAssertEqual(a[1, 0], 0)
+        XCTAssertEqual(a[1, 1], 2)
+    }
+    
+    func testCopyOnMutate() {
+        let a = M(1,2,0,4)
+        var b = a
+        
+        b[0, 0] = 0
+        
+        XCTAssertEqual(a[0, 0], 1)
+        XCTAssertEqual(b[0, 0], 0)
     }
     
     func testSum() {
@@ -101,5 +133,41 @@ class MatrixTests: XCTestCase {
     func testTransposed() {
         let a = M(1,2,3,4)
         XCTAssertEqual(a.transposed, M(1,3,2,4))
+    }
+    
+    func testCodable() {
+        let a = M(1,2,3,4)
+        let d = try! JSONEncoder().encode(a)
+        let b = try! JSONDecoder().decode(M.self, from: d)
+        XCTAssertEqual(a, b)
+    }
+    
+    func testMatrixElim() {
+        var a = M(1,2,3,4)
+        a.eliminate()
+        XCTAssertEqual(a, M(1,0,0,2))
+    }
+
+    func testMatrixElimCache() {
+        let a = M(1,2,3,4)
+        
+        XCTAssertNil(a.elimCache.value?[.Diagonal])
+        
+        let e1 = a.elimination(form: .Diagonal)
+        
+        XCTAssertNotNil(a.elimCache.value?[.Diagonal]) // cached
+        
+        let e2 = a.elimination(form: .Diagonal)
+        
+        XCTAssertTrue(e1.impl === e2.impl) // cache is used
+        
+        var b = a
+        
+        XCTAssertNotNil(b.elimCache.value?[.Diagonal]) // cache is copied
+        
+        b[0, 0] = 0
+        
+        XCTAssertNotNil(a.elimCache.value?[.Diagonal]) // cache exists for a
+        XCTAssertNil(b.elimCache.value?[.Diagonal]) // cache is released for b
     }
 }

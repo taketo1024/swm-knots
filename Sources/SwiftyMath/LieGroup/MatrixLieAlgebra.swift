@@ -23,16 +23,16 @@ public protocol MatrixLieAlgebra: FiniteDimLieAlgebra {
 }
 
 public extension MatrixLieAlgebra {
-    public init(_ elements: ElementRing ...) {
-        self.init(Matrix(grid: elements))
+    public init(_ grid: ElementRing ...) {
+        self.init(SquareMatrix(grid))
     }
     
-    public init(grid: [ElementRing]) {
-        self.init(Matrix(grid: grid))
+    public init(_ grid: [ElementRing]) {
+        self.init(SquareMatrix(grid))
     }
     
     public init(generator g: (Int, Int) -> ElementRing) {
-        self.init(Matrix(generator: g))
+        self.init(SquareMatrix(generator: g))
     }
     
     public var size: Int {

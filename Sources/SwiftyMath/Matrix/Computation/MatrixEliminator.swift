@@ -8,45 +8,35 @@
 
 import Foundation
 
-public enum MatrixForm {
-    case Default
-    case RowEchelon
-    case ColEchelon
-    case RowHermite
-    case ColHermite
-    case Diagonal
-    case Smith
-}
-
-public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
-    internal var target: ComputationalMatrix<R>
-    internal var rowOps: [ElementaryOperation]
-    internal var colOps: [ElementaryOperation]
+internal class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
+    var target: MatrixImpl<R>
+    var rowOps: [ElementaryOperation]
+    var colOps: [ElementaryOperation]
     
-    public required init(_ target: ComputationalMatrix<R>) {
+    required init(_ target: MatrixImpl<R>) {
         self.target = target
         self.rowOps = []
         self.colOps = []
     }
     
-    public var rows: Int {
+    var rows: Int {
         return target.rows
     }
     
-    public var cols: Int {
+    var cols: Int {
         return target.cols
     }
     
-    internal var resultType: MatrixEliminationResult<R>.Type {
-        return MatrixEliminationResult.self
+    var resultType: MatrixEliminationResultImpl<R>.Type {
+        return MatrixEliminationResultImpl.self
     }
 
-    public var result: MatrixEliminationResult<R> {
+    var result: MatrixEliminationResultImpl<R> {
         return resultType.init(target, rowOps, colOps, .Default)
     }
     
     @discardableResult
-    public final func run() -> MatrixEliminationResult<R> {
+    final func run() -> MatrixEliminationResultImpl<R> {
         log("-----Start:\(self)-----")
         
         prepare()
@@ -60,30 +50,30 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         return result
     }
     
-    internal func prepare() {
+    func prepare() {
         // override in subclass
     }
     
-    internal func isDone() -> Bool {
+    func isDone() -> Bool {
         fatalError("override in subclass")
     }
     
-    internal func iteration() {
+    func iteration() {
         fatalError("override in subclass")
     }
     
-    internal func finish() {
+    func finish() {
         // override in subclass
     }
     
-    internal func run(_ eliminator: MatrixEliminator.Type) {
+    func run(_ eliminator: MatrixEliminator.Type) {
         let e = eliminator.init(target)
         e.run()
         rowOps += e.rowOps
         colOps += e.colOps
     }
     
-    internal func runTranpose(_ eliminator: MatrixEliminator.Type) {
+    func runTranpose(_ eliminator: MatrixEliminator.Type) {
         transpose()
         let e = eliminator.init(target)
         e.run()
@@ -92,7 +82,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         transpose()
     }
     
-    internal func apply(_ s: ElementaryOperation) {
+    func apply(_ s: ElementaryOperation) {
         s.apply(to: target)
         s.isRowOperation ? rowOps.append(s) : colOps.append(s)
         log("\(s)")
@@ -109,11 +99,11 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
 //        Debug.log(.MatrixElim, "\n")
     }
     
-    public var description: String {
+    var description: String {
         return "\(type(of: self))"
     }
     
-    public enum ElementaryOperation {
+    enum ElementaryOperation {
         case AddRow(at: Int, to: Int, mul: R)
         case MulRow(at: Int, by: R)
         case SwapRows(Int, Int)
@@ -121,21 +111,21 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         case MulCol(at: Int, by: R)
         case SwapCols(Int, Int)
         
-        public var isRowOperation: Bool {
+        var isRowOperation: Bool {
             switch self {
             case .AddRow, .MulRow, .SwapRows: return true
             default: return false
             }
         }
         
-        public var isColOperation: Bool {
+        var isColOperation: Bool {
             switch self {
             case .AddCol, .MulCol, .SwapCols: return true
             default: return false
             }
         }
         
-        public var determinant: R {
+        var determinant: R {
             switch self {
             case .AddRow(_, _, _), .AddCol(_, _, _):
                 return .identity
@@ -148,7 +138,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
             }
         }
         
-        public var inverse: ElementaryOperation {
+        var inverse: ElementaryOperation {
             switch self {
             case let .AddRow(i, j, r):
                 return .AddRow(at: i, to: j, mul: -r)
@@ -163,7 +153,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
             }
         }
         
-        public var transpose: ElementaryOperation {
+        var transpose: ElementaryOperation {
             switch self {
             case let .AddRow(i, j, r):
                 return .AddCol(at: i, to: j, mul: r)
@@ -181,7 +171,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         }
         
         @_specialize(where R == ComputationSpecializedRing)
-        public func apply(to A: ComputationalMatrix<R>) {
+        func apply(to A: MatrixImpl<R>) {
             switch self {
             case let .AddRow(i, j, r):
                 A.addRow(at: i, to: j, multipliedBy: r)

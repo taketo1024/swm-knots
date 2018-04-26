@@ -125,16 +125,16 @@ public struct KhHomology<R: EuclideanRing> {
 //        print((i, j))
 //        print(prev, "\t->\t[", this, "]\t->\t", next, "\n")
         
-        func matrix(from: Summand, to: Summand) -> ComputationalMatrix<R> {
+        func matrix(from: Summand, to: Summand) -> Matrix<R> {
             let (μL, ΔL) = (KhBasisElement.μL, KhBasisElement.ΔL)
             let grid = from.generators.flatMap { x -> [R] in
                 let y = cube.map(x, μL, ΔL)
                 return to.factorize(y)
             }
-            return ComputationalMatrix(rows: from.generators.count, cols: to.generators.count, grid: grid).transpose()
+            return Matrix(rows: from.generators.count, cols: to.generators.count, grid: grid).transposed
         }
         
-        func eliminate(from: Summand, to: Summand, matrix A: ComputationalMatrix<R>) -> (MatrixEliminationResult<R>, MatrixEliminationResult<𝐙₂>)? {
+        func eliminate(from: Summand, to: Summand, matrix A: Matrix<R>) -> (Matrix<R>.EliminationResult, Matrix<𝐙₂>.EliminationResult)? {
             let a1 = from.torsionCoeffs.count
             let a2 = to.torsionCoeffs.count
             
@@ -143,16 +143,18 @@ public struct KhHomology<R: EuclideanRing> {
                 return nil
             }
             
-            let B = A.submatrix(a2 ..< A.rows, a1 ..< A.cols) // freePart
+            var B = A.submatrix(a2 ..< A.rows, a1 ..< A.cols) // freePart
             let C = A.submatrix(0 ..< a2, 0 ..< a1)           // torsionPart
             
             guard C.isZero || (R.self == 𝐙.self && (from.torsionCoeffs + to.torsionCoeffs).forAll{ $0 == R(from: 2) }) else {
-                print((i, j), ": only 𝐙 with order-2 torsions are computable.", A.detailDescription)
+                print((i, j), ": only 𝐙 with order-2 torsions are computable.", A)
                 return nil
             }
             
-            let X = B.eliminate(form: .Smith)
-            let Y = C.mapValues{ 𝐙₂(from: $0 as! 𝐙)}.eliminate(form: .Smith)
+            var C2 = C.mapValues{ 𝐙₂(from: $0 as! 𝐙)}
+            
+            let X =  B.eliminate(form: .Smith)
+            let Y = C2.eliminate(form: .Smith)
 
             return (X, Y)
         }
@@ -171,14 +173,14 @@ public struct KhHomology<R: EuclideanRing> {
         let S1 = SimpleModuleStructure(
             basis:            this.summands.enumerated().filter{ $0.1.isFree }.map{ AbstractBasisElement($0.0) },
             generatingMatrix: Eout.0.kernelMatrix,
-            relationMatrix:    Ein.0.imageMatrix,
+            relationMatrix:   Ein.0.imageMatrix,
             transitionMatrix: Eout.0.kernelTransitionMatrix
         )
         
         let S2 = SimpleModuleStructure(
             basis:            this.summands.enumerated().filter{ !$0.1.isFree }.map{ AbstractBasisElement($0.0) },
             generatingMatrix: Eout.1.kernelMatrix,
-            relationMatrix:    Ein.1.imageMatrix,
+            relationMatrix:   Ein.1.imageMatrix,
             transitionMatrix: Eout.1.kernelTransitionMatrix
         )
         

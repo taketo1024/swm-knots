@@ -52,24 +52,25 @@ extension 𝐐: Randomable {
     }
 }
 
+/*
 // TODO conditional conformance - Matrix: Randomable
-public extension Matrix where R: Randomable {
-    public static func random(_ lowerBound: Int, _ upperBound: Int) -> Matrix<n, m, R> {
-        return Matrix { (_, _) in  R.random(lowerBound, upperBound) }
+public extension _Matrix where R: Randomable {
+    public static func random(_ lowerBound: Int, _ upperBound: Int) -> _Matrix<n, m, R> {
+        return _Matrix { (_, _) in  R.random(lowerBound, upperBound) }
     }
     
-    public static func random(rank r: Int, shuffle s: Int = 50) -> Matrix<n, m, R> {
-        let A = Matrix<n, m, R>{ (i, j) in (i == j && i < r) ? .identity : .zero }
-        let P = Matrix<n, n, R>.randRegular(shuffle: s)
-        let Q = Matrix<m, m, R>.randRegular(shuffle: s)
+    public static func random(rank r: Int, shuffle s: Int = 50) -> _Matrix<n, m, R> {
+        let A = _Matrix<n, m, R>{ (i, j) in (i == j && i < r) ? .identity : .zero }
+        let P = _Matrix<n, n, R>.randRegular(shuffle: s)
+        let Q = _Matrix<m, m, R>.randRegular(shuffle: s)
         return P * A * Q
     }
 }
 
-public extension Matrix where R: Randomable, n == m {
-    public static func randRegular(_ size: Int? = nil, shuffle: Int = 50) -> Matrix<n, n, R> {
+public extension _Matrix where R: Randomable, n == m {
+    public static func randRegular(_ size: Int? = nil, shuffle: Int = 50) -> _Matrix<n, n, R> {
         let s = size ?? n.intValue
-        let A = ComputationalMatrix<R>.identity(s)
+        let A = MatrixImpl<R>.identity(s)
         
         for _ in 0 ..< shuffle {
             let i = Int.random(0, A.rows)
@@ -89,6 +90,7 @@ public extension Matrix where R: Randomable, n == m {
             }
         }
         
-        return A.asMatrix()
+        return _Matrix(A)
     }
 }
+*/
