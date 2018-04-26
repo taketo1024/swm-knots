@@ -12,7 +12,9 @@ internal typealias ComputationSpecializedRing = 𝐙
 
 // TODO to internal class
 
-public final class MatrixImpl<R: Ring>: Equatable, CustomStringConvertible {
+public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
+    public typealias Component = MatrixComponent<R>
+    
     public enum Alignment: String, Codable {
         case Rows, Cols
     }
@@ -32,18 +34,24 @@ public final class MatrixImpl<R: Ring>: Equatable, CustomStringConvertible {
         self.table = table
     }
     
-    public convenience init<n, m>(_ a: Matrix<n, m, R>, align: Alignment = .Rows) {
-        self.init(rows: a.rows, cols: a.cols, grid: a.grid, align: align)
-    }
-    
-    public convenience init(rows: Int, cols: Int, grid: [R], align: Alignment = .Rows) {
+    public convenience init(rows: Int, cols: Int, align: Alignment = .Rows, grid: [R]) {
         let components = grid.enumerated().compactMap{ (k, a) -> MatrixComponent<R>? in
             (a != .zero) ? MatrixComponent(k / cols, k % cols, a) : nil
         }
-        self.init(rows: rows, cols: cols, components: components, align: align)
+        self.init(rows: rows, cols: cols, align: align, components: components)
     }
     
-    public convenience init<S: Sequence>(rows: Int, cols: Int, components: S, align: Alignment = .Rows) where S.Element == MatrixComponent<R> {
+    public convenience init(rows: Int, cols: Int, align: Alignment = .Rows, generator g: (Int, Int) -> R) {
+        let components = (0 ..< rows).flatMap { i -> [Component] in
+            (0 ..< cols).compactMap { j -> Component? in
+                let a = g(i, j)
+                return (a != .zero) ? Component(i, j, a) : nil
+            }
+        }
+        self.init(rows: rows, cols: cols, align: align, components: components)
+    }
+    
+    public convenience init<S: Sequence>(rows: Int, cols: Int, align: Alignment = .Rows, components: S) where S.Element == MatrixComponent<R> {
         self.init(rows, cols, align, [:])
         
         for c in components where c.value != .zero {
@@ -104,6 +112,38 @@ public final class MatrixImpl<R: Ring>: Equatable, CustomStringConvertible {
         sort()
     }
     
+    public var density: Double {
+        let c = table.sum{ (_, list) in list.count }
+        return Double(c) / Double(rows * cols)
+    }
+    
+    public var sparsity: Double {
+        return 1.0 - density
+    }
+    
+    public var isZero: Bool {
+        return table.isEmpty
+    }
+    
+    public var isDiagonal: Bool {
+        return table.forAll { (i, list) in (list.count == 1) && list.first!.0 == i }
+    }
+    
+    public var diagonal: [R] {
+        return table.keys.sorted().compactMap { i -> R? in
+            table[i]!.first.flatMap{ (j, a) -> R? in (i == j) ? a : nil }
+        }
+    }
+    
+    public static func zero(rows: Int, cols: Int, align: Alignment = .Rows) -> MatrixImpl<R> {
+        return MatrixImpl(rows: rows, cols: cols, align: align, components: [])
+    }
+    
+    public static func identity(_ n: Int, align: Alignment = .Rows) -> MatrixImpl<R> {
+        let components = (0 ..< n).map{ i in MatrixComponent(i, i, R.identity)}
+        return MatrixImpl(rows: n, cols: n, align: align, components: components)
+    }
+    
     public var components: [MatrixComponent<R>] {
         switchAlignment(.Rows)
         return table.flatMap{ (i, list) in list.map{(j, a) in MatrixComponent(i, j, a)} }
@@ -124,6 +164,10 @@ public final class MatrixImpl<R: Ring>: Equatable, CustomStringConvertible {
         (rows, cols) = (cols, rows)
         align = (align == .Rows) ? .Cols : .Rows
         return self
+    }
+    
+    public var transposed: MatrixImpl<R> {
+        return self.copy().transpose()
     }
     
     public func submatrix(rowRange: CountableRange<Int>) -> MatrixImpl<R> {
@@ -177,18 +221,42 @@ public final class MatrixImpl<R: Ring>: Equatable, CustomStringConvertible {
         return M(rows, cols, a, mapped)
     }
     
-    public var isZero: Bool {
-        return table.isEmpty
-    }
-
-    public var isDiagonal: Bool {
-        return table.forAll { (i, list) in (list.count == 1) && list.first!.0 == i }
+    @_specialize(where R == ComputationSpecializedRing)
+    public static func ==(a: MatrixImpl, b: MatrixImpl) -> Bool {
+        if (a.rows, a.cols) != (b.rows, b.cols) {
+            return false
+        }
+        
+        if a.align != b.align {
+            b.switchAlignment(a.align)
+        }
+        
+        // wish we could just write `a.table == b.table` ..
+        
+        return (Set(a.table.keys) == Set(b.table.keys)) && a.table.keys.forAll{ i in
+            let (x, y) = (a.table[i]!, b.table[i]!)
+            return x.elementsEqual(y) { $0 == $1 }
+        }
     }
     
-    public var diagonal: [R] {
-        return table.keys.sorted().compactMap { i -> R? in
-            table[i]!.first.flatMap{ (j, a) -> R? in (i == j) ? a : nil }
-        }
+    @_specialize(where R == ComputationSpecializedRing)
+    public static func +(a: MatrixImpl, b: MatrixImpl) -> MatrixImpl<R> {
+        return a // FIXME!
+    }
+    
+    @_specialize(where R == ComputationSpecializedRing)
+    public static prefix func -(a: MatrixImpl) -> MatrixImpl<R> {
+        return a.mapValues{ -$0 }
+    }
+    
+    @_specialize(where R == ComputationSpecializedRing)
+    public static func *(r: R, a: MatrixImpl) -> MatrixImpl<R> {
+        return a.mapValues{ r * $0 }
+    }
+    
+    @_specialize(where R == ComputationSpecializedRing)
+    public static func *(a: MatrixImpl, r: R) -> MatrixImpl<R> {
+        return a.mapValues{ $0 * r }
     }
     
     @_specialize(where R == ComputationSpecializedRing)
@@ -339,39 +407,6 @@ public final class MatrixImpl<R: Ring>: Equatable, CustomStringConvertible {
         transpose()
     }
     
-    @discardableResult
-    public func multiply(_ r: R) -> MatrixImpl<R> {
-        table = table.mapValues{ list in list.map{ (j, a) in (j, r * a) } }
-        return self
-    }
-    
-    @_specialize(where R == ComputationSpecializedRing)
-    public static func ==(a: MatrixImpl, b: MatrixImpl) -> Bool {
-        if (a.rows, a.cols) != (b.rows, b.cols) {
-            return false
-        }
-        
-        if a.align != b.align {
-            b.switchAlignment(a.align)
-        }
-        
-        // wish we could just write `a.table == b.table` ..
-        
-        return (Set(a.table.keys) == Set(b.table.keys)) && a.table.keys.forAll{ i in
-            let (x, y) = (a.table[i]!, b.table[i]!)
-            return x.elementsEqual(y) { $0 == $1 }
-        }
-    }
-    
-    public static func zero(rows: Int, cols: Int, align: Alignment = .Rows) -> MatrixImpl<R> {
-        return MatrixImpl(rows: rows, cols: cols, components: [], align: align)
-    }
-    
-    public static func identity(_ n: Int, align: Alignment = .Rows) -> MatrixImpl<R> {
-        let components = (0 ..< n).map{ i in MatrixComponent(i, i, R.identity)}
-        return MatrixImpl(rows: n, cols: n, components: components, align: align)
-    }
-    
     public func generateGrid() -> [R] {
         var grid = Array(repeating: R.zero, count: rows * cols)
         switch align {
@@ -394,45 +429,14 @@ public final class MatrixImpl<R: Ring>: Equatable, CustomStringConvertible {
         return grid
     }
     
-    // TODO move to FreeModule.init
-    public func generateElements<A>(from basis: [A]) -> [FreeModule<A, R>] {
-        assert(basis.count <= rows)
-        
-        switchAlignment(.Cols)
-        
-        return (0 ..< cols).map { j -> FreeModule<A, R> in
-            guard let v = table[j] else {
-                return .zero
-            }
-            return FreeModule( v.map{ (i, r) in (basis[i], r)} )
-        }
-    }
-    
-    public func asMatrix<n, m>() -> Matrix<n, m, R> {
-        return Matrix(grid: generateGrid())
-    }
-    
-    public func asDynamicMatrix() -> DynamicMatrix<R> {
-        return DynamicMatrix(rows: rows, cols: cols, grid: generateGrid())
-    }
-    
-    public var density: Double {
-        let c = table.sum{ (_, list) in list.count }
-        return Double(c) / Double(rows * cols)
-    }
-    
-    public var sparsity: Double {
-        return 1.0 - density
+    public var hashValue: Int {
+        return 0 // TODO
     }
     
     public var description: String {
         return "CMatrix<\(rows), \(cols)> [ " + table.flatMap { (i, list) in
             list.map{ (j, a) in "\(a)" + Format.sub("\(align == .Rows ? (i, j) : (j, i) )") }
         }.joined(separator: ", ") + " ]"
-    }
-    
-    public var detailDescription: String {
-        return asDynamicMatrix().detailDescription
     }
 }
 
@@ -472,10 +476,10 @@ extension MatrixImpl: Codable where R: Codable {
         
         if c.contains(.grid) {
             let grid = try c.decode([R].self, forKey: .grid)
-            self.init(rows: rows, cols: cols, grid: grid, align: .Rows)
+            self.init(rows: rows, cols: cols, align: .Rows, grid: grid)
         } else {
             let comps = try c.decode([MatrixComponent<R>].self, forKey: .components)
-            self.init(rows: rows, cols: cols, components: comps, align: .Rows)
+            self.init(rows: rows, cols: cols, align: .Rows, components: comps)
         }
     }
     
@@ -487,6 +491,22 @@ extension MatrixImpl: Codable where R: Codable {
             try c.encode(generateGrid(), forKey: .grid)
         } else {
             try c.encode(components, forKey: .components)
+        }
+    }
+}
+
+// TODO move to FreeModule.init
+public extension MatrixImpl {
+    public func generateElements<A>(from basis: [A]) -> [FreeModule<A, R>] {
+        assert(basis.count <= rows)
+        
+        switchAlignment(.Cols)
+        
+        return (0 ..< cols).map { j -> FreeModule<A, R> in
+            guard let v = table[j] else {
+                return .zero
+            }
+            return FreeModule( v.map{ (i, r) in (basis[i], r)} )
         }
     }
 }

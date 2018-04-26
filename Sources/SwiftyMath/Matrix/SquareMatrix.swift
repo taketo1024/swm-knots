@@ -51,11 +51,11 @@ extension SquareMatrix: Ring where n == m {
     }
     
     public var isZero: Bool {
-        return self.forAll{ c in c.value == .zero }
+        return self.forAll{ (_, _, a) in a == .zero }
     }
     
     public var isDiagonal: Bool {
-        return self.forAll{ c in (c.row == c.col) || c.value == .zero }
+        return self.forAll{ (i, j, a) in i == j || a == .zero }
     }
     
     public var isSymmetric: Bool {

@@ -147,7 +147,7 @@ public struct KhHomology<R: EuclideanRing> {
             let C = A.submatrix(0 ..< a2, 0 ..< a1)           // torsionPart
             
             guard C.isZero || (R.self == 𝐙.self && (from.torsionCoeffs + to.torsionCoeffs).forAll{ $0 == R(from: 2) }) else {
-                print((i, j), ": only 𝐙 with order-2 torsions are computable.", A.detailDescription)
+                print((i, j), ": only 𝐙 with order-2 torsions are computable.", A)
                 return nil
             }
             

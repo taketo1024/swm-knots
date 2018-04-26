@@ -42,7 +42,7 @@ public typealias DynamicRowVector<R: Ring> = RowVector<Dynamic, R>
 
 public extension ColVector where n == Dynamic, m == _1 {
     public init(dim: Int, grid: [R]) {
-        self.init(dim, 1, grid)
+        self.init(MatrixImpl(rows: dim, cols: 1, grid: grid))
     }
     
     public init(dim: Int, grid: R ...) {
@@ -52,7 +52,7 @@ public extension ColVector where n == Dynamic, m == _1 {
 
 public extension RowVector where n == _1, m == Dynamic {
     public init(dim: Int, grid: [R]) {
-        self.init(dim, 1, grid)
+        self.init(MatrixImpl(rows: 1, cols: dim, grid: grid))
     }
     
     public init(dim: Int, grid: R ...) {

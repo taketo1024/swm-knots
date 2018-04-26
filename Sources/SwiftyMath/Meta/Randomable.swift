@@ -89,6 +89,6 @@ public extension Matrix where R: Randomable, n == m {
             }
         }
         
-        return A.asMatrix()
+        return Matrix(A)
     }
 }

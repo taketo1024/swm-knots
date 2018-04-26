@@ -134,23 +134,23 @@ public struct MatrixEliminationResultWrapper<n: _Int, m: _Int, R: EuclideanRing>
     }
     
     public var result: Matrix<n, m, R> {
-        return res.result.asMatrix()
+        return Matrix(res.result)
     }
     
     public var left: Matrix<n, n, R> {
-        return res.left.asMatrix()
+        return Matrix(res.left)
     }
     
     public var leftInverse: Matrix<n, n, R> {
-        return res.leftInverse.asMatrix()
+        return Matrix(res.leftInverse)
     }
     
     public var right: Matrix<m, m, R> {
-        return res.right.asMatrix()
+        return Matrix(res.right)
     }
     
     public var rightInverse: Matrix<m, m, R> {
-        return res.rightInverse.asMatrix()
+        return Matrix(res.rightInverse)
     }
     
     public var rank: Int {
@@ -168,7 +168,7 @@ public struct MatrixEliminationResultWrapper<n: _Int, m: _Int, R: EuclideanRing>
 
 public extension MatrixEliminationResultWrapper where n == m {
     public var inverse: Matrix<n, n, R>? {
-        return res.inverse?.asMatrix()
+        return res.inverse.map{ Matrix($0) }
     }
     
     public var determinant: R {

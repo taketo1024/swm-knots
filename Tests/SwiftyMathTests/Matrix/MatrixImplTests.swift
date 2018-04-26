@@ -20,7 +20,7 @@ class MatrixImplTests: XCTestCase {
     }
     
     private func M22c(_ xs: R...) -> MatrixImpl<R> {
-        return MatrixImpl(rows: 2, cols: 2, grid: xs, align: .Cols)
+        return MatrixImpl(rows: 2, cols: 2, align: .Cols, grid: xs)
     }
     
     private func M12(_ xs: R...) -> MatrixImpl<R> {
