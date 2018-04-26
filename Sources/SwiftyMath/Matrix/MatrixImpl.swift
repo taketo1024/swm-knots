@@ -126,11 +126,7 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         return table.forAll { (i, list) in (list.count == 1) && list.first!.0 == i }
     }
     
-    public static func zero(rows: Int, cols: Int, align: Alignment = .Rows) -> MatrixImpl<R> {
-        return MatrixImpl(rows: rows, cols: cols, align: align, components: [])
-    }
-    
-    public static func identity(_ n: Int, align: Alignment = .Rows) -> MatrixImpl<R> {
+    public static func identity(size n: Int, align: Alignment) -> MatrixImpl<R> {
         let components = (0 ..< n).map{ i in MatrixComponent(i, i, R.identity)}
         return MatrixImpl(rows: n, cols: n, align: align, components: components)
     }
@@ -481,22 +477,6 @@ extension MatrixImpl: Codable where R: Codable {
             try c.encode(grid, forKey: .grid)
         } else {
             try c.encode(components, forKey: .components)
-        }
-    }
-}
-
-// TODO move to FreeModule.init
-public extension MatrixImpl {
-    public func generateElements<A>(from basis: [A]) -> [FreeModule<A, R>] {
-        assert(basis.count <= rows)
-        
-        switchAlignment(.Cols)
-        
-        return (0 ..< cols).map { j -> FreeModule<A, R> in
-            guard let v = table[j] else {
-                return .zero
-            }
-            return FreeModule( v.map{ (i, r) in (basis[i], r)} )
         }
     }
 }

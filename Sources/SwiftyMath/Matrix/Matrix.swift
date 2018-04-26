@@ -124,6 +124,10 @@ public struct _Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         return _Matrix<n, p, R>(a.impl * b.impl)
     }
     
+    public func mapValues<R2>(_ f: (R) -> R2) -> _Matrix<n, m, R2> {
+        return _Matrix<n, m, R2>(impl.mapValues(f))
+    }
+
     public var transposed: _Matrix<m, n, R> {
         return _Matrix<m, n, R>(impl.transposed)
     }
@@ -287,9 +291,10 @@ extension _Matrix: VectorSpace, FiniteDimVectorSpace where R: Field {
 }
 
 public extension _Matrix where R: EuclideanRing {
-    public func eliminate(form: MatrixForm = .Diagonal) -> MatrixEliminationResultWrapper<n, m, R> {
+    public typealias EliminationResult = MatrixEliminationResultWrapper<n, m, R>
+    public func eliminate(form: MatrixForm = .Diagonal) -> EliminationResult {
         let result = impl.copy().eliminate(form: form)
-        return MatrixEliminationResultWrapper(self, result)
+        return EliminationResult(self, result)
     }
 }
 
@@ -320,5 +325,17 @@ public extension _Matrix where R == 𝐂 {
     
     public var adjoint: _Matrix<m, n, R> {
         return _Matrix<m, n, R>(impl.transposed.mapValues{ $0.conjugate })
+    }
+}
+
+extension Matrix: Codable where R: Codable {
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        self.impl = try c.decode(MatrixImpl<R>.self)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        try c.encode(impl)
     }
 }

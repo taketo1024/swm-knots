@@ -24,10 +24,10 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
     public let summands: [Summand]
     
     internal let basis: [A]
-    internal let transform: MatrixImpl<R>
+    internal let transform: Matrix<R>
     
     // root initializer
-    internal init(_ summands: [Summand], _ basis: [A], _ transform: MatrixImpl<R>) {
+    internal init(_ summands: [Summand], _ basis: [A], _ transform: Matrix<R>) {
         self.summands = summands
         self.basis = basis
         self.transform = transform
@@ -35,12 +35,12 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
         super.init()
     }
     
-    public convenience init(generators: [A], relationMatrix B: MatrixImpl<R>) {
-        let I = MatrixImpl<R>.identity(generators.count)
+    public convenience init(generators: [A], relationMatrix B: Matrix<R>) {
+        let I = Matrix<R>.identity(size: generators.count)
         self.init(basis: generators, generatingMatrix: I, relationMatrix: B, transitionMatrix: I)
     }
     
-    public convenience init(basis: [A], generatingMatrix A: MatrixImpl<R>, relationMatrix B: MatrixImpl<R>, transitionMatrix T: MatrixImpl<R>) {
+    public convenience init(basis: [A], generatingMatrix A: Matrix<R>, relationMatrix B: Matrix<R>, transitionMatrix T: Matrix<R>) {
         
         assert(A.rows == B.rows)
         assert(A.rows >= A.cols)  // n ≧ k
@@ -74,7 +74,9 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
         let s = divisors.count
         
         let A2 = A * E.leftInverse.submatrix(colRange: (k - s) ..< k)
-        let generators = A2.generateElements(from: basis)
+        let generators = (0 ..< A2.cols).map { j in
+            A2.nonZeroComponents(ofCol: j).sum { c in FreeModule(basis[c.row], c.value) }
+        }
         
         let summands = zip(generators, divisors).map { (z, a) in
             return SimpleModuleStructure<A, R>.Summand(z, a)
@@ -121,7 +123,7 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
         let n = basis.count
-        let v = transform * MatrixImpl(rows: n, cols: 1, grid: z.factorize(by: basis))
+        let v = transform * Matrix(rows: n, cols: 1, grid: z.factorize(by: basis))
         
         return summands.enumerated().map { (i, s) in
             return s.isFree ? v[i, 0] : v[i, 0] % s.divisor
@@ -205,7 +207,7 @@ public extension AbstractSimpleModuleStructure where A == AbstractBasisElement {
         let basis = (0 ..< r + t).map{ i in A(i) }
         let summands = (0 ..< r).map{ i in Summand(basis[i], .zero) }
             + torsions.enumerated().map{ (i, d) in Summand(basis[i + r], d) }
-        let I = MatrixImpl<R>.identity(r + t)
+        let I = Matrix<R>.identity(size: r + t)
         self.init(summands, basis, I)
     }
     
@@ -226,7 +228,7 @@ extension SimpleModuleStructure: Codable where A: Codable, R: Codable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let summands = try c.decode([Summand].self, forKey: .summands)
         let basis = try c.decode([A].self, forKey: .basis)
-        let trans = try c.decode(MatrixImpl<R>.self, forKey: .transform)
+        let trans = try c.decode(Matrix<R>.self, forKey: .transform)
         self.init(summands, basis, trans)
     }
     

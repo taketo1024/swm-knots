@@ -33,7 +33,7 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
     
     internal let chain: [(basis: ChainBasis, map: BoundaryMap)]
     internal let offset: Int
-    internal var matrices: [MatrixImpl<R>?]
+    internal var matrices: [Matrix<R>?]
     
     // root initializer
     public init(name: String? = nil, chain: [(ChainBasis, BoundaryMap)], offset: Int = 0) {
@@ -63,7 +63,7 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
         return (offset ... topDegree).contains(i) ? chain[i - offset].map : .zero
     }
     
-    public func boundaryMatrix(_ i: Int) -> MatrixImpl<R> {
+    public func boundaryMatrix(_ i: Int) -> Matrix<R> {
         switch i {
         case (offset ... topDegree):
             if let A = matrices[i - offset] {
@@ -85,7 +85,7 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
         }
     }
     
-    internal func makeMatrix(_ i: Int) -> MatrixImpl<R> {
+    internal func makeMatrix(_ i: Int) -> Matrix<R> {
         let (from, to, map) = (chainBasis(i), chainBasis(i + T.degree), boundaryMap(i))
         let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toBasisElement: toBasisIndex]
         let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
@@ -94,7 +94,7 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
             }
         }
         
-        return MatrixImpl(rows: to.count, cols: from.count, components: components)
+        return Matrix(rows: to.count, cols: from.count, components: components)
     }
     
     public func shifted(_ d: Int) -> _ChainComplex<T, A, R> {
@@ -151,12 +151,12 @@ public extension ChainComplex where T == Descending {
             
             let current = chainBasis(i)
             let next = chainBasis(i + 1)
-            let matrix = boundaryMatrix(i + 1).transpose()
+            let matrix = boundaryMatrix(i + 1).transposed
             
             let dBasis = chainBasis(i).map{ Dual($0) }
             let dMap  = D.BoundaryMap { (f: Dual<A>) in
                 let j = current.index(of: f.base)!
-                let col = matrix.components(ofCol: j)
+                let col = matrix.nonZeroComponents(ofCol: j)
                 let elements = col.map { c in (next[c.row].dual, e * c.value) }
                 return D.Chain(elements)
             }

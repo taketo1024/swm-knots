@@ -52,6 +52,7 @@ extension 𝐐: Randomable {
     }
 }
 
+/*
 // TODO conditional conformance - Matrix: Randomable
 public extension _Matrix where R: Randomable {
     public static func random(_ lowerBound: Int, _ upperBound: Int) -> _Matrix<n, m, R> {
@@ -92,3 +93,4 @@ public extension _Matrix where R: Randomable, n == m {
         return _Matrix(A)
     }
 }
+*/

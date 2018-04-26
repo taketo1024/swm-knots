@@ -125,16 +125,16 @@ public struct KhHomology<R: EuclideanRing> {
 //        print((i, j))
 //        print(prev, "\t->\t[", this, "]\t->\t", next, "\n")
         
-        func matrix(from: Summand, to: Summand) -> MatrixImpl<R> {
+        func matrix(from: Summand, to: Summand) -> Matrix<R> {
             let (μL, ΔL) = (KhBasisElement.μL, KhBasisElement.ΔL)
             let grid = from.generators.flatMap { x -> [R] in
                 let y = cube.map(x, μL, ΔL)
                 return to.factorize(y)
             }
-            return MatrixImpl(rows: from.generators.count, cols: to.generators.count, grid: grid).transpose()
+            return Matrix(rows: from.generators.count, cols: to.generators.count, grid: grid).transposed
         }
         
-        func eliminate(from: Summand, to: Summand, matrix A: MatrixImpl<R>) -> (MatrixEliminationResult<R>, MatrixEliminationResult<𝐙₂>)? {
+        func eliminate(from: Summand, to: Summand, matrix A: Matrix<R>) -> (Matrix<R>.EliminationResult, Matrix<𝐙₂>.EliminationResult)? {
             let a1 = from.torsionCoeffs.count
             let a2 = to.torsionCoeffs.count
             
@@ -171,14 +171,14 @@ public struct KhHomology<R: EuclideanRing> {
         let S1 = SimpleModuleStructure(
             basis:            this.summands.enumerated().filter{ $0.1.isFree }.map{ AbstractBasisElement($0.0) },
             generatingMatrix: Eout.0.kernelMatrix,
-            relationMatrix:    Ein.0.imageMatrix,
+            relationMatrix:   Ein.0.imageMatrix,
             transitionMatrix: Eout.0.kernelTransitionMatrix
         )
         
         let S2 = SimpleModuleStructure(
             basis:            this.summands.enumerated().filter{ !$0.1.isFree }.map{ AbstractBasisElement($0.0) },
             generatingMatrix: Eout.1.kernelMatrix,
-            relationMatrix:    Ein.1.imageMatrix,
+            relationMatrix:   Ein.1.imageMatrix,
             transitionMatrix: Eout.1.kernelTransitionMatrix
         )
         

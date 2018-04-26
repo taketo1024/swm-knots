@@ -51,7 +51,7 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     
     @_specialize(where R == ComputationSpecializedRing)
     internal final func _left() -> MatrixImpl<R> {
-        let P = MatrixImpl<R>.identity(result.rows)
+        let P = MatrixImpl<R>.identity(size: result.rows, align: .Rows)
         for s in rowOps {
             s.apply(to: P)
         }
@@ -61,8 +61,8 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     @_specialize(where R == ComputationSpecializedRing)
     internal final func _leftInverse(restrictedToCols colRange: CountableRange<Int>? = nil) -> MatrixImpl<R> {
         let P = (colRange == nil)
-            ? MatrixImpl<R>.identity(result.rows)
-            : MatrixImpl<R>.identity(result.rows).submatrix(colRange: colRange!)
+            ? MatrixImpl<R>.identity(size: result.rows, align: .Rows)
+            : MatrixImpl<R>.identity(size: result.rows, align: .Rows).submatrix(colRange: colRange!)
         
         for s in rowOps.reversed() {
             s.inverse.apply(to: P)
@@ -73,7 +73,7 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     
     @_specialize(where R == ComputationSpecializedRing)
     internal final func _right() -> MatrixImpl<R> {
-        let P = MatrixImpl<R>.identity(result.cols, align: .Cols)
+        let P = MatrixImpl<R>.identity(size: result.cols, align: .Cols)
         for s in colOps {
             s.apply(to: P)
         }
@@ -83,8 +83,8 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     @_specialize(where R == ComputationSpecializedRing)
     internal final func _rightInverse(restrictedToRows rowRange: CountableRange<Int>? = nil) -> MatrixImpl<R> {
         let P = (rowRange == nil)
-            ? MatrixImpl<R>.identity(result.cols, align: .Cols)
-            : MatrixImpl<R>.identity(result.cols, align: .Cols).submatrix(rowRange: rowRange!)
+            ? MatrixImpl<R>.identity(size: result.cols, align: .Cols)
+            : MatrixImpl<R>.identity(size: result.cols, align: .Cols).submatrix(rowRange: rowRange!)
         
         for s in colOps.reversed() {
             s.inverse.apply(to: P)
@@ -163,6 +163,19 @@ public struct MatrixEliminationResultWrapper<n: _Int, m: _Int, R: EuclideanRing>
     
     public var diagonal: [R] {
         return res.diagonal
+    }
+    
+    public var kernelMatrix: _Matrix<m, Dynamic, R> {
+        return _Matrix(res.kernelMatrix)
+    }
+    
+    public var imageMatrix: _Matrix<n, Dynamic, R> {
+        return _Matrix(res.imageMatrix)
+    }
+    
+    // The left inverse of kernelMatrix
+    public var kernelTransitionMatrix: _Matrix<Dynamic, m, R> {
+        return _Matrix(res.kernelTransitionMatrix)
     }
 }
 
