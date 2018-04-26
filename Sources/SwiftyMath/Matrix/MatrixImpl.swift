@@ -14,6 +14,7 @@ internal typealias ComputationSpecializedRing = 𝐙
 
 public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     public typealias Component = MatrixComponent<R>
+    public typealias Table =  [Int : [(Int, R)]]
     
     public enum Alignment: String, Codable {
         case Rows, Cols
@@ -23,9 +24,22 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     public internal(set) var cols: Int
     
     internal var align: Alignment
-    internal var table:  [Int : [(Int, R)]] // [row : [ (col, R) ]]
+    internal var table: Table
     
-    private init(_ rows: Int, _ cols: Int, _ align: Alignment, _ table: [Int : [(Int, R)]]) {
+    private init(_ rows: Int, _ cols: Int, _ align: Alignment, _ table: Table) {
+        if _isDebugAssertConfiguration() {
+            switch align {
+            case .Rows:
+                assert(table.keys.forAll{ (0 ..< rows).contains($0) })
+                assert(table.values.forAll{ $0.forAll{ (0 ..< cols).contains($0.0) } })
+                assert(table.values.forAll{ $0.map{ $0.0 } == $0.map{ $0.0 }.unique().sorted() })
+            case .Cols:
+                assert(table.keys.forAll{ (0 ..< cols).contains($0) })
+                assert(table.values.forAll{ $0.forAll{ (0 ..< rows).contains($0.0) } })
+                assert(table.values.forAll{ $0.map{ $0.0 } == $0.map{ $0.0 }.unique().sorted() })
+            }
+        }
+        
         self.rows = rows
         self.cols = cols
         self.align = align
@@ -50,40 +64,33 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     }
     
     public convenience init<S: Sequence>(rows: Int, cols: Int, align: Alignment = .Rows, components: S) where S.Element == Component {
-        self.init(rows, cols, align, [:])
-        
-        for c in components where c.value != .zero {
-            let (i, j, a) = (c.row, c.col, c.value)
-            (align == .Rows) ? set(i, j, a) : set(j, i, a)
+        self.init(rows, cols, align, MatrixImpl.generateTable(align, components))
+    }
+    
+    public static func generateTable<S: Sequence>(_ align: Alignment, _ components: S) -> Table where S.Element == Component {
+        switch align {
+        case .Rows:
+            return components.group{ c in c.row }.mapValues{ l in l.sorted{ c in c.col }.map{ c in (c.col, c.value) } }
+        case .Cols:
+            return components.group{ c in c.col }.mapValues{ l in l.sorted{ c in c.row }.map{ c in (c.row, c.value) } }
         }
-        sort()
     }
     
     public subscript(i: Int, j: Int) -> R {
-        let (p, q) = (align == .Rows) ? (i, j) : (j, i)
-        return table[p]?.binarySearch(q, { $0.0 })?.element.1 ?? .zero
-    }
-    
-    internal func set(_ i: Int, _ j: Int, _ a: R) {
-        if (align == .Rows) {
-            assert(0 <= i && i < rows)
-            assert(0 <= j && j < cols)
-        } else {
-            assert(0 <= i && i < cols)
-            assert(0 <= j && j < rows)
-        }
-        assert(a != .zero)
-        
-        if table[i] == nil {
-            table[i] = []
-        }
-        table[i]!.append( (j, a) )
-    }
-
-    @_specialize(where R == ComputationSpecializedRing)
-    internal func sort() {
-        for (i, list) in table {
-            table[i] = list.sorted{ (e1, e2) in e1.0 < e2.0 }
+        get {
+            switch align {
+            case .Rows: return table[i]?.binarySearch(j, { $0.0 } )?.element.1 ?? .zero
+            case .Cols: return table[j]?.binarySearch(i, { $0.0 } )?.element.1 ?? .zero
+            }
+        } set {
+            switch align {
+            case .Rows:
+                let row = MatrixImpl.addRows(table[i] ?? [], [(j, newValue - self[i, j])])
+                table[i] = row
+            case .Cols:
+                let col = MatrixImpl.addRows(table[j] ?? [], [(i, newValue - self[i, j])])
+                table[j] = col
+            }
         }
     }
     
@@ -96,18 +103,10 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
             return
         }
         
+        let comps = components
+        
         self.align = align
-        
-        let copy = table
-        self.table = [:]
-        
-        for (i, list) in copy {
-            for (j, a) in list {
-                set(j, i, a)
-            }
-        }
-        
-        sort()
+        self.table = MatrixImpl.generateTable(align, comps)
     }
     
     public var density: Double {
@@ -125,12 +124,6 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     
     public var isDiagonal: Bool {
         return table.forAll { (i, list) in (list.count == 1) && list.first!.0 == i }
-    }
-    
-    public var diagonal: [R] {
-        return table.keys.sorted().compactMap { i -> R? in
-            table[i]!.first.flatMap{ (j, a) -> R? in (i == j) ? a : nil }
-        }
     }
     
     public static func zero(rows: Int, cols: Int, align: Alignment = .Rows) -> MatrixImpl<R> {
@@ -152,13 +145,21 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     }
     
     public func components(ofRow i: Int) -> [Component] {
-        switchAlignment(.Rows)
-        return table[i].map { $0.map{ (j, r) in MatrixComponent(i, j, r) } } ?? []
+        switch align {
+        case .Rows:
+            return table[i].map { list in list.map{ (j, r) in MatrixComponent(i, j, r) } } ?? []
+        case .Cols:
+            return table.compactMap{ (j, list) in list.binarySearch(i, { $0.0 } ).map{ MatrixComponent(i, j, $0.1.1) } }
+        }
     }
     
     public func components(ofCol j: Int) -> [Component] {
-        switchAlignment(.Cols)
-        return table[j].map { $0.map{ (i, r) in MatrixComponent(i, j, r) } } ?? []
+        switch align {
+        case .Cols:
+            return table[j].map { list in list.map{ (i, r) in MatrixComponent(i, j, r) } } ?? []
+        case .Rows:
+            return table.compactMap{ (i, list) in list.binarySearch(j, { $0.0 } ).map{ MatrixComponent(i, j, $0.1.1) } }
+        }
     }
     
     public var grid: [R] {
@@ -209,16 +210,16 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         }
         
         let subTable = table.compactMap{ (i, list) -> (Int, [(Int, R)])? in
-            guard let k = iList.binarySearch(i) else {
+            guard let i1 = iList.binarySearch(i) else {
                 return nil
             }
             let subList = list.compactMap{ (j, a) -> (Int, R)? in
-                guard let l = jList.binarySearch(j) else {
+                guard let j1 = jList.binarySearch(j) else {
                     return nil
                 }
-                return (l, a)
+                return (j1, a)
             }
-            return !subList.isEmpty ? (k, subList) : nil
+            return !subList.isEmpty ? (i1, subList) : nil
         }
         
         return MatrixImpl(sRows, sCols, align, Dictionary(pairs: subTable))
@@ -236,22 +237,21 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         if (a.rows, a.cols) != (b.rows, b.cols) {
             return false
         }
-        
-        if a.align != b.align {
-            b.switchAlignment(a.align)
-        }
-        
-        // wish we could just write `a.table == b.table` ..
-        
-        return (Set(a.table.keys) == Set(b.table.keys)) && a.table.keys.forAll{ i in
-            let (x, y) = (a.table[i]!, b.table[i]!)
-            return x.elementsEqual(y) { $0 == $1 }
-        }
+        return Set(a.components) == Set(b.components)
     }
     
     @_specialize(where R == ComputationSpecializedRing)
     public static func +(a: MatrixImpl, b: MatrixImpl) -> MatrixImpl<R> {
-        return a // FIXME!
+        assert( (a.rows, a.cols) == (b.rows, b.cols) )
+        
+        b.switchAlignment(a.align)
+        
+        let iList = Set(a.table.keys).union(b.table.keys)
+        let table = iList.compactMap { i in
+            MatrixImpl.addRows(a.table[i] ?? [], b.table[i] ?? []).map{ (i, $0) }
+        }
+        
+        return MatrixImpl(a.rows, a.cols, a.align, Dictionary(pairs: table))
     }
     
     @_specialize(where R == ComputationSpecializedRing)
@@ -273,33 +273,40 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     public static func *(a: MatrixImpl, b: MatrixImpl) -> MatrixImpl<R> {
         assert(a.cols == b.rows)
         
-        let result = MatrixImpl<R>(rows: a.rows, cols: b.cols, components: [])
-        
         // TODO support .Cols
         
         a.switchAlignment(.Rows)
         b.switchAlignment(.Rows)
         
-        for (i, list) in a.table {
-            var row: [Int: R] = [:]
+        let table = a.table.compactMap { (i, list1) -> (Int, [(Int, R)])? in
             
-            for (j, a) in list {
-                if let bRow = b.table[j] {
-                    for (k, b) in bRow {
-                        row[k] = row[k, default: .zero] + a * b
-                    }
+            //       k              j
+            //       v            | v        |
+            //  i>|  x    *  |  k>| y   *    |
+            //                    |          |
+            //                    | * *    * |
+            //                    |          |
+            //
+            //                         ↓
+            //
+            //                  i>| * * *  * |
+            
+            var tmp: [Int: R] = [:]
+            
+            for (k, x) in list1 where b.table[k] != nil {
+                let list2 = b.table[k]!
+                for (j, y) in list2 {
+                    tmp[j] = (tmp[j] ?? .zero) + x * y
                 }
             }
             
-            row.filter{ (_, a) in a != .zero }.forEach{ (j, a) in
-                result.set(i, j, a)
-            }
+            let row = tmp.filter{ $0.value != .zero }.map{ ($0.key, $0.value ) }.sorted{ $0.0 }
+            return !row.isEmpty ? (i, row) : nil
         }
         
-        result.sort()
-        return result
+        return MatrixImpl(a.rows, b.cols, a.align, Dictionary(pairs: table))
     }
-    
+
     @_specialize(where R == ComputationSpecializedRing)
     public func multiplyRow(at i0: Int, by r: R) {
         switchAlignment(.Rows)
@@ -318,77 +325,78 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         }
         
         row = row.filter{ $0.1 != .zero }
-        
-        if row.count == 0 {
-            table.removeValue(forKey: i0)
-        } else {
-            table[i0] = row
-        }
+        table[i0] = !row.isEmpty ? row : nil
     }
     
     @_specialize(where R == ComputationSpecializedRing)
     public func addRow(at i0: Int, to i1: Int, multipliedBy r: R = .identity) {
         switchAlignment(.Rows)
         
-        guard let r0 = table[i0] else {
-            return
-        }
+        let row0 = table[i0]?.map{ (j, a) in (j, r * a) } ?? []
+        let row1 = table[i1] ?? []
         
-        guard let r1 = table[i1] else {
-            table[i1] = r0.map{ ($0.0, r * $0.1 )}
-            return
+        table[i1] = MatrixImpl.addRows(row0, row1)
+    }
+    
+    @_specialize(where R == ComputationSpecializedRing)
+    public static func addRows(_ row0: [(Int, R)], _ row1: [(Int, R)]) -> [(Int, R)]? {
+        switch (row0.isEmpty, row1.isEmpty) {
+        case (true,  true): return nil
+        case (false, true): return row0
+        case (true, false): return row1
+        default: ()
         }
         
         var result: [(Int, R)] = []
         
-        var (p0, p1) = (UnsafePointer(r0), UnsafePointer(r1))
+        let (n0, n1) = (row0.count, row1.count)
+        var (p0, p1) = (UnsafePointer(row0), UnsafePointer(row1))
         var (k0, k1) = (0, 0) // counters
-        let (n0, n1) = (r0.count, r1.count)
-        
-        while k0 < n0 || k1 < n1 {
-            let b = (k0 < n0 && k1 < n1)
-            if b && (p0.pointee.0 == p1.pointee.0) {
-                let j0 = p0.pointee.0
-                let (a0, a1) = (p0.pointee.1, p1.pointee.1)
-                let value = r * a0 + a1
-                
-                if value != .zero {
-                    result.append( (j0, value) )
-                }
+
+        while k0 < n0 && k1 < n1 {
+            let (j0, a0) = p0.pointee
+            let (j1, a1) = p1.pointee
+            
+            if j0 == j1 {
+                result.append((j0, a0 + a1))
                 
                 p0 += 1
                 p1 += 1
                 k0 += 1
                 k1 += 1
                 
-            } else if (k1 >= n1) || (b && p0.pointee.0 < p1.pointee.0) {
-                let j0 = p0.pointee.0
-                let a0 = p0.pointee.1
-                let value = r * a0
-                
-                if value != .zero {
-                    result.append( (j0, r * a0) )
-                }
+            } else if j0 < j1 {
+                result.append((j0, a0))
                 
                 p0 += 1
                 k0 += 1
                 
-            } else if (k0 >= n0) || (b && p0.pointee.0 > p1.pointee.0) {
-                let j1 = p1.pointee.0
-                let a1 = p1.pointee.1
+            } else if j0 > j1 {
                 result.append( (j1, a1) )
                 
                 p1 += 1
                 k1 += 1
-                
             }
         }
         
-        if result.count == 0 {
-            table.removeValue(forKey: i1)
-        } else {
-            table[i1] = result
+        for _ in k0 ..< n0 {
+            let (j0, a0) = p0.pointee
+            result.append((j0, a0))
+            
+            p0 += 1
+            k0 += 1
         }
+        
+        for _ in k1 ..< n1 {
+            let (j1, a1) = p1.pointee
+            result.append((j1, a1))
+            
+            p1 += 1
+            k1 += 1
+        }
+        
+        result = result.filter{ $0.1 != .zero }
+        return !result.isEmpty ? result : nil
     }
     
     public func swapRows(_ i0: Int, _ i1: Int) {
@@ -418,7 +426,7 @@ public final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     }
     
     public var hashValue: Int {
-        return 0 // TODO
+        return isZero ? 0 : 1 // TODO
     }
     
     public var description: String {

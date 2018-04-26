@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct MatrixComponent<R: Ring> {
+public struct MatrixComponent<R: Ring>: Hashable {
     public let row: Int
     public let col: Int
     public let value: R

@@ -15,6 +15,14 @@ class MatrixTests: XCTestCase {
     typealias C = MatrixComponent<R>
     typealias M = Matrix2<R>
     
+    func testEquality() {
+        let a = M(1,2,3,4)
+        let b = M(1,2,3,4)
+        let c = M(1,3,2,4)
+        XCTAssertEqual(a, b)
+        XCTAssertNotEqual(a, c)
+    }
+    
     func testInitByGenerator() {
         let a = M { (i, j) in i * 10 + j}
         XCTAssertEqual(a, M(0,1,10,11))
@@ -30,11 +38,34 @@ class MatrixTests: XCTestCase {
         XCTAssertEqual(a, M(1,2,3,0))
     }
 
-// TODO
-//    func testInitWithTooMuchGrid() {
-//        let a = M(1,2,3,4,5,6)
-//        XCTAssertEqual(a, M(1,2,3,4))
-//    }
+    func testSubscript() {
+        let a = M(1,2,0,4)
+        XCTAssertEqual(a[0, 0], 1)
+        XCTAssertEqual(a[0, 1], 2)
+        XCTAssertEqual(a[1, 0], 0)
+        XCTAssertEqual(a[1, 1], 4)
+    }
+    
+    func testSubscriptSet() {
+        var a = M(1,2,0,4)
+        a[0, 0] = 0
+        a[0, 1] = 0
+        a[1, 1] = 2
+        XCTAssertEqual(a[0, 0], 0)
+        XCTAssertEqual(a[0, 1], 0)
+        XCTAssertEqual(a[1, 0], 0)
+        XCTAssertEqual(a[1, 1], 2)
+    }
+    
+    func testCopyOnMutate() {
+        let a = M(1,2,0,4)
+        var b = a
+        
+        b[0, 0] = 0
+        
+        XCTAssertEqual(a[0, 0], 1)
+        XCTAssertEqual(b[0, 0], 0)
+    }
     
     func testSum() {
         let a = M(1,2,3,4)

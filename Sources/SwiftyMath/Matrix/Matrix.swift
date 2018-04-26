@@ -79,7 +79,7 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
             return impl[i, j]
         } set {
             willMutate()
-            fatalError("TODO")
+            impl[i, j] = newValue
         }
     }
     

@@ -14,7 +14,12 @@ public final class DiagonalEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     }
     
     override func isDone() -> Bool {
-        return target.isDiagonal && target.diagonal.forAll({ $0.normalizeUnit == .identity })
+        let n = target.table.keys.count
+        return target.table.forAll{ (i, list) in
+            i < n && (list.count == 1)
+                  && list.first!.0 == i
+                  && list.first!.1.normalizeUnit == .identity
+        }
     }
     
     override func iteration() {
@@ -30,7 +35,7 @@ public final class DiagonalEliminator<R: EuclideanRing>: MatrixEliminator<R> {
 
 public final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminationResult<R> {
     internal override func _diagonal() -> [R] {
-        return result.diagonal
+        return result.table.map{ (_, list) in list.first!.1 }
     }
     
     internal override func _rank() -> Int {

@@ -47,12 +47,6 @@ class MatrixImplTests: XCTestCase {
         XCTAssertEqual(a, M22(1,2,3,4))
     }
     
-    public func testMul() {
-        let a = M22(1, 2, 3, 4)
-        let b = M22(2, 1, 1, 2)
-        XCTAssertEqual(a * b, M22(4, 5, 10, 11))
-    }
-    
     public func testAddRow() {
         let a = M22(1,2,3,4)
         a.addRow(at: 0, to: 1)
