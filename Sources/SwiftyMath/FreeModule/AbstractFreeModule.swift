@@ -61,7 +61,7 @@ public extension AbstractTensorModule where A == Tensor<AbstractBasisElement> {
 public typealias AbstractFreeModuleHom<K: Ring> = FreeModuleHom<AbstractBasisElement, AbstractBasisElement, K>
 
 public extension AbstractFreeModuleHom where A == AbstractBasisElement, A == B {
-    public init<n, m>(matrix: Matrix<n, m, R>) {
+    public init(matrix: Matrix<R>) {
         self.init { (e: AbstractBasisElement) -> AbstractFreeModule<R> in
             AbstractFreeModule(matrix.colVector(e.index).grid)
         }

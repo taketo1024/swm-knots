@@ -21,7 +21,7 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module, Sequence {
         self.init(Dictionary(pairs: zip(basis, components)))
     }
     
-    public init<n>(basis: Basis, vector: ColVector<n, R>) {
+    public init<n>(basis: Basis, vector: _ColVector<n, R>) {
         assert(basis.count == vector.rows)
         self.init(Dictionary(pairs: zip(basis, vector.grid)))
     }

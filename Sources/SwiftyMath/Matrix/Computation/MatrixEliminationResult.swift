@@ -129,28 +129,28 @@ public class MatrixEliminationResult<R: EuclideanRing> {
 public struct MatrixEliminationResultWrapper<n: _Int, m: _Int, R: EuclideanRing> {
     private let res: MatrixEliminationResult<R>
     
-    public init<n, m>(_ matrix: Matrix<n, m, R>, _ res: MatrixEliminationResult<R>) {
+    public init<n, m>(_ matrix: _Matrix<n, m, R>, _ res: MatrixEliminationResult<R>) {
         self.res = res
     }
     
-    public var result: Matrix<n, m, R> {
-        return Matrix(res.result)
+    public var result: _Matrix<n, m, R> {
+        return _Matrix(res.result)
     }
     
-    public var left: Matrix<n, n, R> {
-        return Matrix(res.left)
+    public var left: _Matrix<n, n, R> {
+        return _Matrix(res.left)
     }
     
-    public var leftInverse: Matrix<n, n, R> {
-        return Matrix(res.leftInverse)
+    public var leftInverse: _Matrix<n, n, R> {
+        return _Matrix(res.leftInverse)
     }
     
-    public var right: Matrix<m, m, R> {
-        return Matrix(res.right)
+    public var right: _Matrix<m, m, R> {
+        return _Matrix(res.right)
     }
     
-    public var rightInverse: Matrix<m, m, R> {
-        return Matrix(res.rightInverse)
+    public var rightInverse: _Matrix<m, m, R> {
+        return _Matrix(res.rightInverse)
     }
     
     public var rank: Int {
@@ -167,8 +167,8 @@ public struct MatrixEliminationResultWrapper<n: _Int, m: _Int, R: EuclideanRing>
 }
 
 public extension MatrixEliminationResultWrapper where n == m {
-    public var inverse: Matrix<n, n, R>? {
-        return res.inverse.map{ Matrix($0) }
+    public var inverse: _Matrix<n, n, R>? {
+        return res.inverse.map{ _Matrix($0) }
     }
     
     public var determinant: R {

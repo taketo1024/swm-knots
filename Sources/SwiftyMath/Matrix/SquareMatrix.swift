@@ -8,7 +8,7 @@
 
 import Foundation
 
-public typealias SquareMatrix<n: _Int, R: Ring> = Matrix<n, n, R>
+public typealias SquareMatrix<n: _Int, R: Ring> = _Matrix<n, n, R>
 
 public typealias Matrix2<R: Ring> = SquareMatrix<_2, R>
 public typealias Matrix3<R: Ring> = SquareMatrix<_3, R>
@@ -19,35 +19,21 @@ extension SquareMatrix: Ring where n == m {
         self.init(scalar: R(from: n))
     }
     
-    public static var identity: Matrix<n, n, R> {
+    public static var identity: _Matrix<n, n, R> {
         assert(!n.isDynamic)
-        return Matrix<n, n, R> { $0 == $1 ? .identity : .zero }
-    }
-    
-    public var size: Int {
-        return rows
-    }
-    
-    public var trace: R {
-        return (0 ..< rows).sum { i in self[i, i] }
-    }
-    
-    public var determinant: R {
-        print("warn: computing determinant for a general ring.")
-        return Permutation.allPermutations(ofLength: size).sum { s in
-            let e = R(from: s.signature)
-            let term = (0 ..< size).multiply { i in self[i, s[i]] }
-            print("\t", e, term)
-            return e * term
-        }
+        return _Matrix<n, n, R> { $0 == $1 ? .identity : .zero }
     }
     
     public var isInvertible: Bool {
         return determinant.isInvertible
     }
     
-    public var inverse: Matrix<n, n, R>? {
+    public var inverse: _Matrix<n, n, R>? {
         fatalError("matrix-inverse not yet supported for a general ring.")
+    }
+    
+    public var isSquare: Bool {
+        return rows == cols
     }
     
     public var isZero: Bool {
@@ -59,7 +45,9 @@ extension SquareMatrix: Ring where n == m {
     }
     
     public var isSymmetric: Bool {
-        if size <= 1 {
+        if !isSquare { return false }
+        
+        if rows <= 1 {
             return true
         }
         return (0 ..< rows - 1).forAll { i in
@@ -70,7 +58,9 @@ extension SquareMatrix: Ring where n == m {
     }
     
     public var isSkewSymmetric: Bool {
-        if size <= 1 {
+        if !isSquare { return false }
+        
+        if rows <= 1 {
             return isZero
         }
         return (0 ..< rows - 1).forAll { i in
@@ -81,18 +71,36 @@ extension SquareMatrix: Ring where n == m {
     }
     
     public var isOrthogonal: Bool {
-        return self.transposed * self == .identity
+        return isSquare && self.transposed * self == .identity
     }
     
     public func pow(_ n: 𝐙) -> SquareMatrix<n, R> {
+        assert(isSquare)
         assert(n >= 0)
         return (0 ..< n).reduce(.identity){ (res, _) in self * res }
+    }
+    
+    public var trace: R {
+        assert(isSquare)
+        return (0 ..< rows).sum { i in self[i, i] }
+    }
+    
+    public var determinant: R {
+        assert(isSquare)
+        print("warn: computing determinant for a general ring.")
+        return Permutation.allPermutations(ofLength: rows).sum { s in
+            let e = R(from: s.signature)
+            let term = (0 ..< rows).multiply { i in self[i, s[i]] }
+            print("\t", e, term)
+            return e * term
+        }
     }
 }
 
 public extension SquareMatrix where n == m, R: EuclideanRing {
     public var determinant: R {
-        switch size {
+        assert(isSquare)
+        switch rows {
         case 0: return .identity
         case 1: return self[0, 0]
         case 2: return self[0, 0] * self[1, 1] - self[1, 0] * self[0, 1]
@@ -100,14 +108,15 @@ public extension SquareMatrix where n == m, R: EuclideanRing {
         }
     }
     
-    public var inverse: Matrix<n, n, R>? {
-        switch size {
+    public var inverse: _Matrix<n, n, R>? {
+        assert(isSquare)
+        switch rows {
         case 0: return .identity
-        case 1: return self[0, 0].inverse.flatMap{ Matrix($0) }
+        case 1: return self[0, 0].inverse.flatMap{ _Matrix($0) }
         case 2:
             let det = determinant
             return (det.isInvertible)
-                ? det.inverse! * Matrix(self[1, 1], -self[0, 1], -self[1, 0], self[0, 0])
+                ? det.inverse! * _Matrix(self[1, 1], -self[0, 1], -self[1, 0], self[0, 0])
                 : nil
         default: return eliminate().inverse
         }
@@ -116,7 +125,9 @@ public extension SquareMatrix where n == m, R: EuclideanRing {
 
 public extension SquareMatrix where n == m, R == 𝐂 {
     public var isHermitian: Bool {
-        if size <= 1 {
+        if !isSquare { return false }
+        
+        if rows <= 1 {
             return true
         }
         return (0 ..< rows - 1).forAll { i in
@@ -127,7 +138,9 @@ public extension SquareMatrix where n == m, R == 𝐂 {
     }
     
     public var isSkewHermitian: Bool {
-        if size <= 1 {
+        if !isSquare { return false }
+        
+        if rows <= 1 {
             return isZero
         }
         return (0 ..< rows - 1).forAll { i in
@@ -138,7 +151,7 @@ public extension SquareMatrix where n == m, R == 𝐂 {
     }
     
     public var isUnitary: Bool {
-        return self.adjoint * self == .identity
+        return isSquare && self.adjoint * self == .identity
     }
 }
 

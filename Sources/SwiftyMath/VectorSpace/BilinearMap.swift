@@ -82,13 +82,13 @@ public extension BilinearFormType {
 }
 
 public extension BilinearFormType where Domain.Left: FiniteDimVectorSpace {
-    public var asMatrix: DynamicMatrix<CoeffRing> {
+    public var asMatrix: Matrix<CoeffRing> {
         typealias V = Domain.Left
         
         let n = V.dim
         let basis = V.standardBasis
         
-        return DynamicMatrix(rows: n, cols: n) { (i, j) in
+        return Matrix(rows: n, cols: n) { (i, j) in
             let (v, w) = (basis[i], basis[j])
             return self.applied(to: (v, w)).value
         }
