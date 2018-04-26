@@ -75,10 +75,41 @@ class LinkTests: XCTestCase {
         XCTAssertEqual(K.JonesPolynomial, A(symbol: "q", coeffs: [8: -1, 6: 1, 2: 1]))
     }
     
+    func testPlanarCode() {
+        let K = Link.trefoil
+        print(K.planarCode)
+        
+        let Kr = K.reversed
+        print(Kr.planarCode)
+        
+        let Km = K.mirrored
+        print(Km.planarCode)
+    }
+    
     func testCoding() {
         let K = Link.trefoil
         let d = try! JSONEncoder().encode(K)
         let K2 = try! JSONDecoder().decode(Link.self, from: d)
         XCTAssertEqual(K, K2)
+    }
+    
+    func testCodingReversed() {
+        let K = Link.trefoil.reversed
+        let d = try! JSONEncoder().encode(K)
+        let K2 = try! JSONDecoder().decode(Link.self, from: d)
+        
+        XCTAssertEqual(K.crossingNumber, K2.crossingNumber)
+        XCTAssertEqual(K.writhe, K2.writhe)
+        XCTAssertEqual(K.JonesPolynomial, K2.JonesPolynomial)
+    }
+    
+    func testCodingMirrored() {
+        let K = Link.trefoil.mirrored
+        let d = try! JSONEncoder().encode(K)
+        let K2 = try! JSONDecoder().decode(Link.self, from: d)
+        
+        XCTAssertEqual(K.crossingNumber, K2.crossingNumber)
+        XCTAssertEqual(K.writhe, K2.writhe)
+        XCTAssertEqual(K.JonesPolynomial, K2.JonesPolynomial)
     }
 }

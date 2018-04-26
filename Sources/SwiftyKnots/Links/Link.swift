@@ -40,21 +40,17 @@ public struct Link: Equatable, CustomStringConvertible {
         self.crossings = crossings
     }
     
-    public init(name: String? = nil, planarCode: [(Int, Int, Int, Int)]) {
+    public init(name: String? = nil, planarCode: [[Int]]) {
         
         // generate edges.
         
-        var edges = [Int : Edge]()
-        for edgeId in planarCode.flatMap( {[$0.0, $0.1, $0.2, $0.3]} ) {
-            if edges[edgeId] == nil {
-                edges[edgeId] = Edge(edgeId)
-            }
-        }
+        let edgeIds = Set(planarCode.flatMap{ $0 })
+        let edges = Dictionary(keys: edgeIds) { id in Edge(id) }
         
         // generate crossings.
         
         let crossings = planarCode.map { c -> Crossing in
-            let (e0, e1, e2, e3) = (edges[c.0]!, edges[c.1]!, edges[c.2]!, edges[c.3]!)
+            let (e0, e1, e2, e3) = (edges[c[0]]!, edges[c[1]]!, edges[c[2]]!, edges[c[3]]!)
             assert(e0.to == nil)
             assert(e2.from == nil)
             
@@ -104,7 +100,7 @@ public struct Link: Equatable, CustomStringConvertible {
         self.init(name: (name ?? "L"), crossings: crossings)
     }
     
-    public init(name: String? = nil, planarCode: (Int, Int, Int, Int) ...) {
+    public init(name: String? = nil, planarCode: [Int] ...) {
         self.init(name: name, planarCode: planarCode)
     }
     
@@ -194,6 +190,31 @@ public struct Link: Equatable, CustomStringConvertible {
             x.changeCrossing()
         }
         return L
+    }
+    
+    public var planarCode: [[Int]] {
+        return crossings.map { c -> [Int] in
+            switch c.mode {
+            case .X⁻:
+                if c.edge0.to == c {
+                    return [c.edge0.id, c.edge1.id, c.edge2.id, c.edge3.id]
+                } else if c.edge2.to == c {
+                    return [c.edge2.id, c.edge3.id, c.edge0.id, c.edge1.id]
+                }
+                fallthrough
+                
+            case .X⁺:
+                if c.edge1.to == c {
+                    return [c.edge1.id, c.edge2.id, c.edge3.id, c.edge0.id]
+                } else if c.edge3.to == c {
+                    return [c.edge3.id, c.edge0.id, c.edge1.id, c.edge2.id]
+                }
+                fallthrough
+                
+            default:
+                fatalError()
+            }
+        }
     }
     
     public static func +(L1: Link, L2: Link) -> Link {
@@ -436,23 +457,19 @@ public struct Link: Equatable, CustomStringConvertible {
 
 extension Link: Codable {
     enum CodingKeys: String, CodingKey {
-        case name, code
+        case name, planarCode
     }
     
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let name = try c.decode(String.self, forKey: .name)
-        let code = try c.decode([[Int]].self, forKey: .code)
-        self.init(name: name, planarCode: code.map{ l in (l[0], l[1], l[2], l[3]) })
+        let code = try c.decode([[Int]].self, forKey: .planarCode)
+        self.init(name: name, planarCode: code)
     }
     
     public func encode(to encoder: Encoder) throws {
-        // MEMO currently supports only ones generated from planarCode.
-        assert(crossings.forAll{ c in c.mode == .X⁻ })
-        
-        let code = crossings.map{ c in c.edges.map{ $0.id } }
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(name, forKey: .name)
-        try c.encode(code, forKey: .code)
+        try c.encode(planarCode, forKey: .planarCode)
     }
 }
