@@ -53,6 +53,7 @@ public struct Storage {
             return nil
         }
         
+        log("load: \(file.path)")
         return obj
     }
     
