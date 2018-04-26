@@ -129,32 +129,48 @@ public struct _Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     }
     
     public func rowVector(_ i: Int) -> _RowVector<m, R> {
-        return _submatrix(i ..< i + 1, 0 ..< cols)
+        return _RowVector(impl.submatrix(i ..< i + 1, 0 ..< cols))
     }
     
     public func colVector(_ j: Int) -> _ColVector<n, R> {
-        return _submatrix(0 ..< rows, j ..< j + 1)
+        return _ColVector(impl.submatrix(0 ..< rows, j ..< j + 1))
+    }
+    
+    public func submatrix(rowRange: CountableRange<Int>) -> Matrix<R> {
+        return submatrix(rowRange, 0 ..< cols)
+    }
+    
+    public func submatrix(colRange: CountableRange<Int>) -> Matrix<R> {
+        return submatrix(0 ..< rows, colRange)
     }
     
     public func submatrix(_ rowRange: CountableRange<Int>, _ colRange: CountableRange<Int>) -> Matrix<R> {
-        return _submatrix(rowRange, colRange)
+        return Matrix(impl.submatrix(rowRange, colRange))
     }
     
-    internal func _submatrix<k: _Int, l: _Int>(_ rowRange: CountableRange<Int>, _ colRange: CountableRange<Int>) -> _Matrix<k, l, R> {
-        return _Matrix<k, l, R>(impl.submatrix(rowRange, colRange))
+    public func submatrix(_ rowCond: (Int) -> Bool, _ colCond: (Int) -> Bool) -> Matrix<R> {
+        return Matrix(impl.submatrix(rowCond, colCond))
     }
     
     public var grid: [R] {
         return impl.grid
     }
     
-    public var components: [MatrixComponent<R>] {
+    public var nonZeroComponents: [MatrixComponent<R>] {
         return impl.components
+    }
+    
+    public func nonZeroComponents(ofRow i: Int) -> [MatrixComponent<R>] {
+        return impl.components(ofRow: i)
+    }
+    
+    public func nonZeroComponents(ofCol j: Int) -> [MatrixComponent<R>] {
+        return impl.components(ofCol: j)
     }
     
     // TODO directly iterate impl
     public func makeIterator() -> IndexingIterator<[(Int, Int, R)]> {
-        return components.map{ c in (c.row, c.col, c.value) }.makeIterator()
+        return nonZeroComponents.map{ c in (c.row, c.col, c.value) }.makeIterator()
     }
     
     public var hashValue: Int {
