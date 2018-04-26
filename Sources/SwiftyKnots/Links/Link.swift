@@ -124,7 +124,7 @@ public struct Link: Equatable, CustomStringConvertible {
         return Set( crossings.flatMap{ x -> [Edge] in x.edges } )
     }
     
-    public func copy() -> Link {
+    public func copy(name: String? = nil) -> Link {
         let edges = Dictionary(pairs: allEdges.map{ e -> (Int, Edge) in (e.id, e) } )
         
         let copiedEdges = edges.mapValues{ e in Edge(e.id) }
@@ -139,7 +139,7 @@ public struct Link: Equatable, CustomStringConvertible {
             e.to   = copiedCross[ crossings.index(of: orig.to  )! ]
         }
         
-        return Link(name: name, crossings: copiedCross)
+        return Link(name: name ?? self.name, crossings: copiedCross)
     }
     
     public var components: [Component] {
@@ -181,7 +181,7 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var reversed: Link {
-        let L = self.copy()
+        let L = self.copy(name: "-\(name)")
         for e in L.allEdges {
             e.reverse()
         }
@@ -189,7 +189,7 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var mirrored: Link {
-        let L = self.copy()
+        let L = self.copy(name: "m\(name)")
         for x in L.crossings {
             x.changeCrossing()
         }
