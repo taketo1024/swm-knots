@@ -125,16 +125,16 @@ public struct KhHomology<R: EuclideanRing> {
 //        print((i, j))
 //        print(prev, "\t->\t[", this, "]\t->\t", next, "\n")
         
-        func matrix(from: Summand, to: Summand) -> ComputationalMatrix<R> {
+        func matrix(from: Summand, to: Summand) -> MatrixImpl<R> {
             let (μL, ΔL) = (KhBasisElement.μL, KhBasisElement.ΔL)
             let grid = from.generators.flatMap { x -> [R] in
                 let y = cube.map(x, μL, ΔL)
                 return to.factorize(y)
             }
-            return ComputationalMatrix(rows: from.generators.count, cols: to.generators.count, grid: grid).transpose()
+            return MatrixImpl(rows: from.generators.count, cols: to.generators.count, grid: grid).transpose()
         }
         
-        func eliminate(from: Summand, to: Summand, matrix A: ComputationalMatrix<R>) -> (MatrixEliminationResult<R>, MatrixEliminationResult<𝐙₂>)? {
+        func eliminate(from: Summand, to: Summand, matrix A: MatrixImpl<R>) -> (MatrixEliminationResult<R>, MatrixEliminationResult<𝐙₂>)? {
             let a1 = from.torsionCoeffs.count
             let a2 = to.torsionCoeffs.count
             

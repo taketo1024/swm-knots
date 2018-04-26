@@ -19,11 +19,11 @@ public enum MatrixForm {
 }
 
 public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
-    internal var target: ComputationalMatrix<R>
+    internal var target: MatrixImpl<R>
     internal var rowOps: [ElementaryOperation]
     internal var colOps: [ElementaryOperation]
     
-    public required init(_ target: ComputationalMatrix<R>) {
+    public required init(_ target: MatrixImpl<R>) {
         self.target = target
         self.rowOps = []
         self.colOps = []
@@ -181,7 +181,7 @@ public class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         }
         
         @_specialize(where R == ComputationSpecializedRing)
-        public func apply(to A: ComputationalMatrix<R>) {
+        public func apply(to A: MatrixImpl<R>) {
             switch self {
             case let .AddRow(i, j, r):
                 A.addRow(at: i, to: j, multipliedBy: r)

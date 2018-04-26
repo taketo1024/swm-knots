@@ -10,7 +10,9 @@ import Foundation
 
 internal typealias ComputationSpecializedRing = 𝐙
 
-public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConvertible {
+// TODO to internal class
+
+public final class MatrixImpl<R: Ring>: Equatable, CustomStringConvertible {
     public enum Alignment: String, Codable {
         case Rows, Cols
     }
@@ -79,8 +81,8 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
-    public func copy() -> ComputationalMatrix<R> {
-        return ComputationalMatrix(rows, cols, align, table)
+    public func copy() -> MatrixImpl<R> {
+        return MatrixImpl(rows, cols, align, table)
     }
     
     public func switchAlignment(_ align: Alignment) {
@@ -118,29 +120,29 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @discardableResult
-    public func transpose() -> ComputationalMatrix<R> {
+    public func transpose() -> MatrixImpl<R> {
         (rows, cols) = (cols, rows)
         align = (align == .Rows) ? .Cols : .Rows
         return self
     }
     
-    public func submatrix(rowRange: CountableRange<Int>) -> ComputationalMatrix<R> {
+    public func submatrix(rowRange: CountableRange<Int>) -> MatrixImpl<R> {
         return submatrix(rowRange, 0 ..< cols)
     }
     
-    public func submatrix(colRange: CountableRange<Int>) -> ComputationalMatrix<R> {
+    public func submatrix(colRange: CountableRange<Int>) -> MatrixImpl<R> {
         return submatrix(0 ..< rows, colRange)
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    public func submatrix(_ rowRange: CountableRange<Int>, _ colRange: CountableRange<Int>) -> ComputationalMatrix<R> {
+    public func submatrix(_ rowRange: CountableRange<Int>, _ colRange: CountableRange<Int>) -> MatrixImpl<R> {
         assert(0 <= rowRange.lowerBound && rowRange.upperBound <= rows)
         assert(0 <= colRange.lowerBound && colRange.upperBound <= cols)
 
         return submatrix({i in rowRange.contains(i)}, {j in colRange.contains(j)})
     }
     
-    public func submatrix(_ rowCond: (Int) -> Bool, _ colCond: (Int) -> Bool) -> ComputationalMatrix<R> {
+    public func submatrix(_ rowCond: (Int) -> Bool, _ colCond: (Int) -> Bool) -> MatrixImpl<R> {
         let (sRows, sCols, iList, jList): (Int, Int, [Int], [Int])
         
         switch align {
@@ -165,11 +167,11 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
             return !subList.isEmpty ? (k, subList) : nil
         }
         
-        return ComputationalMatrix(sRows, sCols, align, Dictionary(pairs: subTable))
+        return MatrixImpl(sRows, sCols, align, Dictionary(pairs: subTable))
     }
     
-    public func mapValues<R2>(_ f: (R) -> R2) -> ComputationalMatrix<R2> {
-        typealias M = ComputationalMatrix<R2>
+    public func mapValues<R2>(_ f: (R) -> R2) -> MatrixImpl<R2> {
+        typealias M = MatrixImpl<R2>
         let mapped = table.mapValues { $0.map{ ($0, f($1)) } }
         let a = (align == .Rows) ? M.Alignment.Rows : M.Alignment.Cols
         return M(rows, cols, a, mapped)
@@ -190,10 +192,10 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    public static func *(a: ComputationalMatrix, b: ComputationalMatrix) -> ComputationalMatrix<R> {
+    public static func *(a: MatrixImpl, b: MatrixImpl) -> MatrixImpl<R> {
         assert(a.cols == b.rows)
         
-        let result = ComputationalMatrix<R>(rows: a.rows, cols: b.cols, components: [])
+        let result = MatrixImpl<R>(rows: a.rows, cols: b.cols, components: [])
         
         // TODO support .Cols
         
@@ -338,13 +340,13 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
     
     @discardableResult
-    public func multiply(_ r: R) -> ComputationalMatrix<R> {
+    public func multiply(_ r: R) -> MatrixImpl<R> {
         table = table.mapValues{ list in list.map{ (j, a) in (j, r * a) } }
         return self
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    public static func ==(a: ComputationalMatrix, b: ComputationalMatrix) -> Bool {
+    public static func ==(a: MatrixImpl, b: MatrixImpl) -> Bool {
         if (a.rows, a.cols) != (b.rows, b.cols) {
             return false
         }
@@ -361,13 +363,13 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
         }
     }
     
-    public static func zero(rows: Int, cols: Int, align: Alignment = .Rows) -> ComputationalMatrix<R> {
-        return ComputationalMatrix(rows: rows, cols: cols, components: [], align: align)
+    public static func zero(rows: Int, cols: Int, align: Alignment = .Rows) -> MatrixImpl<R> {
+        return MatrixImpl(rows: rows, cols: cols, components: [], align: align)
     }
     
-    public static func identity(_ n: Int, align: Alignment = .Rows) -> ComputationalMatrix<R> {
+    public static func identity(_ n: Int, align: Alignment = .Rows) -> MatrixImpl<R> {
         let components = (0 ..< n).map{ i in MatrixComponent(i, i, R.identity)}
-        return ComputationalMatrix(rows: n, cols: n, components: components, align: align)
+        return MatrixImpl(rows: n, cols: n, components: components, align: align)
     }
     
     public func generateGrid() -> [R] {
@@ -434,7 +436,7 @@ public final class ComputationalMatrix<R: Ring>: Equatable, CustomStringConverti
     }
 }
 
-public extension ComputationalMatrix where R: EuclideanRing{
+public extension MatrixImpl where R: EuclideanRing{
     public func eliminate(form: MatrixForm = .Diagonal) -> MatrixEliminationResult<R> {
         if let res = eliminationResult as? MatrixEliminationResult<R> {
             return res
@@ -458,7 +460,7 @@ public extension ComputationalMatrix where R: EuclideanRing{
     }
 }
 
-extension ComputationalMatrix: Codable where R: Codable {
+extension MatrixImpl: Codable where R: Codable {
     enum CodingKeys: String, CodingKey {
         case rows, cols, grid, components
     }

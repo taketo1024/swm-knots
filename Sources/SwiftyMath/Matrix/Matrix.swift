@@ -180,8 +180,8 @@ public struct Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         return self.filter{ c in c.value != .zero }
     }
     
-    public var asComputational: ComputationalMatrix<R> {
-        return ComputationalMatrix(rows: rows, cols: cols, components: components)
+    public var asComputational: MatrixImpl<R> {
+        return MatrixImpl(rows: rows, cols: cols, components: components)
     }
     
     public var hashValue: Int {
@@ -240,7 +240,7 @@ extension Matrix: VectorSpace, FiniteDimVectorSpace where R: Field {
 public extension Matrix where R: EuclideanRing {
     // MEMO use computational Matrix for more direct manipulation.
     public func eliminate(form: MatrixForm = .Diagonal) -> MatrixEliminationResultWrapper<n, m, R> {
-        let cmatrix = ComputationalMatrix(self)
+        let cmatrix = MatrixImpl(self)
         let eliminator = { () -> MatrixEliminator<R> in
             switch form {
             case .RowEchelon: return RowEchelonEliminator(cmatrix)

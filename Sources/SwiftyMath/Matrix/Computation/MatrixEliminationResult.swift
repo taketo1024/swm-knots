@@ -9,29 +9,29 @@
 import Foundation
 
 public class MatrixEliminationResult<R: EuclideanRing> {
-    public let result: ComputationalMatrix<R>
+    public let result: MatrixImpl<R>
     internal let rowOps: [MatrixEliminator<R>.ElementaryOperation]
     internal let colOps: [MatrixEliminator<R>.ElementaryOperation]
     public let form: MatrixForm
     
-    public required init(_ result: ComputationalMatrix<R>, _ rowOps: [MatrixEliminator<R>.ElementaryOperation], _ colOps: [MatrixEliminator<R>.ElementaryOperation], _ form: MatrixForm) {
+    public required init(_ result: MatrixImpl<R>, _ rowOps: [MatrixEliminator<R>.ElementaryOperation], _ colOps: [MatrixEliminator<R>.ElementaryOperation], _ form: MatrixForm) {
         self.result = result
         self.rowOps = rowOps
         self.colOps = colOps
         self.form = form
     }
     
-    public final lazy var left: ComputationalMatrix<R>         = _left()
-    public final lazy var leftInverse: ComputationalMatrix<R>  = _leftInverse()
-    public final lazy var right: ComputationalMatrix<R>        = _right()
-    public final lazy var rightInverse: ComputationalMatrix<R> = _rightInverse()
+    public final lazy var left: MatrixImpl<R>         = _left()
+    public final lazy var leftInverse: MatrixImpl<R>  = _leftInverse()
+    public final lazy var right: MatrixImpl<R>        = _right()
+    public final lazy var rightInverse: MatrixImpl<R> = _rightInverse()
     public final lazy var rank: Int                            = _rank()
     public final lazy var diagonal: [R]                        = _diagonal()
-    public final lazy var inverse: ComputationalMatrix<R>?     = _inverse()
+    public final lazy var inverse: MatrixImpl<R>?     = _inverse()
     public final lazy var determinant: R                       = _determinant()
-    public final lazy var kernelMatrix: ComputationalMatrix<R> = _kernelMatrix()
-    public final lazy var imageMatrix: ComputationalMatrix<R>  = _imageMatrix()
-    public final lazy var kernelTransitionMatrix: ComputationalMatrix<R> = _kernelTransitionMatrix()
+    public final lazy var kernelMatrix: MatrixImpl<R> = _kernelMatrix()
+    public final lazy var imageMatrix: MatrixImpl<R>  = _imageMatrix()
+    public final lazy var kernelTransitionMatrix: MatrixImpl<R> = _kernelTransitionMatrix()
 
     public final var nullity: Int {
         return result.cols - rank
@@ -50,8 +50,8 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    internal final func _left() -> ComputationalMatrix<R> {
-        let P = ComputationalMatrix<R>.identity(result.rows)
+    internal final func _left() -> MatrixImpl<R> {
+        let P = MatrixImpl<R>.identity(result.rows)
         for s in rowOps {
             s.apply(to: P)
         }
@@ -59,10 +59,10 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    internal final func _leftInverse(restrictedToCols colRange: CountableRange<Int>? = nil) -> ComputationalMatrix<R> {
+    internal final func _leftInverse(restrictedToCols colRange: CountableRange<Int>? = nil) -> MatrixImpl<R> {
         let P = (colRange == nil)
-            ? ComputationalMatrix<R>.identity(result.rows)
-            : ComputationalMatrix<R>.identity(result.rows).submatrix(colRange: colRange!)
+            ? MatrixImpl<R>.identity(result.rows)
+            : MatrixImpl<R>.identity(result.rows).submatrix(colRange: colRange!)
         
         for s in rowOps.reversed() {
             s.inverse.apply(to: P)
@@ -72,8 +72,8 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    internal final func _right() -> ComputationalMatrix<R> {
-        let P = ComputationalMatrix<R>.identity(result.cols, align: .Cols)
+    internal final func _right() -> MatrixImpl<R> {
+        let P = MatrixImpl<R>.identity(result.cols, align: .Cols)
         for s in colOps {
             s.apply(to: P)
         }
@@ -81,10 +81,10 @@ public class MatrixEliminationResult<R: EuclideanRing> {
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    internal final func _rightInverse(restrictedToRows rowRange: CountableRange<Int>? = nil) -> ComputationalMatrix<R> {
+    internal final func _rightInverse(restrictedToRows rowRange: CountableRange<Int>? = nil) -> MatrixImpl<R> {
         let P = (rowRange == nil)
-            ? ComputationalMatrix<R>.identity(result.cols, align: .Cols)
-            : ComputationalMatrix<R>.identity(result.cols, align: .Cols).submatrix(rowRange: rowRange!)
+            ? MatrixImpl<R>.identity(result.cols, align: .Cols)
+            : MatrixImpl<R>.identity(result.cols, align: .Cols).submatrix(rowRange: rowRange!)
         
         for s in colOps.reversed() {
             s.inverse.apply(to: P)
@@ -103,7 +103,7 @@ public class MatrixEliminationResult<R: EuclideanRing> {
         fatalError("not available.")
     }
     
-    internal func _inverse() -> ComputationalMatrix<R>? {
+    internal func _inverse() -> MatrixImpl<R>? {
         fatalError("not available.")
     }
     
@@ -111,15 +111,15 @@ public class MatrixEliminationResult<R: EuclideanRing> {
         fatalError("not available.")
     }
     
-    internal func _kernelMatrix() -> ComputationalMatrix<R> {
+    internal func _kernelMatrix() -> MatrixImpl<R> {
         fatalError("not available.")
     }
     
-    internal func _imageMatrix() -> ComputationalMatrix<R> {
+    internal func _imageMatrix() -> MatrixImpl<R> {
         fatalError("not available.")
     }
     
-    internal func _kernelTransitionMatrix() -> ComputationalMatrix<R> {
+    internal func _kernelTransitionMatrix() -> MatrixImpl<R> {
         fatalError("not available.")
     }
 }

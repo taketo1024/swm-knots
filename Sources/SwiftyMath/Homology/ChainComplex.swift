@@ -33,7 +33,7 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
     
     internal let chain: [(basis: ChainBasis, map: BoundaryMap)]
     internal let offset: Int
-    internal var matrices: [ComputationalMatrix<R>?]
+    internal var matrices: [MatrixImpl<R>?]
     
     // root initializer
     public init(name: String? = nil, chain: [(ChainBasis, BoundaryMap)], offset: Int = 0) {
@@ -63,7 +63,7 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
         return (offset ... topDegree).contains(i) ? chain[i - offset].map : .zero
     }
     
-    public func boundaryMatrix(_ i: Int) -> ComputationalMatrix<R> {
+    public func boundaryMatrix(_ i: Int) -> MatrixImpl<R> {
         switch i {
         case (offset ... topDegree):
             if let A = matrices[i - offset] {
@@ -85,7 +85,7 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
         }
     }
     
-    internal func makeMatrix(_ i: Int) -> ComputationalMatrix<R> {
+    internal func makeMatrix(_ i: Int) -> MatrixImpl<R> {
         let (from, to, map) = (chainBasis(i), chainBasis(i + T.degree), boundaryMap(i))
         let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toBasisElement: toBasisIndex]
         let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
@@ -94,7 +94,7 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
             }
         }
         
-        return ComputationalMatrix(rows: to.count, cols: from.count, components: components)
+        return MatrixImpl(rows: to.count, cols: from.count, components: components)
     }
     
     public func shifted(_ d: Int) -> _ChainComplex<T, A, R> {

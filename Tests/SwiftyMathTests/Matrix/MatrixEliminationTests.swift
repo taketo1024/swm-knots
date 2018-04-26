@@ -13,8 +13,8 @@ import XCTest
 
 class MatrixEliminationTests: XCTestCase {
     
-    private func M<R: Ring>(_ rows: Int, _ cols: Int, _ grid: [R]) -> ComputationalMatrix<R> {
-        return ComputationalMatrix(rows: rows, cols: cols, grid: grid)
+    private func M<R: Ring>(_ rows: Int, _ cols: Int, _ grid: [R]) -> MatrixImpl<R> {
+        return MatrixImpl(rows: rows, cols: cols, grid: grid)
     }
     
     func testNormalize_Z() {
