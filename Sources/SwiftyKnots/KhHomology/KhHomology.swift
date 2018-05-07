@@ -83,7 +83,7 @@ public struct KhHomology<R: EuclideanRing> {
         return H.gradedEulerCharacteristic
     }
     
-    public var asCode: String {
+    public var structureCode: String {
         return validDegrees.map{ (i, j) in
             let s = self[i, j]
             let f = (s.rank > 0) ? "0\(Format.sup(s.rank))₍\(Format.sub(i)),\(Format.sub(j))₎" : ""
