@@ -177,7 +177,7 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var reversed: Link {
-        let L = self.copy(name: "-\(name)")
+        let L = self.copy(name: "-\(name)r")
         for e in L.allEdges {
             e.reverse()
         }
@@ -185,7 +185,7 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var mirrored: Link {
-        let L = self.copy(name: "m\(name)")
+        let L = self.copy(name: "\(name)m")
         for x in L.crossings {
             x.changeCrossing()
         }
