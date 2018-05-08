@@ -29,13 +29,17 @@ public struct KhHomology<R: EuclideanRing> {
     internal let H: Inner
     
     public init(_ link: Link) {
-        self.link = link
-        
         let name = "Kh(\(link.name); \(R.symbol))"
         let (cube, C) = link.KhChainComplex(R.self)
+        let H = Inner(name: name, chainComplex: C)
         
+        self.init(link, cube, H)
+    }
+    
+    internal init(_ link: Link, _ cube: KhCube, _ H: Inner) {
+        self.link = link
         self.cube = cube
-        self.H = Cohomology(name: name, chainComplex: C)
+        self.H = H
     }
     
     public subscript(i: Int) -> Summand {
@@ -73,6 +77,29 @@ public struct KhHomology<R: EuclideanRing> {
         return degs.forAll { (i, j) -> Bool in
             (j == 2 * (i - i0) + j0) || (j == 2 * (i - i0 + 1) + j0)
         }
+    }
+    
+    public var freePart: KhHomology<R> {
+        let name = "Kh(\(link.name); \(R.symbol))_free"
+        return filtered(name) { s in s.isFree }
+    }
+    
+    public var torsionPart: KhHomology<R> {
+        let name = "Kh(\(link.name); \(R.symbol))_tor"
+        return filtered(name) { s in !s.isFree }
+    }
+    
+    private func filtered(_ name: String, _ condition: (Summand.Summand) -> Bool) -> KhHomology<R> {
+        let summands = (H.offset ... H.topDegree).map { i -> Summand in
+            let s = H[i]
+            let indices = s.summands.enumerated().compactMap { (k, s) in
+                condition(s) ? k : nil
+            }
+            return s.subSummands(indices: indices)
+        }
+        let Hf = Inner(name: name, offset: H.offset, summands: summands)
+        
+        return KhHomology(link, cube, Hf)
     }
     
     public var eulerCharacteristic: Int {
