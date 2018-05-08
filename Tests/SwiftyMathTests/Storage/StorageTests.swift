@@ -16,13 +16,13 @@ class StorageTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        Storage.setTestMode(true)
+        Storage.setDir(NSTemporaryDirectory() + "test/")
         Storage.clear()
     }
     
     override func tearDown() {
         Storage.clear()
-        Storage.setTestMode(false)
+        Storage.setDir(nil)
         super.tearDown()
     }
 
