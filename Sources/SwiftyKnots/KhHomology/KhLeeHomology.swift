@@ -8,9 +8,10 @@
 import Foundation
 import SwiftyMath
 
-public struct KhLeeHomology<R: EuclideanRing> {
+public final class KhLeeHomology<R: EuclideanRing> {
     
     private let Kh: KhHomology<R>
+    private var matrices: [IntList: Matrix<R>] = [:]
     
     public init(_ Kh: KhHomology<R>) {
         assert(Kh.validDegrees.forAll{ (i, j) in Kh[i, j].isFree })
@@ -29,6 +30,10 @@ public struct KhLeeHomology<R: EuclideanRing> {
     }
     
     private func matrix(_ i: Int, _ j: Int) -> Matrix<R> {
+        if let A = matrices[IntList(i, j)] {
+            return A
+        }
+        
         let (from, to) = (Kh[i, j], Kh[i + 1, j + 4])
         let (μL, ΔL) = (KhBasisElement.μL, KhBasisElement.ΔL)
         let grid = from.generators.flatMap { x -> [R] in
@@ -36,7 +41,9 @@ public struct KhLeeHomology<R: EuclideanRing> {
             return to.factorize(y)
         }
         
-        return Matrix(rows: from.generators.count, cols: to.generators.count, grid: grid).transposed
+        let A = Matrix(rows: from.generators.count, cols: to.generators.count, grid: grid).transposed
+        matrices[IntList(i, j)] = A
+        return A
     }
     
     public var table: KhHomology<R>.Table<AbstractSimpleModuleStructure<R>> {
