@@ -20,7 +20,7 @@ import Foundation
 // See: https://en.wikipedia.org/wiki/Free_presentation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
-public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: ModuleStructure<R> {
+public final class SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleStructure<R> {
     public let summands: [Summand]
     
     internal let basis: [A]
@@ -35,62 +35,8 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
         super.init()
     }
     
-    public convenience init(generators: [A], relationMatrix B: Matrix<R>) {
-        let I = Matrix<R>.identity(size: generators.count)
-        self.init(basis: generators, generatingMatrix: I, relationMatrix: B, transitionMatrix: I)
-    }
-    
-    public convenience init(basis: [A], generatingMatrix A: Matrix<R>, relationMatrix B: Matrix<R>, transitionMatrix T: Matrix<R>) {
-        
-        assert(A.rows == B.rows)
-        assert(A.rows >= A.cols)  // n ≧ k
-        assert(A.cols >= B.cols)  // k ≧ l
-        
-        let (k, l) = (A.cols, B.cols)
-        
-        // R ∈ M(k, l) : B = A * R.
-        //
-        // R = T * B, since
-        //     T * A = I_k,
-        //     T * B = T * (A * R) = I_k * R = R.
-        //
-        // R gives the structure of the quotient A / B.
-        
-        var R1 = T * B
-        
-        // Retake bases of A and B to obtain the decomposition of M.
-        //
-        //   P' * R * Q' = [D'; O].
-        //   => (B * Q') = (Z * R) * Q' = (Z * P'^-1) * [D; O]
-        //
-        // D gives the relation between the new bases.
-        //
-        // eg)     D = [1,   1,   2,   0]
-        //     A / B =  0  + 0 + Z/2 + Z
-        
-        let E  = R1.eliminate(form: .Smith)
-        
-        let divisors = (E.diagonal + Array(repeating: R.zero, count: k - l)).filter{ $0 != .identity }
-        let s = divisors.count
-        
-        let A2 = A * E.leftInverse.submatrix(colRange: (k - s) ..< k)
-        let generators = (0 ..< A2.cols).map { j in
-            A2.nonZeroComponents(ofCol: j).sum { c in FreeModule(basis[c.row], c.value) }
-        }
-        
-        let summands = zip(generators, divisors).map { (z, a) in
-            return SimpleModuleStructure<A, R>.Summand(z, a)
-        }
-        
-        // The transition matrix to A' = (A * P'^-1) is given by
-        //
-        //   T' := P' * T, since
-        //   T' * A' = (P' * T) * (Z * P'^-1) = P' * I_k * P'^-1 = I_k.
-        //
-
-        let T2 = E.left.submatrix(rowRange: (k - s) ..< k) * T
-        
-        self.init(summands, basis, T2)
+    public subscript(i: Int) -> Summand {
+        return summands[i]
     }
     
     public static var zeroModule: SimpleModuleStructure<A, R> {
@@ -121,21 +67,14 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
         return summands[i].generator
     }
     
-    public func factorize(_ z: FreeModule<A, R>) -> [R] {
-        let n = basis.count
-        let v = transform * Matrix(rows: n, cols: 1, grid: z.factorize(by: basis))
-        
-        return summands.enumerated().map { (i, s) in
-            return s.isFree ? v[i, 0] : v[i, 0] % s.divisor
-        }
+    public var freePart: SimpleModuleStructure<A, R> {
+        let indices = (0 ..< summands.count).filter{ i in self[i].isFree }
+        return subSummands(indices: indices)
     }
     
-    public func elementIsZero(_ z: FreeModule<A, R>) -> Bool {
-        return factorize(z).forAll{ $0 == .zero }
-    }
-    
-    public func elementsAreEqual(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {
-        return elementIsZero(z1 - z2)
+    public var torsionPart: SimpleModuleStructure<A, R> {
+        let indices = (0 ..< summands.count).filter{ i in !self[i].isFree }
+        return subSummands(indices: indices)
     }
     
     public func subSummands(_ indices: Int ...) -> SimpleModuleStructure<A, R> {
@@ -199,7 +138,103 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
     }
 }
 
-public typealias AbstractSimpleModuleStructure<R: EuclideanRing> = SimpleModuleStructure<AbstractBasisElement, R>
+public extension SimpleModuleStructure where R: EuclideanRing {
+    public convenience init(generators: [A], relationMatrix B: Matrix<R>) {
+        let I = Matrix<R>.identity(size: generators.count)
+        self.init(basis: generators, generatingMatrix: I, relationMatrix: B, transitionMatrix: I)
+    }
+    
+    public convenience init(basis: [A], generatingMatrix A: Matrix<R>, relationMatrix B: Matrix<R>, transitionMatrix T: Matrix<R>) {
+        
+        assert(A.rows == B.rows)
+        assert(A.rows >= A.cols)  // n ≧ k
+        assert(A.cols >= B.cols)  // k ≧ l
+        
+        let (k, l) = (A.cols, B.cols)
+        
+        // R ∈ M(k, l) : B = A * R.
+        //
+        // R = T * B, since
+        //     T * A = I_k,
+        //     T * B = T * (A * R) = I_k * R = R.
+        //
+        // R gives the structure of the quotient A / B.
+        
+        var R1 = T * B
+        
+        // Retake bases of A and B to obtain the decomposition of M.
+        //
+        //   P' * R * Q' = [D'; O].
+        //   => (B * Q') = (Z * R) * Q' = (Z * P'^-1) * [D; O]
+        //
+        // D gives the relation between the new bases.
+        //
+        // eg)     D = [1,   1,   2,   0]
+        //     A / B =  0  + 0 + Z/2 + Z
+        
+        let E  = R1.eliminate(form: .Smith)
+        
+        let divisors = (E.diagonal + Array(repeating: R.zero, count: k - l)).filter{ $0 != .identity }
+        let s = divisors.count
+        
+        let A2 = A * E.leftInverse.submatrix(colRange: (k - s) ..< k)
+        let generators = (0 ..< A2.cols).map { j in
+            A2.nonZeroComponents(ofCol: j).sum { c in FreeModule(basis[c.row], c.value) }
+        }
+        
+        let summands = zip(generators, divisors).map { (z, a) in
+            return SimpleModuleStructure<A, R>.Summand(z, a)
+        }
+        
+        // The transition matrix to A' = (A * P'^-1) is given by
+        //
+        //   T' := P' * T, since
+        //   T' * A' = (P' * T) * (Z * P'^-1) = P' * I_k * P'^-1 = I_k.
+        //
+        
+        let T2 = E.left.submatrix(rowRange: (k - s) ..< k) * T
+        
+        self.init(summands, basis, T2)
+    }
+    
+    public func factorize(_ z: FreeModule<A, R>) -> [R] {
+        let n = basis.count
+        let v = transform * Matrix(rows: n, cols: 1, grid: z.factorize(by: basis))
+        
+        return summands.enumerated().map { (i, s) in
+            return s.isFree ? v[i, 0] : v[i, 0] % s.divisor
+        }
+    }
+    
+    public func elementIsZero(_ z: FreeModule<A, R>) -> Bool {
+        return factorize(z).forAll{ $0 == .zero }
+    }
+    
+    public func elementsAreEqual(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {
+        return elementIsZero(z1 - z2)
+    }
+}
+
+public extension SimpleModuleStructure where R == 𝐙 {
+    public func subSummands<n: _Int>(torsion: Int) -> SimpleModuleStructure<A, IntegerQuotientRing<n>> {
+        assert(n.intValue == torsion)
+        
+        typealias Q = IntegerQuotientRing<n>
+        typealias T = SimpleModuleStructure<A, Q>
+        
+        let indices = (0 ..< self.summands.count).filter{ i in self[i].divisor == torsion }
+        let sub = subSummands(indices: indices)
+        
+        let summands = sub.summands.map { s -> T.Summand in
+            T.Summand(s.generator.mapValues{ Q($0) }, .zero)
+        }
+        let transform = sub.transform.mapValues { Q($0) }
+        
+        return T(summands, basis, transform)
+    }
+}
+
+public typealias AbstractSimpleModuleStructure<R: Ring> = SimpleModuleStructure<AbstractBasisElement, R>
 
 public extension AbstractSimpleModuleStructure where A == AbstractBasisElement {
     public convenience init(rank r: Int, torsions: [R] = []) {
