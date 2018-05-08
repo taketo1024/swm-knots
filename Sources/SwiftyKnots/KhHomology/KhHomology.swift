@@ -161,6 +161,20 @@ public struct KhHomology<R: EuclideanRing> {
     }
 }
 
+public extension KhHomology where R == 𝐙 {
+    public var order2torsionPart: KhHomology<𝐙₂> {
+        typealias T = KhHomology<𝐙₂>
+        let name = "Kh(\(link.name); \(R.symbol))_𝐙₂"
+        let summands = (H.offset ... H.topDegree).map { i -> T.Summand in
+            H[i].subSummands(torsion: 2)
+        }
+        let Hf = T.Inner(name: name, offset: H.offset, summands: summands)
+        
+        return T(link, cube, Hf)
+    }
+    
+}
+
 extension KhHomology: Codable where R: Codable {
     enum CodingKeys: String, CodingKey {
         case link, H
