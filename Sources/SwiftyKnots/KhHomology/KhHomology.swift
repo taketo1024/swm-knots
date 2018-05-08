@@ -110,7 +110,11 @@ public struct KhHomology<R: EuclideanRing> {
         return H.gradedEulerCharacteristic
     }
     
-    public var table: Table {
+    public var KhLee: KhLeeHomology<R> {
+        return KhLeeHomology(self)
+    }
+    
+    public var table: Table<Summand> {
         return Table(components: validDegrees.map{ (i, j) in (i, j, self[i, j]) })
     }
     
@@ -125,16 +129,15 @@ public struct KhHomology<R: EuclideanRing> {
         }.joined()
     }
     
-    public struct Table: CustomStringConvertible {
-        public typealias Summand = Cohomology<KhTensorElement, R>.Summand
-        private let components: [IntList : Summand]
+    public struct Table<E>: CustomStringConvertible {
+        private let components: [IntList : E]
         
-        internal init(components: [(Int, Int, Summand)]) {
+        internal init(components: [(Int, Int, E)]) {
             self.components = Dictionary(pairs: components.map{ (IntList($0, $1), $2) })
         }
         
-        public subscript(i: Int, j: Int) -> Summand {
-            return components[IntList(i, j)] ?? .zeroModule
+        public subscript(i: Int, j: Int) -> E? {
+            return components[IntList(i, j)]
         }
         
         public var description: String {
@@ -152,99 +155,9 @@ public struct KhHomology<R: EuclideanRing> {
             
             return Format.table("j\\i", rows: rows, cols: cols) { (j, i) -> String in
                 let s = self[i, j]
-                return s.isTrivial ? "" : "\(s)"
+                return s.map{ "\($0)" } ?? ""
             }
         }
-    }
-    
-    public func KhLee(_ i: Int, _ j: Int) -> (AbstractSimpleModuleStructure<R>, AbstractSimpleModuleStructure<𝐙₂>)? {
-        let (prev, this, next) = (self[i - 1, j - 4], self[i, j], self[i + 1, j + 4])
-        
-//        print((i, j))
-//        print(prev, "\t->\t[", this, "]\t->\t", next, "\n")
-        
-        func matrix(from: Summand, to: Summand) -> Matrix<R> {
-            let (μL, ΔL) = (KhBasisElement.μL, KhBasisElement.ΔL)
-            let grid = from.generators.flatMap { x -> [R] in
-                let y = cube.map(x, μL, ΔL)
-                return to.factorize(y)
-            }
-            return Matrix(rows: from.generators.count, cols: to.generators.count, grid: grid).transposed
-        }
-        
-        func eliminate(from: Summand, to: Summand, matrix A: Matrix<R>) -> (Matrix<R>.EliminationResult, Matrix<𝐙₂>.EliminationResult)? {
-            let a1 = from.torsionCoeffs.count
-            let a2 = to.torsionCoeffs.count
-            
-            guard A.submatrix(a2 ..< A.rows, 0 ..< a1).isZero else {
-                print((i, j), ": undecidable")
-                return nil
-            }
-            
-            var B = A.submatrix(a2 ..< A.rows, a1 ..< A.cols) // freePart
-            let C = A.submatrix(0 ..< a2, 0 ..< a1)           // torsionPart
-            
-            guard C.isZero || (R.self == 𝐙.self && (from.torsionCoeffs + to.torsionCoeffs).forAll{ $0 == R(from: 2) }) else {
-                print((i, j), ": only 𝐙 with order-2 torsions are computable.", A)
-                return nil
-            }
-            
-            var C2 = C.mapValues{ 𝐙₂(from: $0 as! 𝐙)}
-            
-            let X =  B.eliminate(form: .Smith)
-            let Y = C2.eliminate(form: .Smith)
-
-            return (X, Y)
-        }
-        
-        let Ain  = matrix(from: prev, to: this)
-        let Aout = matrix(from: this, to: next)
-        
-//        print("In: \n",  Ain.asDynamicMatrix().detailDescription, "\n")
-//        print("Out:\n", Aout.asDynamicMatrix().detailDescription, "\n")
-        
-        guard let Ein  = eliminate(from: prev, to: this, matrix: Ain),
-              let Eout = eliminate(from: this, to: next, matrix: Aout) else {
-                return nil
-        }
-        
-        let S1 = SimpleModuleStructure(
-            basis:            this.summands.enumerated().filter{ $0.1.isFree }.map{ AbstractBasisElement($0.0) },
-            generatingMatrix: Eout.0.kernelMatrix,
-            relationMatrix:   Ein.0.imageMatrix,
-            transitionMatrix: Eout.0.kernelTransitionMatrix
-        )
-        
-        let S2 = SimpleModuleStructure(
-            basis:            this.summands.enumerated().filter{ !$0.1.isFree }.map{ AbstractBasisElement($0.0) },
-            generatingMatrix: Eout.1.kernelMatrix,
-            relationMatrix:   Ein.1.imageMatrix,
-            transitionMatrix: Eout.1.kernelTransitionMatrix
-        )
-        
-        return (S1, S2)
-    }
-    
-    public func printKhLeeTable() {
-        let cols = (offset ... topDegree).toArray()
-        let degs = cols.flatMap{ i in self[i].summands.map{ $0.degree } }.unique()
-        
-        guard let j0 = degs.min(), let j1 = degs.max() else {
-            return
-        }
-        
-        let rows = (j0 ... j1).filter{ ($0 - j0).isEven }.reversed().toArray()
-        print(Format.table("j\\i", rows: rows, cols: cols) { (j, i) -> String in
-            let s = self.KhLee(i, j)
-            return s.flatMap{ (s1, s2) in
-                switch (s1.isTrivial, s2.isTrivial) {
-                case (true , true ): return ""
-                case (false, true ): return s1.description
-                case (true , false): return s2.description
-                default            : return s1.description + "⊕" + s2.description
-                }
-            } ?? "?"
-        })
     }
 }
 
