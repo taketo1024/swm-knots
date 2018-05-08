@@ -177,7 +177,7 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var reversed: Link {
-        let L = self.copy(name: "-\(name)r")
+        let L = self.copy(name: "\(name)r")
         for e in L.allEdges {
             e.reverse()
         }
@@ -268,7 +268,11 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var description: String {
-        return "L{ \(crossings.map{ $0.description }.joined(separator: ", ")) }"
+        return name
+    }
+    
+    public var detailDescription: String {
+        return "\(name){ \(crossings.map{ $0.description }.joined(separator: ", ")) }"
     }
     
     public class Edge: Equatable, Comparable, Hashable, CustomStringConvertible {

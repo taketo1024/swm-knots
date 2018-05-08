@@ -18,6 +18,24 @@ public extension Link {
         return knot(3, 1)
     }
     
+    public static func knot(_ name: String) -> Link {
+        if name.hasSuffix("r") {
+            let orig = name.substring(0 ..< name.count - 1)
+            return knot(orig).reversed
+        }
+        
+        if name.hasSuffix("m") {
+            let orig = name.substring(0 ..< name.count - 1)
+            return knot(orig).mirrored
+        }
+        
+        if name.hasPrefix("K") {
+            return Link(name: name, planarCode: knotTable[name]!)
+        } else {
+            return Link(name: name, planarCode: RolfsenTable[name]!)
+        }
+    }
+    
     public static func knot(_ n: Int, _ i: Int) -> Link {
         assert( (3...10).contains(n) )
         let name = "\(n)_\(i)"
