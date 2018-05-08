@@ -83,6 +83,10 @@ public struct KhHomology<R: EuclideanRing> {
         return H.gradedEulerCharacteristic
     }
     
+    public var table: Table {
+        return Table(components: validDegrees.map{ (i, j) in (i, j, self[i, j]) })
+    }
+    
     public var structureCode: String {
         return validDegrees.map{ (i, j) in
             let s = self[i, j]
@@ -94,31 +98,38 @@ public struct KhHomology<R: EuclideanRing> {
         }.joined()
     }
     
-    public func printTable(detail: Bool = false) {
-        let cols = (offset ... topDegree).toArray()
-        let degs = cols.flatMap{ i in self[i].summands.map{ $0.degree} }.unique()
+    public struct Table: CustomStringConvertible {
+        public typealias Summand = Cohomology<KhTensorElement, R>.Summand
+        private let components: [IntList : Summand]
         
-        guard let j0 = degs.min(), let j1 = degs.max() else {
-            return
+        internal init(components: [(Int, Int, Summand)]) {
+            self.components = Dictionary(pairs: components.map{ (IntList($0, $1), $2) })
         }
         
-        let rows = (j0 ... j1).filter{ ($0 - j0).isEven }.reversed().toArray()
-        Format.printTable("j\\i", rows: rows, cols: cols) { (j, i) -> String in
-            let s = self[i, j]
-            return s.isTrivial ? "" : "\(s)"
+        public subscript(i: Int, j: Int) -> Summand {
+            return components[IntList(i, j)] ?? .zeroModule
         }
         
-        if detail {
-            for (i, j) in validDegrees {
-                print((i, j))
-                for s in self[i, j].summands {
-                    print("\t", s, "\t", s.generator)
-                }
-                print()
+        public var description: String {
+            guard !components.isEmpty else {
+                return ""
+            }
+            
+            let keys = components.keys
+            let (I, J) = (keys.map{$0[0]}.unique(), keys.map{$0[1]}.unique())
+            let (i0, i1) = (I.min()!, I.max()!)
+            let (j0, j1) = (J.min()!, J.max()!)
+            
+            let cols = (i0 ... i1).toArray()
+            let rows = (j0 ... j1).filter{ ($0 - j0).isEven }.reversed().toArray()
+            
+            return Format.table("j\\i", rows: rows, cols: cols) { (j, i) -> String in
+                let s = self[i, j]
+                return s.isTrivial ? "" : "\(s)"
             }
         }
     }
-
+    
     public func KhLee(_ i: Int, _ j: Int) -> (AbstractSimpleModuleStructure<R>, AbstractSimpleModuleStructure<𝐙₂>)? {
         let (prev, this, next) = (self[i - 1, j - 4], self[i, j], self[i + 1, j + 4])
         
@@ -196,7 +207,7 @@ public struct KhHomology<R: EuclideanRing> {
         }
         
         let rows = (j0 ... j1).filter{ ($0 - j0).isEven }.reversed().toArray()
-        Format.printTable("j\\i", rows: rows, cols: cols) { (j, i) -> String in
+        print(Format.table("j\\i", rows: rows, cols: cols) { (j, i) -> String in
             let s = self.KhLee(i, j)
             return s.flatMap{ (s1, s2) in
                 switch (s1.isTrivial, s2.isTrivial) {
@@ -206,7 +217,7 @@ public struct KhHomology<R: EuclideanRing> {
                 default            : return s1.description + "⊕" + s2.description
                 }
             } ?? "?"
-        }
+        })
     }
 }
 
