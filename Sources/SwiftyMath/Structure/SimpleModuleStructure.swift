@@ -92,7 +92,15 @@ public final class SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleSt
     }
     
     public override var description: String {
-        return summands.isEmpty ? "0" : summands.map{$0.description}.joined(separator: " ⊕ ")
+        if summands.isEmpty {
+            return "0"
+        }
+        
+        let f = (rank > 0) ? ["\(R.symbol)\(rank > 1 ? Format.sup(rank) : "")"] : []
+        let t = torsionCoeffs.countMultiplicities().map{ (d, r) in
+            "\(R.symbol)/\(d)\(r > 1 ? Format.sup(r) : "")"
+        }
+        return (t + f).joined(separator: "⊕")
     }
     
     public var detailDescription: String {
