@@ -69,14 +69,20 @@ public struct KhHomology<R: EuclideanRing> {
         }
     }
     
+    public var bandWidth: Int {
+        return validDegrees.map{ (i, j) in j - 2 * i }.unique().count
+    }
+    
+    public var isDiagonal: Bool {
+        return bandWidth == 1
+    }
+    
     public var isHThin: Bool {
-        let degs = validDegrees
-        if degs.isEmpty { return true }
-        
-        let (i0, j0) = (degs.map{ $0.0 }.min()!, degs.map{ $0.1 }.min()!)
-        return degs.forAll { (i, j) -> Bool in
-            (j == 2 * (i - i0) + j0) || (j == 2 * (i - i0 + 1) + j0)
-        }
+        return bandWidth <= 2
+    }
+    
+    public var isHThick: Bool {
+        return !isHThin
     }
     
     public var freePart: KhHomology<R> {
