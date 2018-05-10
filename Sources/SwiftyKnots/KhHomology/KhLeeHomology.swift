@@ -14,11 +14,13 @@ public final class KhLeeHomology<R: EuclideanRing> {
     private var matrices: [IntList: Matrix<R>] = [:]
     
     public init(_ Kh: KhHomology<R>) {
-        assert(Kh.validDegrees.forAll{ (i, j) in Kh[i, j].isFree })
         self.Kh = Kh
     }
     
     public subscript(i: Int, j: Int) -> AbstractSimpleModuleStructure<R> {
+        // MEMO currently supports only free cases.
+        assert(Kh.validDegrees.forAll{ (i, j) in Kh[i, j].isFree })
+        
         var (Ain, Aout) = (matrix(i - 1, j - 4), matrix(i, j))
         let (Ein, Eout) = (Ain.eliminate(form: .Smith), Aout.eliminate(form: .Smith))
         return SimpleModuleStructure(
@@ -46,12 +48,40 @@ public final class KhLeeHomology<R: EuclideanRing> {
         return A
     }
     
+    public var validDegrees: [(Int, Int)] {
+        return Kh.validDegrees
+    }
+    
+    public var splits: Bool {
+        return validDegrees.forAll { (i, j) -> Bool in
+            let (from, to) = (Kh[i, j].freePart, Kh[i + 1, j + 4].torsionPart)
+            if from.isTrivial || to.isTrivial {
+                return true
+            }
+            
+            let (μL, ΔL) = (KhBasisElement.μL, KhBasisElement.ΔL)
+            let res = from.generators.forAll{ x in
+                let y = Kh.cube.map(x, μL, ΔL)
+                return to.factorize(y).forAll{ $0 == .zero }
+            }
+            
+            // MEMO for experiments
+            if res {
+                print(Kh.link, (i, j), from, " -> ", to, ": zero")
+            } else {
+                print(Kh.link, (i, j), from, " -> ", to, ": non-zero")
+            }
+            
+            return res
+        }
+    }
+    
     public var table: KhHomology<R>.Table<AbstractSimpleModuleStructure<R>> {
-        return KhHomology.Table(components: Kh.validDegrees.map{ (i, j) in (i, j, self[i, j]) })
+        return KhHomology.Table(components: validDegrees.map{ (i, j) in (i, j, self[i, j]) })
     }
     
     public var structureCode: String {
-        return Kh.validDegrees.map{ (i, j) in
+        return validDegrees.map{ (i, j) in
             let s = self[i, j]
             let f = (s.rank > 0) ? "0\(Format.sup(s.rank))₍\(Format.sub(i)),\(Format.sub(j))₎" : ""
             let t = s.torsionCoeffs.countMultiplicities().map{ (d, r) in
