@@ -10,6 +10,7 @@ import SwiftyMath
 
 public struct KhCube {
     public struct Vertex {
+        public let degree: Int
         public let state: LinkSpliceState
         public let components: [Link.Component]
         public let basis: [KhTensorElement]
@@ -24,7 +25,7 @@ public struct KhCube {
             let sL = L.spliced(by: s)
             let comps = sL.components
             let basis = KhTensorElement.generateBasis(state: s, power: comps.count, shift: n⁺ - 2 * n⁻)
-            return Vertex(state: s, components: comps, basis: basis)
+            return Vertex(degree: s.degree - n⁻, state: s, components: comps, basis: basis)
         }
     }
     
@@ -32,8 +33,16 @@ public struct KhCube {
         return vertices[s]!
     }
     
-    public subscript(i: Int) -> [Vertex] {
-        return vertices.values.filter{ $0.state.degree == i }
+    public func vertices(degree: Int) -> [Vertex] {
+        return vertices.values.filter{ $0.degree == degree }
+    }
+    
+    public func basis(degree: Int) -> [KhTensorElement] {
+        return vertices(degree: degree).flatMap { v in v.basis }
+    }
+    
+    public func basis(degree i: Int, _ j: Int) -> [KhTensorElement] {
+        return basis(degree: i).filter{ $0.degree == j }
     }
     
     public func map<R: Ring>(_ x: KhTensorElement, _ μ: KhBasisElement.Product, _ Δ: KhBasisElement.Coproduct) -> FreeModule<KhTensorElement, R> {
@@ -73,7 +82,7 @@ public extension Link {
         let chain = (0 ... n).map { i -> (C.ChainBasis, C.BoundaryMap) in
             let (μ, Δ) = (KhBasisElement.μ, KhBasisElement.Δ)
             
-            let chainBasis = cube[i].flatMap { v in v.basis }
+            let chainBasis = cube.basis(degree: i - n⁻)
             let boundaryMap = C.BoundaryMap { (x: KhTensorElement) in cube.map(x, μ, Δ) }
             return (chainBasis, boundaryMap)
         }
