@@ -9,13 +9,17 @@ import Foundation
 import SwiftyMath
 
 public extension Link {
-    public func khHomology<R: EuclideanRing>(_ type: R.Type) -> KhHomology<R> {
-        return KhHomology<R>(self)
+    public func KhHomology<R: EuclideanRing>(_ type: R.Type) -> SwiftyKnots.KhHomology<R> {
+        return SwiftyKnots.KhHomology<R>(self)
     }
     
-    public func khHomology<R: EuclideanRing & Codable>(_ type: R.Type) -> KhHomology<R> {
-        let id = "Kh_\(name)_\(R.symbol)"
-        return Storage.useCache(id) { KhHomology<R>(self) }
+    public func KhHomology<R: EuclideanRing & Codable>(_ type: R.Type, useCache: Bool) -> SwiftyKnots.KhHomology<R> {
+        if useCache {
+            let id = "Kh_\(name)_\(R.symbol)"
+            return Storage.useCache(id) { self.KhHomology(R.self) }
+        } else {
+            return self.KhHomology(R.self)
+        }
     }
 }
 
@@ -30,7 +34,8 @@ public struct KhHomology<R: EuclideanRing> {
     
     public init(_ link: Link) {
         let name = "Kh(\(link.name); \(R.symbol))"
-        let (cube, C) = link.KhChainComplex(R.self)
+        let cube = link.KhCube
+        let C = link.KhChainComplex(cube, R.self)
         let H = Inner(name: name, chainComplex: C)
         
         self.init(link, cube, H)
