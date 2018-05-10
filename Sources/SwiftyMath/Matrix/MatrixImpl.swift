@@ -26,6 +26,9 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     
     private init(_ rows: Int, _ cols: Int, _ align: Alignment, _ table: Table) {
         if _isDebugAssertConfiguration() {
+            assert(table.values.forAll{ !$0.isEmpty })
+            assert(table.values.forAll{ $0.forAll{ $0.1 != .zero }})
+            
             switch align {
             case .Rows:
                 assert(table.keys.forAll{ (0 ..< rows).contains($0) })
@@ -66,11 +69,12 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     }
     
     static func generateTable<S: Sequence>(_ align: Alignment, _ components: S) -> Table where S.Element == Component {
+        let filtered = components.filter{ $0.value != .zero }
         switch align {
         case .Rows:
-            return components.group{ c in c.row }.mapValues{ l in l.sorted{ c in c.col }.map{ c in (c.col, c.value) } }
+            return filtered.group{ c in c.row }.mapValues{ l in l.sorted{ c in c.col }.map{ c in (c.col, c.value) } }
         case .Cols:
-            return components.group{ c in c.col }.mapValues{ l in l.sorted{ c in c.row }.map{ c in (c.row, c.value) } }
+            return filtered.group{ c in c.col }.mapValues{ l in l.sorted{ c in c.row }.map{ c in (c.row, c.value) } }
         }
     }
     
