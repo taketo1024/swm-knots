@@ -189,6 +189,10 @@ public extension _Polynomial where R: Field {
 }
 
 extension _Polynomial: EuclideanRing where T == NormalPolynomialType, R: Field {
+    public var eucDegree: Int {
+        return highestPower
+    }
+    
     public func eucDiv(by g: _Polynomial<T, R, x>) -> (q: _Polynomial<T, R, x>, r: _Polynomial<T, R, x>) {
         typealias This = _Polynomial<T, R, x>
         
@@ -198,7 +202,7 @@ extension _Polynomial: EuclideanRing where T == NormalPolynomialType, R: Field {
         }
         
         func eucDivMonomial(_ f: This, _ g: This) -> (q: This, r: This) {
-            let n = f.degree - g.degree
+            let n = f.eucDegree - g.eucDegree
             
             if n < 0 {
                 return (.zero, f)
@@ -211,7 +215,7 @@ extension _Polynomial: EuclideanRing where T == NormalPolynomialType, R: Field {
             }
         }
         
-        return (0 ... max(0, f.degree - g.degree))
+        return (0 ... max(0, f.eucDegree - g.eucDegree))
             .reversed()
             .reduce( (.zero, f) ) { (result: (This, This), degree: Int) in
                 let (q, r) = result

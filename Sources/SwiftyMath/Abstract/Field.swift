@@ -13,7 +13,7 @@ public extension Field {
         return self.inverse!
     }
     
-    public var degree: Int {
+    public var eucDegree: Int {
         return self == .zero ? 0 : 1
     }
     

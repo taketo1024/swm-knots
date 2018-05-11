@@ -122,7 +122,7 @@ class PolynomialTests: XCTestCase {
         let (q, r) = a /% b
         XCTAssertEqual(q, B(coeffs: 1./4, 1./2))
         XCTAssertEqual(r, B(1./4))
-        XCTAssertTrue(a.degree > r.degree)
+        XCTAssertTrue(a.eucDegree > r.eucDegree)
         XCTAssertEqual(a, q * b + r)
     }
     

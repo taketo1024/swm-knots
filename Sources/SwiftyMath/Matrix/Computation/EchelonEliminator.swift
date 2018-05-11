@@ -32,7 +32,7 @@ internal final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R>
         let targetElements = pivotCandidates()
         
         guard let (i0, a0) = targetElements.min(by: { (e1, e2) in
-            (e1.1.degree < e2.1.degree) || (e1.1.degree == e2.1.degree && weight(e1.0) < weight(e2.0) )
+            (e1.1.eucDegree < e2.1.eucDegree) || (e1.1.eucDegree == e2.1.eucDegree && weight(e1.0) < weight(e2.0) )
         }) else {
             targetCol += 1
             return
@@ -84,7 +84,7 @@ internal final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R>
     }
     
     private func weight(_ i: Int) -> Int {
-        return target.table[i]!.sum{ $0.1.degree }
+        return target.table[i]!.sum{ $0.1.eucDegree }
     }
 }
 
