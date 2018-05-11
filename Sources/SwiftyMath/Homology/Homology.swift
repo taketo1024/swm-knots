@@ -86,11 +86,11 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
         return (offset ... topDegree).sum{ i in (-1).pow(i) * bettiNumer(i) }
     }
     
-    public var gradedEulerCharacteristic: LaurentPolynomial<R> {
-        let q = LaurentPolynomial<R>.indeterminate
-        return (offset ... topDegree).sum { i -> LaurentPolynomial<R> in
-            R(from: (-1).pow(i)) * self[i].summands.sum { s -> LaurentPolynomial<R> in
-                s.isFree ? q.pow(s.generator.degree) : .zero
+    public var gradedEulerCharacteristic: LaurentPolynomial_x<R> {
+        let x = LaurentPolynomial_x<R>.indeterminate
+        return (offset ... topDegree).sum { i in
+            R(from: (-1).pow(i)) * self[i].summands.sum { s in
+                s.isFree ? x.pow(s.generator.degree) : .zero
             }
         }
     }

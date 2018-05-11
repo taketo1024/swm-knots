@@ -11,11 +11,15 @@ import XCTest
 
 class AlgebraicExtensionTests: XCTestCase {
     
-    struct p1: IrrPolynomialTP { static var value = Polynomial<𝐐>(coeffs: -2, 0, 1) }
+    struct p1: IrrPolynomialTP {
+        static let value = Polynomial_x<𝐐>(coeffs: -2, 0, 1)
+    }
     typealias A = AlgebraicExtension<𝐐, p1>
     let α = A(.indeterminate)
     
-    struct p2: IrrPolynomialTP { static var value = Polynomial<A>(coeffs: -3, 0, 1) }
+    struct p2: IrrPolynomialTP {
+        static let value = Polynomial_x<A>(coeffs: -3, 0, 1)
+    }
     typealias B = AlgebraicExtension<A, p2>
     let β = B(.indeterminate)
 

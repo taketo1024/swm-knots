@@ -8,7 +8,7 @@
 import Foundation
 
 public struct AlgebraicExtension<K: Field, p: IrrPolynomialTP>: QuotientRingType, Field where K == p.CoeffRing {
-    public typealias Base = Polynomial<K>
+    public typealias Base = p.PolynomialType
     public typealias Sub = PolynomialIdeal<p>
     
     private let p: Base
@@ -25,11 +25,11 @@ public struct AlgebraicExtension<K: Field, p: IrrPolynomialTP>: QuotientRingType
         self.init(Polynomial(x))
     }
     
-    public init(_ x: Polynomial<K>) {
+    public init(_ x: Base) {
         self.p = Sub.normalizedInQuotient(x)
     }
     
-    public var representative: Polynomial<K> {
+    public var representative: Base {
         return p
     }
 }

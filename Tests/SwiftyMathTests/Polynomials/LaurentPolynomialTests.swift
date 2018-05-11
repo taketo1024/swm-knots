@@ -9,8 +9,8 @@ import XCTest
 @testable import SwiftyMath
 
 class LaurentPolynomialTests: XCTestCase {
-    typealias A = LaurentPolynomial<𝐙>
-    typealias B = LaurentPolynomial<𝐐>
+    typealias A = LaurentPolynomial_x<𝐙>
+    typealias B = LaurentPolynomial_x<𝐐>
 
     func testInitFromInt() {
         let a = A(from: 3)

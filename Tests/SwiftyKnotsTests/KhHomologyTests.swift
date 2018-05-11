@@ -30,7 +30,7 @@ class KhHomologyTests: XCTestCase {
         let J = L.unnormalizedJonesPolynomial
         
         let Kh = L.KhHomology(𝐙.self)
-        let χ = Kh.gradedEulerCharacteristic.withSymbol("q")
+        let χ = Kh.gradedEulerCharacteristic.asPolynomial(of: JonesPolynomial_q.self)
         
         XCTAssertEqual(χ, J)
     }

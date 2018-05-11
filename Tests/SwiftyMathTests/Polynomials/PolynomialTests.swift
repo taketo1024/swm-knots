@@ -9,8 +9,8 @@ import XCTest
 @testable import SwiftyMath
 
 class PolynomialTests: XCTestCase {
-    typealias A = Polynomial<𝐙>
-    typealias B = Polynomial<𝐐>
+    typealias A = Polynomial_x<𝐙>
+    typealias B = Polynomial_x<𝐐>
 
     func testInitFromInt() {
         let a = A(from: 3)
@@ -115,5 +115,16 @@ class PolynomialTests: XCTestCase {
         XCTAssertEqual(r, B(1./4))
         XCTAssertTrue(a.degree > r.degree)
         XCTAssertEqual(a, q * b + r)
+    }
+    
+    struct Indeterminate_t: Indeterminate {
+        static var symbol = "t"
+        static var degree = 2
+    }
+    
+    func testCustomIndeterminate() {
+        typealias A = Polynomial<𝐙, Indeterminate_t>
+        XCTAssertEqual(A.indeterminate.description, "t")
+//        XCTAssertEqual(A.indeterminate.degree, 2)
     }
 }

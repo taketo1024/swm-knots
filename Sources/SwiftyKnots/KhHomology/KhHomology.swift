@@ -117,7 +117,7 @@ public struct KhHomology<R: EuclideanRing> {
         return H.eulerCharacteristic
     }
     
-    public var gradedEulerCharacteristic: LaurentPolynomial<R> {
+    public var gradedEulerCharacteristic: LaurentPolynomial_x<R> {
         return H.gradedEulerCharacteristic
     }
     
