@@ -51,9 +51,10 @@ public extension Link {
     public func _JonesPolynomial(normalized b: Bool) -> JonesPolynomial {
         let A = KauffmanBracketPolynomial.indeterminate
         let f = (-A).pow( -3 * writhe ) * _KauffmanBracket(normalized: b)
-        let J = SwiftyKnots.JonesPolynomial(degreeRange: -f.upperDegree/2 ... -f.lowerDegree/2) { i in
+        let range = -f.highestPower/2 ... -f.lowestPower/2
+        let coeffs = Dictionary(keys: range) { i -> 𝐙 in
             (-1).pow(i) * f.coeff(-2 * i)
         }
-        return J
+        return SwiftyKnots.JonesPolynomial(coeffs: coeffs)
     }
 }
