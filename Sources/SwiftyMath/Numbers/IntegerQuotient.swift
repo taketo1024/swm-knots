@@ -37,3 +37,15 @@ extension IntegerQuotientRing: FiniteSetType where Base == 𝐙, Sub: _IntegerId
         return Sub.mod
     }
 }
+
+extension IntegerQuotientRing: Codable where Base == 𝐙, Sub: _IntegerIdeal {
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        try self.init(c.decode(𝐙.self))
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        try c.encode(self.representative)
+    }
+}
