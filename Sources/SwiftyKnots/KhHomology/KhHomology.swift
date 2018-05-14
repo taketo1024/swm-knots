@@ -9,15 +9,15 @@ import Foundation
 import SwiftyMath
 
 public extension Link {
-    public func KhHomology<R: EuclideanRing>(_ type: R.Type) -> SwiftyKnots.KhHomology<R> {
-        return KhHomology(KhBasisElement.μ, KhBasisElement.Δ, R.self)
+    public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false) -> SwiftyKnots.KhHomology<R> {
+        return KhHomology(KhBasisElement.μ, KhBasisElement.Δ, R.self, reduced: reduced)
     }
     
-    public func KhHomology<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type) -> SwiftyKnots.KhHomology<R> {
+    public func KhHomology<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, reduced: Bool = false) -> SwiftyKnots.KhHomology<R> {
         
         let name = "Kh(\(self.name); \(R.symbol))"
         let cube = self.KhCube
-        let C = self.KhChainComplex(cube, μ, Δ, R.self)
+        let C = self.KhChainComplex(cube, μ, Δ, R.self, reduced: reduced)
         let H = Cohomology(name: name, chainComplex: C)
         
         return SwiftyKnots.KhHomology(self, cube, H)

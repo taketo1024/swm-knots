@@ -116,12 +116,12 @@ public struct Link: Equatable, CustomStringConvertible {
         return Link(name: "○", crossings: [x])
     }
     
-    private var allEdges: Set<Edge> {
+    public var edges: Set<Edge> {
         return Set( crossings.flatMap{ x -> [Edge] in x.edges } )
     }
     
     public func copy(name: String? = nil) -> Link {
-        let edges = Dictionary(pairs: allEdges.map{ e -> (Int, Edge) in (e.id, e) } )
+        let edges = Dictionary(pairs: self.edges.map{ e -> (Int, Edge) in (e.id, e) } )
         
         let copiedEdges = edges.mapValues{ e in Edge(e.id) }
         let copiedCross = crossings.map { x -> Crossing in
@@ -139,7 +139,7 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var components: [Component] {
-        var queue = allEdges.sorted()
+        var queue = edges.sorted()
         var comps = [Component]()
         
         while !queue.isEmpty {
@@ -178,7 +178,7 @@ public struct Link: Equatable, CustomStringConvertible {
     
     public var reversed: Link {
         let L = self.copy(name: "\(name)r")
-        for e in L.allEdges {
+        for e in L.edges {
             e.reverse()
         }
         return L
@@ -220,8 +220,8 @@ public struct Link: Equatable, CustomStringConvertible {
     public static func +(L1: Link, L2: Link) -> Link {
         let cL1 = L1.copy()
         let cL2 = L2.copy()
-        let D = (cL1.allEdges.max()?.id ?? 0) - (cL2.allEdges.min()?.id ?? 0) + 1
-        for e in cL2.allEdges {
+        let D = (cL1.edges.max()?.id ?? 0) - (cL2.edges.min()?.id ?? 0) + 1
+        for e in cL2.edges {
             e.id += D
         }
         return Link(name: "\(L1.name) + \(L2.name)", crossings: cL1.crossings + cL2.crossings)
