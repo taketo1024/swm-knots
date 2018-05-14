@@ -76,11 +76,15 @@ public extension Link {
         return SwiftyKnots.KhCube(self)
     }
     
-    public func KhChainComplex<R: EuclideanRing>(_ cube: KhCube, _ type: R.Type) -> CochainComplex<KhTensorElement, R> {
-        return chainComplex(cube, KhBasisElement.μ, KhBasisElement.Δ, R.self)
+    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type) -> CochainComplex<KhTensorElement, R> {
+        return KhChainComplex(KhCube, KhBasisElement.μ, KhBasisElement.Δ, R.self)
     }
 
-    public func chainComplex<R: EuclideanRing>(_ cube: KhCube, _ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type) -> CochainComplex<KhTensorElement, R> {
+    public func KhChainComplex<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type) -> CochainComplex<KhTensorElement, R> {
+        return KhChainComplex(KhCube, μ, Δ, R.self)
+    }
+    
+    internal func KhChainComplex<R: EuclideanRing>(_ cube: KhCube, _ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type) -> CochainComplex<KhTensorElement, R> {
         typealias C = CochainComplex<KhTensorElement, R>
         
         let name = "CKh(\(self.name); \(R.symbol))"

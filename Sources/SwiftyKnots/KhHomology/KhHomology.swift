@@ -10,15 +10,25 @@ import SwiftyMath
 
 public extension Link {
     public func KhHomology<R: EuclideanRing>(_ type: R.Type) -> SwiftyKnots.KhHomology<R> {
-        return SwiftyKnots.KhHomology<R>(self)
+        return KhHomology(KhBasisElement.μ, KhBasisElement.Δ, R.self)
+    }
+    
+    public func KhHomology<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type) -> SwiftyKnots.KhHomology<R> {
+        
+        let name = "Kh(\(self.name); \(R.symbol))"
+        let cube = self.KhCube
+        let C = self.KhChainComplex(cube, μ, Δ, R.self)
+        let H = Cohomology(name: name, chainComplex: C)
+        
+        return SwiftyKnots.KhHomology(self, cube, H)
     }
     
     public func KhHomology<R: EuclideanRing & Codable>(_ type: R.Type, useCache: Bool) -> SwiftyKnots.KhHomology<R> {
         if useCache {
             let id = "Kh_\(name)_\(R.symbol)"
-            return Storage.useCache(id) { self.KhHomology(R.self) }
+            return Storage.useCache(id) { KhHomology(R.self) }
         } else {
-            return self.KhHomology(R.self)
+            return KhHomology(R.self)
         }
     }
 }
@@ -31,15 +41,6 @@ public struct KhHomology<R: EuclideanRing> {
     
     internal let cube: KhCube
     internal let H: Inner
-    
-    public init(_ link: Link) {
-        let name = "Kh(\(link.name); \(R.symbol))"
-        let cube = link.KhCube
-        let C = link.KhChainComplex(cube, R.self)
-        let H = Inner(name: name, chainComplex: C)
-        
-        self.init(link, cube, H)
-    }
     
     internal init(_ link: Link, _ cube: KhCube, _ H: Inner) {
         self.link = link
