@@ -59,10 +59,15 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module, Sequence {
         return FreeModule([])
     }
     
-    public func mapValues<R2: Ring>(_ f: (R) -> R2) -> FreeModule<A, R2> {
+    public func mapValues<R2>(_ f: (R) -> R2) -> FreeModule<A, R2> {
         return FreeModule<A, R2>(elements.mapValues(f))
     }
     
+    public func map<A2, R2>(_ f: (A, R) -> (A2, R2)) -> FreeModule<A2, R2> {
+        return FreeModule<A2, R2>(elements.mapPairs{ (a, r) in f(a, r) })
+    }
+    
+    // TODO delete this.
     public func makeIterator() -> AnyIterator<(A, R)> {
         return AnyIterator(elements.lazy.map{ (a, r) in (a, r) }.makeIterator())
     }
