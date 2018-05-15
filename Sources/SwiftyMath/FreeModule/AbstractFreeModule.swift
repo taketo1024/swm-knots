@@ -38,7 +38,7 @@ extension AbstractFreeModule where A == AbstractBasisElement {
     }
     
     public var asTensor: AbstractTensorModule<CoeffRing> {
-        return AbstractTensorModule( self.map{ (e, a) in (Tensor(e), a) } )
+        return self.map{ (e, a) in (Tensor(e), a) }
     }
     
     public static func standardBasis(dim: Int) -> [AbstractFreeModule<CoeffRing>] {

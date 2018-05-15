@@ -88,10 +88,12 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
     
     internal func makeMatrix(_ i: Int) -> Matrix<R> {
         let (from, to, map) = (chainBasis(i), chainBasis(i + T.degree), boundaryMap(i))
-        let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toBasisElement: toBasisIndex]
+        let toIndexer = to.indexer()
+        
         let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
-            map.applied(to: x).compactMap { (y, a) -> MatrixComponent<R>? in
-                toIndex[y].flatMap{ i in MatrixComponent(i, j, a) } // nil if toIndex[y] == nil
+            map.applied(to: x).elements.map { (y, a) -> MatrixComponent<R> in
+                let i = toIndexer(y)
+                return MatrixComponent(i, j, a)
             }
         }
         

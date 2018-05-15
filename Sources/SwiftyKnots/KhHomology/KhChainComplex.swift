@@ -81,7 +81,7 @@ public struct KhCube {
     }
     
     public func map<R: Ring>(_ x: FreeModule<KhTensorElement, R>, _ μ: KhBasisElement.Product<R>, _ Δ: KhBasisElement.Coproduct<R>) -> FreeModule<KhTensorElement, R> {
-        return x.sum { (a, r) in r * self.map(a, μ, Δ) }
+        return x.elements.sum { (a, r) in r * self.map(a, μ, Δ) }
     }
 }
 

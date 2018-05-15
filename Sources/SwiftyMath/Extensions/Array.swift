@@ -71,3 +71,9 @@ public extension Array where Element: Comparable {
         return binarySearch(needle, { $0 }).map{ $0.index }
     }
 }
+
+public extension Array where Element: Hashable {
+    public func indexer() -> (Element) -> Int {
+        return Dictionary(pairs: self.enumerated().map{ ($1, $0) }).asFunc()
+    }
+}

@@ -17,8 +17,8 @@ public struct FreeModuleHom<A: BasisElementType, B: BasisElementType, R: Ring>: 
     public init(_ f: @escaping (A) -> Codomain) {
         self.init { (m: Domain) in
             var d: [B : R] = [:]
-            for (a, r) in m {
-                for (b, s) in f(a) {
+            for (a, r) in m.elements {
+                for (b, s) in f(a).elements {
                     d[b] = d[b, default: .zero] + r * s
                 }
             }
