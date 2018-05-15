@@ -9,8 +9,8 @@ import XCTest
 @testable import SwiftyMath
 
 class PolynomialTests: XCTestCase {
-    typealias A = Polynomial<𝐙>
-    typealias B = Polynomial<𝐐>
+    typealias A = Polynomial_x<𝐙>
+    typealias B = Polynomial_x<𝐐>
 
     func testInitFromInt() {
         let a = A(from: 3)
@@ -27,9 +27,18 @@ class PolynomialTests: XCTestCase {
         XCTAssertEqual(a.leadCoeff, 5)
         XCTAssertEqual(a.leadTerm, A(coeffs: [3: 5]))
         XCTAssertEqual(a.constTerm, 3)
-        XCTAssertEqual(a.upperDegree, 3)
-        XCTAssertEqual(a.lowerDegree, 0)
+        XCTAssertEqual(a.highestPower, 3)
+        XCTAssertEqual(a.lowestPower, 0)
         XCTAssertEqual(a.degree, 3)
+    }
+    
+    func testIndeterminate() {
+        let x = A.indeterminate
+        XCTAssertEqual(x, A(coeffs: [1: 1]))
+        XCTAssertEqual(x.description, "x")
+        XCTAssertEqual(x.degree, 1)
+        XCTAssertEqual(x.highestPower, 1)
+        XCTAssertEqual(x.lowestPower, 1)
     }
     
     func testSum() {
@@ -113,7 +122,22 @@ class PolynomialTests: XCTestCase {
         let (q, r) = a /% b
         XCTAssertEqual(q, B(coeffs: 1./4, 1./2))
         XCTAssertEqual(r, B(1./4))
-        XCTAssertTrue(a.degree > r.degree)
+        XCTAssertTrue(a.eucDegree > r.eucDegree)
         XCTAssertEqual(a, q * b + r)
+    }
+    
+    struct Indeterminate_t: Indeterminate {
+        static var symbol = "t"
+        static var degree = 2
+    }
+    
+    func testCustomIndeterminate() {
+        typealias A = Polynomial<𝐙, Indeterminate_t>
+        let t = A.indeterminate
+        XCTAssertEqual(t, A(coeffs: [1: 1]))
+        XCTAssertEqual(t.description, "t")
+        XCTAssertEqual(t.degree, 2)
+        XCTAssertEqual(t.highestPower, 1)
+        XCTAssertEqual(t.lowestPower, 1)
     }
 }

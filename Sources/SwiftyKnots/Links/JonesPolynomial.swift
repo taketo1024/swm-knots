@@ -8,15 +8,26 @@
 import Foundation
 import SwiftyMath
 
+public struct KauffmanBracket_A: Indeterminate {
+    public static let symbol = "A"
+}
+
+public struct JonesPolynomial_q: Indeterminate {
+    public static let symbol = "q"
+}
+
+public typealias KauffmanBracketPolynomial = LaurentPolynomial<𝐙, KauffmanBracket_A>
+public typealias JonesPolynomial = LaurentPolynomial<𝐙, JonesPolynomial_q>
+
 public extension Link {
     
     // a polynomial in 𝐙[A, 1/A]
-    public var KauffmanBracket: LaurentPolynomial<𝐙> {
+    public var KauffmanBracket: KauffmanBracketPolynomial {
         return _KauffmanBracket(normalized: false)
     }
     
-    private func _KauffmanBracket(normalized b: Bool) -> LaurentPolynomial<𝐙> {
-        let A = LaurentPolynomial<𝐙>.indeterminate(symbol: "A")
+    private func _KauffmanBracket(normalized b: Bool) -> KauffmanBracketPolynomial {
+        let A = KauffmanBracketPolynomial.indeterminate
         if let x = crossings.first(where: {$0.isCrossing}) {
             let i = crossings.index(of: x)!
             let pair = splicedPair(at: i)
@@ -29,20 +40,21 @@ public extension Link {
     
     // a polynomial in 𝐐[q, 1/q] where q = -A^{-2}
     // TODO replace with t = -q^2 = A^{-4} to get J ∈ 𝐙[√t, 1/√t]
-    public var JonesPolynomial: LaurentPolynomial<𝐙> {
+    public var JonesPolynomial: JonesPolynomial {
         return _JonesPolynomial(normalized: true)
     }
     
-    public var unnormalizedJonesPolynomial: LaurentPolynomial<𝐙> {
+    public var unnormalizedJonesPolynomial: JonesPolynomial {
         return _JonesPolynomial(normalized: false)
     }
     
-    public func _JonesPolynomial(normalized b: Bool) -> LaurentPolynomial<𝐙> {
-        let A = LaurentPolynomial<𝐙>.indeterminate(symbol: "A")
+    public func _JonesPolynomial(normalized b: Bool) -> JonesPolynomial {
+        let A = KauffmanBracketPolynomial.indeterminate
         let f = (-A).pow( -3 * writhe ) * _KauffmanBracket(normalized: b)
-        let J = LaurentPolynomial(symbol: "q", degreeRange: -f.upperDegree/2 ... -f.lowerDegree/2) { i in
+        let range = -f.highestPower/2 ... -f.lowestPower/2
+        let coeffs = Dictionary(keys: range) { i -> 𝐙 in
             (-1).pow(i) * f.coeff(-2 * i)
         }
-        return J
+        return SwiftyKnots.JonesPolynomial(coeffs: coeffs)
     }
 }

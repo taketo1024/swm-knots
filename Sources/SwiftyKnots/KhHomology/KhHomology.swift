@@ -9,13 +9,27 @@ import Foundation
 import SwiftyMath
 
 public extension Link {
-    public func khHomology<R: EuclideanRing>(_ type: R.Type) -> KhHomology<R> {
-        return KhHomology<R>(self)
+    public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false) -> SwiftyKnots.KhHomology<R> {
+        return KhHomology(KhBasisElement.μ, KhBasisElement.Δ, R.self, reduced: reduced)
     }
     
-    public func khHomology<R: EuclideanRing & Codable>(_ type: R.Type) -> KhHomology<R> {
-        let id = "Kh_\(name)_\(R.symbol)"
-        return Storage.useCache(id) { KhHomology<R>(self) }
+    public func KhHomology<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, reduced: Bool = false) -> SwiftyKnots.KhHomology<R> {
+        
+        let name = "Kh(\(self.name); \(R.symbol))"
+        let cube = self.KhCube
+        let C = self.KhChainComplex(cube, μ, Δ, R.self, reduced: reduced)
+        let H = Cohomology(name: name, chainComplex: C)
+        
+        return SwiftyKnots.KhHomology(self, cube, H)
+    }
+    
+    public func KhHomology<R: EuclideanRing & Codable>(_ type: R.Type, useCache: Bool) -> SwiftyKnots.KhHomology<R> {
+        if useCache {
+            let id = "Kh_\(name)_\(R.symbol)"
+            return Storage.useCache(id) { KhHomology(R.self) }
+        } else {
+            return KhHomology(R.self)
+        }
     }
 }
 
@@ -28,14 +42,10 @@ public struct KhHomology<R: EuclideanRing> {
     internal let cube: KhCube
     internal let H: Inner
     
-    public init(_ link: Link) {
+    internal init(_ link: Link, _ cube: KhCube, _ H: Inner) {
         self.link = link
-        
-        let name = "Kh(\(link.name); \(R.symbol))"
-        let (cube, C) = link.KhChainComplex(R.self)
-        
         self.cube = cube
-        self.H = Cohomology(name: name, chainComplex: C)
+        self.H = H
     }
     
     public subscript(i: Int) -> Summand {
@@ -65,25 +75,62 @@ public struct KhHomology<R: EuclideanRing> {
         }
     }
     
+    public var bandWidth: Int {
+        return validDegrees.map{ (i, j) in j - 2 * i }.unique().count
+    }
+    
+    public var isDiagonal: Bool {
+        return bandWidth == 1
+    }
+    
     public var isHThin: Bool {
-        let degs = validDegrees
-        if degs.isEmpty { return true }
-        
-        let (i0, j0) = (degs.map{ $0.0 }.min()!, degs.map{ $0.1 }.min()!)
-        return degs.forAll { (i, j) -> Bool in
-            (j == 2 * (i - i0) + j0) || (j == 2 * (i - i0 + 1) + j0)
+        return bandWidth <= 2
+    }
+    
+    public var isHThick: Bool {
+        return !isHThin
+    }
+    
+    public var freePart: KhHomology<R> {
+        let name = "Kh(\(link.name); \(R.symbol))_free"
+        return filtered(name) { s in s.isFree }
+    }
+    
+    public var torsionPart: KhHomology<R> {
+        let name = "Kh(\(link.name); \(R.symbol))_tor"
+        return filtered(name) { s in !s.isFree }
+    }
+    
+    private func filtered(_ name: String, _ condition: (Summand.Summand) -> Bool) -> KhHomology<R> {
+        let summands = (H.offset ... H.topDegree).map { i -> Summand in
+            let s = H[i]
+            let indices = s.summands.enumerated().compactMap { (k, s) in
+                condition(s) ? k : nil
+            }
+            return s.subSummands(indices: indices)
         }
+        let Hf = Inner(name: name, offset: H.offset, summands: summands)
+        
+        return KhHomology(link, cube, Hf)
     }
     
     public var eulerCharacteristic: Int {
         return H.eulerCharacteristic
     }
     
-    public var gradedEulerCharacteristic: LaurentPolynomial<R> {
+    public var gradedEulerCharacteristic: LaurentPolynomial_x<R> {
         return H.gradedEulerCharacteristic
     }
     
-    public var asCode: String {
+    public var KhLee: KhLeeHomology<R> {
+        return KhLeeHomology(self)
+    }
+    
+    public var table: Table<Summand> {
+        return Table(components: validDegrees.map{ (i, j) in (i, j, self[i, j]) })
+    }
+    
+    public var structureCode: String {
         return validDegrees.map{ (i, j) in
             let s = self[i, j]
             let f = (s.rank > 0) ? "0\(Format.sup(s.rank))₍\(Format.sub(i)),\(Format.sub(j))₎" : ""
@@ -94,120 +141,50 @@ public struct KhHomology<R: EuclideanRing> {
         }.joined()
     }
     
-    public func printTable(detail: Bool = false) {
-        let cols = (offset ... topDegree).toArray()
-        let degs = cols.flatMap{ i in self[i].summands.map{ $0.degree} }.unique()
+    public struct Table<E>: CustomStringConvertible {
+        private let components: [IntList : E]
         
-        guard let j0 = degs.min(), let j1 = degs.max() else {
-            return
+        internal init(components: [(Int, Int, E)]) {
+            self.components = Dictionary(pairs: components.map{ (IntList($0, $1), $2) })
         }
         
-        let rows = (j0 ... j1).filter{ ($0 - j0).isEven }.reversed().toArray()
-        Format.printTable("j\\i", rows: rows, cols: cols) { (j, i) -> String in
-            let s = self[i, j]
-            return s.isTrivial ? "" : "\(s)"
+        public subscript(i: Int, j: Int) -> E? {
+            return components[IntList(i, j)]
         }
         
-        if detail {
-            for (i, j) in validDegrees {
-                print((i, j))
-                for s in self[i, j].summands {
-                    print("\t", s, "\t", s.generator)
-                }
-                print()
+        public var description: String {
+            guard !components.isEmpty else {
+                return ""
+            }
+            
+            let keys = components.keys
+            let (I, J) = (keys.map{$0[0]}.unique(), keys.map{$0[1]}.unique())
+            let (i0, i1) = (I.min()!, I.max()!)
+            let (j0, j1) = (J.min()!, J.max()!)
+            
+            let cols = (i0 ... i1).toArray()
+            let rows = (j0 ... j1).filter{ ($0 - j0).isEven }.reversed().toArray()
+            
+            return Format.table("j\\i", rows: rows, cols: cols) { (j, i) -> String in
+                let s = self[i, j]
+                return s.map{ "\($0)" } ?? ""
             }
         }
     }
+}
 
-    public func KhLee(_ i: Int, _ j: Int) -> (AbstractSimpleModuleStructure<R>, AbstractSimpleModuleStructure<𝐙₂>)? {
-        let (prev, this, next) = (self[i - 1, j - 4], self[i, j], self[i + 1, j + 4])
-        
-//        print((i, j))
-//        print(prev, "\t->\t[", this, "]\t->\t", next, "\n")
-        
-        func matrix(from: Summand, to: Summand) -> Matrix<R> {
-            let (μL, ΔL) = (KhBasisElement.μL, KhBasisElement.ΔL)
-            let grid = from.generators.flatMap { x -> [R] in
-                let y = cube.map(x, μL, ΔL)
-                return to.factorize(y)
-            }
-            return Matrix(rows: from.generators.count, cols: to.generators.count, grid: grid).transposed
+public extension KhHomology where R == 𝐙 {
+    public var order2torsionPart: KhHomology<𝐙₂> {
+        typealias T = KhHomology<𝐙₂>
+        let name = "Kh(\(link.name); \(R.symbol))_𝐙₂"
+        let summands = (H.offset ... H.topDegree).map { i -> T.Summand in
+            H[i].subSummands(torsion: 2)
         }
+        let Hf = T.Inner(name: name, offset: H.offset, summands: summands)
         
-        func eliminate(from: Summand, to: Summand, matrix A: Matrix<R>) -> (Matrix<R>.EliminationResult, Matrix<𝐙₂>.EliminationResult)? {
-            let a1 = from.torsionCoeffs.count
-            let a2 = to.torsionCoeffs.count
-            
-            guard A.submatrix(a2 ..< A.rows, 0 ..< a1).isZero else {
-                print((i, j), ": undecidable")
-                return nil
-            }
-            
-            var B = A.submatrix(a2 ..< A.rows, a1 ..< A.cols) // freePart
-            let C = A.submatrix(0 ..< a2, 0 ..< a1)           // torsionPart
-            
-            guard C.isZero || (R.self == 𝐙.self && (from.torsionCoeffs + to.torsionCoeffs).forAll{ $0 == R(from: 2) }) else {
-                print((i, j), ": only 𝐙 with order-2 torsions are computable.", A)
-                return nil
-            }
-            
-            var C2 = C.mapValues{ 𝐙₂(from: $0 as! 𝐙)}
-            
-            let X =  B.eliminate(form: .Smith)
-            let Y = C2.eliminate(form: .Smith)
-
-            return (X, Y)
-        }
-        
-        let Ain  = matrix(from: prev, to: this)
-        let Aout = matrix(from: this, to: next)
-        
-//        print("In: \n",  Ain.asDynamicMatrix().detailDescription, "\n")
-//        print("Out:\n", Aout.asDynamicMatrix().detailDescription, "\n")
-        
-        guard let Ein  = eliminate(from: prev, to: this, matrix: Ain),
-              let Eout = eliminate(from: this, to: next, matrix: Aout) else {
-                return nil
-        }
-        
-        let S1 = SimpleModuleStructure(
-            basis:            this.summands.enumerated().filter{ $0.1.isFree }.map{ AbstractBasisElement($0.0) },
-            generatingMatrix: Eout.0.kernelMatrix,
-            relationMatrix:   Ein.0.imageMatrix,
-            transitionMatrix: Eout.0.kernelTransitionMatrix
-        )
-        
-        let S2 = SimpleModuleStructure(
-            basis:            this.summands.enumerated().filter{ !$0.1.isFree }.map{ AbstractBasisElement($0.0) },
-            generatingMatrix: Eout.1.kernelMatrix,
-            relationMatrix:   Ein.1.imageMatrix,
-            transitionMatrix: Eout.1.kernelTransitionMatrix
-        )
-        
-        return (S1, S2)
+        return T(link, cube, Hf)
     }
     
-    public func printKhLeeTable() {
-        let cols = (offset ... topDegree).toArray()
-        let degs = cols.flatMap{ i in self[i].summands.map{ $0.degree } }.unique()
-        
-        guard let j0 = degs.min(), let j1 = degs.max() else {
-            return
-        }
-        
-        let rows = (j0 ... j1).filter{ ($0 - j0).isEven }.reversed().toArray()
-        Format.printTable("j\\i", rows: rows, cols: cols) { (j, i) -> String in
-            let s = self.KhLee(i, j)
-            return s.flatMap{ (s1, s2) in
-                switch (s1.isTrivial, s2.isTrivial) {
-                case (true , true ): return ""
-                case (false, true ): return s1.description
-                case (true , false): return s2.description
-                default            : return s1.description + "⊕" + s2.description
-                }
-            } ?? "?"
-        }
-    }
 }
 
 extension KhHomology: Codable where R: Codable {

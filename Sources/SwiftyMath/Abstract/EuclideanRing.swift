@@ -1,8 +1,9 @@
 import Foundation
 
 public protocol EuclideanRing: Ring {
-    var degree: Int { get }
+    var  eucDegree: Int { get }
     func eucDiv(by b: Self) -> (q: Self, r: Self) // override point
+    
     static func /% (a: Self, b: Self) -> (q: Self, r: Self)
     static func / (a: Self, b: Self) -> Self
     static func % (a: Self, b: Self) -> Self

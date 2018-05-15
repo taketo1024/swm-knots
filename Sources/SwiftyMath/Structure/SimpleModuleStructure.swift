@@ -20,7 +20,7 @@ import Foundation
 // See: https://en.wikipedia.org/wiki/Free_presentation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
-public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: ModuleStructure<R> {
+public final class SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleStructure<R> {
     public let summands: [Summand]
     
     internal let basis: [A]
@@ -35,6 +35,118 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
         super.init()
     }
     
+    public subscript(i: Int) -> Summand {
+        return summands[i]
+    }
+    
+    public static var zeroModule: SimpleModuleStructure<A, R> {
+        return SimpleModuleStructure([], [], .zero(rows: 0, cols: 0))
+    }
+    
+    public var isTrivial: Bool {
+        return summands.isEmpty
+    }
+    
+    public var isFree: Bool {
+        return summands.forAll { $0.isFree } 
+    }
+    
+    public var rank: Int {
+        return summands.filter{ $0.isFree }.count
+    }
+    
+    public var torsionCoeffs: [R] {
+        return summands.filter{ !$0.isFree }.map{ $0.divisor }
+    }
+    
+    public var generators: [FreeModule<A, R>] {
+        return summands.map{ $0.generator }
+    }
+    
+    public func generator(_ i: Int) -> FreeModule<A, R> {
+        return summands[i].generator
+    }
+    
+    public var freePart: SimpleModuleStructure<A, R> {
+        let indices = (0 ..< summands.count).filter{ i in self[i].isFree }
+        return subSummands(indices: indices)
+    }
+    
+    public var torsionPart: SimpleModuleStructure<A, R> {
+        let indices = (0 ..< summands.count).filter{ i in !self[i].isFree }
+        return subSummands(indices: indices)
+    }
+    
+    public func subSummands(_ indices: Int ...) -> SimpleModuleStructure<A, R> {
+        return subSummands(indices: indices)
+    }
+    
+    public func subSummands(indices: [Int]) -> SimpleModuleStructure<A, R> {
+        let sub = indices.map{ summands[$0] }
+        let T = transform.submatrix({ i in indices.contains(i)}, { _ in true })
+        return SimpleModuleStructure(sub, basis, T)
+    }
+    
+    public static func ==(a: SimpleModuleStructure<A, R>, b: SimpleModuleStructure<A, R>) -> Bool {
+        return a.summands == b.summands
+    }
+    
+    public override var description: String {
+        if summands.isEmpty {
+            return "0"
+        }
+        
+        let f = (rank > 0) ? ["\(R.symbol)\(rank > 1 ? Format.sup(rank) : "")"] : []
+        let t = torsionCoeffs.countMultiplicities().map{ (d, r) in
+            "\(R.symbol)/\(d)\(r > 1 ? Format.sup(r) : "")"
+        }
+        return (t + f).joined(separator: "⊕")
+    }
+    
+    public var detailDescription: String {
+        return "\(self),\t\(generators)"
+    }
+    
+    public var asAbstract: AbstractSimpleModuleStructure<R> {
+        let torsions = summands.filter{!$0.isFree}.map{$0.divisor}
+        return AbstractSimpleModuleStructure(rank: rank, torsions: torsions)
+    }
+    
+    public final class Summand: AlgebraicStructure {
+        public let generator: FreeModule<A, R>
+        public let divisor: R
+        
+        internal init(_ generator: FreeModule<A, R>, _ divisor: R) {
+            self.generator = generator
+            self.divisor = divisor
+        }
+        
+        internal convenience init(_ a: A, _ divisor: R) {
+            self.init(FreeModule(a), divisor)
+        }
+        
+        public var isFree: Bool {
+            return divisor == .zero
+        }
+        
+        public var degree: Int {
+            return generator.degree
+        }
+        
+        public static func ==(a: Summand, b: Summand) -> Bool {
+            return (a.generator, a.divisor) == (b.generator, b.divisor)
+        }
+        
+        public var description: String {
+            switch isFree {
+            case true : return R.symbol
+            case false: return "\(R.symbol)/\(divisor)"
+            }
+        }
+    }
+}
+
+public extension SimpleModuleStructure where R: EuclideanRing {
     public convenience init(generators: [A], relationMatrix B: Matrix<R>) {
         let I = Matrix<R>.identity(size: generators.count)
         self.init(basis: generators, generatingMatrix: I, relationMatrix: B, transitionMatrix: I)
@@ -87,38 +199,10 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
         //   T' := P' * T, since
         //   T' * A' = (P' * T) * (Z * P'^-1) = P' * I_k * P'^-1 = I_k.
         //
-
+        
         let T2 = E.left.submatrix(rowRange: (k - s) ..< k) * T
         
         self.init(summands, basis, T2)
-    }
-    
-    public static var zeroModule: SimpleModuleStructure<A, R> {
-        return SimpleModuleStructure([], [], .zero(rows: 0, cols: 0))
-    }
-    
-    public var isTrivial: Bool {
-        return summands.isEmpty
-    }
-    
-    public var isFree: Bool {
-        return summands.forAll { $0.isFree } 
-    }
-    
-    public var rank: Int {
-        return summands.filter{ $0.isFree }.count
-    }
-    
-    public var torsionCoeffs: [R] {
-        return summands.filter{ !$0.isFree }.map{ $0.divisor }
-    }
-    
-    public var generators: [FreeModule<A, R>] {
-        return summands.map{ $0.generator }
-    }
-    
-    public func generator(_ i: Int) -> FreeModule<A, R> {
-        return summands[i].generator
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
@@ -137,69 +221,28 @@ public final class SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>:
     public func elementsAreEqual(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {
         return elementIsZero(z1 - z2)
     }
-    
-    public func subSummands(_ indices: Int ...) -> SimpleModuleStructure<A, R> {
-        return subSummands(indices: indices)
-    }
-    
-    public func subSummands(indices: [Int]) -> SimpleModuleStructure<A, R> {
-        let sub = indices.map{ summands[$0] }
-        let T = transform.submatrix({ i in indices.contains(i)}, { _ in true })
-        return SimpleModuleStructure(sub, basis, T)
-    }
-    
-    public static func ==(a: SimpleModuleStructure<A, R>, b: SimpleModuleStructure<A, R>) -> Bool {
-        return a.summands == b.summands
-    }
-    
-    public override var description: String {
-        return summands.isEmpty ? "0" : summands.map{$0.description}.joined(separator: " ⊕ ")
-    }
-    
-    public var detailDescription: String {
-        return "\(self),\t\(generators)"
-    }
-    
-    public var asAbstract: AbstractSimpleModuleStructure<R> {
-        let torsions = summands.filter{!$0.isFree}.map{$0.divisor}
-        return AbstractSimpleModuleStructure(rank: rank, torsions: torsions)
-    }
-    
-    public final class Summand: AlgebraicStructure {
-        public let generator: FreeModule<A, R>
-        public let divisor: R
+}
+
+public extension SimpleModuleStructure where R == 𝐙 {
+    public func subSummands<n: _Int>(torsion: Int) -> SimpleModuleStructure<A, IntegerQuotientRing<n>> {
+        assert(n.intValue == torsion)
         
-        internal init(_ generator: FreeModule<A, R>, _ divisor: R) {
-            self.generator = generator
-            self.divisor = divisor
-        }
+        typealias Q = IntegerQuotientRing<n>
+        typealias T = SimpleModuleStructure<A, Q>
         
-        internal convenience init(_ a: A, _ divisor: R) {
-            self.init(FreeModule(a), divisor)
-        }
+        let indices = (0 ..< self.summands.count).filter{ i in self[i].divisor == torsion }
+        let sub = subSummands(indices: indices)
         
-        public var isFree: Bool {
-            return divisor == .zero
+        let summands = sub.summands.map { s -> T.Summand in
+            T.Summand(s.generator.mapValues{ Q($0) }, .zero)
         }
+        let transform = sub.transform.mapValues { Q($0) }
         
-        public var degree: Int {
-            return generator.degree
-        }
-        
-        public static func ==(a: Summand, b: Summand) -> Bool {
-            return (a.generator, a.divisor) == (b.generator, b.divisor)
-        }
-        
-        public var description: String {
-            switch isFree {
-            case true : return R.symbol
-            case false: return "\(R.symbol)/\(divisor)"
-            }
-        }
+        return T(summands, basis, transform)
     }
 }
 
-public typealias AbstractSimpleModuleStructure<R: EuclideanRing> = SimpleModuleStructure<AbstractBasisElement, R>
+public typealias AbstractSimpleModuleStructure<R: Ring> = SimpleModuleStructure<AbstractBasisElement, R>
 
 public extension AbstractSimpleModuleStructure where A == AbstractBasisElement {
     public convenience init(rank r: Int, torsions: [R] = []) {

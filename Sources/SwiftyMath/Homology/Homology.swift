@@ -28,7 +28,6 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
     
     public let name: String
     public let offset: Int
-    public var topDegree: Int
     
     private var _summands: [Summand?]
     private var _generator: (Int) -> Summand
@@ -36,7 +35,6 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
     public init(name: String? = nil, chainComplex: _ChainComplex<T, A, R>) {
         self.name = name ?? "\(T.descending ? "H" : "cH")(\(chainComplex.name))"
         self.offset = chainComplex.offset
-        self.topDegree = chainComplex.topDegree
         
         self._summands = Array(repeating: nil, count: chainComplex.topDegree - chainComplex.offset + 1) // lazy init
         self._generator = { i in
@@ -55,10 +53,9 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
         }
     }
     
-    internal init(name: String, offset: Int, topDegree: Int, summands: [Summand]) {
+    public init(name: String, offset: Int, summands: [Summand]) {
         self.name = name
         self.offset = offset
-        self.topDegree = topDegree
         self._summands = summands
         self._generator = {_ in fatalError()}
     }
@@ -77,6 +74,10 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
         }
     }
     
+    public var topDegree: Int {
+        return offset + _summands.count - 1
+    }
+    
     public func bettiNumer(_ i: Int) -> Int {
         return self[i].rank
     }
@@ -85,11 +86,11 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
         return (offset ... topDegree).sum{ i in (-1).pow(i) * bettiNumer(i) }
     }
     
-    public var gradedEulerCharacteristic: LaurentPolynomial<R> {
-        let q = LaurentPolynomial<R>.indeterminate
-        return (offset ... topDegree).sum { i -> LaurentPolynomial<R> in
-            R(from: (-1).pow(i)) * self[i].summands.sum { s -> LaurentPolynomial<R> in
-                s.isFree ? q.pow(s.generator.degree) : .zero
+    public var gradedEulerCharacteristic: LaurentPolynomial_x<R> {
+        let x = LaurentPolynomial_x<R>.indeterminate
+        return (offset ... topDegree).sum { i in
+            R(from: (-1).pow(i)) * self[i].summands.sum { s in
+                s.isFree ? x.pow(s.generator.degree) : .zero
             }
         }
     }
@@ -117,16 +118,15 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
 
 extension _Homology: Codable where A: Codable, R: Codable {
     enum CodingKeys: String, CodingKey {
-        case name, offset, topDegree, summands
+        case name, offset, summands
     }
     
     public convenience init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let name = try c.decode(String.self, forKey: .name)
         let offset = try c.decode(Int.self, forKey: .offset)
-        let topDegree = try c.decode(Int.self, forKey: .topDegree)
         let summands = try c.decode([Summand].self, forKey: .summands)
-        self.init(name: name, offset: offset, topDegree: topDegree, summands: summands)
+        self.init(name: name, offset: offset, summands: summands)
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -134,7 +134,6 @@ extension _Homology: Codable where A: Codable, R: Codable {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(name, forKey: .name)
         try c.encode(offset, forKey: .offset)
-        try c.encode(topDegree, forKey: .topDegree)
         try c.encode(summands, forKey: .summands)
     }
 }

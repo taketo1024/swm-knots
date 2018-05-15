@@ -8,12 +8,9 @@
 import Foundation
 
 private var testMode = false
+private var storageDir: String?
 
 public struct Storage {
-    public static func setTestMode(_ flag: Bool) {
-        testMode = flag
-    }
-    
     public static func exists(_ id: String) -> Bool {
         let fm = FileManager()
         return fm.fileExists(atPath: fileURL(id).path)
@@ -44,7 +41,7 @@ public struct Storage {
         
         let file = fileURL(id)
         guard let data = try? Data(contentsOf: file) else {
-            log("no such data: \(id)")
+            log("no such file: \(file)")
             return nil
         }
         
@@ -53,6 +50,7 @@ public struct Storage {
             return nil
         }
         
+        log("load: \(file.path)")
         return obj
     }
     
@@ -106,8 +104,16 @@ public struct Storage {
         }
     }
     
+    public static func setDir(_ dir: String?) {
+        storageDir = dir
+    }
+    
     public static var dir: String {
-        return !testMode ? NSTemporaryDirectory() + "SwiftyMath/" : NSTemporaryDirectory() + "SwiftyMath_test/"
+        return storageDir ?? defaultDir
+    }
+    
+    public static var defaultDir: String {
+        return NSTemporaryDirectory() + "SwiftyMath/"
     }
     
     public static func fileURL(_ id: String) -> URL {

@@ -41,7 +41,9 @@ public struct FreeModuleHom<A: BasisElementType, B: BasisElementType, R: Ring>: 
     public func asMatrix(from: [A], to: [B]) -> Matrix<CoeffRing> {
         let comps = from.enumerated().flatMap { (j, a) -> [MatrixComponent<CoeffRing>] in
             let w = self.applied(to: a)
-            return w.factorize(by: to).enumerated().map { (i, a) in MatrixComponent(i, j, a) }
+            return w.factorize(by: to).enumerated().compactMap { (i, a) in
+                a != .zero ? MatrixComponent(i, j, a) : nil
+            }
         }
         return Matrix(rows: to.count, cols: from.count, components: comps)
     }

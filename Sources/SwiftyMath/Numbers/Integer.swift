@@ -17,7 +17,7 @@ extension 𝐙: EuclideanRing {
         return (self > 0) ? 1 : -1
     }
     
-    public var degree: Int {
+    public var eucDegree: Int {
         return Swift.abs(self)
     }
     

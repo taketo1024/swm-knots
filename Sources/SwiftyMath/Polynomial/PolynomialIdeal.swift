@@ -10,7 +10,9 @@ import Foundation
 
 public protocol PolynomialTP {
     associatedtype CoeffRing: Ring
-    static var value: Polynomial<CoeffRing> { get }
+    associatedtype x: Indeterminate
+    typealias PolynomialType = Polynomial<CoeffRing, x>
+    static var value: PolynomialType { get }
 }
 
 public protocol IrrPolynomialTP: PolynomialTP {}
@@ -18,8 +20,8 @@ public protocol IrrPolynomialTP: PolynomialTP {}
 // memo: Supports only Field-coeffs.
 public struct PolynomialIdeal<p: PolynomialTP>: EuclideanIdeal where p.CoeffRing: Field {
     public typealias CoeffRing = p.CoeffRing
-    public typealias Super = Polynomial<CoeffRing>
-    public static var mod: Polynomial<CoeffRing> {
+    public typealias Super = Polynomial<CoeffRing, p.x>
+    public static var mod: Polynomial<CoeffRing, p.x> {
         return p.value
     }
 }

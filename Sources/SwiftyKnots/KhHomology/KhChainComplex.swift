@@ -10,12 +10,14 @@ import SwiftyMath
 
 public struct KhCube {
     public struct Vertex {
+        public let degree: Int
         public let state: LinkSpliceState
         public let components: [Link.Component]
         public let basis: [KhTensorElement]
     }
     
     public let vertices: [LinkSpliceState : Vertex]
+    private let minEdgeId: Int
     
     public init(_ L: Link) {
         let (n, n⁺, n⁻) = (L.crossingNumber, L.crossingNumber⁺, L.crossingNumber⁻)
@@ -24,19 +26,39 @@ public struct KhCube {
             let sL = L.spliced(by: s)
             let comps = sL.components
             let basis = KhTensorElement.generateBasis(state: s, power: comps.count, shift: n⁺ - 2 * n⁻)
-            return Vertex(state: s, components: comps, basis: basis)
+            return Vertex(degree: s.degree - n⁻, state: s, components: comps, basis: basis)
         }
+        
+        self.minEdgeId = L.edges.map{ $0.id }.min() ?? -1
     }
     
     public subscript(s: LinkSpliceState) -> Vertex {
         return vertices[s]!
     }
     
-    public subscript(i: Int) -> [Vertex] {
-        return vertices.values.filter{ $0.state.degree == i }
+    public func vertices(degree: Int) -> [Vertex] {
+        return vertices.values.filter{ $0.degree == degree }
     }
     
-    public func map<R: Ring>(_ x: KhTensorElement, _ μ: KhBasisElement.Product, _ Δ: KhBasisElement.Coproduct) -> FreeModule<KhTensorElement, R> {
+    public func basis(degree: Int) -> [KhTensorElement] {
+        return vertices(degree: degree).flatMap { v in v.basis }
+    }
+    
+    public func basis(degree i: Int, _ j: Int) -> [KhTensorElement] {
+        return basis(degree: i).filter{ $0.degree == j }
+    }
+    
+    public func reducedBasis(degree: Int) -> [KhTensorElement] {
+        return vertices(degree: degree).flatMap { v -> [KhTensorElement] in
+            if let i = v.components.index(where: { $0.edges.contains{ $0.id == minEdgeId } }) {
+                return v.basis.filter{ t in t.factors[i] == .X }
+            } else {
+                return v.basis
+            }
+        }
+    }
+    
+    public func map<R: Ring>(_ x: KhTensorElement, _ μ: KhBasisElement.Product<R>, _ Δ: KhBasisElement.Coproduct<R>) -> FreeModule<KhTensorElement, R> {
         let s = x.state
         return s.next.sum { (sgn, next) in
             let (c1, c2) = (self[s].components, self[next].components)
@@ -57,27 +79,36 @@ public struct KhCube {
         }
     }
     
-    public func map<R: Ring>(_ x: FreeModule<KhTensorElement, R>, _ μ: KhBasisElement.Product, _ Δ: KhBasisElement.Coproduct) -> FreeModule<KhTensorElement, R> {
+    public func map<R: Ring>(_ x: FreeModule<KhTensorElement, R>, _ μ: KhBasisElement.Product<R>, _ Δ: KhBasisElement.Coproduct<R>) -> FreeModule<KhTensorElement, R> {
         return x.sum { (a, r) in r * self.map(a, μ, Δ) }
     }
 }
 
 public extension Link {
-    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type) -> (KhCube, CochainComplex<KhTensorElement, R>) {
+    public var KhCube: SwiftyKnots.KhCube {
+        return SwiftyKnots.KhCube(self)
+    }
+    
+    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false) -> CochainComplex<KhTensorElement, R> {
+        return KhChainComplex(KhCube, KhBasisElement.μ, KhBasisElement.Δ, R.self, reduced: reduced)
+    }
+
+    public func KhChainComplex<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, reduced: Bool = false) -> CochainComplex<KhTensorElement, R> {
+        return KhChainComplex(KhCube, μ, Δ, R.self, reduced: reduced)
+    }
+    
+    internal func KhChainComplex<R: EuclideanRing>(_ cube: KhCube, _ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, reduced: Bool = false) -> CochainComplex<KhTensorElement, R> {
         typealias C = CochainComplex<KhTensorElement, R>
         
         let name = "CKh(\(self.name); \(R.symbol))"
         let (n, n⁻) = (crossingNumber, crossingNumber⁻)
         
-        let cube = KhCube(self)
         let chain = (0 ... n).map { i -> (C.ChainBasis, C.BoundaryMap) in
-            let (μ, Δ) = (KhBasisElement.μ, KhBasisElement.Δ)
-            
-            let chainBasis = cube[i].flatMap { v in v.basis }
+            let chainBasis = !reduced ? cube.basis(degree: i - n⁻) : cube.reducedBasis(degree: i - n⁻)
             let boundaryMap = C.BoundaryMap { (x: KhTensorElement) in cube.map(x, μ, Δ) }
             return (chainBasis, boundaryMap)
         }
         
-        return (cube, CochainComplex(name: name, chain: chain, offset: -n⁻))
+        return CochainComplex(name: name, chain: chain, offset: -n⁻)
     }
 }

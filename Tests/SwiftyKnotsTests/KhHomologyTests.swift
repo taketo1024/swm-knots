@@ -29,8 +29,8 @@ class KhHomologyTests: XCTestCase {
     func assert(_ L: Link) {
         let J = L.unnormalizedJonesPolynomial
         
-        let Kh = L.khHomology(𝐙.self)
-        let χ = Kh.gradedEulerCharacteristic.withSymbol("q")
+        let Kh = L.KhHomology(𝐙.self)
+        let χ = Kh.gradedEulerCharacteristic.asPolynomial(of: JonesPolynomial_q.self)
         
         XCTAssertEqual(χ, J)
     }

@@ -102,3 +102,16 @@ extension 𝐙 {
         return 𝐐(a, b)
     }
 }
+
+extension RationalNumber: Codable {
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        let vals = try c.decode([𝐙].self)
+        self.init(vals[0], vals[1])
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        try c.encode([p, q])
+    }
+}

@@ -11,7 +11,7 @@ import SwiftyMath
 
 class LinkTests: XCTestCase {
     
-    typealias A = LaurentPolynomial<𝐙>
+    typealias A = JonesPolynomial
     
     func testEmpty() {
         let e = Link.empty
@@ -32,7 +32,7 @@ class LinkTests: XCTestCase {
         XCTAssertEqual(L.components.count, 2)
         XCTAssertEqual(L.crossingNumber, 2)
         XCTAssertEqual(L.writhe, -2)
-        XCTAssertEqual(L.JonesPolynomial, A(symbol: "q", coeffs: [-5: 1, -1: 1]) )
+        XCTAssertEqual(L.JonesPolynomial, A(coeffs: [-5: 1, -1: 1]) )
     }
     
     func testHopfLinkReversed() {
@@ -40,7 +40,7 @@ class LinkTests: XCTestCase {
         XCTAssertEqual(L.components.count, 2)
         XCTAssertEqual(L.crossingNumber, 2)
         XCTAssertEqual(L.writhe, -2)
-        XCTAssertEqual(L.JonesPolynomial, A(symbol: "q", coeffs: [-5: 1, -1: 1]) )
+        XCTAssertEqual(L.JonesPolynomial, A(coeffs: [-5: 1, -1: 1]) )
     }
     
     func testHopfLinkMirrored() {
@@ -48,7 +48,7 @@ class LinkTests: XCTestCase {
         XCTAssertEqual(L.components.count, 2)
         XCTAssertEqual(L.crossingNumber, 2)
         XCTAssertEqual(L.writhe, 2)
-        XCTAssertEqual(L.JonesPolynomial, A(symbol: "q", coeffs: [5: 1, 1: 1]) )
+        XCTAssertEqual(L.JonesPolynomial, A(coeffs: [5: 1, 1: 1]) )
     }
     
     func testTrefoil() {
@@ -56,7 +56,7 @@ class LinkTests: XCTestCase {
         XCTAssertEqual(K.components.count, 1)
         XCTAssertEqual(K.crossingNumber, 3)
         XCTAssertEqual(K.writhe, -3)
-        XCTAssertEqual(K.JonesPolynomial, A(symbol: "q", coeffs: [-8: -1, -6: 1, -2: 1]))
+        XCTAssertEqual(K.JonesPolynomial, A(coeffs: [-8: -1, -6: 1, -2: 1]))
     }
     
     func testTrefoilReversed() {
@@ -64,7 +64,7 @@ class LinkTests: XCTestCase {
         XCTAssertEqual(K.components.count, 1)
         XCTAssertEqual(K.crossingNumber, 3)
         XCTAssertEqual(K.writhe, -3)
-        XCTAssertEqual(K.JonesPolynomial, A(symbol: "q", coeffs: [-8: -1, -6: 1, -2: 1]))
+        XCTAssertEqual(K.JonesPolynomial, A(coeffs: [-8: -1, -6: 1, -2: 1]))
     }
     
     func testTrefoilMirrored() {
@@ -72,7 +72,18 @@ class LinkTests: XCTestCase {
         XCTAssertEqual(K.components.count, 1)
         XCTAssertEqual(K.crossingNumber, 3)
         XCTAssertEqual(K.writhe, 3)
-        XCTAssertEqual(K.JonesPolynomial, A(symbol: "q", coeffs: [8: -1, 6: 1, 2: 1]))
+        XCTAssertEqual(K.JonesPolynomial, A(coeffs: [8: -1, 6: 1, 2: 1]))
+    }
+    
+    func testPlanarCode() {
+        let K = Link.trefoil
+        print(K.planarCode)
+        
+        let Kr = K.reversed
+        print(Kr.planarCode)
+        
+        let Km = K.mirrored
+        print(Km.planarCode)
     }
     
     func testCoding() {
@@ -80,5 +91,25 @@ class LinkTests: XCTestCase {
         let d = try! JSONEncoder().encode(K)
         let K2 = try! JSONDecoder().decode(Link.self, from: d)
         XCTAssertEqual(K, K2)
+    }
+    
+    func testCodingReversed() {
+        let K = Link.trefoil.reversed
+        let d = try! JSONEncoder().encode(K)
+        let K2 = try! JSONDecoder().decode(Link.self, from: d)
+        
+        XCTAssertEqual(K.crossingNumber, K2.crossingNumber)
+        XCTAssertEqual(K.writhe, K2.writhe)
+        XCTAssertEqual(K.JonesPolynomial, K2.JonesPolynomial)
+    }
+    
+    func testCodingMirrored() {
+        let K = Link.trefoil.mirrored
+        let d = try! JSONEncoder().encode(K)
+        let K2 = try! JSONDecoder().decode(Link.self, from: d)
+        
+        XCTAssertEqual(K.crossingNumber, K2.crossingNumber)
+        XCTAssertEqual(K.writhe, K2.writhe)
+        XCTAssertEqual(K.JonesPolynomial, K2.JonesPolynomial)
     }
 }

@@ -33,29 +33,29 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
         return degree - factors.sum{ e in e.degree } - state.degree
     }
     
-    internal func product<R: Ring>(_ μ: KhBasisElement.Product, _ from: (Int, Int), _ to: Int, _ toState: LinkSpliceState) -> FreeModule<KhTensorElement, R> {
+    internal func product<R: Ring>(_ μ: KhBasisElement.Product<R>, _ from: (Int, Int), _ to: Int, _ toState: LinkSpliceState) -> FreeModule<KhTensorElement, R> {
         let (i1, i2) = from
         let (e1, e2) = (factors[i1], factors[i2])
         
-        return μ(e1, e2).sum { e in
+        return μ(e1, e2).sum { (e, a) in
             var toFactors = factors
             toFactors.remove(at: i2)
             toFactors.remove(at: i1)
             toFactors.insert(e, at: to)
-            return FreeModule( KhTensorElement(toState, toFactors, shift) )
+            return FreeModule( KhTensorElement(toState, toFactors, shift), a )
         }
     }
     
-    internal func coproduct<R: Ring>(_ Δ: KhBasisElement.Coproduct, _ from: Int, _ to: (Int, Int), _ toState: LinkSpliceState) -> FreeModule<KhTensorElement, R> {
+    internal func coproduct<R: Ring>(_ Δ: KhBasisElement.Coproduct<R>, _ from: Int, _ to: (Int, Int), _ toState: LinkSpliceState) -> FreeModule<KhTensorElement, R> {
         let (j1, j2) = to
         let e = factors[from]
         
-        return Δ(e).sum { (e1, e2) -> FreeModule<KhTensorElement, R> in
+        return Δ(e).sum { (e1, e2, a) -> FreeModule<KhTensorElement, R> in
             var toFactors = factors
             toFactors.remove(at: from)
             toFactors.insert(e1, at: j1)
             toFactors.insert(e2, at: j2)
-            return FreeModule( KhTensorElement(toState, toFactors, shift) )
+            return FreeModule( KhTensorElement(toState, toFactors, shift), a )
         }
     }
     

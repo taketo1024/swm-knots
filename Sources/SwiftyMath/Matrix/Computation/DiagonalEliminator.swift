@@ -34,17 +34,16 @@ internal final class DiagonalEliminator<R: EuclideanRing>: MatrixEliminator<R> {
 }
 
 internal final class DiagonalEliminationResult<R: EuclideanRing>: MatrixEliminationResultImpl<R> {
-    override func _diagonal() -> [R] {
-        return result.table.map{ (_, list) in list.first!.1 }
+    override func _rank() -> Int {
+        return result.table.count
     }
     
-    override func _rank() -> Int {
-        return diagonal.count
+    override func _diagonal() -> [R] {
+        return (0 ..< rank).map{ i in result.table[i]!.first!.1 }
     }
     
     override func _determinant() -> R {
         assert(result.rows == result.cols)
-        assert(diagonal.forAll{ $0 == .identity })
         
         if rank == result.rows {
             return rowOps.multiply { $0.determinant }.inverse!
