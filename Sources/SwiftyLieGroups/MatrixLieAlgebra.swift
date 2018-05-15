@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public protocol MatrixLieAlgebra: FiniteDimLieAlgebra {
     associatedtype Size: _Int

@@ -8,6 +8,7 @@
 
 import Foundation
 
+/*
 public struct ExactSequence<R: EuclideanRing>: Sequence {
     public typealias Object = AbstractSimpleModuleStructure<R>
     public typealias Map    = FreeModuleHom<Int, Int, R>
@@ -307,3 +308,4 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         }
     }
 }
+*/

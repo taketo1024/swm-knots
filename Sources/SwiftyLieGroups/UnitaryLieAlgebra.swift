@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public struct UnitaryLieAlgebra<n: _Int>: MatrixLieAlgebra {
     public typealias CoeffRing   = 𝐑 // MEMO: not a C-vec sp.

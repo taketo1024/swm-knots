@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 // A class representing the total (co)Homology group for a given ChainComplex.
 // Consists of the direct-sum of i-th Homology groups:

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public protocol ChainType {
     static var descending: Bool { get }

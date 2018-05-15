@@ -8,6 +8,7 @@
 
 import XCTest
 import SwiftyMath
+import SwiftyHomology
 @testable import SwiftyTopology
 
 class HomologyTests: XCTestCase {

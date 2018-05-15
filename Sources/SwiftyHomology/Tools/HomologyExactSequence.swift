@@ -8,6 +8,7 @@
 
 import Foundation
 
+/*
 public typealias   HomologyExactSequence<A: FreeModuleBase, B: FreeModuleBase, C: FreeModuleBase, R: EuclideanRing>
     = _HomologyExactSequence<Descending, A, B, C, R>
 
@@ -186,3 +187,4 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
             + "\t-> 0"
     }
 }
+*/

@@ -11,15 +11,21 @@ let package = Package(
             name: "SwiftyMath",
             targets: ["SwiftyMath"]),
         .library(
+            name: "SwiftyHomology",
+            targets: ["SwiftyHomology"]),
+        .library(
             name: "SwiftyTopology",
             targets: ["SwiftyTopology"]),
+        .library(
+            name: "SwiftyLieGroups",
+            targets: ["SwiftyLieGroups"]),
         .library(
             name: "SwiftyKnots",
             targets: ["SwiftyKnots"]),
         .library(
             name: "dSwiftyMath",
 			type: .dynamic,
-            targets: ["SwiftyMath", "SwiftyTopology", "SwiftyKnots"]),
+            targets: ["SwiftyMath", "SwiftyHomology", "SwiftyTopology", "SwiftyKnots"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -28,11 +34,6 @@ let package = Package(
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
-        .target(
-            name: "Sample",
-            dependencies: ["SwiftyMath", "SwiftyTopology", "SwiftyKnots"],
-			path: "Sources/Sample"),
-
         .target(
             name: "SwiftyMath",
             dependencies: [],
@@ -43,13 +44,31 @@ let package = Package(
             dependencies: ["SwiftyMath"]),
 
         .target(
-            name: "SwiftyTopology",
+            name: "SwiftyHomology",
             dependencies: ["SwiftyMath"],
+			path: "Sources/SwiftyHomology"),
+
+        .testTarget(
+            name: "SwiftyHomologyTests",
+            dependencies: ["SwiftyHomology"]),
+
+        .target(
+            name: "SwiftyTopology",
+            dependencies: ["SwiftyMath", "SwiftyHomology"],
 			path: "Sources/SwiftyTopology"),
 
         .testTarget(
             name: "SwiftyTopologyTests",
             dependencies: ["SwiftyTopology"]),
+
+        .target(
+            name: "SwiftyLieGroups",
+            dependencies: ["SwiftyMath"],
+			path: "Sources/SwiftyLieGroups"),
+
+        .testTarget(
+            name: "SwiftyLieGroupsTests",
+            dependencies: ["SwiftyLieGroups"]),
 
         .target(
             name: "SwiftyKnots",
@@ -59,6 +78,11 @@ let package = Package(
         .testTarget(
             name: "SwiftyKnotsTests",
             dependencies: ["SwiftyKnots"]),
+
+        .target(
+            name: "Sample",
+            dependencies: ["SwiftyMath", "SwiftyHomology", "SwiftyTopology", "SwiftyKnots"],
+			path: "Sources/Sample"),
 
     ]
 )

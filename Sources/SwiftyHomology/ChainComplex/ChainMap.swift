@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public typealias   ChainMap<A: BasisElementType, B: BasisElementType, R: Ring> = _ChainMap<Descending, A, B, R>
 public typealias CochainMap<A: BasisElementType, B: BasisElementType, R: Ring> = _ChainMap<Ascending,  A, B, R>

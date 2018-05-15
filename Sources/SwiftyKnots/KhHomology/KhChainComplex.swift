@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftyMath
+import SwiftyHomology
 
 public struct KhCube {
     public struct Vertex {

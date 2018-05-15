@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 // A class representing the algebraic Homology group.
 // Each instance corresponds to a homology-class of the given cycle,

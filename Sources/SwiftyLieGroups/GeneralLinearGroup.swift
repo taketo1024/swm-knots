@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public struct GeneralLinearGroup<n: _Int, K: Field>: MatrixGroup {
     public let matrix: SquareMatrix<n, K>

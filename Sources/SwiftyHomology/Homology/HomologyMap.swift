@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public typealias   HomologyMap<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = _HomologyMap<Descending, A, B, R>
 public typealias CohomologyMap<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = _HomologyMap<Ascending,  A, B, R>

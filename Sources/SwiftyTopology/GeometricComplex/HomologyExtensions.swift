@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftyMath
+import SwiftyHomology
 
 public extension ChainComplex where T == Descending {
     public convenience init<C: GeometricComplex>(geometricComplex K: C, relativeTo L: C?, _ type: R.Type) where A == C.Cell {

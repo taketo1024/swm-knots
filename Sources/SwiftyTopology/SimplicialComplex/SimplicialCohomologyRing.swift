@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftyMath
+import SwiftyHomology
 
 public typealias SimplicialHomology<R: EuclideanRing> = Homology<Simplex, R>
 public typealias SimplicialHomologyClass<R: EuclideanRing> = HomologyClass<Simplex, R>

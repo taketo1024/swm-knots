@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftyMath
+import SwiftyHomology
 
 public extension GeometricComplex {
     public var eulerNumber: Int {

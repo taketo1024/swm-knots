@@ -8,6 +8,7 @@
 //  see: https://en.wikipedia.org/wiki/Symplectic_group
 
 import Foundation
+import SwiftyMath
 
 // Note <n> is the size of the matrix, thus must be even.
 public struct SymplecticLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
