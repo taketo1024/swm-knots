@@ -44,6 +44,30 @@ public struct _ChainMap<T: ChainType, A: BasisElementType, B: BasisElementType, 
         return _ChainMap<T, A, C, R>(g.f ∘ f.f)
     }
     
+    public func asAbstract(from: _ChainComplex<T, A, R>, to: _ChainComplex<T, B, R>) -> _ChainMap<T, AbstractBasisElement, AbstractBasisElement, R> {
+        
+        //      self
+        //   A  ----> B
+        //   ^        |
+        // f1|        |f2
+        //   |        v
+        //   X  ====> X
+        //
+        
+        typealias X = AbstractBasisElement
+        
+        let p1 = from.abstractBasisDict().inverse!.asFunc()
+        let p2 = to.abstractBasisDict().asFunc()
+        
+        let f1 = _ChainMap<T, X, A, R> { (a: X) in FreeModule(p1(a)) }
+        let f2 = _ChainMap<T, B, X, R> { (b: B) in FreeModule(p2(b)) }
+        let f = f2 ∘ self ∘ f1
+
+        return _ChainMap<T, AbstractBasisElement, AbstractBasisElement, R> {
+            (x: X) in f.applied(to: x)
+        }
+    }
+    
     public func assertChainMap(from: _ChainComplex<T, A, R>, to: _ChainComplex<T, B, R>, debug: Bool = false) {
         (min(from.offset, to.offset) ... max(from.topDegree, to.topDegree)).forEach { i in
             
