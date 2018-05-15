@@ -9,6 +9,7 @@
 import Foundation
 
 public enum DebugFlag {
+    case `default`
     case MatrixElim
     case Storage
 }

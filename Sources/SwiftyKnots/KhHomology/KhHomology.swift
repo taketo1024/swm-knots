@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftyMath
+import SwiftyHomology
 
 public extension Link {
     public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false) -> SwiftyKnots.KhHomology<R> {

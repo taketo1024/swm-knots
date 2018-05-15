@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public protocol LieAlgebra: VectorSpace {
     func bracket(_ Y: Self) -> Self
@@ -55,3 +56,12 @@ extension LieAlgebraHom where Domain: LieAlgebra, Codomain: LinearEndType, Domai
         return applied(to: x)
     }
 }
+
+extension LinearEndType {
+    public func bracket(_ g: Self) -> Self {
+        let f = self
+        return f ∘ g - g ∘ f
+    }
+}
+
+extension Map: LieAlgebra where Domain == Codomain, Domain: VectorSpace { }

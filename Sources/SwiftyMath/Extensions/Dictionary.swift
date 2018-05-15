@@ -20,4 +20,14 @@ public extension Dictionary {
     public func mapPairs<K, V>(_ transform: (Key, Value) -> (K, V)) -> [K : V] {
         return Dictionary<K, V>(pairs: self.map{ (k, v) in transform(k, v) })
     }
+    
+    public func asFunc(default v: Value? = nil) -> (Key) -> Value {
+        return { k in self[k] ?? v! }
+    }
+}
+
+public extension Dictionary where Value: Hashable {
+    public var inverse: [Value : Key]? {
+        return values.isUnique ? Dictionary<Value, Key>(pairs: self.map{(k, v) in (v, k)}) : nil
+    }
 }

@@ -7,5 +7,6 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public protocol LieGroup: Group /*, SmoothManifold */ {}

@@ -12,7 +12,7 @@ import SwiftyMath
 public typealias SimplicialChain<R: Ring> = FreeModule<Simplex, R>
 public extension SimplicialChain where A == Simplex {
     public func boundary() -> SimplicialChain<R> {
-        return self.reduce(SimplicialChain<R>.zero) { (res, next) -> SimplicialChain<R> in
+        return self.elements.reduce(SimplicialChain<R>.zero) { (res, next) -> SimplicialChain<R> in
             let (s, r) = next
             return res + r * s.boundary(R.self)
         }
@@ -61,8 +61,8 @@ public extension SimplicialCochain where A == Dual<Simplex> {
             }
         }
         
-        return z.sum { (s, r1) -> C in
-            let eval = self.sum { (f, r2) -> C in
+        return z.elements.sum { (s, r1) -> C in
+            let eval = self.elements.sum { (f, r2) -> C in
                 if let (s2, e) = cap(f, s) {
                     return C([(s2, e * r2)])
                 } else {
@@ -138,7 +138,7 @@ public extension SimplicialCochain where A == Dual<Simplex>, R == 𝐙₂ {
     }
     
     public func Sq(_ i: Int) -> SimplicialCochain<R> {
-        let n = self.anyElement?.0.degree ?? 0 // MEMO only supports homogeneous element
+        let n = degree // MEMO only supports homogeneous element
         return self.cup(n - i, self)
     }
 }

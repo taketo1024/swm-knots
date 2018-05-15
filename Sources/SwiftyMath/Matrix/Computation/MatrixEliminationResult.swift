@@ -58,6 +58,18 @@ public struct MatrixEliminationResult<n: _Int, m: _Int, R: EuclideanRing> {
     public var kernelTransitionMatrix: _Matrix<Dynamic, m, R> {
         return _Matrix(impl.kernelTransitionMatrix)
     }
+    
+    public var isInjective: Bool {
+        return impl.isInjective
+    }
+    
+    public var isSurjective: Bool {
+        return impl.isSurjective
+    }
+    
+    public var isBijective: Bool {
+        return impl.isBijective
+    }
 }
 
 public extension MatrixEliminationResult where n == m {

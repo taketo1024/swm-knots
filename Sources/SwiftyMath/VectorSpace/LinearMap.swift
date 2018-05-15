@@ -39,17 +39,10 @@ public extension LinearMapType where Domain: FiniteDimVectorSpace, Codomain: Fin
 public typealias LinearMap<Domain: VectorSpace, Codomain: VectorSpace> = ModuleHom<Domain, Codomain> where Domain.CoeffRing == Codomain.CoeffRing
 extension LinearMap: VectorSpace, LinearMapType where Domain: VectorSpace, Codomain: VectorSpace, Domain.CoeffRing == Codomain.CoeffRing { }
 
-public protocol LinearEndType: LinearMapType, EndType, LieAlgebra {}
-
-public extension LinearEndType {
-    public func bracket(_ g: Self) -> Self {
-        let f = self
-        return f ∘ g - g ∘ f
-    }
-}
+public protocol LinearEndType: LinearMapType, EndType {}
 
 public typealias LinearEnd<Domain: VectorSpace> = LinearMap<Domain, Domain>
-extension Map: LinearEndType, LieAlgebra where Domain == Codomain, Domain: VectorSpace { }
+extension Map: LinearEndType where Domain == Codomain, Domain: VectorSpace { }
 
 public protocol LinearAutType: AutType where Domain: VectorSpace { }
 

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public protocol MatrixGroup: Group {
     associatedtype Size: _Int

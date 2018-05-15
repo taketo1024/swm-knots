@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public protocol ChainType {
     static var descending: Bool { get }
@@ -87,10 +88,12 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
     
     internal func makeMatrix(_ i: Int) -> Matrix<R> {
         let (from, to, map) = (chainBasis(i), chainBasis(i + T.degree), boundaryMap(i))
-        let toIndex = Dictionary(pairs: to.enumerated().map{($1, $0)}) // [toBasisElement: toBasisIndex]
+        let toIndexer = to.indexer()
+        
         let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
-            map.applied(to: x).compactMap { (y, a) -> MatrixComponent<R>? in
-                toIndex[y].flatMap{ i in MatrixComponent(i, j, a) } // nil if toIndex[y] == nil
+            map.applied(to: x).elements.map { (y, a) -> MatrixComponent<R> in
+                let i = toIndexer(y)
+                return MatrixComponent(i, j, a)
             }
         }
         
@@ -99,6 +102,41 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
     
     public func shifted(_ d: Int) -> _ChainComplex<T, A, R> {
         return _ChainComplex.init(name: "\(name)[\(d)]", chain: chain, offset: offset + d)
+    }
+    
+    internal func abstractBasisDict() -> [A : AbstractBasisElement] {
+        let pairs = validDegrees
+            .flatMap{ chainBasis($0) }
+            .enumerated()
+            .map{ (i, a) in (a, AbstractBasisElement(i)) }
+        return Dictionary(pairs: pairs)
+    }
+    
+    public func asAbstract() -> _ChainComplex<T, AbstractBasisElement, R> {
+        typealias X = AbstractBasisElement
+        typealias C = _ChainComplex<T, X, R>
+        
+        //       d
+        //   A  ---> A
+        //   ^       |
+        // f1|       |f2
+        //   |       v
+        //   X  ===> X
+        //
+
+        let dict = abstractBasisDict()
+        let p1 = dict.inverse!.asFunc()
+        let p2 = dict.asFunc()
+        
+        let f1 = FreeModuleHom<X, A, R> { (a: X) in FreeModule(p1(a)) }
+        let f2 = FreeModuleHom<A, X, R> { (a: A) in FreeModule(p2(a)) }
+
+        let chain = validDegrees.map { i -> (C.ChainBasis, C.BoundaryMap) in
+            let (basis, map) = (chainBasis(i), boundaryMap(i))
+            return (basis.map(p2), f2 ∘ map ∘ f1)
+        }
+        
+        return C(name: name, chain: chain, offset: offset)
     }
     
     public func assertComplex(debug: Bool = false) {

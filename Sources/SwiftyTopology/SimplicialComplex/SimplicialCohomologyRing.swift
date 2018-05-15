@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftyMath
+import SwiftyHomology
 
 public typealias SimplicialHomology<R: EuclideanRing> = Homology<Simplex, R>
 public typealias SimplicialHomologyClass<R: EuclideanRing> = HomologyClass<Simplex, R>
@@ -27,7 +28,7 @@ public extension SimplicialCohomologyClass where T == Ascending, A == Dual<Simpl
         assert(H1 == H2)
         
         let x = a.representative.cup(b.representative)
-        return H1.homologyClass(x)
+        return H1.homologyClass(of: x)
     }
     
     public static func *(a: SimplicialCohomologyClass<R>, b: SimplicialCohomologyClass<R>) -> SimplicialCohomologyClass<R> {
@@ -51,7 +52,7 @@ public extension SimplicialCohomologyClass where T == Ascending, A == Dual<Simpl
         // TODO check H1, H2 matches.
         
         let y = self.representative.cap(x.representative)
-        return H2.homologyClass(y)
+        return H2.homologyClass(of: y)
     }
     
     public static func ∩(a: SimplicialCohomologyClass<R>, x: SimplicialHomologyClass<R>) -> SimplicialHomologyClass<R> {
@@ -63,7 +64,7 @@ public extension SimplicialCohomologyClass where T == Ascending, A == Dual<Simpl
     public func Sq(_ i: Int) -> SimplicialCohomologyClass<R> {
         if let H = structure {
             let a = self.representative
-            return H.homologyClass(a.Sq(i))
+            return H.homologyClass(of: a.Sq(i))
         } else {
             return .zero
         }

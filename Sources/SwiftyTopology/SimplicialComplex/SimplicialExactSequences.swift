@@ -8,27 +8,55 @@
 
 import Foundation
 import SwiftyMath
+import SwiftyHomology
 
-public extension HomologyExactSequence where T == Descending, A == Simplex, B == Simplex, C == Simplex {
-    public static func pair(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<A, B, C, R> {
+public extension HomologyExactSequence where T == Descending {
+    public static func pair(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<R> {
         
         //             i         j
         //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
         //
         
-        typealias C = ChainComplex
-        typealias M = ChainMap
+        typealias C = ChainComplex<Simplex, R>
+        typealias M = ChainMap<Simplex, Simplex, R>
         
         let (CA, CX, CXA) = (C(A, R.self), C(X, R.self), C(X, A, R.self))
         
         let i = M.induced(from: SimplicialMap.inclusion(from: A, to: X), R.self)
-        let j = M.induced(from: SimplicialMap.inclusion(from: X, to: X), R.self)
+        let j = M { (s: Simplex) in !A.contains(s) ? FreeModule(s) : .zero }
         let d = M { (s: Simplex) in s.boundary(R.self) }
         
         return HomologyExactSequence(CA, i, CX, j, CXA, d)
     }
 }
 
+public extension CohomologyExactSequence where T == Ascending {
+    public static func pair(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> CohomologyExactSequence<R> {
+        
+        //             i         j
+        //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
+        //
+        //
+        // ==> Hom(-, R)
+        //
+        //             i*        j*
+        //   0 <- C*A <--  C*X  <-- C*XA <- 0  (exact)
+        
+        typealias C = ChainComplex<Simplex, R>
+        typealias M = ChainMap<Simplex, Simplex, R>
+        
+        let (CA, CX, CXA) = (C(A, R.self), C(X, R.self), C(X, A, R.self))
+        let (DA, DX, DXA) = (CA.dual, CX.dual, CXA.dual)
+        
+        let i = M.induced(from: SimplicialMap.inclusion(from: A, to: X), R.self).dual(domain: CA)
+        let j = M { (s: Simplex) in !A.contains(s) ? FreeModule(s) : .zero }.dual(domain: CX)
+        let d = M { (s: Simplex) in s.boundary(R.self) }.dual(domain: CXA, degree: -1)
+        
+        return CohomologyExactSequence(DXA, j, DX, i, DA, d)
+    }
+}
+
+/*
 public extension HomologyExactSequence where T == Descending, A == Simplex, B == Sum<Simplex, Simplex>, C == Simplex {
     public static func MayerVietoris(_ X: SimplicialComplex, _ A: SimplicialComplex, _ B: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<A, B, C, R> {
         
@@ -74,31 +102,6 @@ public extension HomologyExactSequence where T == Descending, A == Simplex, B ==
     }
 }
 
-public extension CohomologyExactSequence where T == Ascending, A == Dual<Simplex>, B == Dual<Simplex>, C == Dual<Simplex> {
-    public static func pair(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> CohomologyExactSequence<A, B, C, R> {
-        
-        //             i         j
-        //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
-        //
-        //
-        // ==> Hom(-, R)
-        //
-        //             i*        j*
-        //   0 <- C*A <--  C*X  <-- C*XA <- 0  (exact)
-        
-        typealias C = ChainComplex<Simplex, R>
-        typealias M = ChainMap<Simplex, Simplex, R>
-
-        let (CA, CX, CXA) = (C(A, R.self), C(X, R.self), C(X, A, R.self))
-        let (DA, DX, DXA) = (CA.dual, CX.dual, CXA.dual)
-        
-        let i = M.induced(from: SimplicialMap.inclusion(from: A, to: X), R.self).dual(domain: CA)
-        let j = M.induced(from: SimplicialMap.inclusion(from: X, to: X), R.self).dual(domain: CX)
-        let d = M { (s: Simplex) in s.boundary(R.self) }.dual(domain: CXA)
-        
-        return CohomologyExactSequence(DXA, j, DX, i, DA, d)
-    }
-}
 
 public extension CohomologyExactSequence where T == Ascending, A == Dual<Simplex>, B == Sum<Dual<Simplex>, Dual<Simplex>>, C == Dual<Simplex> {
     public static func MayerVietoris(_ X: SimplicialComplex, _ A: SimplicialComplex, _ B: SimplicialComplex, _ type: R.Type) -> CohomologyExactSequence<A, B, C, R> {
@@ -148,4 +151,4 @@ public extension CohomologyExactSequence where T == Ascending, A == Dual<Simplex
         return CohomologyExactSequence(DX, j, DAB, i, DAnB, d)
     }
 }
-
+*/

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public struct OrthogonalLieAlgebra<n: _Int, K: Field>: MatrixLieAlgebra {
     public typealias CoeffRing   = K

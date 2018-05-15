@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 // A class representing the algebraic Homology group.
 // Each instance corresponds to a homology-class of the given cycle,
@@ -26,8 +27,7 @@ public struct _HomologyClass<T: ChainType, A: BasisElementType, R: EuclideanRing
     
     internal init(_ z: Cycle, _ H: Structure?) {
         self.z = z
-        self.factors = z.group { (a, _) in a.degree }
-                        .mapValues{ Cycle($0) }
+        self.factors = z.elements.group { (a, _) in a.degree }.mapValues{ Cycle($0) }
         self.structure = H
     }
     
@@ -44,15 +44,8 @@ public struct _HomologyClass<T: ChainType, A: BasisElementType, R: EuclideanRing
     }
     
     public var isHomogeneous: Bool {
-        if let i = z.anyElement?.0.degree {
-            return z.forAll{ (a, _) in a.degree == i }
-        } else {
-            return true
-        }
-    }
-    
-    public var homogeneousDegree: Int {
-        return z.anyElement?.0.degree ?? 0
+        let i = z.degree
+        return z.elements.forAll{ (a, _) in a.degree == i }
     }
     
     public static var zero: _HomologyClass<T, A, R> {

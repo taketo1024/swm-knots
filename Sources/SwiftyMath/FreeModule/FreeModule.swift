@@ -1,10 +1,10 @@
 import Foundation
 
-public struct FreeModule<A: BasisElementType, R: Ring>: Module, Sequence {
+public struct FreeModule<A: BasisElementType, R: Ring>: Module {
     public typealias CoeffRing = R
     public typealias Basis = [A]
     
-    internal let elements: [A: R]
+    public let elements: [A: R]
     
     // root initializer
     public init(_ elements: [A : R]) {
@@ -40,7 +40,7 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module, Sequence {
     }
     
     public var degree: Int {
-        return anyElement?.0.degree ?? 0
+        return elements.anyElement?.0.degree ?? 0
     }
     
     public var basis: Basis {
@@ -59,12 +59,12 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module, Sequence {
         return FreeModule([])
     }
     
-    public func mapValues<R2: Ring>(_ f: (R) -> R2) -> FreeModule<A, R2> {
+    public func mapValues<R2>(_ f: (R) -> R2) -> FreeModule<A, R2> {
         return FreeModule<A, R2>(elements.mapValues(f))
     }
     
-    public func makeIterator() -> AnyIterator<(A, R)> {
-        return AnyIterator(elements.lazy.map{ (a, r) in (a, r) }.makeIterator())
+    public func map<A2, R2>(_ f: (A, R) -> (A2, R2)) -> FreeModule<A2, R2> {
+        return FreeModule<A2, R2>(elements.mapPairs{ (a, r) in f(a, r) })
     }
     
     public static func == (a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
@@ -72,8 +72,8 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module, Sequence {
     }
     
     public static func + (a: FreeModule<A, R>, b: FreeModule<A, R>) -> FreeModule<A, R> {
-        var d: [A : R] = a.elements
-        for (a, r) in b {
+        var d = a.elements
+        for (a, r) in b.elements {
             d[a] = d[a, default: .zero] + r
         }
         return FreeModule<A, R>(d)
@@ -107,7 +107,7 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module, Sequence {
 extension FreeModule: VectorSpace where R: Field {}
 
 public func pair<A, R>(_ x: FreeModule<A, R>, _ y: FreeModule<Dual<A>, R>) -> R {
-    return x.reduce(.zero) { (res, next) -> R in
+    return x.elements.reduce(.zero) { (res, next) -> R in
         let (a, r) = next
         return res + r * y[Dual(a)]
     }

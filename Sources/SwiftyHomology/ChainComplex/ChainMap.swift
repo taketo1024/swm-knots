@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public typealias   ChainMap<A: BasisElementType, B: BasisElementType, R: Ring> = _ChainMap<Descending, A, B, R>
 public typealias CochainMap<A: BasisElementType, B: BasisElementType, R: Ring> = _ChainMap<Ascending,  A, B, R>
@@ -41,6 +42,30 @@ public struct _ChainMap<T: ChainType, A: BasisElementType, B: BasisElementType, 
     
     public static func ∘<C>(g: _ChainMap<T, B, C, R>, f: _ChainMap<T, A, B, R>) -> _ChainMap<T, A, C, R> {
         return _ChainMap<T, A, C, R>(g.f ∘ f.f)
+    }
+    
+    public func asAbstract(from: _ChainComplex<T, A, R>, to: _ChainComplex<T, B, R>) -> _ChainMap<T, AbstractBasisElement, AbstractBasisElement, R> {
+        
+        //      self
+        //   A  ----> B
+        //   ^        |
+        // f1|        |f2
+        //   |        v
+        //   X  ====> X
+        //
+        
+        typealias X = AbstractBasisElement
+        
+        let p1 = from.abstractBasisDict().inverse!.asFunc()
+        let p2 = to.abstractBasisDict().asFunc()
+        
+        let f1 = _ChainMap<T, X, A, R> { (a: X) in FreeModule(p1(a)) }
+        let f2 = _ChainMap<T, B, X, R> { (b: B) in FreeModule(p2(b)) }
+        let f = f2 ∘ self ∘ f1
+
+        return _ChainMap<T, AbstractBasisElement, AbstractBasisElement, R> {
+            (x: X) in f.applied(to: x)
+        }
     }
     
     public func assertChainMap(from: _ChainComplex<T, A, R>, to: _ChainComplex<T, B, R>, debug: Bool = false) {
@@ -86,9 +111,9 @@ public extension ChainMap where T == Descending {
     // f: C1 -> C2  ==>  f^*: Hom(C1, R) <- Hom(C1, R) , pullback
     //                        g∘f        <- g
 
-    public func dual(domain C: ChainComplex<A, R>) -> CochainMap<Dual<B>, Dual<A>, R> {
+    public func dual(domain C: ChainComplex<A, R>, degree: Int = 0) -> CochainMap<Dual<B>, Dual<A>, R> {
         return CochainMap { (d: Dual<B>) -> FreeModule<Dual<A>, R> in
-            let i = d.degree
+            let i = d.degree - degree
             let values = C.chainBasis(i).compactMap { s -> (Dual<A>, R)? in
                 let a = self.applied(to: s)[d.base]
                 return (a != .zero) ? (Dual(s), a) : nil

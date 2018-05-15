@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public struct OrthogonalGroup<n: _Int>: MatrixGroup {
     public let matrix: SquareMatrix<n, 𝐑>

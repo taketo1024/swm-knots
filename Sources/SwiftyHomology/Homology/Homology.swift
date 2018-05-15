@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 // A class representing the total (co)Homology group for a given ChainComplex.
 // Consists of the direct-sum of i-th Homology groups:
@@ -95,7 +96,7 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
         }
     }
     
-    public func homologyClass(_ z: Cycle) -> _HomologyClass<T, A, R> {
+    public func homologyClass(of z: Cycle) -> _HomologyClass<T, A, R> {
         return _HomologyClass(z, self)
     }
 
