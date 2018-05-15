@@ -56,9 +56,7 @@ class SimplicialHomologyExSeqTests: XCTestCase {
     }
     
     func testCH_DS20() {
-        Debug.setFlag(.default)
         let E = CH_DS(2, 0)
-        print(E.detailDescription)
         XCTAssertTrue( E[1, 0]!.isFree)
         XCTAssertEqual(E[1, 0]!.rank, 1)
         XCTAssertTrue( E[1, 1]!.isTrivial)

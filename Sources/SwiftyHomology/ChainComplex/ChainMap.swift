@@ -111,9 +111,9 @@ public extension ChainMap where T == Descending {
     // f: C1 -> C2  ==>  f^*: Hom(C1, R) <- Hom(C1, R) , pullback
     //                        g∘f        <- g
 
-    public func dual(domain C: ChainComplex<A, R>) -> CochainMap<Dual<B>, Dual<A>, R> {
+    public func dual(domain C: ChainComplex<A, R>, degree: Int = 0) -> CochainMap<Dual<B>, Dual<A>, R> {
         return CochainMap { (d: Dual<B>) -> FreeModule<Dual<A>, R> in
-            let i = d.degree
+            let i = d.degree - degree
             let values = C.chainBasis(i).compactMap { s -> (Dual<A>, R)? in
                 let a = self.applied(to: s)[d.base]
                 return (a != .zero) ? (Dual(s), a) : nil
