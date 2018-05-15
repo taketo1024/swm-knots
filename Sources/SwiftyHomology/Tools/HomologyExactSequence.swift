@@ -7,45 +7,56 @@
 //
 
 import Foundation
+import SwiftyMath
 
-/*
-public typealias   HomologyExactSequence<A: FreeModuleBase, B: FreeModuleBase, C: FreeModuleBase, R: EuclideanRing>
-    = _HomologyExactSequence<Descending, A, B, C, R>
+public typealias   HomologyExactSequence<R: EuclideanRing> = _HomologyExactSequence<Descending, R>
+public typealias CohomologyExactSequence<R: EuclideanRing> = _HomologyExactSequence< Ascending, R>
 
-public typealias CohomologyExactSequence<A: FreeModuleBase, B: FreeModuleBase, C: FreeModuleBase, R: EuclideanRing>
-    = _HomologyExactSequence<Ascending , A, B, C, R>
-
-public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeModuleBase, C: FreeModuleBase, R: EuclideanRing>: Sequence, CustomStringConvertible {
+public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, CustomStringConvertible {
+    public typealias H = _Homology<T, AbstractBasisElement, R>
+    public typealias Map = _HomologyMap<T, AbstractBasisElement, AbstractBasisElement, R>
     public typealias Object = ExactSequence<R>.Object
-
-    public let H0: _Homology<T, A, R>
-    public let H1: _Homology<T, B, R>
-    public let H2: _Homology<T, C, R>
     
-    internal let map0:  _HomologyMap<T, A, B, R>
-    internal let map1:  _HomologyMap<T, B, C, R>
-    internal let delta: _HomologyMap<T, C, A, R>
-
+    internal let h:    [H]   // [H0,  H1,  H2]
+    internal let maps: [Map] // [   f0,  f1,  ∂]
+    
     public let topDegree: Int
     public let bottomDegree: Int
     public var sequence : ExactSequence<R>
 
-    public init(_ chain0: _ChainComplex<T, A, R>, _ map0 : _ChainMap<T, A, B, R>,
-                _ chain1: _ChainComplex<T, B, R>, _ map1 : _ChainMap<T, B, C, R>,
-                _ chain2: _ChainComplex<T, C, R>, _ delta: _ChainMap<T, C, A, R>) {
+    // Induce from short ex. seq. of ChainComplexes.
+    public init<A, B, C>(_ chain0: _ChainComplex<T, A, R>, _ map0 : _ChainMap<T, A, B, R>,
+                         _ chain1: _ChainComplex<T, B, R>, _ map1 : _ChainMap<T, B, C, R>,
+                         _ chain2: _ChainComplex<T, C, R>, _ delta: _ChainMap<T, C, A, R>) {
         
-        self.H0 = _Homology(chainComplex: chain0)
-        self.H1 = _Homology(chainComplex: chain1)
-        self.H2 = _Homology(chainComplex: chain2)
+        let (h0, h1, h2) = (H(chainComplex: chain0.asAbstract()),
+                            H(chainComplex: chain1.asAbstract()),
+                            H(chainComplex: chain2.asAbstract()))
         
-        self.map0  = _HomologyMap.induced(from: map0,  codomainStructure: H1)
-        self.map1  = _HomologyMap.induced(from: map1,  codomainStructure: H2)
-        self.delta = _HomologyMap.induced(from: delta, codomainStructure: H0)
+        let (f0, f1,  d) = (Map.induced(from:  map0.asAbstract(from: chain0, to: chain1), codomainStructure: h1),
+                            Map.induced(from:  map1.asAbstract(from: chain1, to: chain2), codomainStructure: h2),
+                            Map.induced(from: delta.asAbstract(from: chain2, to: chain0), codomainStructure: h0))
+       
+        self.init(h0, f0, h1, f1, h2, d)
+    }
+    
+    public init(_ h0: H, _ map0 : Map, _ h1: H, _ map1 : Map, _ h2: H, _ delta: Map) {
+        self.h = [h0, h1, h2]
+        self.maps = [map0, map1, delta]
         
-        self.topDegree    = Swift.max(chain0.topDegree, chain1.topDegree, chain2.topDegree)
-        self.bottomDegree = Swift.min(chain0.offset,    chain1.offset,    chain2.offset)
-        
+        self.topDegree    = Swift.max(h0.topDegree, h1.topDegree, h2.topDegree)
+        self.bottomDegree = Swift.min(h0.offset,    h1.offset,    h2.offset)
         self.sequence  = ExactSequence(count: 3 * (topDegree - bottomDegree + 1))
+    }
+    
+    public subscript(i: Int) -> [Object?] {
+        assert((0 ..< 3).contains(i))
+        return (bottomDegree ... topDegree).map { n in self[i, n] }
+    }
+    
+    public subscript(i: Int, n: Int) -> Object? {
+        assert((0 ..< 3).contains(i))
+        return sequence[seqIndex(i, n)]
     }
     
     public var length: Int {
@@ -59,11 +70,6 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
     internal func gridIndex(_ k: Int) -> (Int, Int) {
         let (i, j) = (k >= 0) ? (k % 3, k / 3) : (k % 3 + 3, k / 3 - 1)
         return (i, T.descending ? topDegree - j : bottomDegree + j)
-    }
-    
-    public subscript(i: Int, n: Int) -> Object? {
-        assert((0 ..< 3).contains(i))
-        return sequence[seqIndex(i, n)]
     }
     
     internal var degrees: [Int] {
@@ -88,20 +94,12 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
         return sequence.isIsomorphic(i)
     }
 
-    
     public mutating func fill(column i: Int, degree n: Int) {
         assert((0 ..< 3).contains(i))
 
         let k = seqIndex(i, n)
         
-        sequence[k] = {
-            switch i {
-            case 0: return H0[n].structure.asAbstract
-            case 1: return H1[n].structure.asAbstract
-            case 2: return H2[n].structure.asAbstract
-            default: fatalError()
-            }
-        }()
+        sequence[k] = h[i][n]
 
         if sequence[k - 1] != nil && sequence.arrows[k - 1].map == nil {
             sequence.arrows[k - 1].map = makeMap(k - 1)
@@ -112,59 +110,51 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
         }
     }
     
-    public mutating func fill(column i: Int) {
-        assert((0 ..< 3).contains(i))
-        for n in bottomDegree ... topDegree {
-            fill(column: i, degree: n)
+    public mutating func fill(columns: Int ...) {
+        assert(columns.forAll{ i in (0 ..< 3).contains(i) })
+        for i in columns {
+            for n in bottomDegree ... topDegree {
+                fill(column: i, degree: n)
+            }
         }
     }
     
     private func makeMap(_ k: Int) -> ExactSequence<R>.Map {
-        let (i0, n0) = gridIndex(k)
-        let (_ , n1) = gridIndex(k + 1)
+        let (i, _) = gridIndex(k)
+        let (h0, f) = (h[i], maps[i])
         
-        switch i0 {
-        case 0: return _makeMap(H0[n0], map0,  H1[n1])
-        case 1: return _makeMap(H1[n0], map1,  H2[n1])
-        case 2: return _makeMap(H2[n0], delta, H0[n1])
-        default: fatalError()
-        }
-    }
-    
-    private func _makeMap<X, Y>(_ h0: _Homology<T, X, R>.Summand, _ f: _HomologyMap<T, X, Y, R>, _ h1: _Homology<T, Y, R>.Summand) -> ExactSequence<R>.Map {
-        return ExactSequence<R>.Map { (i: Int) in
-            let z = h0.generator(i)
-            let w = f.applied(to: z)
-            let n = h1.summands.count
-            return FreeModule( zip( 0 ..< n, h1.factorize(w.representative) ) )
+        return ExactSequence<R>.Map { (z: FreeModule<AbstractBasisElement, R>) in
+            let x = h0.homologyClass(of: z)
+            let y = f.applied(to: x)
+            return y.representative
         }
     }
     
     @discardableResult
-    public mutating func solve(column i: Int, degree n: Int, debug: Bool = false) -> Object? {
-        sequence.solve(seqIndex(i, n), debug: debug)
+    public mutating func solve(column i: Int, degree n: Int) -> Object? {
+        sequence.solve(seqIndex(i, n))
         return self[i, n]
     }
     
     @discardableResult
-    public mutating func solve(column i: Int, debug: Bool = false) -> [Object?] {
+    public mutating func solve(column i: Int) -> [Object?] {
         return (bottomDegree ... topDegree).map { n in
-            self.solve(column: i, degree: n, debug: debug)
+            self.solve(column: i, degree: n)
         }
     }
     
     @discardableResult
-    public mutating func solve(debug: Bool = false) -> [Object?] {
-        return sequence.solve(debug: debug)
+    public mutating func solve() -> [Object?] {
+        return sequence.solve()
     }
     
-    public func assertExactness(column i: Int, degree n: Int, debug: Bool = false) {
+    public func assertExactness(column i: Int, degree n: Int) {
         let k = seqIndex(i, n)
-        sequence.assertExactness(at: k, debug: debug)
+        sequence.assertExactness(at: k)
     }
     
-    public func assertExactness(debug: Bool = false) {
-        sequence.assertExactness(debug: debug)
+    public func assertExactness() {
+        sequence.assertExactness()
     }
     
     public func makeIterator() -> AnyIterator<Object?> {
@@ -173,7 +163,7 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
     }
     
     public var description: String {
-        return "\(H0) -> \(H1) -> \(H2)"
+        return h.map{ $0.description }.joined(separator: " -> ")
     }
     
     public var detailDescription: String {
@@ -187,4 +177,3 @@ public struct _HomologyExactSequence<T: ChainType, A: FreeModuleBase, B: FreeMod
             + "\t-> 0"
     }
 }
-*/
