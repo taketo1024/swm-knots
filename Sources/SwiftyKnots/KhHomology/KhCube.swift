@@ -20,8 +20,7 @@ public struct KhCube {
     private let minEdgeId: Int
     
     public init(_ L: Link) {
-        let n = L.crossingNumber
-        self.vertices = Dictionary(keys: KauffmanState.all(n)) { s -> Vertex in
+        self.vertices = Dictionary(keys: L.allStates) { s -> Vertex in
             let sL = L.spliced(by: s)
             let comps = sL.components
             let basis = KhTensorElement.generateBasis(state: s, power: comps.count)

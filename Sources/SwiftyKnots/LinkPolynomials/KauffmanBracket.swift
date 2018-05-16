@@ -24,8 +24,8 @@ public extension Link {
     public func KauffmanBracket(normalized b: Bool) -> KauffmanBracketPolynomial {
         let A = KauffmanBracketPolynomial.indeterminate
         let B = -A.pow(2) - A.pow(-2)
-        let states = KauffmanState.all(crossingNumber)
-        return states.sum{ s -> KauffmanBracketPolynomial in
+        
+        return allStates.sum { s -> KauffmanBracketPolynomial in
             let L = self.spliced(by: s)
             let n = L.components.count
             return A.pow(s.count0 - s.count1) * B.pow(b ? n - 1 : n)

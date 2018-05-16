@@ -47,6 +47,12 @@ public extension Array {
         return ArraySlice([])
     }
     
+    public func appended(_ e: Element) -> [Element] {
+        var a = self
+        a.append(e)
+        return a
+    }
+    
     public func replaced(at i: Int, with e: Element) -> [Element] {
         var a = self
         a[i] = e
@@ -66,7 +72,11 @@ public extension Array where Element: Equatable {
     }
 }
 
-public extension Array where Element: Comparable {
+extension Array: Comparable where Element: Comparable {
+    public static func < (lhs: [Element], rhs: [Element]) -> Bool {
+        return lhs.lexicographicallyPrecedes(rhs)
+    }
+    
     public func binarySearch(_ needle: Element) -> Int? {
         return binarySearch(needle, { $0 }).map{ $0.index }
     }

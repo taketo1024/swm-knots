@@ -8,9 +8,32 @@
 import Foundation
 
 public struct KauffmanState: Equatable, Comparable, Hashable, CustomStringConvertible {
-    public let bits: [UInt8]
-    public init(_ bits: [UInt8]) {
+    /*
+     *     \ /     0     \ /
+     *      /     ===>   | |
+     *     / \           / \
+     *
+     *
+     *     \ /     1     \_/
+     *      /     ===>
+     *     / \           /‾\
+     */
+    
+    public enum Bit: Int, Codable, CustomStringConvertible {
+        case O, I
+        
+        public var description: String {
+            return (self == .O) ? "0" : "1"
+        }
+    }
+    
+    fileprivate let bits: [Int : Bit]
+    public init(_ bits: [Int : Bit]) {
         self.bits = bits
+    }
+    
+    public subscript(i: Int) -> Bit {
+        return bits[i]!
     }
     
     public var length: Int {
@@ -18,11 +41,11 @@ public struct KauffmanState: Equatable, Comparable, Hashable, CustomStringConver
     }
     
     public var count0: Int {
-        return bits.count{ $0 == 0 }
+        return bits.count{ $0.value == .O }
     }
     
     public var count1: Int {
-        return bits.count{ $0 == 1 }
+        return bits.count{ $0.value == .I }
     }
     
     public var degree: Int {
@@ -30,21 +53,13 @@ public struct KauffmanState: Equatable, Comparable, Hashable, CustomStringConver
     }
     
     public var next: [(sign: Int, state: KauffmanState)] {
-        return (0 ..< length).compactMap { i -> (Int, KauffmanState)? in
-            if bits[i] == 0 {
-                let sgn = (-1).pow( bits[0 ..< i].count{ $0 == 1 } )
-                let next = bits.replaced(at: i, with: 1)
+        return bits
+            .filter{ $0.value == .O }
+            .map { (i, _) -> (Int, KauffmanState) in
+                let sgn = (-1).pow( bits.count{ (j, a) in j < i && a == .I } )
+                let next = bits.replaced(at: i, with: .I)
                 return (sgn, KauffmanState(next))
-            } else {
-                return nil
-            }
         }
-    }
-    
-    public static func all(_ n: Int) -> [KauffmanState] {
-        return (0 ..< n).reduce([[]]) { (res, _) -> [[UInt8]] in
-            res.map{ $0 + [0] } + res.map{ $0 + [1] }
-        }.map{ KauffmanState($0) }.sorted()
     }
     
     public static func ==(a: KauffmanState, b: KauffmanState) -> Bool {
@@ -52,63 +67,54 @@ public struct KauffmanState: Equatable, Comparable, Hashable, CustomStringConver
     }
     
     public static func <(a: KauffmanState, b: KauffmanState) -> Bool {
-        return a.degree < b.degree || (a.degree == b.degree && b.bits.lexicographicallyPrecedes(a.bits))
+        func indices(_ a: KauffmanState) -> [Int] {
+            return a.bits.compactMap{ $0.value == .O ? $0.key : nil }
+        }
+        return (a.degree < b.degree) || (a.degree == b.degree && indices(a) < indices(b))
     }
     
     public var hashValue: Int {
-        return bits.reduce(0) { (res, b) in 2 &* res &+ Int(b) }
+        return bits.reduce(0) { (res, e) in
+            res &+ (e.value.rawValue &<< e.key)
+        }
     }
     
     public var description: String {
-        return bits.map{ "\($0)" }.joined()
+        if Set(bits.keys) == Set( 0 ..< length ) {
+            return "(" + (0 ..< length).map{ i in "\(self[i])" }.joined() + ")"
+        } else {
+            return "(" + bits.sorted{ $0.key }.map{ (i, a) in "\(i):\(a)" }.joined(separator: ", ") + ")"
+        }
     }
 }
 
 public extension Link {
-    /*
-     *     \ /          \ /
-     *      /      ==>  | |
-     *     / \          / \
-     */
+    public var allStates: [KauffmanState] {
+        let indices = self.crossings.enumerated().compactMap{ (i, c) in c.isCrossing ? i : nil }
+        let all: [[(Int, KauffmanState.Bit)]] = indices.reduce([[]]) { (res, i) in
+            res.map{ $0.appended((i, .O)) } + res.map{ $0.appended((i, .I)) }
+        }
+        return all.map { pairs in KauffmanState(Dictionary(pairs: pairs))}.sorted()
+    }
     
     @discardableResult
-    public mutating func splice0(at n: Int) -> Link {
-        crossings[n].splice0()
+    public mutating func splice(at i: Int, by mode: KauffmanState.Bit) -> Link {
+        switch mode {
+        case .O: crossings[i].splice0()
+        case .I: crossings[i].splice1()
+        }
         return self
     }
     
-    public func spliced0(at n: Int) -> Link {
+    public func spliced(at i: Int, by mode: KauffmanState.Bit) -> Link {
         var L = self.copy()
-        L.splice0(at: n)
-        return L
+        return L.splice(at: i, by: mode)
     }
-    
-    /*
-     *     \ /          \_/
-     *      /      ==>
-     *     / \          /‾\
-     */
-    
-    @discardableResult
-    public mutating func splice1(at n: Int) -> Link {
-        crossings[n].splice1()
-        return self
-    }
-    
-    public func spliced1(at n: Int) -> Link {
-        var L = self.copy()
-        L.splice1(at: n)
-        return L
-    }
-    
+
     public func spliced(by state: KauffmanState) -> Link {
         var L = self.copy()
-        for (i, b) in state.bits.enumerated() {
-            if b == 0 {
-                L.splice0(at: i)
-            } else {
-                L.splice1(at: i)
-            }
+        for (i, s) in state.bits {
+            L.splice(at: i, by: s)
         }
         return L
     }
@@ -117,7 +123,7 @@ public extension Link {
 extension KauffmanState: Codable {
     public init(from decoder: Decoder) throws {
         let c = try decoder.singleValueContainer()
-        self.bits = try c.decode([UInt8].self)
+        self.bits = try c.decode([Int : Bit].self)
     }
     
     public func encode(to encoder: Encoder) throws {
