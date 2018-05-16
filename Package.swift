@@ -72,7 +72,7 @@ let package = Package(
 
         .target(
             name: "SwiftyKnots",
-            dependencies: ["SwiftyMath"],
+            dependencies: ["SwiftyMath", "SwiftyHomology"],
 			path: "Sources/SwiftyKnots"),
 
         .testTarget(
