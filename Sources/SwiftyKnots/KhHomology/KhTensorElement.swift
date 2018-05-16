@@ -13,17 +13,17 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
     internal let factors: [KhBasisElement]
     public let degree: Int
     
-    public static func generateBasis(state: LinkSpliceState, power n: Int, shift: Int) -> [KhTensorElement] {
+    public static func generateBasis(state: LinkSpliceState, power n: Int) -> [KhTensorElement] {
         return (0 ..< n).reduce([[]]) { (res, _) -> [[KhBasisElement]] in
             res.flatMap{ factors -> [[KhBasisElement]] in
                 [factors + [.I], factors + [.X]]
             }
             }
-            .map{ factors in KhTensorElement.init(state, factors, shift) }
+            .map{ factors in KhTensorElement.init(state: state, factors: factors) }
             .sorted()
     }
     
-    internal init(_ state: LinkSpliceState, _ factors: [KhBasisElement], _ shift: Int) {
+    internal init(state: LinkSpliceState, factors: [KhBasisElement], shift: Int = 0) {
         self.state = state
         self.factors = factors
         self.degree = factors.sum{ e in e.degree } + state.degree + shift
@@ -42,7 +42,7 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
             toFactors.remove(at: i2)
             toFactors.remove(at: i1)
             toFactors.insert(e, at: to)
-            return FreeModule( KhTensorElement(toState, toFactors, shift), a )
+            return FreeModule( KhTensorElement(state: toState, factors: toFactors, shift: shift), a )
         }
     }
     
@@ -55,8 +55,12 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
             toFactors.remove(at: from)
             toFactors.insert(e1, at: j1)
             toFactors.insert(e2, at: j2)
-            return FreeModule( KhTensorElement(toState, toFactors, shift), a )
+            return FreeModule( KhTensorElement(state: toState, factors: toFactors, shift: shift), a )
         }
+    }
+    
+    public func shifted(_ i: Int) -> KhTensorElement {
+        return KhTensorElement(state: state, factors: factors, shift: shift + i)
     }
     
     public static func ==(b1: KhTensorElement, b2: KhTensorElement) -> Bool {

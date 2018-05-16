@@ -11,7 +11,6 @@ import SwiftyHomology
 
 public struct KhCube {
     public struct Vertex {
-        public let degree: Int
         public let state: LinkSpliceState
         public let components: [Link.Component]
         public let basis: [KhTensorElement]
@@ -21,13 +20,12 @@ public struct KhCube {
     private let minEdgeId: Int
     
     public init(_ L: Link) {
-        let (n, n⁺, n⁻) = (L.crossingNumber, L.crossingNumber⁺, L.crossingNumber⁻)
-        
+        let n = L.crossingNumber
         self.vertices = Dictionary(keys: LinkSpliceState.all(n)) { s -> Vertex in
             let sL = L.spliced(by: s)
             let comps = sL.components
-            let basis = KhTensorElement.generateBasis(state: s, power: comps.count, shift: n⁺ - 2 * n⁻)
-            return Vertex(degree: s.degree - n⁻, state: s, components: comps, basis: basis)
+            let basis = KhTensorElement.generateBasis(state: s, power: comps.count)
+            return Vertex(state: s, components: comps, basis: basis)
         }
         
         self.minEdgeId = L.edges.map{ $0.id }.min() ?? -1
@@ -38,7 +36,7 @@ public struct KhCube {
     }
     
     public func vertices(degree: Int) -> [Vertex] {
-        return vertices.values.filter{ $0.degree == degree }
+        return vertices.values.filter{ $0.state.degree == degree }
     }
     
     public func basis(degree: Int) -> [KhTensorElement] {
@@ -90,26 +88,26 @@ public extension Link {
         return SwiftyKnots.KhCube(self)
     }
     
-    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false) -> CochainComplex<KhTensorElement, R> {
-        return KhChainComplex(KhCube, KhBasisElement.μ, KhBasisElement.Δ, R.self, reduced: reduced)
+    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, unnormalized: Bool = false, reduced: Bool = false) -> CochainComplex<KhTensorElement, R> {
+        return KhChainComplex(KhCube, KhBasisElement.μ, KhBasisElement.Δ, R.self, unnormalized: unnormalized, reduced: reduced)
     }
 
-    public func KhChainComplex<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, reduced: Bool = false) -> CochainComplex<KhTensorElement, R> {
-        return KhChainComplex(KhCube, μ, Δ, R.self, reduced: reduced)
+    public func KhChainComplex<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, unnormalized: Bool = false, reduced: Bool = false) -> CochainComplex<KhTensorElement, R> {
+        return KhChainComplex(KhCube, μ, Δ, R.self, unnormalized: unnormalized, reduced: reduced)
     }
     
-    internal func KhChainComplex<R: EuclideanRing>(_ cube: KhCube, _ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, reduced: Bool = false) -> CochainComplex<KhTensorElement, R> {
+    internal func KhChainComplex<R: EuclideanRing>(_ cube: KhCube, _ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, unnormalized: Bool, reduced: Bool) -> CochainComplex<KhTensorElement, R> {
         typealias C = CochainComplex<KhTensorElement, R>
         
-        let name = "CKh(\(self.name); \(R.symbol))"
-        let (n, n⁻) = (crossingNumber, crossingNumber⁻)
+        let (n, n⁺, n⁻) = (crossingNumber, crossingNumber⁺, crossingNumber⁻)
         
+        let name = "CKh(\(self.name); \(R.symbol))"
         let chain = (0 ... n).map { i -> (C.ChainBasis, C.BoundaryMap) in
-            let chainBasis = !reduced ? cube.basis(degree: i - n⁻) : cube.reducedBasis(degree: i - n⁻)
+            let chainBasis = (!reduced ? cube.basis(degree: i) : cube.reducedBasis(degree: i))
             let boundaryMap = C.BoundaryMap { (x: KhTensorElement) in cube.map(x, μ, Δ) }
-            return (chainBasis, boundaryMap)
+            return (!unnormalized ? chainBasis.map{ $0.shifted(n⁺ - 2 * n⁻)} : chainBasis, boundaryMap)
         }
         
-        return CochainComplex(name: name, chain: chain, offset: -n⁻)
+        return CochainComplex(name: name, chain: chain, offset: !unnormalized ? -n⁻ : 0)
     }
 }
