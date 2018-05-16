@@ -17,7 +17,7 @@ class LinkTests: XCTestCase {
         let e = Link.empty
         XCTAssertEqual(e.components.count, 0)
         XCTAssertEqual(e.crossingNumber, 0)
-        XCTAssertEqual(e.unnormalizedJonesPolynomial, A(1))
+        XCTAssertEqual(e.JonesPolynomial(normalized: false), A(1))
     }
 
     func testUnknot() {
