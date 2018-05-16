@@ -50,7 +50,7 @@ public extension CohomologyExactSequence where T == Ascending {
         
         let i = M.induced(from: SimplicialMap.inclusion(from: A, to: X), R.self).dual(domain: CA)
         let j = M { (s: Simplex) in !A.contains(s) ? FreeModule(s) : .zero }.dual(domain: CX)
-        let d = M { (s: Simplex) in s.boundary(R.self) }.dual(domain: CXA, degree: -1)
+        let d = M (degree: -1) { (s: Simplex) in s.boundary(R.self) }.dual(domain: CXA)
         
         return CohomologyExactSequence(DXA, j, DX, i, DA, d)
     }

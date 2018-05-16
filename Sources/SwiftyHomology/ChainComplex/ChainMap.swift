@@ -18,17 +18,23 @@ public struct _ChainMap<T: ChainType, A: BasisElementType, B: BasisElementType, 
     public typealias Domain   = FreeModule<A, R>
     public typealias Codomain = FreeModule<B, R>
     
+    public var degree: Int
     internal let f: FreeModuleHom<A, B, R>
     
-    public init(_ f: @escaping (A) -> Codomain) {
-        self.init(FreeModuleHom(f))
+    public init(_ f: @escaping (Domain) -> Codomain) { // required
+        self.init(degree: 0, FreeModuleHom(f))
     }
     
-    public init(_ f: @escaping (Domain) -> Codomain) {
-        self.init(FreeModuleHom(f))
+    public init(degree: Int = 0, _ f: @escaping (A) -> Codomain) {
+        self.init(degree: degree, FreeModuleHom(f))
     }
     
-    public init(_ f: FreeModuleHom<A, B, R>) {
+    public init(degree: Int, _ f: @escaping (Domain) -> Codomain) {
+        self.init(degree: degree, FreeModuleHom(f))
+    }
+    
+    public init(degree: Int = 0, _ f: FreeModuleHom<A, B, R>) {
+        self.degree = degree
         self.f = f
     }
     
@@ -41,7 +47,7 @@ public struct _ChainMap<T: ChainType, A: BasisElementType, B: BasisElementType, 
     }
     
     public static func ∘<C>(g: _ChainMap<T, B, C, R>, f: _ChainMap<T, A, B, R>) -> _ChainMap<T, A, C, R> {
-        return _ChainMap<T, A, C, R>(g.f ∘ f.f)
+        return _ChainMap<T, A, C, R>(degree: f.degree + g.degree, g.f ∘ f.f)
     }
     
     public func asAbstract(from: _ChainComplex<T, A, R>, to: _ChainComplex<T, B, R>) -> _ChainMap<T, AbstractBasisElement, AbstractBasisElement, R> {
@@ -63,7 +69,7 @@ public struct _ChainMap<T: ChainType, A: BasisElementType, B: BasisElementType, 
         let f2 = _ChainMap<T, B, X, R> { (b: B) in FreeModule(p2(b)) }
         let f = f2 ∘ self ∘ f1
 
-        return _ChainMap<T, AbstractBasisElement, AbstractBasisElement, R> {
+        return _ChainMap<T, X, X, R> (degree: degree) {
             (x: X) in f.applied(to: x)
         }
     }
@@ -88,7 +94,7 @@ public struct _ChainMap<T: ChainType, A: BasisElementType, B: BasisElementType, 
             
             for a in basis {
                 let x1 = f.applied(to: a)
-                let d2 = to.boundaryMap(x1.degree)
+                let d2 = to.boundaryMap(i + degree)
                 let x2 = d2.applied(to: x1)
                 
                 let y1 = d1.applied(to: a)
@@ -111,9 +117,9 @@ public extension ChainMap where T == Descending {
     // f: C1 -> C2  ==>  f^*: Hom(C1, R) <- Hom(C1, R) , pullback
     //                        g∘f        <- g
 
-    public func dual(domain C: ChainComplex<A, R>, degree: Int = 0) -> CochainMap<Dual<B>, Dual<A>, R> {
-        return CochainMap { (d: Dual<B>) -> FreeModule<Dual<A>, R> in
-            let i = d.degree - degree
+    public func dual(domain C: ChainComplex<A, R>) -> CochainMap<Dual<B>, Dual<A>, R> {
+        return CochainMap (degree: -degree) { (d: Dual<B>) -> FreeModule<Dual<A>, R> in
+            let i = d.degree - self.degree
             let values = C.chainBasis(i).compactMap { s -> (Dual<A>, R)? in
                 let a = self.applied(to: s)[d.base]
                 return (a != .zero) ? (Dual(s), a) : nil
