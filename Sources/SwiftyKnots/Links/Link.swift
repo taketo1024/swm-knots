@@ -104,22 +104,6 @@ public struct Link: Equatable, CustomStringConvertible {
         self.init(name: name, planarCode: planarCode)
     }
     
-    public static var empty: Link {
-        return Link(name: "∅", crossings: [])
-    }
-    
-    public static var unknot: Link {
-        let (e0, e1) = (Edge(0), Edge(1))
-        let x = Crossing(edges: (e0, e0, e1, e1), mode: .V)
-        (e0.from, e0.to) = (x, x)
-        (e1.from, e1.to) = (x, x)
-        return Link(name: "○", crossings: [x])
-    }
-    
-    public var edges: Set<Edge> {
-        return Set( crossings.flatMap{ x -> [Edge] in x.edges } )
-    }
-    
     public func copy(name: String? = nil) -> Link {
         let edges = Dictionary(pairs: self.edges.map{ e -> (Int, Edge) in (e.id, e) } )
         
@@ -136,6 +120,10 @@ public struct Link: Equatable, CustomStringConvertible {
         }
         
         return Link(name: name ?? self.name, crossings: copiedCross)
+    }
+    
+    public var edges: Set<Edge> {
+        return Set( crossings.flatMap{ x -> [Edge] in x.edges } )
     }
     
     public var components: [Component] {

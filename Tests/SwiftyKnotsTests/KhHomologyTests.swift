@@ -12,18 +12,18 @@ import SwiftyMath
 class KhHomologyTests: XCTestCase {
     
     func test3_1() {
-        let L = Link.knot(3, 1)
-        assert(L)
+        let K = Knot(3, 1)
+        assert(K)
     }
     
     func test4_1() {
-        let L = Link.knot(4, 1)
-        assert(L)
+        let K = Knot(4, 1)
+        assert(K)
     }
     
     func test5_1() {
-        let L = Link.knot(5, 1)
-        assert(L)
+        let K = Knot(5, 1)
+        assert(K)
     }
     
     func assert(_ L: Link) {

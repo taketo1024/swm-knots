@@ -13,114 +13,113 @@ import SwiftyMath
 // - Link Table  http://katlas.org/wiki/The_Thistlethwaite_Link_Table
 // - Torus Knots http://katlas.org/wiki/36_Torus_Knots
 
+public func Knot(_ n: Int, _ i: Int) -> Link {
+    assert( (3...10).contains(n) )
+    let name = "\(n)_\(i)"
+    let code = table(.Rolfsen)[name]!
+    return Link(name: name, planarCode: code)
+}
+
 public extension Link {
-    public static var trefoil: Link {
-        return knot(3, 1)
+    public enum LinkType {
+        case knot, link
     }
     
-    public static func knot(_ name: String) -> Link {
+    public static var empty: Link {
+        return Link(name: "∅", crossings: [])
+    }
+    
+    public static var unknot: Link {
+        let (e0, e1) = (Edge(0), Edge(1))
+        let x = Crossing(edges: (e0, e0, e1, e1), mode: .V)
+        (e0.from, e0.to) = (x, x)
+        (e1.from, e1.to) = (x, x)
+        return Link(name: "○", crossings: [x])
+    }
+    
+    public static var trefoil: Link {
+        return Link.load("3_1")
+    }
+    
+    public static var HopfLink: Link {
+        return Link.load("L2a1")
+    }
+    
+    public static func load(_ name: String) -> Link {
         if name.hasSuffix("r") {
             let orig = name.substring(0 ..< name.count - 1)
-            return knot(orig).reversed
+            return load(orig).reversed
         }
         
         if name.hasSuffix("m") {
             let orig = name.substring(0 ..< name.count - 1)
-            return knot(orig).mirrored
+            return load(orig).mirrored
         }
         
-        if name.hasPrefix("K") {
-            return Link(name: name, planarCode: knotTable[name]!)
+        let code: [[Int]]
+        
+        if name.hasPrefix("L") {
+            code = table(.link)[name]!
+        } else if name.hasPrefix("K") {
+            code = table(.knot)[name]!
         } else {
-            return Link(name: name, planarCode: RolfsenTable[name]!)
+            code = table(.Rolfsen)[name]!
         }
-    }
-    
-    public static func knot(_ n: Int, _ i: Int) -> Link {
-        assert( (3...10).contains(n) )
-        let name = "\(n)_\(i)"
-        let code = RolfsenTable[name]!
+        
         return Link(name: name, planarCode: code)
     }
     
-    public static func K11a(_ i: Int) -> Link {
-        let name = "K11a\(i)"
-        let code = knotTable[name]!
-        return Link(name: name, planarCode: code)
-    }
-    
-    public static func K11n(_ i: Int) -> Link {
-        let name = "K11n\(i)"
-        let code = knotTable[name]!
-        return Link(name: name, planarCode: code)
-    }
-    
-    public static func knots(crossing n: Int) -> [Link] {
-        if n <= 10 {
-            let indices = RolfsenTable.keys
+    public static func list(_ type: LinkType, crossing n: Int) -> [Link] {
+        switch (type, n) {
+        case (.knot, _) where n <= 10 :
+            let indices = table(.Rolfsen).keys
                 .filter { $0.hasPrefix("\(n)_") }
                 .map { $0.suffix(from: $0.index(after: $0.index(of: "_")!) ) }
                 .map { Int($0)! }
                 .sorted()
-            return indices.map{ i in knot(n, i) }
             
-        } else {
-            let names = knotTable.keys
+            return indices.map{ i in Knot(n, i) }
+            
+        case (.knot, _) :
+            let names = table(.knot).keys
                 .filter { $0.hasPrefix("K\(n)") }
                 .sorted()
-
-            return names.map{ name in Link(name: name, planarCode: knotTable[name]!)}
+            
+            return names.map{ name in Link.load(name) }
+            
+        case (.link, _):
+            let names = table(.link).keys
+                .filter { $0.hasPrefix("L\(n)") }
+                .sorted()
+            
+            return names.map{ name in Link.load(name) }
         }
-    }
-    
-    public static var HopfLink: Link {
-        return link("L2a1")
-    }
-    
-    public static func link(_ name: String) -> Link {
-        let code = linkTable[name]!
-        return Link(name: name, planarCode: code)
-    }
-    
-    public static func links(crossing n: Int) -> [Link] {
-        let names = linkTable.keys
-            .filter { $0.hasPrefix("L\(n)") }
-            .sorted()
-        return names.map{ name in Link(name: name, planarCode: linkTable[name]!)}
-    }
-
-    private static var RolfsenTable: LinkTable {
-        if _RolfsenTable == nil {
-            loadTable(&_RolfsenTable, RolfsenTableJSON)
-        }
-        return _RolfsenTable
-    }
-    
-    private static var knotTable: LinkTable {
-        if _knotTable == nil {
-            loadTable(&_knotTable, K11TableJSON)
-        }
-        return _knotTable
-    }
-    
-    private static var linkTable: LinkTable {
-        if _linkTable == nil {
-            loadTable(&_linkTable, linkTableJSON)
-        }
-        return _linkTable
-    }
-    
-    private static func loadTable(_ table: inout LinkTable!, _ jsonString: String) {
-        let data = jsonString.data(using: .utf8)!
-        table = try! JSONDecoder().decode(LinkTable.self, from: data)
     }
 }
 
-private typealias LinkTable = [String : [[Int]]]
+private enum LinkTableType: String {
+    case Rolfsen, knot, link
+}
 
-private var _RolfsenTable: LinkTable! = nil
-private var _knotTable: LinkTable! = nil
-private var _linkTable: LinkTable! = nil
+private typealias LinkTable = [String : [[Int]]]
+private var _table: [LinkTableType: LinkTable] = [:]
+
+private func table(_ type: LinkTableType) -> LinkTable {
+    func load(_ type: LinkTableType, _ jsonString: String) {
+        let data = jsonString.data(using: .utf8)!
+        _table[type] = try! JSONDecoder().decode(LinkTable.self, from: data)
+    }
+    
+    if _table[type] == nil {
+        switch type {
+        case .Rolfsen: load(type, RolfsenTableJSON)
+        case .knot:    load(type, K11TableJSON)
+        case .link:    load(type, linkTableJSON)
+        }
+    }
+    
+    return _table[type]!
+}
 
 /*
  * JSON string extracted from: http://katlas.org/wiki/The_Take_Home_Database
