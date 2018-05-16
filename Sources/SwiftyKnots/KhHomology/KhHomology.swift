@@ -18,11 +18,10 @@ public extension Link {
     public func KhHomology<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> SwiftyKnots.KhHomology<R> {
         
         let name = "Kh(\(self.name); \(R.symbol))"
-        let cube = self.KhCube
-        let C = self.KhChainComplex(cube, μ, Δ, R.self, reduced: reduced, normalized: normalized, shifted: shifted)
+        let C = self.KhChainComplex(μ, Δ, R.self, reduced: reduced, normalized: normalized, shifted: shifted)
         let H = Cohomology(name: name, chainComplex: C)
         
-        return SwiftyKnots.KhHomology(self, cube, H)
+        return SwiftyKnots.KhHomology(self, H)
     }
     
     public func KhHomology<R: EuclideanRing & Codable>(_ type: R.Type, useCache: Bool) -> SwiftyKnots.KhHomology<R> {
@@ -40,13 +39,10 @@ public struct KhHomology<R: EuclideanRing> {
     public typealias Summand = Inner.Summand
     
     public let link: Link
-    
-    internal let cube: KhCube
     internal let H: Inner
     
-    internal init(_ link: Link, _ cube: KhCube, _ H: Inner) {
+    internal init(_ link: Link, _ H: Inner) {
         self.link = link
-        self.cube = cube
         self.H = H
     }
     
@@ -113,7 +109,7 @@ public struct KhHomology<R: EuclideanRing> {
         }
         let Hf = Inner(name: name, offset: H.offset, summands: summands)
         
-        return KhHomology(link, cube, Hf)
+        return KhHomology(link, Hf)
     }
     
     public var eulerCharacteristic: Int {
@@ -177,14 +173,14 @@ public struct KhHomology<R: EuclideanRing> {
 
 public extension KhHomology where R == 𝐙 {
     public var order2torsionPart: KhHomology<𝐙₂> {
-        typealias T = KhHomology<𝐙₂>
+        typealias Kh = KhHomology<𝐙₂>
         let name = "Kh(\(link.name); \(R.symbol))_𝐙₂"
-        let summands = (H.offset ... H.topDegree).map { i -> T.Summand in
+        let summands = (H.offset ... H.topDegree).map { i -> Kh.Summand in
             H[i].subSummands(torsion: 2)
         }
-        let Hf = T.Inner(name: name, offset: H.offset, summands: summands)
+        let Hf = Kh.Inner(name: name, offset: H.offset, summands: summands)
         
-        return T(link, cube, Hf)
+        return Kh(link, Hf)
     }
     
 }
@@ -197,7 +193,6 @@ extension KhHomology: Codable where R: Codable {
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         self.link = try c.decode(Link.self, forKey: .link)
-        self.cube = KhCube(link)
         self.H = try c.decode(Inner.self, forKey: .H)
     }
     

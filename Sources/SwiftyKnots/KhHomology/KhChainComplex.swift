@@ -10,27 +10,19 @@ import SwiftyMath
 import SwiftyHomology
 
 public extension Link {
-    public var KhCube: SwiftyKnots.KhCube {
-        return SwiftyKnots.KhCube(self)
-    }
-    
     public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> CochainComplex<KhTensorElement, R> {
-        return KhChainComplex(KhCube, KhBasisElement.μ, KhBasisElement.Δ, R.self,
+        return KhChainComplex(KhBasisElement.μ, KhBasisElement.Δ, R.self,
                               reduced: reduced, normalized: normalized, shifted: shifted)
     }
 
     public func KhChainComplex<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> CochainComplex<KhTensorElement, R> {
-        return KhChainComplex(KhCube, μ, Δ, R.self,
-                              reduced: reduced, normalized: normalized, shifted: shifted)
-    }
-    
-    internal func KhChainComplex<R: EuclideanRing>(_ cube: KhCube, _ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, reduced: Bool, normalized: Bool, shifted: (Int, Int)) -> CochainComplex<KhTensorElement, R> {
         typealias C = CochainComplex<KhTensorElement, R>
         
         let (n, n⁺, n⁻) = (crossingNumber, crossingNumber⁺, crossingNumber⁻)
         
         let name = "CKh(\(self.name); \(R.symbol))"
         let chain = (0 ... n).map { i -> (C.ChainBasis, C.BoundaryMap) in
+            let cube = self.KhCube
             let chainBasis = { () -> C.ChainBasis in
                 let basis = !reduced ? cube.basis(degree: i) : cube.reducedBasis(degree: i)
                 let shift = (normalized ? n⁺ - 2 * n⁻ : 0) + shifted.1

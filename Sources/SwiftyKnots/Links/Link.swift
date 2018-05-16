@@ -34,6 +34,7 @@ public struct Link: Equatable, CustomStringConvertible {
     
     public let name: String
     internal let crossings: [Crossing]
+    internal let _KhCube: Cache<KhCube> = Cache()
     
     internal init(name: String, crossings: [Crossing]) {
         self.name = name
@@ -213,6 +214,10 @@ public struct Link: Equatable, CustomStringConvertible {
             e.id += D
         }
         return Link(name: "\(L1.name) + \(L2.name)", crossings: cL1.crossings + cL2.crossings)
+    }
+    
+    public static func == (lhs: Link, rhs: Link) -> Bool {
+        return lhs.crossings == rhs.crossings
     }
     
     public var description: String {

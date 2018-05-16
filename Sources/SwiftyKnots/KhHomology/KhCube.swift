@@ -81,3 +81,16 @@ public struct KhCube {
         return x.elements.sum { (a, r) in r * self.map(a, μ, Δ) }
     }
 }
+
+public extension Link {
+    public var KhCube: SwiftyKnots.KhCube {
+        if let val = _KhCube.value {
+            return val
+        }
+        
+        let val = SwiftyKnots.KhCube(self)
+        _KhCube.value = val
+        return val
+    }
+}
+
