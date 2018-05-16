@@ -11,17 +11,17 @@ import SwiftyHomology
 
 public struct KhCube {
     public struct Vertex {
-        public let state: LinkSpliceState
+        public let state: KauffmanState
         public let components: [Link.Component]
         public let basis: [KhTensorElement]
     }
     
-    public let vertices: [LinkSpliceState : Vertex]
+    public let vertices: [KauffmanState : Vertex]
     private let minEdgeId: Int
     
     public init(_ L: Link) {
         let n = L.crossingNumber
-        self.vertices = Dictionary(keys: LinkSpliceState.all(n)) { s -> Vertex in
+        self.vertices = Dictionary(keys: KauffmanState.all(n)) { s -> Vertex in
             let sL = L.spliced(by: s)
             let comps = sL.components
             let basis = KhTensorElement.generateBasis(state: s, power: comps.count)
@@ -31,7 +31,7 @@ public struct KhCube {
         self.minEdgeId = L.edges.map{ $0.id }.min() ?? -1
     }
     
-    public subscript(s: LinkSpliceState) -> Vertex {
+    public subscript(s: KauffmanState) -> Vertex {
         return vertices[s]!
     }
     

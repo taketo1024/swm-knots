@@ -9,11 +9,11 @@ import Foundation
 import SwiftyMath
 
 public struct KhTensorElement: BasisElementType, Comparable, Codable {
-    public let state: LinkSpliceState
+    public let state: KauffmanState
     internal let factors: [KhBasisElement]
     public let degree: Int
     
-    public static func generateBasis(state: LinkSpliceState, power n: Int) -> [KhTensorElement] {
+    public static func generateBasis(state: KauffmanState, power n: Int) -> [KhTensorElement] {
         return (0 ..< n).reduce([[]]) { (res, _) -> [[KhBasisElement]] in
             res.flatMap{ factors -> [[KhBasisElement]] in
                 [factors + [.I], factors + [.X]]
@@ -23,7 +23,7 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
             .sorted()
     }
     
-    internal init(state: LinkSpliceState, factors: [KhBasisElement], shift: Int = 0) {
+    internal init(state: KauffmanState, factors: [KhBasisElement], shift: Int = 0) {
         self.state = state
         self.factors = factors
         self.degree = factors.sum{ e in e.degree } + state.degree + shift
@@ -33,7 +33,7 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
         return degree - factors.sum{ e in e.degree } - state.degree
     }
     
-    internal func product<R: Ring>(_ μ: KhBasisElement.Product<R>, _ from: (Int, Int), _ to: Int, _ toState: LinkSpliceState) -> FreeModule<KhTensorElement, R> {
+    internal func product<R: Ring>(_ μ: KhBasisElement.Product<R>, _ from: (Int, Int), _ to: Int, _ toState: KauffmanState) -> FreeModule<KhTensorElement, R> {
         let (i1, i2) = from
         let (e1, e2) = (factors[i1], factors[i2])
         
@@ -46,7 +46,7 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
         }
     }
     
-    internal func coproduct<R: Ring>(_ Δ: KhBasisElement.Coproduct<R>, _ from: Int, _ to: (Int, Int), _ toState: LinkSpliceState) -> FreeModule<KhTensorElement, R> {
+    internal func coproduct<R: Ring>(_ Δ: KhBasisElement.Coproduct<R>, _ from: Int, _ to: (Int, Int), _ toState: KauffmanState) -> FreeModule<KhTensorElement, R> {
         let (j1, j2) = to
         let e = factors[from]
         

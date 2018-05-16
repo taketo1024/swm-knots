@@ -227,46 +227,6 @@ public struct Link: Equatable, CustomStringConvertible {
         return Link(name: "\(L1.name) + \(L2.name)", crossings: cL1.crossings + cL2.crossings)
     }
     
-    /*
-     *     \ /          \ /
-     *      /      ==>  | |
-     *     / \          / \
-     */
-    
-    @discardableResult
-    public mutating func spliceA(at n: Int) -> Link {
-        crossings[n].spliceA()
-        return self
-    }
-    
-    public func splicedA(at n: Int) -> Link {
-        var L = self.copy()
-        L.spliceA(at: n)
-        return L
-    }
-    
-    /*
-     *     \ /          \_/
-     *      /      ==>
-     *     / \          /‾\
-     */
-    
-    @discardableResult
-    public mutating func spliceB(at n: Int) -> Link {
-        crossings[n].spliceB()
-        return self
-    }
-    
-    public func splicedB(at n: Int) -> Link {
-        var L = self.copy()
-        L.spliceB(at: n)
-        return L
-    }
-    
-    public func splicedPair(at i: Int) -> (Link, Link) {
-        return (splicedA(at: i), splicedB(at: i))
-    }
-    
     public var description: String {
         return name
     }
@@ -425,7 +385,7 @@ public struct Link: Equatable, CustomStringConvertible {
             }
         }
         
-        public func spliceA() {
+        public func splice0() {
             switch mode {
             case .X⁺: mode = .V
             case .X⁻: mode = .H
@@ -433,7 +393,7 @@ public struct Link: Equatable, CustomStringConvertible {
             }
         }
         
-        public func spliceB() {
+        public func splice1() {
             switch mode {
             case .X⁺: mode = .H
             case .X⁻: mode = .V
