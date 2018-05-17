@@ -55,14 +55,9 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
         self.sequence  = ExactSequence(count: 3 * (n1 - n0 + 1))
     }
     
-    public subscript(i: Int) -> [Object?] {
+    public subscript(n: Int, i: Int) -> Object? {
         assert((0 ..< 3).contains(i))
-        return (bottomDegree ... topDegree).map { n in self[i, n] }
-    }
-    
-    public subscript(i: Int, n: Int) -> Object? {
-        assert((0 ..< 3).contains(i))
-        return sequence[seqIndex(i, n)]
+        return sequence[seqIndex(n, i)]
     }
     
     public var topDegree: Int {
@@ -77,13 +72,13 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
         return (topDegree - bottomDegree + 1) * 3
     }
     
-    internal func seqIndex(_ i: Int, _ n: Int) -> Int {
+    internal func seqIndex(_ n: Int, _ i: Int) -> Int {
         return T.descending ? (topDegree - n) * 3 + i : (n - bottomDegree) * 3 + i
     }
     
     internal func gridIndex(_ k: Int) -> (Int, Int) {
         let (i, j) = (k >= 0) ? (k % 3, k / 3) : (k % 3 + 3, k / 3 - 1)
-        return (i, T.descending ? topDegree - j : bottomDegree + j)
+        return (T.descending ? topDegree - j : bottomDegree + j, i)
     }
     
     internal var degrees: [Int] {
@@ -92,26 +87,26 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
             : (bottomDegree ... topDegree).toArray()
     }
     
-    public func isZeroMap(_ i: Int, _ n: Int) -> Bool {
-        return sequence.isZeroMap(seqIndex(i, n))
+    public func isZeroMap(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isZeroMap(seqIndex(n, i))
     }
     
-    public func isInjective(_ i: Int, _ n: Int) -> Bool {
-        return sequence.isInjective(seqIndex(i, n))
+    public func isInjective(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isInjective(seqIndex(n, i))
     }
     
-    public func isSurjective(_ i: Int, _ n: Int) -> Bool {
-        return sequence.isSurjective(seqIndex(i, n))
+    public func isSurjective(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isSurjective(seqIndex(n, i))
     }
     
-    public func isIsomorphic(_ i: Int, _ n: Int) -> Bool {
-        return sequence.isIsomorphic(seqIndex(i, n))
+    public func isIsomorphic(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isIsomorphic(seqIndex(n, i))
     }
 
-    public mutating func fill(column i: Int, degree n: Int) {
+    public mutating func fill(_ n: Int, _ i: Int) {
         assert((0 ..< 3).contains(i))
 
-        let k = seqIndex(i, n)
+        let k = seqIndex(n, i)
         
         sequence[k] = h[i][n]
 
@@ -128,13 +123,13 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
         assert(columns.forAll{ i in (0 ..< 3).contains(i) })
         for i in columns {
             for n in bottomDegree ... topDegree {
-                fill(column: i, degree: n)
+                fill(n, i)
             }
         }
     }
     
     private func makeMap(_ k: Int) -> ExactSequence<R>.Map {
-        let (i, _) = gridIndex(k)
+        let (_, i) = gridIndex(k)
         let (h0, f) = (h[i], maps[i])
         
         return ExactSequence<R>.Map { (z: FreeModule<AbstractBasisElement, R>) in
@@ -145,15 +140,15 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
     }
     
     @discardableResult
-    public mutating func solve(column i: Int, degree n: Int) -> Object? {
-        sequence.solve(seqIndex(i, n))
-        return self[i, n]
+    public mutating func solve(_ n: Int, _ i: Int) -> Object? {
+        sequence.solve(seqIndex(n, i))
+        return self[n, i]
     }
     
     @discardableResult
     public mutating func solve(column i: Int) -> [Object?] {
         return (bottomDegree ... topDegree).map { n in
-            self.solve(column: i, degree: n)
+            self.solve(n, i)
         }
     }
     
@@ -161,8 +156,8 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
         return sequence.solve()
     }
     
-    public func assertExactness(column i: Int, degree n: Int) {
-        let k = seqIndex(i, n)
+    public func assertExactness(_ n: Int, _ i: Int) {
+        let k = seqIndex(n, i)
         sequence.assertExactness(at: k)
     }
     
@@ -176,25 +171,14 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
     }
     
     public var description: String {
-        return h.map{ $0.description }.joined(separator: "\t->\t")
-            + "\n--------------------\n"
-            + degrees.map { n -> String in
-                "\(n): \t" + (0 ..< 3).map { i in
-                    let k = self.seqIndex(i, n)
-                    return "\(sequence.objectDescription(k))\t\(sequence.arrowDescription(k))\t"
+        let title = h.map{ h in h.description }.joined(separator: " -> ")
+        let head = "n\\i\t" + h.enumerated().map{ (i, _) in "\(i)" }.joined(separator: "\t\t")
+        let lines = degrees.map { n -> String in
+            "\(n)\t" + (0 ..< 3).map { i in
+                let k = self.seqIndex(n, i)
+                return "\(sequence.objectDescription(k))\t\(sequence.arrowDescription(k))\t"
                 }.joined()
-              }.joined(separator: "\n")
-            + "0"
-    }
-    
-    public var detailDescription: String {
-        func s(_ i: Int, _ n: Int) -> String {
-            return self[i, n].map{ "\($0)" } ?? "?"
         }
-        return "\(self.description)\n--------------------\n"
-            + degrees.map { n -> String in
-                "\(n): \t" + (0 ..< 3).map{ i in self[i, n].map{ "\($0)" } ?? "?" }.joined(separator: "\t-> ")
-                }.joined(separator: "\t->\n")
-            + "\t-> 0"
+        return ([title, head] + lines).joined(separator: "\n")
     }
 }
