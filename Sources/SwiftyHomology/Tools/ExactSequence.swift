@@ -9,6 +9,12 @@
 import Foundation
 import SwiftyMath
 
+public extension LogFlag {
+    public static var exactSequence: LogFlag {
+        return LogFlag(id: "Homology.ExactSequence", label: "exSeq")
+    }
+}
+
 public struct ExactSequence<R: EuclideanRing>: Sequence {
     public typealias Object = AbstractSimpleModuleStructure<R>
     public typealias Map    = FreeModuleHom<AbstractBasisElement, AbstractBasisElement, R>
@@ -274,7 +280,7 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
     }
     
     private func log(_ msg: @autoclosure () -> String) {
-        Debug.log(.default, msg)
+        Logger.write(.exactSequence, msg)
     }
     
     internal struct Arrow {

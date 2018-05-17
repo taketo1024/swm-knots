@@ -10,6 +10,10 @@ import Foundation
 private var testMode = false
 private var storageDir: String?
 
+public extension LogFlag {
+    public static var storage: LogFlag { return LogFlag(id: "Storage", label: "storage") }
+}
+
 public struct Storage {
     public static func exists(_ id: String) -> Bool {
         let fm = FileManager()
@@ -21,7 +25,7 @@ public struct Storage {
         prepare()
         
         guard let data = try? JSONEncoder().encode(obj) else {
-            log("[error] couldn't encode given data: \(id)")
+            logError("couldn't encode given data: \(id)")
             return false
         }
         
@@ -31,7 +35,7 @@ public struct Storage {
             log("saved: \(file.path)")
             return true
         } catch {
-            log("[error] failed to save data: \(id)")
+            logError("failed to save data: \(id)")
             return false
         }
     }
@@ -46,7 +50,7 @@ public struct Storage {
         }
         
         guard let obj = try? JSONDecoder().decode(Obj.self, from: data) else {
-            log("[error] broken load: \(id)")
+            logError("broken data: \(id)")
             return nil
         }
         
@@ -75,7 +79,7 @@ public struct Storage {
         if let _ = try? fm.removeItem(at: file) {
             log("delete: \(file.path)")
         } else {
-            log("[error] couldn't delete: \(file.path)")
+            logError("couldn't delete: \(file.path)")
         }
     }
     
@@ -87,7 +91,7 @@ public struct Storage {
             try fm.removeItem(atPath: dir)
             log("remove: \(dir)")
         } catch {
-            log("[error] failed to clear storage.")
+            logError("failed to clear storage.")
         }
     }
     
@@ -100,7 +104,7 @@ public struct Storage {
             try fm.createDirectory(at: dirURL, withIntermediateDirectories: false, attributes: nil)
             log("created dir: \(dir)")
         } catch {
-            log("[error] failed to create dir: \(dir)")
+            logError("failed to create dir: \(dir)")
         }
     }
     
@@ -122,6 +126,10 @@ public struct Storage {
     }
     
     private static func log(_ msg: @autoclosure () -> String) {
-        Debug.log(.Storage, msg)
+        Logger.write(.storage, msg)
+    }
+    
+    private static func logError(_ msg: @autoclosure () -> String) {
+        Logger.write(.error, msg)
     }
 }
