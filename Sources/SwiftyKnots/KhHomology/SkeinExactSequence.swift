@@ -13,12 +13,15 @@ public extension Link {
     
     // MEMO currently supports only unnormalized degrees.
     
-    public func skeinExactSequence<R>(_ type: R.Type, reduced r: Bool = false) -> CohomologyExactSequence<R> {
+    public func skeinExactSequence<R>(_ type: R.Type, atCrossing i: Int? = nil, reduced r: Bool = false) -> CohomologyExactSequence<R> {
         typealias C = CochainComplex<KhTensorElement, R>
         typealias M = CochainMap<KhTensorElement, KhTensorElement, R>
         
-        let L = self
-        let n = L.crossingNumber - 1
+        let n = crossingNumber - 1
+        let L = (i == nil || i! == n)
+            ? self
+            : Link(name: name, crossings: crossings.moved(elementAt: i!, to: n))
+        
         let (L0, L1) = L.splicedPair(at: n)
 
         //                 i      j

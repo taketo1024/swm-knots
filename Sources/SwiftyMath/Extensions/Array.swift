@@ -58,6 +58,13 @@ public extension Array {
         a[i] = e
         return a
     }
+    
+    public func moved(elementAt i: Int, to j: Int) -> [Element] {
+        var a = self
+        let e = a.remove(at: i)
+        a.insert(e, at: j)
+        return a
+    }
 }
 
 public extension Array where Element: Equatable {
