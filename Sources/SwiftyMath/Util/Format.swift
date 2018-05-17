@@ -32,7 +32,7 @@ public struct Format {
             case "-": return "⁻"
             case "(": return "⁽"
             case ")": return "⁾"
-
+            case ",": return " ̓"
             default: return c
             }
         } )
@@ -59,6 +59,8 @@ public struct Format {
             case "-": return "₋"
             case "(": return "₍"
             case ")": return "₎"
+            case ",": return " ̦"
+            case "*": return " ͙"
             default: return c
             }
         } )
