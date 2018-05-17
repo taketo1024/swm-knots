@@ -92,20 +92,20 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
             : (bottomDegree ... topDegree).toArray()
     }
     
-    public mutating func isZeroMap(_ i: Int) -> Bool {
-        return sequence.isZeroMap(i)
+    public func isZeroMap(_ i: Int, _ n: Int) -> Bool {
+        return sequence.isZeroMap(seqIndex(i, n))
     }
     
-    public mutating func isInjective(_ i: Int) -> Bool {
-        return sequence.isZeroMap(i - 1)
+    public func isInjective(_ i: Int, _ n: Int) -> Bool {
+        return sequence.isInjective(seqIndex(i, n))
     }
     
-    public mutating func isSurjective(_ i: Int) -> Bool {
-        return sequence.isZeroMap(i + 1)
+    public func isSurjective(_ i: Int, _ n: Int) -> Bool {
+        return sequence.isSurjective(seqIndex(i, n))
     }
     
-    public mutating func isIsomorphic(_ i: Int) -> Bool {
-        return sequence.isIsomorphic(i)
+    public func isIsomorphic(_ i: Int, _ n: Int) -> Bool {
+        return sequence.isIsomorphic(seqIndex(i, n))
     }
 
     public mutating func fill(column i: Int, degree n: Int) {
@@ -157,8 +157,7 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
         }
     }
     
-    @discardableResult
-    public mutating func solve() -> [Object?] {
+    public mutating func solve() {
         return sequence.solve()
     }
     
@@ -177,7 +176,15 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
     }
     
     public var description: String {
-        return h.map{ $0.description }.joined(separator: " -> ")
+        return h.map{ $0.description }.joined(separator: "\t->\t")
+            + "\n--------------------\n"
+            + degrees.map { n -> String in
+                "\(n): \t" + (0 ..< 3).map { i in
+                    let k = self.seqIndex(i, n)
+                    return "\(sequence.objectDescription(k))\t\(sequence.arrowDescription(k))\t"
+                }.joined()
+              }.joined(separator: "\n")
+            + "0"
     }
     
     public var detailDescription: String {
