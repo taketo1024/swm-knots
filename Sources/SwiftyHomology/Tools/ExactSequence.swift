@@ -229,6 +229,25 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         }
     }
     
+    public func describe(_ i0: Int) {
+        let i1 = i0 + 1
+        print("\(objectDescription(i0)) \(arrowDescription(i0)) \(objectDescription(i1))", "\n")
+        
+        for i in [i0, i1] {
+            if let M = self[i] {
+                print(M, "{")
+                for x in M.generators {
+                    print("\t", x)
+                }
+                print("}\n")
+            }
+        }
+        
+        if let A = self.matrix(i0) {
+            print(A.detailDescription, "\n")
+        }
+    }
+    
     public func assertExactness(at i1: Int) {
         
         //     f0        f1
@@ -243,11 +262,8 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
             let f0 = arrows[i0].map,
             let f1 = arrows[i1].map
             else {
-                log("\(i1): skipped.")
                 return
         }
-        
-        log("\(i1): \(M0) -> [\(M1)] -> \(M2)")
         
         if M1.isTrivial {
             return
@@ -258,7 +274,6 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
             let y = f0.applied(to: x)
             let z = f1.applied(to: y)
             
-            log("\t\(x) ->\t\(y) ->\t\(z)")
             assert(M2.elementIsZero(z))
         }
         
@@ -283,7 +298,7 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
     
     internal func arrowDescription(_ i: Int) -> String {
         return isNonZero(i) && isNonZero(i + 1)
-                ? (isZeroMap(i) ? "-ͦ>" : isIsomorphic(i) ? "-̃>" : isInjective(i) ? "-ͥ>" : isSurjective(i) ? "-ͤ>" : "->")
+                ? (isZeroMap(i) ? "-ͦ>" : isIsomorphic(i) ? "-̃>" : isInjective(i) ? "-ͫ>" : isSurjective(i) ? "-ͤ>" : "->")
                 : "->"
     }
     

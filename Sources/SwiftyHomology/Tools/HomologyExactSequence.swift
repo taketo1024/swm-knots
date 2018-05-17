@@ -156,6 +156,10 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
         return sequence.solve()
     }
     
+    public func describe(_ n: Int, _ i: Int) {
+        return sequence.describe(seqIndex(n, i))
+    }
+    
     public func assertExactness(_ n: Int, _ i: Int) {
         let k = seqIndex(n, i)
         sequence.assertExactness(at: k)
