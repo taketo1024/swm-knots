@@ -63,6 +63,16 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
         return KhTensorElement(state: state, factors: factors, shift: shift + i)
     }
     
+    public func stateModified(_ i: Int, _ bit: KauffmanState.Bit?) -> KhTensorElement {
+        var s = state
+        if let bit = bit {
+            s[i] = bit
+        } else {
+            s.unset(i)
+        }
+        return KhTensorElement(state: s, factors: factors, shift: shift)
+    }
+    
     public static func ==(b1: KhTensorElement, b2: KhTensorElement) -> Bool {
         return b1.state == b2.state && b1.factors == b2.factors
     }

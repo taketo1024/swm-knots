@@ -17,10 +17,13 @@ public extension Link {
     
     public func KhHomology<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> SwiftyKnots.KhHomology<R> {
         
-        let name = "Kh(\(self.name); \(R.symbol))"
         let C = self.KhChainComplex(μ, Δ, R.self, reduced: reduced, normalized: normalized, shifted: shifted)
+        return KhHomology(C)
+    }
+    
+    public func KhHomology<R>(_ C: CochainComplex<KhTensorElement, R>) -> SwiftyKnots.KhHomology<R> {
+        let name = "Kh(\(self.name); \(R.symbol))"
         let H = Cohomology(name: name, chainComplex: C)
-        
         return SwiftyKnots.KhHomology(self, H)
     }
     

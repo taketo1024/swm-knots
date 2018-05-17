@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 public struct KauffmanState: Equatable, Comparable, Hashable, CustomStringConvertible {
     /*
@@ -27,13 +28,21 @@ public struct KauffmanState: Equatable, Comparable, Hashable, CustomStringConver
         }
     }
     
-    fileprivate let bits: [Int : Bit]
+    internal var bits: [Int : Bit]
     public init(_ bits: [Int : Bit]) {
         self.bits = bits
     }
     
     public subscript(i: Int) -> Bit {
-        return bits[i]!
+        get {
+            return bits[i]!
+        } set {
+            bits[i] = newValue
+        }
+    }
+    
+    public mutating func unset(_ i: Int) {
+        bits[i] = nil
     }
     
     public var length: Int {
@@ -107,7 +116,7 @@ public extension Link {
     }
     
     public func spliced(at i: Int, by mode: KauffmanState.Bit) -> Link {
-        var L = self.copy()
+        var L = self.copy(name: "\(name)\(Format.sub(mode.description))")
         return L.splice(at: i, by: mode)
     }
 
@@ -117,6 +126,10 @@ public extension Link {
             L.splice(at: i, by: s)
         }
         return L
+    }
+    
+    public func splicedPair(at i: Int) -> (Link, Link) {
+        return (self.spliced(at: i, by: .O), self.spliced(at: i, by: .I))
     }
 }
 
