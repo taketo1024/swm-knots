@@ -46,6 +46,10 @@ public struct _ChainMap<T: ChainType, A: BasisElementType, B: BasisElementType, 
         return f.applied(to: x)
     }
     
+    public func asMatrix(from: [A], to: [B]) -> Matrix<R> {
+        return f.asMatrix(from: from, to: to)
+    }
+    
     public static func ∘<C>(g: _ChainMap<T, B, C, R>, f: _ChainMap<T, A, B, R>) -> _ChainMap<T, A, C, R> {
         return _ChainMap<T, A, C, R>(degree: f.degree + g.degree, g.f ∘ f.f)
     }
@@ -62,11 +66,23 @@ public struct _ChainMap<T: ChainType, A: BasisElementType, B: BasisElementType, 
         
         typealias X = AbstractBasisElement
         
-        let p1 = from.abstractBasisDict().inverse!.asFunc()
-        let p2 = to.abstractBasisDict().asFunc()
+        let p1 = from.abstractBasisDict().inverse!
+        let p2 = to.abstractBasisDict()
         
-        let f1 = _ChainMap<T, X, A, R> { (a: X) in FreeModule(p1(a)) }
-        let f2 = _ChainMap<T, B, X, R> { (b: B) in FreeModule(p2(b)) }
+        let f1 = _ChainMap<T, X, A, R> { (x: X) in
+            guard let a = p1[x] else {
+                fatalError("\(x) not in the basis of: \(from)")
+            }
+            return FreeModule(a)
+        }
+        
+        let f2 = _ChainMap<T, B, X, R> { (b: B) in
+            guard let x = p2[b] else {
+                fatalError("\(b) not in the basis of: \(to)")
+            }
+            return FreeModule(x)
+        }
+        
         let f = f2 ∘ self ∘ f1
 
         return _ChainMap<T, X, X, R> (degree: degree) {
