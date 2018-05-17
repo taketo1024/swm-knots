@@ -8,6 +8,10 @@
 
 import Foundation
 
+public extension LogFlag {
+    public static var matrixElimination: LogFlag { return LogFlag(id: "Matrix.Elimination", label: "matrix") }
+}
+
 internal class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
     var target: MatrixImpl<R>
     var rowOps: [ElementaryOperation]
@@ -93,14 +97,12 @@ internal class MatrixEliminator<R: EuclideanRing>: CustomStringConvertible {
         log("Transpose")
     }
     
-    func log(_ msg: @autoclosure () -> String) {
-        Debug.log(.MatrixElim, msg)
-//        Debug.log(.MatrixElim, target.detailDescription)
-//        Debug.log(.MatrixElim, "\n")
-    }
-    
     var description: String {
         return "\(type(of: self))"
+    }
+    
+    func log(_ msg: @autoclosure () -> String) {
+        Logger.write(.matrixElimination, msg)
     }
     
     enum ElementaryOperation {

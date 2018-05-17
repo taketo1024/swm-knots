@@ -8,14 +8,6 @@
 
 import Foundation
 
-public enum DebugFlag {
-    case `default`
-    case MatrixElim
-    case Storage
-}
-
-private var flags = Set<DebugFlag>()
-
 public class Debug {
     private static let precision = 1000.0
     
@@ -34,19 +26,5 @@ public class Debug {
             }
         }
         return f()
-    }
-    
-    public static func setFlag(_ flag: DebugFlag) {
-        flags.insert(flag)
-    }
-    
-    public static func unsetFlag(_ flag: DebugFlag) {
-        flags.remove(flag)
-    }
-    
-    public static func log(_ flag: DebugFlag, _ msg: @autoclosure () -> String) {
-        if flags.contains(flag) {
-            print(msg())
-        }
     }
 }
