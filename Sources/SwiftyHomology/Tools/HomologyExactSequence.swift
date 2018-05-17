@@ -56,7 +56,6 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
     }
     
     public subscript(n: Int, i: Int) -> Object? {
-        assert((0 ..< 3).contains(i))
         return sequence[seqIndex(n, i)]
     }
     
@@ -73,6 +72,7 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
     }
     
     internal func seqIndex(_ n: Int, _ i: Int) -> Int {
+        assert((0 ..< 3).contains(i))
         return T.descending ? (topDegree - n) * 3 + i : (n - bottomDegree) * 3 + i
     }
     
