@@ -56,6 +56,10 @@ public struct KhCube {
         }
     }
     
+    public func d<R: Ring>(_ x: KhTensorElement) -> FreeModule<KhTensorElement, R> {
+        return map(x, KhBasisElement.μ, KhBasisElement.Δ)
+    }
+    
     public func map<R: Ring>(_ x: KhTensorElement, _ μ: KhBasisElement.Product<R>, _ Δ: KhBasisElement.Coproduct<R>) -> FreeModule<KhTensorElement, R> {
         let s = x.state
         return s.next.sum { (sgn, next) in
