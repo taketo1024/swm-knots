@@ -34,7 +34,7 @@ public extension Link {
     }
 }
 
-public struct KhHomology<R: EuclideanRing> {
+public struct KhHomology<R: EuclideanRing>: CustomStringConvertible {
     public typealias Inner = Cohomology<KhTensorElement, R>
     public typealias Summand = Inner.Summand
     
@@ -137,6 +137,10 @@ public struct KhHomology<R: EuclideanRing> {
             }.joined()
             return f + t
         }.joined()
+    }
+    
+    public var description: String {
+        return "\(H.name)\n\(table.description)"
     }
     
     public struct Table<E>: CustomStringConvertible {
