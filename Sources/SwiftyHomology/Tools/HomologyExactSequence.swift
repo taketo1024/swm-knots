@@ -20,33 +20,39 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
     internal let h:    [H]   // [H0,  H1,  H2]
     internal let maps: [Map] // [   f0,  f1,  ∂]
     
-    public let topDegree: Int
-    public let bottomDegree: Int
     public var sequence : ExactSequence<R>
 
-    // Induce from short ex. seq. of ChainComplexes.
     public init<A, B, C>(_ chain0: _ChainComplex<T, A, R>, _ map0 : _ChainMap<T, A, B, R>,
                          _ chain1: _ChainComplex<T, B, R>, _ map1 : _ChainMap<T, B, C, R>,
                          _ chain2: _ChainComplex<T, C, R>, _ delta: _ChainMap<T, C, A, R>) {
         
-        let (h0, h1, h2) = (H(chainComplex: chain0.asAbstract()),
-                            H(chainComplex: chain1.asAbstract()),
-                            H(chainComplex: chain2.asAbstract()))
+        let SES = _ChainComplexSES(chain0, map0, chain1, map1, chain2, delta)
         
-        let (f0, f1,  d) = (Map.induced(from:  map0.asAbstract(from: chain0, to: chain1), codomainStructure: h1),
-                            Map.induced(from:  map1.asAbstract(from: chain1, to: chain2), codomainStructure: h2),
-                            Map.induced(from: delta.asAbstract(from: chain2, to: chain0), codomainStructure: h0))
-       
-        self.init(h0, f0, h1, f1, h2, d)
+        self.init(SES)
+    }
+    
+    public init<A, B, C>(_ S: _ChainComplexSES<T, A, B, C, R>) {
+        let (c0, c1, c2) = (S.c0, S.c1, S.c2)
+        let (f0, f1, f2)  = (S.f0, S.f1, S.d)
+        
+        let (h0, h1, h2) = (H(chainComplex: c0.asAbstract()),
+                            H(chainComplex: c1.asAbstract()),
+                            H(chainComplex: c2.asAbstract()))
+        
+        let (g0, g1, g2) = (Map.induced(from: f0.asAbstract(from: c0, to: c1), codomainStructure: h1),
+                            Map.induced(from: f1.asAbstract(from: c1, to: c2), codomainStructure: h2),
+                            Map.induced(from: f2.asAbstract(from: c2, to: c0), codomainStructure: h0))
+        
+        self.init(h0, g0, h1, g1, h2, g2)
+
     }
     
     public init(_ h0: H, _ map0 : Map, _ h1: H, _ map1 : Map, _ h2: H, _ delta: Map) {
         self.h = [h0, h1, h2]
         self.maps = [map0, map1, delta]
         
-        self.topDegree    = Swift.max(h0.topDegree, h1.topDegree, h2.topDegree)
-        self.bottomDegree = Swift.min(h0.offset,    h1.offset,    h2.offset)
-        self.sequence  = ExactSequence(count: 3 * (topDegree - bottomDegree + 1))
+        let (n0, n1) = (h.map{ $0.offset }.min()!, h.map{ $0.topDegree }.max()!)
+        self.sequence  = ExactSequence(count: 3 * (n1 - n0 + 1))
     }
     
     public subscript(i: Int) -> [Object?] {
@@ -57,6 +63,14 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
     public subscript(i: Int, n: Int) -> Object? {
         assert((0 ..< 3).contains(i))
         return sequence[seqIndex(i, n)]
+    }
+    
+    public var topDegree: Int {
+        return h.map{ $0.topDegree }.max()!
+    }
+    
+    public var bottomDegree: Int {
+        return h.map{ $0.offset }.min()!
     }
     
     public var length: Int {
