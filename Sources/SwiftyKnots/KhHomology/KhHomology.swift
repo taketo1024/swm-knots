@@ -102,6 +102,19 @@ public struct KhHomology<R: EuclideanRing>: CustomStringConvertible {
         return filtered(name) { s in !s.isFree }
     }
     
+    public func describe(_ i: Int, _ j: Int) {
+        let s = self[i, j]
+        if s.isTrivial {
+            print((i, j), ": 0")
+        } else {
+            print((i, j), ":", s, "{")
+            for x in s.generators {
+                print("\t", x, ",")
+            }
+            print("}\n")
+        }
+    }
+    
     private func filtered(_ name: String, _ condition: (Summand.Summand) -> Bool) -> KhHomology<R> {
         let summands = (H.offset ... H.topDegree).map { i -> Summand in
             let s = H[i]
