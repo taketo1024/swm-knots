@@ -136,11 +136,20 @@ public extension Link {
 extension KauffmanState: Codable {
     public init(from decoder: Decoder) throws {
         let c = try decoder.singleValueContainer()
-        self.bits = try c.decode([Int : Bit].self)
+        do {
+            let a = try c.decode([Int].self)
+            self.bits = Dictionary(pairs: a.enumerated().map{ (i, v) in (i, Bit(rawValue: v)!) })
+        } catch {
+            self.bits = try c.decode([Int : Bit].self)
+        }
     }
     
     public func encode(to encoder: Encoder) throws {
         var c = encoder.singleValueContainer()
-        try c.encode(bits)
+        if bits.keys.sorted() == (0 ..< bits.count).toArray() {
+            try c.encode(bits.sorted{ $0.key }.map{ $0.value.rawValue })
+        } else {
+            try c.encode(bits)
+        }
     }
 }
