@@ -95,6 +95,10 @@ public extension Link {
             return names.map{ name in Link.load(name) }
         }
     }
+    
+    public static func list(_ type: LinkType, crossing range: CountableClosedRange<Int>) -> [Link] {
+        return Array(range).flatMap { i in list(type, crossing: i) }
+    }
 }
 
 private enum LinkTableType: String {
