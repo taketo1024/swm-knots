@@ -21,6 +21,12 @@ public extension Dictionary {
         return Dictionary<K, V>(pairs: self.map{ (k, v) in transform(k, v) })
     }
     
+    public func replaced(at k: Key, with v: Value) -> [Key : Value] {
+        var a = self
+        a[k] = v
+        return a
+    }
+
     public func asFunc(default v: Value? = nil) -> (Key) -> Value {
         return { k in self[k] ?? v! }
     }

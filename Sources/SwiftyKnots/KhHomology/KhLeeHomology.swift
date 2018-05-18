@@ -38,7 +38,8 @@ public final class KhLeeHomology<R: EuclideanRing> {
         
         let (from, to) = (Kh[i, j], Kh[i + 1, j + 4])
         let grid = from.generators.flatMap { x -> [R] in
-            let y = Kh.cube.map(x, KhBasisElement.μ_Lee, KhBasisElement.Δ_Lee)
+            let cube = Kh.link.KhCube
+            let y = cube.map(x, KhBasisElement.μ_Lee, KhBasisElement.Δ_Lee)
             return to.factorize(y)
         }
         
@@ -59,7 +60,8 @@ public final class KhLeeHomology<R: EuclideanRing> {
             }
             
             let res = from.generators.forAll{ x in
-                let y = Kh.cube.map(x, KhBasisElement.μ_Lee, KhBasisElement.Δ_Lee)
+                let cube = Kh.link.KhCube
+                let y = cube.map(x, KhBasisElement.μ_Lee, KhBasisElement.Δ_Lee)
                 return to.factorize(y).forAll{ $0 == .zero }
             }
             

@@ -9,21 +9,21 @@ import Foundation
 import SwiftyMath
 
 public struct KhTensorElement: BasisElementType, Comparable, Codable {
-    public let state: LinkSpliceState
+    public let state: KauffmanState
     internal let factors: [KhBasisElement]
     public let degree: Int
     
-    public static func generateBasis(state: LinkSpliceState, power n: Int, shift: Int) -> [KhTensorElement] {
+    public static func generateBasis(state: KauffmanState, power n: Int) -> [KhTensorElement] {
         return (0 ..< n).reduce([[]]) { (res, _) -> [[KhBasisElement]] in
             res.flatMap{ factors -> [[KhBasisElement]] in
                 [factors + [.I], factors + [.X]]
             }
             }
-            .map{ factors in KhTensorElement.init(state, factors, shift) }
+            .map{ factors in KhTensorElement.init(state: state, factors: factors) }
             .sorted()
     }
     
-    internal init(_ state: LinkSpliceState, _ factors: [KhBasisElement], _ shift: Int) {
+    internal init(state: KauffmanState, factors: [KhBasisElement], shift: Int = 0) {
         self.state = state
         self.factors = factors
         self.degree = factors.sum{ e in e.degree } + state.degree + shift
@@ -33,7 +33,7 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
         return degree - factors.sum{ e in e.degree } - state.degree
     }
     
-    internal func product<R: Ring>(_ μ: KhBasisElement.Product<R>, _ from: (Int, Int), _ to: Int, _ toState: LinkSpliceState) -> FreeModule<KhTensorElement, R> {
+    internal func product<R: Ring>(_ μ: KhBasisElement.Product<R>, _ from: (Int, Int), _ to: Int, _ toState: KauffmanState) -> FreeModule<KhTensorElement, R> {
         let (i1, i2) = from
         let (e1, e2) = (factors[i1], factors[i2])
         
@@ -42,11 +42,11 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
             toFactors.remove(at: i2)
             toFactors.remove(at: i1)
             toFactors.insert(e, at: to)
-            return FreeModule( KhTensorElement(toState, toFactors, shift), a )
+            return FreeModule( KhTensorElement(state: toState, factors: toFactors, shift: shift), a )
         }
     }
     
-    internal func coproduct<R: Ring>(_ Δ: KhBasisElement.Coproduct<R>, _ from: Int, _ to: (Int, Int), _ toState: LinkSpliceState) -> FreeModule<KhTensorElement, R> {
+    internal func coproduct<R: Ring>(_ Δ: KhBasisElement.Coproduct<R>, _ from: Int, _ to: (Int, Int), _ toState: KauffmanState) -> FreeModule<KhTensorElement, R> {
         let (j1, j2) = to
         let e = factors[from]
         
@@ -55,8 +55,22 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
             toFactors.remove(at: from)
             toFactors.insert(e1, at: j1)
             toFactors.insert(e2, at: j2)
-            return FreeModule( KhTensorElement(toState, toFactors, shift), a )
+            return FreeModule( KhTensorElement(state: toState, factors: toFactors, shift: shift), a )
         }
+    }
+    
+    public func shifted(_ i: Int) -> KhTensorElement {
+        return KhTensorElement(state: state, factors: factors, shift: shift + i)
+    }
+    
+    public func stateModified(_ i: Int, _ bit: KauffmanState.Bit?) -> KhTensorElement {
+        var s = state
+        if let bit = bit {
+            s[i] = bit
+        } else {
+            s.unset(i)
+        }
+        return KhTensorElement(state: s, factors: factors, shift: shift)
     }
     
     public static func ==(b1: KhTensorElement, b2: KhTensorElement) -> Bool {
@@ -81,6 +95,6 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
     }
     
     public var description: String {
-        return "(" + factors.map{ "\($0)" }.joined(separator: "⊗") + ")" + Format.sub(state.description)
+        return factors.map{ "\($0)" }.joined(separator: "⊗") + Format.sub(state.description)
     }
 }

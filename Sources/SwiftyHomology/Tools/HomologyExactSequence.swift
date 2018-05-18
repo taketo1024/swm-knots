@@ -20,56 +20,65 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
     internal let h:    [H]   // [H0,  H1,  H2]
     internal let maps: [Map] // [   f0,  f1,  ∂]
     
-    public let topDegree: Int
-    public let bottomDegree: Int
     public var sequence : ExactSequence<R>
 
-    // Induce from short ex. seq. of ChainComplexes.
     public init<A, B, C>(_ chain0: _ChainComplex<T, A, R>, _ map0 : _ChainMap<T, A, B, R>,
                          _ chain1: _ChainComplex<T, B, R>, _ map1 : _ChainMap<T, B, C, R>,
                          _ chain2: _ChainComplex<T, C, R>, _ delta: _ChainMap<T, C, A, R>) {
         
-        let (h0, h1, h2) = (H(chainComplex: chain0.asAbstract()),
-                            H(chainComplex: chain1.asAbstract()),
-                            H(chainComplex: chain2.asAbstract()))
+        let SES = _ChainComplexSES(chain0, map0, chain1, map1, chain2, delta)
         
-        let (f0, f1,  d) = (Map.induced(from:  map0.asAbstract(from: chain0, to: chain1), codomainStructure: h1),
-                            Map.induced(from:  map1.asAbstract(from: chain1, to: chain2), codomainStructure: h2),
-                            Map.induced(from: delta.asAbstract(from: chain2, to: chain0), codomainStructure: h0))
-       
-        self.init(h0, f0, h1, f1, h2, d)
+        self.init(SES)
+    }
+    
+    public init<A, B, C>(_ S: _ChainComplexSES<T, A, B, C, R>) {
+        let (c0, c1, c2) = (S.c0, S.c1, S.c2)
+        let (f0, f1, f2)  = (S.f0, S.f1, S.d)
+        
+        let (h0, h1, h2) = (H(chainComplex: c0.asAbstract()),
+                            H(chainComplex: c1.asAbstract()),
+                            H(chainComplex: c2.asAbstract()))
+        
+        let (g0, g1, g2) = (Map.induced(from: f0.asAbstract(from: c0, to: c1), codomainStructure: h1),
+                            Map.induced(from: f1.asAbstract(from: c1, to: c2), codomainStructure: h2),
+                            Map.induced(from: f2.asAbstract(from: c2, to: c0), codomainStructure: h0))
+        
+        self.init(h0, g0, h1, g1, h2, g2)
+
     }
     
     public init(_ h0: H, _ map0 : Map, _ h1: H, _ map1 : Map, _ h2: H, _ delta: Map) {
         self.h = [h0, h1, h2]
         self.maps = [map0, map1, delta]
         
-        self.topDegree    = Swift.max(h0.topDegree, h1.topDegree, h2.topDegree)
-        self.bottomDegree = Swift.min(h0.offset,    h1.offset,    h2.offset)
-        self.sequence  = ExactSequence(count: 3 * (topDegree - bottomDegree + 1))
+        let (n0, n1) = (h.map{ $0.offset }.min()!, h.map{ $0.topDegree }.max()!)
+        self.sequence  = ExactSequence(count: 3 * (n1 - n0 + 1))
     }
     
-    public subscript(i: Int) -> [Object?] {
-        assert((0 ..< 3).contains(i))
-        return (bottomDegree ... topDegree).map { n in self[i, n] }
+    public subscript(n: Int, i: Int) -> Object? {
+        return sequence[seqIndex(n, i)]
     }
     
-    public subscript(i: Int, n: Int) -> Object? {
-        assert((0 ..< 3).contains(i))
-        return sequence[seqIndex(i, n)]
+    public var topDegree: Int {
+        return h.map{ $0.topDegree }.max()!
+    }
+    
+    public var bottomDegree: Int {
+        return h.map{ $0.offset }.min()!
     }
     
     public var length: Int {
         return (topDegree - bottomDegree + 1) * 3
     }
     
-    internal func seqIndex(_ i: Int, _ n: Int) -> Int {
+    internal func seqIndex(_ n: Int, _ i: Int) -> Int {
+        assert((0 ..< 3).contains(i))
         return T.descending ? (topDegree - n) * 3 + i : (n - bottomDegree) * 3 + i
     }
     
     internal func gridIndex(_ k: Int) -> (Int, Int) {
         let (i, j) = (k >= 0) ? (k % 3, k / 3) : (k % 3 + 3, k / 3 - 1)
-        return (i, T.descending ? topDegree - j : bottomDegree + j)
+        return (T.descending ? topDegree - j : bottomDegree + j, i)
     }
     
     internal var degrees: [Int] {
@@ -78,26 +87,26 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
             : (bottomDegree ... topDegree).toArray()
     }
     
-    public mutating func isZeroMap(_ i: Int) -> Bool {
-        return sequence.isZeroMap(i)
+    public func isZeroMap(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isZeroMap(seqIndex(n, i))
     }
     
-    public mutating func isInjective(_ i: Int) -> Bool {
-        return sequence.isZeroMap(i - 1)
+    public func isInjective(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isInjective(seqIndex(n, i))
     }
     
-    public mutating func isSurjective(_ i: Int) -> Bool {
-        return sequence.isZeroMap(i + 1)
+    public func isSurjective(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isSurjective(seqIndex(n, i))
     }
     
-    public mutating func isIsomorphic(_ i: Int) -> Bool {
-        return sequence.isIsomorphic(i)
+    public func isIsomorphic(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isIsomorphic(seqIndex(n, i))
     }
 
-    public mutating func fill(column i: Int, degree n: Int) {
+    public mutating func fill(_ n: Int, _ i: Int) {
         assert((0 ..< 3).contains(i))
 
-        let k = seqIndex(i, n)
+        let k = seqIndex(n, i)
         
         sequence[k] = h[i][n]
 
@@ -114,13 +123,13 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
         assert(columns.forAll{ i in (0 ..< 3).contains(i) })
         for i in columns {
             for n in bottomDegree ... topDegree {
-                fill(column: i, degree: n)
+                fill(n, i)
             }
         }
     }
     
     private func makeMap(_ k: Int) -> ExactSequence<R>.Map {
-        let (i, _) = gridIndex(k)
+        let (_, i) = gridIndex(k)
         let (h0, f) = (h[i], maps[i])
         
         return ExactSequence<R>.Map { (z: FreeModule<AbstractBasisElement, R>) in
@@ -131,25 +140,28 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
     }
     
     @discardableResult
-    public mutating func solve(column i: Int, degree n: Int) -> Object? {
-        sequence.solve(seqIndex(i, n))
-        return self[i, n]
+    public mutating func solve(_ n: Int, _ i: Int) -> Object? {
+        sequence.solve(seqIndex(n, i))
+        return self[n, i]
     }
     
     @discardableResult
     public mutating func solve(column i: Int) -> [Object?] {
         return (bottomDegree ... topDegree).map { n in
-            self.solve(column: i, degree: n)
+            self.solve(n, i)
         }
     }
     
-    @discardableResult
-    public mutating func solve() -> [Object?] {
+    public mutating func solve() {
         return sequence.solve()
     }
     
-    public func assertExactness(column i: Int, degree n: Int) {
-        let k = seqIndex(i, n)
+    public func describe(_ n: Int, _ i: Int) {
+        return sequence.describe(seqIndex(n, i))
+    }
+    
+    public func assertExactness(_ n: Int, _ i: Int) {
+        let k = seqIndex(n, i)
         sequence.assertExactness(at: k)
     }
     
@@ -163,17 +175,14 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
     }
     
     public var description: String {
-        return h.map{ $0.description }.joined(separator: " -> ")
-    }
-    
-    public var detailDescription: String {
-        func s(_ i: Int, _ n: Int) -> String {
-            return self[i, n].map{ "\($0)" } ?? "?"
+        let title = h.map{ h in h.description }.joined(separator: " -> ")
+        let head = "n\\i\t" + h.enumerated().map{ (i, _) in "\(i)" }.joined(separator: "\t\t")
+        let lines = degrees.map { n -> String in
+            "\(n)\t" + (0 ..< 3).map { i in
+                let k = self.seqIndex(n, i)
+                return "\(sequence.objectDescription(k))\t\(sequence.arrowDescription(k))\t"
+                }.joined()
         }
-        return "\(self.description)\n--------------------\n"
-            + degrees.map { n -> String in
-                "\(n): \t" + (0 ..< 3).map{ i in self[i, n].map{ "\($0)" } ?? "?" }.joined(separator: "\t-> ")
-                }.joined(separator: "\t->\n")
-            + "\t-> 0"
+        return ([title, head] + lines).joined(separator: "\n")
     }
 }

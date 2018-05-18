@@ -108,7 +108,7 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
         let pairs = validDegrees
             .flatMap{ chainBasis($0) }
             .enumerated()
-            .map{ (i, a) in (a, AbstractBasisElement(i)) }
+            .map{ (i, a) in (a, AbstractBasisElement(i, label: a.description)) }
         return Dictionary(pairs: pairs)
     }
     

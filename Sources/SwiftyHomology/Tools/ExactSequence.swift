@@ -66,69 +66,62 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         return Matrix(rows: to.generators.count, cols: from.generators.count, components: comps)
     }
     
-    //  The following are equivalent:
-    //
-    //        f0     [f1]      f2
-    //    M0 ---> M1 ----> M2 ---> M3
-    //
-    //
-    //  1) f1 = 0
-    //  2) f2: injective  ( Ker(f2) = Im(f1) = 0 )
-    //  3) f0: surjective ( M1 = Ker(f1) = Im(f0) )
-    //
+    public func isZero(_ i: Int) -> Bool {
+        return self[i]?.isTrivial ?? false
+    }
     
-    public mutating func isZeroMap(_ i1: Int) -> Bool {
+    public func isNonZero(_ i: Int) -> Bool {
+        return self[i].map{ !$0.isTrivial } ?? false
+    }
+    
+    public func isZeroMap(_ i1: Int) -> Bool {
         if self.arrows[i1].isZero {
             return true
         }
         
-        let result = { () -> Bool in
-            let (i0, i2, i3) = (i1 - 1, i1 + 1, i1 + 2)
-            
-            if let M1 = self[i1], M1.isTrivial {
-                return true
-            }
-            
-            if let M2 = self[i2], M2.isTrivial {
-                return true
-            }
-
-            if let A1 = matrix(i1), A1.isZero {
-                return true
-            }
-            
-            if  let M2 = self[i2], M2.isFree,
-                let M3 = self[i3], M3.isFree,
-                let A2 = matrix(i2), A2.elimination().isInjective {
-                return true
-            }
-            
-            if  let M0 = self[i0], M0.isFree,
-                let M1 = self[i1], M1.isFree,
-                let A0 = matrix(i0), A0.elimination().isSurjective {
-                return true
-            }
-
-            return false
-        }()
+        let (i0, i2, i3) = (i1 - 1, i1 + 1, i1 + 2)
         
-        if result {
-            self.arrows[i1].isZero = true
+        if let M1 = self[i1], M1.isTrivial {
+            return true
         }
         
-        return result
+        if let M2 = self[i2], M2.isTrivial {
+            return true
+        }
+        
+        if let A1 = matrix(i1), A1.isZero {
+            return true
+        }
+        
+        if  let M2 = self[i2], M2.isFree,
+            let M3 = self[i3], M3.isFree,
+            let A2 = matrix(i2), A2.elimination().isInjective {
+            return true
+        }
+        
+        if  let M0 = self[i0], M0.isFree,
+            let M1 = self[i1], M1.isFree,
+            let A0 = matrix(i0), A0.elimination().isSurjective {
+            return true
+        }
+        
+        return false
     }
     
-    public mutating func isInjective(_ i: Int) -> Bool {
+    public func isInjective(_ i: Int) -> Bool {
         return isZeroMap(i - 1)
     }
     
-    public mutating func isSurjective(_ i: Int) -> Bool {
+    public func isSurjective(_ i: Int) -> Bool {
         return isZeroMap(i + 1)
     }
     
-    public mutating func isIsomorphic(_ i: Int) -> Bool {
+    public func isIsomorphic(_ i: Int) -> Bool {
         return isInjective(i) && isSurjective(i)
+    }
+    
+    public mutating func solve() {
+        return (0 ..< length).forEach{ i in solve(i) }
     }
     
     @discardableResult
@@ -137,7 +130,7 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
             return o
         }
         
-        if let o = _solve(i) {
+        if let o = solveObject(i) {
             self[i] = o
             return o
         } else {
@@ -145,7 +138,7 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         }
     }
     
-    private mutating func _solve(_ i2: Int) -> Object? {
+    internal mutating func solveObject(_ i2: Int) -> Object? {
         
         // Aim: [M2]
         //
@@ -160,7 +153,7 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         //     0         0
         // M1 ---> [M2] ---> M3  ==>  M2 = Ker(0) = Im(0) = 0
         
-        if isZeroMap(i1), isZeroMap(i2) {
+        if solveZeroMap(i1), solveZeroMap(i2) {
             log("\(i2): trivial.")
             return Object.zeroModule
         }
@@ -170,7 +163,7 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         //     0       f1        0
         // M0 ---> M1 ---> [M2] ---> M3  ==>  f1: isom
         
-        if let M1 = self[i1], isZeroMap(i0), isZeroMap(i2) {
+        if let M1 = self[i1], solveZeroMap(i0), solveZeroMap(i2) {
             log("\(i2): isom to \(i1).")
             arrows[i1] = Arrow.identity
             return M1
@@ -181,7 +174,7 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         //     0         f2      0
         // M1 ---> [M2] ---> M3 ---> M4  ==>  f2: isom
         
-        if let M3 = self[i3], isZeroMap(i1), isZeroMap(i3) {
+        if let M3 = self[i3], solveZeroMap(i1), solveZeroMap(i3) {
             log("\(i2): isom to \(i3).")
             arrows[i2] = Arrow.identity
             return M3
@@ -216,9 +209,43 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         return N0 ⊕ N1
     }
     
-    @discardableResult
-    public mutating func solve() -> [Object?] {
-        return (0 ..< length).map{ i in solve(i) }
+    //  The following are equivalent:
+    //
+    //        f0     [f1]      f2
+    //    M0 ---> M1 ----> M2 ---> M3
+    //
+    //
+    //  1) f1 = 0
+    //  2) f2: injective  ( Ker(f2) = Im(f1) = 0 )
+    //  3) f0: surjective ( M1 = Ker(f1) = Im(f0) )
+    //
+    
+    internal mutating func solveZeroMap(_ i1: Int) -> Bool {
+        if isZeroMap(i1) {
+            self.arrows[i1].isZero = true
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    public func describe(_ i0: Int) {
+        let i1 = i0 + 1
+        print("\(objectDescription(i0)) \(arrowDescription(i0)) \(objectDescription(i1))", "\n")
+        
+        for i in [i0, i1] {
+            if let M = self[i] {
+                print(M, "{")
+                for x in M.generators {
+                    print("\t", x)
+                }
+                print("}\n")
+            }
+        }
+        
+        if let A = self.matrix(i0) {
+            print(A.detailDescription, "\n")
+        }
     }
     
     public func assertExactness(at i1: Int) {
@@ -235,11 +262,8 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
             let f0 = arrows[i0].map,
             let f1 = arrows[i1].map
             else {
-                log("\(i1): skipped.")
                 return
         }
-        
-        log("\(i1): \(M0) -> [\(M1)] -> \(M2)")
         
         if M1.isTrivial {
             return
@@ -250,7 +274,6 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
             let y = f0.applied(to: x)
             let z = f1.applied(to: y)
             
-            log("\t\(x) ->\t\(y) ->\t\(z)")
             assert(M2.elementIsZero(z))
         }
         
@@ -269,14 +292,21 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         return AnyIterator(lazy.makeIterator())
     }
     
-    public var description: String {
-        return "ExactSequence(length: \(length))"
+    internal func objectDescription(_ i: Int) -> String {
+        return self[i]?.description ?? "?"
     }
     
-    public var detailDescription: String {
-        return "\(self.description)\n--------------------\n0\t-> "
-            + objects.map{ $0.flatMap{"\($0)"} ?? "?" }.joined(separator: "\t -> ")
-            + "\t-> 0"
+    internal func arrowDescription(_ i: Int) -> String {
+        return isNonZero(i) && isNonZero(i + 1)
+                ? (isZeroMap(i) ? "-ͦ>" : isIsomorphic(i) ? "-̃>" : isInjective(i) ? "-ͫ>" : isSurjective(i) ? "-ͤ>" : "->")
+                : "->"
+    }
+    
+    public var description: String {
+        return "ExSeq<\(R.symbol)>: "
+            + "0 -> "
+            + (0 ..< length).map { i in "\(objectDescription(i)) \(arrowDescription(i)) " }.joined()
+            + "0"
     }
     
     private func log(_ msg: @autoclosure () -> String) {

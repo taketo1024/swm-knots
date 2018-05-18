@@ -34,6 +34,7 @@ public struct Link: Equatable, CustomStringConvertible {
     
     public let name: String
     internal let crossings: [Crossing]
+    internal let _KhCube: Cache<KhCube> = Cache()
     
     internal init(name: String, crossings: [Crossing]) {
         self.name = name
@@ -104,22 +105,6 @@ public struct Link: Equatable, CustomStringConvertible {
         self.init(name: name, planarCode: planarCode)
     }
     
-    public static var empty: Link {
-        return Link(name: "∅", crossings: [])
-    }
-    
-    public static var unknot: Link {
-        let (e0, e1) = (Edge(0), Edge(1))
-        let x = Crossing(edges: (e0, e0, e1, e1), mode: .V)
-        (e0.from, e0.to) = (x, x)
-        (e1.from, e1.to) = (x, x)
-        return Link(name: "○", crossings: [x])
-    }
-    
-    public var edges: Set<Edge> {
-        return Set( crossings.flatMap{ x -> [Edge] in x.edges } )
-    }
-    
     public func copy(name: String? = nil) -> Link {
         let edges = Dictionary(pairs: self.edges.map{ e -> (Int, Edge) in (e.id, e) } )
         
@@ -136,6 +121,10 @@ public struct Link: Equatable, CustomStringConvertible {
         }
         
         return Link(name: name ?? self.name, crossings: copiedCross)
+    }
+    
+    public var edges: Set<Edge> {
+        return Set( crossings.flatMap{ x -> [Edge] in x.edges } )
     }
     
     public var components: [Component] {
@@ -227,44 +216,8 @@ public struct Link: Equatable, CustomStringConvertible {
         return Link(name: "\(L1.name) + \(L2.name)", crossings: cL1.crossings + cL2.crossings)
     }
     
-    /*
-     *     \ /          \ /
-     *      /      ==>  | |
-     *     / \          / \
-     */
-    
-    @discardableResult
-    public mutating func spliceA(at n: Int) -> Link {
-        crossings[n].spliceA()
-        return self
-    }
-    
-    public func splicedA(at n: Int) -> Link {
-        var L = self.copy()
-        L.spliceA(at: n)
-        return L
-    }
-    
-    /*
-     *     \ /          \_/
-     *      /      ==>
-     *     / \          /‾\
-     */
-    
-    @discardableResult
-    public mutating func spliceB(at n: Int) -> Link {
-        crossings[n].spliceB()
-        return self
-    }
-    
-    public func splicedB(at n: Int) -> Link {
-        var L = self.copy()
-        L.spliceB(at: n)
-        return L
-    }
-    
-    public func splicedPair(at i: Int) -> (Link, Link) {
-        return (splicedA(at: i), splicedB(at: i))
+    public static func == (lhs: Link, rhs: Link) -> Bool {
+        return lhs.crossings == rhs.crossings
     }
     
     public var description: String {
@@ -425,7 +378,7 @@ public struct Link: Equatable, CustomStringConvertible {
             }
         }
         
-        public func spliceA() {
+        public func splice0() {
             switch mode {
             case .X⁺: mode = .V
             case .X⁻: mode = .H
@@ -433,7 +386,7 @@ public struct Link: Equatable, CustomStringConvertible {
             }
         }
         
-        public func spliceB() {
+        public func splice1() {
             switch mode {
             case .X⁺: mode = .H
             case .X⁻: mode = .V

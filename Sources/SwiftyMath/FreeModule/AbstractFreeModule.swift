@@ -9,12 +9,19 @@ import Foundation
 
 public struct AbstractBasisElement: BasisElementType {
     public let index: Int
-    public init(_ index: Int) {
+    public let label: String
+    
+    public init(_ index: Int, label: String? = nil) {
         self.index = index
+        self.label = label ?? "e\(Format.sub(index))"
     }
     
     public static func generateBasis(_ size: Int) -> [AbstractBasisElement] {
         return (0 ..< size).map{ AbstractBasisElement($0) }
+    }
+    
+    public static func == (e1: AbstractBasisElement, e2: AbstractBasisElement) -> Bool {
+        return e1.index == e2.index
     }
     
     public static func < (e1: AbstractBasisElement, e2: AbstractBasisElement) -> Bool {
@@ -22,7 +29,7 @@ public struct AbstractBasisElement: BasisElementType {
     }
     
     public var description: String {
-        return "e\(Format.sub(index))"
+        return label
     }
 }
 
