@@ -115,6 +115,12 @@ public struct KhHomology<R: EuclideanRing>: CustomStringConvertible {
         }
     }
     
+    public func describeAll() {
+        for (i, j) in validDegrees {
+            describe(i, j)
+        }
+    }
+    
     private func filtered(_ name: String, _ condition: (Summand.Summand) -> Bool) -> KhHomology<R> {
         let summands = (H.offset ... H.topDegree).map { i -> Summand in
             let s = H[i]
