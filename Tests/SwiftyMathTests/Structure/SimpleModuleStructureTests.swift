@@ -17,40 +17,80 @@ class SimpleModuleStructureTests: XCTestCase {
 
     func testFree() {
         let basis = (0 ..< 3).map{ A($0) }
-        let matrix = Matrix<R>.zero(rows: 3, cols: 0)
-        let str = SimpleModuleStructure<A, R>(generators: basis, relationMatrix: matrix)
+        let a = M(basis: basis, components: [1, 0, 0])
+        let b = M(basis: basis, components: [0, 1, 0])
+        let c = M(basis: basis, components: [0, 0, 1])
+        
+        let str = S(generators: [a, b, c])
+        
         XCTAssertEqual(str.rank, 3)
+        XCTAssertEqual(str.factorize(a), [1, 0, 0])
+        XCTAssertEqual(str.factorize(b), [0, 1, 0])
+        XCTAssertEqual(str.factorize(c), [0, 0, 1])
     }
     
-    func testRelation() {
-        typealias A = AbstractBasisElement
+    func testFreeSub() {
         let basis = (0 ..< 3).map{ A($0) }
-        let matrix = Matrix<R>(rows: 3, cols: 2, grid:[1, 0, 0, 2, 0, 0])
-        let str = S(generators: basis, relationMatrix: matrix)
+        let a = M(basis: basis, components: [1, 1, 0])
+        let b = M(basis: basis, components: [0, 0, 1])
+        
+        let str = S(generators: [a, b])
+        
+        XCTAssertEqual(str.rank, 2)
+        XCTAssertEqual(str.factorize(a), [1, 0])
+        XCTAssertEqual(str.factorize(b), [0, 1])
+        XCTAssertEqual(str.factorize(a + 2 * b), [1, 2])
+    }
+    
+    func testDiagonalRelation() {
+        let basis = (0 ..< 3).map{ A($0) }
+        let a = M(basis: basis, components: [1, 0, 0])
+        let b = M(basis: basis, components: [0, 1, 0])
+        let c = M(basis: basis, components: [0, 0, 1])
+        
+        let matrix = Matrix<R>(rows: 3, cols: 2, grid:
+            [1, 0,
+             0, 2,
+             0, 0]
+        )
+        
+        let str = S(generators: [a, b, c], relationMatrix: matrix)
+        
         XCTAssertEqual(str.rank, 1)
         XCTAssertEqual(str.torsionCoeffs, [2])
-        XCTAssertEqual(str.generator(0), M(basis[1]))
-        XCTAssertEqual(str.generator(1), M(basis[2]))
+        
+        XCTAssertEqual(str.generator(0), b)
+        XCTAssertEqual(str.generator(1), c)
+        
+        XCTAssertEqual(str.factorize(a), [0, 0])
+        XCTAssertEqual(str.factorize(b), [1, 0])
+        XCTAssertEqual(str.factorize(2 * b), [0, 0])
+        XCTAssertEqual(str.factorize(c), [0, 1])
+        XCTAssertEqual(str.factorize(2 * c), [0, 2])
     }
     
-    func testFactorize() {
-        typealias A = AbstractBasisElement
+    func testCrossRelation() {
         let basis = (0 ..< 3).map{ A($0) }
-        let matrix = Matrix<R>(rows: 3, cols: 2, grid:[1, 0, 0, 2, 0, 0])
-        let str = S(generators: basis, relationMatrix: matrix)
+        let a = M(basis: basis, components: [1, 0, 0])
+        let b = M(basis: basis, components: [0, 1, 0])
+        let c = M(basis: basis, components: [0, 0, 1])
+
+        let matrix = Matrix<R>(rows: 3, cols: 2, grid:
+            [1, 1,
+             1, 0,
+             0, -1]
+        )
+        let str = S(generators: [a, b, c], relationMatrix: matrix)
         
-        let z1 = M(basis: basis, components: [1, 0, 0])
-        let z2 = M(basis: basis, components: [0, 1, 0])
-        let z3 = M(basis: basis, components: [0, 0, 1])
+        XCTAssertEqual(str.rank, 1)
+        XCTAssertEqual(str.generator(0), a)
         
-        XCTAssertEqual(str.factorize(z1), [0, 0])
-        XCTAssertEqual(str.factorize(z2), [1, 0])
-        XCTAssertEqual(str.factorize(z3), [0, 1])
-        XCTAssertEqual(str.factorize(2 * z2 - z3), [0, -1])
+        XCTAssertEqual(str.factorize(a), [1])
+        XCTAssertEqual(str.factorize(b), [-1])
+        XCTAssertEqual(str.factorize(c), [1])
     }
     
     func testSubsummands() {
-        typealias A = AbstractBasisElement
         let basis = (0 ..< 3).map{ A($0) }
         let matrix = Matrix<R>(rows: 3, cols: 2, grid:[2, 0, 0, 4, 0, 0])
         let str = S(generators: basis, relationMatrix: matrix)

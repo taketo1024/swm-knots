@@ -43,13 +43,11 @@ public final class _Homology<T: ChainType, A: BasisElementType, R: EuclideanRing
             let (Ain, Aout) = (chainComplex.boundaryMatrix(i - T.degree), chainComplex.boundaryMatrix(i))
             let (Ein, Eout) = (Ain.elimination(), Aout.elimination())
             
-            let (Z, B, ZT) = (Eout.kernelMatrix, Ein.imageMatrix, Eout.kernelTransitionMatrix)
-            
             return SimpleModuleStructure(
                 basis:            basis,
-                generatingMatrix: Z,
-                relationMatrix:   B,
-                transitionMatrix: ZT
+                generatingMatrix: Eout.kernelMatrix,
+                transitionMatrix: Eout.kernelTransitionMatrix,
+                relationMatrix:   Eout.kernelTransitionMatrix * Ein.imageMatrix
             )
         }
     }

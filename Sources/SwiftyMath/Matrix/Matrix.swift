@@ -140,6 +140,10 @@ public struct _Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         return _Matrix<n, m, R2>(impl.mapValues(f))
     }
 
+    public var diagonal: [R] {
+        return (0 ..< Swift.min(rows, cols)).map{ i in self[i, i] }
+    }
+    
     public var transposed: _Matrix<m, n, R> {
         return _Matrix<m, n, R>(impl.transposed)
     }

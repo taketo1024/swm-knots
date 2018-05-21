@@ -24,10 +24,10 @@ public final class KhLeeHomology<R: EuclideanRing> {
         var (Ain, Aout) = (matrix(i - 1, j - 4), matrix(i, j))
         let (Ein, Eout) = (Ain.eliminate(form: .Smith), Aout.eliminate(form: .Smith))
         return SimpleModuleStructure(
-            basis:            Kh[i, j].generators.enumerated().map{ AbstractBasisElement($0.0) },
+            basis: Kh[i, j].generators.enumerated().map{ AbstractBasisElement($0.0) },
             generatingMatrix: Eout.kernelMatrix,
-            relationMatrix:    Ein.imageMatrix,
-            transitionMatrix: Eout.kernelTransitionMatrix
+            transitionMatrix: Eout.kernelTransitionMatrix,
+            relationMatrix:   Eout.kernelTransitionMatrix * Ein.imageMatrix
         )
     }
     

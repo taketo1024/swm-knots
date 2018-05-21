@@ -11,11 +11,7 @@ import Foundation
 // A decomposed form of a freely & finitely presented module,
 // i.e. a module with finite generators and a finite & free presentation.
 //
-//           B        A
-// 0 -> R^m ---> R^n ---> M -> 0
-//
-// ==> M ~= R^r + (R/d_0) + ... + (R/d_k),
-//     r: rank, k: torsion
+//   M = (R/d_0 ⊕ ... ⊕ R/d_k) ⊕ R^r  ( d_i: torsion-coeffs, r: rank )
 //
 // See: https://en.wikipedia.org/wiki/Free_presentation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
@@ -23,8 +19,9 @@ import Foundation
 public final class SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleStructure<R> {
     public let summands: [Summand]
     
-    internal let basis: [A]
-    internal let transform: Matrix<R>
+    // MEMO values used for factorization.
+    private let basis: [A]
+    private let transform: Matrix<R>
     
     // root initializer
     internal init(_ summands: [Summand], _ basis: [A], _ transform: Matrix<R>) {
@@ -40,7 +37,7 @@ public final class SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleSt
     }
     
     public static var zeroModule: SimpleModuleStructure<A, R> {
-        return SimpleModuleStructure([], [], .zero(rows: 0, cols: 0))
+        return SimpleModuleStructure([], [], Matrix.zero(rows: 0, cols: 0))
     }
     
     public var isTrivial: Bool {
@@ -48,7 +45,7 @@ public final class SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleSt
     }
     
     public var isFree: Bool {
-        return summands.forAll { $0.isFree } 
+        return summands.forAll { $0.isFree }
     }
     
     public var rank: Int {
@@ -147,70 +144,73 @@ public final class SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleSt
 }
 
 public extension SimpleModuleStructure where R: EuclideanRing {
-    public convenience init(generators: [A], relationMatrix B: Matrix<R>) {
+    public convenience init(generators: [A], relationMatrix B: Matrix<R>? = nil) {
         let I = Matrix<R>.identity(size: generators.count)
-        self.init(basis: generators, generatingMatrix: I, relationMatrix: B, transitionMatrix: I)
+        self.init(basis: generators, generatingMatrix: I, transitionMatrix: I, relationMatrix: B)
     }
     
-    public convenience init(basis: [A], generatingMatrix A: Matrix<R>, relationMatrix B: Matrix<R>, transitionMatrix T: Matrix<R>) {
+    // TODO must consider when `generators` does not form a subbasis of R^n
+    // e.g) generators = [(2, 0), (0, 2)]
+    
+    public convenience init(generators: [FreeModule<A, R>], relationMatrix B: Matrix<R>? = nil) {
+        let basis = generators.flatMap{ $0.basis }.unique().sorted()
+        let A = Matrix(rows: basis.count, cols: generators.count) { (i, j) in generators[j][basis[i]] }
+        let T = A.elimination(form: .RowEchelon).left.submatrix(rowRange: 0 ..< generators.count)
+        self.init(basis: basis, generatingMatrix: A, transitionMatrix: T, relationMatrix: B)
+    }
+    
+    /*
+     *                 R^n
+     *                 ^|
+     *                A||T
+     *             B   |v
+     *  0 -> R^l >---> R^k --->> M -> 0
+     *        ^        ^|
+     *        |       P||
+     *        |    D   |v
+     *  0 -> R^l >---> R^k --->> M' -> 0
+     *
+     */
+    public convenience init(basis: [A], generatingMatrix A: Matrix<R>, transitionMatrix T:Matrix<R>, relationMatrix _B: Matrix<R>?) {
         
-        assert(A.rows == B.rows)
-        assert(A.rows >= A.cols)  // n ≧ k
-        assert(A.cols >= B.cols)  // k ≧ l
+        let B = _B ?? Matrix.zero(rows: A.cols, cols: 0)
         
-        let (k, l) = (A.cols, B.cols)
+        let (n, k, l) = (A.rows, A.cols, B.cols)
         
-        // R ∈ M(k, l) : B = A * R.
-        //
-        // R = T * B, since
-        //     T * A = I_k,
-        //     T * B = T * (A * R) = I_k * R = R.
-        //
-        // R gives the structure of the quotient A / B.
+        assert(n == basis.count)
+        assert(k == B.rows)
+        assert(n >= k)
+        assert(k >= l)
         
-        var R1 = T * B
+        let elim = B.elimination(form: .Smith)
         
-        // Retake bases of A and B to obtain the decomposition of M.
-        //
-        //   P' * R * Q' = [D'; O].
-        //   => (B * Q') = (Z * R) * Q' = (Z * P'^-1) * [D; O]
-        //
-        // D gives the relation between the new bases.
-        //
-        // eg)     D = [1,   1,   2,   0]
-        //     A / B =  0  + 0 + Z/2 + Z
+        let D = elim.diagonal + [.zero].repeated(k - l)
+        let s = D.count{ $0 != .identity }
         
-        let E  = R1.eliminate(form: .Smith)
+        let A2 = A * elim.leftInverse.submatrix(colRange: (k - s) ..< k)
+        let T2 = (elim.left * T).submatrix(rowRange: (k - s) ..< k)
         
-        let divisors = (E.diagonal + Array(repeating: R.zero, count: k - l)).filter{ $0 != .identity }
-        let s = divisors.count
+        // MEMO see TODO above.
+        assert(T2 * A2 == Matrix<R>.identity(size: s))
         
-        let A2 = A * E.leftInverse.submatrix(colRange: (k - s) ..< k)
-        let generators = (0 ..< A2.cols).map { j in
-            A2.nonZeroComponents(ofCol: j).sum { c in FreeModule(basis[c.row], c.value) }
-        }
+        let summands = (0 ..< s)
+            .map { j -> Summand in
+                let d = D[k - s + j]
+                let g = A2.nonZeroComponents(ofCol: j).sum { c in
+                    FreeModule(basis[c.row], c.value)
+                }
+                return Summand(g, d)
+            }
         
-        let summands = zip(generators, divisors).map { (z, a) in
-            return SimpleModuleStructure<A, R>.Summand(z, a)
-        }
-        
-        // The transition matrix to A' = (A * P'^-1) is given by
-        //
-        //   T' := P' * T, since
-        //   T' * A' = (P' * T) * (Z * P'^-1) = P' * I_k * P'^-1 = I_k.
-        //
-        
-        let T2 = E.left.submatrix(rowRange: (k - s) ..< k) * T
         
         self.init(summands, basis, T2)
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
-        let n = basis.count
-        let v = transform * Matrix(rows: n, cols: 1, grid: z.factorize(by: basis))
+        let v = transform * Vector(z.factorize(by: basis))
         
         return summands.enumerated().map { (i, s) in
-            return s.isFree ? v[i, 0] : v[i, 0] % s.divisor
+            return s.isFree ? v[i] : v[i] % s.divisor
         }
     }
     
