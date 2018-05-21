@@ -15,8 +15,8 @@ class SimplicialHomologyExSeqTests: XCTestCase {
     
     func testH_DS01() {
         let E = H_DS(0, 1)
-        XCTAssertTrue( E[2, 0]!.isTrivial)
-        XCTAssertTrue( E[2, 1]!.isTrivial)
+        XCTAssertTrue( E[0, 2]!.isTrivial)
+        XCTAssertTrue( E[1, 2]!.isTrivial)
         XCTAssertTrue( E[2, 2]!.isFree)
         XCTAssertEqual(E[2, 2]!.rank, 1)
     }
@@ -25,42 +25,42 @@ class SimplicialHomologyExSeqTests: XCTestCase {
         let E = H_DS(1, 2)
         XCTAssertTrue( E[0, 0]!.isFree)
         XCTAssertEqual(E[0, 0]!.rank, 1)
-        XCTAssertTrue( E[0, 1]!.isFree)
-        XCTAssertEqual(E[0, 1]!.rank, 1)
-        XCTAssertTrue( E[0, 2]!.isTrivial)
+        XCTAssertTrue( E[1, 0]!.isFree)
+        XCTAssertEqual(E[1, 0]!.rank, 1)
+        XCTAssertTrue( E[2, 0]!.isTrivial)
     }
     
     func testH_DS20() {
         let E = H_DS(2, 0)
-        XCTAssertTrue( E[1, 0]!.isFree)
-        XCTAssertEqual(E[1, 0]!.rank, 1)
+        XCTAssertTrue( E[0, 1]!.isFree)
+        XCTAssertEqual(E[0, 1]!.rank, 1)
         XCTAssertTrue( E[1, 1]!.isTrivial)
-        XCTAssertTrue( E[1, 2]!.isTrivial)
+        XCTAssertTrue( E[2, 1]!.isTrivial)
     }
     
     func testCH_DS01() {
         let E = CH_DS(0, 1)
-        XCTAssertTrue( E[2, 0]!.isFree)
-        XCTAssertEqual(E[2, 0]!.rank, 1)
-        XCTAssertTrue( E[2, 1]!.isFree)
-        XCTAssertEqual(E[2, 1]!.rank, 1)
+        XCTAssertTrue( E[0, 2]!.isFree)
+        XCTAssertEqual(E[0, 2]!.rank, 1)
+        XCTAssertTrue( E[1, 2]!.isFree)
+        XCTAssertEqual(E[1, 2]!.rank, 1)
         XCTAssertTrue( E[2, 2]!.isTrivial)
     }
     
     func testCH_DS12() {
         let E = CH_DS(1, 2)
         XCTAssertTrue( E[0, 0]!.isTrivial)
-        XCTAssertTrue( E[0, 1]!.isTrivial)
-        XCTAssertTrue( E[0, 2]!.isFree)
-        XCTAssertEqual(E[0, 2]!.rank, 1)
+        XCTAssertTrue( E[1, 0]!.isTrivial)
+        XCTAssertTrue( E[2, 0]!.isFree)
+        XCTAssertEqual(E[2, 0]!.rank, 1)
     }
     
     func testCH_DS20() {
         let E = CH_DS(2, 0)
-        XCTAssertTrue( E[1, 0]!.isFree)
-        XCTAssertEqual(E[1, 0]!.rank, 1)
+        XCTAssertTrue( E[0, 1]!.isFree)
+        XCTAssertEqual(E[0, 1]!.rank, 1)
         XCTAssertTrue( E[1, 1]!.isTrivial)
-        XCTAssertTrue( E[1, 2]!.isTrivial)
+        XCTAssertTrue( E[2, 1]!.isTrivial)
     }
     
     private func H_DS(_ i0: Int, _ i1: Int) -> HomologyExactSequence<R> {
