@@ -21,6 +21,10 @@ public extension Dictionary {
         return Dictionary<K, V>(pairs: self.map{ (k, v) in transform(k, v) })
     }
     
+    public func exclude(_ isExcluded: (Element) throws -> Bool) rethrows -> [Key : Value] {
+        return try self.filter{ try !isExcluded($0) }
+    }
+    
     public func replaced(at k: Key, with v: Value) -> [Key : Value] {
         var a = self
         a[k] = v

@@ -30,6 +30,10 @@ public extension Sequence {
         return self.lazy.filter(predicate).count
     }
     
+    public func exclude(_ isExcluded: (Self.Element) throws -> Bool) rethrows -> [Self.Element] {
+        return try self.filter{ try !isExcluded($0) }
+    }
+    
     public func sorted<C: Comparable>(by indexer: (Element) -> C) -> [Element] {
         return self.sorted{ (e1, e2) in indexer(e1) < indexer(e2) }
     }
