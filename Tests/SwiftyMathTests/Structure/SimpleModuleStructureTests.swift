@@ -110,4 +110,10 @@ class SimpleModuleStructureTests: XCTestCase {
         XCTAssertTrue (sub2.isFree)
         XCTAssertEqual(sub2.factorize(M(basis[2])), [1])
     }
+    
+    func testAbstract() {
+        let str = S(rank: 1, torsions: [2, 3])
+        XCTAssertEqual(str.rank, 1)
+        XCTAssertEqual(str.torsionCoeffs, [2, 3])
+    }
 }
