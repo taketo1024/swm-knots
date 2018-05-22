@@ -72,6 +72,18 @@ public extension SimpleModuleStructure where R: EuclideanRing {
         self.init(summands, basis, T2)
     }
     
+    public convenience init(basis: [FreeModule<A, R>], generatingMatrix A: Matrix<R>, transitionMatrix T: Matrix<R>, relationMatrix B: Matrix<R>?) {
+        
+        let oBasis = basis.flatMap{ $0.basis }.unique().sorted()
+        let A0 = Matrix(rows: oBasis.count, cols: basis.count) { (i, j) in basis[j][oBasis[i]] }
+        let T0 = A0.elimination(form: .RowHermite).left.submatrix(rowRange: 0 ..< basis.count)
+        
+        assert(T0 * A0 == Matrix.identity(size: basis.count))
+        
+        self.init(basis: oBasis, generatingMatrix: A0 * A, transitionMatrix: T * T0, relationMatrix: B)
+
+    }
+    
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
         let v = transform * Vector(z.factorize(by: basis))
         
