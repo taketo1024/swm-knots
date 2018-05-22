@@ -99,7 +99,7 @@ public struct MPolynomial<K: Field>: Ring, Module {
     public static func * (f: MPolynomial<K>, g: MPolynomial<K>) -> MPolynomial<K> {
         var coeffs = [IntList : K]()
         for (I, J) in f.mIndices.allCombinations(with: g.mIndices) {
-            let K = I * J
+            let K = I + J
             coeffs[K] = coeffs[K, default: .zero] + f.coeff(I) * g.coeff(J)
         }
         return MPolynomial(coeffs)
