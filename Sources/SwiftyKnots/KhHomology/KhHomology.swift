@@ -36,6 +36,14 @@ public extension Link {
         let C = self.KhChainComplex(R.self, reduced: reduced, normalized: normalized)
         return C.homology(name: name)
     }
+    
+    public func KhLeeHomology<R: EuclideanRing>(_ type: R.Type) -> BigradedModuleStructure<KhTensorElement, R> {
+        let name = "KhLee(\(self.name); \(R.symbol))"
+        let Kh = KhHomology(type)
+        return Kh.homology(name: name, degree: (1, 4)) { (_, _, x) in
+            self.KhCube.d_Lee(x)
+        }
+    }
 }
 
 public extension BigradedModuleStructure where Dim == _2, A == KhTensorElement {

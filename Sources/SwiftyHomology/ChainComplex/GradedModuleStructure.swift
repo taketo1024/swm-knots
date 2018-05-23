@@ -68,6 +68,10 @@ public struct MultigradedModuleStructure<Dim: _Int, A: BasisElementType, R: Eucl
         return MultigradedChainComplex(base: self, degree: degree, map: d)
     }
     
+    public func homology(name: String? = nil, degree: IntList, d: @escaping (IntList, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
+        return asChainComplex(degree: degree, d: d).homology(name: name)
+    }
+    
     public func describe(_ I: IntList) {
         if let o = self[I] {
             if !o.isTrivial {
@@ -140,6 +144,10 @@ public extension MultigradedModuleStructure where Dim == _1 {
         return asChainComplex(degree: IntList(degree), d: {(I, a) in d(I[0], a)})
     }
     
+    public func homology(name: String? = nil, degree: Int, d: @escaping (Int, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
+        return asChainComplex(degree: degree, d: d).homology(name: name)
+    }
+    
     public func describe(_ i: Int) {
         describe(IntList(i))
     }
@@ -172,6 +180,10 @@ public extension MultigradedModuleStructure where Dim == _2 {
     
     public func asChainComplex(degree: (Int, Int), d: @escaping (Int, Int, A) -> FreeModule<A, R>) -> BigradedChainComplex<A, R> {
         return asChainComplex(degree: IntList(degree.0, degree.1), d: {(I, a) in d(I[0], I[1], a)})
+    }
+    
+    public func homology(name: String? = nil, degree: (Int, Int), d: @escaping (Int, Int, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
+        return asChainComplex(degree: degree, d: d).homology(name: name)
     }
 
     public func describe(_ i: Int, _ j: Int) {
