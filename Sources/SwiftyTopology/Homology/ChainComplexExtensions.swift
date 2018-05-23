@@ -13,7 +13,7 @@ import SwiftyHomology
 public extension GeometricComplex {
     public func chainComplex<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> GradedChainComplex<Cell, R> {
         if let L = L { // relative: (K, L)
-            return _chainComplex(relativeTo: L, R.self)
+            return _chainComplex(relativeTo: L, type)
         } else {
             return _chainComplex(R.self)
         }
@@ -41,7 +41,18 @@ public extension GeometricComplex {
     
     public func homology<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> GradedModuleStructure<Cell, R> {
         let name = (L == nil) ? "H(\(self.name); \(R.symbol))" : "H(\(self.name), \(L!.name); \(R.symbol))"
-        let C = chainComplex(relativeTo: L, R.self)
+        let C = chainComplex(relativeTo: L, type)
+        return C.homology(name: name)
+    }
+    
+    public func cochainComplex<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> GradedChainComplex<Dual<Cell>, R> {
+        let name = (L == nil) ? "cC(\(self.name); \(R.symbol))" : "cC(\(self.name), \(L!.name); \(R.symbol))"
+        return chainComplex(relativeTo: L, type).dual(name: name)
+    }
+    
+    public func cohomology<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> GradedModuleStructure<Dual<Cell>, R> {
+        let name = (L == nil) ? "cH(\(self.name); \(R.symbol))" : "cH(\(self.name), \(L!.name); \(R.symbol))"
+        let C = cochainComplex(relativeTo: L, type)
         return C.homology(name: name)
     }
 }
