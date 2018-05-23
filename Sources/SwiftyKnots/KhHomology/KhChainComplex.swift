@@ -9,6 +9,7 @@ import Foundation
 import SwiftyMath
 import SwiftyHomology
 
+/*
 public extension Link {
     public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> CochainComplex<KhTensorElement, R> {
         return KhChainComplex(KhBasisElement.μ, KhBasisElement.Δ, R.self,
@@ -36,3 +37,4 @@ public extension Link {
         return CochainComplex(name: name, chain: chain, offset: offset)
     }
 }
+*/

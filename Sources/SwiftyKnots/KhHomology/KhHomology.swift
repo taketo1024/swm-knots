@@ -9,6 +9,7 @@ import Foundation
 import SwiftyMath
 import SwiftyHomology
 
+/*
 public extension Link {
     public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> SwiftyKnots.KhHomology<R> {
         return KhHomology(KhBasisElement.μ, KhBasisElement.Δ, R.self,
@@ -228,3 +229,4 @@ extension KhHomology: Codable where R: Codable {
         try c.encode(H, forKey: .H)
     }
 }
+*/

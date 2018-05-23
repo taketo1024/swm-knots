@@ -15,6 +15,7 @@ public extension LogFlag {
     }
 }
 
+/*
 public struct ExactSequence<R: EuclideanRing>: Sequence {
     public typealias Object = AbstractSimpleModuleStructure<R>
     public typealias Map    = FreeModuleHom<AbstractBasisElement, AbstractBasisElement, R>
@@ -348,3 +349,4 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         }
     }
 }
+*/

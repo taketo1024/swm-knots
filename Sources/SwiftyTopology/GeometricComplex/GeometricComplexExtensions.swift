@@ -32,31 +32,17 @@ public extension GeometricComplex {
     }
     
     public var orientationCycle: FreeModule<Cell, 𝐙>? {
-        return orientationClass?.representative
+        return orientationCycle(relativeTo: nil, 𝐙.self)
     }
     
     public func orientationCycle(relativeTo L: Self) -> FreeModule<Cell, 𝐙>? {
-        return orientationClass(relativeTo:L)?.representative
+        return orientationCycle(relativeTo: L, 𝐙.self)
     }
     
     public func orientationCycle<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> FreeModule<Cell, R>? {
-        return orientationClass(relativeTo: L, R.self)?.representative
-    }
-    
-    public var orientationClass: HomologyClass<Cell, 𝐙>? {
-        return orientationClass(𝐙.self)
-    }
-    
-    public func orientationClass(relativeTo L: Self) -> HomologyClass<Cell, 𝐙>? {
-        return orientationClass(relativeTo: L, 𝐙.self)
-    }
-    
-    public func orientationClass<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> HomologyClass<Cell, R>? {
-        let H = Homology(geometricComplex: self, relativeTo: L, R.self)
-        let top = H[dim]
-        
-        if top.isFree && top.rank == 1 {
-            return H.homologyClass(of: top.generator(0))
+        let H = self.homology(relativeTo: L, R.self)
+        if let top = H[dim], top.isFree, top.rank == 1 {
+            return top.generator(0)
         } else {
             return nil
         }

@@ -9,6 +9,7 @@
 import Foundation
 import SwiftyMath
 
+/*
 public typealias   HomologyExactSequence<R: EuclideanRing> = _HomologyExactSequence<Descending, R>
 public typealias CohomologyExactSequence<R: EuclideanRing> = _HomologyExactSequence< Ascending, R>
 
@@ -186,3 +187,4 @@ public struct _HomologyExactSequence<T: ChainType, R: EuclideanRing>: Sequence, 
         return ([title, head] + lines).joined(separator: "\n")
     }
 }
+*/

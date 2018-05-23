@@ -8,6 +8,7 @@
 import Foundation
 import SwiftyMath
 
+/*
 public final class KhLeeHomology<R: EuclideanRing> {
     
     private let Kh: KhHomology<R>
@@ -91,3 +92,4 @@ public final class KhLeeHomology<R: EuclideanRing> {
             }.joined()
     }
 }
+*/

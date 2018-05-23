@@ -9,6 +9,7 @@ import Foundation
 import SwiftyMath
 import SwiftyHomology
 
+/*
 public extension Link {
     
     // MEMO currently supports only unnormalized degrees.
@@ -63,3 +64,4 @@ public extension Link {
         return H
     }
 }
+*/

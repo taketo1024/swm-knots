@@ -8,6 +8,7 @@
 import Foundation
 import SwiftyMath
 
+/*
 public typealias   ChainComplexSES<A: BasisElementType, B: BasisElementType, C: BasisElementType, R: EuclideanRing>
     = _ChainComplexSES<Descending, A, B, C, R>
 public typealias CochainComplexSES<A: BasisElementType, B: BasisElementType, C: BasisElementType, R: EuclideanRing>
@@ -73,4 +74,4 @@ public struct _ChainComplexSES<T: ChainType, A: BasisElementType, B: BasisElemen
         // TODO
     }
 }
-
+*/

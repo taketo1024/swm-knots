@@ -11,7 +11,7 @@ import SwiftyMath
 import SwiftyHomology
 
 public extension GeometricComplex {
-    public func chainComplex<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> GradedChainComplex<Cell, R> {
+    public func chainComplex<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> ChainComplex<Cell, R> {
         if let L = L { // relative: (K, L)
             return _chainComplex(relativeTo: L, type)
         } else {
@@ -19,7 +19,7 @@ public extension GeometricComplex {
         }
     }
 
-    private func _chainComplex<R: EuclideanRing>(_ type: R.Type) -> GradedChainComplex<Cell, R> {
+    private func _chainComplex<R: EuclideanRing>(_ type: R.Type) -> ChainComplex<Cell, R> {
         let name = "C(\(self.name); \(R.symbol))"
         let list = validDims.map { i in cells(ofDim: i) }
         let base = GradedModuleStructure<Cell, R>(name: name, list: list)
@@ -28,7 +28,7 @@ public extension GeometricComplex {
         }
     }
     
-    private func _chainComplex<R: EuclideanRing>(relativeTo L: Self, _ type: R.Type) -> GradedChainComplex<Cell, R> {
+    private func _chainComplex<R: EuclideanRing>(relativeTo L: Self, _ type: R.Type) -> ChainComplex<Cell, R> {
         let name = "C(\(self.name), \(L.name); \(R.symbol))"
         let list = validDims.map { i in cells(ofDim: i).subtract(L.cells(ofDim: i)) }
         let base = GradedModuleStructure<Cell, R>(name: name, list: list)
@@ -45,7 +45,7 @@ public extension GeometricComplex {
         return C.homology(name: name)
     }
     
-    public func cochainComplex<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> GradedChainComplex<Dual<Cell>, R> {
+    public func cochainComplex<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> ChainComplex<Dual<Cell>, R> {
         let name = (L == nil) ? "cC(\(self.name); \(R.symbol))" : "cC(\(self.name), \(L!.name); \(R.symbol))"
         return chainComplex(relativeTo: L, type).dual(name: name)
     }
@@ -54,43 +54,5 @@ public extension GeometricComplex {
         let name = (L == nil) ? "cH(\(self.name); \(R.symbol))" : "cH(\(self.name), \(L!.name); \(R.symbol))"
         let C = cochainComplex(relativeTo: L, type)
         return C.homology(name: name)
-    }
-}
-
-// TODO remove old
-
-public extension ChainComplex where T == Descending {
-    public convenience init<C: GeometricComplex>(geometricComplex K: C, relativeTo L: C?, _ type: R.Type) where A == C.Cell {
-        if let L = L { // relative: (K, L)
-            let name = "C(\(K.name), \(L.name); \(R.symbol))"
-            let chain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap) in
-                let basis = K.cells(ofDim: i).subtract(L.cells(ofDim: i))
-                let orig = K.boundaryMap(i, R.self)
-                let map = BoundaryMap{ (c: A) in
-                    orig.applied(to: c).map{ (a, r) in
-                        basis.contains(a) ? (a, r) : (a, .zero)
-                    }
-                }
-                return (basis, map)
-            }
-            self.init(name: name, chain: chain)
-            
-        } else { // absolute
-            let name = "C(\(K.name); \(R.symbol))"
-            let chain = K.validDims.map{ (i) -> (ChainBasis, BoundaryMap) in
-                let basis = K.cells(ofDim: i)
-                let map = K.boundaryMap(i, R.self)
-                return (basis, map)
-            }
-            self.init(name: name, chain: chain)
-        }
-    }
-    
-    public convenience init<C: GeometricComplex>(_ K: C, _ type: R.Type) where A == C.Cell {
-        self.init(geometricComplex: K, relativeTo: nil, R.self)
-    }
-    
-    public convenience init<C: GeometricComplex>(_ K: C, _ L: C, _ type: R.Type) where A == C.Cell {
-        self.init(geometricComplex: K, relativeTo: L, R.self)
     }
 }

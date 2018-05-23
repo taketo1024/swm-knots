@@ -10,6 +10,7 @@ import Foundation
 import SwiftyMath
 import SwiftyHomology
 
+/*
 public extension ChainMap where T == Descending {
     public static func induced<F: GeometricComplexMap>(from f: F, _ type: R.Type) -> ChainMap<A, B, R> where A == F.Complex.Cell, B == F.Complex.Cell {
         typealias Cell = F.Complex.Cell
@@ -26,3 +27,4 @@ public extension CochainMap where T == Ascending {
         return ChainMap.induced(from: f, R.self).dual(domain: domainComplex)
     }
 }
+*/

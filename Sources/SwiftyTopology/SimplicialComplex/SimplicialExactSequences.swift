@@ -10,6 +10,7 @@ import Foundation
 import SwiftyMath
 import SwiftyHomology
 
+/*
 public extension HomologyExactSequence where T == Descending {
     public static func pair(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<R> {
         
@@ -55,6 +56,7 @@ public extension CohomologyExactSequence where T == Ascending {
         return CohomologyExactSequence(DXA, j, DX, i, DA, d)
     }
 }
+ */
 
 /*
 public extension HomologyExactSequence where T == Descending, A == Simplex, B == Sum<Simplex, Simplex>, C == Simplex {

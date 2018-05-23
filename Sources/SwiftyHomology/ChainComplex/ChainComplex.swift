@@ -1,144 +1,158 @@
 //
-//  ChainComplex.swift
-//  SwiftyMath
+//  GradedChainComplex.swift
+//  Sample
 //
-//  Created by Taketo Sano on 2017/05/04.
-//  Copyright © 2017年 Taketo Sano. All rights reserved.
+//  Created by Taketo Sano on 2018/05/21.
 //
 
 import Foundation
 import SwiftyMath
 
-public protocol ChainType {
-    static var descending: Bool { get }
-    static var degree: Int { get }
-}
-public struct Descending : ChainType {    // for ChainComplex / Homology
-    public static let descending = true
-    public static var degree: Int { return -1 }
-}
-public struct Ascending : ChainType {
-    public static let descending = false
-    public static var degree: Int { return +1 }
-}
+// TODO substitute for old ChainComplex.
 
-public typealias   ChainComplex<A: BasisElementType, R: Ring> = _ChainComplex<Descending, A, R>
-public typealias CochainComplex<A: BasisElementType, R: Ring> = _ChainComplex<Ascending,  A, R>
+public typealias ChainComplex<A: BasisElementType, R: EuclideanRing> = MultigradedChainComplex<_1, A, R>
+public typealias BigradedChainComplex<A: BasisElementType, R: EuclideanRing> = MultigradedChainComplex<_2, A, R>
 
-public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatable, CustomStringConvertible {
-    public typealias Chain = FreeModule<A, R>
-    public typealias ChainBasis = [A]
-    public typealias BoundaryMap = FreeModuleHom<A, A, R>
+public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing> {
+    public typealias Base = MultigradedModuleStructure<Dim, A, R>
+    public var base: Base
     
-    public let name: String
+    internal let _degree: IntList
+    internal let map: (IntList, A) -> FreeModule<A, R>
+    internal let matrices: [IntList : Cache<Matrix<R>>]
     
-    internal let chain: [(basis: ChainBasis, map: BoundaryMap)]
-    internal let offset: Int
-    internal var matrices: [Matrix<R>?]
-    
-    // root initializer
-    public init(name: String? = nil, chain: [(ChainBasis, BoundaryMap)], offset: Int = 0) {
-        self.name = name ?? (T.descending ? "C" : "C*")
-        self.chain = chain
-        self.matrices = Array(repeating: nil, count: chain.count)
-        self.offset = offset
+    public init(base: MultigradedModuleStructure<Dim, A, R>, degree: IntList, map: @escaping (IntList, A) -> FreeModule<A, R>) {
+        self.base = base
+        self._degree = degree
+        self.map = map
+        
+        let degs = base.nonZeroMultiDegrees.flatMap{ I in [I, I - degree] }.unique()
+        self.matrices = Dictionary(pairs: degs.map{ I in (I, .empty) })
     }
     
-    public var isEmpty: Bool {
-        return chain.isEmpty
+    public subscript(I: IntList) -> Base.Object? {
+        get {
+            return base[I]
+        } set {
+            base[I] = newValue
+        }
     }
     
-    public var validDegrees: [Int] {
-        return isEmpty ? [] : (offset ... topDegree).toArray()
+    public func matrix(_ I: IntList) -> Matrix<R>? {
+        guard let from = base[I], let to = base[I + _degree] else {
+            return nil // indeterminable.
+        }
+        
+        if from.isTrivial && to.isTrivial {
+            return .zero
+        }
+        
+        if let c = matrices[I], let A = c.value {
+            return A // cached.
+        }
+        
+        let grid = from.generators.flatMap { x -> [R] in
+            let y = x.elements.sum{ (a, r) in r * map(I, a)}
+            return to.factorize(y)
+        }
+        
+        let A = Matrix(rows: from.generators.count, cols: to.generators.count, grid: grid).transposed
+        matrices[I]!.value = A
+        return A
     }
     
-    public var topDegree: Int {
-        return chain.count + offset - 1
+    internal func kernel(_ I: IntList) -> Matrix<R>? {
+        guard let from = base[I], from.isFree,
+            let to = base[I + _degree], to.isFree,
+            let A = matrix(I) else {
+                return nil // indeterminable.
+        }
+        
+        let E = A.elimination(form: .Diagonal)
+        return E.kernelMatrix
     }
     
-    public func chainBasis(_ i: Int) -> ChainBasis {
-        return (offset ... topDegree).contains(i) ? chain[i - offset].basis : []
+    internal func kernelTransition(_ I: IntList) -> Matrix<R>? {
+        guard let from = base[I], from.isFree,
+            let to = base[I + _degree], to.isFree,
+            let A = matrix(I) else {
+                return nil // indeterminable.
+        }
+        
+        let E = A.elimination(form: .Diagonal)
+        return E.kernelTransitionMatrix
     }
     
-    public func boundaryMap(_ i: Int) -> BoundaryMap {
-        return (offset ... topDegree).contains(i) ? chain[i - offset].map : .zero
+    internal func image(_ I: IntList) -> Matrix<R>? {
+        guard let from = base[I], from.isFree,
+            let to = base[I + _degree], to.isFree,
+            let A = matrix(I) else {
+                return nil // indeterminable.
+        }
+        
+        let E = A.elimination(form: .Diagonal)
+        return E.imageMatrix
     }
     
-    public func boundaryMatrix(_ i: Int) -> Matrix<R> {
-        switch i {
-        case (offset ... topDegree):
-            if let A = matrices[i - offset] {
-                return A
+    internal func homology(_ I: IntList) -> SimpleModuleStructure<A, R>? {
+        guard let basis = base[I]?.generators,
+              let Z = kernel(I),
+              let T = kernelTransition(I),
+              let B = image(I - _degree)
+            else {
+            return nil // indeterminable.
+        }
+        
+        return SimpleModuleStructure(
+            basis: basis,
+            generatingMatrix: Z,
+            transitionMatrix: T,
+            relationMatrix: T * B
+        )
+    }
+    
+    public func homology(name: String? = nil) -> MultigradedModuleStructure<Dim, A, R> {
+        return MultigradedModuleStructure(
+            name: name ?? "H(\(base.name))",
+            list: base.nonZeroMultiDegrees.map{ I in (I, homology(I)) }
+        )
+    }
+    
+    // MEMO works only when each generator is a single basis-element.
+    
+    public func dual(name: String? = nil) -> MultigradedChainComplex<Dim, Dual<A>, R> {
+        let dName = name ?? "\(base.name)^*"
+        let dList: [(IntList, [Dual<A>]?)] = base.nonZeroMultiDegrees.map { I -> (IntList, [Dual<A>]?) in
+            guard let o = self[I] else {
+                return (I, nil)
+            }
+            guard o.isFree, o.generators.forAll({ $0.basis.count == 1 }) else {
+                fatalError("inavailable")
+            }
+            return (I, o.generators.map{ $0.basis.first!.dual })
+        }
+        
+        let dBase = MultigradedModuleStructure<Dim, Dual<A>, R>(name: dName, list: dList)
+        return dBase.asChainComplex(degree: -_degree) { (I0, x) in
+            let I1 = I0 - self._degree
+            guard let current = dBase[I0],
+                let target = dBase[I1],
+                let matrix = self.matrix(I1)?.transposed else {
+                    return .zero
             }
             
-            let A = makeMatrix(i)
-            matrices[i - offset] = A
-            return A
+            guard let j = current.generators.index(where: { $0 == FreeModule(x) }) else {
+                fatalError()
+            }
             
-        case topDegree + 1 where T.descending:
-            return .zero(rows: chainBasis(topDegree).count, cols: 0)
-            
-        case offset - 1 where !T.descending:
-            return .zero(rows: chainBasis(offset).count, cols: 0)
-            
-        default:
-            return .zero(rows: 0, cols: 0)
-        }
-    }
-    
-    internal func makeMatrix(_ i: Int) -> Matrix<R> {
-        let (from, to, map) = (chainBasis(i), chainBasis(i + T.degree), boundaryMap(i))
-        let toIndexer = to.indexer()
-        
-        let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
-            map.applied(to: x).elements.map { (y, a) -> MatrixComponent<R> in
-                let i = toIndexer(y)
-                return MatrixComponent(i, j, a)
+            return matrix.nonZeroComponents(ofCol: j).sum { (c: MatrixComponent<R>) in
+                let (i, r) = (c.row, c.value)
+                return r * target.generator(i)
             }
         }
-        
-        return Matrix(rows: to.count, cols: from.count, components: components)
     }
     
-    public func shifted(_ d: Int) -> _ChainComplex<T, A, R> {
-        return _ChainComplex.init(name: "\(name)[\(d)]", chain: chain, offset: offset + d)
-    }
-    
-    internal func abstractBasisDict() -> [A : AbstractBasisElement] {
-        let pairs = validDegrees
-            .flatMap{ chainBasis($0) }
-            .enumerated()
-            .map{ (i, a) in (a, AbstractBasisElement(i, label: a.description)) }
-        return Dictionary(pairs: pairs)
-    }
-    
-    public func asAbstract() -> _ChainComplex<T, AbstractBasisElement, R> {
-        typealias X = AbstractBasisElement
-        typealias C = _ChainComplex<T, X, R>
-        
-        //       d
-        //   A  ---> A
-        //   ^       |
-        // f1|       |f2
-        //   |       v
-        //   X  ===> X
-        //
-
-        let dict = abstractBasisDict()
-        let p1 = dict.inverse!.asFunc()
-        let p2 = dict.asFunc()
-        
-        let f1 = FreeModuleHom<X, A, R> { (a: X) in FreeModule(p1(a)) }
-        let f2 = FreeModuleHom<A, X, R> { (a: A) in FreeModule(p2(a)) }
-
-        let chain = validDegrees.map { i -> (C.ChainBasis, C.BoundaryMap) in
-            let (basis, map) = (chainBasis(i), boundaryMap(i))
-            return (basis.map(p2), f2 ∘ map ∘ f1)
-        }
-        
-        return C(name: name, chain: chain, offset: offset)
-    }
-    
+    /*
     public func assertComplex(debug: Bool = false) {
         (offset ... topDegree).forEach { i1 in
             let i2 = i1 + T.degree
@@ -163,44 +177,60 @@ public class _ChainComplex<T: ChainType, A: BasisElementType, R: Ring>: Equatabl
             assert(matrix.isZero, "d\(i2)∘d\(i1) = \(matrix)")
         }
     }
+ */
     
-    public static func ==<T, A, R>(a: _ChainComplex<T, A, R>, b: _ChainComplex<T, A, R>) -> Bool {
-        let offset = min(a.offset, b.offset)
-        let degree = max(a.topDegree, b.topDegree)
-        return (offset ... degree).forAll { i in (a.chainBasis(i) == b.chainBasis(i)) && (a.boundaryMatrix(i) == b.boundaryMatrix(i)) }
+    public func describe(_ I: IntList) {
+        base.describe(I)
     }
     
-    public var description: String {
-        return name
-    }
-    
-    public var detailDescription: String {
-        return name + " = {\n"
-            + (offset ... topDegree).map{ i in "\t\(i) : \(chainBasis(i))"}.joined(separator: ",\n")
-            + "\n}"
+    public func describeMap(_ I: IntList) {
+        print("\(I) \(self[I]?.description ?? "?") -> \(self[I + _degree]?.description ?? "?")")
+        if let A = matrix(I) {
+            print("\n", A.detailDescription)
+        }
     }
 }
 
-public extension ChainComplex where T == Descending {
-    public var dual: CochainComplex<Dual<A>, R> {
-        typealias D = CochainComplex<Dual<A>, R>
-        let cochain = validDegrees.map{ (i) -> (D.ChainBasis, D.BoundaryMap) in
-            let e = R(from: (-1).pow(i + 1))
-            
-            let current = chainBasis(i)
-            let next = chainBasis(i + 1)
-            let matrix = boundaryMatrix(i + 1).transposed
-            
-            let dBasis = chainBasis(i).map{ Dual($0) }
-            let dMap  = D.BoundaryMap { (f: Dual<A>) in
-                let j = current.index(of: f.base)!
-                let col = matrix.nonZeroComponents(ofCol: j)
-                let elements = col.map { c in (next[c.row].dual, e * c.value) }
-                return D.Chain(elements)
-            }
-            return (dBasis, dMap)
-        }
-        
-        return D(name: "\(name)*", chain: cochain)
+public extension MultigradedChainComplex where Dim == _1 {
+    public var degree: Int {
+        return _degree[0]
+    }
+    
+    public func matrix(_ i: Int) -> Matrix<R>? {
+        return matrix(IntList(i))
+    }
+    
+    public func homology(_ i: Int) -> SimpleModuleStructure<A, R>? {
+        return homology(IntList(i))
+    }
+    
+    public func describe(_ i: Int) {
+        describe(IntList(i))
+    }
+    
+    public func describeMap(_ i: Int) {
+        describeMap(IntList(i))
+    }
+}
+
+public extension MultigradedChainComplex where Dim == _2 {
+    public var degree: (Int, Int) {
+        return (_degree[0], _degree[1])
+    }
+    
+    public func matrix(_ i: Int, _ j: Int) -> Matrix<R>? {
+        return matrix(IntList(i, j))
+    }
+    
+    public func homology(_ i: Int, _ j: Int) -> SimpleModuleStructure<A, R>? {
+        return homology(IntList(i, j))
+    }
+    
+    public func describe(_ i: Int, _ j: Int) {
+        describe(IntList(i, j))
+    }
+    
+    public func describeMap(_ i: Int, _ j: Int) {
+        describeMap(IntList(i, j))
     }
 }

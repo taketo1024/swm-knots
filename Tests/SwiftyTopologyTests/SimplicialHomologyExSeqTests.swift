@@ -10,6 +10,7 @@ import SwiftyMath
 import SwiftyHomology
 @testable import SwiftyTopology
 
+/*
 class SimplicialHomologyExSeqTests: XCTestCase {
     typealias R = 𝐙
     
@@ -86,3 +87,4 @@ class SimplicialHomologyExSeqTests: XCTestCase {
         return E
     }
 }
+*/
