@@ -173,6 +173,57 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
         }
     }
     
+    public func assertChainMap<B>(_ f: MultigradedModuleHom<Dim, A, B, R>, to: MultigradedChainComplex<Dim, B, R>, debug: Bool = false) {
+        //          d0
+        //   C[I0] -----> C[I1]
+        //     |          |
+        //   f |          | f
+        //     v          v
+        //  C'[I2] ---> C'[I3]
+        //          d1
+        
+        func print(_ msg: @autoclosure () -> String) {
+            Swift.print(msg())
+        }
+        
+        assert(self.d.degree == to.d.degree)
+        
+        for I0 in base.nonZeroMultiDegrees {
+            let (I1, I2, I3) = (I0 + d.degree, I0 + f.degree, I0 + d.degree + f.degree)
+            
+            guard let D0 = dMatrix(I0),
+                  let D1 = to.dMatrix(I2),
+                  let F0 = f.matrix(from: self, to: to, at: I0),
+                  let F1 = f.matrix(from: self, to: to, at: I1) else {
+                    print("\(I0): undeterminable.")
+                    continue
+            }
+            
+            if debug {
+                let (s0, s1, s2, s3) = (self[I0]!, self[I1]!, to[I2]!, to[I3]!)
+                print("\(I0): \(s0) -> \(s1) -> \(s3)")
+
+                for x in s0.generators {
+                    let y = d[I0](x)
+                    let z = f[I1](y)
+                    print("\t\(x) ->\t\(y) ->\t\(z)")
+                }
+
+                print("\(I0): \(s0) -> \(s2) -> \(s3)")
+                
+                for x in s0.generators {
+                    let y = f[I0](x)
+                    let z = to.d[I2](y)
+                    print("\t\(x) ->\t\(y) ->\t\(z)")
+                }
+                
+                print("")
+            }
+            
+            assert(F1 * D0 == D1 * F0)
+        }
+    }
+    
     public func describe(_ I: IntList) {
         base.describe(I)
     }

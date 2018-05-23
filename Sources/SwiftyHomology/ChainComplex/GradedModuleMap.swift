@@ -8,6 +8,9 @@
 import Foundation
 import SwiftyMath
 
+public typealias GradedModuleHom<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = MultigradedModuleHom<_1, A, B, R>
+public typealias BigradedModuleHom<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = MultigradedModuleHom<_2, A, B, R>
+
 public struct MultigradedModuleHom<Dim: _Int, A: BasisElementType, B: BasisElementType, R: EuclideanRing> {
     public var degree: IntList
     internal let f: (IntList, A) -> FreeModule<B, R>
@@ -40,5 +43,17 @@ public struct MultigradedModuleHom<Dim: _Int, A: BasisElementType, B: BasisEleme
 
     public func matrix(from: MultigradedChainComplex<Dim, A, R>, to: MultigradedChainComplex<Dim, B, R>, at I: IntList) -> Matrix<R>? {
         return matrix(from: from.base, to: to.base, at: I)
+    }
+}
+
+public extension MultigradedModuleHom where Dim == _1 {
+    public init(degree: Int, func f: @escaping (Int, A) -> FreeModule<B, R>) {
+        self.init(degree: IntList(degree), func: {(I, a) in f(I[0], a)})
+    }
+}
+
+public extension MultigradedModuleHom where Dim == _2 {
+    public init(degree: (Int, Int), func f: @escaping (Int, Int, A) -> FreeModule<B, R>) {
+        self.init(degree: IntList(degree.0, degree.1), func: {(I, a) in f(I[0], I[1], a)})
     }
 }
