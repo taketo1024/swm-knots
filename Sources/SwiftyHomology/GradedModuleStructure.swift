@@ -48,6 +48,10 @@ public struct _GradedModuleStructure<Dim: _Int, A: BasisElementType, R: Euclidea
         return grid.keys.sorted()
     }
     
+    internal func shifted(_ I: IntList) -> _GradedModuleStructure<Dim, A, R> {
+        return _GradedModuleStructure(name: name, grid: grid.mapKeys{ $0 + I} )
+    }
+    
     internal func asChainComplex(degree: IntList, d: @escaping (IntList, A) -> FreeModule<A, R>) -> _GradedChainComplex<Dim, A, R> {
         return _GradedChainComplex(base: self, degree: degree, map: d)
     }
@@ -65,6 +69,12 @@ public struct _GradedModuleStructure<Dim: _Int, A: BasisElementType, R: Euclidea
             }
         } else {
             print("\(I) ?")
+        }
+    }
+    
+    public func describeAll() {
+        for I in _nonZeroDegrees {
+            describe(I)
         }
     }
     
@@ -102,6 +112,10 @@ public extension _GradedModuleStructure where Dim == _1 {
         return nonZeroDegrees.max() ?? 0
     }
     
+    public func shifted(_ i: Int) -> GradedModuleStructure<A, R> {
+        return shifted(IntList(i))
+    }
+    
     public func asChainComplex(degree: Int, d: @escaping (Int, A) -> FreeModule<A, R>) -> GradedChainComplex<A, R> {
         return asChainComplex(degree: IntList(degree), d: {(I, a) in d(I[0], a)})
     }
@@ -112,6 +126,10 @@ public extension _GradedModuleStructure where Dim == _1 {
 }
 
 public extension _GradedModuleStructure where Dim == _2 {
+    public init<S: Sequence>(name: String? = nil, list: S) where S.Element == (Int, Int, [A]?) {
+        self.init(name: name, list: list.map{ (i, j, basis) in (IntList(i, j), basis) })
+    }
+    
     public init<S: Sequence>(name: String? = nil, list: S) where S.Element == (Int, Int, Object?) {
         self.init(name: name, list: list.map{ (i, j, o) in (IntList(i, j), o) })
     }
@@ -126,6 +144,10 @@ public extension _GradedModuleStructure where Dim == _2 {
     
     public var nonZeroDegrees: [(Int, Int)] {
         return _nonZeroDegrees.map{ I in (I[0], I[1]) }
+    }
+    
+    public func shifted(_ i: Int, _ j: Int) -> BigradedModuleStructure<A, R> {
+        return shifted(IntList(i, j))
     }
     
     public func asChainComplex(degree: (Int, Int), d: @escaping (Int, Int, A) -> FreeModule<A, R>) -> BigradedChainComplex<A, R> {
