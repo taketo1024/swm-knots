@@ -48,6 +48,10 @@ public struct MultigradedModuleStructure<Dim: _Int, A: BasisElementType, R: Eucl
         return grid.keys.sorted()
     }
     
+    public var isTrivial: Bool {
+        return nonZeroMultiDegrees.isEmpty
+    }
+    
     public var isDetermined: Bool {
         return grid.values.forAll{ $0 != nil }
     }
@@ -64,12 +68,12 @@ public struct MultigradedModuleStructure<Dim: _Int, A: BasisElementType, R: Eucl
         return MultigradedModuleStructure(name: name, grid: grid.mapKeys{ $0 + I} )
     }
     
-    public func asChainComplex(degree: IntList, d: @escaping (IntList, A) -> FreeModule<A, R>) -> MultigradedChainComplex<Dim, A, R> {
-        return MultigradedChainComplex(base: self, degree: degree, map: d)
+    public func asChainComplex(degree: IntList, differential d: @escaping (IntList, A) -> FreeModule<A, R>) -> MultigradedChainComplex<Dim, A, R> {
+        return MultigradedChainComplex(base: self, degree: degree, differential: d)
     }
     
-    public func homology(name: String? = nil, degree: IntList, d: @escaping (IntList, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
-        return asChainComplex(degree: degree, d: d).homology(name: name)
+    public func homology(name: String? = nil, degree: IntList, differential d: @escaping (IntList, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
+        return asChainComplex(degree: degree, differential: d).homology(name: name)
     }
     
     public func describe(_ I: IntList) {
@@ -140,12 +144,12 @@ public extension MultigradedModuleStructure where Dim == _1 {
         return shifted(IntList(i))
     }
     
-    public func asChainComplex(degree: Int, d: @escaping (Int, A) -> FreeModule<A, R>) -> ChainComplex<A, R> {
-        return asChainComplex(degree: IntList(degree), d: {(I, a) in d(I[0], a)})
+    public func asChainComplex(degree: Int, differential d: @escaping (Int, A) -> FreeModule<A, R>) -> ChainComplex<A, R> {
+        return asChainComplex(degree: IntList(degree), differential: {(I, a) in d(I[0], a)})
     }
     
-    public func homology(name: String? = nil, degree: Int, d: @escaping (Int, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
-        return asChainComplex(degree: degree, d: d).homology(name: name)
+    public func homology(name: String? = nil, degree: Int, differential d: @escaping (Int, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
+        return asChainComplex(degree: degree, differential: d).homology(name: name)
     }
     
     public func describe(_ i: Int) {
@@ -178,12 +182,12 @@ public extension MultigradedModuleStructure where Dim == _2 {
         return shifted(IntList(i, j))
     }
     
-    public func asChainComplex(degree: (Int, Int), d: @escaping (Int, Int, A) -> FreeModule<A, R>) -> BigradedChainComplex<A, R> {
-        return asChainComplex(degree: IntList(degree.0, degree.1), d: {(I, a) in d(I[0], I[1], a)})
+    public func asChainComplex(degree: (Int, Int), differential d: @escaping (Int, Int, A) -> FreeModule<A, R>) -> BigradedChainComplex<A, R> {
+        return asChainComplex(degree: IntList(degree.0, degree.1), differential: {(I, a) in d(I[0], I[1], a)})
     }
     
-    public func homology(name: String? = nil, degree: (Int, Int), d: @escaping (Int, Int, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
-        return asChainComplex(degree: degree, d: d).homology(name: name)
+    public func homology(name: String? = nil, degree: (Int, Int), differential d: @escaping (Int, Int, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
+        return asChainComplex(degree: degree, differential: d).homology(name: name)
     }
 
     public func describe(_ i: Int, _ j: Int) {

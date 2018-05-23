@@ -18,13 +18,13 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
     public var base: Base
     
     internal let _degree: IntList
-    internal let map: (IntList, A) -> FreeModule<A, R>
+    internal let dFunc: (IntList, A) -> FreeModule<A, R>
     internal let matrices: [IntList : Cache<Matrix<R>>]
     
-    public init(base: MultigradedModuleStructure<Dim, A, R>, degree: IntList, map: @escaping (IntList, A) -> FreeModule<A, R>) {
+    public init(base: MultigradedModuleStructure<Dim, A, R>, degree: IntList, differential d: @escaping (IntList, A) -> FreeModule<A, R>) {
         self.base = base
         self._degree = degree
-        self.map = map
+        self.dFunc = d
         
         let degs = base.nonZeroMultiDegrees.flatMap{ I in [I, I - degree] }.unique()
         self.matrices = Dictionary(pairs: degs.map{ I in (I, .empty) })
@@ -38,13 +38,17 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
         }
     }
     
+    public func d(_ I: IntList) -> (FreeModule<A, R>) -> FreeModule<A, R> {
+        return { x in x.elements.sum{ (a, r) in r * self.dFunc(I, a) } }
+    }
+    
     public func matrix(_ I: IntList) -> Matrix<R>? {
         guard let from = base[I], let to = base[I + _degree] else {
             return nil // indeterminable.
         }
         
         if from.isTrivial && to.isTrivial {
-            return .zero
+            return .zero(rows: to.generators.count, cols: from.generators.count)
         }
         
         if let c = matrices[I], let A = c.value {
@@ -52,7 +56,7 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
         }
         
         let grid = from.generators.flatMap { x -> [R] in
-            let y = x.elements.sum{ (a, r) in r * map(I, a)}
+            let y = d(I)(x)
             return to.factorize(y)
         }
         
@@ -118,6 +122,10 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
         )
     }
     
+    public var isExact: Bool {
+        return homology().isTrivial
+    }
+    
     // MEMO works only when each generator is a single basis-element.
     
     public func dual(name: String? = nil) -> MultigradedChainComplex<Dim, Dual<A>, R> {
@@ -152,32 +160,38 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
         }
     }
     
-    /*
-    public func assertComplex(debug: Bool = false) {
-        (offset ... topDegree).forEach { i1 in
-            let i2 = i1 + T.degree
-            let b1 = chainBasis(i1)
-            let (d1, d2) = (boundaryMap(i1), boundaryMap(i2))
-            let (m1, m2) = (boundaryMatrix(i1), boundaryMatrix(i2))
+    public func assertChainComplex(debug: Bool = false) {
+        func print(_ msg: @autoclosure () -> String) {
+            Swift.print(msg())
+        }
+        
+        for I0 in base.nonZeroMultiDegrees {
+            let I1 = I0 + _degree
+            let I2 = I1 + _degree
             
-            if debug {
-                print("----------")
-                print("C\(i1) -> C\(i2)")
-                print("----------")
-                print("C\(i1) : \(b1)\n")
-                for s in b1 {
-                    let x = d1.applied(to: s)
-                    let y = d2.applied(to: x)
-                    print("\t\(s) ->\t\(x) ->\t\(y)")
-                }
-                print()
+            guard let s0 = self[I0],
+                  let s1 = self[I1],
+                  let s2 = self[I2],
+                  let A0 = matrix(I0),
+                  let A1 = matrix(I1) else {
+                    print("\(I0): undeterminable.")
+                    continue
             }
             
-            let matrix = m2 * m1
-            assert(matrix.isZero, "d\(i2)∘d\(i1) = \(matrix)")
+            if debug {
+                print("\(I0): \(s0) -> \(s1) -> \(s2)")
+                
+                for x in s0.generators {
+                    let y = d(I0)(x)
+                    let z = d(I1)(y)
+                    print("\t\(x) ->\t\(y) ->\t\(z)")
+                }
+                print("")
+            }
+            
+            assert((A1 * A0).isZero)
         }
     }
- */
     
     public func describe(_ I: IntList) {
         base.describe(I)
