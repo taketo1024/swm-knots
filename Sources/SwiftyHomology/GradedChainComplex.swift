@@ -38,7 +38,7 @@ public struct _GradedChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRi
         }
     }
     
-    internal func _matrix(_ I: IntList) -> Matrix<R>? {
+    internal func matrix(_ I: IntList) -> Matrix<R>? {
         guard let from = base[I], let to = base[I + _degree] else {
             return nil // indeterminable.
         }
@@ -61,10 +61,10 @@ public struct _GradedChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRi
         return A
     }
     
-    internal func _kernel(_ I: IntList) -> Matrix<R>? {
+    internal func kernel(_ I: IntList) -> Matrix<R>? {
         guard let from = base[I], from.isFree,
             let to = base[I + _degree], to.isFree,
-            let A = _matrix(I) else {
+            let A = matrix(I) else {
                 return nil // indeterminable.
         }
         
@@ -72,10 +72,10 @@ public struct _GradedChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRi
         return E.kernelMatrix
     }
     
-    internal func _kernelTransition(_ I: IntList) -> Matrix<R>? {
+    internal func kernelTransition(_ I: IntList) -> Matrix<R>? {
         guard let from = base[I], from.isFree,
             let to = base[I + _degree], to.isFree,
-            let A = _matrix(I) else {
+            let A = matrix(I) else {
                 return nil // indeterminable.
         }
         
@@ -83,10 +83,10 @@ public struct _GradedChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRi
         return E.kernelTransitionMatrix
     }
     
-    internal func _image(_ I: IntList) -> Matrix<R>? {
+    internal func image(_ I: IntList) -> Matrix<R>? {
         guard let from = base[I], from.isFree,
             let to = base[I + _degree], to.isFree,
-            let A = _matrix(I) else {
+            let A = matrix(I) else {
                 return nil // indeterminable.
         }
         
@@ -94,11 +94,11 @@ public struct _GradedChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRi
         return E.imageMatrix
     }
     
-    internal func _homology(_ I: IntList) -> SimpleModuleStructure<A, R>? {
+    internal func homology(_ I: IntList) -> SimpleModuleStructure<A, R>? {
         guard let basis = base[I]?.generators,
-              let Z = _kernel(I),
-              let T = _kernelTransition(I),
-              let B = _image(I - _degree)
+              let Z = kernel(I),
+              let T = kernelTransition(I),
+              let B = image(I - _degree)
             else {
             return nil // indeterminable.
         }
@@ -114,17 +114,51 @@ public struct _GradedChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRi
     public func homology(name: String? = nil) -> _GradedModuleStructure<Dim, A, R> {
         return _GradedModuleStructure(
             name: name ?? "H(\(base.name))",
-            list: base._nonZeroDegrees.map{ I in (I, _homology(I)) }
+            list: base._nonZeroDegrees.map{ I in (I, homology(I)) }
         )
     }
     
-    internal func _describe(_ I: IntList) {
-        base._describe(I)
+    // MEMO works only when each generator is a single basis-element.
+    
+    public func dual(name: String? = nil) -> _GradedChainComplex<Dim, Dual<A>, R> {
+        let dName = name ?? "\(base.name)^*"
+        let dList: [(IntList, [Dual<A>]?)] = base._nonZeroDegrees.map { I -> (IntList, [Dual<A>]?) in
+            guard let o = self[I] else {
+                return (I, nil)
+            }
+            guard o.isFree, o.generators.forAll({ $0.basis.count == 1 }) else {
+                fatalError("inavailable")
+            }
+            return (I, o.generators.map{ $0.basis.first!.dual })
+        }
+        
+        let dBase = _GradedModuleStructure<Dim, Dual<A>, R>(name: dName, list: dList)
+        return dBase.asChainComplex(degree: -_degree) { (I0, x) in
+            let I1 = I0 - self._degree
+            guard let current = dBase[I0],
+                let target = dBase[I1],
+                let matrix = self.matrix(I1)?.transposed else {
+                    return .zero
+            }
+            
+            guard let j = current.generators.index(where: { $0 == FreeModule(x) }) else {
+                fatalError()
+            }
+            
+            return matrix.nonZeroComponents(ofCol: j).sum { (c: MatrixComponent<R>) in
+                let (i, r) = (c.row, c.value)
+                return r * target.generator(i)
+            }
+        }
     }
     
-    internal func _describeMap(_ I: IntList) {
+    internal func describe(_ I: IntList) {
+        base.describe(I)
+    }
+    
+    internal func describeMap(_ I: IntList) {
         print("\(I) \(self[I]?.description ?? "?") -> \(self[I + _degree]?.description ?? "?")")
-        if let A = _matrix(I) {
+        if let A = matrix(I) {
             print("\n", A.detailDescription)
         }
     }
@@ -136,19 +170,19 @@ public extension _GradedChainComplex where Dim == _1 {
     }
     
     public func matrix(_ i: Int) -> Matrix<R>? {
-        return _matrix(IntList(i))
+        return matrix(IntList(i))
     }
     
     public func homology(_ i: Int) -> SimpleModuleStructure<A, R>? {
-        return _homology(IntList(i))
+        return homology(IntList(i))
     }
     
     public func describe(_ i: Int) {
-        _describe(IntList(i))
+        describe(IntList(i))
     }
     
     public func describeMap(_ i: Int) {
-        _describeMap(IntList(i))
+        describeMap(IntList(i))
     }
 }
 
@@ -158,18 +192,18 @@ public extension _GradedChainComplex where Dim == _2 {
     }
     
     public func matrix(_ i: Int, _ j: Int) -> Matrix<R>? {
-        return _matrix(IntList(i, j))
+        return matrix(IntList(i, j))
     }
     
     public func homology(_ i: Int, _ j: Int) -> SimpleModuleStructure<A, R>? {
-        return _homology(IntList(i, j))
+        return homology(IntList(i, j))
     }
     
     public func describe(_ i: Int, _ j: Int) {
-        _describe(IntList(i, j))
+        describe(IntList(i, j))
     }
     
     public func describeMap(_ i: Int, _ j: Int) {
-        _describeMap(IntList(i, j))
+        describeMap(IntList(i, j))
     }
 }
