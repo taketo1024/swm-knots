@@ -112,6 +112,14 @@ public extension MultigradedModuleStructure where Dim == _1 {
         return nonZeroDegrees.max() ?? 0
     }
     
+    public func bettiNumer(_ i: Int) -> Int? {
+        return self[i]?.rank
+    }
+    
+    public var eulerCharacteristic: Int {
+        return nonZeroDegrees.sum{ i in (-1).pow(i) * bettiNumer(i)! }
+    }
+    
     public func shifted(_ i: Int) -> GradedModuleStructure<A, R> {
         return shifted(IntList(i))
     }

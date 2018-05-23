@@ -11,18 +11,24 @@ import SwiftyMath
 
 class KhHomologyTests: XCTestCase {
     
-    func test3_1() {
+    func test3_1_Z() {
         let K = Knot(3, 1)
-//        assert(K)
+        let Kh = K.KhHomology(𝐙.self)
+        
+        XCTAssertEqual(Kh.qEulerCharacteristic, K.JonesPolynomial(normalized: false))
     }
     
-    func test4_1() {
+    func test4_1_Z() {
         let K = Knot(4, 1)
-//        assert(K)
+        let Kh = K.KhHomology(𝐙.self)
+        
+        XCTAssertEqual(Kh.qEulerCharacteristic, K.JonesPolynomial(normalized: false))
     }
     
-    func test5_1() {
+    func test5_1_Z() {
         let K = Knot(5, 1)
-//        assert(K)
+        let Kh = K.KhHomology(𝐙.self)
+        
+        XCTAssertEqual(Kh.qEulerCharacteristic, K.JonesPolynomial(normalized: false))
     }
 }
