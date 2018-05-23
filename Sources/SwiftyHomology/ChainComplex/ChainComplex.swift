@@ -17,17 +17,15 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
     public typealias Base = MultigradedModuleStructure<Dim, A, R>
     public var base: Base
     
-    internal let _degree: IntList
-    internal let dFunc: (IntList, A) -> FreeModule<A, R>
-    internal let matrices: [IntList : Cache<Matrix<R>>]
+    public let d: MultigradedModuleHom<Dim, A, A, R>
+    internal let dMatrices: [IntList : Cache<Matrix<R>>]
     
     public init(base: MultigradedModuleStructure<Dim, A, R>, degree: IntList, differential d: @escaping (IntList, A) -> FreeModule<A, R>) {
         self.base = base
-        self._degree = degree
-        self.dFunc = d
+        self.d = MultigradedModuleHom(degree: degree, func: d)
         
         let degs = base.nonZeroMultiDegrees.flatMap{ I in [I, I - degree] }.unique()
-        self.matrices = Dictionary(pairs: degs.map{ I in (I, .empty) })
+        self.dMatrices = Dictionary(pairs: degs.map{ I in (I, .empty) })
     }
     
     public subscript(I: IntList) -> Base.Object? {
@@ -38,37 +36,20 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
         }
     }
     
-    public func d(_ I: IntList) -> (FreeModule<A, R>) -> FreeModule<A, R> {
-        return { x in x.elements.sum{ (a, r) in r * self.dFunc(I, a) } }
-    }
-    
-    public func matrix(_ I: IntList) -> Matrix<R>? {
-        guard let from = base[I], let to = base[I + _degree] else {
-            return nil // indeterminable.
-        }
-        
-        if from.isTrivial && to.isTrivial {
-            return .zero(rows: to.generators.count, cols: from.generators.count)
-        }
-        
-        if let c = matrices[I], let A = c.value {
+    internal func dMatrix(_ I: IntList) -> Matrix<R>? {
+        if let c = dMatrices[I], let A = c.value {
             return A // cached.
         }
-        
-        let grid = from.generators.flatMap { x -> [R] in
-            let y = d(I)(x)
-            return to.factorize(y)
-        }
-        
-        let A = Matrix(rows: from.generators.count, cols: to.generators.count, grid: grid).transposed
-        matrices[I]!.value = A
+
+        let A = d.matrix(from: self, to: self, at: I)
+        dMatrices[I]?.value = A
         return A
     }
     
     internal func kernel(_ I: IntList) -> Matrix<R>? {
         guard let from = base[I], from.isFree,
-            let to = base[I + _degree], to.isFree,
-            let A = matrix(I) else {
+            let to = base[I + d.degree], to.isFree,
+            let A = dMatrix(I) else {
                 return nil // indeterminable.
         }
         
@@ -78,8 +59,8 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
     
     internal func kernelTransition(_ I: IntList) -> Matrix<R>? {
         guard let from = base[I], from.isFree,
-            let to = base[I + _degree], to.isFree,
-            let A = matrix(I) else {
+            let to = base[I + d.degree], to.isFree,
+            let A = dMatrix(I) else {
                 return nil // indeterminable.
         }
         
@@ -89,8 +70,8 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
     
     internal func image(_ I: IntList) -> Matrix<R>? {
         guard let from = base[I], from.isFree,
-            let to = base[I + _degree], to.isFree,
-            let A = matrix(I) else {
+            let to = base[I + d.degree], to.isFree,
+            let A = dMatrix(I) else {
                 return nil // indeterminable.
         }
         
@@ -102,7 +83,7 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
         guard let basis = base[I]?.generators,
               let Z = kernel(I),
               let T = kernelTransition(I),
-              let B = image(I - _degree)
+              let B = image(I - d.degree)
             else {
             return nil // indeterminable.
         }
@@ -141,11 +122,11 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
         }
         
         let dBase = MultigradedModuleStructure<Dim, Dual<A>, R>(name: dName, list: dList)
-        return dBase.asChainComplex(degree: -_degree) { (I0, x) in
-            let I1 = I0 - self._degree
+        return dBase.asChainComplex(degree: -d.degree) { (I0, x) in
+            let I1 = I0 - self.d.degree
             guard let current = dBase[I0],
                 let target = dBase[I1],
-                let matrix = self.matrix(I1)?.transposed else {
+                let matrix = self.dMatrix(I1)?.transposed else {
                     return .zero
             }
             
@@ -166,24 +147,23 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
         }
         
         for I0 in base.nonZeroMultiDegrees {
-            let I1 = I0 + _degree
-            let I2 = I1 + _degree
+            let I1 = I0 + d.degree
+            let I2 = I1 + d.degree
             
-            guard let s0 = self[I0],
-                  let s1 = self[I1],
-                  let s2 = self[I2],
-                  let A0 = matrix(I0),
-                  let A1 = matrix(I1) else {
+            guard let A0 = dMatrix(I0),
+                  let A1 = dMatrix(I1) else {
                     print("\(I0): undeterminable.")
                     continue
             }
             
             if debug {
+                let (s0, s1, s2) = (self[I0]!, self[I1]!, self[I2]!)
+                
                 print("\(I0): \(s0) -> \(s1) -> \(s2)")
                 
                 for x in s0.generators {
-                    let y = d(I0)(x)
-                    let z = d(I1)(y)
+                    let y = d[I0](x)
+                    let z = d[I1](y)
                     print("\t\(x) ->\t\(y) ->\t\(z)")
                 }
                 print("")
@@ -198,22 +178,14 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
     }
     
     public func describeMap(_ I: IntList) {
-        print("\(I) \(self[I]?.description ?? "?") -> \(self[I + _degree]?.description ?? "?")")
-        if let A = matrix(I) {
+        print("\(I) \(self[I]?.description ?? "?") -> \(self[I + d.degree]?.description ?? "?")")
+        if let A = dMatrix(I) {
             print("\n", A.detailDescription)
         }
     }
 }
 
 public extension MultigradedChainComplex where Dim == _1 {
-    public var degree: Int {
-        return _degree[0]
-    }
-    
-    public func matrix(_ i: Int) -> Matrix<R>? {
-        return matrix(IntList(i))
-    }
-    
     public func homology(_ i: Int) -> SimpleModuleStructure<A, R>? {
         return homology(IntList(i))
     }
@@ -228,14 +200,6 @@ public extension MultigradedChainComplex where Dim == _1 {
 }
 
 public extension MultigradedChainComplex where Dim == _2 {
-    public var degree: (Int, Int) {
-        return (_degree[0], _degree[1])
-    }
-    
-    public func matrix(_ i: Int, _ j: Int) -> Matrix<R>? {
-        return matrix(IntList(i, j))
-    }
-    
     public func homology(_ i: Int, _ j: Int) -> SimpleModuleStructure<A, R>? {
         return homology(IntList(i, j))
     }
