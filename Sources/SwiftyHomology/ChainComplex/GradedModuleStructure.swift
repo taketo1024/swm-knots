@@ -48,6 +48,10 @@ public struct MultigradedModuleStructure<Dim: _Int, A: BasisElementType, R: Eucl
         return grid.keys.sorted()
     }
     
+    public var isDetermined: Bool {
+        return grid.values.forAll{ $0 != nil }
+    }
+    
     public func shifted(_ I: IntList) -> MultigradedModuleStructure<Dim, A, R> {
         return MultigradedModuleStructure(name: name, grid: grid.mapKeys{ $0 + I} )
     }
@@ -190,5 +194,17 @@ public extension MultigradedModuleStructure where Dim == _2 {
         }
         
         print(table)
+    }
+}
+
+public extension MultigradedModuleStructure where R == 𝐙 {
+    public var structureCode: String {
+        return nonZeroMultiDegrees.map{ I in
+            if let s = self[I] {
+                return "\(I): \(s.structureCode)"
+            } else {
+                return "\(I): ?"
+            }
+        }.joined(separator: ", ")
     }
 }

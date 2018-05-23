@@ -75,19 +75,6 @@ public extension BigradedModuleStructure where Dim == _2, A == KhTensorElement {
             R(from: (-1).pow(i) * self[i, j]!.summands.count{ $0.isFree }) * q.pow(j)
         }
     }
-    
-    /*
-    public var structureCode: String {
-        return validDegrees.map{ (i, j) in
-            let s = self[i, j]
-            let f = (s.rank > 0) ? "0\(Format.sup(s.rank))₍\(Format.sub(i)),\(Format.sub(j))₎" : ""
-            let t = s.torsionCoeffs.countMultiplicities().map{ (d, r) in
-                "\(d)\(Format.sup(r))₍\(Format.sub(i)),\(Format.sub(j))₎"
-            }.joined()
-            return f + t
-        }.joined()
-    }
-    */
 }
 
 /*
