@@ -114,20 +114,23 @@ public extension SimpleModuleStructure where R == 𝐙 {
         }.joined()
     }
     
-    public func subSummands<n: _Int>(torsion: Int) -> SimpleModuleStructure<A, IntegerQuotientRing<n>> {
-        assert(n.intValue == torsion)
-        
+    public func orderNtorsionPart<n: _Int>(_ type: n.Type) -> SimpleModuleStructure<A, IntegerQuotientRing<n>> {
         typealias Q = IntegerQuotientRing<n>
-        typealias T = SimpleModuleStructure<A, Q>
+        typealias Summand = SimpleModuleStructure<A, Q>.Summand
         
-        let indices = (0 ..< self.summands.count).filter{ i in self[i].divisor == torsion }
+        let n = n.intValue
+        let indices = (0 ..< self.summands.count).filter{ i in self[i].divisor == n }
         let sub = subSummands(indices: indices)
         
-        let summands = sub.summands.map { s -> T.Summand in
-            T.Summand(s.generator.mapValues{ Q($0) }, .zero)
+        let summands = sub.summands.map { s -> Summand in
+            Summand(s.generator.mapValues{ Q($0) }, .zero)
         }
         let transform = sub.transform.mapValues { Q($0) }
         
-        return T(summands, basis, transform)
+        return SimpleModuleStructure<A, Q>(summands, basis, transform)
+    }
+    
+    public var order2torsionPart: SimpleModuleStructure<A, 𝐙₂> {
+        return orderNtorsionPart(_2.self)
     }
 }

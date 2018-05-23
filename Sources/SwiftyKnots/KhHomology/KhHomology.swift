@@ -78,20 +78,6 @@ public extension BigradedModuleStructure where Dim == _2, A == KhTensorElement {
 }
 
 /*
-public extension KhHomology where R == 𝐙 {
-    public var order2torsionPart: KhHomology<𝐙₂> {
-        typealias Kh = KhHomology<𝐙₂>
-        let name = "Kh(\(link.name); \(R.symbol))_𝐙₂"
-        let summands = (H.offset ... H.topDegree).map { i -> Kh.Summand in
-            H[i].subSummands(torsion: 2)
-        }
-        let Hf = Kh.Inner(name: name, offset: H.offset, summands: summands)
-        
-        return Kh(link, Hf)
-    }
-    
-}
-
 extension KhHomology: Codable where R: Codable {
     enum CodingKeys: String, CodingKey {
         case link, H

@@ -52,6 +52,14 @@ public struct MultigradedModuleStructure<Dim: _Int, A: BasisElementType, R: Eucl
         return grid.values.forAll{ $0 != nil }
     }
     
+    public var freePart: MultigradedModuleStructure<Dim, A, R> {
+        return MultigradedModuleStructure(name: "\(name)_free", grid: grid.mapValues{ $0?.freePart })
+    }
+    
+    public var torsionPart: MultigradedModuleStructure<Dim, A, R> {
+        return MultigradedModuleStructure(name: "\(name)_tor", grid: grid.mapValues{ $0?.torsionPart })
+    }
+
     public func shifted(_ I: IntList) -> MultigradedModuleStructure<Dim, A, R> {
         return MultigradedModuleStructure(name: name, grid: grid.mapKeys{ $0 + I} )
     }
@@ -206,5 +214,16 @@ public extension MultigradedModuleStructure where R == 𝐙 {
                 return "\(I): ?"
             }
         }.joined(separator: ", ")
+    }
+    
+    public func orderNtorsionPart<n: _Int>(_ type: n.Type) -> MultigradedModuleStructure<Dim, A, IntegerQuotientRing<n>> {
+        return MultigradedModuleStructure<Dim, A, IntegerQuotientRing<n>>(
+            name: "\(name)_\(n.intValue)",
+            grid: grid.mapValues{ $0?.orderNtorsionPart(type) }
+        )
+    }
+    
+    public var order2torsionPart: MultigradedModuleStructure<Dim, A, 𝐙₂> {
+        return orderNtorsionPart(_2.self)
     }
 }
