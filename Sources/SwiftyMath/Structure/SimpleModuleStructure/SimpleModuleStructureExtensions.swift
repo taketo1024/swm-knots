@@ -104,6 +104,16 @@ public extension SimpleModuleStructure where R: EuclideanRing {
 // Int Extensions
 
 public extension SimpleModuleStructure where R == 𝐙 {
+    public var structure: [Int : Int] {
+        return summands.group{ $0.divisor }.mapValues{ $0.count }
+    }
+    
+    public var structureCode: String {
+        return structure.sorted{ $0.key }.map { (d, r) in
+            "\(r)\(d == 0 ? "" : Format.sub(d))"
+        }.joined()
+    }
+    
     public func subSummands<n: _Int>(torsion: Int) -> SimpleModuleStructure<A, IntegerQuotientRing<n>> {
         assert(n.intValue == torsion)
         
