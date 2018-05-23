@@ -111,9 +111,9 @@ public struct _GradedChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRi
         )
     }
     
-    public func homology() -> _GradedModuleStructure<Dim, A, R> {
+    public func homology(name: String? = nil) -> _GradedModuleStructure<Dim, A, R> {
         return _GradedModuleStructure(
-            name: "H(\(base.name); \(R.symbol))",
+            name: name ?? "H(\(base.name))",
             list: base._nonZeroDegrees.map{ I in (I, _homology(I)) }
         )
     }
