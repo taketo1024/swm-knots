@@ -77,10 +77,6 @@ public extension BigradedModuleStructure where Dim == _2, A == KhTensorElement {
     }
     
     /*
-    public var table: Table<Summand> {
-        return Table(components: validDegrees.map{ (i, j) in (i, j, self[i, j]) })
-    }
-    
     public var structureCode: String {
         return validDegrees.map{ (i, j) in
             let s = self[i, j]
@@ -91,42 +87,7 @@ public extension BigradedModuleStructure where Dim == _2, A == KhTensorElement {
             return f + t
         }.joined()
     }
-    
-    public var description: String {
-        return "\(H.name)\n\(table.description)"
-    }
-    
-    public struct Table<E>: CustomStringConvertible {
-        private let components: [IntList : E]
-        
-        internal init(components: [(Int, Int, E)]) {
-            self.components = Dictionary(pairs: components.map{ (IntList($0, $1), $2) })
-        }
-        
-        public subscript(i: Int, j: Int) -> E? {
-            return components[IntList(i, j)]
-        }
-        
-        public var description: String {
-            guard !components.isEmpty else {
-                return ""
-            }
-            
-            let keys = components.keys
-            let (I, J) = (keys.map{$0[0]}.unique(), keys.map{$0[1]}.unique())
-            let (i0, i1) = (I.min()!, I.max()!)
-            let (j0, j1) = (J.min()!, J.max()!)
-            
-            let cols = (i0 ... i1).toArray()
-            let rows = (j0 ... j1).filter{ ($0 - j0).isEven }.reversed().toArray()
-            
-            return Format.table("j\\i", rows: rows, cols: cols) { (j, i) -> String in
-                let s = self[i, j]
-                return s.map{ "\($0)" } ?? ""
-            }
-        }
-    }
- */
+    */
 }
 
 /*

@@ -165,4 +165,30 @@ public extension MultigradedModuleStructure where Dim == _2 {
     public func describe(_ i: Int, _ j: Int) {
         describe(IntList(i, j))
     }
+    
+    public func printTable() {
+        if grid.isEmpty {
+            return
+        }
+        
+        let keys = grid.keys
+        let (iList, jList) = ( keys.map{$0[0]}.unique(), keys.map{$0[1]}.unique() )
+        let (i0, i1) = (iList.min()!, iList.max()!)
+        let (j0, j1) = (jList.min()!, jList.max()!)
+        
+        let jEvenOnly = jList.forAll{ j in (j - j0).isEven }
+        
+        let colList = (i0 ... i1).toArray()
+        let rowList = (j0 ... j1).reversed().filter{ j in jEvenOnly ? (j - j0).isEven : true }.toArray()
+
+        let table = Format.table("j\\i", rows: rowList, cols: colList) { (j, i) -> String in
+            if let o = self[i, j] {
+                return !o.isTrivial ? o.description : ""
+            } else {
+                return "?"
+            }
+        }
+        
+        print(table)
+    }
 }

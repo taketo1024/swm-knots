@@ -233,4 +233,8 @@ public extension MultigradedChainComplex where Dim == _2 {
     public func describeMap(_ i: Int, _ j: Int) {
         describeMap(IntList(i, j))
     }
+    
+    public func printTable() {
+        base.printTable()
+    }
 }
