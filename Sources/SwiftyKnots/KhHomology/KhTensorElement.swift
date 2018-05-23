@@ -11,7 +11,6 @@ import SwiftyMath
 public struct KhTensorElement: BasisElementType, Comparable, Codable {
     public let state: KauffmanState
     internal let factors: [KhBasisElement]
-    public let degree: Int
     
     public static func generateBasis(state: KauffmanState, power n: Int) -> [KhTensorElement] {
         return (0 ..< n).reduce([[]]) { (res, _) -> [[KhBasisElement]] in
@@ -23,14 +22,13 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
             .sorted()
     }
     
-    internal init(state: KauffmanState, factors: [KhBasisElement], shift: Int = 0) {
+    internal init(state: KauffmanState, factors: [KhBasisElement]) {
         self.state = state
         self.factors = factors
-        self.degree = factors.sum{ e in e.degree } + state.degree + shift
     }
     
-    internal var shift: Int {
-        return degree - factors.sum{ e in e.degree } - state.degree
+    public var degree: Int {
+        return factors.sum{ e in e.degree } + state.degree
     }
     
     internal func product<R: Ring>(_ μ: KhBasisElement.Product<R>, _ from: (Int, Int), _ to: Int, _ toState: KauffmanState) -> FreeModule<KhTensorElement, R> {
@@ -42,7 +40,7 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
             toFactors.remove(at: i2)
             toFactors.remove(at: i1)
             toFactors.insert(e, at: to)
-            return FreeModule( KhTensorElement(state: toState, factors: toFactors, shift: shift), a )
+            return FreeModule( KhTensorElement(state: toState, factors: toFactors), a )
         }
     }
     
@@ -55,12 +53,8 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
             toFactors.remove(at: from)
             toFactors.insert(e1, at: j1)
             toFactors.insert(e2, at: j2)
-            return FreeModule( KhTensorElement(state: toState, factors: toFactors, shift: shift), a )
+            return FreeModule( KhTensorElement(state: toState, factors: toFactors), a )
         }
-    }
-    
-    public func shifted(_ i: Int) -> KhTensorElement {
-        return KhTensorElement(state: state, factors: factors, shift: shift + i)
     }
     
     public func stateModified(_ i: Int, _ bit: KauffmanState.Bit?) -> KhTensorElement {
@@ -70,7 +64,7 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
         } else {
             s.unset(i)
         }
-        return KhTensorElement(state: s, factors: factors, shift: shift)
+        return KhTensorElement(state: s, factors: factors)
     }
     
     public static func ==(b1: KhTensorElement, b2: KhTensorElement) -> Bool {
@@ -79,13 +73,7 @@ public struct KhTensorElement: BasisElementType, Comparable, Codable {
     
     public static func <(b1: KhTensorElement, b2: KhTensorElement) -> Bool {
         return (b1.state < b2.state)
-            || (b1.state == b2.state
-                && (b1.degree < b2.degree
-                    || (b1.degree == b2.degree
-                        && b1.factors.lexicographicallyPrecedes(b2.factors)
-                    )
-                )
-        )
+            || (b1.state == b2.state && b1.factors.lexicographicallyPrecedes(b2.factors) )
     }
     
     public var hashValue: Int {

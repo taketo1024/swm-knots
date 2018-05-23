@@ -42,10 +42,6 @@ public struct KhCube {
         return vertices(degree: degree).flatMap { v in v.basis }
     }
     
-    public func basis(degree i: Int, _ j: Int) -> [KhTensorElement] {
-        return basis(degree: i).filter{ $0.degree == j }
-    }
-    
     public func reducedBasis(degree: Int) -> [KhTensorElement] {
         return vertices(degree: degree).flatMap { v -> [KhTensorElement] in
             if let i = v.components.index(where: { $0.edges.contains{ $0.id == minEdgeId } }) {
