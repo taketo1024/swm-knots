@@ -10,12 +10,7 @@ import SwiftyMath
 import SwiftyHomology
 
 public extension Link {
-    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> BigradedChainComplex<KhTensorElement, R> {
-        return KhChainComplex(KhBasisElement.μ, KhBasisElement.Δ, R.self,
-                              reduced: reduced, normalized: normalized, shifted: shifted)
-    }
-    
-    public func KhChainComplex<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> BigradedChainComplex<KhTensorElement, R> {
+    public func KhChainComplexBase<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> BigradedModuleStructure<KhTensorElement, R> {
         
         let (n, n⁺, n⁻) = (crossingNumber, crossingNumber⁺, crossingNumber⁻)
         
@@ -31,23 +26,17 @@ public extension Link {
             return basis.group(by: { $0.degree }).map{ (j, basis) in (i, j, basis) }
         }
         
-        let base = BigradedModuleStructure<KhTensorElement, R>(name: name, list: list)
-            .shifted( (normalized ? -n⁻ : 0) + shifted.0, 0)
-        
-        return base.asChainComplex(degree: (1, 0)) { (i, j, x) in
-            cube.map(x, μ, Δ)
-        }
-    }
-
-    public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> BigradedModuleStructure<KhTensorElement, R> {
-        return KhHomology(KhBasisElement.μ, KhBasisElement.Δ, R.self,
-                          reduced: reduced, normalized: normalized, shifted: shifted)
+        return BigradedModuleStructure(name: name, list: list).shifted( (normalized ? -n⁻ : 0) + shifted.0, 0)
     }
     
-    public func KhHomology<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, _ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> BigradedModuleStructure<KhTensorElement, R> {
-        
+    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> BigradedChainComplex<KhTensorElement, R> {
+        let base = KhChainComplexBase(type, reduced: reduced, normalized: normalized, shifted: shifted)
+        return base.asChainComplex(degree: (1, 0)) { (_, _, x) in self.KhCube.d(x) }
+    }
+    
+    public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true, shifted: (Int, Int) = (0, 0)) -> BigradedModuleStructure<KhTensorElement, R> {
         let name = "Kh(\(self.name); \(R.symbol))"
-        let C = self.KhChainComplex(μ, Δ, R.self, reduced: reduced, normalized: normalized, shifted: shifted)
+        let C = self.KhChainComplex(R.self, reduced: reduced, normalized: normalized, shifted: shifted)
         return C.homology(name: name)
     }
 }

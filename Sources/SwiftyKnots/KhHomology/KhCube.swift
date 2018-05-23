@@ -57,32 +57,38 @@ public struct KhCube {
     }
     
     public func d<R: Ring>(_ x: KhTensorElement) -> FreeModule<KhTensorElement, R> {
-        return map(x, KhBasisElement.μ, KhBasisElement.Δ)
+        return d(KhBasisElement.μ, KhBasisElement.Δ)(x)
     }
     
-    public func map<R: Ring>(_ x: KhTensorElement, _ μ: KhBasisElement.Product<R>, _ Δ: KhBasisElement.Coproduct<R>) -> FreeModule<KhTensorElement, R> {
-        let s = x.state
-        return s.next.sum { (sgn, next) in
-            let (c1, c2) = (self[s].components, self[next].components)
-            let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
-            
-            switch (d1.count, d2.count) {
-            case (2, 1): // apply μ
-                let (i1, i2, j) = (c1.index(of: d1[0])!, c1.index(of: d1[1])!, c2.index(of: d2[0])!)
-                return R(from: sgn) * x.product(μ, (i1, i2), j, next)
+    public func d_Lee<R: Ring>(_ x: KhTensorElement) -> FreeModule<KhTensorElement, R> {
+        return d(KhBasisElement.μ_Lee, KhBasisElement.Δ_Lee)(x)
+    }
+    
+    public func d_BN<R: Ring>(_ x: KhTensorElement) -> FreeModule<KhTensorElement, R> {
+        return d(KhBasisElement.μ_BN, KhBasisElement.Δ_BN)(x)
+    }
+    
+    public func d<R: Ring>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>) -> (KhTensorElement) -> FreeModule<KhTensorElement, R> {
+        return { x in
+            let s = x.state
+            return s.next.sum { (sgn, next) in
+                let (c1, c2) = (self[s].components, self[next].components)
+                let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
                 
-            case (1, 2): // apply Δ
-                let (i, j1, j2) = (c1.index(of: d1[0])!, c2.index(of: d2[0])!, c2.index(of: d2[1])!)
-                return R(from: sgn) * x.coproduct(Δ, i, (j1, j2), next)
-                
-            default:
-                fatalError()
+                switch (d1.count, d2.count) {
+                case (2, 1): // apply μ
+                    let (i1, i2, j) = (c1.index(of: d1[0])!, c1.index(of: d1[1])!, c2.index(of: d2[0])!)
+                    return R(from: sgn) * x.product(μ, (i1, i2), j, next)
+                    
+                case (1, 2): // apply Δ
+                    let (i, j1, j2) = (c1.index(of: d1[0])!, c2.index(of: d2[0])!, c2.index(of: d2[1])!)
+                    return R(from: sgn) * x.coproduct(Δ, i, (j1, j2), next)
+                    
+                default:
+                    fatalError()
+                }
             }
         }
-    }
-    
-    public func map<R: Ring>(_ x: FreeModule<KhTensorElement, R>, _ μ: KhBasisElement.Product<R>, _ Δ: KhBasisElement.Coproduct<R>) -> FreeModule<KhTensorElement, R> {
-        return x.elements.sum { (a, r) in r * self.map(a, μ, Δ) }
     }
 }
 
