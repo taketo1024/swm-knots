@@ -102,22 +102,14 @@ public struct HomologyExactSequenceSolver<A: BasisElementType, B: BasisElementTy
     
     private func makeMatrix(_ k: Int) -> Matrix<R>? {
         let (n0, i0) = gridIndex(k)
-        let (n1, i1) = gridIndex(k + 1)
+        let (n1,  _) = gridIndex(k + 1)
         
-        let A = { () -> Matrix<R>? in
         switch i0 {
         case 0: return makeMatrix(C0.homology(n0), map0[n0],  C1.homology(n1))
         case 1: return makeMatrix(C1.homology(n0), map1[n0],  C2.homology(n1))
         case 2: return makeMatrix(C2.homology(n0), delta[n0], C0.homology(n1))
         default: fatalError()
         }
-        }()
-        
-        print((n0, i0), " -> ", (n1, i1))
-        print(A?.detailDescription ?? "nil")
-        print()
-        
-        return A
     }
     
     private func makeMatrix<X, Y>(_ s0: SimpleModuleStructure<X, R>?, _ f: @escaping (FreeModule<X, R>) -> FreeModule<Y, R>, _ s1: SimpleModuleStructure<Y, R>?) -> Matrix<R>? {
