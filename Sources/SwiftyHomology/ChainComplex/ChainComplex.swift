@@ -20,11 +20,11 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
     public let d: MultigradedModuleHom<Dim, A, A, R>
     internal let dMatrices: [IntList : Cache<Matrix<R>>]
     
-    public init(base: MultigradedModuleStructure<Dim, A, R>, degree: IntList, differential d: @escaping (IntList, A) -> FreeModule<A, R>) {
+    public init(base: MultigradedModuleStructure<Dim, A, R>, differential d: MultigradedModuleHom<Dim, A, A, R>) {
         self.base = base
-        self.d = MultigradedModuleHom(degree: degree, func: d)
+        self.d = d
         
-        let degs = base.nonZeroMultiDegrees.flatMap{ I in [I, I - degree] }.unique()
+        let degs = base.nonZeroMultiDegrees.flatMap{ I in [I, I - d.mDegree] }.unique()
         self.dMatrices = Dictionary(pairs: degs.map{ I in (I, .empty) })
     }
     

@@ -69,7 +69,11 @@ public struct MultigradedModuleStructure<Dim: _Int, A: BasisElementType, R: Eucl
     }
     
     public func asChainComplex(degree: IntList, differential d: @escaping (IntList, A) -> FreeModule<A, R>) -> MultigradedChainComplex<Dim, A, R> {
-        return MultigradedChainComplex(base: self, degree: degree, differential: d)
+        return asChainComplex(differential: MultigradedModuleHom(degree: degree, func: d))
+    }
+    
+    public func asChainComplex(differential d: MultigradedModuleHom<Dim, A, A, R>) -> MultigradedChainComplex<Dim, A, R> {
+        return MultigradedChainComplex(base: self, differential: d)
     }
     
     public func homology(name: String? = nil, degree: IntList, differential d: @escaping (IntList, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
