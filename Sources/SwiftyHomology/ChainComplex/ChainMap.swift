@@ -65,36 +65,25 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
         for I0 in C0.base.nonZeroMultiDegrees {
             let (I1, I2, I3) = (I0 + d0.mDegree, I0 + f.mDegree, I0 + d0.mDegree + f.mDegree)
             
-            guard let D0 = C0.dMatrix(I0),
-                  let D1 = C1.dMatrix(I2),
-                  let F0 = f.matrix(from: C0, to: C1, at: I0),
-                  let F1 = f.matrix(from: C0, to: C1, at: I1) else {
+            guard let s0 = C0[I0], let s3 = C1[I3] else {
                     print("\(I0): undeterminable.")
                     continue
             }
             
-            if debug {
-                let (s0, s1, s2, s3) = (C0[I0]!, C0[I1]!, C1[I2]!, C1[I3]!)
-                print("\(I0): \(s0) -> \(s1) -> \(s3)")
-                
-                for x in s0.generators {
-                    let y = d0[I0](x)
-                    let z = f[I1](y)
-                    print("\t\(x) ->\t\(y) ->\t\(z)")
-                }
-                
-                print("\(I0): \(s0) -> \(s2) -> \(s3)")
-                
-                for x in s0.generators {
-                    let y = f[I0](x)
-                    let z = d1[I2](y)
-                    print("\t\(x) ->\t\(y) ->\t\(z)")
-                }
-                
-                print("")
-            }
+            print("\(I0): \(s0) -> \(s3)")
             
-            assert(F1 * D0 == D1 * F0)
+            for x in s0.generators {
+                let y0 = d0[I0](x)
+                let z0 = f[I1](y0)
+                print("\t\(x) ->\t\(y0) ->\t\(z0)")
+                
+                let y1 = f[I0](x)
+                let z1 = d1[I2](y1)
+                print("\t\(x) ->\t\(y1) ->\t\(z1)")
+                print("")
+                
+                assert(s3.elementsAreEqual(z0, z1))
+            }
         }
     }
 }
