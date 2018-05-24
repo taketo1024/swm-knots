@@ -9,7 +9,7 @@ import Foundation
 import SwiftyMath
 
 public typealias ChainMap<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = MChainMap<_1, A, B, R>
-public typealias BigradedChainMap<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = MChainMap<_2, A, B, R>
+public typealias ChainMap2<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = MChainMap<_2, A, B, R>
 
 public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: EuclideanRing> {
     public var mDegree: IntList
@@ -24,7 +24,7 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
         return { x in x.elements.sum{ (a, r) in r * self.f(I, a) } }
     }
     
-    public func matrix(from: MultigradedModuleStructure<Dim, A, R>, to: MultigradedModuleStructure<Dim, B, R>, at I: IntList) -> Matrix<R>? {
+    public func matrix(from: ModuleGrid<Dim, A, R>, to: ModuleGrid<Dim, B, R>, at I: IntList) -> Matrix<R>? {
         guard let s0 = from[I], let s1 = to[I + mDegree] else {
             return nil
         }
@@ -108,7 +108,7 @@ public extension MChainMap where Dim == _1 {
         return mDegree[0]
     }
     
-    public func matrix(from: GradedModuleStructure<A, R>, to: GradedModuleStructure<B, R>, at i: Int) -> Matrix<R>? {
+    public func matrix(from: ModuleSequence<A, R>, to: ModuleSequence<B, R>, at i: Int) -> Matrix<R>? {
         return matrix(from: from, to: to, at: IntList(i))
     }
     

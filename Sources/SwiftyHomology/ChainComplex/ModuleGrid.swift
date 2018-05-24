@@ -8,10 +8,10 @@
 import Foundation
 import SwiftyMath
 
-public typealias GradedModuleStructure<A: BasisElementType, R: EuclideanRing> = MultigradedModuleStructure<_1, A, R>
-public typealias BigradedModuleStructure<A: BasisElementType, R: EuclideanRing> = MultigradedModuleStructure<_2, A, R>
+public typealias ModuleSequence<A: BasisElementType, R: EuclideanRing> = ModuleGrid<_1, A, R>
+public typealias ModuleGrid2<A: BasisElementType, R: EuclideanRing> = ModuleGrid<_2, A, R>
 
-public struct MultigradedModuleStructure<Dim: _Int, A: BasisElementType, R: EuclideanRing>: CustomStringConvertible {
+public struct ModuleGrid<Dim: _Int, A: BasisElementType, R: EuclideanRing>: CustomStringConvertible {
     public typealias Object = SimpleModuleStructure<A, R>
     
     public let name: String
@@ -56,16 +56,16 @@ public struct MultigradedModuleStructure<Dim: _Int, A: BasisElementType, R: Eucl
         return grid.values.forAll{ $0 != nil }
     }
     
-    public var freePart: MultigradedModuleStructure<Dim, A, R> {
-        return MultigradedModuleStructure(name: "\(name)_free", grid: grid.mapValues{ $0?.freePart })
+    public var freePart: ModuleGrid<Dim, A, R> {
+        return ModuleGrid(name: "\(name)_free", grid: grid.mapValues{ $0?.freePart })
     }
     
-    public var torsionPart: MultigradedModuleStructure<Dim, A, R> {
-        return MultigradedModuleStructure(name: "\(name)_tor", grid: grid.mapValues{ $0?.torsionPart })
+    public var torsionPart: ModuleGrid<Dim, A, R> {
+        return ModuleGrid(name: "\(name)_tor", grid: grid.mapValues{ $0?.torsionPart })
     }
 
-    public func shifted(_ I: IntList) -> MultigradedModuleStructure<Dim, A, R> {
-        return MultigradedModuleStructure(name: name, grid: grid.mapKeys{ $0 + I} )
+    public func shifted(_ I: IntList) -> ModuleGrid<Dim, A, R> {
+        return ModuleGrid(name: name, grid: grid.mapKeys{ $0 + I} )
     }
     
     public func asChainComplex(degree: IntList, differential d: @escaping (IntList, A) -> FreeModule<A, R>) -> MChainComplex<Dim, A, R> {
@@ -76,7 +76,7 @@ public struct MultigradedModuleStructure<Dim: _Int, A: BasisElementType, R: Eucl
         return MChainComplex(base: self, differential: d)
     }
     
-    public func homology(name: String? = nil, degree: IntList, differential d: @escaping (IntList, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
+    public func homology(name: String? = nil, degree: IntList, differential d: @escaping (IntList, A) -> FreeModule<A, R>) -> ModuleGrid<Dim, A, R> {
         return asChainComplex(degree: degree, differential: d).homology(name: name)
     }
     
@@ -107,7 +107,7 @@ public struct MultigradedModuleStructure<Dim: _Int, A: BasisElementType, R: Eucl
     }
 }
 
-public extension MultigradedModuleStructure where Dim == _1 {
+public extension ModuleGrid where Dim == _1 {
     public init<S: Sequence>(name: String? = nil, list: S) where S.Element == [A]? {
         self.init(name: name, list: list.enumerated().map{ (i, basis) in (IntList(i), basis) })
     }
@@ -144,7 +144,7 @@ public extension MultigradedModuleStructure where Dim == _1 {
         return nonZeroDegrees.sum{ i in (-1).pow(i) * bettiNumer(i)! }
     }
     
-    public func shifted(_ i: Int) -> GradedModuleStructure<A, R> {
+    public func shifted(_ i: Int) -> ModuleSequence<A, R> {
         return shifted(IntList(i))
     }
     
@@ -152,7 +152,7 @@ public extension MultigradedModuleStructure where Dim == _1 {
         return asChainComplex(degree: IntList(degree), differential: {(I, a) in d(I[0], a)})
     }
     
-    public func homology(name: String? = nil, degree: Int, differential d: @escaping (Int, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
+    public func homology(name: String? = nil, degree: Int, differential d: @escaping (Int, A) -> FreeModule<A, R>) -> ModuleGrid<Dim, A, R> {
         return asChainComplex(degree: degree, differential: d).homology(name: name)
     }
     
@@ -161,7 +161,7 @@ public extension MultigradedModuleStructure where Dim == _1 {
     }
 }
 
-public extension MultigradedModuleStructure where Dim == _2 {
+public extension ModuleGrid where Dim == _2 {
     public init<S: Sequence>(name: String? = nil, list: S) where S.Element == (Int, Int, [A]?) {
         self.init(name: name, list: list.map{ (i, j, basis) in (IntList(i, j), basis) })
     }
@@ -182,15 +182,15 @@ public extension MultigradedModuleStructure where Dim == _2 {
         return nonZeroMultiDegrees.map{ I in (I[0], I[1]) }
     }
     
-    public func shifted(_ i: Int, _ j: Int) -> BigradedModuleStructure<A, R> {
+    public func shifted(_ i: Int, _ j: Int) -> ModuleGrid2<A, R> {
         return shifted(IntList(i, j))
     }
     
-    public func asChainComplex(degree: (Int, Int), differential d: @escaping (Int, Int, A) -> FreeModule<A, R>) -> BigradedChainComplex<A, R> {
+    public func asChainComplex(degree: (Int, Int), differential d: @escaping (Int, Int, A) -> FreeModule<A, R>) -> ChainComplex2<A, R> {
         return asChainComplex(degree: IntList(degree.0, degree.1), differential: {(I, a) in d(I[0], I[1], a)})
     }
     
-    public func homology(name: String? = nil, degree: (Int, Int), differential d: @escaping (Int, Int, A) -> FreeModule<A, R>) -> MultigradedModuleStructure<Dim, A, R> {
+    public func homology(name: String? = nil, degree: (Int, Int), differential d: @escaping (Int, Int, A) -> FreeModule<A, R>) -> ModuleGrid<Dim, A, R> {
         return asChainComplex(degree: degree, differential: d).homology(name: name)
     }
 
@@ -225,7 +225,7 @@ public extension MultigradedModuleStructure where Dim == _2 {
     }
 }
 
-public extension MultigradedModuleStructure where R == 𝐙 {
+public extension ModuleGrid where R == 𝐙 {
     public var structureCode: String {
         return nonZeroMultiDegrees.map{ I in
             if let s = self[I] {
@@ -236,14 +236,14 @@ public extension MultigradedModuleStructure where R == 𝐙 {
         }.joined(separator: ", ")
     }
     
-    public func orderNtorsionPart<n: _Int>(_ type: n.Type) -> MultigradedModuleStructure<Dim, A, IntegerQuotientRing<n>> {
-        return MultigradedModuleStructure<Dim, A, IntegerQuotientRing<n>>(
+    public func orderNtorsionPart<n: _Int>(_ type: n.Type) -> ModuleGrid<Dim, A, IntegerQuotientRing<n>> {
+        return ModuleGrid<Dim, A, IntegerQuotientRing<n>>(
             name: "\(name)_\(n.intValue)",
             grid: grid.mapValues{ $0?.orderNtorsionPart(type) }
         )
     }
     
-    public var order2torsionPart: MultigradedModuleStructure<Dim, A, 𝐙₂> {
+    public var order2torsionPart: ModuleGrid<Dim, A, 𝐙₂> {
         return orderNtorsionPart(_2.self)
     }
 }

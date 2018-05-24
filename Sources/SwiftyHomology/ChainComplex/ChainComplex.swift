@@ -11,16 +11,16 @@ import SwiftyMath
 // TODO substitute for old ChainComplex.
 
 public typealias ChainComplex<A: BasisElementType, R: EuclideanRing> = MChainComplex<_1, A, R>
-public typealias BigradedChainComplex<A: BasisElementType, R: EuclideanRing> = MChainComplex<_2, A, R>
+public typealias ChainComplex2<A: BasisElementType, R: EuclideanRing> = MChainComplex<_2, A, R>
 
 public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing> {
-    public typealias Base = MultigradedModuleStructure<Dim, A, R>
+    public typealias Base = ModuleGrid<Dim, A, R>
     public var base: Base
     
     public let d: MChainMap<Dim, A, A, R>
     internal let dMatrices: [IntList : Cache<Matrix<R>>]
     
-    public init(base: MultigradedModuleStructure<Dim, A, R>, differential d: MChainMap<Dim, A, A, R>) {
+    public init(base: ModuleGrid<Dim, A, R>, differential d: MChainMap<Dim, A, A, R>) {
         self.base = base
         self.d = d
         
@@ -96,8 +96,8 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing> {
         )
     }
     
-    public func homology(name: String? = nil) -> MultigradedModuleStructure<Dim, A, R> {
-        return MultigradedModuleStructure(
+    public func homology(name: String? = nil) -> ModuleGrid<Dim, A, R> {
+        return ModuleGrid(
             name: name ?? "H(\(base.name))",
             list: base.nonZeroMultiDegrees.map{ I in (I, homology(I)) }
         )
@@ -121,7 +121,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing> {
             return (I, o.generators.map{ $0.basis.first!.dual })
         }
         
-        let dBase = MultigradedModuleStructure<Dim, Dual<A>, R>(name: dName, list: dList)
+        let dBase = ModuleGrid<Dim, Dual<A>, R>(name: dName, list: dList)
         return dBase.asChainComplex(degree: -d.mDegree) { (I0, x) in
             let I1 = I0 - self.d.mDegree
             guard let current = dBase[I0],

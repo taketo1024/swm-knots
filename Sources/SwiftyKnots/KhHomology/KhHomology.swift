@@ -10,7 +10,7 @@ import SwiftyMath
 import SwiftyHomology
 
 public extension Link {
-    public func KhChainComplexBase<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> BigradedModuleStructure<KhTensorElement, R> {
+    public func KhChainComplexBase<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhTensorElement, R> {
         
         let (n, n⁺, n⁻) = (crossingNumber, crossingNumber⁺, crossingNumber⁻)
         
@@ -22,22 +22,22 @@ public extension Link {
             return basis.group(by: { $0.degree }).map{ (j, basis) in (i, j, basis) }
         }
         
-        let base = BigradedModuleStructure<KhTensorElement, R>(name: name, list: list)
+        let base = ModuleGrid2<KhTensorElement, R>(name: name, list: list)
         return normalized ? base.shifted(-n⁻, n⁺ - 2 * n⁻) : base
     }
     
-    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> BigradedChainComplex<KhTensorElement, R> {
+    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhTensorElement, R> {
         let base = KhChainComplexBase(type, reduced: reduced, normalized: normalized)
         return base.asChainComplex(degree: (1, 0)) { (_, _, x) in self.KhCube.d(x) }
     }
     
-    public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> BigradedModuleStructure<KhTensorElement, R> {
+    public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhTensorElement, R> {
         let name = "Kh(\(self.name); \(R.symbol))"
         let C = self.KhChainComplex(R.self, reduced: reduced, normalized: normalized)
         return C.homology(name: name)
     }
     
-    public func KhLeeHomology<R: EuclideanRing>(_ type: R.Type) -> BigradedModuleStructure<KhTensorElement, R> {
+    public func KhLeeHomology<R: EuclideanRing>(_ type: R.Type) -> ModuleGrid2<KhTensorElement, R> {
         let name = "KhLee(\(self.name); \(R.symbol))"
         let Kh = KhHomology(type)
         return Kh.homology(name: name, degree: (1, 4)) { (_, _, x) in
@@ -46,7 +46,7 @@ public extension Link {
     }
 }
 
-public extension BigradedModuleStructure where Dim == _2, A == KhTensorElement {
+public extension ModuleGrid where Dim == _2, A == KhTensorElement {
     public var bandWidth: Int {
         return nonZeroDegrees.map{ (i, j) in j - 2 * i }.unique().count
     }
