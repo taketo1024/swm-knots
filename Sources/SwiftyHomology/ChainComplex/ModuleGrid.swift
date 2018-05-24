@@ -102,11 +102,15 @@ public struct ModuleGrid<Dim: _Int, A: BasisElementType, R: EuclideanRing>: Cust
 
 public extension ModuleGrid where Dim == _1 {
     public init<S: Sequence>(name: String? = nil, list: S) where S.Element == [A]? {
-        self.init(name: name, list: list.enumerated().map{ (i, basis) in (IntList(i), basis) })
+        self.init(name: name, list: list.enumerated().map{ (i, b) in (i, b)})
     }
     
-    public init<S: Sequence>(name: String? = nil, list: S) where S.Element == Object? {
-        self.init(name: name, list: list.enumerated().map{ (i, o) in (IntList(i), o) })
+    public init<S: Sequence>(name: String? = nil, list: S) where S.Element == (Int, [A]?) {
+        self.init(name: name, list: list.map{ (i, basis) in (IntList(i), basis) })
+    }
+    
+    public init<S: Sequence>(name: String? = nil, list: S) where S.Element == (Int, Object?) {
+        self.init(name: name, list: list.map{ (i, o) in (IntList(i), o) })
     }
     
     public subscript(i: Int) -> Object? {

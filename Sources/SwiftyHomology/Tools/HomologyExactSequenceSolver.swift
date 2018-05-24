@@ -73,6 +73,10 @@ public struct HomologyExactSequenceSolver<A: BasisElementType, B: BasisElementTy
             : (bottomDegree ... topDegree).toArray()
     }
     
+    public func column(_ i: Int) -> ModuleSequence<AbstractBasisElement, R> {
+        return ModuleSequence(list: degrees.map{ n in (n, self[n, i]) })
+    }
+    
     public mutating func fill(_ n: Int, _ i: Int) {
         assert((0 ..< 3).contains(i))
         
