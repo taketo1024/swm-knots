@@ -10,17 +10,17 @@ import SwiftyMath
 
 // TODO substitute for old ChainComplex.
 
-public typealias ChainComplex<A: BasisElementType, R: EuclideanRing> = MultigradedChainComplex<_1, A, R>
-public typealias BigradedChainComplex<A: BasisElementType, R: EuclideanRing> = MultigradedChainComplex<_2, A, R>
+public typealias ChainComplex<A: BasisElementType, R: EuclideanRing> = MChainComplex<_1, A, R>
+public typealias BigradedChainComplex<A: BasisElementType, R: EuclideanRing> = MChainComplex<_2, A, R>
 
-public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing> {
+public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing> {
     public typealias Base = MultigradedModuleStructure<Dim, A, R>
     public var base: Base
     
-    public let d: MultigradedModuleHom<Dim, A, A, R>
+    public let d: MChainMap<Dim, A, A, R>
     internal let dMatrices: [IntList : Cache<Matrix<R>>]
     
-    public init(base: MultigradedModuleStructure<Dim, A, R>, differential d: MultigradedModuleHom<Dim, A, A, R>) {
+    public init(base: MultigradedModuleStructure<Dim, A, R>, differential d: MChainMap<Dim, A, A, R>) {
         self.base = base
         self.d = d
         
@@ -109,7 +109,7 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
     
     // MEMO works only when each generator is a single basis-element.
     
-    public func dual(name: String? = nil) -> MultigradedChainComplex<Dim, Dual<A>, R> {
+    public func dual(name: String? = nil) -> MChainComplex<Dim, Dual<A>, R> {
         let dName = name ?? "\(base.name)^*"
         let dList: [(IntList, [Dual<A>]?)] = base.nonZeroMultiDegrees.map { I -> (IntList, [Dual<A>]?) in
             guard let o = self[I] else {
@@ -173,57 +173,6 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
         }
     }
     
-    public func assertChainMap<B>(_ f: MultigradedModuleHom<Dim, A, B, R>, to: MultigradedChainComplex<Dim, B, R>, debug: Bool = false) {
-        //          d0
-        //   C[I0] -----> C[I1]
-        //     |          |
-        //   f |          | f
-        //     v          v
-        //  C'[I2] ---> C'[I3]
-        //          d1
-        
-        func print(_ msg: @autoclosure () -> String) {
-            Swift.print(msg())
-        }
-        
-        assert(self.d.mDegree == to.d.mDegree)
-        
-        for I0 in base.nonZeroMultiDegrees {
-            let (I1, I2, I3) = (I0 + d.mDegree, I0 + f.mDegree, I0 + d.mDegree + f.mDegree)
-            
-            guard let D0 = dMatrix(I0),
-                  let D1 = to.dMatrix(I2),
-                  let F0 = f.matrix(from: self, to: to, at: I0),
-                  let F1 = f.matrix(from: self, to: to, at: I1) else {
-                    print("\(I0): undeterminable.")
-                    continue
-            }
-            
-            if debug {
-                let (s0, s1, s2, s3) = (self[I0]!, self[I1]!, to[I2]!, to[I3]!)
-                print("\(I0): \(s0) -> \(s1) -> \(s3)")
-
-                for x in s0.generators {
-                    let y = d[I0](x)
-                    let z = f[I1](y)
-                    print("\t\(x) ->\t\(y) ->\t\(z)")
-                }
-
-                print("\(I0): \(s0) -> \(s2) -> \(s3)")
-                
-                for x in s0.generators {
-                    let y = f[I0](x)
-                    let z = to.d[I2](y)
-                    print("\t\(x) ->\t\(y) ->\t\(z)")
-                }
-                
-                print("")
-            }
-            
-            assert(F1 * D0 == D1 * F0)
-        }
-    }
-    
     public func describe(_ I: IntList) {
         base.describe(I)
     }
@@ -236,7 +185,7 @@ public struct MultigradedChainComplex<Dim: _Int, A: BasisElementType, R: Euclide
     }
 }
 
-public extension MultigradedChainComplex where Dim == _1 {
+public extension MChainComplex where Dim == _1 {
     public subscript(i: Int) -> Base.Object? {
         get {
             return base[i]
@@ -266,7 +215,7 @@ public extension MultigradedChainComplex where Dim == _1 {
     }
 }
 
-public extension MultigradedChainComplex where Dim == _2 {
+public extension MChainComplex where Dim == _2 {
     public subscript(i: Int, j: Int) -> Base.Object? {
         get {
             return base[i, j]
