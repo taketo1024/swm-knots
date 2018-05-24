@@ -28,8 +28,16 @@ public extension AbstractSimpleModuleStructure where A == AbstractBasisElement, 
 }
 
 public extension SimpleModuleStructure where R: EuclideanRing {
-    public var asAbstract: AbstractSimpleModuleStructure<R> {
-        let torsions = summands.filter{!$0.isFree}.map{$0.divisor}
-        return AbstractSimpleModuleStructure(rank: rank, torsions: torsions)
+    public func asAbstract() -> AbstractSimpleModuleStructure<R> {
+        typealias Summand = AbstractSimpleModuleStructure<R>.Summand
+        
+        let basis = self.basis.enumerated().map{ (i, a) in
+            AbstractBasisElement(i, label: a.description)
+        }
+        let summands = self.summands.map { s in
+            Summand(s.generator.mapKeys { a in basis[self.basis.index(of: a)!] }, s.divisor)
+        }
+        
+        return AbstractSimpleModuleStructure(summands, basis, transform)
     }
 }

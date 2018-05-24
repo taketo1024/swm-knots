@@ -59,6 +59,10 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
         return FreeModule([])
     }
     
+    public func mapKeys<A2>(_ f: (A) -> A2) -> FreeModule<A2, R> {
+        return FreeModule<A2, R>(elements.mapKeys(f))
+    }
+    
     public func mapValues<R2>(_ f: (R) -> R2) -> FreeModule<A, R2> {
         return FreeModule<A, R2>(elements.mapValues(f))
     }
