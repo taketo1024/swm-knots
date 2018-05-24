@@ -154,26 +154,22 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
             let I1 = I0 + d.mDegree
             let I2 = I1 + d.mDegree
             
-            guard let A0 = dMatrix(I0),
-                  let A1 = dMatrix(I1) else {
+            guard let s0 = self[I0],
+                  let s1 = self[I1],
+                  let s2 = self[I2] else {
                     print("\(I0): undeterminable.")
                     continue
             }
             
-            if debug {
-                let (s0, s1, s2) = (self[I0]!, self[I1]!, self[I2]!)
-                
-                print("\(I0): \(s0) -> \(s1) -> \(s2)")
-                
-                for x in s0.generators {
-                    let y = d[I0](x)
-                    let z = d[I1](y)
-                    print("\t\(x) ->\t\(y) ->\t\(z)")
-                }
-                print("")
-            }
+            print("\(I0): \(s0) -> \(s1) -> \(s2)")
             
-            assert((A1 * A0).isZero)
+            for x in s0.generators {
+                let y = d[I0](x)
+                let z = d[I1](y)
+                print("\t\(x) ->\t\(y) ->\t\(z)")
+                
+                assert(s2.elementIsZero(z))
+            }
         }
     }
     
