@@ -46,22 +46,26 @@ public struct ExactSequenceSolver<R: EuclideanRing>: Sequence {
         }
     }
     
-    public func map(_ i: Int) -> Map? {
-        return arrows[i].map
-    }
-    
     public func matrix(_ i: Int) -> Matrix<R>? {
+        if let matrix = arrows[i].matrix {
+            return matrix
+        }
+        
         guard
             let from = self[i],
             let to   = self[i + 1],
             let map  = arrows[i].map
-            else { return nil }
+            else {
+                return nil
+        }
         
         let comps = from.generators.enumerated().flatMap { (j, z) -> [MatrixComponent<R>] in
             let w = map.applied(to: z)
             let vec = to.factorize(w)
             return vec.enumerated().map{ (i, a) in MatrixComponent(i, j, a) }
         }
+        
+        // TODO cache matrix
         
         return Matrix(rows: to.generators.count, cols: from.generators.count, components: comps)
     }
@@ -230,25 +234,24 @@ public struct ExactSequenceSolver<R: EuclideanRing>: Sequence {
     }
     
     public func describe(_ i0: Int) {
-        let i1 = i0 + 1
-        print("\(objectDescription(i0)) \(arrowDescription(i0)) \(objectDescription(i1))", "\n")
-        
-        for i in [i0, i1] {
-            if let M = self[i] {
-                print(M, "{")
-                for x in M.generators {
-                    print("\t", x)
-                }
-                print("}\n")
-            }
+        if let s = self[i0] {
+            print("\(i0): ", terminator: "")
+            s.describe()
+        } else {
+            print("\(i0): ?")
         }
+    }
+    
+    public func describeMap(_ i0: Int) {
+        let i1 = i0 + 1
+        print("\(i0): \(objectDescription(i0)) \(arrowDescription(i0)) \(objectDescription(i1))")
         
         if let A = self.matrix(i0) {
             print(A.detailDescription, "\n")
         }
     }
     
-    public func assertExactness(at i1: Int) {
+    public func assertExactness(at i1: Int, debug: Bool = false) {
         
         //     f0        f1
         // M0 ---> [M1] ---> M2
@@ -281,9 +284,9 @@ public struct ExactSequenceSolver<R: EuclideanRing>: Sequence {
         // TODO
     }
     
-    public func assertExactness() {
+    public func assertExactness(debug: Bool = false) {
         for i in 0 ..< length {
-            assertExactness(at: i)
+            assertExactness(at: i, debug: debug)
         }
     }
     
@@ -315,26 +318,28 @@ public struct ExactSequenceSolver<R: EuclideanRing>: Sequence {
     
     internal struct Arrow {
         var map: Map?
+        var matrix: Matrix<R>?
         var isZero: Bool
         
-        init(_ map: Map?, isZero: Bool = false) {
+        init(map: Map? = nil, matrix: Matrix<R>? = nil, isZero: Bool = false) {
             self.map = map
+            self.matrix = matrix
             self.isZero = isZero
         }
         
         static var identity: Arrow {
-            return Arrow(Map.identity)
+            return Arrow(map: .identity)
         }
         
         static var zero: Arrow {
-            return Arrow(Map.zero, isZero: true)
+            return Arrow(isZero: true)
         }
     }
     
     internal struct Arrows {
         internal var arrows: [Arrow]
         internal init (_ maps: [Map?]) {
-            self.arrows = maps.map{ Arrow($0) }
+            self.arrows = maps.map{ Arrow(map: $0) }
         }
         
         public subscript(i: Int) -> Arrow {
