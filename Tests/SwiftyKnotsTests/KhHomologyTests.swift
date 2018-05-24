@@ -46,8 +46,6 @@ class KhHomologyTests: XCTestCase {
         let K = Knot(5, 1)
         let Kh = K.KhHomology(𝐙.self)
         
-        Kh.printTable()
-        
         XCTAssertEqual(Kh.nonZeroDegrees.count, 8)
         XCTAssertEqual(Kh[-5, -15]!.structure, [0 : 1])
         XCTAssertEqual(Kh[-4, -13]!.structure, [2 : 1])
