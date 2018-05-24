@@ -15,8 +15,7 @@ public extension LogFlag {
     }
 }
 
-/*
-public struct ExactSequence<R: EuclideanRing>: Sequence {
+public struct ExactSequenceSolver<R: EuclideanRing>: Sequence {
     public typealias Object = AbstractSimpleModuleStructure<R>
     public typealias Map    = FreeModuleHom<AbstractBasisElement, AbstractBasisElement, R>
     
@@ -74,6 +73,17 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
     public func isNonZero(_ i: Int) -> Bool {
         return self[i].map{ !$0.isTrivial } ?? false
     }
+    
+    //  The following are equivalent:
+    //
+    //        f0     [f1]      f2
+    //    M0 ---> M1 ----> M2 ---> M3
+    //
+    //
+    //  1) f1 = 0
+    //  2) f2: injective  ( Ker(f2) = Im(f1) = 0 )
+    //  3) f0: surjective ( M1 = Ker(f1) = Im(f0) )
+    //
     
     public func isZeroMap(_ i1: Int) -> Bool {
         if self.arrows[i1].isZero {
@@ -210,17 +220,6 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         return N0 ⊕ N1
     }
     
-    //  The following are equivalent:
-    //
-    //        f0     [f1]      f2
-    //    M0 ---> M1 ----> M2 ---> M3
-    //
-    //
-    //  1) f1 = 0
-    //  2) f2: injective  ( Ker(f2) = Im(f1) = 0 )
-    //  3) f0: surjective ( M1 = Ker(f1) = Im(f0) )
-    //
-    
     internal mutating func solveZeroMap(_ i1: Int) -> Bool {
         if isZeroMap(i1) {
             self.arrows[i1].isZero = true
@@ -349,4 +348,3 @@ public struct ExactSequence<R: EuclideanRing>: Sequence {
         }
     }
 }
-*/
