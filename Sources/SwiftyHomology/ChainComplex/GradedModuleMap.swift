@@ -12,11 +12,11 @@ public typealias GradedModuleHom<A: BasisElementType, B: BasisElementType, R: Eu
 public typealias BigradedModuleHom<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = MultigradedModuleHom<_2, A, B, R>
 
 public struct MultigradedModuleHom<Dim: _Int, A: BasisElementType, B: BasisElementType, R: EuclideanRing> {
-    public var degree: IntList
+    public var mDegree: IntList
     internal let f: (IntList, A) -> FreeModule<B, R>
     
     public init(degree: IntList, func f: @escaping (IntList, A) -> FreeModule<B, R>) {
-        self.degree = degree
+        self.mDegree = degree
         self.f = f
     }
     
@@ -25,7 +25,7 @@ public struct MultigradedModuleHom<Dim: _Int, A: BasisElementType, B: BasisEleme
     }
     
     public func matrix(from: MultigradedModuleStructure<Dim, A, R>, to: MultigradedModuleStructure<Dim, B, R>, at I: IntList) -> Matrix<R>? {
-        guard let s0 = from[I], let s1 = to[I + degree] else {
+        guard let s0 = from[I], let s1 = to[I + mDegree] else {
             return nil
         }
         
@@ -49,6 +49,18 @@ public struct MultigradedModuleHom<Dim: _Int, A: BasisElementType, B: BasisEleme
 public extension MultigradedModuleHom where Dim == _1 {
     public init(degree: Int, func f: @escaping (Int, A) -> FreeModule<B, R>) {
         self.init(degree: IntList(degree), func: {(I, a) in f(I[0], a)})
+    }
+    
+    public var degree: Int {
+        return mDegree[0]
+    }
+    
+    public func matrix(from: GradedModuleStructure<A, R>, to: GradedModuleStructure<B, R>, at i: Int) -> Matrix<R>? {
+        return matrix(from: from, to: to, at: IntList(i))
+    }
+    
+    public func matrix(from: ChainComplex<A, R>, to: ChainComplex<B, R>, at i: Int) -> Matrix<R>? {
+        return matrix(from: from, to: to, at: IntList(i))
     }
 }
 
