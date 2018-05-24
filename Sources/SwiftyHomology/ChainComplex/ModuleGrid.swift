@@ -82,15 +82,8 @@ public struct ModuleGrid<Dim: _Int, A: BasisElementType, R: EuclideanRing>: Cust
     
     public func describe(_ I: IntList) {
         if let o = self[I] {
-            if !o.isTrivial {
-                print("\(I) \(o) {")
-                for (i, x) in o.generators.enumerated() {
-                    print("\t(\(i)) ", x)
-                }
-                print("}")
-            } else {
-                print("\(I) 0")
-            }
+            print("\(I)", terminator: " ")
+            o.describe()
         } else {
             print("\(I) ?")
         }

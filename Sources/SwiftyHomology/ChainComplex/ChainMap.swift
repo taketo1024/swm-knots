@@ -8,7 +8,7 @@
 import Foundation
 import SwiftyMath
 
-public typealias ChainMap<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = MChainMap<_1, A, B, R>
+public typealias  ChainMap<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = MChainMap<_1, A, B, R>
 public typealias ChainMap2<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = MChainMap<_2, A, B, R>
 
 public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: EuclideanRing> {
@@ -104,6 +104,10 @@ public extension MChainMap where Dim == _1 {
         self.init(degree: IntList(degree), func: {(I, a) in f(I[0], a)})
     }
     
+    public subscript(_ i: Int) -> (FreeModule<A, R>) -> FreeModule<B, R> {
+        return { x in x.elements.sum{ (a, r) in r * self.f(IntList(i), a) } }
+    }
+    
     public var degree: Int {
         return mDegree[0]
     }
@@ -120,5 +124,9 @@ public extension MChainMap where Dim == _1 {
 public extension MChainMap where Dim == _2 {
     public init(degree: (Int, Int), func f: @escaping (Int, Int, A) -> FreeModule<B, R>) {
         self.init(degree: IntList(degree.0, degree.1), func: {(I, a) in f(I[0], I[1], a)})
+    }
+    
+    public subscript(_ i: Int, _ j: Int) -> (FreeModule<A, R>) -> FreeModule<B, R> {
+        return { x in x.elements.sum{ (a, r) in r * self.f(IntList(i, j), a) } }
     }
 }

@@ -13,7 +13,7 @@ import SwiftyMath
 public typealias ChainComplex<A: BasisElementType, R: EuclideanRing> = MChainComplex<_1, A, R>
 public typealias ChainComplex2<A: BasisElementType, R: EuclideanRing> = MChainComplex<_2, A, R>
 
-public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing> {
+public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: CustomStringConvertible {
     public typealias Base = ModuleGrid<Dim, A, R>
     public var base: Base
     
@@ -34,6 +34,10 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing> {
         } set {
             base[I] = newValue
         }
+    }
+    
+    public var name: String {
+        return base.name
     }
     
     internal func dMatrix(_ I: IntList) -> Matrix<R>? {
@@ -182,6 +186,10 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing> {
         if let A = dMatrix(I) {
             print("\n", A.detailDescription)
         }
+    }
+    
+    public var description: String {
+        return base.description
     }
 }
 
