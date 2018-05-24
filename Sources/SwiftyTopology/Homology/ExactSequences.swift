@@ -10,27 +10,29 @@ import Foundation
 import SwiftyMath
 import SwiftyHomology
 
-/*
-public extension HomologyExactSequence where T == Descending {
-    public static func pair(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> HomologyExactSequence<R> {
+public extension SimplicialComplex {
+    public static func homologyExactSequence<R>(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> HomologyExactSequenceSolver<Simplex, Simplex, Simplex, R> {
         
         //             i         j
         //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
         //
         
-        typealias C = ChainComplex<Simplex, R>
         typealias M = ChainMap<Simplex, Simplex, R>
         
-        let (CA, CX, CXA) = (C(A, R.self), C(X, R.self), C(X, A, R.self))
+        let CA  = A.chainComplex(R.self)
+        let CX  = X.chainComplex(R.self)
+        let CXA = X.chainComplex(relativeTo: A, R.self)
         
-        let i = M.induced(from: SimplicialMap.inclusion(from: A, to: X), R.self)
-        let j = M { (s: Simplex) in !A.contains(s) ? FreeModule(s) : .zero }
-        let d = M { (s: Simplex) in s.boundary(R.self) }
+        let i = SimplicialMap.inclusion(from: A, to: X).asChainMap(R.self)
+        let j = M(degree:  0) { (_, s) in !A.contains(s) ? FreeModule(s) : .zero }
+        let d = M(degree: -1) { (_, s) in s.boundary(R.self) }
         
-        return HomologyExactSequence(CA, i, CX, j, CXA, d)
+        typealias H = HomologyExactSequenceSolver<Simplex, Simplex, Simplex, R>
+        return H(CA, i, CX, j, CXA, d)
     }
 }
 
+/*
 public extension CohomologyExactSequence where T == Ascending {
     public static func pair(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> CohomologyExactSequence<R> {
         
