@@ -86,6 +86,18 @@ public struct SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleStructu
         return a.summands == b.summands
     }
     
+    public func describe() {
+        if !isTrivial {
+            print("\(self) {")
+            for (i, x) in generators.enumerated() {
+                print("\t(\(i)) ", x)
+            }
+            print("}")
+        } else {
+            print("\(self)")
+        }
+    }
+    
     public var description: String {
         if summands.isEmpty {
             return "0"
@@ -96,10 +108,6 @@ public struct SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleStructu
             "\(R.symbol)/\(d)\(r > 1 ? Format.sup(r) : "")"
         }
         return (t + f).joined(separator: "⊕")
-    }
-    
-    public var detailDescription: String {
-        return "\(self),\t\(generators)"
     }
     
     public struct Summand: AlgebraicStructure {
