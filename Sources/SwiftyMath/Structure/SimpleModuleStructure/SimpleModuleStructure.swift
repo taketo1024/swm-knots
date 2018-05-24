@@ -16,7 +16,7 @@ import Foundation
 // See: https://en.wikipedia.org/wiki/Free_presentation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
-public final class SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleStructure<R> {
+public struct SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleStructure {
     public let summands: [Summand]
     
     // MEMO values used for factorization where R: EuclideanRing
@@ -28,8 +28,6 @@ public final class SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleSt
         self.summands = summands
         self.basis = basis
         self.transform = transform
-        
-        super.init()
     }
     
     public subscript(i: Int) -> Summand {
@@ -88,7 +86,7 @@ public final class SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleSt
         return a.summands == b.summands
     }
     
-    public override var description: String {
+    public var description: String {
         if summands.isEmpty {
             return "0"
         }
@@ -104,7 +102,7 @@ public final class SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleSt
         return "\(self),\t\(generators)"
     }
     
-    public final class Summand: AlgebraicStructure {
+    public struct Summand: AlgebraicStructure {
         public let generator: FreeModule<A, R>
         public let divisor: R
         
@@ -113,7 +111,7 @@ public final class SimpleModuleStructure<A: BasisElementType, R: Ring>: ModuleSt
             self.divisor = divisor
         }
         
-        internal convenience init(_ a: A, _ divisor: R) {
+        internal init(_ a: A, _ divisor: R) {
             self.init(FreeModule(a), divisor)
         }
         
@@ -143,7 +141,7 @@ extension SimpleModuleStructure: Codable where A: Codable, R: Codable {
         case summands, basis, transform
     }
     
-    public convenience init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let summands = try c.decode([Summand].self, forKey: .summands)
         let basis = try c.decode([A].self, forKey: .basis)
@@ -164,7 +162,7 @@ extension SimpleModuleStructure.Summand: Codable where A: Codable, R: Codable {
         case generator, divisor
     }
     
-    public convenience init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let g = try c.decode(FreeModule<A, R>.self, forKey: .generator)
         let d = try c.decode(R.self, forKey: .divisor)

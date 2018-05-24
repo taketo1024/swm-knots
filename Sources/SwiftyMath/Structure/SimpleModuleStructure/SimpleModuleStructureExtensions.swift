@@ -10,7 +10,7 @@ import Foundation
 // EuclideanRing extensions
 
 public extension SimpleModuleStructure where R: EuclideanRing {
-    public convenience init(generators: [A], relationMatrix B: Matrix<R>? = nil) {
+    public init(generators: [A], relationMatrix B: Matrix<R>? = nil) {
         let I = Matrix<R>.identity(size: generators.count)
         self.init(basis: generators, generatingMatrix: I, transitionMatrix: I, relationMatrix: B)
     }
@@ -18,7 +18,7 @@ public extension SimpleModuleStructure where R: EuclideanRing {
     // TODO must consider when `generators` does not form a subbasis of R^n
     // e.g) generators = [(2, 0), (0, 2)]
     
-    public convenience init(generators: [FreeModule<A, R>], relationMatrix B: Matrix<R>? = nil) {
+    public init(generators: [FreeModule<A, R>], relationMatrix B: Matrix<R>? = nil) {
         let basis = generators.flatMap{ $0.basis }.unique().sorted()
         let A = Matrix(rows: basis.count, cols: generators.count) { (i, j) in generators[j][basis[i]] }
         let T = A.elimination(form: .RowEchelon).left.submatrix(rowRange: 0 ..< generators.count)
@@ -37,7 +37,7 @@ public extension SimpleModuleStructure where R: EuclideanRing {
      *  0 -> R^l >---> R^k --->> M' -> 0
      *
      */
-    public convenience init(basis: [A], generatingMatrix A: Matrix<R>, transitionMatrix T:Matrix<R>, relationMatrix _B: Matrix<R>?) {
+    public init(basis: [A], generatingMatrix A: Matrix<R>, transitionMatrix T:Matrix<R>, relationMatrix _B: Matrix<R>?) {
         
         let B = _B ?? Matrix.zero(rows: A.cols, cols: 0)
         
@@ -72,7 +72,7 @@ public extension SimpleModuleStructure where R: EuclideanRing {
         self.init(summands, basis, T2)
     }
     
-    public convenience init(basis: [FreeModule<A, R>], generatingMatrix A: Matrix<R>, transitionMatrix T: Matrix<R>, relationMatrix B: Matrix<R>?) {
+    public init(basis: [FreeModule<A, R>], generatingMatrix A: Matrix<R>, transitionMatrix T: Matrix<R>, relationMatrix B: Matrix<R>?) {
         
         let oBasis = basis.flatMap{ $0.basis }.unique().sorted()
         let A0 = Matrix(rows: oBasis.count, cols: basis.count) { (i, j) in basis[j][oBasis[i]] }
