@@ -171,7 +171,7 @@ public extension ObjectGrid where Dim == _2 {
         let rowList = (j0 ... j1).reversed().filter{ j in jEvenOnly ? (j - j0).isEven : true }.toArray()
 
         let table = Format.table("j\\i", rows: rowList, cols: colList) { (j, i) in
-            describe(IntList(i, j))
+            self[i, j].map{ "\($0)" } ?? "?"
         }
         
         print(table)
