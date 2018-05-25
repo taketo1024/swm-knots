@@ -33,10 +33,12 @@ public struct MChainComplexSES<Dim: _Int, A: BasisElementType, B: BasisElementTy
         self.d  = d
     }
     
-    public var elements: (MChainComplex<Dim, A, R>, MChainMap<Dim, A, B, R>,
-                          MChainComplex<Dim, B, R>, MChainMap<Dim, B, C, R>,
-                          MChainComplex<Dim, C, R>, MChainMap<Dim, C, A, R>) {
-        return (C0, f0, C1, f1, C2, d)
+    public var chainComplexes: (MChainComplex<Dim, A, R>, MChainComplex<Dim, B, R>, MChainComplex<Dim, C, R>) {
+        return (C0, C1, C2)
+    }
+    
+    public var chainMaps: (MChainMap<Dim, A, B, R>, MChainMap<Dim, B, C, R>) {
+        return (f0, f1)
     }
     
     //              f0        f1

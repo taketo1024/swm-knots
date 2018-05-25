@@ -9,59 +9,42 @@ import Foundation
 import SwiftyMath
 import SwiftyHomology
 
-/*
 public extension Link {
-    
-    // MEMO currently supports only unnormalized degrees.
-    
-    public func skeinExactSequence<R>(_ type: R.Type, atCrossing i: Int? = nil, reduced: Bool = false, solved: Bool = true) -> CohomologyExactSequence<R> {
-        typealias C = CochainComplex<KhTensorElement, R>
-        typealias M = CochainMap<KhTensorElement, KhTensorElement, R>
+    public func skeinExactSequence<R>(_ type: R.Type, atCrossing i: Int? = nil, reduced: Bool = false) -> ChainComplex2SES<KhTensorElement, KhTensorElement, KhTensorElement, R> {
         
-        let n = crossingNumber - 1
-        let L = (i == nil || i! == n)
+        typealias M = ChainMap2<KhTensorElement, KhTensorElement, R>
+        
+        let (n, n⁺, n⁻) = (crossingNumber, crossingNumber⁺, crossingNumber⁻)
+        let L = (i == nil || i! == n - 1)
             ? self
-            : Link(name: name, crossings: crossings.moved(elementAt: i!, to: n))
+            : Link(name: name, crossings: crossings.moved(elementAt: i!, to: n - 1))
         
-        let (L0, L1) = L.splicedPair(at: n)
+        let (L0, L1) = L.splicedPair(at: n - 1)
 
         //                 i      j
         //  0 --> c1{1,1} ---> c ---> c0 --> 0 (exact)
         //
         
-        let (c1, c, c0) = (L1.KhChainComplex(R.self, reduced: reduced, normalized: false, shifted: (1, 1)),
-                           L .KhChainComplex(R.self, reduced: reduced, normalized: false),
-                           L0.KhChainComplex(R.self, reduced: reduced, normalized: false))
+        let CKh  =  L.KhChainComplex(R.self, reduced: reduced)
         
-        let i = M { (e: KhTensorElement) in
-            C.Chain(e.stateModified(n, .I))
+        let CKh0 = L0.KhChainComplex(R.self, reduced: reduced, normalized: false)
+                     .shifted(-n⁻, n⁺ - 2 * n⁻)
+        let CKh1 = L1.KhChainComplex(R.self, reduced: reduced, normalized: false)
+                     .shifted(-n⁻ + 1, n⁺ - 2 * n⁻ + 1)
+        
+        let i = M { (_, _, e) in FreeModule(e.stateModified(n, .I)) }
+        let j = M { (_, _, e) in
+            e.state[n] == .O ? FreeModule(e.stateModified(n, nil)) : .zero
         }
         
-        let j = M { (e: KhTensorElement) in
-            e.state[n] == .O ? C.Chain(e.stateModified(n, nil)) : .zero
-        }
-        
-        let d = M(degree: 1) { (e0: KhTensorElement) in
+        let d = M(bidegree: (1, 0)) { (_, _, e0) in
             let e = e0.stateModified(n, .O)
-            let de: C.Chain = L.KhCube.d(e)
+            let de: FreeModule<KhTensorElement, R> = L.KhCube.d(e)
             return de.map { (e, a) -> (KhTensorElement, R) in
                 e.state[n] == .I ? (e.stateModified(n, nil), a) : (e, .zero)
             }
         }
         
-        print( L.KhHomology(c) , "\n")
-        print(L0.KhHomology(c0), "\n")
-        print(L1.KhHomology(c1), "\n")
-
-        let S = CochainComplexSES(c1, i, c, j, c0, d)
-        var H = CohomologyExactSequence(S)
-        
-        if solved {
-            H.fill(columns: 0, 1, 2)
-            H.solve()
-        }
-        
-        return H
+        return ChainComplex2SES(CKh1, i, CKh, j, CKh0, d)
     }
 }
-*/
