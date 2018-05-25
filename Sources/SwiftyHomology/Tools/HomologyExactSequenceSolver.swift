@@ -44,6 +44,10 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
         sequence[(topDegree - bottomDegree + 1) * 3] = .zeroModule
     }
     
+    public convenience init(_ S: ChainComplexSES<A, B, C, R>) {
+        self.init(S.C0, S.f0, S.C1, S.f1, S.C2, S.d)
+    }
+    
     public var length: Int {
         return sequence.length
     }

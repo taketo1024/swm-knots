@@ -16,7 +16,7 @@ public extension SimplicialComplex {
     //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
     //
     
-    internal static func shortExactSequence<R>(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> (ChainComplex<Simplex, R>, ChainMap<Simplex, Simplex, R>, ChainComplex<Simplex, R>, ChainMap<Simplex, Simplex, R>, ChainComplex<Simplex, R>, ChainMap<Simplex, Simplex, R>) {
+    public static func shortExactSequence<R>(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> ChainComplexSES<Simplex, Simplex, Simplex, R> {
         
         typealias M = ChainMap<Simplex, Simplex, R>
         
@@ -28,37 +28,19 @@ public extension SimplicialComplex {
         let j = M(degree:  0) { (_, s) in !A.contains(s) ? FreeModule(s) : .zero }
         let d = M(degree: -1) { (_, s) in s.boundary(R.self) }
         
-        return (CA, i, CX, j, CXA, d)
+        return ChainComplexSES(CA, i, CX, j, CXA, d)
     }
     
     public static func homologyExactSequence<R>(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> HomologyExactSequenceSolver<Simplex, Simplex, Simplex, R> {
         
-        let (CA, i, CX, j, CXA, d) = shortExactSequence(X, A, type)
-        
         typealias H = HomologyExactSequenceSolver<Simplex, Simplex, Simplex, R>
-        return H(CA, i, CX, j, CXA, d)
+        return H(shortExactSequence(X, A, type))
     }
     
     public static func cohomologyExactSequence<R>(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> HomologyExactSequenceSolver<Dual<Simplex>, Dual<Simplex>, Dual<Simplex>, R> {
         
-        //             i         j
-        //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
-        //
-        //
-        // ==> Hom(-, R)
-        //
-        //             i*        j*
-        //   0 <- C*A <--  C*X  <-- C*XA <- 0  (exact)
-        
-        let (CA, i, CX, j, CXA, d) = shortExactSequence(X, A, type)
-        let (DA, DX, DXA)  = (CA.dual(), CX.dual(), CXA.dual())
-        
-        let Di = i.dual(from: CA, to: CX)
-        let Dj = j.dual(from: CX, to: CXA)
-        let Dd = d.dual(from: CXA, to: CA)
-        
         typealias H = HomologyExactSequenceSolver<Dual<Simplex>, Dual<Simplex>, Dual<Simplex>, R>
-        return H(DXA, Dj, DX, Di, DA, Dd)
+        return H(shortExactSequence(X, A, type).dual)
     }
 }
 
