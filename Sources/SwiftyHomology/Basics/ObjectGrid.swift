@@ -155,7 +155,7 @@ public extension ObjectGrid where Dim == _2 {
         describe(IntList(i, j))
     }
     
-    public func printTable() {
+    public func printTable(skipDefault: Bool = true) {
         if grid.isEmpty {
             return
         }
@@ -170,8 +170,11 @@ public extension ObjectGrid where Dim == _2 {
         let colList = (i0 ... i1).toArray()
         let rowList = (j0 ... j1).reversed().filter{ j in jEvenOnly ? (j - j0).isEven : true }.toArray()
 
-        let table = Format.table("j\\i", rows: rowList, cols: colList) { (j, i) in
-            self[i, j].map{ "\($0)" } ?? "?"
+        let table = Format.table("j\\i", rows: rowList, cols: colList) { (j, i) -> String in
+            if skipDefault && !grid.contains(key: IntList(i, j)) {
+                return ""
+            }
+            return self[i, j].map{ "\($0)" } ?? "?"
         }
         
         print(table)

@@ -196,11 +196,12 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
             return "0"
         }
         
-        let f = (rank > 0) ? ["\(R.symbol)\(rank > 1 ? Format.sup(rank) : "")"] : []
-        let t = torsionCoeffs.countMultiplicities().map{ (d, r) in
-            "\(R.symbol)/\(d)\(r > 1 ? Format.sup(r) : "")"
-        }
-        return (t + f).joined(separator: "⊕")
+        return summands
+            .group{ $0.divisor }
+            .map{ (r, list) in
+                list.first!.description + (list.count > 1 ? Format.sup(list.count) : "")
+            }
+            .joined(separator: "⊕")
     }
     
     public struct Summand: AlgebraicStructure {
@@ -229,9 +230,10 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
         }
         
         public var description: String {
-            switch isFree {
-            case true : return R.symbol
-            case false: return "\(R.symbol)/\(divisor)"
+            switch (isFree, R.self == 𝐙.self) {
+            case (true, _)    : return R.symbol
+            case (false, true): return "𝐙\(Format.sub("\(divisor)"))"
+            default           : return "\(R.symbol)/\(divisor)"
             }
         }
     }
