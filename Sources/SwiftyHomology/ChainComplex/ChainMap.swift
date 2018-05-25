@@ -15,8 +15,8 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
     public var mDegree: IntList
     internal let f: (IntList, A) -> FreeModule<B, R>
     
-    public init(degree: IntList, func f: @escaping (IntList, A) -> FreeModule<B, R>) {
-        self.mDegree = degree
+    public init(mDegree: IntList, func f: @escaping (IntList, A) -> FreeModule<B, R>) {
+        self.mDegree = mDegree
         self.f = f
     }
     
@@ -25,7 +25,7 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
     }
     
     public func shifted(_ I: IntList) -> MChainMap<Dim, A, B, R> {
-        return MChainMap(degree: mDegree) { (I0, a) in
+        return MChainMap(mDegree: mDegree) { (I0, a) in
             self[I0 - I](FreeModule(a))
         }
     }
@@ -49,7 +49,7 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
 
     public func dual(from: MChainComplex<Dim, A, R>, to: MChainComplex<Dim, B, R>) -> MChainMap<Dim, Dual<B>, Dual<A>, R> {
         typealias F = MChainMap<Dim, Dual<B>, Dual<A>, R>
-        return F(degree: -mDegree) { (I1, b) -> FreeModule<Dual<A>, R> in
+        return F(mDegree: -mDegree) { (I1, b) -> FreeModule<Dual<A>, R> in
             let I0 = I1 - self.mDegree
             guard let s0 = from[I0],
                   let s1  =  to[I1],
@@ -119,8 +119,8 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
 }
 
 public extension MChainMap where Dim == _1 {
-    public init(degree: Int, func f: @escaping (Int, A) -> FreeModule<B, R>) {
-        self.init(degree: IntList(degree), func: {(I, a) in f(I[0], a)})
+    public init(degree: Int = 0, func f: @escaping (Int, A) -> FreeModule<B, R>) {
+        self.init(mDegree: IntList(degree), func: {(I, a) in f(I[0], a)})
     }
     
     public subscript(_ i: Int) -> (FreeModule<A, R>) -> FreeModule<B, R> {
@@ -137,11 +137,16 @@ public extension MChainMap where Dim == _1 {
 }
 
 public extension MChainMap where Dim == _2 {
-    public init(degree: (Int, Int), func f: @escaping (Int, Int, A) -> FreeModule<B, R>) {
-        self.init(degree: IntList(degree.0, degree.1), func: {(I, a) in f(I[0], I[1], a)})
+    public init(bidegree: (Int, Int) = (0, 0), func f: @escaping (Int, Int, A) -> FreeModule<B, R>) {
+        let (i, j) = bidegree
+        self.init(mDegree: IntList(i, j), func: {(I, a) in f(I[0], I[1], a)})
     }
     
     public subscript(_ i: Int, _ j: Int) -> (FreeModule<A, R>) -> FreeModule<B, R> {
         return { x in x.elements.sum{ (a, r) in r * self.f(IntList(i, j), a) } }
+    }
+    
+    public var bidegree: (Int, Int) {
+        return (mDegree[0], mDegree[1])
     }
 }
