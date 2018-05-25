@@ -16,9 +16,9 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
     public let C1: ChainComplex<B, R>
     public let C2: ChainComplex<C, R>
     
-    internal let map0:  ChainMap<A, B, R>
-    internal let map1:  ChainMap<B, C, R>
-    internal let delta: ChainMap<C, A, R>
+    public let f0: ChainMap<A, B, R>
+    public let f1: ChainMap<B, C, R>
+    public let  d: ChainMap<C, A, R>
     
     public var sequence : ExactSequenceSolver<R>
     
@@ -34,9 +34,9 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
         self.C1 = C1
         self.C2 = C2
 
-        self.map0  = f0
-        self.map1  = f1
-        self.delta = d
+        self.f0 = f0
+        self.f1 = f1
+        self.d  = d
         
         self.sequence  = ExactSequenceSolver()
         
@@ -49,7 +49,7 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
     }
     
     public var descending: Bool {
-        return delta.degree == -1
+        return d.degree == -1
     }
     
     internal func seqIndex(_ n: Int, _ i: Int) -> Int {
@@ -136,9 +136,9 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
         let (n1,  _) = gridIndex(k + 1)
         
         switch i0 {
-        case 0: return makeMatrix(C0.homology(n0), map0[n0],  C1.homology(n1))
-        case 1: return makeMatrix(C1.homology(n0), map1[n0],  C2.homology(n1))
-        case 2: return makeMatrix(C2.homology(n0), delta[n0], C0.homology(n1))
+        case 0: return makeMatrix(C0.homology(n0), f0[n0],  C1.homology(n1))
+        case 1: return makeMatrix(C1.homology(n0), f1[n0],  C2.homology(n1))
+        case 2: return makeMatrix(C2.homology(n0), d[n0], C0.homology(n1))
         default: fatalError()
         }
     }
