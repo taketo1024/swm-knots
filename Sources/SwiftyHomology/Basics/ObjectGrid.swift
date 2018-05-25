@@ -180,3 +180,24 @@ public extension ObjectGrid where Dim == _2 {
         print(table)
     }
 }
+
+extension ObjectGrid: Codable where Object: Codable {
+    enum CodingKeys: String, CodingKey {
+        case name, defaultObject, grid
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let name = try c.decode(String.self, forKey: .name)
+        let defaultObject = try c.decode(Object?.self, forKey: .defaultObject)
+        let grid = try c.decode([IntList : Object?].self, forKey: .grid)
+        self.init(name: name, default: defaultObject, grid: grid)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(name, forKey: .name)
+        try c.encode(defaultObject, forKey: .defaultObject)
+        try c.encode(grid, forKey: .grid)
+    }
+}

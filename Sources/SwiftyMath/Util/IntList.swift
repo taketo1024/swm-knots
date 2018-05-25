@@ -79,3 +79,15 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
         return "(\( elements.map{ String($0) }.joined(separator: ", ")))"
     }
 }
+
+extension IntList: Codable {
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        self.elements = try c.decode([Int].self)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        try c.encode(elements)
+    }
+}
