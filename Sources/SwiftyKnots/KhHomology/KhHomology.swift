@@ -22,13 +22,15 @@ public extension Link {
             return basis.group(by: { $0.degree }).map{ (j, basis) in (i, j, basis) }
         }
         
-        let base = ModuleGrid2<KhTensorElement, R>(name: name, list: list)
+        let base = ModuleGrid2<KhTensorElement, R>(name: name, default: .zeroModule, list: list)
         return normalized ? base.shifted(-n⁻, n⁺ - 2 * n⁻) : base
     }
     
     public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhTensorElement, R> {
+        typealias C = ChainComplex2<KhTensorElement, R>
         let base = KhChainComplexBase(type, reduced: reduced, normalized: normalized)
-        return base.asChainComplex(degree: (1, 0)) { (_, _, x) in self.KhCube.d(x) }
+        let d = C.Differential(degree: (1, 0)) { (_, _, x) in self.KhCube.d(x) }
+        return C(base: base, differential: d)
     }
     
     public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhTensorElement, R> {
@@ -38,17 +40,19 @@ public extension Link {
     }
     
     public func KhLeeHomology<R: EuclideanRing>(_ type: R.Type) -> ModuleGrid2<KhTensorElement, R> {
+        typealias C = ChainComplex2<KhTensorElement, R>
         let name = "KhLee(\(self.name); \(R.symbol))"
-        let Kh = KhHomology(type)
-        return Kh.homology(name: name, degree: (1, 4)) { (_, _, x) in
+        let base = KhHomology(type)
+        let d = C.Differential(degree: (1, 4)) { (_, _, x) in
             self.KhCube.d_Lee(x)
         }
+        return ChainComplex2(base: base, differential: d).homology(name: name)
     }
 }
 
-public extension ModuleGrid where Dim == _2, A == KhTensorElement {
+public extension ObjectGrid where Dim == _2, Object: SimpleModuleStructureType, Object.A == KhTensorElement {
     public var bandWidth: Int {
-        return nonZeroDegrees.map{ (i, j) in j - 2 * i }.unique().count
+        return bidegrees.map{ (i, j) in j - 2 * i }.unique().count
     }
     
     public var isDiagonal: Bool {
@@ -65,8 +69,10 @@ public extension ModuleGrid where Dim == _2, A == KhTensorElement {
     
     public var qEulerCharacteristic: LaurentPolynomial<R, JonesPolynomial_q> {
         let q = LaurentPolynomial<R, JonesPolynomial_q>.indeterminate
-        return nonZeroDegrees.sum { (i, j) -> LaurentPolynomial<R, JonesPolynomial_q> in
-            R(from: (-1).pow(i) * self[i, j]!.summands.count{ $0.isFree }) * q.pow(j)
+        return bidegrees.sum { (i, j) -> LaurentPolynomial<R, JonesPolynomial_q> in
+            let s = self[i, j]!
+            let a = R(from: (-1).pow(i) * s.rank )
+            return a * q.pow(j)
         }
     }
 }

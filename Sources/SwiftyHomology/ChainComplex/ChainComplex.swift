@@ -15,16 +15,19 @@ public typealias ChainComplex2<A: BasisElementType, R: EuclideanRing> = MChainCo
 
 public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: CustomStringConvertible {
     public typealias Base = ModuleGrid<Dim, A, R>
+    public typealias Differential = MChainMap<Dim, A, A, R>
     public var base: Base
     
-    public let d: MChainMap<Dim, A, A, R>
+    public let d: Differential
     internal let dMatrices: [IntList : Cache<Matrix<R>>]
     
-    public init(base: ModuleGrid<Dim, A, R>, differential d: MChainMap<Dim, A, A, R>) {
+    public init(base: ModuleGrid<Dim, A, R>, differential d: Differential) {
+        assert(base.defaultObject == nil || base.defaultObject == .some(.zeroModule))
+        
         self.base = base
         self.d = d
         
-        let degs = base.nonZeroMultiDegrees.flatMap{ I in [I, I - d.mDegree] }.unique()
+        let degs = base.mDegrees.flatMap{ I in [I, I - d.mDegree] }.unique()
         self.dMatrices = Dictionary(pairs: degs.map{ I in (I, .empty) })
     }
     
@@ -101,9 +104,14 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     }
     
     public func homology(name: String? = nil) -> ModuleGrid<Dim, A, R> {
+        let list = base.mDegrees
+            .map{ I in (I, homology(I)) }
+            .exclude{ base.defaultObject == .zeroModule && ($0.1?.isTrivial ?? false) }
+        
         return ModuleGrid(
             name: name ?? "H(\(base.name))",
-            list: base.nonZeroMultiDegrees.map{ I in (I, homology(I)) }
+            default: base.defaultObject,
+            list: list
         )
     }
     
@@ -114,8 +122,11 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     // MEMO works only when each generator is a single basis-element.
     
     public func dual(name: String? = nil) -> MChainComplex<Dim, Dual<A>, R> {
+        typealias D = MChainComplex<Dim, Dual<A>, R>
+        
         let dName = name ?? "\(base.name)^*"
-        let dList: [(IntList, [Dual<A>]?)] = base.nonZeroMultiDegrees.map { I -> (IntList, [Dual<A>]?) in
+        let dDef = (base.defaultObject == .zeroModule) ? D.Base.Object.zeroModule : nil
+        let dList: [(IntList, [Dual<A>]?)] = base.mDegrees.map { I -> (IntList, [Dual<A>]?) in
             guard let o = self[I] else {
                 return (I, nil)
             }
@@ -125,8 +136,8 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
             return (I, o.generators.map{ $0.basis.first!.dual })
         }
         
-        let dBase = ModuleGrid<Dim, Dual<A>, R>(name: dName, list: dList)
-        return dBase.asChainComplex(degree: -d.mDegree) { (I0, x) in
+        let dBase = D.Base(name: dName, default: dDef, list: dList)
+        let dDiff = D.Differential(degree: -d.mDegree) { (I0, x) -> FreeModule<Dual<A>, R> in
             let I1 = I0 - self.d.mDegree
             guard let current = dBase[I0],
                 let target = dBase[I1],
@@ -143,6 +154,8 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
                 return r * target.generator(i)
             }
         }
+        
+        return D(base: dBase, differential: dDiff)
     }
     
     public func assertChainComplex(debug: Bool = false) {
@@ -150,7 +163,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
             Swift.print(msg())
         }
         
-        for I0 in base.nonZeroMultiDegrees {
+        for I0 in base.mDegrees {
             let I1 = I0 + d.mDegree
             let I2 = I1 + d.mDegree
             

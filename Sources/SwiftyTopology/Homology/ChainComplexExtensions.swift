@@ -20,23 +20,27 @@ public extension GeometricComplex {
     }
 
     private func _chainComplex<R: EuclideanRing>(_ type: R.Type) -> ChainComplex<Cell, R> {
+        typealias C = ChainComplex<Cell, R>
         let name = "C(\(self.name); \(R.symbol))"
         let list = validDims.map { i in cells(ofDim: i) }
-        let base = ModuleSequence<Cell, R>(name: name, list: list)
-        return base.asChainComplex(degree: -1) { (i, cell) -> FreeModule<Cell, R> in
+        let base = C.Base(name: name, default: .zeroModule, list: list)
+        let d = C.Differential(degree: -1) { (i, cell) in
             cell.boundary(R.self)
         }
+        return C(base: base, differential: d)
     }
     
     private func _chainComplex<R: EuclideanRing>(relativeTo L: Self, _ type: R.Type) -> ChainComplex<Cell, R> {
+        typealias C = ChainComplex<Cell, R>
         let name = "C(\(self.name), \(L.name); \(R.symbol))"
         let list = validDims.map { i in cells(ofDim: i).subtract(L.cells(ofDim: i)) }
-        let base = ModuleSequence<Cell, R>(name: name, list: list)
-        return base.asChainComplex(degree: -1) { (i, cell) -> FreeModule<Cell, R> in
+        let base = C.Base(name: name, default: .zeroModule, list: list)
+        let d = C.Differential(degree: -1) { (i, cell) -> FreeModule<Cell, R> in
             cell.boundary(R.self).map { (cell, r) in
                 (i > 0 && list[i - 1].contains(cell)) ? (cell, r) : (cell, .zero)
             }
         }
+        return C(base: base, differential: d)
     }
     
     public func homology<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> ModuleSequence<Cell, R> {

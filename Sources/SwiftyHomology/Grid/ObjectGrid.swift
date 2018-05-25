@@ -11,7 +11,11 @@ import SwiftyMath
 public typealias ObjectSequence<Object> = ObjectGrid<_1, Object>
 public typealias ObjectGrid2<Object>    = ObjectGrid<_2, Object>
 
-public struct ObjectGrid<Dim: _Int, Object>: CustomStringConvertible {
+public protocol ObjectGridType: CustomStringConvertible {
+    associatedtype Object
+}
+
+public struct ObjectGrid<Dim: _Int, Object>: ObjectGridType {
     public let name: String
     internal let defaultObject: Object?
     internal var grid: [IntList : Object?]
