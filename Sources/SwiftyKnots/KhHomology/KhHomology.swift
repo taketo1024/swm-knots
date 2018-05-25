@@ -39,6 +39,16 @@ public extension Link {
         return C.homology(name: name)
     }
     
+    public func KhHomology<R: EuclideanRing & Codable>(_ type: R.Type, useCache: Bool) -> ModuleGrid2<KhTensorElement, R> {
+        if useCache {
+            let id = "Kh_\(name)_\(R.symbol)"
+            return Storage.useCache(id) { KhHomology(R.self) }
+        } else {
+            return KhHomology(R.self)
+        }
+    }
+
+    
     public func KhLeeHomology<R: EuclideanRing>(_ type: R.Type) -> ModuleGrid2<KhTensorElement, R> {
         typealias C = ChainComplex2<KhTensorElement, R>
         let name = "KhLee(\(self.name); \(R.symbol))"
@@ -76,23 +86,3 @@ public extension ObjectGrid where Dim == _2, Object: SimpleModuleStructureType, 
         }
     }
 }
-
-/*
-extension KhHomology: Codable where R: Codable {
-    enum CodingKeys: String, CodingKey {
-        case link, H
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        self.link = try c.decode(Link.self, forKey: .link)
-        self.H = try c.decode(Inner.self, forKey: .H)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(link, forKey: .link)
-        try c.encode(H, forKey: .H)
-    }
-}
-*/
