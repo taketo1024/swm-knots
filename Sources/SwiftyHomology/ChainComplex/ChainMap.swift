@@ -24,6 +24,12 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
         return { x in x.elements.sum{ (a, r) in r * self.f(I, a) } }
     }
     
+    public func shifted(_ I: IntList) -> MChainMap<Dim, A, B, R> {
+        return MChainMap(degree: mDegree) { (I0, a) in
+            self[I0 - I](FreeModule(a))
+        }
+    }
+
     public func matrix(from: MChainComplex<Dim, A, R>, to: MChainComplex<Dim, B, R>, at I: IntList) -> Matrix<R>? {
         guard let s0 = from[I], let s1 = to[I + mDegree] else {
             return nil

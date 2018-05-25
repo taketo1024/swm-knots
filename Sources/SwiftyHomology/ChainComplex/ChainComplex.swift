@@ -43,6 +43,10 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         return base.name
     }
     
+    public func shifted(_ I: IntList) -> MChainComplex<Dim, A, R> {
+        return MChainComplex(base: base.shifted(I), differential: d.shifted(I))
+    }
+    
     internal func dMatrix(_ I: IntList) -> Matrix<R>? {
         if let c = dMatrices[I], let A = c.value {
             return A // cached.
@@ -203,6 +207,10 @@ public extension MChainComplex where Dim == _1 {
         return base.topDegree
     }
     
+    public func shifted(_ i: Int) -> ChainComplex<A, R> {
+        return shifted(IntList(i))
+    }
+    
     public func homology(_ i: Int) -> SimpleModuleStructure<A, R>? {
         return homology(IntList(i))
     }
@@ -223,6 +231,10 @@ public extension MChainComplex where Dim == _2 {
         } set {
             base[i, j] = newValue
         }
+    }
+    
+    public func shifted(_ i: Int, _ j: Int) -> ChainComplex2<A, R> {
+        return shifted(IntList(i, j))
     }
     
     public func homology(_ i: Int, _ j: Int) -> SimpleModuleStructure<A, R>? {
