@@ -24,7 +24,7 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
         return { x in x.elements.sum{ (a, r) in r * self.f(I, a) } }
     }
     
-    public func matrix(from: ModuleGrid<Dim, A, R>, to: ModuleGrid<Dim, B, R>, at I: IntList) -> Matrix<R>? {
+    public func matrix(from: MChainComplex<Dim, A, R>, to: MChainComplex<Dim, B, R>, at I: IntList) -> Matrix<R>? {
         guard let s0 = from[I], let s1 = to[I + mDegree] else {
             return nil
         }
@@ -41,8 +41,32 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
         return Matrix(rows: s0.generators.count, cols: s1.generators.count, grid: grid).transposed
     }
 
-    public func matrix(from: MChainComplex<Dim, A, R>, to: MChainComplex<Dim, B, R>, at I: IntList) -> Matrix<R>? {
-        return matrix(from: from.base, to: to.base, at: I)
+    public func dual(from: MChainComplex<Dim, A, R>, to: MChainComplex<Dim, B, R>) -> MChainMap<Dim, Dual<B>, Dual<A>, R> {
+        typealias F = MChainMap<Dim, Dual<B>, Dual<A>, R>
+        return F(degree: -mDegree) { (I1, b) -> FreeModule<Dual<A>, R> in
+            let I0 = I1 - self.mDegree
+            guard let s0 = from[I0],
+                  let s1  =  to[I1],
+                  let matrix = self.matrix(from: from, to: to, at: I0) else {
+                    return .zero
+            }
+            
+            guard s0.isFree, s0.generators.forAll({ $0.basis.count == 1 }),
+                  s1.isFree, s1.generators.forAll({ $0.basis.count == 1 }) else {
+                fatalError("inavailable")
+            }
+            
+            // MEMO: the matrix of the dual-map w.r.t the dual-basis is the transpose of the original.
+            
+            guard let i = s1.generators.index(where: { $0 == FreeModule(b.base) }) else {
+                fatalError()
+            }
+            
+            return matrix.nonZeroComponents(ofRow: i).sum { (c: MatrixComponent<R>) in
+                let (j, r) = (c.col, c.value)
+                return r * s0.generator(j).mapKeys{ $0.dual }
+            }
+        }
     }
     
     public func assertChainMap(from C0: MChainComplex<Dim, A, R>, to C1: MChainComplex<Dim, B, R>, debug: Bool = false) {
@@ -99,10 +123,6 @@ public extension MChainMap where Dim == _1 {
     
     public var degree: Int {
         return mDegree[0]
-    }
-    
-    public func matrix(from: ModuleSequence<A, R>, to: ModuleSequence<B, R>, at i: Int) -> Matrix<R>? {
-        return matrix(from: from, to: to, at: IntList(i))
     }
     
     public func matrix(from: ChainComplex<A, R>, to: ChainComplex<B, R>, at i: Int) -> Matrix<R>? {

@@ -137,23 +137,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         }
         
         let dBase = D.Base(name: dName, default: dDef, list: dList)
-        let dDiff = D.Differential(degree: -d.mDegree) { (I0, x) -> FreeModule<Dual<A>, R> in
-            let I1 = I0 - self.d.mDegree
-            guard let current = dBase[I0],
-                let target = dBase[I1],
-                let matrix = self.dMatrix(I1)?.transposed else {
-                    return .zero
-            }
-            
-            guard let j = current.generators.index(where: { $0 == FreeModule(x) }) else {
-                fatalError()
-            }
-            
-            return matrix.nonZeroComponents(ofCol: j).sum { (c: MatrixComponent<R>) in
-                let (i, r) = (c.row, c.value)
-                return r * target.generator(i)
-            }
-        }
+        let dDiff = d.dual(from: self, to: self)
         
         return D(base: dBase, differential: dDiff)
     }
