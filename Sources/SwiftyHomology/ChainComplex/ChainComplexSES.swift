@@ -1,76 +1,62 @@
 //
-//  File.swift
-//  SwiftyHomology
+//  ChainComplexSES.swift
+//  Sample
 //
-//  Created by Taketo Sano on 2018/05/16.
+//  Created by Taketo Sano on 2018/05/25.
 //
 
 import Foundation
 import SwiftyMath
 
-public typealias   ChainComplexSES<A: BasisElementType, B: BasisElementType, C: BasisElementType, R: EuclideanRing>
-    = _ChainComplexSES<Descending, A, B, C, R>
-public typealias CochainComplexSES<A: BasisElementType, B: BasisElementType, C: BasisElementType, R: EuclideanRing>
-    = _ChainComplexSES< Ascending, A, B, C, R>
+public typealias ChainComplexSES<A: BasisElementType, B: BasisElementType, C: BasisElementType, R: EuclideanRing> = MChainComplexSES<_1, A, B, C, R>
+public typealias ChainComplex2SES<A: BasisElementType, B: BasisElementType, C: BasisElementType, R: EuclideanRing> = MChainComplexSES<_2, A, B, C, R>
 
-public struct _ChainComplexSES<T: ChainType, A: BasisElementType, B: BasisElementType, C: BasisElementType, R: EuclideanRing> {
-    internal typealias Ch<X: BasisElementType> = _ChainComplex<T, X, R>
-    internal typealias Map<X: BasisElementType, Y: BasisElementType> = _ChainMap<T, X, Y, R>
+public struct MChainComplexSES<Dim: _Int, A: BasisElementType, B: BasisElementType, C: BasisElementType, R: EuclideanRing> {
+    public let C0: MChainComplex<Dim, A, R>
+    public let C1: MChainComplex<Dim, B, R>
+    public let C2: MChainComplex<Dim, C, R>
     
-    public var c0: _ChainComplex<T, A, R>
-    public var c1: _ChainComplex<T, B, R>
-    public var c2: _ChainComplex<T, C, R>
+    public let f0: MChainMap<Dim, A, B, R>
+    public let f1: MChainMap<Dim, B, C, R>
+    public let  d: MChainMap<Dim, C, A, R> // TODO compute from construction
     
-    public var f0: _ChainMap<T, A, B, R>
-    public var f1: _ChainMap<T, B, C, R>
-    public var  d: _ChainMap<T, C, A, R>
-
-    // MEMO: f0, f1 are assumed to be deg-0 chain maps.
-    
-    public init(_ c0: _ChainComplex<T, A, R>, _ f0 : _ChainMap<T, A, B, R>,
-                _ c1: _ChainComplex<T, B, R>, _ f1 : _ChainMap<T, B, C, R>,
-                _ c2: _ChainComplex<T, C, R>, _ d:   _ChainMap<T, C, A, R>) {
+    public init(_ C0: MChainComplex<Dim, A, R>, _ f0: MChainMap<Dim, A, B, R>,
+                _ C1: MChainComplex<Dim, B, R>, _ f1: MChainMap<Dim, B, C, R>,
+                _ C2: MChainComplex<Dim, C, R>, _  d: MChainMap<Dim, C, A, R>) {
         
-        self.c0 = c0
-        self.c1 = c1
-        self.c2 = c2
+        self.C0 = C0
+        self.C1 = C1
+        self.C2 = C2
         
         self.f0 = f0
         self.f1 = f1
-        self.d = d
+        self.d  = d
     }
     
-    public var topDegree: Int {
-        return [c0.topDegree, c1.topDegree, c2.topDegree].max()!
+    public var chainComplexes: (MChainComplex<Dim, A, R>, MChainComplex<Dim, B, R>, MChainComplex<Dim, C, R>) {
+        return (C0, C1, C2)
     }
     
-    public var bottomDegree: Int {
-        return [c0.offset, c1.offset, c2.offset].min()!
+    public var chainMaps: (MChainMap<Dim, A, B, R>, MChainMap<Dim, B, C, R>) {
+        return (f0, f1)
     }
     
-    public func assertExactness(debug: Bool = false) {
-        for n in (bottomDegree ... topDegree) {
-            typealias M = Matrix<R>
-            let (b0, b1, b2) = (c0.chainBasis(n), c1.chainBasis(n), c2.chainBasis(n))
-            let (A0, A1, A2, A3) = (M.zero(rows: b0.count, cols: 0),
-                                    f0.asMatrix(from: b0, to: b1),
-                                    f1.asMatrix(from: b1, to: b2),
-                                    M.zero(rows: 0, cols: b2.count))
-            
-            assertExactness(A0, A1)
-            assertExactness(A1, A2)
-            assertExactness(A2, A3)
-        }
-    }
+    //              f0        f1
+    //   0 --> C0  --->  C1  ---> C2  --> 0  (exact)
+    //
+    //
+    // ==> Hom(-, R)
+    //
+    //              f0*       f1*
+    //   0 <-- C0* <---  C1* <--- C2* <-- 0  (exact)
     
-    public func assertExactness(_ A: Matrix<R>, _ B: Matrix<R>) {
-        assert((B * A).isZero) // Im(A) ⊂ Ker(B)
+    public var dual: MChainComplexSES<Dim, Dual<C>, Dual<B>, Dual<A>, R> {
+        let (D0, D1, D2)  = (C0.dual(), C1.dual(), C2.dual())
         
-        // TODO assert Im(A) ⊃ Ker(B)
-    }
-    
-    private func log(_ msg: @autoclosure () -> String) {
-        // TODO
+        let g0 = f0.dual(from: C0, to: C1)
+        let g1 = f1.dual(from: C1, to: C2)
+        let dd =  d.dual(from: C2, to: C0)
+        
+        return MChainComplexSES<Dim, Dual<C>, Dual<B>, Dual<A>, R>(D2, g1, D1, g0, D0, dd)
     }
 }
-

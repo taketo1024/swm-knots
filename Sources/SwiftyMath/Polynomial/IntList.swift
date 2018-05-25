@@ -45,9 +45,17 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
         return IntList(Dictionary(pairs: indices))
     }
     
-    public static func *(I: IntList, J: IntList) -> IntList {
+    public static func +(I: IntList, J: IntList) -> IntList {
         let l = max(I.length, J.length)
         return IntList( (0 ..< l).map{ i in I[i] + J[i] } )
+    }
+    
+    public static prefix func -(I: IntList) -> IntList {
+        return IntList( I.elements.map{ -$0 } )
+    }
+    
+    public static func -(I: IntList, J: IntList) -> IntList {
+        return I + (-J)
     }
     
     public static func ==(I: IntList, J: IntList) -> Bool {

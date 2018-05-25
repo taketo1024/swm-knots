@@ -8,12 +8,15 @@
 
 import Foundation
 
-// A `Structure` instance expresses a mathematical structure that is determined dynamically.
-// Used when we want a 'dynamic-type', where Swift-types are strictly static.
-//
-// * All finite subgroups of a finite (static) group.
-// * The invariant factor decomposition of a given f.g. module.
-// * The Homology group of a given SimplicialComplex.
+public protocol AlgebraicStructure: Structure {}
 
-public protocol AlgebraicStructure: class, Equatable, CustomStringConvertible { }
+public protocol GroupStructure: AlgebraicStructure {}
 
+public protocol SubgroupStructure: GroupStructure {
+    associatedtype Base: Group
+    func contains(_ g: Base) -> Bool
+}
+
+public protocol ModuleStructure: AlgebraicStructure {
+    associatedtype R: Ring
+}

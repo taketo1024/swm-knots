@@ -17,8 +17,20 @@ public extension Dictionary {
         self.init(pairs: keys.map{ ($0, generator($0))} )
     }
     
+    public func contains(key: Key) -> Bool {
+        return self[key] != nil
+    }
+    
+    public func mapKeys<K>(_ transform: (Key) -> K) -> [K : Value] {
+        return Dictionary<K, Value>(pairs: self.map{ (k, v) in (transform(k), v) })
+    }
+    
     public func mapPairs<K, V>(_ transform: (Key, Value) -> (K, V)) -> [K : V] {
         return Dictionary<K, V>(pairs: self.map{ (k, v) in transform(k, v) })
+    }
+    
+    public func exclude(_ isExcluded: (Element) throws -> Bool) rethrows -> [Key : Value] {
+        return try self.filter{ try !isExcluded($0) }
     }
     
     public func replaced(at k: Key, with v: Value) -> [Key : Value] {

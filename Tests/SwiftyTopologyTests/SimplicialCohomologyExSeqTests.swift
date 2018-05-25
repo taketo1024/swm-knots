@@ -10,23 +10,23 @@ import SwiftyMath
 @testable import SwiftyHomology
 @testable import SwiftyTopology
 
-class SimplicialHomologyExSeqTests: XCTestCase {
+class SimplicialCohomologyExSeqTests: XCTestCase {
     typealias R = 𝐙
     
     func testDS_col0() {
-        let E = H_DS()
+        let E = cH_DS()
         E.fill(columns: 1, 2)
         E.solve()
 
         let h = E.column(0)
         
-        XCTAssertEqual(h[0]!.structure, [0 : 1])
-        XCTAssertEqual(h[1]!.structure, [0 : 1])
-        XCTAssertTrue( h[2]!.isTrivial)
+        XCTAssertTrue( h[0]!.isTrivial)
+        XCTAssertTrue( h[1]!.isTrivial)
+        XCTAssertEqual(h[2]!.structure, [0 : 1])
     }
     
     func testDS_col1() {
-        let E = H_DS()
+        let E = cH_DS()
         E.fill(columns: 2, 0)
         E.solve()
 
@@ -38,22 +38,22 @@ class SimplicialHomologyExSeqTests: XCTestCase {
     }
     
     func testDS_col2() {
-        let E = H_DS()
+        let E = cH_DS()
         E.fill(columns: 0, 1)
         E.solve()
         
         let h = E.column(2)
         
-        XCTAssertTrue( h[0]!.isTrivial)
-        XCTAssertTrue( h[1]!.isTrivial)
-        XCTAssertEqual(h[2]!.structure, [0 : 1])
+        XCTAssertEqual(h[0]!.structure, [0 : 1])
+        XCTAssertEqual(h[1]!.structure, [0 : 1])
+        XCTAssertTrue( h[2]!.isTrivial)
     }
     
-    private func H_DS() -> HomologyExactSequenceSolver<Simplex, Simplex, Simplex, R> {
+    private func cH_DS() -> HomologyExactSequenceSolver<Dual<Simplex>, Dual<Simplex>, Dual<Simplex>, R> {
         let n = 2
         let D = SimplicialComplex.ball(dim: n)
         let S = D.skeleton(n - 1).named("S\(n - 1)")
-        return SimplicialComplex.homologyExactSequence(D, S, R.self)
+        return SimplicialComplex.cohomologyExactSequence(D, S, R.self)
     }
     
 }

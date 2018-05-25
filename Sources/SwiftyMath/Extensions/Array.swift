@@ -65,6 +65,10 @@ public extension Array {
         a.insert(e, at: j)
         return a
     }
+    
+    public func repeated(_ count: Int) -> [Element] {
+        return (Array<[Element]>(repeating: self, count: count)).flatMap{ $0 }
+    }
 }
 
 public extension Array where Element: Equatable {
