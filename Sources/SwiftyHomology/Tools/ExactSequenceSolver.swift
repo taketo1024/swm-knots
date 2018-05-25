@@ -15,46 +15,57 @@ public extension LogFlag {
     }
 }
 
-public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
+public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomStringConvertible {
     public typealias Object = AbstractSimpleModuleStructure<R>
     public typealias Map    = FreeModuleHom<AbstractBasisElement, AbstractBasisElement, R>
     
-    internal var objects: [Object?]
-    internal var arrows : Arrows
+    public   var objects : ObjectSequence<Object>
+    public   var maps    : ObjectSequence<Map>
+    internal var matrices: ObjectSequence<Matrix<R>>
     
     public init(objects: [Object?], maps: [Map?]) {
-        assert(objects.count - 1 == maps.count)
-        self.objects = objects
-        self.arrows  = Arrows(maps)
+        self.objects  = ObjectSequence<Object>(list: objects)
+        self.maps     = ObjectSequence(list: maps)
+        self.matrices = ObjectSequence()
     }
 
-    public convenience init(count n: Int) {
-        self.init(objects: Array(repeating: nil, count: n), maps: Array(repeating: nil, count: n - 1))
-    }
-    
-    public var length: Int {
-        return objects.count
+    public convenience init() {
+        self.init(objects: [], maps: [])
     }
     
     public subscript(i: Int) -> Object? {
         get {
-            return (0 ..< length).contains(i) ? objects[i] : Object.zeroModule
+            return objects[i]
         } set {
-            if (0 ..< length).contains(i) {
-                objects[i] = newValue
-            }
+            log("set \(i) = \(newValue.map{ "\($0)" } ?? "nil")")
+            objects[i] = newValue
         }
     }
     
+    public var length: Int {
+        return objects.isEmpty ? 0 : objects.topDegree - objects.bottomDegree + 1
+    }
+    
+    public var range: [Int] {
+        return objects.isEmpty ? [] : (objects.degrees.min()! ... objects.degrees.max()!).toArray()
+    }
+    
     public func matrix(_ i: Int) -> Matrix<R>? {
-        if let matrix = arrows[i].matrix {
-            return matrix
+        if let A = matrices[i] {
+            return A
         }
         
+        let A = _matrix(i)
+        matrices[i] = A
+        
+        return A
+    }
+    
+    private func _matrix(_ i: Int) -> Matrix<R>? {
         guard
             let from = self[i],
             let to   = self[i + 1],
-            let map  = arrows[i].map
+            let map  = maps[i]
             else {
                 return nil
         }
@@ -64,8 +75,6 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
             let vec = to.factorize(w)
             return vec.enumerated().map{ (i, a) in MatrixComponent(i, j, a) }
         }
-        
-        // TODO cache matrix
         
         return Matrix(rows: to.generators.count, cols: from.generators.count, components: comps)
     }
@@ -78,21 +87,34 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
         return self[i].map{ !$0.isTrivial } ?? false
     }
     
-    //  The following are equivalent:
-    //
-    //        f0     [f1]      f2
-    //    M0 ---> M1 ----> M2 ---> M3
-    //
-    //
-    //  1) f1 = 0
-    //  2) f2: injective  ( Ker(f2) = Im(f1) = 0 )
-    //  3) f0: surjective ( M1 = Ker(f1) = Im(f0) )
-    //
-    
     public func isZeroMap(_ i1: Int) -> Bool {
-        if self.arrows[i1].isZero {
+        if _isZeroMap(i1) {
+            let i2 = i1 + 1
+            if matrices[i1] == nil, let M1 = self[i1], let M2 = self[i2] {
+                log("\(i1) -> \(i2): zeroMap")
+                matrices[i1] = .zero(rows: M2.generators.count, cols: M1.generators.count)
+            }
+            return true
+        } else {
+            return false
+        }
+    }
+
+    private func _isZeroMap(_ i1: Int) -> Bool {
+        if let A = matrices[i1], A.isZero {
             return true
         }
+        
+        //  The following are equivalent:
+        //
+        //        f0     [f1]      f2
+        //    M0 ---> M1 ----> M2 ---> M3
+        //
+        //
+        //  1) f1 = 0
+        //  2) f2: injective  ( Ker(f2) = Im(f1) = 0 )
+        //  3) f0: surjective ( M1 = Ker(f1) = Im(f0) )
+        //
         
         let (i0, i2, i3) = (i1 - 1, i1 + 1, i1 + 2)
         
@@ -136,7 +158,11 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
     }
     
     public func solve() {
-        return (0 ..< length).forEach{ i in solve(i) }
+        return range.forEach{ i in
+            if objects[i] == nil {
+                solve(i)
+            }
+        }
     }
     
     @discardableResult
@@ -145,7 +171,7 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
             return o
         }
         
-        if let o = solveObject(i) {
+        if let o = _solve(i) {
             self[i] = o
             return o
         } else {
@@ -153,7 +179,7 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
         }
     }
     
-    internal func solveObject(_ i2: Int) -> Object? {
+    private func _solve(_ i2: Int) -> Object? {
         
         // Aim: [M2]
         //
@@ -168,7 +194,7 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
         //     0         0
         // M1 ---> [M2] ---> M3  ==>  M2 = Ker(0) = Im(0) = 0
         
-        if solveZeroMap(i1), solveZeroMap(i2) {
+        if isZeroMap(i1), isZeroMap(i2) {
             log("\(i2): trivial.")
             return Object.zeroModule
         }
@@ -178,9 +204,9 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
         //     0       f1        0
         // M0 ---> M1 ---> [M2] ---> M3  ==>  f1: isom
         
-        if let M1 = self[i1], solveZeroMap(i0), solveZeroMap(i2) {
+        if let M1 = self[i1], isZeroMap(i0), isZeroMap(i2) {
             log("\(i2): isom to \(i1).")
-            arrows[i1] = Arrow.identity
+            maps[i1] = .identity
             return M1
         }
         
@@ -189,9 +215,9 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
         //     0         f2      0
         // M1 ---> [M2] ---> M3 ---> M4  ==>  f2: isom
         
-        if let M3 = self[i3], solveZeroMap(i1), solveZeroMap(i3) {
+        if let M3 = self[i3], isZeroMap(i1), isZeroMap(i3) {
             log("\(i2): isom to \(i3).")
-            arrows[i2] = Arrow.identity
+            maps[i2] = .identity
             return M3
         }
         
@@ -224,15 +250,6 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
         return N0 ⊕ N1
     }
     
-    internal func solveZeroMap(_ i1: Int) -> Bool {
-        if isZeroMap(i1) {
-            self.arrows[i1].isZero = true
-            return true
-        } else {
-            return false
-        }
-    }
-    
     public func describe(_ i0: Int) {
         if let s = self[i0] {
             print("\(i0): ", terminator: "")
@@ -262,8 +279,8 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
             let M0 = self[i0],
             let M1 = self[i1],
             let M2 = self[i2],
-            let f0 = arrows[i0].map,
-            let f1 = arrows[i1].map
+            let f0 = maps[i0],
+            let f1 = maps[i1]
             else {
                 return
         }
@@ -285,14 +302,13 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
     }
     
     public func assertExactness(debug: Bool = false) {
-        for i in 0 ..< length {
+        for i in range {
             assertExactness(at: i, debug: debug)
         }
     }
     
     public func makeIterator() -> AnyIterator<Object?> {
-        let lazy = (0 ..< length).lazy.map{ k in self[k] }
-        return AnyIterator(lazy.makeIterator())
+        return objects.makeIterator()
     }
     
     internal func objectDescription(_ i: Int) -> String {
@@ -306,50 +322,17 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
     }
     
     public var description: String {
-        return "ExSeq<\(R.symbol)>: "
-            + "0 -> "
-            + (0 ..< length).map { i in "\(objectDescription(i)) \(arrowDescription(i)) " }.joined()
-            + "0"
+        if objects.isEmpty {
+            return "ExSeq<\(R.symbol)>: empty"
+        } else {
+            let (i0, i1) = (objects.degrees.min()!, objects.degrees.max()!)
+            return "ExSeq<\(R.symbol)>: "
+                + (i0 ..< i1).map { i in "\(objectDescription(i)) \(arrowDescription(i)) " }.joined()
+                + objectDescription(i1)
+        }
     }
     
     private func log(_ msg: @autoclosure () -> String) {
         Logger.write(.exactSequence, msg)
-    }
-    
-    internal struct Arrow {
-        var map: Map?
-        var matrix: Matrix<R>?
-        var isZero: Bool
-        
-        init(map: Map? = nil, matrix: Matrix<R>? = nil, isZero: Bool = false) {
-            self.map = map
-            self.matrix = matrix
-            self.isZero = isZero
-        }
-        
-        static var identity: Arrow {
-            return Arrow(map: .identity)
-        }
-        
-        static var zero: Arrow {
-            return Arrow(isZero: true)
-        }
-    }
-    
-    internal struct Arrows {
-        internal var arrows: [Arrow]
-        internal init (_ maps: [Map?]) {
-            self.arrows = maps.map{ Arrow(map: $0) }
-        }
-        
-        public subscript(i: Int) -> Arrow {
-            get {
-                return (0 ..< arrows.count).contains(i) ? arrows[i] : Arrow.zero
-            } set {
-                if (0 ..< arrows.count).contains(i) {
-                    arrows[i] = newValue
-                }
-            }
-        }
     }
 }

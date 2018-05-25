@@ -7,14 +7,14 @@
 
 import XCTest
 import SwiftyMath
-import SwiftyHomology
+@testable import SwiftyHomology
 @testable import SwiftyTopology
 
 class SimplicialHomologyExSeqTests: XCTestCase {
     typealias R = 𝐙
     
     func testDS_col0() {
-        var E = H_DS()
+        let E = H_DS()
         E.fill(columns: 1, 2)
         E.solve()
 
@@ -26,7 +26,7 @@ class SimplicialHomologyExSeqTests: XCTestCase {
     }
     
     func testDS_col1() {
-        var E = H_DS()
+        let E = H_DS()
         E.fill(columns: 2, 0)
         E.solve()
 
@@ -38,7 +38,7 @@ class SimplicialHomologyExSeqTests: XCTestCase {
     }
     
     func testDS_col2() {
-        var E = H_DS()
+        let E = H_DS()
         E.fill(columns: 0, 1)
         E.solve()
         

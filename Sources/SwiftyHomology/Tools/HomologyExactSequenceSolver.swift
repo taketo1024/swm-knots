@@ -20,8 +20,6 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
     internal let map1:  ChainMap<B, C, R>
     internal let delta: ChainMap<C, A, R>
     
-    public let topDegree: Int
-    public let bottomDegree: Int
     public var sequence : ExactSequenceSolver<R>
     
     public init(_ C0: ChainComplex<A, R>, _ f0: ChainMap<A, B, R>,
@@ -40,13 +38,14 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
         self.map1  = f1
         self.delta = d
         
-        self.topDegree    = [C0.topDegree,    C1.topDegree,    C2.topDegree   ].max()!
-        self.bottomDegree = [C0.bottomDegree, C1.bottomDegree, C2.bottomDegree].min()!
-        self.sequence  = ExactSequenceSolver(count: 3 * (topDegree - bottomDegree + 1))
+        self.sequence  = ExactSequenceSolver()
+        
+        sequence[-1] = .zeroModule
+        sequence[(topDegree - bottomDegree + 1) * 3] = .zeroModule
     }
     
     public var length: Int {
-        return (topDegree - bottomDegree + 1) * 3
+        return sequence.length
     }
     
     public var descending: Bool {
@@ -67,12 +66,44 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
         return sequence[seqIndex(n, i)]
     }
     
+    public var topDegree: Int {
+        return [C0.topDegree, C1.topDegree, C2.topDegree].max()!
+    }
+    
+    public var bottomDegree: Int {
+        return [C0.bottomDegree, C1.bottomDegree, C2.bottomDegree].min()!
+    }
+
     internal var degrees: [Int] {
         return descending
             ? (bottomDegree ... topDegree).reversed().toArray()
             : (bottomDegree ... topDegree).toArray()
     }
     
+    public func isZero(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isZero(seqIndex(n, i))
+    }
+    
+    public func isNonZero(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isNonZero(seqIndex(n, i))
+    }
+    
+    public func isZeroMap(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isZeroMap(seqIndex(n, i))
+    }
+    
+    public func isInjective(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isInjective(seqIndex(n, i))
+    }
+    
+    public func isSurjective(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isSurjective(seqIndex(n, i))
+    }
+    
+    public func isIsomorphic(_ n: Int, _ i: Int) -> Bool {
+        return sequence.isIsomorphic(seqIndex(n, i))
+    }
+
     public func column(_ i: Int) -> ModuleSequence<AbstractBasisElement, R> {
         return ModuleSequence(list: degrees.map{ n in (n, self[n, i]) })
     }
@@ -91,12 +122,12 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
             }
         }()
         
-        if sequence[k - 1] != nil && sequence.arrows[k - 1].matrix == nil {
-            sequence.arrows[k - 1].matrix = makeMatrix(k - 1)
+        if sequence[k - 1] != nil && sequence.matrices[k - 1] == nil {
+            sequence.matrices[k - 1] = makeMatrix(k - 1)
         }
         
-        if sequence[k + 1] != nil && sequence.arrows[k].matrix == nil {
-            sequence.arrows[k].matrix = makeMatrix(k)
+        if sequence[k + 1] != nil && sequence.matrices[k] == nil {
+            sequence.matrices[k] = makeMatrix(k)
         }
     }
     
@@ -163,8 +194,7 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
     }
     
     public func makeIterator() -> AnyIterator<Object?> {
-        let lazy = (0 ..< length).lazy.map{ k in self.sequence[k] }
-        return AnyIterator(lazy.makeIterator())
+        return sequence.makeIterator()
     }
     
     public var description: String {

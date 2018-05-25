@@ -83,6 +83,10 @@ public extension ObjectGrid where Dim == _1 {
         self.init(name: name, default: defaultObject, grid: grid.mapKeys{ i in IntList(i) })
     }
     
+    public init<S: Sequence>(name: String? = nil, default defaultObject: Object? = nil, list: S) where S.Element == Object? {
+        self.init(name: name, default: defaultObject, list: list.enumerated().map{ (i, o) in (i, o) })
+    }
+    
     public init<S: Sequence>(name: String? = nil, default defaultObject: Object? = nil, list: S) where S.Element == (Int, Object?) {
         self.init(name: name, default: defaultObject, list: list.map{ (i, o) in (IntList(i), o) })
     }
@@ -113,6 +117,16 @@ public extension ObjectGrid where Dim == _1 {
     
     public func describe(_ i: Int) {
         describe(IntList(i))
+    }
+}
+
+extension ObjectGrid: Sequence where Dim == _1 {
+    public typealias Element = Object?
+    public typealias Iterator = AnyIterator<Object?>
+    
+    public func makeIterator() -> AnyIterator<Object?> {
+        let itr = (isEmpty ? (bottomDegree ... topDegree).map{ self[$0] } : []).makeIterator()
+        return AnyIterator(itr)
     }
 }
 
