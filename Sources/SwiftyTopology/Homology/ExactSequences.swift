@@ -11,11 +11,12 @@ import SwiftyMath
 import SwiftyHomology
 
 public extension SimplicialComplex {
-    public static func homologyExactSequence<R>(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> HomologyExactSequenceSolver<Simplex, Simplex, Simplex, R> {
-        
-        //             i         j
-        //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
-        //
+    
+    //             i         j
+    //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
+    //
+    
+    internal static func shortExactSequence<R>(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> (ChainComplex<Simplex, R>, ChainMap<Simplex, Simplex, R>, ChainComplex<Simplex, R>, ChainMap<Simplex, Simplex, R>, ChainComplex<Simplex, R>, ChainMap<Simplex, Simplex, R>) {
         
         typealias M = ChainMap<Simplex, Simplex, R>
         
@@ -27,14 +28,18 @@ public extension SimplicialComplex {
         let j = M(degree:  0) { (_, s) in !A.contains(s) ? FreeModule(s) : .zero }
         let d = M(degree: -1) { (_, s) in s.boundary(R.self) }
         
+        return (CA, i, CX, j, CXA, d)
+    }
+    
+    public static func homologyExactSequence<R>(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> HomologyExactSequenceSolver<Simplex, Simplex, Simplex, R> {
+        
+        let (CA, i, CX, j, CXA, d) = shortExactSequence(X, A, type)
+        
         typealias H = HomologyExactSequenceSolver<Simplex, Simplex, Simplex, R>
         return H(CA, i, CX, j, CXA, d)
     }
-}
-
-/*
-public extension CohomologyExactSequence where T == Ascending {
-    public static func pair(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> CohomologyExactSequence<R> {
+    
+    public static func cohomologyExactSequence<R>(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> HomologyExactSequenceSolver<Dual<Simplex>, Dual<Simplex>, Dual<Simplex>, R> {
         
         //             i         j
         //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
@@ -45,20 +50,17 @@ public extension CohomologyExactSequence where T == Ascending {
         //             i*        j*
         //   0 <- C*A <--  C*X  <-- C*XA <- 0  (exact)
         
-        typealias C = ChainComplex<Simplex, R>
-        typealias M = ChainMap<Simplex, Simplex, R>
+        let (CA, i, CX, j, CXA, d) = shortExactSequence(X, A, type)
+        let (DA, DX, DXA)  = (CA.dual(), CX.dual(), CXA.dual())
         
-        let (CA, CX, CXA) = (C(A, R.self), C(X, R.self), C(X, A, R.self))
-        let (DA, DX, DXA) = (CA.dual, CX.dual, CXA.dual)
+        let Di = i.dual(from: CA, to: CX)
+        let Dj = j.dual(from: CX, to: CXA)
+        let Dd = d.dual(from: CXA, to: CA)
         
-        let i = M.induced(from: SimplicialMap.inclusion(from: A, to: X), R.self).dual(domain: CA)
-        let j = M { (s: Simplex) in !A.contains(s) ? FreeModule(s) : .zero }.dual(domain: CX)
-        let d = M (degree: -1) { (s: Simplex) in s.boundary(R.self) }.dual(domain: CXA)
-        
-        return CohomologyExactSequence(DXA, j, DX, i, DA, d)
+        typealias H = HomologyExactSequenceSolver<Dual<Simplex>, Dual<Simplex>, Dual<Simplex>, R>
+        return H(DXA, Dj, DX, Di, DA, Dd)
     }
 }
- */
 
 /*
 public extension HomologyExactSequence where T == Descending, A == Simplex, B == Sum<Simplex, Simplex>, C == Simplex {
