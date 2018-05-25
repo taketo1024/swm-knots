@@ -18,8 +18,6 @@ class SimplicialCohomologyExSeqTests: XCTestCase {
         E.fill(columns: 1, 2)
         E.solve()
 
-        print(E)
-        
         let h = E.column(0)
         
         XCTAssertTrue( h[0]!.isTrivial)
@@ -32,8 +30,6 @@ class SimplicialCohomologyExSeqTests: XCTestCase {
         E.fill(columns: 2, 0)
         E.solve()
 
-        print(E)
-        
         let h = E.column(1)
         
         XCTAssertEqual(h[0]!.structure, [0 : 1])
@@ -45,8 +41,6 @@ class SimplicialCohomologyExSeqTests: XCTestCase {
         let E = cH_DS()
         E.fill(columns: 0, 1)
         E.solve()
-        
-        print(E)
         
         let h = E.column(2)
         
