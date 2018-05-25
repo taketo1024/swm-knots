@@ -15,7 +15,7 @@ public extension LogFlag {
     }
 }
 
-public struct ExactSequenceSolver<R: EuclideanRing>: Sequence {
+public final class ExactSequenceSolver<R: EuclideanRing>: Sequence {
     public typealias Object = AbstractSimpleModuleStructure<R>
     public typealias Map    = FreeModuleHom<AbstractBasisElement, AbstractBasisElement, R>
     
@@ -28,7 +28,7 @@ public struct ExactSequenceSolver<R: EuclideanRing>: Sequence {
         self.arrows  = Arrows(maps)
     }
 
-    public init(count n: Int) {
+    public convenience init(count n: Int) {
         self.init(objects: Array(repeating: nil, count: n), maps: Array(repeating: nil, count: n - 1))
     }
     
@@ -135,12 +135,12 @@ public struct ExactSequenceSolver<R: EuclideanRing>: Sequence {
         return isInjective(i) && isSurjective(i)
     }
     
-    public mutating func solve() {
+    public func solve() {
         return (0 ..< length).forEach{ i in solve(i) }
     }
     
     @discardableResult
-    public mutating func solve(_ i: Int) -> Object? {
+    public func solve(_ i: Int) -> Object? {
         if let o = self[i] {
             return o
         }
@@ -153,7 +153,7 @@ public struct ExactSequenceSolver<R: EuclideanRing>: Sequence {
         }
     }
     
-    internal mutating func solveObject(_ i2: Int) -> Object? {
+    internal func solveObject(_ i2: Int) -> Object? {
         
         // Aim: [M2]
         //
@@ -224,7 +224,7 @@ public struct ExactSequenceSolver<R: EuclideanRing>: Sequence {
         return N0 ⊕ N1
     }
     
-    internal mutating func solveZeroMap(_ i1: Int) -> Bool {
+    internal func solveZeroMap(_ i1: Int) -> Bool {
         if isZeroMap(i1) {
             self.arrows[i1].isZero = true
             return true

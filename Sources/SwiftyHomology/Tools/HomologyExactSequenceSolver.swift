@@ -9,7 +9,7 @@
 import Foundation
 import SwiftyMath
 
-public struct HomologyExactSequenceSolver<A: BasisElementType, B: BasisElementType, C: BasisElementType, R: EuclideanRing>: CustomStringConvertible {
+public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElementType, C: BasisElementType, R: EuclideanRing>: CustomStringConvertible {
     public typealias Object = ExactSequenceSolver<R>.Object
     
     public let C0: ChainComplex<A, R>
@@ -77,7 +77,7 @@ public struct HomologyExactSequenceSolver<A: BasisElementType, B: BasisElementTy
         return ModuleSequence(list: degrees.map{ n in (n, self[n, i]) })
     }
     
-    public mutating func fill(_ n: Int, _ i: Int) {
+    public func fill(_ n: Int, _ i: Int) {
         assert((0 ..< 3).contains(i))
         
         let k = seqIndex(n, i)
@@ -121,7 +121,7 @@ public struct HomologyExactSequenceSolver<A: BasisElementType, B: BasisElementTy
         return Matrix(rows: s0.generators.count, cols: s1.generators.count, grid: grid).transposed
     }
     
-    public mutating func fill(columns: Int ...) {
+    public func fill(columns: Int ...) {
         for i in columns {
             for n in bottomDegree ... topDegree {
                 fill(n, i)
@@ -130,18 +130,18 @@ public struct HomologyExactSequenceSolver<A: BasisElementType, B: BasisElementTy
     }
     
     @discardableResult
-    public mutating func solve(_ n: Int, _ i: Int) -> Object? {
+    public func solve(_ n: Int, _ i: Int) -> Object? {
         sequence.solve(seqIndex(n, i))
         return self[n, i]
     }
     
-    public mutating func solve(column i: Int) -> [Object?] {
+    public func solve(column i: Int) -> [Object?] {
         return (bottomDegree ... topDegree).map { n in
             self.solve(n, i)
         }
     }
     
-    public mutating func solve() {
+    public func solve() {
         return sequence.solve()
     }
     
