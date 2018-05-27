@@ -8,9 +8,9 @@
 import Foundation
 import SwiftyMath
 
-public enum KhBasisElement: String, BasisElementType, Comparable, Codable {
-    case I
-    case X
+public enum KhBasisElement: Int, BasisElementType, Comparable, Codable {
+    case I =  1
+    case X = -1
     
     public typealias Product<R: Ring> = (KhBasisElement, KhBasisElement) -> [(KhBasisElement, R)]
     public typealias Coproduct<R: Ring> = (KhBasisElement) -> [(KhBasisElement, KhBasisElement, R)]
