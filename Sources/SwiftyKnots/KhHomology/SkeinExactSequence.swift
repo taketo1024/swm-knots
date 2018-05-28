@@ -32,8 +32,8 @@ public extension SkeinTriple {
         
         let d = M(bidegree: (1, 0)) { (_, _, e0) in
             let e = e0.stateModified(n, .O)
-            let de: FreeModule<KhTensorElement, R> = self.L.KhCube.d(e)
-            return de.map { (e, a) -> (KhTensorElement, R) in
+            let d = self.L.KhCube.d(R.self)
+            return d.applied(to: e).map { (e, a) -> (KhTensorElement, R) in
                 e.state[n] == .I ? (e.stateModified(n, nil), a) : (e, .zero)
             }
         }
