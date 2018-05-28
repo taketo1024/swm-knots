@@ -147,12 +147,12 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
         }
     }
     
-    private func makeMatrix<X, Y>(_ s0: SimpleModuleStructure<X, R>?, _ f: @escaping (FreeModule<X, R>) -> FreeModule<Y, R>, _ s1: SimpleModuleStructure<Y, R>?) -> Matrix<R>? {
+    private func makeMatrix<X, Y>(_ s0: SimpleModuleStructure<X, R>?, _ f: FreeModuleHom<X, Y, R>, _ s1: SimpleModuleStructure<Y, R>?) -> Matrix<R>? {
         guard let s0 = s0, let s1 = s1 else {
             return nil
         }
         
-        let grid = s0.generators.flatMap { x in s1.factorize(f(x)) }
+        let grid = s0.generators.flatMap { x in s1.factorize(f.applied(to: x)) }
         return Matrix(rows: s0.generators.count, cols: s1.generators.count, grid: grid).transposed
     }
     
