@@ -225,7 +225,10 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     
     func mapValues<R2>(_ f: (R) -> R2) -> MatrixImpl<R2> {
         typealias M = MatrixImpl<R2>
-        let mapped = table.mapValues { $0.map{ ($0, f($1)) } }
+        let mapped = table.mapValues { list in
+                list.map { (i, r) in (i, f(r)) }
+                    .exclude { (_, r) in r == .zero }
+            }.exclude{ (_, list) in list.isEmpty }
         let a = (align == .Rows) ? M.Alignment.Rows : M.Alignment.Cols
         return M(rows, cols, a, mapped)
     }
