@@ -46,6 +46,10 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         return base.name
     }
     
+    private var dDegree: IntList {
+        return d.mDegree
+    }
+    
     public func shifted(_ I: IntList) -> MChainComplex<Dim, A, R> {
         return MChainComplex(base: base.shifted(I), differential: d.shifted(I))
     }
@@ -74,7 +78,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     
     internal func kernel(_ I: IntList) -> Matrix<R>? {
         guard let from = base[I], from.isFree,
-            let to = base[I + d.mDegree], to.isFree,
+            let to = base[I + dDegree], to.isFree,
             let A = dMatrix(I) else {
                 return nil // indeterminable.
         }
@@ -85,7 +89,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     
     internal func kernelTransition(_ I: IntList) -> Matrix<R>? {
         guard let from = base[I], from.isFree,
-            let to = base[I + d.mDegree], to.isFree,
+            let to = base[I + dDegree], to.isFree,
             let A = dMatrix(I) else {
                 return nil // indeterminable.
         }
@@ -96,7 +100,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     
     internal func image(_ I: IntList) -> Matrix<R>? {
         guard let from = base[I], from.isFree,
-            let to = base[I + d.mDegree], to.isFree,
+            let to = base[I + dDegree], to.isFree,
             let A = dMatrix(I) else {
                 return nil // indeterminable.
         }
@@ -112,7 +116,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         }
         
         // case: obviously isom
-        if  let Ain = dMatrix(I - d.mDegree), Ain.isZero,
+        if  let Ain = dMatrix(I - dDegree), Ain.isZero,
             let Aout = dMatrix(I), Aout.isZero {
             return self[I]
         }
@@ -126,7 +130,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         if  let basis = self[I]?.generators,
             let Z = kernel(I),
             let T = kernelTransition(I),
-            let B = image(I - d.mDegree) {
+            let B = image(I - dDegree) {
             return SimpleModuleStructure(
                 basis: basis,
                 generatingMatrix: Z,
@@ -135,7 +139,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
             )
         }
         
-        if dSplits(I) && dSplits(I - d.mDegree) {
+        if dSplits(I) && dSplits(I - dDegree) {
             // case: splits as 𝐙, 𝐙₂ summands
             if R.self == 𝐙.self && self[I]!.torsionCoeffs.forAll({ $0 as! 𝐙 == 2 }) {
                 let free = (freePart.homology(I)! as! SimpleModuleStructure<A, 𝐙>)
@@ -154,7 +158,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     
     internal func dSplits(_ I: IntList) -> Bool {
         guard let from = self[I],
-            let to = self[I + d.mDegree],
+            let to = self[I + dDegree],
             let A = dMatrix(I) else {
                 return false
         }
@@ -184,14 +188,15 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     }
     
     public func homology(name: String? = nil) -> ModuleGrid<Dim, A, R> {
-        let list = base.mDegrees
-            .map{ I in (I, homology(I)) }
-            .exclude{ base.defaultObject == .zeroModule && ($0.1?.isTrivial ?? false) }
-        
+        let list = base.mDegrees.map{ I in (I, homology(I)) }
+        let exList = (base.defaultObject == .zeroModule)
+            ? list.exclude { (_, s) in s?.isTrivial ?? false }
+            : list
+            
         return ModuleGrid(
             name: name ?? "H(\(base.name))",
             default: base.defaultObject,
-            list: list
+            list: exList
         )
     }
     
@@ -228,8 +233,8 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         }
         
         for I0 in base.mDegrees {
-            let I1 = I0 + d.mDegree
-            let I2 = I1 + d.mDegree
+            let I1 = I0 + dDegree
+            let I2 = I1 + dDegree
             
             guard let s0 = self[I0],
                   let s1 = self[I1],
@@ -255,7 +260,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     }
     
     public func describeMap(_ I: IntList) {
-        print("\(I) \(self[I]?.description ?? "?") -> \(self[I + d.mDegree]?.description ?? "?")")
+        print("\(I) \(self[I]?.description ?? "?") -> \(self[I + dDegree]?.description ?? "?")")
         if let A = dMatrix(I) {
             print(A.detailDescription)
         }
