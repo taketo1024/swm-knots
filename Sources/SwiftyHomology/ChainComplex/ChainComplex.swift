@@ -10,7 +10,7 @@ import SwiftyMath
 
 // TODO substitute for old ChainComplex.
 
-public typealias ChainComplex<A: BasisElementType, R: EuclideanRing> = MChainComplex<_1, A, R>
+public typealias  ChainComplex<A: BasisElementType, R: EuclideanRing> = MChainComplex<_1, A, R>
 public typealias ChainComplex2<A: BasisElementType, R: EuclideanRing> = MChainComplex<_2, A, R>
 
 public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: CustomStringConvertible {
@@ -21,6 +21,9 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     public let d: Differential
     internal let dMatrices: [IntList : Cache<Matrix<R>>]
     
+    internal let _freePart = Cache<MChainComplex<Dim, A, R>>()
+    internal let  _torPart = Cache<MChainComplex<Dim, A, R>>()
+
     public init(base: ModuleGrid<Dim, A, R>, differential d: Differential) {
         assert(base.defaultObject == nil || base.defaultObject == .some(.zeroModule))
         
@@ -45,6 +48,18 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     
     public func shifted(_ I: IntList) -> MChainComplex<Dim, A, R> {
         return MChainComplex(base: base.shifted(I), differential: d.shifted(I))
+    }
+    
+    public var freePart: MChainComplex<Dim, A, R> {
+        return _freePart.useCacheOrSet(
+            MChainComplex<Dim, A, R>(base: base.freePart, differential: d)
+        )
+    }
+    
+    public var torsionPart: MChainComplex<Dim, A, R> {
+        return _torPart.useCacheOrSet(
+            MChainComplex(base: base.torsionPart, differential: d)
+        )
     }
     
     internal func dMatrix(_ I: IntList) -> Matrix<R>? {
@@ -90,13 +105,9 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         return E.imageMatrix
     }
     
-    internal func splits(_ I: IntList) -> Bool {
-        return false
-    }
-    
     public func homology(_ I: IntList) -> SimpleModuleStructure<A, R>? {
         // case: indeterminable
-        guard self[I] != nil else {
+        if self[I] == nil {
             return nil
         }
         
@@ -124,7 +135,52 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
             )
         }
         
+        if dSplits(I) && dSplits(I - d.mDegree) {
+            // case: splits as 𝐙, 𝐙₂ summands
+            if R.self == 𝐙.self && self[I]!.torsionCoeffs.forAll({ $0 as! 𝐙 == 2 }) {
+                let free = (freePart.homology(I)! as! SimpleModuleStructure<A, 𝐙>)
+                let tor = (self as! MChainComplex<Dim, A, 𝐙>).order2torsionPart.homology(I)!
+                return .some( (free ⊕ tor) as! SimpleModuleStructure<A, R> )
+            } else {
+                // TODO
+                print(I, ": split")
+                describeMap(I)
+                return nil
+            }
+        }
+        
         return nil
+    }
+    
+    internal func dSplits(_ I: IntList) -> Bool {
+        guard let from = self[I],
+            let to = self[I + d.mDegree],
+            let A = dMatrix(I) else {
+                return false
+        }
+        
+        // MEMO summands are assumed to be ordered as:
+        // (R/d_0 ⊕ ... ⊕ R/d_k) ⊕ R^r
+        
+        func t(_ s: SimpleModuleStructure<A, R>) -> [(R, Int)] {
+            return s.summands.reduce([]) { (res, s) in
+                if let l = res.last, l.0 == s.divisor {
+                    return res[0 ..< res.count - 1] + [(l.0, l.1 + 1)]
+                } else {
+                    return res + [(s.divisor, 1)]
+                }
+            }
+        }
+        
+        let t0 = t(from)
+        let t1 = t(to)
+        
+        let blocks = A.blocks(rowSizes: t1.map{ $0.1 }, colSizes: t0.map{ $0.1 })
+        return blocks.enumerated().forAll { (i, Bs) in
+            Bs.enumerated().forAll { (j, B) in
+                return (t0[j].0 == t1[i].0) || B.isZero
+            }
+        }
     }
     
     public func homology(name: String? = nil) -> ModuleGrid<Dim, A, R> {
@@ -201,7 +257,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     public func describeMap(_ I: IntList) {
         print("\(I) \(self[I]?.description ?? "?") -> \(self[I + d.mDegree]?.description ?? "?")")
         if let A = dMatrix(I) {
-            print("\n", A.detailDescription)
+            print(A.detailDescription)
         }
     }
     
@@ -271,5 +327,11 @@ public extension MChainComplex where Dim == _2 {
     
     public func printTable() {
         base.printTable()
+    }
+}
+
+public extension MChainComplex where R == 𝐙 {
+    public var order2torsionPart: MChainComplex<Dim, A, 𝐙₂> {
+        return MChainComplex<Dim, A, 𝐙₂>(base: base.order2torsionPart, differential: d.tensor2)
     }
 }
