@@ -179,6 +179,20 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
         return a.summands == b.summands
     }
     
+    public static func ⊕<Q: QuotientRingType>(l: SimpleModuleStructure<A, R>, r: SimpleModuleStructure<A, Q>) -> SimpleModuleStructure<A, R> where Q.Base == R, Q.Sub: EuclideanIdeal {
+        assert(r.isFree)
+        let summands = l.summands + r.summands.map { s -> SimpleModuleStructure<A, R>.Summand in
+            SimpleModuleStructure<A, R>.Summand(s.generator.mapValues{ $0.representative }, Q.Sub.mod )
+        }
+        
+        // TODO
+        let basis = [A]()
+        let T = Matrix<R>.zero(rows: 0, cols: 0)
+        // --TODO
+        
+        return SimpleModuleStructure<A, R>(summands, basis, T)
+    }
+    
     public func describe() {
         if !isTrivial {
             print("\(self) {")
@@ -208,12 +222,12 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
         public let generator: FreeModule<A, R>
         public let divisor: R
         
-        internal init(_ generator: FreeModule<A, R>, _ divisor: R) {
+        public init(_ generator: FreeModule<A, R>, _ divisor: R = .zero) {
             self.generator = generator
             self.divisor = divisor
         }
         
-        internal init(_ a: A, _ divisor: R) {
+        public init(_ a: A, _ divisor: R = .zero) {
             self.init(FreeModule(a), divisor)
         }
         
