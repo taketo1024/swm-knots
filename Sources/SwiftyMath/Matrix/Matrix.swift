@@ -188,6 +188,19 @@ public struct _Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         return impl.components(ofCol: j)
     }
     
+    public func blocks(rowSizes: [Int], colSizes: [Int]) -> [[Matrix<R>]] {
+        var i = 0
+        return rowSizes.map { r -> [Matrix<R>] in
+            defer { i += r }
+            
+            var j = 0
+            return colSizes.map { c -> Matrix<R> in
+                defer { j += c }
+                return self.submatrix(i ..< i + r, j ..< j + c)
+            }
+        }
+    }
+    
     // TODO directly iterate impl
     public func makeIterator() -> IndexingIterator<[(Int, Int, R)]> {
         return nonZeroComponents.map{ c in (c.row, c.col, c.value) }.makeIterator()
