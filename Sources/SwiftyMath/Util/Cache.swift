@@ -23,6 +23,16 @@ public final class Cache<T>: CustomStringConvertible {
         return value != nil
     }
     
+    public func useCacheOrSet(_ initializer: @autoclosure () -> T) -> T {
+        if let v = value {
+            return v
+        }
+        
+        let v = initializer()
+        value = v
+        return v
+    }
+    
     public func clear() {
         self.value = nil
     }
