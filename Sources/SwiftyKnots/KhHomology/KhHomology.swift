@@ -29,7 +29,7 @@ public extension Link {
     public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhTensorElement, R> {
         typealias C = ChainComplex2<KhTensorElement, R>
         let base = KhChainComplexBase(type, reduced: reduced, normalized: normalized)
-        let d = C.Differential(bidegree: (1, 0)) { (_, _, x) in self.KhCube.d(x) }
+        let d = C.Differential(bidegree: (1, 0)) { (_, _) in self.KhCube.d(R.self) }
         return C(base: base, differential: d)
     }
     
@@ -53,9 +53,7 @@ public extension Link {
         typealias C = ChainComplex2<KhTensorElement, R>
         let name = "KhLee(\(self.name); \(R.symbol))"
         let base = KhHomology(type)
-        let d = C.Differential(bidegree: (1, 4)) { (_, _, x) in
-            self.KhCube.d_Lee(x)
-        }
+        let d = C.Differential(bidegree: (1, 4)) { (_, _) in self.KhCube.d_Lee(R.self) }
         return ChainComplex2(base: base, differential: d).homology(name: name)
     }
 }

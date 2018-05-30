@@ -165,8 +165,8 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
             print("\(I0): \(s0) -> \(s1) -> \(s2)")
             
             for x in s0.generators {
-                let y = d[I0](x)
-                let z = d[I1](y)
+                let y = d[I0].applied(to: x)
+                let z = d[I1].applied(to: y)
                 print("\t\(x) ->\t\(y) ->\t\(z)")
                 
                 assert(s2.elementIsZero(z))

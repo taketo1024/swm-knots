@@ -13,21 +13,29 @@ public typealias ChainMap2<A: BasisElementType, B: BasisElementType, R: Euclidea
 
 public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: EuclideanRing> {
     public var mDegree: IntList
-    internal let f: (IntList, A) -> FreeModule<B, R>
+    internal let f: (IntList) -> FreeModuleHom<A, B, R>
     
-    public init(mDegree: IntList, func f: @escaping (IntList, A) -> FreeModule<B, R>) {
+    public init(mDegree: IntList, _ f: @escaping (IntList) -> FreeModuleHom<A, B, R>) {
         self.mDegree = mDegree
         self.f = f
     }
     
-    public subscript(_ I: IntList) -> (FreeModule<A, R>) -> FreeModule<B, R> {
-        return { x in x.elements.sum{ (a, r) in r * self.f(I, a) } }
+    public init(mDegree: IntList, _ f: @escaping (IntList, A) -> FreeModule<B, R>) {
+        self.mDegree = mDegree
+        self.f = { I in FreeModuleHom{ a in f(I, a) } }
     }
     
-    public func shifted(_ I: IntList) -> MChainMap<Dim, A, B, R> {
-        return MChainMap(mDegree: mDegree) { (I0, a) in
-            self[I0 - I](FreeModule(a))
-        }
+    public init(mDegree: IntList, _ f: FreeModuleHom<A, B, R>) {
+        self.mDegree = mDegree
+        self.f = { _ in f }
+    }
+    
+    public subscript(_ I: IntList) -> FreeModuleHom<A, B, R> {
+        return f(I)
+    }
+    
+    public func shifted(_ I0: IntList) -> MChainMap<Dim, A, B, R> {
+        return MChainMap(mDegree: mDegree) { I in self[I - I0] }
     }
 
     public func matrix(from: MChainComplex<Dim, A, R>, to: MChainComplex<Dim, B, R>, at I: IntList) -> Matrix<R>? {
@@ -40,7 +48,7 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
         }
         
         let grid = s0.generators.flatMap { x -> [R] in
-            let y = self[I](x)
+            let y = self[I].applied(to: x)
             return s1.factorize(y)
         }
         
@@ -103,12 +111,12 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
             print("\(I0): \(s0) -> \(s3)")
             
             for x in s0.generators {
-                let y0 = d0[I0](x)
-                let z0 = f[I1](y0)
+                let y0 = d0[I0].applied(to: x)
+                let z0 =  f[I1].applied(to: y0)
                 print("\t\(x) ->\t\(y0) ->\t\(z0)")
                 
-                let y1 = f[I0](x)
-                let z1 = d1[I2](y1)
+                let y1 =  f[I0].applied(to: x)
+                let z1 = d1[I2].applied(to: y1)
                 print("\t\(x) ->\t\(y1) ->\t\(z1)")
                 print("")
                 
@@ -119,12 +127,20 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
 }
 
 public extension MChainMap where Dim == _1 {
-    public init(degree: Int = 0, func f: @escaping (Int, A) -> FreeModule<B, R>) {
-        self.init(mDegree: IntList(degree), func: {(I, a) in f(I[0], a)})
+    public init(degree: Int = 0, func f: @escaping (Int) -> FreeModuleHom<A, B, R>) {
+        self.init(mDegree: IntList(degree)) { I in f(I[0]) }
     }
     
-    public subscript(_ i: Int) -> (FreeModule<A, R>) -> FreeModule<B, R> {
-        return { x in x.elements.sum{ (a, r) in r * self.f(IntList(i), a) } }
+    public init(degree: Int = 0, func f: @escaping (Int, A) -> FreeModule<B, R>) {
+        self.init(mDegree: IntList(degree)) { (I, a) in f(I[0], a) }
+    }
+    
+    public init(degree: Int = 0, _ f: FreeModuleHom<A, B, R>) {
+        self.init(mDegree: IntList(degree), f)
+    }
+    
+    public subscript(_ i: Int) -> FreeModuleHom<A, B, R> {
+        return self[IntList(i)]
     }
     
     public var degree: Int {
@@ -137,13 +153,23 @@ public extension MChainMap where Dim == _1 {
 }
 
 public extension MChainMap where Dim == _2 {
-    public init(bidegree: (Int, Int) = (0, 0), func f: @escaping (Int, Int, A) -> FreeModule<B, R>) {
+    public init(bidegree: (Int, Int) = (0, 0), func f: @escaping (Int, Int) -> FreeModuleHom<A, B, R>) {
         let (i, j) = bidegree
-        self.init(mDegree: IntList(i, j), func: {(I, a) in f(I[0], I[1], a)})
+        self.init(mDegree: IntList(i, j)) { I in f(I[0], I[1]) }
     }
     
-    public subscript(_ i: Int, _ j: Int) -> (FreeModule<A, R>) -> FreeModule<B, R> {
-        return { x in x.elements.sum{ (a, r) in r * self.f(IntList(i, j), a) } }
+    public init(bidegree: (Int, Int) = (0, 0), func f: @escaping (Int, Int, A) -> FreeModule<B, R>) {
+        let (i, j) = bidegree
+        self.init(mDegree: IntList(i, j)) { (I, a) in f(I[0], I[1], a) }
+    }
+    
+    public init(bidegree: (Int, Int) = (0, 0), _ f: FreeModuleHom<A, B, R>) {
+        let (i, j) = bidegree
+        self.init(mDegree: IntList(i, j), f)
+    }
+
+    public subscript(_ i: Int, _ j: Int) -> FreeModuleHom<A, B, R> {
+        return self[IntList(i, j)]
     }
     
     public var bidegree: (Int, Int) {

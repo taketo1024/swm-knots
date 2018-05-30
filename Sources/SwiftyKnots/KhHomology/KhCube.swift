@@ -52,20 +52,20 @@ public struct KhCube {
         }
     }
     
-    public func d<R: Ring>(_ x: KhTensorElement) -> FreeModule<KhTensorElement, R> {
-        return d(KhBasisElement.μ, KhBasisElement.Δ)(x)
+    public func d<R: Ring>(_ type: R.Type) -> FreeModuleHom<KhTensorElement, KhTensorElement, R> {
+        return d(type, KhBasisElement.μ, KhBasisElement.Δ)
     }
     
-    public func d_Lee<R: Ring>(_ x: KhTensorElement) -> FreeModule<KhTensorElement, R> {
-        return d(KhBasisElement.μ_Lee, KhBasisElement.Δ_Lee)(x)
+    public func d_Lee<R: Ring>(_ type: R.Type) -> FreeModuleHom<KhTensorElement, KhTensorElement, R> {
+        return d(type, KhBasisElement.μ_Lee, KhBasisElement.Δ_Lee)
     }
     
-    public func d_BN<R: Ring>(_ x: KhTensorElement) -> FreeModule<KhTensorElement, R> {
-        return d(KhBasisElement.μ_BN, KhBasisElement.Δ_BN)(x)
+    public func d_BN<R: Ring>(_ type: R.Type) -> FreeModuleHom<KhTensorElement, KhTensorElement, R> {
+        return d(type, KhBasisElement.μ_BN, KhBasisElement.Δ_BN)
     }
     
-    public func d<R: Ring>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>) -> (KhTensorElement) -> FreeModule<KhTensorElement, R> {
-        return { x in
+    public func d<R: Ring>(_ type: R.Type, _ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>) -> FreeModuleHom<KhTensorElement, KhTensorElement, R> {
+        return FreeModuleHom { (x: KhTensorElement) in
             let s = x.state
             return s.next.sum { (sgn, next) in
                 let (c1, c2) = (self[s].components, self[next].components)

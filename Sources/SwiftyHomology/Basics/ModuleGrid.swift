@@ -25,6 +25,7 @@ public protocol SimpleModuleStructureType {
     var rank: Int { get }
     var freePart: Self { get }
     var torsionPart: Self { get }
+    func describe()
 }
 
 extension SimpleModuleStructure: SimpleModuleStructureType {}
@@ -53,6 +54,21 @@ public extension ObjectGrid where Object: SimpleModuleStructureType {
         let grid = self.grid.mapValues{ $0?.torsionPart }
         return ObjectGrid<Dim, Object>(name: "\(name)_tor", default: defaultObject, grid: grid)
     }
+    
+    public func describe(_ I: IntList) {
+        if let s = self[I] {
+            print("\(I) ", terminator: "")
+            s.describe()
+        } else {
+            print("\(I) ?")
+        }
+    }
+    
+    public func describeAll() {
+        for I in mDegrees {
+            describe(I)
+        }
+    }
 }
 
 public extension ObjectGrid where Dim == _1, Object: SimpleModuleStructureType {
@@ -73,11 +89,19 @@ public extension ObjectGrid where Dim == _1, Object: SimpleModuleStructureType {
         return degrees.sum{ i in (-1).pow(i) * bettiNumer(i)! }
     }
      */
+    
+    public func describe(_ i: Int) {
+        describe(IntList(i))
+    }
 }
 
 public extension ObjectGrid where Dim == _2, Object: SimpleModuleStructureType {
     public init<S: Sequence>(name: String? = nil, default defaultObject: Object? = nil, list: S) where S.Element == (Int, Int, [A]?) {
         self.init(name: name, default: defaultObject, list: list.map{ (i, j, basis) in (IntList(i, j), basis) })
+    }
+    
+    public func describe(_ i: Int, _ j: Int) {
+        describe(IntList(i, j))
     }
 }
 
