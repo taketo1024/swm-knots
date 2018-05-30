@@ -90,21 +90,41 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         return E.imageMatrix
     }
     
-    internal func homology(_ I: IntList) -> SimpleModuleStructure<A, R>? {
-        guard let basis = base[I]?.generators,
-              let Z = kernel(I),
-              let T = kernelTransition(I),
-              let B = image(I - d.mDegree)
-            else {
-            return nil // indeterminable.
+    internal func splits(_ I: IntList) -> Bool {
+        return false
+    }
+    
+    public func homology(_ I: IntList) -> SimpleModuleStructure<A, R>? {
+        // case: indeterminable
+        guard self[I] != nil else {
+            return nil
         }
         
-        return SimpleModuleStructure(
-            basis: basis,
-            generatingMatrix: Z,
-            transitionMatrix: T,
-            relationMatrix: T * B
-        )
+        // case: obviously isom
+        if  let Ain = dMatrix(I - d.mDegree), Ain.isZero,
+            let Aout = dMatrix(I), Aout.isZero {
+            return self[I]
+        }
+        
+        // case: obviously zero
+        if let Z = kernel(I), Z.isZero {
+            return .zeroModule
+        }
+        
+        // case: free
+        if  let basis = self[I]?.generators,
+            let Z = kernel(I),
+            let T = kernelTransition(I),
+            let B = image(I - d.mDegree) {
+            return SimpleModuleStructure(
+                basis: basis,
+                generatingMatrix: Z,
+                transitionMatrix: T,
+                relationMatrix: T * B
+            )
+        }
+        
+        return nil
     }
     
     public func homology(name: String? = nil) -> ModuleGrid<Dim, A, R> {
