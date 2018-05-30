@@ -126,6 +126,7 @@ public extension ModuleGrid where Object: IntSimpleModuleStructureType {
     public func orderNtorsionPart<n: _Int>(_ type: n.Type) -> ModuleGrid<Dim, A, IntegerQuotientRing<n>> {
         return ModuleGrid<Dim, A, IntegerQuotientRing<n>>(
             name: "\(name)_\(n.intValue)",
+            default: (defaultObject != nil) ? .zeroModule : nil,
             grid: grid.mapValues{ $0?.orderNtorsionPart(type) }
         )
     }

@@ -176,3 +176,13 @@ public extension MChainMap where Dim == _2 {
         return (mDegree[0], mDegree[1])
     }
 }
+
+public extension MChainMap where R == 𝐙 {
+    public var tensor2: MChainMap<Dim, A, B, 𝐙₂> {
+        return MChainMap<Dim, A, B, 𝐙₂>(mDegree: mDegree) { I -> FreeModuleHom<A, B, 𝐙₂> in
+            FreeModuleHom{ (a: A) -> FreeModule<B, 𝐙₂> in
+                return self[I].applied(to: a).mapValues{ r in 𝐙₂(r) }
+            }
+        }
+    }
+}
