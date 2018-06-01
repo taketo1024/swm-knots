@@ -8,14 +8,10 @@
 import Foundation
 import SwiftyMath
 
-public typealias ObjectSequence<Object> = ObjectGrid<_1, Object>
-public typealias ObjectGrid2<Object>    = ObjectGrid<_2, Object>
+public typealias Grid1<Object> = GridN<_1, Object>
+public typealias Grid2<Object> = GridN<_2, Object>
 
-public protocol ObjectGridType: CustomStringConvertible {
-    associatedtype Object
-}
-
-public struct ObjectGrid<Dim: _Int, Object>: ObjectGridType {
+public struct GridN<n: _Int, Object>: CustomStringConvertible {
     public let name: String
     internal let defaultObject: Object?
     internal var grid: [IntList : Object?]
@@ -38,8 +34,8 @@ public struct ObjectGrid<Dim: _Int, Object>: ObjectGridType {
         }
     }
     
-    public var gradingDim: Int {
-        return Dim.intValue
+    public var gridDim: Int {
+        return n.intValue
     }
     
     public var mDegrees: [IntList] {
@@ -54,8 +50,8 @@ public struct ObjectGrid<Dim: _Int, Object>: ObjectGridType {
         return grid.values.forAll{ $0 != nil }
     }
     
-    public func shifted(_ I: IntList) -> ObjectGrid<Dim, Object> {
-        return ObjectGrid(name: name, default: defaultObject, grid: grid.mapKeys{ $0 + I })
+    public func shifted(_ I: IntList) -> GridN<n, Object> {
+        return GridN(name: name, default: defaultObject, grid: grid.mapKeys{ $0 + I })
     }
     
     public func describe(_ I: IntList) {
@@ -78,7 +74,7 @@ public struct ObjectGrid<Dim: _Int, Object>: ObjectGridType {
     }
 }
 
-public extension ObjectGrid where Dim == _1 {
+public extension GridN where n == _1 {
     public init(name: String? = nil, default defaultObject: Object? = nil, grid: [Int : Object?]) {
         self.init(name: name, default: defaultObject, grid: grid.mapKeys{ i in IntList(i) })
     }
@@ -111,7 +107,7 @@ public extension ObjectGrid where Dim == _1 {
         return degrees.max() ?? 0
     }
     
-    public func shifted(_ i: Int) -> ObjectSequence<Object> {
+    public func shifted(_ i: Int) -> Grid1<Object> {
         return shifted(IntList(i))
     }
     
@@ -120,7 +116,7 @@ public extension ObjectGrid where Dim == _1 {
     }
 }
 
-extension ObjectGrid: Sequence where Dim == _1 {
+extension GridN: Sequence where n == _1 {
     public typealias Element = Object?
     public typealias Iterator = AnyIterator<Object?>
     
@@ -130,7 +126,7 @@ extension ObjectGrid: Sequence where Dim == _1 {
     }
 }
 
-public extension ObjectGrid where Dim == _2 {
+public extension GridN where n == _2 {
     public init<S: Sequence>(name: String? = nil, default defaultObject: Object? = nil, list: S) where S.Element == (Int, Int, Object?) {
         self.init(name: name, default: defaultObject, list: list.map{ (i, j, o) in (IntList(i, j), o) })
     }
@@ -147,7 +143,7 @@ public extension ObjectGrid where Dim == _2 {
         return mDegrees.map{ I in (I[0], I[1]) }
     }
     
-    public func shifted(_ i: Int, _ j: Int) -> ObjectGrid2<Object> {
+    public func shifted(_ i: Int, _ j: Int) -> Grid2<Object> {
         return shifted(IntList(i, j))
     }
     
@@ -181,7 +177,7 @@ public extension ObjectGrid where Dim == _2 {
     }
 }
 
-extension ObjectGrid: Codable where Object: Codable {
+extension GridN: Codable where Object: Codable {
     enum CodingKeys: String, CodingKey {
         case name, defaultObject, grid
     }

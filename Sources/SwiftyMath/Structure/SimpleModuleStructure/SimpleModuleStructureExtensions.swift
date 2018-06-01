@@ -22,11 +22,11 @@ public extension SimpleModuleStructure where R == 𝐙 {
         }.joined()
     }
     
-    public func orderNtorsionPart<n: _Int>(_ type: n.Type) -> SimpleModuleStructure<A, IntegerQuotientRing<n>> {
-        typealias Q = IntegerQuotientRing<n>
+    public func torsionPart<t: _Int>(order: t.Type) -> SimpleModuleStructure<A, IntegerQuotientRing<t>> {
+        typealias Q = IntegerQuotientRing<t>
         typealias Summand = SimpleModuleStructure<A, Q>.Summand
         
-        let n = n.intValue
+        let n = t.intValue
         let indices = (0 ..< self.summands.count).filter{ i in self[i].divisor == n }
         let sub = subSummands(indices: indices)
         
@@ -39,6 +39,6 @@ public extension SimpleModuleStructure where R == 𝐙 {
     }
     
     public var order2torsionPart: SimpleModuleStructure<A, 𝐙₂> {
-        return orderNtorsionPart(_2.self)
+        return torsionPart(order: _2.self)
     }
 }

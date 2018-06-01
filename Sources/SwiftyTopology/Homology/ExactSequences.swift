@@ -16,7 +16,7 @@ public extension SimplicialComplex {
     //   0 -> CA  --->  CX  ---> CXA -> 0  (exact)
     //
     
-    public static func shortExactSequence<R>(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> ChainComplexSES<Simplex, Simplex, Simplex, R> {
+    public static func shortExactSequence<R>(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> ChainShortExactSequence<Simplex, Simplex, Simplex, R> {
         
         typealias M = ChainMap<Simplex, Simplex, R>
         
@@ -28,7 +28,7 @@ public extension SimplicialComplex {
         let j = M(degree:  0) { (_, s) in !A.contains(s) ? FreeModule(s) : .zero }
         let d = M(degree: -1) { (_, s) in s.boundary(R.self) }
         
-        return ChainComplexSES(CA, i, CX, j, CXA, d)
+        return ChainShortExactSequence(CA, i, CX, j, CXA, d)
     }
     
     public static func homologyExactSequence<R>(_ X: SimplicialComplex, _ A: SimplicialComplex, _ type: R.Type) -> HomologyExactSequenceSolver<Simplex, Simplex, Simplex, R> {

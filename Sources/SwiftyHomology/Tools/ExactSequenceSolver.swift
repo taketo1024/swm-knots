@@ -19,14 +19,14 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
     public typealias Object = AbstractSimpleModuleStructure<R>
     public typealias Map    = FreeModuleHom<AbstractBasisElement, AbstractBasisElement, R>
     
-    public   var objects : ObjectSequence<Object>
-    public   var maps    : ObjectSequence<Map>
-    internal var matrices: ObjectSequence<Matrix<R>>
+    public   var objects : Grid1<Object>
+    public   var maps    : Grid1<Map>
+    internal var matrices: Grid1<Matrix<R>>
     
     public init(objects: [Object?], maps: [Map?]) {
-        self.objects  = ObjectSequence<Object>(list: objects)
-        self.maps     = ObjectSequence(list: maps)
-        self.matrices = ObjectSequence()
+        self.objects  = Grid1<Object>(list: objects)
+        self.maps     = Grid1(list: maps)
+        self.matrices = Grid1()
     }
 
     public convenience init() {

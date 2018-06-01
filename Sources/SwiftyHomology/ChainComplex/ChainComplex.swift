@@ -10,21 +10,22 @@ import SwiftyMath
 
 // TODO substitute for old ChainComplex.
 
-public typealias  ChainComplex<A: BasisElementType, R: EuclideanRing> = MChainComplex<_1, A, R>
-public typealias ChainComplex2<A: BasisElementType, R: EuclideanRing> = MChainComplex<_2, A, R>
+public typealias  ChainComplex<A: BasisElementType, R: EuclideanRing> = ChainComplexN<_1, A, R>
+public typealias ChainComplex2<A: BasisElementType, R: EuclideanRing> = ChainComplexN<_2, A, R>
 
-public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: CustomStringConvertible {
-    public typealias Base = ModuleGrid<Dim, A, R>
-    public typealias Differential = MChainMap<Dim, A, A, R>
+public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: CustomStringConvertible {
+    public typealias Base = ModuleGridN<n, A, R>
+    public typealias Differential = ChainMapN<n, A, A, R>
+    public typealias Object = SimpleModuleStructure<A, R>
     public var base: Base
     
     public let d: Differential
     internal let dMatrices: [IntList : Cache<Matrix<R>>]
     
-    internal let _freePart = Cache<MChainComplex<Dim, A, R>>()
-    internal let  _torPart = Cache<MChainComplex<Dim, A, R>>()
+    internal let _freePart = Cache<ChainComplexN<n, A, R>>()
+    internal let  _torPart = Cache<ChainComplexN<n, A, R>>()
 
-    public init(base: ModuleGrid<Dim, A, R>, differential d: Differential) {
+    public init(base: ModuleGridN<n, A, R>, differential d: Differential) {
         assert(base.defaultObject == nil || base.defaultObject == .some(.zeroModule))
         
         self.base = base
@@ -34,7 +35,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         self.dMatrices = Dictionary(pairs: degs.map{ I in (I, .empty) })
     }
     
-    public subscript(I: IntList) -> Base.Object? {
+    public subscript(I: IntList) -> Object? {
         get {
             return base[I]
         } set {
@@ -50,19 +51,19 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         return d.mDegree
     }
     
-    public func shifted(_ I: IntList) -> MChainComplex<Dim, A, R> {
-        return MChainComplex(base: base.shifted(I), differential: d.shifted(I))
+    public func shifted(_ I: IntList) -> ChainComplexN<n, A, R> {
+        return ChainComplexN(base: base.shifted(I), differential: d.shifted(I))
     }
     
-    public var freePart: MChainComplex<Dim, A, R> {
+    public var freePart: ChainComplexN<n, A, R> {
         return _freePart.useCacheOrSet(
-            MChainComplex<Dim, A, R>(base: base.freePart, differential: d)
+            ChainComplexN<n, A, R>(base: base.freePart, differential: d)
         )
     }
     
-    public var torsionPart: MChainComplex<Dim, A, R> {
+    public var torsionPart: ChainComplexN<n, A, R> {
         return _torPart.useCacheOrSet(
-            MChainComplex(base: base.torsionPart, differential: d)
+            ChainComplexN(base: base.torsionPart, differential: d)
         )
     }
     
@@ -143,7 +144,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
             // case: splits as 𝐙, 𝐙₂ summands
             if R.self == 𝐙.self && self[I]!.torsionCoeffs.forAll({ $0 as! 𝐙 == 2 }) {
                 let free = (freePart.homology(I)! as! SimpleModuleStructure<A, 𝐙>)
-                let tor = (self as! MChainComplex<Dim, A, 𝐙>).order2torsionPart.homology(I)!
+                let tor = (self as! ChainComplexN<n, A, 𝐙>).order2torsionPart.homology(I)!
                 return .some( (free ⊕ tor) as! SimpleModuleStructure<A, R> )
             } else {
                 // TODO
@@ -187,13 +188,13 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         }
     }
     
-    public func homology(name: String? = nil) -> ModuleGrid<Dim, A, R> {
+    public func homology(name: String? = nil) -> ModuleGridN<n, A, R> {
         let list = base.mDegrees.map{ I in (I, homology(I)) }
         let exList = (base.defaultObject == .zeroModule)
             ? list.exclude { (_, s) in s?.isTrivial ?? false }
             : list
             
-        return ModuleGrid(
+        return ModuleGridN(
             name: name ?? "H(\(base.name))",
             default: base.defaultObject,
             list: exList
@@ -206,11 +207,11 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     
     // MEMO works only when each generator is a single basis-element.
     
-    public func dual(name: String? = nil) -> MChainComplex<Dim, Dual<A>, R> {
-        typealias D = MChainComplex<Dim, Dual<A>, R>
+    public func dual(name: String? = nil) -> ChainComplexN<n, Dual<A>, R> {
+        typealias D = ChainComplexN<n, Dual<A>, R>
         
         let dName = name ?? "\(base.name)^*"
-        let dDef = (base.defaultObject == .zeroModule) ? D.Base.Object.zeroModule : nil
+        let dDef = (base.defaultObject == .zeroModule) ? D.Object.zeroModule : nil
         let dList: [(IntList, [Dual<A>]?)] = base.mDegrees.map { I -> (IntList, [Dual<A>]?) in
             guard let o = self[I] else {
                 return (I, nil)
@@ -271,8 +272,8 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     }
 }
 
-public extension MChainComplex where Dim == _1 {
-    public subscript(i: Int) -> Base.Object? {
+public extension ChainComplexN where n == _1 {
+    public subscript(i: Int) -> Object? {
         get {
             return base[i]
         } set {
@@ -305,8 +306,8 @@ public extension MChainComplex where Dim == _1 {
     }
 }
 
-public extension MChainComplex where Dim == _2 {
-    public subscript(i: Int, j: Int) -> Base.Object? {
+public extension ChainComplexN where n == _2 {
+    public subscript(i: Int, j: Int) -> Object? {
         get {
             return base[i, j]
         } set {
@@ -335,8 +336,8 @@ public extension MChainComplex where Dim == _2 {
     }
 }
 
-public extension MChainComplex where R == 𝐙 {
-    public var order2torsionPart: MChainComplex<Dim, A, 𝐙₂> {
-        return MChainComplex<Dim, A, 𝐙₂>(base: base.order2torsionPart, differential: d.tensor2)
+public extension ChainComplexN where R == 𝐙 {
+    public var order2torsionPart: ChainComplexN<n, A, 𝐙₂> {
+        return ChainComplexN<n, A, 𝐙₂>(base: base.order2torsionPart, differential: d.tensor2)
     }
 }

@@ -43,7 +43,7 @@ public extension GeometricComplex {
         return C(base: base, differential: d)
     }
     
-    public func homology<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> ModuleSequence<Cell, R> {
+    public func homology<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> ModuleGrid1<Cell, R> {
         let name = (L == nil) ? "H(\(self.name); \(R.symbol))" : "H(\(self.name), \(L!.name); \(R.symbol))"
         let C = chainComplex(relativeTo: L, type)
         return C.homology(name: name)
@@ -54,7 +54,7 @@ public extension GeometricComplex {
         return chainComplex(relativeTo: L, type).dual(name: name)
     }
     
-    public func cohomology<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> ModuleSequence<Dual<Cell>, R> {
+    public func cohomology<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> ModuleGrid1<Dual<Cell>, R> {
         let name = (L == nil) ? "cH(\(self.name); \(R.symbol))" : "cH(\(self.name), \(L!.name); \(R.symbol))"
         let C = cochainComplex(relativeTo: L, type)
         return C.homology(name: name)

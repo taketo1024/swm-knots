@@ -8,10 +8,10 @@
 import Foundation
 import SwiftyMath
 
-public typealias  ChainMap<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = MChainMap<_1, A, B, R>
-public typealias ChainMap2<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = MChainMap<_2, A, B, R>
+public typealias  ChainMap<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = ChainMapN<_1, A, B, R>
+public typealias ChainMap2<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = ChainMapN<_2, A, B, R>
 
-public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: EuclideanRing> {
+public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: EuclideanRing> {
     public var mDegree: IntList
     internal let f: (IntList) -> FreeModuleHom<A, B, R>
     
@@ -34,11 +34,11 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
         return f(I)
     }
     
-    public func shifted(_ I0: IntList) -> MChainMap<Dim, A, B, R> {
-        return MChainMap(mDegree: mDegree) { I in self[I - I0] }
+    public func shifted(_ I0: IntList) -> ChainMapN<n, A, B, R> {
+        return ChainMapN(mDegree: mDegree) { I in self[I - I0] }
     }
 
-    public func matrix(from: MChainComplex<Dim, A, R>, to: MChainComplex<Dim, B, R>, at I: IntList) -> Matrix<R>? {
+    public func matrix(from: ChainComplexN<n, A, R>, to: ChainComplexN<n, B, R>, at I: IntList) -> Matrix<R>? {
         guard let s0 = from[I], let s1 = to[I + mDegree] else {
             return nil
         }
@@ -55,8 +55,8 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
         return Matrix(rows: s0.generators.count, cols: s1.generators.count, grid: grid).transposed
     }
 
-    public func dual(from: MChainComplex<Dim, A, R>, to: MChainComplex<Dim, B, R>) -> MChainMap<Dim, Dual<B>, Dual<A>, R> {
-        typealias F = MChainMap<Dim, Dual<B>, Dual<A>, R>
+    public func dual(from: ChainComplexN<n, A, R>, to: ChainComplexN<n, B, R>) -> ChainMapN<n, Dual<B>, Dual<A>, R> {
+        typealias F = ChainMapN<n, Dual<B>, Dual<A>, R>
         return F(mDegree: -mDegree) { (I1, b) -> FreeModule<Dual<A>, R> in
             let I0 = I1 - self.mDegree
             guard let s0 = from[I0],
@@ -83,7 +83,7 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
         }
     }
     
-    public func assertChainMap(from C0: MChainComplex<Dim, A, R>, to C1: MChainComplex<Dim, B, R>, debug: Bool = false) {
+    public func assertChainMap(from C0: ChainComplexN<n, A, R>, to C1: ChainComplexN<n, B, R>, debug: Bool = false) {
         func print(_ msg: @autoclosure () -> String) {
             Swift.print(msg())
         }
@@ -126,7 +126,7 @@ public struct MChainMap<Dim: _Int, A: BasisElementType, B: BasisElementType, R: 
     }
 }
 
-public extension MChainMap where Dim == _1 {
+public extension ChainMapN where n == _1 {
     public init(degree: Int = 0, func f: @escaping (Int) -> FreeModuleHom<A, B, R>) {
         self.init(mDegree: IntList(degree)) { I in f(I[0]) }
     }
@@ -152,7 +152,7 @@ public extension MChainMap where Dim == _1 {
     }
 }
 
-public extension MChainMap where Dim == _2 {
+public extension ChainMapN where n == _2 {
     public init(bidegree: (Int, Int) = (0, 0), func f: @escaping (Int, Int) -> FreeModuleHom<A, B, R>) {
         let (i, j) = bidegree
         self.init(mDegree: IntList(i, j)) { I in f(I[0], I[1]) }
@@ -177,9 +177,9 @@ public extension MChainMap where Dim == _2 {
     }
 }
 
-public extension MChainMap where R == 𝐙 {
-    public var tensor2: MChainMap<Dim, A, B, 𝐙₂> {
-        return MChainMap<Dim, A, B, 𝐙₂>(mDegree: mDegree) { I -> FreeModuleHom<A, B, 𝐙₂> in
+public extension ChainMapN where R == 𝐙 {
+    public var tensor2: ChainMapN<n, A, B, 𝐙₂> {
+        return ChainMapN<n, A, B, 𝐙₂>(mDegree: mDegree) { I -> FreeModuleHom<A, B, 𝐙₂> in
             FreeModuleHom{ (a: A) -> FreeModule<B, 𝐙₂> in
                 return self[I].applied(to: a).mapValues{ r in 𝐙₂(r) }
             }
