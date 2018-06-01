@@ -20,7 +20,7 @@ public protocol SimpleModuleStructureType {
     associatedtype R: EuclideanRing
     
     init(generators: [A])
-    
+    static var zeroModule: Self { get }
     var isTrivial: Bool { get }
     var rank: Int { get }
     var freePart: Self { get }
@@ -34,11 +34,11 @@ public extension GridN where Object: SimpleModuleStructureType {
     public typealias A = Object.A
     public typealias R = Object.R
     
-    public init<S: Sequence>(name: String? = nil, default defaultObject: Object? = nil, list: S) where S.Element == (IntList, [A]?) {
+    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (IntList, [A]?) {
         let grid = Dictionary(pairs: list.map{ (I, basis) in
             (I, basis.map{ Object(generators: $0) })
         })
-        self.init(name: name, default: defaultObject, grid: grid)
+        self.init(name: name, grid: grid, default: defaultObject)
     }
     
     public var isTrivial: Bool {
@@ -47,12 +47,12 @@ public extension GridN where Object: SimpleModuleStructureType {
     
     public var freePart: GridN<n, Object> {
         let grid: [IntList : Object?] = self.grid.mapValues{ $0?.freePart }
-        return GridN(name: "\(name)_free", default: defaultObject, grid: grid)
+        return GridN(name: "\(name)_free", grid: grid, default: defaultObject)
     }
     
     public var torsionPart: GridN<n, Object> {
         let grid = self.grid.mapValues{ $0?.torsionPart }
-        return GridN<n, Object>(name: "\(name)_tor", default: defaultObject, grid: grid)
+        return GridN<n, Object>(name: "\(name)_tor", grid: grid, default: defaultObject)
     }
     
     public func describe(_ I: IntList) {
@@ -72,12 +72,12 @@ public extension GridN where Object: SimpleModuleStructureType {
 }
 
 public extension GridN where n == _1, Object: SimpleModuleStructureType {
-    public init<S: Sequence>(name: String? = nil, default defaultObject: Object? = nil, list: S) where S.Element == [A]? {
-        self.init(name: name, default: defaultObject, list: list.enumerated().map{ (i, b) in (i, b)})
+    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == [A]? {
+        self.init(name: name, list: list.enumerated().map{ (i, b) in (i, b)}, default: defaultObject)
     }
     
-    public init<S: Sequence>(name: String? = nil, default defaultObject: Object? = nil, list: S) where S.Element == (Int, [A]?) {
-        self.init(name: name, default: defaultObject, list: list.map{ (i, basis) in (IntList(i), basis) })
+    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (Int, [A]?) {
+        self.init(name: name, list: list.map{ (i, basis) in (IntList(i), basis) }, default: defaultObject)
     }
     
     /*
@@ -96,8 +96,8 @@ public extension GridN where n == _1, Object: SimpleModuleStructureType {
 }
 
 public extension GridN where n == _2, Object: SimpleModuleStructureType {
-    public init<S: Sequence>(name: String? = nil, default defaultObject: Object? = nil, list: S) where S.Element == (Int, Int, [A]?) {
-        self.init(name: name, default: defaultObject, list: list.map{ (i, j, basis) in (IntList(i, j), basis) })
+    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (Int, Int, [A]?) {
+        self.init(name: name, list: list.map{ (i, j, basis) in (IntList(i, j), basis) }, default: defaultObject)
     }
     
     public func describe(_ i: Int, _ j: Int) {
@@ -126,8 +126,8 @@ public extension ModuleGridN where Object: IntSimpleModuleStructureType {
     public func torsionPart<t: _Int>(order: t.Type) -> ModuleGridN<n, A, IntegerQuotientRing<t>> {
         return ModuleGridN<n, A, IntegerQuotientRing<t>>(
             name: "\(name)_\(t.intValue)",
-            default: (defaultObject != nil) ? .zeroModule : nil,
-            grid: grid.mapValues{ $0?.torsionPart(order: order) }
+            grid: grid.mapValues{ $0?.torsionPart(order: order) },
+            default: (defaultObject == .zeroModule) ? .zeroModule : nil
         )
     }
     

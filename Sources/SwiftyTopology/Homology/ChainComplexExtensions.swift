@@ -23,7 +23,7 @@ public extension GeometricComplex {
         typealias C = ChainComplex<Cell, R>
         let name = "C(\(self.name); \(R.symbol))"
         let list = validDims.map { i in cells(ofDim: i) }
-        let base = C.Base(name: name, default: .zeroModule, list: list)
+        let base = C.Base(name: name, list: list, default: .zeroModule)
         let d = C.Differential(degree: -1) { (i, cell) in
             cell.boundary(R.self)
         }
@@ -34,7 +34,7 @@ public extension GeometricComplex {
         typealias C = ChainComplex<Cell, R>
         let name = "C(\(self.name), \(L.name); \(R.symbol))"
         let list = validDims.map { i in cells(ofDim: i).subtract(L.cells(ofDim: i)) }
-        let base = C.Base(name: name, default: .zeroModule, list: list)
+        let base = C.Base(name: name, list: list, default: .zeroModule)
         let d = C.Differential(degree: -1) { (i, cell) -> FreeModule<Cell, R> in
             cell.boundary(R.self).map { (cell, r) in
                 (i > 0 && list[i - 1].contains(cell)) ? (cell, r) : (cell, .zero)

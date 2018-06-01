@@ -132,12 +132,14 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
             let Z = kernel(I),
             let T = kernelTransition(I),
             let B = image(I - dDegree) {
-            return SimpleModuleStructure(
+            
+            let res = SimpleModuleStructure(
                 basis: basis,
                 generatingMatrix: Z,
                 transitionMatrix: T,
                 relationMatrix: T * B
             )
+            return !res.isTrivial ? res : .zeroModule
         }
         
         if dSplits(I) && dSplits(I - dDegree) {
@@ -189,15 +191,10 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
     }
     
     public func homology(name: String? = nil) -> ModuleGridN<n, A, R> {
-        let list = base.mDegrees.map{ I in (I, homology(I)) }
-        let exList = (base.defaultObject == .zeroModule)
-            ? list.exclude { (_, s) in s?.isTrivial ?? false }
-            : list
-            
         return ModuleGridN(
             name: name ?? "H(\(base.name))",
-            default: base.defaultObject,
-            list: exList
+            list: base.mDegrees.map{ I in (I, homology(I)) },
+            default: base.defaultObject
         )
     }
     
@@ -211,7 +208,6 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         typealias D = ChainComplexN<n, Dual<A>, R>
         
         let dName = name ?? "\(base.name)^*"
-        let dDef = (base.defaultObject == .zeroModule) ? D.Object.zeroModule : nil
         let dList: [(IntList, [Dual<A>]?)] = base.mDegrees.map { I -> (IntList, [Dual<A>]?) in
             guard let o = self[I] else {
                 return (I, nil)
@@ -221,8 +217,8 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
             }
             return (I, o.generators.map{ $0.basis.first!.dual })
         }
-        
-        let dBase = D.Base(name: dName, default: dDef, list: dList)
+        let dDef = (base.defaultObject == .zeroModule) ? D.Object.zeroModule : nil
+        let dBase = D.Base(name: dName, list: dList, default: dDef)
         let dDiff = d.dual(from: self, to: self)
         
         return D(base: dBase, differential: dDiff)

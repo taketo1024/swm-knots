@@ -8,22 +8,22 @@
 import Foundation
 import SwiftyMath
 
-public typealias Grid1<Object> = GridN<_1, Object>
-public typealias Grid2<Object> = GridN<_2, Object>
+public typealias Grid1<Object: Equatable> = GridN<_1, Object>
+public typealias Grid2<Object: Equatable> = GridN<_2, Object>
 
-public struct GridN<n: _Int, Object>: CustomStringConvertible {
+public struct GridN<n: _Int, Object: Equatable>: CustomStringConvertible {
     public let name: String
-    internal let defaultObject: Object?
     internal var grid: [IntList : Object?]
-    
-    public init(name: String? = nil, default defaultObject: Object? = nil, grid: [IntList : Object?] = [:]) {
+    internal let defaultObject: Object?
+
+    public init(name: String? = nil, grid: [IntList : Object?] = [:], default defaultObject: Object? = nil) {
         self.name = name ?? ""
+        self.grid = grid.exclude{ $0.value == defaultObject }
         self.defaultObject = defaultObject
-        self.grid = grid
     }
     
-    public init<S: Sequence>(name: String? = nil, default defaultObject: Object? = nil, list: S) where S.Element == (IntList, Object?) {
-        self.init(name: name, default: defaultObject, grid: Dictionary(pairs: list))
+    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (IntList, Object?) {
+        self.init(name: name, grid: Dictionary(pairs: list), default: defaultObject)
     }
     
     public subscript(I: IntList) -> Object? {
@@ -51,7 +51,7 @@ public struct GridN<n: _Int, Object>: CustomStringConvertible {
     }
     
     public func shifted(_ I: IntList) -> GridN<n, Object> {
-        return GridN(name: name, default: defaultObject, grid: grid.mapKeys{ $0 + I })
+        return GridN(name: name, grid: grid.mapKeys{ $0 + I }, default: defaultObject)
     }
     
     public func describe(_ I: IntList) {
@@ -75,16 +75,16 @@ public struct GridN<n: _Int, Object>: CustomStringConvertible {
 }
 
 public extension GridN where n == _1 {
-    public init(name: String? = nil, default defaultObject: Object? = nil, grid: [Int : Object?]) {
-        self.init(name: name, default: defaultObject, grid: grid.mapKeys{ i in IntList(i) })
+    public init(name: String? = nil, grid: [Int : Object?], default defaultObject: Object? = nil) {
+        self.init(name: name, grid: grid.mapKeys{ i in IntList(i) }, default: defaultObject)
     }
     
-    public init<S: Sequence>(name: String? = nil, default defaultObject: Object? = nil, list: S) where S.Element == Object? {
-        self.init(name: name, default: defaultObject, list: list.enumerated().map{ (i, o) in (i, o) })
+    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == Object? {
+        self.init(name: name, list: list.enumerated().map{ (i, o) in (i, o) }, default: defaultObject)
     }
     
-    public init<S: Sequence>(name: String? = nil, default defaultObject: Object? = nil, list: S) where S.Element == (Int, Object?) {
-        self.init(name: name, default: defaultObject, list: list.map{ (i, o) in (IntList(i), o) })
+    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (Int, Object?) {
+        self.init(name: name, list: list.map{ (i, o) in (IntList(i), o) }, default: defaultObject)
     }
     
     public subscript(i: Int) -> Object? {
@@ -127,8 +127,8 @@ extension GridN: Sequence where n == _1 {
 }
 
 public extension GridN where n == _2 {
-    public init<S: Sequence>(name: String? = nil, default defaultObject: Object? = nil, list: S) where S.Element == (Int, Int, Object?) {
-        self.init(name: name, default: defaultObject, list: list.map{ (i, j, o) in (IntList(i, j), o) })
+    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (Int, Int, Object?) {
+        self.init(name: name, list: list.map{ (i, j, o) in (IntList(i, j), o) }, default: defaultObject)
     }
     
     public subscript(i: Int, j: Int) -> Object? {
@@ -185,15 +185,15 @@ extension GridN: Codable where Object: Codable {
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let name = try c.decode(String.self, forKey: .name)
-        let defaultObject = try c.decode(Object?.self, forKey: .defaultObject)
         let grid = try c.decode([IntList : Object?].self, forKey: .grid)
-        self.init(name: name, default: defaultObject, grid: grid)
+        let defaultObject = try c.decode(Object?.self, forKey: .defaultObject)
+        self.init(name: name, grid: grid, default: defaultObject)
     }
     
     public func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(name, forKey: .name)
-        try c.encode(defaultObject, forKey: .defaultObject)
         try c.encode(grid, forKey: .grid)
+        try c.encode(defaultObject, forKey: .defaultObject)
     }
 }

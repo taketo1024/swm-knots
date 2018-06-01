@@ -22,7 +22,7 @@ public extension Link {
             return basis.group(by: { $0.degree }).map{ (j, basis) in (i, j, basis) }
         }
         
-        let base = ModuleGrid2<KhTensorElement, R>(name: name, default: .zeroModule, list: list)
+        let base = ModuleGrid2<KhTensorElement, R>(name: name, list: list, default: .zeroModule)
         return normalized ? base.shifted(-n⁻, n⁺ - 2 * n⁻) : base
     }
     
