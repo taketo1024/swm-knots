@@ -42,3 +42,14 @@ public extension SimpleModuleStructure where R == 𝐙 {
         return torsionPart(order: _2.self)
     }
 }
+
+public extension SimpleModuleStructure where R == 𝐙₂ {
+    public var asIntegerQuotients: SimpleModuleStructure<A, 𝐙> {
+        typealias Summand = SimpleModuleStructure<A, 𝐙>.Summand
+        let summands = self.summands.map { s -> Summand in
+            Summand(s.generator.mapValues{ $0.representative }, 2)
+        }
+        let T = self.transform.mapValues{ a in a.representative }
+        return SimpleModuleStructure<A, 𝐙>(summands, basis, T)
+    }
+}

@@ -97,7 +97,7 @@ class SimpleModuleStructureTests: XCTestCase {
         let sub0 = str.subSummands(0)
         let sub1 = str.subSummands(1)
         let sub2 = str.subSummands(2)
-
+        
         XCTAssertEqual(sub0.generator(0), M(basis[0]))
         XCTAssertEqual(sub0.torsionCoeffs, [2])
         XCTAssertEqual(sub0.factorize(M(basis[0])), [1])
@@ -105,10 +105,31 @@ class SimpleModuleStructureTests: XCTestCase {
         XCTAssertEqual(sub1.generator(0), M(basis[1]))
         XCTAssertEqual(sub1.torsionCoeffs, [4])
         XCTAssertEqual(sub1.factorize(M(basis[1])), [1])
-
+        
         XCTAssertEqual(sub2.generator(0), M(basis[2]))
         XCTAssertTrue (sub2.isFree)
         XCTAssertEqual(sub2.factorize(M(basis[2])), [1])
+    }
+    
+    func testConcat() {
+        let basis = (0 ..< 3).map{ A($0) }
+        let matrix = Matrix<R>(rows: 3, cols: 2, grid:[2, 0, 0, 4, 0, 0])
+        
+        let str = S(generators: basis, relationMatrix: matrix)
+        let sub0 = str.subSummands(0)
+        let sub2 = str.subSummands(2)
+        
+        let str2 = sub0.concat(with: sub2)
+        
+        XCTAssertEqual(str2.structure, [0: 1, 2: 1])
+        XCTAssertEqual(str2[0].generator, M(basis[0]))
+        XCTAssertEqual(str2[1].generator, M(basis[2]))
+        
+        XCTAssertEqual(str2.factorize(M(basis[0]) + M(basis[2])), [1, 1])
+        XCTAssertEqual(str2.factorize(2 * M(basis[0])), [0, 0])
+        XCTAssertEqual(str2.factorize(2 * M(basis[2])), [0, 2])
+        
+        XCTAssertTrue(!str2.contains(M(basis[1])))
     }
     
     func testAbstract() {

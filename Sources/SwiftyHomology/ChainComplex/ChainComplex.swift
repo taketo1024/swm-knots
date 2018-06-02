@@ -147,7 +147,7 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
             if R.self == 𝐙.self && self[I]!.torsionCoeffs.forAll({ $0 as! 𝐙 == 2 }) {
                 let free = (freePart.homology(I)! as! SimpleModuleStructure<A, 𝐙>)
                 let tor = (self as! ChainComplexN<n, A, 𝐙>).order2torsionPart.homology(I)!
-                return .some( (free ⊕ tor) as! SimpleModuleStructure<A, R> )
+                return .some( free.concat(with: tor.asIntegerQuotients) as! SimpleModuleStructure<A, R> )
             } else {
                 // TODO
                 print(I, ": split")

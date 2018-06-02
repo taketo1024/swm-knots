@@ -159,9 +159,18 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
         return SimpleModuleStructure(sub, basis, T)
     }
     
-    public func merge(_ s: SimpleModuleStructure<A, R>) {
+    public func concat(with s: SimpleModuleStructure<A, R>) -> SimpleModuleStructure<A, R> {
+        if self.isTrivial {
+            return s
+        } else if s.isTrivial {
+            return self
+        }
+        
         assert(self.basis == s.basis)
         
+        let summands = self.summands + s.summands
+        let T = self.transform.concatRows(with: s.transform)
+        return SimpleModuleStructure(summands, basis, T)
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
@@ -170,6 +179,13 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
         return summands.enumerated().map { (i, s) in
             return s.isFree ? v[i] : v[i] % s.divisor
         }
+    }
+    
+    public func contains(_ z: FreeModule<A, R>) -> Bool {
+        let w = factorize(z).enumerated().sum { (i, r) in
+            r * generator(i)
+        }
+        return z == w
     }
     
     public func elementIsZero(_ z: FreeModule<A, R>) -> Bool {
@@ -182,20 +198,6 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
     
     public static func ==(a: SimpleModuleStructure<A, R>, b: SimpleModuleStructure<A, R>) -> Bool {
         return a.summands == b.summands
-    }
-    
-    public static func ⊕<Q: QuotientRingType>(l: SimpleModuleStructure<A, R>, r: SimpleModuleStructure<A, Q>) -> SimpleModuleStructure<A, R> where Q.Base == R, Q.Sub: EuclideanIdeal {
-        assert(r.isFree)
-        let summands = l.summands + r.summands.map { s -> SimpleModuleStructure<A, R>.Summand in
-            SimpleModuleStructure<A, R>.Summand(s.generator.mapValues{ $0.representative }, Q.Sub.mod )
-        }
-        
-        // TODO
-        let basis = [A]()
-        let T = Matrix<R>.zero(rows: 0, cols: 0)
-        // --TODO
-        
-        return SimpleModuleStructure<A, R>(summands, basis, T)
     }
     
     public func describe() {
