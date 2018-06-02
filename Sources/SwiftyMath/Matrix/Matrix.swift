@@ -120,6 +120,10 @@ public struct _Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         return _Matrix<n, p, R>(a.impl * b.impl)
     }
     
+    public static func ⊕ <n2, m2>(a: _Matrix<n, m, R>, b: _Matrix<n2, m2, R>) -> Matrix<R> {
+        return Matrix<R>(a.impl ⊕ b.impl)
+    }
+    
     public func mapValues<R2>(_ f: (R) -> R2) -> _Matrix<n, m, R2> {
         return _Matrix<n, m, R2>(impl.mapValues(f))
     }

@@ -135,6 +135,18 @@ class MatrixTests: XCTestCase {
         XCTAssertEqual(a.transposed, M(1,3,2,4))
     }
     
+    func testDirSum() {
+        let a = M(1,2,3,4)
+        let b = M(5,6,7,8)
+        let x = a ⊕ b
+        XCTAssertEqual(x.rows, 4)
+        XCTAssertEqual(x.cols, 4)
+        XCTAssertEqual(x.grid, [1,2,0,0,
+                                3,4,0,0,
+                                0,0,5,6,
+                                0,0,7,8])
+    }
+    
     func testCodable() {
         let a = M(1,2,3,4)
         let d = try! JSONEncoder().encode(a)

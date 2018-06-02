@@ -328,6 +328,14 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         return MatrixImpl(a.rows, b.cols, a.align, Dictionary(pairs: table))
     }
 
+    static func ⊕ (A: MatrixImpl<R>, B: MatrixImpl<R>) -> MatrixImpl<R> {
+        A.switchAlignment(.Rows)
+        B.switchAlignment(.Rows)
+        
+        let table = A.table + B.table.mapPairs{ (i, list) in (i + A.rows, list.map{ (j, r) in (j + A.cols, r) })}
+        return MatrixImpl<R>(A.rows + B.rows, A.cols + B.cols, .Rows, table)
+    }
+    
     @_specialize(where R == ComputationSpecializedRing)
     func multiplyRow(at i0: Int, by r: R) {
         switchAlignment(.Rows)
