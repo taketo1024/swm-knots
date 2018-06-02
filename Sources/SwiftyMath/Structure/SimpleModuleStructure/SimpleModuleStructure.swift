@@ -155,7 +155,7 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
     
     public func subSummands(indices: [Int]) -> SimpleModuleStructure<A, R> {
         let sub = indices.map{ summands[$0] }
-        let T = transform.submatrix({ i in indices.contains(i)}, { _ in true })
+        let T = transform.submatrix(rowsMatching: { i in indices.contains(i)}, colsMatching: { _ in true })
         return SimpleModuleStructure(sub, basis, T)
     }
     

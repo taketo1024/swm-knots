@@ -187,7 +187,6 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         return submatrix(0 ..< rows, colRange)
     }
     
-    @_specialize(where R == ComputationSpecializedRing)
     func submatrix(_ rowRange: CountableRange<Int>, _ colRange: CountableRange<Int>) -> MatrixImpl<R> {
         assert(0 <= rowRange.lowerBound && rowRange.upperBound <= rows)
         assert(0 <= colRange.lowerBound && colRange.upperBound <= cols)
@@ -195,6 +194,7 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         return submatrix({i in rowRange.contains(i)}, {j in colRange.contains(j)})
     }
     
+    @_specialize(where R == ComputationSpecializedRing)
     func submatrix(_ rowCond: (Int) -> Bool, _ colCond: (Int) -> Bool) -> MatrixImpl<R> {
         let (sRows, sCols, iList, jList): (Int, Int, [Int], [Int])
         

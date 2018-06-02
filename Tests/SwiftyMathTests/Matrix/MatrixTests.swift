@@ -170,4 +170,28 @@ class MatrixTests: XCTestCase {
         XCTAssertNotNil(a.elimCache.value?[.Diagonal]) // cache exists for a
         XCTAssertNil(b.elimCache.value?[.Diagonal]) // cache is released for b
     }
+    
+    func testSubmatrix() {
+        let a = M(1,2,3,4)
+        
+        let a1 = a.submatrix(rowRange: 0 ..< 1)
+        XCTAssertEqual(a1.rows, 1)
+        XCTAssertEqual(a1.cols, 2)
+        XCTAssertEqual(a1.grid, [1, 2])
+        
+        let a2 = a.submatrix(colRange: 1 ..< 2)
+        XCTAssertEqual(a2.rows, 2)
+        XCTAssertEqual(a2.cols, 1)
+        XCTAssertEqual(a2.grid, [2, 4])
+        
+        let a3 = a.submatrix(rowRange: 1 ..< 2, colRange: 0 ..< 1)
+        XCTAssertEqual(a3.rows, 1)
+        XCTAssertEqual(a3.cols, 1)
+        XCTAssertEqual(a3.grid, [3])
+        
+        let a4 = a.submatrix(rowsMatching: { $0 % 2 == 0}, colsMatching: { $0 % 2 != 0})
+        XCTAssertEqual(a4.rows, 1)
+        XCTAssertEqual(a4.cols, 1)
+        XCTAssertEqual(a4.grid, [2])
+    }
 }
