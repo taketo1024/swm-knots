@@ -80,11 +80,11 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
     }
     
     public func isZero(_ i: Int) -> Bool {
-        return self[i]?.isTrivial ?? false
+        return self[i]?.isZero ?? false
     }
     
     public func isNonZero(_ i: Int) -> Bool {
-        return self[i].map{ !$0.isTrivial } ?? false
+        return self[i].map{ !$0.isZero } ?? false
     }
     
     public func isZeroMap(_ i1: Int) -> Bool {
@@ -118,11 +118,11 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
         
         let (i0, i2, i3) = (i1 - 1, i1 + 1, i1 + 2)
         
-        if let M1 = self[i1], M1.isTrivial {
+        if let M1 = self[i1], M1.isZero {
             return true
         }
         
-        if let M2 = self[i2], M2.isTrivial {
+        if let M2 = self[i2], M2.isZero {
             return true
         }
         
@@ -286,7 +286,7 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
                 return
         }
         
-        if M1.isTrivial {
+        if M1.isZero {
             return
         }
         

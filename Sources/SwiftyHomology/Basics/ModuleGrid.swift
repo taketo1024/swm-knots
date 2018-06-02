@@ -23,8 +23,8 @@ public extension GridN where Object: ModuleObjectType {
         self.init(name: name, grid: grid, default: defaultObject)
     }
     
-    public var isTrivial: Bool {
-        return grid.values.forAll { $0?.isTrivial ?? false }
+    public var isZero: Bool {
+        return grid.values.forAll { $0?.isZero ?? false }
     }
     
     public var freePart: GridN<n, Object> {

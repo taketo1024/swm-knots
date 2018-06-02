@@ -75,7 +75,7 @@ public extension ChainComplexN {
                 transitionMatrix: T,
                 relationMatrix: T * B
             )
-            return !res.isTrivial ? res : .zeroModule
+            return !res.isZero ? res : .zeroModule
         }
         
         if dSplits(I) && dSplits(I - dDegree) {
@@ -135,7 +135,7 @@ public extension ChainComplexN {
     }
     
     public var isExact: Bool {
-        return homology().isTrivial
+        return homology().isZero
     }
 }
 

@@ -25,7 +25,7 @@ public protocol ModuleObjectType: Equatable {
     
     init(generators: [A])
     static var zeroModule: Self { get }
-    var isTrivial: Bool { get }
+    var isZero: Bool { get }
     var rank: Int { get }
     var freePart: Self { get }
     var torsionPart: Self { get }
@@ -131,7 +131,7 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: ModuleObjectT
         return ModuleObject([], [], Matrix.zero(rows: 0, cols: 0))
     }
     
-    public var isTrivial: Bool {
+    public var isZero: Bool {
         return summands.isEmpty
     }
     
@@ -176,9 +176,9 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: ModuleObjectT
     }
     
     public func concat(with s: ModuleObject<A, R>) -> ModuleObject<A, R> {
-        if self.isTrivial {
+        if self.isZero {
             return s
-        } else if s.isTrivial {
+        } else if s.isZero {
             return self
         }
         
@@ -217,7 +217,7 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: ModuleObjectT
     }
     
     public func describe() {
-        if !isTrivial {
+        if !isZero {
             print("\(self) {")
             for (i, x) in generators.enumerated() {
                 print("\t(\(i)) ", x)

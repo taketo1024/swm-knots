@@ -43,7 +43,7 @@ public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Eu
             return nil
         }
         
-        if s0.isTrivial || s1.isTrivial {
+        if s0.isZero || s1.isZero {
             return .zero(rows: s1.generators.count, cols: s0.generators.count) // trivially zero
         }
         
