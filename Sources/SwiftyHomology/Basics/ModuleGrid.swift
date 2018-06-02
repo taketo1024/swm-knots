@@ -8,29 +8,11 @@
 import Foundation
 import SwiftyMath
 
-public typealias ModuleGridN<n: _Int, A: BasisElementType, R: EuclideanRing> = GridN<n, SimpleModuleStructure<A, R>>
+public typealias ModuleGridN<n: _Int, A: BasisElementType, R: EuclideanRing> = GridN<n, ModuleObject<A, R>>
 public typealias ModuleGrid1<A: BasisElementType, R: EuclideanRing> = ModuleGridN<_1, A, R>
 public typealias ModuleGrid2<A: BasisElementType, R: EuclideanRing> = ModuleGridN<_2, A, R>
 
-// MEMO waiting for parametrized extension.
-// public extension<A: BasisElementType, R: EuclideanRing> ObjectGrid where Object == SimpleModuleStructure<A, R> {
-
-public protocol SimpleModuleStructureType {
-    associatedtype A: BasisElementType
-    associatedtype R: EuclideanRing
-    
-    init(generators: [A])
-    static var zeroModule: Self { get }
-    var isTrivial: Bool { get }
-    var rank: Int { get }
-    var freePart: Self { get }
-    var torsionPart: Self { get }
-    func describe()
-}
-
-extension SimpleModuleStructure: SimpleModuleStructureType {}
-
-public extension GridN where Object: SimpleModuleStructureType {
+public extension GridN where Object: ModuleObjectType {
     public typealias A = Object.A
     public typealias R = Object.R
     
@@ -71,7 +53,7 @@ public extension GridN where Object: SimpleModuleStructureType {
     }
 }
 
-public extension GridN where n == _1, Object: SimpleModuleStructureType {
+public extension GridN where n == _1, Object: ModuleObjectType {
     public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == [A]? {
         self.init(name: name, list: list.enumerated().map{ (i, b) in (i, b)}, default: defaultObject)
     }
@@ -95,7 +77,7 @@ public extension GridN where n == _1, Object: SimpleModuleStructureType {
     }
 }
 
-public extension GridN where n == _2, Object: SimpleModuleStructureType {
+public extension GridN where n == _2, Object: ModuleObjectType {
     public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (Int, Int, [A]?) {
         self.init(name: name, list: list.map{ (i, j, basis) in (IntList(i, j), basis) }, default: defaultObject)
     }
@@ -105,14 +87,7 @@ public extension GridN where n == _2, Object: SimpleModuleStructureType {
     }
 }
 
-public protocol IntSimpleModuleStructureType: SimpleModuleStructureType where R == 𝐙 {
-    var structureCode: String { get }
-    func torsionPart<t: _Int>(order: t.Type) -> SimpleModuleStructure<A, IntegerQuotientRing<t>>
-}
-
-extension SimpleModuleStructure: IntSimpleModuleStructureType where R == 𝐙 {}
-
-public extension ModuleGridN where Object: IntSimpleModuleStructureType {
+public extension GridN where Object: IntModuleObjectType {
     public var structureCode: String {
         return mDegrees.map{ I in
             if let s = self[I] {

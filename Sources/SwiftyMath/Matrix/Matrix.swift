@@ -286,6 +286,10 @@ public extension _Matrix where n == Dynamic, m == Dynamic {
         return Matrix(size: n, scalar: .identity)
     }
     
+    public static func zero(size n: Int) -> Matrix<R> {
+        return Matrix.zero(rows: n, cols: n)
+    }
+    
     public static func zero(rows: Int, cols: Int) -> Matrix<R> {
         return Matrix(rows: rows, cols: cols) { (_, _) in .zero }
     }

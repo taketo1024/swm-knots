@@ -147,7 +147,7 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
         }
     }
     
-    private func makeMatrix<X, Y>(_ s0: SimpleModuleStructure<X, R>?, _ f: FreeModuleHom<X, Y, R>, _ s1: SimpleModuleStructure<Y, R>?) -> Matrix<R>? {
+    private func makeMatrix<X, Y>(_ s0: ChainComplex<X, R>.Object?, _ f: FreeModuleHom<X, Y, R>, _ s1: ChainComplex<Y, R>.Object?) -> Matrix<R>? {
         guard let s0 = s0, let s1 = s1 else {
             return nil
         }

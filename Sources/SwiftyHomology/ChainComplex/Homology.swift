@@ -45,7 +45,7 @@ public extension ChainComplexN {
         return E.imageMatrix
     }
     
-    public func homology(_ I: IntList) -> SimpleModuleStructure<A, R>? {
+    public func homology(_ I: IntList) -> ModuleObject<A, R>? {
         // case: indeterminable
         if self[I] == nil {
             return nil
@@ -69,7 +69,7 @@ public extension ChainComplexN {
             let T = kernelTransition(I)!
             let B = image(I - dDegree)!
                 
-            let res = SimpleModuleStructure(
+            let res = ModuleObject(
                 basis: basis,
                 generatingMatrix: Z,
                 transitionMatrix: T,
@@ -81,9 +81,9 @@ public extension ChainComplexN {
         if dSplits(I) && dSplits(I - dDegree) {
             // case: splits as 𝐙, 𝐙₂ summands
             if R.self == 𝐙.self && self[I]!.torsionCoeffs.forAll({ $0 as! 𝐙 == 2 }) {
-                let free = (freePart.homology(I)! as! SimpleModuleStructure<A, 𝐙>)
+                let free = (freePart.homology(I)! as! ModuleObject<A, 𝐙>)
                 let tor = (self as! ChainComplexN<n, A, 𝐙>).order2torsionPart.homology(I)!
-                return .some( free.concat(with: tor.asIntegerQuotients) as! SimpleModuleStructure<A, R> )
+                return .some( free.concat(with: tor.asIntegerQuotients) as! ModuleObject<A, R> )
             } else {
                 // TODO
                 print(I, ": split")
@@ -105,7 +105,7 @@ public extension ChainComplexN {
         // MEMO summands are assumed to be ordered as:
         // (R/d_0 ⊕ ... ⊕ R/d_k) ⊕ R^r
         
-        func t(_ s: SimpleModuleStructure<A, R>) -> [(R, Int)] {
+        func t(_ s: ModuleObject<A, R>) -> [(R, Int)] {
             return s.summands.reduce([]) { (res, s) in
                 if let l = res.last, l.0 == s.divisor {
                     return res[0 ..< res.count - 1] + [(l.0, l.1 + 1)]
@@ -140,13 +140,13 @@ public extension ChainComplexN {
 }
 
 public extension ChainComplexN where n == _1 {
-    public func homology(_ i: Int) -> SimpleModuleStructure<A, R>? {
+    public func homology(_ i: Int) -> ModuleObject<A, R>? {
         return homology(IntList(i))
     }
 }
 
 public extension ChainComplexN where n == _2 {
-    public func homology(_ i: Int, _ j: Int) -> SimpleModuleStructure<A, R>? {
+    public func homology(_ i: Int, _ j: Int) -> ModuleObject<A, R>? {
         return homology(IntList(i, j))
     }
 }

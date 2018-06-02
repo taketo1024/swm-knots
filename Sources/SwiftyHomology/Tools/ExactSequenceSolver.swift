@@ -16,7 +16,7 @@ public extension LogFlag {
 }
 
 public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomStringConvertible {
-    public typealias Object = AbstractSimpleModuleStructure<R>
+    public typealias Object = ModuleObject<AbstractBasisElement, R>
     public typealias Map    = FreeModuleHom<AbstractBasisElement, AbstractBasisElement, R>
     
     public   var objects : Grid1<Object>
@@ -232,22 +232,23 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
         //       = Im(f1)             = Ker(f3)
         //      ~= Coker(f0)
         
-        guard
-            let M1 = self[i1], M1.isFree, // TODO concider non-free case
+        if  let M1 = self[i1], M1.isFree, // TODO concider non-free case
             let M3 = self[i3], M3.isFree,
             let A0 = matrix(i0),
             let A3 = matrix(i3)
-            else {
-                log("\(i2): unsolvable.")
-                return nil
+        {
+            let (r, k) = (M1.rank, A3.elimination().nullity)
+            let generators = AbstractBasisElement.generateBasis(r + k)
+            let B = A0 + Matrix<R>.zero(rows: k, cols: k)
+            let M2 = Object(generators: generators, relationMatrix: B)
+            
+            log("\(i2): \(M2)")
+            
+            return M2
         }
         
-        let N0 = AbstractSimpleModuleStructure(generators: AbstractBasisElement.generateBasis(M1.rank), relationMatrix: A0)
-        let N1 = AbstractSimpleModuleStructure<R>(rank: A3.elimination().nullity)
-        
-        log("\(i2): \(N0) ⊕ \(N1)")
-        
-        return N0 ⊕ N1
+        log("\(i2): unsolvable.")
+        return nil
     }
     
     public func describe(_ i0: Int) {

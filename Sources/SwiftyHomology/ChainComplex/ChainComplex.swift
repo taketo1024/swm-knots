@@ -16,7 +16,7 @@ public typealias ChainComplex2<A: BasisElementType, R: EuclideanRing> = ChainCom
 public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: CustomStringConvertible {
     public typealias Base = ModuleGridN<n, A, R>
     public typealias Differential = ChainMapN<n, A, A, R>
-    public typealias Object = SimpleModuleStructure<A, R>
+    public typealias Object = ModuleObject<A, R>
     
     public var base: Base
     public let d: Differential

@@ -1,19 +1,20 @@
 //
-//  SimpleModuleStructureTests.swift
+//  ModuleObjectTests.swift
 //  SwiftyMathTests
 //
 //  Created by Taketo Sano on 2018/04/23.
 //
 
 import XCTest
-@testable import SwiftyMath
+import SwiftyMath
+@testable import SwiftyHomology
 
-class SimpleModuleStructureTests: XCTestCase {
+class ModuleObjectTests: XCTestCase {
     
     typealias A = AbstractBasisElement
     typealias R = 𝐙
     typealias M = FreeModule<A, R>
-    typealias S = SimpleModuleStructure<A, R>
+    typealias S = ModuleObject<A, R>
 
     func testFree() {
         let basis = (0 ..< 3).map{ A($0) }

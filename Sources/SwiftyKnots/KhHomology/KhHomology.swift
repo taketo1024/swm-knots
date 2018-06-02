@@ -58,7 +58,7 @@ public extension Link {
     }
 }
 
-public extension GridN where n == _2, Object: SimpleModuleStructureType, Object.A == KhTensorElement {
+public extension GridN where n == _2, Object: ModuleObjectType, Object.A == KhTensorElement {
     public var bandWidth: Int {
         return bidegrees.map{ (i, j) in j - 2 * i }.unique().count
     }
