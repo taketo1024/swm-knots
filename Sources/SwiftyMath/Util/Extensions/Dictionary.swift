@@ -38,6 +38,18 @@ public extension Dictionary {
         a[k] = v
         return a
     }
+    
+    public mutating func merge(_ other: [Key : Value], overwrite: Bool = false) {
+        return self.merge(other, uniquingKeysWith: { (v1, v2) in !overwrite ? v1 : v2 })
+    }
+    
+    public func merging(_ other: [Key : Value], overwrite: Bool = false) -> [Key : Value] {
+        return self.merging(other, uniquingKeysWith: { (v1, v2) in !overwrite ? v1 : v2 })
+    }
+    
+    public static func + (a: [Key : Value], b: [Key : Value]) -> [Key : Value] {
+        return a.merging(b)
+    }
 
     public func asFunc(default v: Value? = nil) -> (Key) -> Value {
         return { k in self[k] ?? v! }

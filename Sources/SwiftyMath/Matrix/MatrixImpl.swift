@@ -229,7 +229,7 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         self.switchAlignment(.Rows)
            A.switchAlignment(.Rows)
         
-        let table = self.table.merging(A.table.mapKeys{ i in i + self.rows }, uniquingKeysWith: { (_, _) in fatalError() })
+        let table = self.table + A.table.mapKeys{ i in i + self.rows }
         return MatrixImpl(rows + A.rows, cols, .Rows, table)
     }
     
@@ -239,7 +239,7 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         self.switchAlignment(.Cols)
            A.switchAlignment(.Cols)
         
-        let table = self.table.merging(A.table.mapKeys{ j in j + self.cols }, uniquingKeysWith: { (_, _) in fatalError() })
+        let table = self.table + A.table.mapKeys{ j in j + self.cols }
         return MatrixImpl(rows, cols + A.cols, .Cols, table)
     }
     
