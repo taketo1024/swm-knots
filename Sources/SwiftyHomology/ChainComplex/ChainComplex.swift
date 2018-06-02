@@ -17,11 +17,11 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
     public typealias Base = ModuleGridN<n, A, R>
     public typealias Differential = ChainMapN<n, A, A, R>
     public typealias Object = SimpleModuleStructure<A, R>
+    
     public var base: Base
-    
     public let d: Differential
-    internal let dMatrices: [IntList : Cache<Matrix<R>>]
     
+    internal let dMatrices: [IntList : Cache<Matrix<R>>]
     internal let _freePart = Cache<ChainComplexN<n, A, R>>()
     internal let  _torPart = Cache<ChainComplexN<n, A, R>>()
 
@@ -47,7 +47,7 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         return base.name
     }
     
-    private var dDegree: IntList {
+    internal var dDegree: IntList {
         return d.mDegree
     }
     
@@ -75,131 +75,6 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         let A = d.matrix(from: self, to: self, at: I)
         dMatrices[I]?.value = A
         return A
-    }
-    
-    internal func kernel(_ I: IntList) -> Matrix<R>? {
-        guard let from = base[I], from.isFree,
-            let to = base[I + dDegree], to.isFree,
-            let A = dMatrix(I) else {
-                return nil // indeterminable.
-        }
-        
-        let E = A.elimination(form: .Diagonal)
-        return E.kernelMatrix
-    }
-    
-    internal func kernelTransition(_ I: IntList) -> Matrix<R>? {
-        guard let from = base[I], from.isFree,
-            let to = base[I + dDegree], to.isFree,
-            let A = dMatrix(I) else {
-                return nil // indeterminable.
-        }
-        
-        let E = A.elimination(form: .Diagonal)
-        return E.kernelTransitionMatrix
-    }
-    
-    internal func image(_ I: IntList) -> Matrix<R>? {
-        guard let from = base[I], from.isFree,
-            let to = base[I + dDegree], to.isFree,
-            let A = dMatrix(I) else {
-                return nil // indeterminable.
-        }
-        
-        let E = A.elimination(form: .Diagonal)
-        return E.imageMatrix
-    }
-    
-    public func homology(_ I: IntList) -> SimpleModuleStructure<A, R>? {
-        // case: indeterminable
-        if self[I] == nil {
-            return nil
-        }
-        
-        // case: obviously isom
-        if  let Ain = dMatrix(I - dDegree), Ain.isZero,
-            let Aout = dMatrix(I), Aout.isZero {
-            return self[I]
-        }
-        
-        // case: obviously zero
-        if let Z = kernel(I), Z.isZero {
-            return .zeroModule
-        }
-        
-        // case: free
-        if  let basis = self[I]?.generators,
-            let Z = kernel(I),
-            let T = kernelTransition(I),
-            let B = image(I - dDegree) {
-            
-            let res = SimpleModuleStructure(
-                basis: basis,
-                generatingMatrix: Z,
-                transitionMatrix: T,
-                relationMatrix: T * B
-            )
-            return !res.isTrivial ? res : .zeroModule
-        }
-        
-        if dSplits(I) && dSplits(I - dDegree) {
-            // case: splits as 𝐙, 𝐙₂ summands
-            if R.self == 𝐙.self && self[I]!.torsionCoeffs.forAll({ $0 as! 𝐙 == 2 }) {
-                let free = (freePart.homology(I)! as! SimpleModuleStructure<A, 𝐙>)
-                let tor = (self as! ChainComplexN<n, A, 𝐙>).order2torsionPart.homology(I)!
-                return .some( free.concat(with: tor.asIntegerQuotients) as! SimpleModuleStructure<A, R> )
-            } else {
-                // TODO
-                print(I, ": split")
-                describeMap(I)
-                return nil
-            }
-        }
-        
-        return nil
-    }
-    
-    internal func dSplits(_ I: IntList) -> Bool {
-        guard let from = self[I],
-            let to = self[I + dDegree],
-            let A = dMatrix(I) else {
-                return false
-        }
-        
-        // MEMO summands are assumed to be ordered as:
-        // (R/d_0 ⊕ ... ⊕ R/d_k) ⊕ R^r
-        
-        func t(_ s: SimpleModuleStructure<A, R>) -> [(R, Int)] {
-            return s.summands.reduce([]) { (res, s) in
-                if let l = res.last, l.0 == s.divisor {
-                    return res[0 ..< res.count - 1] + [(l.0, l.1 + 1)]
-                } else {
-                    return res + [(s.divisor, 1)]
-                }
-            }
-        }
-        
-        let t0 = t(from)
-        let t1 = t(to)
-        
-        let blocks = A.blocks(rowSizes: t1.map{ $0.1 }, colSizes: t0.map{ $0.1 })
-        return blocks.enumerated().forAll { (i, Bs) in
-            Bs.enumerated().forAll { (j, B) in
-                return (t0[j].0 == t1[i].0) || B.isZero
-            }
-        }
-    }
-    
-    public func homology(name: String? = nil) -> ModuleGridN<n, A, R> {
-        return ModuleGridN(
-            name: name ?? "H(\(base.name))",
-            list: base.mDegrees.map{ I in (I, homology(I)) },
-            default: base.defaultObject
-        )
-    }
-    
-    public var isExact: Bool {
-        return homology().isTrivial
     }
     
     // MEMO works only when each generator is a single basis-element.
@@ -289,10 +164,6 @@ public extension ChainComplexN where n == _1 {
         return shifted(IntList(i))
     }
     
-    public func homology(_ i: Int) -> SimpleModuleStructure<A, R>? {
-        return homology(IntList(i))
-    }
-    
     public func describe(_ i: Int) {
         describe(IntList(i))
     }
@@ -313,10 +184,6 @@ public extension ChainComplexN where n == _2 {
     
     public func shifted(_ i: Int, _ j: Int) -> ChainComplex2<A, R> {
         return shifted(IntList(i, j))
-    }
-    
-    public func homology(_ i: Int, _ j: Int) -> SimpleModuleStructure<A, R>? {
-        return homology(IntList(i, j))
     }
     
     public func describe(_ i: Int, _ j: Int) {
