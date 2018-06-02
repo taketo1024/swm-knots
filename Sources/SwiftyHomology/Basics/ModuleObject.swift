@@ -175,18 +175,21 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: ModuleObjectT
         return ModuleObject(sub, basis, T)
     }
     
-    public func concat(with s: ModuleObject<A, R>) -> ModuleObject<A, R> {
-        if self.isZero {
-            return s
-        } else if s.isZero {
-            return self
+    public static func ⊕(M1: ModuleObject<A, R>, M2: ModuleObject<A, R>) -> ModuleObject<A, R> {
+        if M1.basis == M2.basis {
+            let basis = M1.basis
+            let summands = M1.summands + M2.summands
+            let T = M1.transform.concatRows(with: M2.transform)
+            return ModuleObject(summands, basis, T)
+
+        } else if M1.basis.isDisjoint(with: M2.basis) {
+            let basis = M1.basis + M2.basis
+            let summands = M1.summands + M2.summands
+            let T = M1.transform ⊕ M2.transform
+            return ModuleObject(summands, basis, T)
         }
         
-        assert(self.basis == s.basis)
-        
-        let summands = self.summands + s.summands
-        let T = self.transform.concatRows(with: s.transform)
-        return ModuleObject(summands, basis, T)
+        fatalError()
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {

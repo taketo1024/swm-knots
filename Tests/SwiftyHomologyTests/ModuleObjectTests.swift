@@ -112,7 +112,7 @@ class ModuleObjectTests: XCTestCase {
         XCTAssertEqual(sub2.factorize(M(basis[2])), [1])
     }
     
-    func testConcat() {
+    func testDirSum1() {
         let basis = (0 ..< 3).map{ A($0) }
         let matrix = Matrix<R>(rows: 3, cols: 2, grid:[2, 0, 0, 4, 0, 0])
         
@@ -120,17 +120,35 @@ class ModuleObjectTests: XCTestCase {
         let sub0 = str.subSummands(0)
         let sub2 = str.subSummands(2)
         
-        let str2 = sub0.concat(with: sub2)
+        let sum = sub0 ⊕ sub2
         
-        XCTAssertEqual(str2.structure, [0: 1, 2: 1])
-        XCTAssertEqual(str2[0].generator, M(basis[0]))
-        XCTAssertEqual(str2[1].generator, M(basis[2]))
+        XCTAssertEqual(sum.structure, [0: 1, 2: 1])
+        XCTAssertEqual(sum[0].generator, M(basis[0]))
+        XCTAssertEqual(sum[1].generator, M(basis[2]))
         
-        XCTAssertEqual(str2.factorize(M(basis[0]) + M(basis[2])), [1, 1])
-        XCTAssertEqual(str2.factorize(2 * M(basis[0])), [0, 0])
-        XCTAssertEqual(str2.factorize(2 * M(basis[2])), [0, 2])
+        XCTAssertEqual(sum.factorize(M(basis[0]) + M(basis[2])), [1, 1])
+        XCTAssertEqual(sum.factorize(2 * M(basis[0])), [0, 0])
+        XCTAssertEqual(sum.factorize(2 * M(basis[2])), [0, 2])
         
-        XCTAssertTrue(!str2.contains(M(basis[1])))
+        XCTAssertTrue(!sum.contains(M(basis[1])))
+    }
+    
+    func testDirSum2() {
+        let basis = (0 ..< 3).map{ A($0) }
+        
+        let sub0 = S(generators: [basis[0]], relationMatrix: Matrix<R>(rows: 1, cols: 1, grid:[2]))
+        let sub2 = S(generators: [basis[2]])
+        let sum = sub0 ⊕ sub2
+        
+        XCTAssertEqual(sum.structure, [0: 1, 2: 1])
+        XCTAssertEqual(sum[0].generator, M(basis[0]))
+        XCTAssertEqual(sum[1].generator, M(basis[2]))
+        
+        XCTAssertEqual(sum.factorize(M(basis[0]) + M(basis[2])), [1, 1])
+        XCTAssertEqual(sum.factorize(2 * M(basis[0])), [0, 0])
+        XCTAssertEqual(sum.factorize(2 * M(basis[2])), [0, 2])
+        
+        XCTAssertTrue(!sum.contains(M(basis[1])))
     }
     
     func testAbstract() {
