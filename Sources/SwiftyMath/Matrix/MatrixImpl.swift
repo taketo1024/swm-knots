@@ -223,6 +223,26 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         return MatrixImpl(sRows, sCols, align, Dictionary(pairs: subTable))
     }
     
+    func concatRows(_ A: MatrixImpl<R>) -> MatrixImpl<R> {
+        assert(self.cols == A.cols)
+        
+        self.switchAlignment(.Rows)
+           A.switchAlignment(.Rows)
+        
+        let table = self.table.merging(A.table.mapKeys{ i in i + self.rows }, uniquingKeysWith: { (_, _) in fatalError() })
+        return MatrixImpl(rows + A.rows, cols, .Rows, table)
+    }
+    
+    func concatCols(_ A: MatrixImpl<R>) -> MatrixImpl<R> {
+        assert(self.rows == A.rows)
+        
+        self.switchAlignment(.Cols)
+           A.switchAlignment(.Cols)
+        
+        let table = self.table.merging(A.table.mapKeys{ j in j + self.cols }, uniquingKeysWith: { (_, _) in fatalError() })
+        return MatrixImpl(rows, cols + A.cols, .Cols, table)
+    }
+    
     func mapValues<R2>(_ f: (R) -> R2) -> MatrixImpl<R2> {
         typealias M = MatrixImpl<R2>
         let mapped = table.mapValues { list in

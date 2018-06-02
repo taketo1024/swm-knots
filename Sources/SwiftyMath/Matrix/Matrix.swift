@@ -156,6 +156,14 @@ public struct _Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         return Matrix(impl.submatrix(r, c))
     }
     
+    public func concatRows<n2>(with A: _Matrix<n2, m, R>) -> _Matrix<Dynamic, m, R> {
+        return _Matrix<Dynamic, m, R>(impl.concatRows(A.impl))
+    }
+    
+    public func concatCols<m2>(with A: _Matrix<n, m2, R>) -> _Matrix<n, Dynamic, R> {
+        return _Matrix<n, Dynamic, R>(impl.concatCols(A.impl))
+    }
+    
     public var grid: [R] {
         return impl.grid
     }

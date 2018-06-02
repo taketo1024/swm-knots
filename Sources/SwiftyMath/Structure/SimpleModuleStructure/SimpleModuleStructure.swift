@@ -159,6 +159,11 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
         return SimpleModuleStructure(sub, basis, T)
     }
     
+    public func merge(_ s: SimpleModuleStructure<A, R>) {
+        assert(self.basis == s.basis)
+        
+    }
+    
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
         let v = transform * Vector(z.factorize(by: basis))
         
