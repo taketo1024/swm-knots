@@ -16,17 +16,17 @@ public extension LogFlag {
 }
 
 public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomStringConvertible {
-    public typealias Object = AbstractSimpleModuleStructure<R>
+    public typealias Object = ModuleObject<AbstractBasisElement, R>
     public typealias Map    = FreeModuleHom<AbstractBasisElement, AbstractBasisElement, R>
     
-    public   var objects : ObjectSequence<Object>
-    public   var maps    : ObjectSequence<Map>
-    internal var matrices: ObjectSequence<Matrix<R>>
+    public   var objects : Grid1<Object>
+    public   var maps    : Grid1<Map>
+    internal var matrices: Grid1<Matrix<R>>
     
     public init(objects: [Object?], maps: [Map?]) {
-        self.objects  = ObjectSequence<Object>(list: objects)
-        self.maps     = ObjectSequence(list: maps)
-        self.matrices = ObjectSequence()
+        self.objects  = Grid1<Object>(list: objects)
+        self.maps     = Grid1(list: maps)
+        self.matrices = Grid1()
     }
 
     public convenience init() {
@@ -80,11 +80,11 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
     }
     
     public func isZero(_ i: Int) -> Bool {
-        return self[i]?.isTrivial ?? false
+        return self[i]?.isZero ?? false
     }
     
     public func isNonZero(_ i: Int) -> Bool {
-        return self[i].map{ !$0.isTrivial } ?? false
+        return self[i].map{ !$0.isZero } ?? false
     }
     
     public func isZeroMap(_ i1: Int) -> Bool {
@@ -118,11 +118,11 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
         
         let (i0, i2, i3) = (i1 - 1, i1 + 1, i1 + 2)
         
-        if let M1 = self[i1], M1.isTrivial {
+        if let M1 = self[i1], M1.isZero {
             return true
         }
         
-        if let M2 = self[i2], M2.isTrivial {
+        if let M2 = self[i2], M2.isZero {
             return true
         }
         
@@ -232,22 +232,23 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
         //       = Im(f1)             = Ker(f3)
         //      ~= Coker(f0)
         
-        guard
-            let M1 = self[i1], M1.isFree, // TODO concider non-free case
+        if  let M1 = self[i1], M1.isFree, // TODO concider non-free case
             let M3 = self[i3], M3.isFree,
             let A0 = matrix(i0),
             let A3 = matrix(i3)
-            else {
-                log("\(i2): unsolvable.")
-                return nil
+        {
+            let (r, k) = (M1.rank, A3.elimination().nullity)
+            let generators = AbstractBasisElement.generateBasis(r + k)
+            let B = A0 + Matrix<R>.zero(rows: k, cols: k)
+            let M2 = Object(generators: generators, relationMatrix: B)
+            
+            log("\(i2): \(M2)")
+            
+            return M2
         }
         
-        let N0 = AbstractSimpleModuleStructure(generators: AbstractBasisElement.generateBasis(M1.rank), relationMatrix: A0)
-        let N1 = AbstractSimpleModuleStructure<R>(rank: A3.elimination().nullity)
-        
-        log("\(i2): \(N0) ⊕ \(N1)")
-        
-        return N0 ⊕ N1
+        log("\(i2): unsolvable.")
+        return nil
     }
     
     public func describe(_ i0: Int) {
@@ -285,7 +286,7 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
                 return
         }
         
-        if M1.isTrivial {
+        if M1.isZero {
             return
         }
         

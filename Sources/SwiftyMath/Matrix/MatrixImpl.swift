@@ -187,7 +187,6 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         return submatrix(0 ..< rows, colRange)
     }
     
-    @_specialize(where R == ComputationSpecializedRing)
     func submatrix(_ rowRange: CountableRange<Int>, _ colRange: CountableRange<Int>) -> MatrixImpl<R> {
         assert(0 <= rowRange.lowerBound && rowRange.upperBound <= rows)
         assert(0 <= colRange.lowerBound && colRange.upperBound <= cols)
@@ -195,6 +194,7 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         return submatrix({i in rowRange.contains(i)}, {j in colRange.contains(j)})
     }
     
+    @_specialize(where R == ComputationSpecializedRing)
     func submatrix(_ rowCond: (Int) -> Bool, _ colCond: (Int) -> Bool) -> MatrixImpl<R> {
         let (sRows, sCols, iList, jList): (Int, Int, [Int], [Int])
         
@@ -221,6 +221,26 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         }
         
         return MatrixImpl(sRows, sCols, align, Dictionary(pairs: subTable))
+    }
+    
+    func concatRows(_ A: MatrixImpl<R>) -> MatrixImpl<R> {
+        assert(self.cols == A.cols)
+        
+        self.switchAlignment(.Rows)
+           A.switchAlignment(.Rows)
+        
+        let table = self.table + A.table.mapKeys{ i in i + self.rows }
+        return MatrixImpl(rows + A.rows, cols, .Rows, table)
+    }
+    
+    func concatCols(_ A: MatrixImpl<R>) -> MatrixImpl<R> {
+        assert(self.rows == A.rows)
+        
+        self.switchAlignment(.Cols)
+           A.switchAlignment(.Cols)
+        
+        let table = self.table + A.table.mapKeys{ j in j + self.cols }
+        return MatrixImpl(rows, cols + A.cols, .Cols, table)
     }
     
     func mapValues<R2>(_ f: (R) -> R2) -> MatrixImpl<R2> {
@@ -308,6 +328,14 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
         return MatrixImpl(a.rows, b.cols, a.align, Dictionary(pairs: table))
     }
 
+    static func ⊕ (A: MatrixImpl<R>, B: MatrixImpl<R>) -> MatrixImpl<R> {
+        A.switchAlignment(.Rows)
+        B.switchAlignment(.Rows)
+        
+        let table = A.table + B.table.mapPairs{ (i, list) in (i + A.rows, list.map{ (j, r) in (j + A.cols, r) })}
+        return MatrixImpl<R>(A.rows + B.rows, A.cols + B.cols, .Rows, table)
+    }
+    
     @_specialize(where R == ComputationSpecializedRing)
     func multiplyRow(at i0: Int, by r: R) {
         switchAlignment(.Rows)

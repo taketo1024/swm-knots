@@ -45,6 +45,11 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
         return IntList(Dictionary(pairs: indices))
     }
     
+    public func drop(_ i: Int) -> IntList {
+        assert(0 <= i && i < length)
+        return IntList(elements.removed(at: i))
+    }
+    
     public static func +(I: IntList, J: IntList) -> IntList {
         let l = max(I.length, J.length)
         return IntList( (0 ..< l).map{ i in I[i] + J[i] } )

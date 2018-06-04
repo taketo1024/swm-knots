@@ -20,8 +20,8 @@ class SimplicialCohomologyExSeqTests: XCTestCase {
 
         let h = E.column(0)
         
-        XCTAssertTrue( h[0]!.isTrivial)
-        XCTAssertTrue( h[1]!.isTrivial)
+        XCTAssertTrue( h[0]!.isZero)
+        XCTAssertTrue( h[1]!.isZero)
         XCTAssertEqual(h[2]!.structure, [0 : 1])
     }
     
@@ -33,8 +33,8 @@ class SimplicialCohomologyExSeqTests: XCTestCase {
         let h = E.column(1)
         
         XCTAssertEqual(h[0]!.structure, [0 : 1])
-        XCTAssertTrue( h[1]!.isTrivial)
-        XCTAssertTrue( h[2]!.isTrivial)
+        XCTAssertTrue( h[1]!.isZero)
+        XCTAssertTrue( h[2]!.isZero)
     }
     
     func testDS_col2() {
@@ -46,7 +46,7 @@ class SimplicialCohomologyExSeqTests: XCTestCase {
         
         XCTAssertEqual(h[0]!.structure, [0 : 1])
         XCTAssertEqual(h[1]!.structure, [0 : 1])
-        XCTAssertTrue( h[2]!.isTrivial)
+        XCTAssertTrue( h[2]!.isZero)
     }
     
     private func cH_DS() -> HomologyExactSequenceSolver<Dual<Simplex>, Dual<Simplex>, Dual<Simplex>, R> {

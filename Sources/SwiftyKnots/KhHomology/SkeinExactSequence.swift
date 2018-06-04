@@ -15,7 +15,7 @@ public extension SkeinTriple {
     //  0 --> CKh(L1){1,1} ---> CKh(L) ---> CKh(L0) --> 0 (exact)
     //
     
-    public func shortExactSequence<R>(_ type: R.Type, reduced r: Bool = false) -> ChainComplex2SES<KhTensorElement, KhTensorElement, KhTensorElement, R> {
+    public func shortExactSequence<R>(_ type: R.Type, reduced r: Bool = false) -> ChainShortExactSequence2<KhTensorElement, KhTensorElement, KhTensorElement, R> {
         
         let (n, n⁺, n⁻) = (L.crossingNumber, L.crossingNumber⁺, L.crossingNumber⁻)
         
@@ -38,6 +38,6 @@ public extension SkeinTriple {
             }
         }
         
-        return ChainComplex2SES(C1, i, C, j, C0, d)
+        return ChainShortExactSequence2(C1, i, C, j, C0, d)
     }
 }

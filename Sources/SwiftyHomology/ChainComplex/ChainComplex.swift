@@ -10,21 +10,22 @@ import SwiftyMath
 
 // TODO substitute for old ChainComplex.
 
-public typealias  ChainComplex<A: BasisElementType, R: EuclideanRing> = MChainComplex<_1, A, R>
-public typealias ChainComplex2<A: BasisElementType, R: EuclideanRing> = MChainComplex<_2, A, R>
+public typealias  ChainComplex<A: BasisElementType, R: EuclideanRing> = ChainComplexN<_1, A, R>
+public typealias ChainComplex2<A: BasisElementType, R: EuclideanRing> = ChainComplexN<_2, A, R>
 
-public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: CustomStringConvertible {
-    public typealias Base = ModuleGrid<Dim, A, R>
-    public typealias Differential = MChainMap<Dim, A, A, R>
+public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: CustomStringConvertible {
+    public typealias Base = ModuleGridN<n, A, R>
+    public typealias Differential = ChainMapN<n, A, A, R>
+    public typealias Object = ModuleObject<A, R>
+    
     public var base: Base
-    
     public let d: Differential
-    internal let dMatrices: [IntList : Cache<Matrix<R>>]
     
-    internal let _freePart = Cache<MChainComplex<Dim, A, R>>()
-    internal let  _torPart = Cache<MChainComplex<Dim, A, R>>()
+    internal let dMatrices: [IntList : Cache<Matrix<R>>]
+    internal let _freePart = Cache<ChainComplexN<n, A, R>>()
+    internal let  _torPart = Cache<ChainComplexN<n, A, R>>()
 
-    public init(base: ModuleGrid<Dim, A, R>, differential d: Differential) {
+    public init(base: ModuleGridN<n, A, R>, differential d: Differential) {
         assert(base.defaultObject == nil || base.defaultObject == .some(.zeroModule))
         
         self.base = base
@@ -34,7 +35,7 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         self.dMatrices = Dictionary(pairs: degs.map{ I in (I, .empty) })
     }
     
-    public subscript(I: IntList) -> Base.Object? {
+    public subscript(I: IntList) -> Object? {
         get {
             return base[I]
         } set {
@@ -46,23 +47,23 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         return base.name
     }
     
-    private var dDegree: IntList {
+    internal var dDegree: IntList {
         return d.mDegree
     }
     
-    public func shifted(_ I: IntList) -> MChainComplex<Dim, A, R> {
-        return MChainComplex(base: base.shifted(I), differential: d.shifted(I))
+    public func shifted(_ I: IntList) -> ChainComplexN<n, A, R> {
+        return ChainComplexN(base: base.shifted(I), differential: d.shifted(I))
     }
     
-    public var freePart: MChainComplex<Dim, A, R> {
+    public var freePart: ChainComplexN<n, A, R> {
         return _freePart.useCacheOrSet(
-            MChainComplex<Dim, A, R>(base: base.freePart, differential: d)
+            ChainComplexN<n, A, R>(base: base.freePart, differential: d)
         )
     }
     
-    public var torsionPart: MChainComplex<Dim, A, R> {
+    public var torsionPart: ChainComplexN<n, A, R> {
         return _torPart.useCacheOrSet(
-            MChainComplex(base: base.torsionPart, differential: d)
+            ChainComplexN(base: base.torsionPart, differential: d)
         )
     }
     
@@ -76,141 +77,12 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
         return A
     }
     
-    internal func kernel(_ I: IntList) -> Matrix<R>? {
-        guard let from = base[I], from.isFree,
-            let to = base[I + dDegree], to.isFree,
-            let A = dMatrix(I) else {
-                return nil // indeterminable.
-        }
-        
-        let E = A.elimination(form: .Diagonal)
-        return E.kernelMatrix
-    }
-    
-    internal func kernelTransition(_ I: IntList) -> Matrix<R>? {
-        guard let from = base[I], from.isFree,
-            let to = base[I + dDegree], to.isFree,
-            let A = dMatrix(I) else {
-                return nil // indeterminable.
-        }
-        
-        let E = A.elimination(form: .Diagonal)
-        return E.kernelTransitionMatrix
-    }
-    
-    internal func image(_ I: IntList) -> Matrix<R>? {
-        guard let from = base[I], from.isFree,
-            let to = base[I + dDegree], to.isFree,
-            let A = dMatrix(I) else {
-                return nil // indeterminable.
-        }
-        
-        let E = A.elimination(form: .Diagonal)
-        return E.imageMatrix
-    }
-    
-    public func homology(_ I: IntList) -> SimpleModuleStructure<A, R>? {
-        // case: indeterminable
-        if self[I] == nil {
-            return nil
-        }
-        
-        // case: obviously isom
-        if  let Ain = dMatrix(I - dDegree), Ain.isZero,
-            let Aout = dMatrix(I), Aout.isZero {
-            return self[I]
-        }
-        
-        // case: obviously zero
-        if let Z = kernel(I), Z.isZero {
-            return .zeroModule
-        }
-        
-        // case: free
-        if  let basis = self[I]?.generators,
-            let Z = kernel(I),
-            let T = kernelTransition(I),
-            let B = image(I - dDegree) {
-            return SimpleModuleStructure(
-                basis: basis,
-                generatingMatrix: Z,
-                transitionMatrix: T,
-                relationMatrix: T * B
-            )
-        }
-        
-        if dSplits(I) && dSplits(I - dDegree) {
-            // case: splits as 𝐙, 𝐙₂ summands
-            if R.self == 𝐙.self && self[I]!.torsionCoeffs.forAll({ $0 as! 𝐙 == 2 }) {
-                let free = (freePart.homology(I)! as! SimpleModuleStructure<A, 𝐙>)
-                let tor = (self as! MChainComplex<Dim, A, 𝐙>).order2torsionPart.homology(I)!
-                return .some( (free ⊕ tor) as! SimpleModuleStructure<A, R> )
-            } else {
-                // TODO
-                print(I, ": split")
-                describeMap(I)
-                return nil
-            }
-        }
-        
-        return nil
-    }
-    
-    internal func dSplits(_ I: IntList) -> Bool {
-        guard let from = self[I],
-            let to = self[I + dDegree],
-            let A = dMatrix(I) else {
-                return false
-        }
-        
-        // MEMO summands are assumed to be ordered as:
-        // (R/d_0 ⊕ ... ⊕ R/d_k) ⊕ R^r
-        
-        func t(_ s: SimpleModuleStructure<A, R>) -> [(R, Int)] {
-            return s.summands.reduce([]) { (res, s) in
-                if let l = res.last, l.0 == s.divisor {
-                    return res[0 ..< res.count - 1] + [(l.0, l.1 + 1)]
-                } else {
-                    return res + [(s.divisor, 1)]
-                }
-            }
-        }
-        
-        let t0 = t(from)
-        let t1 = t(to)
-        
-        let blocks = A.blocks(rowSizes: t1.map{ $0.1 }, colSizes: t0.map{ $0.1 })
-        return blocks.enumerated().forAll { (i, Bs) in
-            Bs.enumerated().forAll { (j, B) in
-                return (t0[j].0 == t1[i].0) || B.isZero
-            }
-        }
-    }
-    
-    public func homology(name: String? = nil) -> ModuleGrid<Dim, A, R> {
-        let list = base.mDegrees.map{ I in (I, homology(I)) }
-        let exList = (base.defaultObject == .zeroModule)
-            ? list.exclude { (_, s) in s?.isTrivial ?? false }
-            : list
-            
-        return ModuleGrid(
-            name: name ?? "H(\(base.name))",
-            default: base.defaultObject,
-            list: exList
-        )
-    }
-    
-    public var isExact: Bool {
-        return homology().isTrivial
-    }
-    
     // MEMO works only when each generator is a single basis-element.
     
-    public func dual(name: String? = nil) -> MChainComplex<Dim, Dual<A>, R> {
-        typealias D = MChainComplex<Dim, Dual<A>, R>
+    public func dual(name: String? = nil) -> ChainComplexN<n, Dual<A>, R> {
+        typealias D = ChainComplexN<n, Dual<A>, R>
         
         let dName = name ?? "\(base.name)^*"
-        let dDef = (base.defaultObject == .zeroModule) ? D.Base.Object.zeroModule : nil
         let dList: [(IntList, [Dual<A>]?)] = base.mDegrees.map { I -> (IntList, [Dual<A>]?) in
             guard let o = self[I] else {
                 return (I, nil)
@@ -220,8 +92,8 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
             }
             return (I, o.generators.map{ $0.basis.first!.dual })
         }
-        
-        let dBase = D.Base(name: dName, default: dDef, list: dList)
+        let dDef = (base.defaultObject == .zeroModule) ? D.Object.zeroModule : nil
+        let dBase = D.Base(name: dName, list: dList, default: dDef)
         let dDiff = d.dual(from: self, to: self)
         
         return D(base: dBase, differential: dDiff)
@@ -271,8 +143,8 @@ public struct MChainComplex<Dim: _Int, A: BasisElementType, R: EuclideanRing>: C
     }
 }
 
-public extension MChainComplex where Dim == _1 {
-    public subscript(i: Int) -> Base.Object? {
+public extension ChainComplexN where n == _1 {
+    public subscript(i: Int) -> Object? {
         get {
             return base[i]
         } set {
@@ -292,10 +164,6 @@ public extension MChainComplex where Dim == _1 {
         return shifted(IntList(i))
     }
     
-    public func homology(_ i: Int) -> SimpleModuleStructure<A, R>? {
-        return homology(IntList(i))
-    }
-    
     public func describe(_ i: Int) {
         describe(IntList(i))
     }
@@ -305,8 +173,8 @@ public extension MChainComplex where Dim == _1 {
     }
 }
 
-public extension MChainComplex where Dim == _2 {
-    public subscript(i: Int, j: Int) -> Base.Object? {
+public extension ChainComplexN where n == _2 {
+    public subscript(i: Int, j: Int) -> Object? {
         get {
             return base[i, j]
         } set {
@@ -316,10 +184,6 @@ public extension MChainComplex where Dim == _2 {
     
     public func shifted(_ i: Int, _ j: Int) -> ChainComplex2<A, R> {
         return shifted(IntList(i, j))
-    }
-    
-    public func homology(_ i: Int, _ j: Int) -> SimpleModuleStructure<A, R>? {
-        return homology(IntList(i, j))
     }
     
     public func describe(_ i: Int, _ j: Int) {
@@ -335,8 +199,8 @@ public extension MChainComplex where Dim == _2 {
     }
 }
 
-public extension MChainComplex where R == 𝐙 {
-    public var order2torsionPart: MChainComplex<Dim, A, 𝐙₂> {
-        return MChainComplex<Dim, A, 𝐙₂>(base: base.order2torsionPart, differential: d.tensor2)
+public extension ChainComplexN where R == 𝐙 {
+    public var order2torsionPart: ChainComplexN<n, A, 𝐙₂> {
+        return ChainComplexN<n, A, 𝐙₂>(base: base.order2torsionPart, differential: d.tensor2)
     }
 }

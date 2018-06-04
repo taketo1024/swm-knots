@@ -67,6 +67,10 @@ public extension Sequence where Element: Hashable {
         return self.filter{ !set.contains($0) }
     }
     
+    public func isDisjoint<S: Sequence>(with other: S) -> Bool where S.Element == Element {
+        return Set(self).isDisjoint(with: other)
+    }
+    
     public func countMultiplicities() -> [Element : Int] {
         return self.group{ $0 }.mapValues{ $0.count }
     }

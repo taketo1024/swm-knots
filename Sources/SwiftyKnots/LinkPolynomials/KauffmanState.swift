@@ -61,16 +61,6 @@ public struct KauffmanState: Equatable, Comparable, Hashable, CustomStringConver
         return count1
     }
     
-    public var next: [(sign: Int, state: KauffmanState)] {
-        return bits
-            .filter{ $0.value == .O }
-            .map { (i, _) -> (Int, KauffmanState) in
-                let sgn = (-1).pow( bits.count{ (j, a) in j < i && a == .I } )
-                let next = bits.replaced(at: i, with: .I)
-                return (sgn, KauffmanState(next))
-        }
-    }
-    
     public static func ==(a: KauffmanState, b: KauffmanState) -> Bool {
         return a.bits == b.bits
     }

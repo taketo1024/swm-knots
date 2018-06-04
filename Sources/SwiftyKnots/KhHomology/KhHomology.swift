@@ -22,7 +22,7 @@ public extension Link {
             return basis.group(by: { $0.degree }).map{ (j, basis) in (i, j, basis) }
         }
         
-        let base = ModuleGrid2<KhTensorElement, R>(name: name, default: .zeroModule, list: list)
+        let base = ModuleGrid2<KhTensorElement, R>(name: name, list: list, default: .zeroModule)
         return normalized ? base.shifted(-n⁻, n⁺ - 2 * n⁻) : base
     }
     
@@ -58,7 +58,7 @@ public extension Link {
     }
 }
 
-public extension ObjectGrid where Dim == _2, Object: SimpleModuleStructureType, Object.A == KhTensorElement {
+public extension GridN where n == _2, Object: _ModuleObject, Object.A == KhTensorElement {
     public var bandWidth: Int {
         return bidegrees.map{ (i, j) in j - 2 * i }.unique().count
     }
@@ -79,7 +79,7 @@ public extension ObjectGrid where Dim == _2, Object: SimpleModuleStructureType, 
         let q = LaurentPolynomial<R, JonesPolynomial_q>.indeterminate
         return bidegrees.sum { (i, j) -> LaurentPolynomial<R, JonesPolynomial_q> in
             let s = self[i, j]!
-            let a = R(from: (-1).pow(i) * s.rank )
+            let a = R(from: (-1).pow(i) * s.entity.rank )
             return a * q.pow(j)
         }
     }

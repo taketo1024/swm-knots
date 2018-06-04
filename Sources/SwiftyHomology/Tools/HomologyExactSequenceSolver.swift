@@ -44,7 +44,7 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
         sequence[(topDegree - bottomDegree + 1) * 3] = .zeroModule
     }
     
-    public convenience init(_ S: ChainComplexSES<A, B, C, R>) {
+    public convenience init(_ S: ChainShortExactSequence<A, B, C, R>) {
         self.init(S.C0, S.f0, S.C1, S.f1, S.C2, S.d)
     }
     
@@ -108,8 +108,8 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
         return sequence.isIsomorphic(seqIndex(n, i))
     }
 
-    public func column(_ i: Int) -> ModuleSequence<AbstractBasisElement, R> {
-        return ModuleSequence(list: degrees.map{ n in (n, self[n, i]) })
+    public func column(_ i: Int) -> ModuleGrid1<AbstractBasisElement, R> {
+        return ModuleGrid1(list: degrees.map{ n in (n, self[n, i]) })
     }
     
     public func fill(_ n: Int, _ i: Int) {
@@ -147,7 +147,7 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
         }
     }
     
-    private func makeMatrix<X, Y>(_ s0: SimpleModuleStructure<X, R>?, _ f: FreeModuleHom<X, Y, R>, _ s1: SimpleModuleStructure<Y, R>?) -> Matrix<R>? {
+    private func makeMatrix<X, Y>(_ s0: ChainComplex<X, R>.Object?, _ f: FreeModuleHom<X, Y, R>, _ s1: ChainComplex<Y, R>.Object?) -> Matrix<R>? {
         guard let s0 = s0, let s1 = s1 else {
             return nil
         }

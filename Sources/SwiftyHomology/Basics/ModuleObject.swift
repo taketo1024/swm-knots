@@ -1,12 +1,12 @@
 //
-//  ModuleDecomposition.swift
-//  SwiftyMath
+//  ModuleObject.swift
+//  Sample
 //
-//  Created by Taketo Sano on 2017/11/06.
-//  Copyright © 2017年 Taketo Sano. All rights reserved.
+//  Created by Taketo Sano on 2018/06/02.
 //
 
 import Foundation
+import SwiftyMath
 
 // A decomposed form of a freely & finitely presented module,
 // i.e. a module with finite generators and a finite & free presentation.
@@ -16,7 +16,7 @@ import Foundation
 // See: https://en.wikipedia.org/wiki/Free_presentation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
-public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: ModuleStructure {
+public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, CustomStringConvertible {
     public let summands: [Summand]
     
     // MEMO values used for factorization where R: EuclideanRing
@@ -111,11 +111,11 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
         return summands[i]
     }
     
-    public static var zeroModule: SimpleModuleStructure<A, R> {
-        return SimpleModuleStructure([], [], Matrix.zero(rows: 0, cols: 0))
+    public static var zeroModule: ModuleObject<A, R> {
+        return ModuleObject([], [], Matrix.zero(rows: 0, cols: 0))
     }
     
-    public var isTrivial: Bool {
+    public var isZero: Bool {
         return summands.isEmpty
     }
     
@@ -139,24 +139,41 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
         return summands[i].generator
     }
     
-    public var freePart: SimpleModuleStructure<A, R> {
+    public var freePart: ModuleObject<A, R> {
         let indices = (0 ..< summands.count).filter{ i in self[i].isFree }
         return subSummands(indices: indices)
     }
     
-    public var torsionPart: SimpleModuleStructure<A, R> {
+    public var torsionPart: ModuleObject<A, R> {
         let indices = (0 ..< summands.count).filter{ i in !self[i].isFree }
         return subSummands(indices: indices)
     }
     
-    public func subSummands(_ indices: Int ...) -> SimpleModuleStructure<A, R> {
+    public func subSummands(_ indices: Int ...) -> ModuleObject<A, R> {
         return subSummands(indices: indices)
     }
     
-    public func subSummands(indices: [Int]) -> SimpleModuleStructure<A, R> {
+    public func subSummands(indices: [Int]) -> ModuleObject<A, R> {
         let sub = indices.map{ summands[$0] }
-        let T = transform.submatrix({ i in indices.contains(i)}, { _ in true })
-        return SimpleModuleStructure(sub, basis, T)
+        let T = transform.submatrix(rowsMatching: { i in indices.contains(i)}, colsMatching: { _ in true })
+        return ModuleObject(sub, basis, T)
+    }
+    
+    public static func ⊕(M1: ModuleObject<A, R>, M2: ModuleObject<A, R>) -> ModuleObject<A, R> {
+        if M1.basis == M2.basis {
+            let basis = M1.basis
+            let summands = M1.summands + M2.summands
+            let T = M1.transform.concatRows(with: M2.transform)
+            return ModuleObject(summands, basis, T)
+
+        } else if M1.basis.isDisjoint(with: M2.basis) {
+            let basis = M1.basis + M2.basis
+            let summands = M1.summands + M2.summands
+            let T = M1.transform ⊕ M2.transform
+            return ModuleObject(summands, basis, T)
+        }
+        
+        fatalError()
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
@@ -167,6 +184,13 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
         }
     }
     
+    public func contains(_ z: FreeModule<A, R>) -> Bool {
+        let w = factorize(z).enumerated().sum { (i, r) in
+            r * generator(i)
+        }
+        return z == w
+    }
+    
     public func elementIsZero(_ z: FreeModule<A, R>) -> Bool {
         return factorize(z).forAll{ $0 == .zero }
     }
@@ -175,26 +199,12 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
         return elementIsZero(z1 - z2)
     }
     
-    public static func ==(a: SimpleModuleStructure<A, R>, b: SimpleModuleStructure<A, R>) -> Bool {
+    public static func ==(a: ModuleObject<A, R>, b: ModuleObject<A, R>) -> Bool {
         return a.summands == b.summands
     }
     
-    public static func ⊕<Q: QuotientRingType>(l: SimpleModuleStructure<A, R>, r: SimpleModuleStructure<A, Q>) -> SimpleModuleStructure<A, R> where Q.Base == R, Q.Sub: EuclideanIdeal {
-        assert(r.isFree)
-        let summands = l.summands + r.summands.map { s -> SimpleModuleStructure<A, R>.Summand in
-            SimpleModuleStructure<A, R>.Summand(s.generator.mapValues{ $0.representative }, Q.Sub.mod )
-        }
-        
-        // TODO
-        let basis = [A]()
-        let T = Matrix<R>.zero(rows: 0, cols: 0)
-        // --TODO
-        
-        return SimpleModuleStructure<A, R>(summands, basis, T)
-    }
-    
     public func describe() {
-        if !isTrivial {
+        if !isZero {
             print("\(self) {")
             for (i, x) in generators.enumerated() {
                 print("\t(\(i)) ", x)
@@ -253,7 +263,76 @@ public struct SimpleModuleStructure<A: BasisElementType, R: EuclideanRing>: Modu
     }
 }
 
-extension SimpleModuleStructure: Codable where A: Codable, R: Codable {
+public extension ModuleObject where R == 𝐙 {
+    public var structure: [Int : Int] {
+        return summands.group{ $0.divisor }.mapValues{ $0.count }
+    }
+    
+    public var structureCode: String {
+        return structure.sorted{ $0.key }.map { (d, r) in
+            "\(r)\(d == 0 ? "" : Format.sub(d))"
+            }.joined()
+    }
+    
+    public func torsionPart<t: _Int>(order: t.Type) -> ModuleObject<A, IntegerQuotientRing<t>> {
+        typealias Q = IntegerQuotientRing<t>
+        typealias Summand = ModuleObject<A, Q>.Summand
+        
+        let n = t.intValue
+        let indices = (0 ..< self.summands.count).filter{ i in self[i].divisor == n }
+        let sub = subSummands(indices: indices)
+        
+        let summands = sub.summands.map { s -> Summand in
+            Summand(s.generator.mapValues{ Q($0) }, .zero)
+        }
+        let transform = sub.transform.mapValues { Q($0) }
+        
+        return ModuleObject<A, Q>(summands, basis, transform)
+    }
+    
+    public var order2torsionPart: ModuleObject<A, 𝐙₂> {
+        return torsionPart(order: _2.self)
+    }
+}
+
+public extension ModuleObject where R == 𝐙₂ {
+    public var asIntegerQuotients: ModuleObject<A, 𝐙> {
+        typealias Summand = ModuleObject<A, 𝐙>.Summand
+        let summands = self.summands.map { s -> Summand in
+            Summand(s.generator.mapValues{ $0.representative }, 2)
+        }
+        let T = self.transform.mapValues{ a in a.representative }
+        return ModuleObject<A, 𝐙>(summands, basis, T)
+    }
+}
+
+public extension ModuleObject where A == AbstractBasisElement, R: EuclideanRing {
+    public init(rank r: Int, torsions: [R] = []) {
+        let t = torsions.count
+        let basis = (0 ..< r + t).map{ i in A(i) }
+        let summands = (0 ..< r).map{ i in Summand(basis[i], .zero) }
+            + torsions.enumerated().map{ (i, d) in Summand(basis[i + r], d) }
+        let I = Matrix<R>.identity(size: r + t)
+        self.init(summands, basis, I)
+    }
+}
+
+public extension ModuleObject where R: EuclideanRing {
+    public func asAbstract() -> ModuleObject<AbstractBasisElement, R> {
+        typealias Summand = ModuleObject<AbstractBasisElement, R>.Summand
+        
+        let basis = self.basis.enumerated().map{ (i, a) in
+            AbstractBasisElement(i, label: a.description)
+        }
+        let summands = self.summands.map { s in
+            Summand(s.generator.mapKeys { a in basis[self.basis.index(of: a)!] }, s.divisor)
+        }
+        
+        return ModuleObject<AbstractBasisElement, R>(summands, basis, transform)
+    }
+}
+
+extension ModuleObject: Codable where A: Codable, R: Codable {
     enum CodingKeys: String, CodingKey {
         case summands, basis, transform
     }
@@ -274,7 +353,7 @@ extension SimpleModuleStructure: Codable where A: Codable, R: Codable {
     }
 }
 
-extension SimpleModuleStructure.Summand: Codable where A: Codable, R: Codable {
+extension ModuleObject.Summand: Codable where A: Codable, R: Codable {
     enum CodingKeys: String, CodingKey {
         case generator, divisor
     }

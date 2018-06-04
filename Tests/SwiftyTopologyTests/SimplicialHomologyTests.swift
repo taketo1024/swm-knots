@@ -39,7 +39,7 @@ class SimplicialHomologyTests: XCTestCase {
         }
         
         XCTAssert(h0.isFree && h0.rank == 1)
-        XCTAssert(h1.isTrivial)
+        XCTAssert(h1.isZero)
         XCTAssert(h2.isFree && h2.rank == 1)
     }
     
@@ -115,7 +115,7 @@ class SimplicialHomologyTests: XCTestCase {
         }
         
         XCTAssert(h0.isFree && h0.rank == 1)
-        XCTAssert(h1.isTrivial)
+        XCTAssert(h1.isZero)
         XCTAssert(h2.isFree && h2.rank == 1)
     }
     
@@ -192,7 +192,7 @@ class SimplicialHomologyTests: XCTestCase {
         }
         
         XCTAssert(h0.isFree && h0.rank == 1)
-        XCTAssert(h1.isTrivial)
+        XCTAssert(h1.isZero)
         XCTAssert(h2.isFree && h2.rank == 1)
     }
     
