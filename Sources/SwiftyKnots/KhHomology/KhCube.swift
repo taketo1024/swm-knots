@@ -13,7 +13,7 @@ public struct KhCube {
     public struct Vertex {
         public let state: KauffmanState
         public let components: [Link.Component]
-        public let basis: [KhTensorElement]
+        public let basis: [KhBasisElement]
     }
     
     public let vertices: [KauffmanState : Vertex]
@@ -23,7 +23,7 @@ public struct KhCube {
         self.vertices = Dictionary(keys: L.allStates) { s -> Vertex in
             let sL = L.spliced(by: s)
             let comps = sL.components
-            let basis = KhTensorElement.generateBasis(state: s, power: comps.count)
+            let basis = KhBasisElement.generateBasis(state: s, power: comps.count)
             return Vertex(state: s, components: comps, basis: basis)
         }
         
@@ -38,12 +38,12 @@ public struct KhCube {
         return vertices.values.filter{ $0.state.degree == degree }
     }
     
-    public func basis(degree: Int) -> [KhTensorElement] {
+    public func basis(degree: Int) -> [KhBasisElement] {
         return vertices(degree: degree).flatMap { v in v.basis }
     }
     
-    public func reducedBasis(degree: Int) -> [KhTensorElement] {
-        return vertices(degree: degree).flatMap { v -> [KhTensorElement] in
+    public func reducedBasis(degree: Int) -> [KhBasisElement] {
+        return vertices(degree: degree).flatMap { v -> [KhBasisElement] in
             if let i = v.components.index(where: { $0.edges.contains{ $0.id == minEdgeId } }) {
                 return v.basis.filter{ t in t.factors[i] == .X }
             } else {
@@ -52,7 +52,7 @@ public struct KhCube {
         }
     }
     
-    public func targets(_ v: Vertex) -> [(sign: Int, vertex: Vertex)] {
+    public func targetVertices(from v: Vertex) -> [(sign: Int, vertex: Vertex)] {
         let s = v.state
         return s.bits
             .filter{ $0.value == .O }
@@ -63,44 +63,126 @@ public struct KhCube {
         }
     }
     
-    public func edgeMap<R>(_ type: R.Type, _ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>) -> FreeModuleHom<KhTensorElement, KhTensorElement, R> {
+    internal typealias E = KhBasisElement.E
+    internal typealias Product<R: Ring> = (E, E) -> [(E, R)]
+    internal typealias Coproduct<R: Ring> = (E) -> [(E, E, R)]
+
+    internal func mergeMap<R>(from v0: Vertex, to v1: Vertex, _ μ: @escaping Product<R>) -> FreeModuleHom<KhBasisElement, KhBasisElement, R> {
+        let (c1, c2) = (v0.components, v1.components)
+        let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
         
-        return FreeModuleHom { (x: KhTensorElement) -> FreeModule<KhTensorElement, R> in
-            let v0 = self[x.state]
-            return self.targets(v0).sum { (sgn, v1) in
-                let (c1, c2) = (v0.components, v1.components)
-                let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
-                
-                switch (d1.count, d2.count) {
-                case (2, 1): // apply μ
-                    let (i1, i2, j) = (c1.index(of: d1[0])!, c1.index(of: d1[1])!, c2.index(of: d2[0])!)
-                    return R(from: sgn) * x.product(μ, (i1, i2), j, v1.state)
-                    
-                case (1, 2): // apply Δ
-                    let (i, j1, j2) = (c1.index(of: d1[0])!, c2.index(of: d2[0])!, c2.index(of: d2[1])!)
-                    return R(from: sgn) * x.coproduct(Δ, i, (j1, j2), v1.state)
-                    
-                default:
-                    fatalError()
-                }
+        assert((d1.count, d2.count) == (2, 1))
+        
+        let (i1, i2) = (c1.index(of: d1[0])!, c1.index(of: d1[1])!)
+        let j = c2.index(of: d2[0])!
+        
+        return FreeModuleHom { (x: KhBasisElement) in
+            let (e1, e2) = (x.factors[i1], x.factors[i2])
+            
+            return μ(e1, e2).sum { (e, a) in
+                var factors = x.factors
+                factors.remove(at: i2)
+                factors.remove(at: i1)
+                factors.insert(e, at: j)
+                let t = KhBasisElement(state: v1.state, factors: factors)
+                return FreeModule(t, a)
             }
         }
     }
     
-    public func d<R>(_ type: R.Type, _ bidegree: (Int, Int), _ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>) -> ChainMap2<KhTensorElement, KhTensorElement, R> {
-        return ChainMap2(bidegree: bidegree) { (_, _) in self.edgeMap(type, μ, Δ) }
+    internal func splitMap<R>(from v0: Vertex, to v1: Vertex, _ Δ: @escaping Coproduct<R>) -> FreeModuleHom<KhBasisElement, KhBasisElement, R> {
+        let (c1, c2) = (v0.components, v1.components)
+        let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
+        
+        assert((d1.count, d2.count) == (1, 2))
+        
+        let i = c1.index(of: d1[0])!
+        let (j1, j2) = (c2.index(of: d2[0])!, c2.index(of: d2[1])!)
+
+        return FreeModuleHom { (x: KhBasisElement) in
+            let e = x.factors[i]
+            return Δ(e).sum { (e1, e2, a)  in
+                var factors = x.factors
+                factors.remove(at: i)
+                factors.insert(e1, at: j1)
+                factors.insert(e2, at: j2)
+                let t = KhBasisElement(state: v1.state, factors: factors)
+                return FreeModule(t, a)
+            }
+        }
+    }
+    
+    internal func edgeMap<R>(from v0: Vertex, _ μ: @escaping Product<R>, _ Δ: @escaping Coproduct<R>) -> FreeModuleHom<KhBasisElement, KhBasisElement, R> {
+        
+        return targetVertices(from: v0).sum { (sgn, v1) in
+            let ε = R(from: sgn)
+            switch v1.components.count - v0.components.count {
+            case -1: return ε * mergeMap(from: v0, to: v1, μ)
+            case  1: return ε * splitMap(from: v0, to: v1, Δ)
+            default: fatalError()
+            }
+        }
+    }
+    
+    internal func d<R>(_ μ: @escaping Product<R>, _ Δ: @escaping Coproduct<R>) -> FreeModuleHom<KhBasisElement, KhBasisElement, R> {
+        return FreeModuleHom{ (x: KhBasisElement) in
+            self.edgeMap(from: self[x.state], μ, Δ).applied(to: x)
+        }
+    }
+    
+    public func d<R>(_ type: R.Type) -> FreeModuleHom<KhBasisElement, KhBasisElement, R> {
+        let μ: Product<R> = { (e1, e2) in
+            switch (e1, e2) {
+            case (.I, .I): return [(.I, .identity)]
+            case (.I, .X), (.X, .I): return [(.X, .identity)]
+            case (.X, .X): return []
+            }
+        }
+        
+        let Δ: Coproduct<R> = { e in
+            switch e {
+            case .I: return [(.I, .X, .identity), (.X, .I, .identity)]
+            case .X: return [(.X, .X, .identity)]
+            }
+        }
+        
+        return d(μ, Δ)
+    }
+    
+    public func d_Lee<R>(_ type: R.Type) -> FreeModuleHom<KhBasisElement, KhBasisElement, R> {
+        let μ: Product<R> = { (e1, e2) in
+            switch (e1, e2) {
+            case (.X, .X): return [(.I, .identity)]
+            default: return []
+            }
+        }
+        
+        let Δ: Coproduct<R> = { e in
+            switch e {
+            case .X: return [(.I, .I, .identity)]
+            default: return []
+            }
+        }
+        
+        return d(μ, Δ)
     }
 
-    public func d<R>(_ type: R.Type) -> ChainMap2<KhTensorElement, KhTensorElement, R> {
-        return d(type, (1, 0), KhBasisElement.μ, KhBasisElement.Δ)
-    }
-    
-    public func d_Lee<R>(_ type: R.Type) -> ChainMap2<KhTensorElement, KhTensorElement, R> {
-        return d(type, (1, 4), KhBasisElement.μ_Lee, KhBasisElement.Δ_Lee)
-    }
-    
-    public func d_BN<R>(_ type: R.Type) -> ChainMap2<KhTensorElement, KhTensorElement, R> {
-        return d(type, (1, 2), KhBasisElement.μ_BN, KhBasisElement.Δ_BN)
+    public func d_BN<R>(_ type: R.Type) -> FreeModuleHom<KhBasisElement, KhBasisElement, R> {
+        let μ: Product<R> = { (e1, e2) in
+            switch (e1, e2) {
+            case (.X, .X): return [(.X, .identity)]
+            default: return []
+            }
+        }
+        
+        let Δ: Coproduct<R> = { e in
+            switch e {
+            case .I: return [(.I, .I, -.identity)]
+            default: return []
+            }
+        }
+        
+        return d(μ, Δ)
     }
 }
 

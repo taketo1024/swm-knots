@@ -1,80 +1,79 @@
 //
 //  KhBasisElement.swift
-//  Sample
+//  SwiftyKnots
 //
-//  Created by Taketo Sano on 2018/04/19.
+//  Created by Taketo Sano on 2018/04/04.
 //
 
 import Foundation
 import SwiftyMath
 
-public enum KhBasisElement: Int, BasisElementType, Comparable, Codable {
-    case I =  1
-    case X = -1
+public struct KhBasisElement: BasisElementType, Comparable, Codable {
+    public let state: KauffmanState
+    internal let factors: [E]
     
-    public typealias Product<R: Ring> = (KhBasisElement, KhBasisElement) -> [(KhBasisElement, R)]
-    public typealias Coproduct<R: Ring> = (KhBasisElement) -> [(KhBasisElement, KhBasisElement, R)]
-    
-    public var degree: Int {
-        switch self {
-        case .I: return +1
-        case .X: return -1
-        }
+    public static func generateBasis(state: KauffmanState, power n: Int) -> [KhBasisElement] {
+        return (0 ..< n).reduce([[]]) { (res, _) -> [[E]] in
+            res.flatMap{ factors -> [[E]] in
+                [factors + [.I], factors + [.X]]
+            }
+            }
+            .map{ factors in KhBasisElement.init(state: state, factors: factors) }
+            .sorted()
     }
     
-    public static func <(e1: KhBasisElement, e2: KhBasisElement) -> Bool {
-        return e1.degree < e2.degree
+    internal init(state: KauffmanState, factors: [E]) {
+        self.state = state
+        self.factors = factors
+    }
+    
+    public var degree: Int {
+        return factors.sum{ e in e.degree } + state.degree
+    }
+    
+    public func stateModified(_ i: Int, _ bit: KauffmanState.Bit?) -> KhBasisElement {
+        var s = state
+        if let bit = bit {
+            s[i] = bit
+        } else {
+            s.unset(i)
+        }
+        return KhBasisElement(state: s, factors: factors)
+    }
+    
+    public static func ==(b1: KhBasisElement, b2: KhBasisElement) -> Bool {
+        return b1.state == b2.state && b1.factors == b2.factors
+    }
+    
+    public static func <(b1: KhBasisElement, b2: KhBasisElement) -> Bool {
+        return (b1.state < b2.state)
+            || (b1.state == b2.state && b1.factors.lexicographicallyPrecedes(b2.factors) )
+    }
+    
+    public var hashValue: Int {
+        return factors.reduce(0) { (res, e) in
+            res &<< 2 | (e == .I ? 2 : 1)
+        }
     }
     
     public var description: String {
-        return (self == .I) ? "I" : "X"
-    }
-}
-
-public extension KhBasisElement {
-    // Khovanov's map
-    public static func μ<R: Ring>(_ e1: KhBasisElement, _ e2: KhBasisElement) -> [(KhBasisElement, R)] {
-        switch (e1, e2) {
-        case (.I, .I): return [(.I, .identity)]
-        case (.I, .X), (.X, .I): return [(.X, .identity)]
-        case (.X, .X): return []
-        }
+        return factors.map{ "\($0)" }.joined(separator: "⊗") + Format.sub(state.description)
     }
     
-    public static func Δ<R: Ring>(_ e: KhBasisElement) -> [(KhBasisElement, KhBasisElement, R)] {
-        switch e {
-        case .I: return [(.I, .X, .identity), (.X, .I, .identity)]
-        case .X: return [(.X, .X, .identity)]
+    public enum E: Int, Comparable, Codable {
+        case I =  1
+        case X = -1
+        
+        public var degree: Int {
+            return rawValue
         }
-    }
-    
-    // Lee's map
-    public static func μ_Lee<R: Ring>(_ e1: KhBasisElement, _ e2: KhBasisElement) -> [(KhBasisElement, R)] {
-        switch (e1, e2) {
-        case (.X, .X): return [(.I, .identity)]
-        default: return []
+        
+        public static func <(e1: E, e2: E) -> Bool {
+            return e1.degree < e2.degree
         }
-    }
-    
-    public static func Δ_Lee<R: Ring>(_ e: KhBasisElement) -> [(KhBasisElement, KhBasisElement, R)] {
-        switch e {
-        case .X: return [(.I, .I, .identity)]
-        default: return []
-        }
-    }
-    
-    // Bar-Natan's map
-    public static func μ_BN<R: Ring>(_ e1: KhBasisElement, _ e2: KhBasisElement) -> [(KhBasisElement, R)] {
-        switch (e1, e2) {
-        case (.X, .X): return [(.X, .identity)]
-        default: return []
-        }
-    }
-    
-    public static func Δ_BN<R: Ring>(_ e: KhBasisElement) -> [(KhBasisElement, KhBasisElement, R)] {
-        switch e {
-        case .I: return [(.I, .I, -.identity)]
-        default: return []
+        
+        public var description: String {
+            return (self == .I) ? "I" : "X"
         }
     }
 }

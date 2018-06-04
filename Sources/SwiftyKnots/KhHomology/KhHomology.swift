@@ -10,36 +10,36 @@ import SwiftyMath
 import SwiftyHomology
 
 public extension Link {
-    public func KhChainComplexBase<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhTensorElement, R> {
+    public func KhChainComplexBase<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhBasisElement, R> {
         
         let (n, n⁺, n⁻) = (crossingNumber, crossingNumber⁺, crossingNumber⁻)
         
         let name = "CKh(\(self.name); \(R.symbol))"
         let cube = self.KhCube
         
-        let list = (0 ... n).flatMap { (i) -> [(Int, Int, [KhTensorElement]?)] in
+        let list = (0 ... n).flatMap { (i) -> [(Int, Int, [KhBasisElement]?)] in
             let basis = !reduced ? cube.basis(degree: i) : cube.reducedBasis(degree: i)
             return basis.group(by: { $0.degree }).map{ (j, basis) in (i, j, basis) }
         }
         
-        let base = ModuleGrid2<KhTensorElement, R>(name: name, list: list, default: .zeroModule)
+        let base = ModuleGrid2<KhBasisElement, R>(name: name, list: list, default: .zeroModule)
         return normalized ? base.shifted(-n⁻, n⁺ - 2 * n⁻) : base
     }
     
-    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhTensorElement, R> {
-        typealias C = ChainComplex2<KhTensorElement, R>
+    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhBasisElement, R> {
+        typealias C = ChainComplex2<KhBasisElement, R>
         let base = KhChainComplexBase(type, reduced: reduced, normalized: normalized)
-        let d = KhCube.d(R.self)
+        let d = ChainMap2(bidegree: (1, 0)) { (_, _) in self.KhCube.d(R.self) }
         return C(base: base, differential: d)
     }
     
-    public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhTensorElement, R> {
+    public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhBasisElement, R> {
         let name = "Kh(\(self.name); \(R.symbol))"
         let C = self.KhChainComplex(R.self, reduced: reduced, normalized: normalized)
         return C.homology(name: name)
     }
     
-    public func KhHomology<R: EuclideanRing & Codable>(_ type: R.Type, useCache: Bool) -> ModuleGrid2<KhTensorElement, R> {
+    public func KhHomology<R: EuclideanRing & Codable>(_ type: R.Type, useCache: Bool) -> ModuleGrid2<KhBasisElement, R> {
         if useCache {
             let id = "Kh_\(name)_\(R.symbol)"
             return Storage.useCache(id) { KhHomology(R.self) }
@@ -47,18 +47,17 @@ public extension Link {
             return KhHomology(R.self)
         }
     }
-
     
-    public func KhLeeHomology<R: EuclideanRing>(_ type: R.Type) -> ModuleGrid2<KhTensorElement, R> {
-        typealias C = ChainComplex2<KhTensorElement, R>
+    public func KhLeeHomology<R: EuclideanRing>(_ type: R.Type) -> ModuleGrid2<KhBasisElement, R> {
+        typealias C = ChainComplex2<KhBasisElement, R>
         let name = "KhLee(\(self.name); \(R.symbol))"
         let base = KhHomology(type)
-        let d = KhCube.d_Lee(R.self)
+        let d = ChainMap2(bidegree: (1, 4)) { (_, _) in self.KhCube.d_Lee(R.self) }
         return ChainComplex2(base: base, differential: d).homology(name: name)
     }
 }
 
-public extension GridN where n == _2, Object: _ModuleObject, Object.A == KhTensorElement {
+public extension GridN where n == _2, Object: _ModuleObject, Object.A == KhBasisElement {
     public var bandWidth: Int {
         return bidegrees.map{ (i, j) in j - 2 * i }.unique().count
     }
