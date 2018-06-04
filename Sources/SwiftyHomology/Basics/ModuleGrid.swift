@@ -113,6 +113,10 @@ public extension GridN where n == _2, Object: _ModuleObject {
     public func describe(_ i: Int, _ j: Int) {
         describe(IntList(i, j))
     }
+    
+    public func fold(_ i: Int) -> ModuleGrid1<A, R> {
+        return _fold(i)
+    }
 }
 
 public extension GridN where Object: _ModuleObject, Object.R == 𝐙 {
