@@ -25,11 +25,6 @@ public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Eu
         self.f = { I in FreeModuleHom{ a in f(I, a) } }
     }
     
-    public init(mDegree: IntList, _ f: FreeModuleHom<A, B, R>) {
-        self.mDegree = mDegree
-        self.f = { _ in f }
-    }
-    
     public subscript(_ I: IntList) -> FreeModuleHom<A, B, R> {
         return f(I)
     }
@@ -127,16 +122,12 @@ public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Eu
 }
 
 public extension ChainMapN where n == _1 {
-    public init(degree: Int = 0, func f: @escaping (Int) -> FreeModuleHom<A, B, R>) {
+    public init(degree: Int = 0, _ f: @escaping (Int) -> FreeModuleHom<A, B, R>) {
         self.init(mDegree: IntList(degree)) { I in f(I[0]) }
     }
     
-    public init(degree: Int = 0, func f: @escaping (Int, A) -> FreeModule<B, R>) {
+    public init(degree: Int = 0, _ f: @escaping (Int, A) -> FreeModule<B, R>) {
         self.init(mDegree: IntList(degree)) { (I, a) in f(I[0], a) }
-    }
-    
-    public init(degree: Int = 0, _ f: FreeModuleHom<A, B, R>) {
-        self.init(mDegree: IntList(degree), f)
     }
     
     public subscript(_ i: Int) -> FreeModuleHom<A, B, R> {
@@ -153,21 +144,16 @@ public extension ChainMapN where n == _1 {
 }
 
 public extension ChainMapN where n == _2 {
-    public init(bidegree: (Int, Int) = (0, 0), func f: @escaping (Int, Int) -> FreeModuleHom<A, B, R>) {
+    public init(bidegree: (Int, Int) = (0, 0), _ f: @escaping (Int, Int) -> FreeModuleHom<A, B, R>) {
         let (i, j) = bidegree
         self.init(mDegree: IntList(i, j)) { I in f(I[0], I[1]) }
     }
     
-    public init(bidegree: (Int, Int) = (0, 0), func f: @escaping (Int, Int, A) -> FreeModule<B, R>) {
+    public init(bidegree: (Int, Int) = (0, 0), _ f: @escaping (Int, Int, A) -> FreeModule<B, R>) {
         let (i, j) = bidegree
         self.init(mDegree: IntList(i, j)) { (I, a) in f(I[0], I[1], a) }
     }
     
-    public init(bidegree: (Int, Int) = (0, 0), _ f: FreeModuleHom<A, B, R>) {
-        let (i, j) = bidegree
-        self.init(mDegree: IntList(i, j), f)
-    }
-
     public subscript(_ i: Int, _ j: Int) -> FreeModuleHom<A, B, R> {
         return self[IntList(i, j)]
     }

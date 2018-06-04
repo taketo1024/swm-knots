@@ -52,40 +52,55 @@ public struct KhCube {
         }
     }
     
-    public func d<R: Ring>(_ type: R.Type) -> ChainMap2<KhTensorElement, KhTensorElement, R> {
-        return d(type, (1, 0), KhBasisElement.μ, KhBasisElement.Δ)
+    public func targets(_ v: Vertex) -> [(sign: Int, vertex: Vertex)] {
+        let s = v.state
+        return s.bits
+            .filter{ $0.value == .O }
+            .map { (i, _) -> (Int, Vertex) in
+                let sgn = (-1).pow( s.bits.count{ (j, a) in j < i && a == .I } )
+                let next = KauffmanState(s.bits.replaced(at: i, with: .I))
+                return (sgn, self[next])
+        }
     }
     
-    public func d_Lee<R: Ring>(_ type: R.Type) -> ChainMap2<KhTensorElement, KhTensorElement, R> {
-        return d(type, (1, 4), KhBasisElement.μ_Lee, KhBasisElement.Δ_Lee)
-    }
-    
-    public func d_BN<R: Ring>(_ type: R.Type) -> ChainMap2<KhTensorElement, KhTensorElement, R> {
-        return d(type, (1, 2), KhBasisElement.μ_BN, KhBasisElement.Δ_BN)
-    }
-    
-    public func d<R: Ring>(_ type: R.Type, _ bidegree: (Int, Int), _ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>) -> ChainMap2<KhTensorElement, KhTensorElement, R> {
-        let d = FreeModuleHom { (x: KhTensorElement) -> FreeModule<KhTensorElement, R> in
-            let s = x.state
-            return s.next.sum { (sgn, next) in
-                let (c1, c2) = (self[s].components, self[next].components)
+    public func edgeMap<R>(_ type: R.Type, _ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>) -> FreeModuleHom<KhTensorElement, KhTensorElement, R> {
+        
+        return FreeModuleHom { (x: KhTensorElement) -> FreeModule<KhTensorElement, R> in
+            let v0 = self[x.state]
+            return self.targets(v0).sum { (sgn, v1) in
+                let (c1, c2) = (v0.components, v1.components)
                 let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
                 
                 switch (d1.count, d2.count) {
                 case (2, 1): // apply μ
                     let (i1, i2, j) = (c1.index(of: d1[0])!, c1.index(of: d1[1])!, c2.index(of: d2[0])!)
-                    return R(from: sgn) * x.product(μ, (i1, i2), j, next)
+                    return R(from: sgn) * x.product(μ, (i1, i2), j, v1.state)
                     
                 case (1, 2): // apply Δ
                     let (i, j1, j2) = (c1.index(of: d1[0])!, c2.index(of: d2[0])!, c2.index(of: d2[1])!)
-                    return R(from: sgn) * x.coproduct(Δ, i, (j1, j2), next)
+                    return R(from: sgn) * x.coproduct(Δ, i, (j1, j2), v1.state)
                     
                 default:
                     fatalError()
                 }
             }
         }
-        return ChainMap2(bidegree: bidegree, d)
+    }
+    
+    public func d<R>(_ type: R.Type, _ bidegree: (Int, Int), _ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>) -> ChainMap2<KhTensorElement, KhTensorElement, R> {
+        return ChainMap2(bidegree: bidegree) { (_, _) in self.edgeMap(type, μ, Δ) }
+    }
+
+    public func d<R>(_ type: R.Type) -> ChainMap2<KhTensorElement, KhTensorElement, R> {
+        return d(type, (1, 0), KhBasisElement.μ, KhBasisElement.Δ)
+    }
+    
+    public func d_Lee<R>(_ type: R.Type) -> ChainMap2<KhTensorElement, KhTensorElement, R> {
+        return d(type, (1, 4), KhBasisElement.μ_Lee, KhBasisElement.Δ_Lee)
+    }
+    
+    public func d_BN<R>(_ type: R.Type) -> ChainMap2<KhTensorElement, KhTensorElement, R> {
+        return d(type, (1, 2), KhBasisElement.μ_BN, KhBasisElement.Δ_BN)
     }
 }
 
