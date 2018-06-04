@@ -37,6 +37,27 @@ public extension GridN where Object: ModuleObjectType {
         return GridN<n, Object>(name: "\(name)_tor", grid: grid, default: defaultObject)
     }
     
+    internal func _fold<m>(_ i: Int) -> ModuleGridN<m, A, R> {
+        assert(m.intValue == n.intValue - 1)
+        assert(0 <= i && i < gridDim)
+        
+        typealias Object = ModuleObject<A, R>
+        
+        let list = grid.group { (I, _) in I.drop(i) }
+            .map{ (J, list) -> (IntList, Object?) in
+                let sum = list.reduce(.zeroModule) { (res, next) -> Object? in
+                    if let res = res, let next = next.value {
+                        return res ⊕ (next as! Object)
+                    } else {
+                        return nil
+                    }
+                }
+                return (J, sum)
+        }
+        
+        return ModuleGridN<m, A, R>(name: name, list: list, default: defaultObject?.entity)
+    }
+    
     public func describe(_ I: IntList) {
         if let s = self[I] {
             print("\(I) ", terminator: "")

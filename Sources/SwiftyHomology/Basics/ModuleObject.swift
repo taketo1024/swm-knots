@@ -25,6 +25,7 @@ public protocol ModuleObjectType: Equatable {
     
     init(generators: [A])
     static var zeroModule: Self { get }
+    var entity: ModuleObject<A, R> { get }
     var isZero: Bool { get }
     var rank: Int { get }
     var freePart: Self { get }
@@ -125,6 +126,10 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: ModuleObjectT
     
     public subscript(i: Int) -> Summand {
         return summands[i]
+    }
+    
+    public var entity: ModuleObject<A, R> {
+        return self
     }
     
     public static var zeroModule: ModuleObject<A, R> {
