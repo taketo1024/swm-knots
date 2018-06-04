@@ -16,24 +16,7 @@ import SwiftyMath
 // See: https://en.wikipedia.org/wiki/Free_presentation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
-// MEMO waiting for parametrized extension.
-// public extension<A: BasisElementType, R: EuclideanRing> ObjectGrid where Object == ModuleObject<A, R> {
-
-public protocol ModuleObjectType: Equatable {
-    associatedtype A: BasisElementType
-    associatedtype R: EuclideanRing
-    
-    init(generators: [A])
-    static var zeroModule: Self { get }
-    var entity: ModuleObject<A, R> { get }
-    var isZero: Bool { get }
-    var rank: Int { get }
-    var freePart: Self { get }
-    var torsionPart: Self { get }
-    func describe()
-}
-
-public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: ModuleObjectType, CustomStringConvertible {
+public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, CustomStringConvertible {
     public let summands: [Summand]
     
     // MEMO values used for factorization where R: EuclideanRing
@@ -126,10 +109,6 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: ModuleObjectT
     
     public subscript(i: Int) -> Summand {
         return summands[i]
-    }
-    
-    public var entity: ModuleObject<A, R> {
-        return self
     }
     
     public static var zeroModule: ModuleObject<A, R> {
@@ -283,13 +262,6 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: ModuleObjectT
         }
     }
 }
-
-public protocol IntModuleObjectType: ModuleObjectType {
-    var structureCode: String { get }
-    func torsionPart<t: _Int>(order: t.Type) -> ModuleObject<A, IntegerQuotientRing<t>>
-}
-
-extension ModuleObject: IntModuleObjectType where R == 𝐙 {}
 
 public extension ModuleObject where R == 𝐙 {
     public var structure: [Int : Int] {

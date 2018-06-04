@@ -12,7 +12,24 @@ public typealias ModuleGridN<n: _Int, A: BasisElementType, R: EuclideanRing> = G
 public typealias ModuleGrid1<A: BasisElementType, R: EuclideanRing> = ModuleGridN<_1, A, R>
 public typealias ModuleGrid2<A: BasisElementType, R: EuclideanRing> = ModuleGridN<_2, A, R>
 
-public extension GridN where Object: ModuleObjectType {
+// MEMO waiting for parametrized extension.
+// extension<A, R> ObjectGrid where Object == ModuleObject<A, R> { ... }
+
+public protocol _ModuleObject: Equatable {
+    associatedtype A: BasisElementType
+    associatedtype R: EuclideanRing
+    
+    init(generators: [A])
+    var entity: ModuleObject<A, R> { get }
+}
+
+extension ModuleObject: _ModuleObject {
+    public var entity: ModuleObject<A, R> {
+        return self
+    }
+}
+
+public extension GridN where Object: _ModuleObject {
     public typealias A = Object.A
     public typealias R = Object.R
     
@@ -24,17 +41,17 @@ public extension GridN where Object: ModuleObjectType {
     }
     
     public var isZero: Bool {
-        return grid.values.forAll { $0?.isZero ?? false }
+        return grid.values.forAll { $0?.entity.isZero ?? false }
     }
     
-    public var freePart: GridN<n, Object> {
-        let grid: [IntList : Object?] = self.grid.mapValues{ $0?.freePart }
-        return GridN(name: "\(name)_free", grid: grid, default: defaultObject)
+    public var freePart: ModuleGridN<n, A, R> {
+        let grid = self.grid.mapValues{ $0?.entity.freePart }
+        return ModuleGridN(name: "\(name)_free", grid: grid, default: defaultObject?.entity)
     }
     
-    public var torsionPart: GridN<n, Object> {
-        let grid = self.grid.mapValues{ $0?.torsionPart }
-        return GridN<n, Object>(name: "\(name)_tor", grid: grid, default: defaultObject)
+    public var torsionPart: ModuleGridN<n, A, R> {
+        let grid = self.grid.mapValues{ $0?.entity.torsionPart }
+        return ModuleGridN(name: "\(name)_tor", grid: grid, default: defaultObject?.entity)
     }
     
     internal func _fold<m>(_ i: Int) -> ModuleGridN<m, A, R> {
@@ -61,7 +78,7 @@ public extension GridN where Object: ModuleObjectType {
     public func describe(_ I: IntList) {
         if let s = self[I] {
             print("\(I) ", terminator: "")
-            s.describe()
+            s.entity.describe()
         } else {
             print("\(I) ?")
         }
@@ -74,7 +91,7 @@ public extension GridN where Object: ModuleObjectType {
     }
 }
 
-public extension GridN where n == _1, Object: ModuleObjectType {
+public extension GridN where n == _1, Object: _ModuleObject {
     public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == [A]? {
         self.init(name: name, list: list.enumerated().map{ (i, b) in (i, b)}, default: defaultObject)
     }
@@ -83,22 +100,12 @@ public extension GridN where n == _1, Object: ModuleObjectType {
         self.init(name: name, list: list.map{ (i, basis) in (IntList(i), basis) }, default: defaultObject)
     }
     
-    /*
-    public func bettiNumer(_ i: Int) -> Int? {
-        return self[i]?.rank
-    }
-    
-    public var eulerCharacteristic: Int {
-        return degrees.sum{ i in (-1).pow(i) * bettiNumer(i)! }
-    }
-     */
-    
     public func describe(_ i: Int) {
         describe(IntList(i))
     }
 }
 
-public extension GridN where n == _2, Object: ModuleObjectType {
+public extension GridN where n == _2, Object: _ModuleObject {
     public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (Int, Int, [A]?) {
         self.init(name: name, list: list.map{ (i, j, basis) in (IntList(i, j), basis) }, default: defaultObject)
     }
@@ -108,11 +115,11 @@ public extension GridN where n == _2, Object: ModuleObjectType {
     }
 }
 
-public extension GridN where Object: IntModuleObjectType {
+public extension GridN where Object: _ModuleObject, Object.R == 𝐙 {
     public var structureCode: String {
         return mDegrees.map{ I in
             if let s = self[I] {
-                return "\(I): \(s.structureCode)"
+                return "\(I): \(s.entity.structureCode)"
             } else {
                 return "\(I): ?"
             }
@@ -120,10 +127,11 @@ public extension GridN where Object: IntModuleObjectType {
     }
     
     public func torsionPart<t: _Int>(order: t.Type) -> ModuleGridN<n, A, IntegerQuotientRing<t>> {
+        assert(defaultObject == nil || defaultObject!.entity == .zeroModule)
         return ModuleGridN<n, A, IntegerQuotientRing<t>>(
             name: "\(name)_\(t.intValue)",
-            grid: grid.mapValues{ $0?.torsionPart(order: order) },
-            default: (defaultObject == .zeroModule) ? .zeroModule : nil
+            grid: grid.mapValues{ $0?.entity.torsionPart(order: order) },
+            default: (defaultObject != nil) ? .zeroModule : nil
         )
     }
     

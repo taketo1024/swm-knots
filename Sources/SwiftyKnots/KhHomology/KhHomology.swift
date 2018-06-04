@@ -58,7 +58,7 @@ public extension Link {
     }
 }
 
-public extension GridN where n == _2, Object: ModuleObjectType, Object.A == KhTensorElement {
+public extension GridN where n == _2, Object: _ModuleObject, Object.A == KhTensorElement {
     public var bandWidth: Int {
         return bidegrees.map{ (i, j) in j - 2 * i }.unique().count
     }
@@ -79,7 +79,7 @@ public extension GridN where n == _2, Object: ModuleObjectType, Object.A == KhTe
         let q = LaurentPolynomial<R, JonesPolynomial_q>.indeterminate
         return bidegrees.sum { (i, j) -> LaurentPolynomial<R, JonesPolynomial_q> in
             let s = self[i, j]!
-            let a = R(from: (-1).pow(i) * s.rank )
+            let a = R(from: (-1).pow(i) * s.entity.rank )
             return a * q.pow(j)
         }
     }
