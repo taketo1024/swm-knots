@@ -66,6 +66,12 @@ public extension Array {
         return a
     }
     
+    public func removed(at i: Int) -> [Element] {
+        var a = self
+        a.remove(at: i)
+        return a
+    }
+    
     public func repeated(_ count: Int) -> [Element] {
         return (Array<[Element]>(repeating: self, count: count)).flatMap{ $0 }
     }
