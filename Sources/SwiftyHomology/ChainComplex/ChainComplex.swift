@@ -101,7 +101,7 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
     
     public func assertChainComplex(debug: Bool = false) {
         func print(_ msg: @autoclosure () -> String) {
-            Swift.print(msg())
+            if debug { Swift.print(msg()) }
         }
         
         for I0 in base.mDegrees {
@@ -119,9 +119,12 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
             
             for x in s0.generators {
                 let y = d[I0].applied(to: x)
+                
                 let z = d[I1].applied(to: y)
                 print("\t\(x) ->\t\(y) ->\t\(z)")
                 
+                assert(s1.contains(y))
+                assert(s2.contains(z))
                 assert(s2.elementIsZero(z))
             }
         }
