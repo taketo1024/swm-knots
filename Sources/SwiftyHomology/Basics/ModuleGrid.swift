@@ -85,9 +85,11 @@ public extension GridN where Object: _ModuleObject {
     }
     
     public func describeAll() {
+        print(name)
         for I in mDegrees {
             describe(I)
         }
+        print()
     }
 }
 

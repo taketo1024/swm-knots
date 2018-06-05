@@ -59,9 +59,11 @@ public struct GridN<n: _Int, Object: Equatable>: CustomStringConvertible {
     }
     
     public func describeAll() {
+        print(name)
         for I in mDegrees {
             describe(I)
         }
+        print()
     }
     
     internal func description(_ I: IntList) -> String {
@@ -173,7 +175,9 @@ public extension GridN where n == _2 {
             return self[i, j].map{ "\($0)" } ?? "?"
         }
         
+        print(name)
         print(table)
+        print()
     }
 }
 
