@@ -16,11 +16,11 @@ public struct KhCube {
         public let basis: [KhBasisElement]
     }
     
-    public let vertices: [KauffmanState : Vertex]
-    private let minEdgeId: Int
+    internal let state2vertex: [KauffmanState : Vertex]
+    internal let minEdgeId: Int
     
     public init(_ L: Link) {
-        self.vertices = Dictionary(keys: L.allStates) { s -> Vertex in
+        self.state2vertex = Dictionary(keys: L.allStates) { s -> Vertex in
             let sL = L.spliced(by: s)
             let comps = sL.components
             let basis = KhBasisElement.generateBasis(state: s, power: comps.count)
@@ -31,11 +31,15 @@ public struct KhCube {
     }
     
     public subscript(s: KauffmanState) -> Vertex {
-        return vertices[s]!
+        return state2vertex[s]!
+    }
+    
+    public var vertices: [Vertex] {
+        return state2vertex.sorted{ $0.key }.map{ $0.value }
     }
     
     public func vertices(degree: Int) -> [Vertex] {
-        return vertices.values.filter{ $0.state.degree == degree }
+        return state2vertex.values.filter{ $0.state.degree == degree }
     }
     
     public func basis(degree: Int) -> [KhBasisElement] {
