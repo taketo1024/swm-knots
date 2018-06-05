@@ -18,7 +18,7 @@ public extension ChainComplexN {
         }
     }
     
-    internal func kernel(_ I: IntList) -> Matrix<R>? {
+    internal func dKernel(_ I: IntList) -> Matrix<R>? {
         guard isFreeToFree(I), let A = dMatrix(I) else {
             return nil // indeterminable.
         }
@@ -27,7 +27,7 @@ public extension ChainComplexN {
         return E.kernelMatrix
     }
     
-    internal func kernelTransition(_ I: IntList) -> Matrix<R>? {
+    internal func dKernelTransition(_ I: IntList) -> Matrix<R>? {
         guard isFreeToFree(I), let A = dMatrix(I) else {
             return nil // indeterminable.
         }
@@ -36,13 +36,48 @@ public extension ChainComplexN {
         return E.kernelTransitionMatrix
     }
     
-    internal func image(_ I: IntList) -> Matrix<R>? {
+    internal func dImage(_ I: IntList) -> Matrix<R>? {
         guard isFreeToFree(I), let A = dMatrix(I) else {
             return nil // indeterminable.
         }
         
         let E = A.elimination(form: .Diagonal)
         return E.imageMatrix
+    }
+    
+    internal func dImageTransition(_ I: IntList) -> Matrix<R>? {
+        guard isFreeToFree(I), let A = dMatrix(I) else {
+            return nil // indeterminable.
+        }
+        
+        let E = A.elimination(form: .Diagonal)
+        return E.imageTransitionMatrix
+    }
+    
+    public func cycle(_ I: IntList) -> ModuleObject<A, R>? {
+        if let Z = dKernel(I),
+            let T = dKernelTransition(I) {
+            return ModuleObject(
+                basis: self[I]!.generators,
+                generatingMatrix: Z,
+                transitionMatrix: T
+            )
+        } else {
+            return nil
+        }
+    }
+    
+    public func boundary(_ I: IntList) -> ModuleObject<A, R>? {
+        if let B = dImage(I - dDegree),
+           let T = dImageTransition(I - dDegree) {
+            return ModuleObject(
+                basis: self[I]!.generators,
+                generatingMatrix: B,
+                transitionMatrix: T
+            )
+        } else {
+            return nil
+        }
     }
     
     public func homology(_ I: IntList) -> ModuleObject<A, R>? {
@@ -58,16 +93,16 @@ public extension ChainComplexN {
         }
         
         // case: obviously zero
-        if let Z = kernel(I), Z.isZero {
+        if let Z = dKernel(I), Z.isZero {
             return .zeroModule
         }
         
         // case: free
         if isFreeToFree(I) {
             let basis = self[I]!.generators
-            let Z = kernel(I)!
-            let T = kernelTransition(I)!
-            let B = image(I - dDegree)!
+            let Z = dKernel(I)!
+            let T = dKernelTransition(I)!
+            let B = dImage(I - dDegree)!
                 
             let res = ModuleObject(
                 basis: basis,
@@ -126,6 +161,22 @@ public extension ChainComplexN {
                 return (t0[j].0 == t1[i].0) || B.isZero
             }
         }
+    }
+    
+    public func cycle() -> ModuleGridN<n, A, R> {
+        return ModuleGridN(
+            name: "Z(\(base.name))",
+            list: base.mDegrees.map{ I in (I, cycle(I)) },
+            default: base.defaultObject
+        )
+    }
+    
+    public func boundary() -> ModuleGridN<n, A, R> {
+        return ModuleGridN(
+            name: "B(\(base.name))",
+            list: base.mDegrees.map{ I in (I, boundary(I)) },
+            default: base.defaultObject
+        )
     }
     
     public func homology(name: String? = nil) -> ModuleGridN<n, A, R> {
