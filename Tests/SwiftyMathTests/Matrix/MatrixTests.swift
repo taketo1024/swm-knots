@@ -221,4 +221,27 @@ class MatrixTests: XCTestCase {
         XCTAssertEqual(y.cols, 4)
         XCTAssertEqual(y.grid, [1,2,5,6,3,4,7,8])
     }
+    
+    public func testKernel() {
+        let a = M(1, 2, 1, 2)
+        let k = a.elimination().kernelMatrix
+        XCTAssertEqual(k.rows, 2)
+        XCTAssertEqual(k.cols, 1)
+        XCTAssertTrue((a * k).isZero)
+        
+        let t = a.elimination().kernelTransitionMatrix
+        XCTAssertEqual(t * k, Matrix(rows: 1, cols: 1, grid: [1]))
+    }
+
+    public func testImage() {
+        let a = M(2, 4, 2, 4)
+        let i = a.elimination().imageMatrix
+        
+        XCTAssertEqual(i.rows, 2)
+        XCTAssertEqual(i.cols, 1)
+        XCTAssertEqual(i.grid, [2, 2])
+
+        let t = a.elimination().imageTransitionMatrix
+        XCTAssertEqual(t * i, Matrix(rows: 1, cols: 1, grid: [2]))
+    }
 }

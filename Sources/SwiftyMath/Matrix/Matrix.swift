@@ -127,6 +127,10 @@ public struct _Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     public func mapValues<R2>(_ f: (R) -> R2) -> _Matrix<n, m, R2> {
         return _Matrix<n, m, R2>(impl.mapValues(f))
     }
+    
+    public var isZero: Bool {
+        return impl.isZero
+    }
 
     public var diagonal: [R] {
         return (0 ..< Swift.min(rows, cols)).map{ i in self[i, i] }
