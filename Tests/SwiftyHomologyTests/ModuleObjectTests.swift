@@ -43,6 +43,20 @@ class ModuleObjectTests: XCTestCase {
         XCTAssertEqual(str.factorize(a + 2 * b), [1, 2])
     }
     
+/* TODO
+    func testFreeSub2() {
+        let basis = (0 ..< 3).map{ A($0) }
+        let a = M(basis: basis, components: [2, 0, 0])
+        let b = M(basis: basis, components: [0, 4, 0])
+        
+        let str = S(generators: [a, b])
+        
+        XCTAssertEqual(str.rank, 2)
+        XCTAssertEqual(str.factorize(a), [1, 0])
+        XCTAssertEqual(str.factorize(b), [0, 1])
+    }
+ */
+    
     func testDiagonalRelation() {
         let basis = (0 ..< 3).map{ A($0) }
         let a = M(basis: basis, components: [1, 0, 0])

@@ -61,7 +61,7 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
      *  0 -> R^l >---> R^k --->> M' -> 0
      *
      */
-    public init(basis: [A], generatingMatrix A: Matrix<R>, transitionMatrix T:Matrix<R>, relationMatrix _B: Matrix<R>?) {
+    public init(basis: [A], generatingMatrix A: Matrix<R>, transitionMatrix T:Matrix<R>, relationMatrix _B: Matrix<R>? = nil) {
         
         let B = _B ?? Matrix.zero(rows: A.cols, cols: 0)
         
@@ -81,8 +81,11 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
         let T2 = (elim.left * T).submatrix(rowRange: (k - s) ..< k)
         
         // MEMO see TODO above.
-        assert(T2 * A2 == Matrix<R>.identity(size: s))
-        
+//        assert(T2 * A2 == Matrix<R>.identity(size: s))
+if T2 * A2 != Matrix<R>.identity(size: s) {
+    Logger.write(.warn, "factorize() won't work properly.")
+}
+
         let summands = (0 ..< s)
             .map { j -> Summand in
                 let d = D[k - s + j]
@@ -96,7 +99,7 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
         self.init(summands, basis, T2)
     }
     
-    public init(basis: [FreeModule<A, R>], generatingMatrix A: Matrix<R>, transitionMatrix T: Matrix<R>, relationMatrix B: Matrix<R>?) {
+    public init(basis: [FreeModule<A, R>], generatingMatrix A: Matrix<R>, transitionMatrix T: Matrix<R>, relationMatrix B: Matrix<R>? = nil) {
         
         let oBasis = basis.flatMap{ $0.basis }.unique().sorted()
         let A0 = Matrix(rows: oBasis.count, cols: basis.count) { (i, j) in basis[j][oBasis[i]] }
