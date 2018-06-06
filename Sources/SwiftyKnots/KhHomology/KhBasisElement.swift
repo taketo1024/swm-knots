@@ -77,3 +77,94 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
         }
     }
 }
+
+public extension KhBasisElement {
+    public typealias   Product<R: Ring> = (E, E) -> [(E, R)]
+    public typealias Coproduct<R: Ring> = (E) -> [(E, E, R)]
+    
+    public func applied<R: Ring>(_ μ: Product<R>, at: (Int, Int), to j: Int, state: KauffmanState) -> FreeModule<KhBasisElement, R> {
+        let (i1, i2) = at
+        let (e1, e2) = (factors[i1], factors[i2])
+        
+        return μ(e1, e2).sum { (e, a) in
+            var factors = self.factors
+            factors.remove(at: i2)
+            factors.remove(at: i1)
+            factors.insert(e, at: j)
+            let t = KhBasisElement(state: state, factors: factors)
+            return FreeModule(t, a)
+        }
+    }
+    
+    public func applied<R: Ring>(_ Δ: Coproduct<R>, at i: Int, to: (Int, Int), state: KauffmanState) -> FreeModule<KhBasisElement, R> {
+        let (j1, j2) = to
+        let e = factors[i]
+        
+        return Δ(e).sum { (e1, e2, a)  in
+            var factors = self.factors
+            factors.remove(at: i)
+            factors.insert(e1, at: j1)
+            factors.insert(e2, at: j2)
+            let t = KhBasisElement(state: state, factors: factors)
+            return FreeModule(t, a)
+        }
+    }
+    
+    // Khovanov's map
+    public static func μ<R: Ring>(_ type: R.Type) -> Product<R> {
+        return { (e1, e2) in
+            switch (e1, e2) {
+            case (.I, .I): return [(.I, .identity)]
+            case (.I, .X), (.X, .I): return [(.X, .identity)]
+            case (.X, .X): return []
+            }
+        }
+    }
+    
+    public static func Δ<R: Ring>(_ type: R.Type) -> Coproduct<R> {
+        return { e in
+            switch e {
+            case .I: return [(.I, .X, .identity), (.X, .I, .identity)]
+            case .X: return [(.X, .X, .identity)]
+            }
+        }
+    }
+    
+    // Lee's map
+    public static func μ_Lee<R: Ring>(_ type: R.Type) -> Product<R> {
+        return { (e1, e2) in
+            switch (e1, e2) {
+            case (.X, .X): return [(.I, .identity)]
+            default: return []
+            }
+        }
+    }
+    
+    public static func Δ_Lee<R: Ring>(_ type: R.Type) -> Coproduct<R> {
+        return { e in
+            switch e {
+            case .X: return [(.I, .I, .identity)]
+            default: return []
+            }
+        }
+    }
+    
+    // Bar-Natan's map
+    public static func μ_BN<R: Ring>(_ type: R.Type) -> Product<R> {
+        return { (e1, e2) in
+            switch (e1, e2) {
+            case (.X, .X): return [(.X, .identity)]
+            default: return []
+            }
+        }
+    }
+    
+    public static func Δ_BN<R: Ring>(_ type: R.Type) -> Coproduct<R> {
+        return { e in
+            switch e {
+            case .I: return [(.I, .I, -.identity)]
+            default: return []
+            }
+        }
+    }
+}
