@@ -10,7 +10,7 @@ import SwiftyMath
 import SwiftyHomology
 
 public extension Link {
-    public func KhChainComplexBase<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhBasisElement, R> {
+    internal func KhChainComplexBase<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhBasisElement, R> {
         
         let (n, n⁺, n⁻) = (crossingNumber, crossingNumber⁺, crossingNumber⁻)
         
@@ -48,12 +48,16 @@ public extension Link {
         }
     }
     
-    public func KhLeeHomology<R: EuclideanRing>(_ type: R.Type) -> ModuleGrid2<KhBasisElement, R> {
+    public func KhLeeChainComplex<R: EuclideanRing>(_ type: R.Type) -> ChainComplex2<KhBasisElement, R> {
         typealias C = ChainComplex2<KhBasisElement, R>
-        let name = "KhLee(\(self.name); \(R.symbol))"
         let base = KhHomology(type)
         let d = ChainMap2(bidegree: (1, 4)) { (_, _) in self.KhCube.d_Lee(R.self) }
-        return ChainComplex2(base: base, differential: d).homology(name: name)
+        return ChainComplex2(base: base, differential: d)
+    }
+
+    public func KhLeeHomology<R: EuclideanRing>(_ type: R.Type) -> ModuleGrid2<KhBasisElement, R> {
+        let name = "KhLee(\(self.name); \(R.symbol))"
+        return KhLeeChainComplex(type).homology(name: name)
     }
 }
 

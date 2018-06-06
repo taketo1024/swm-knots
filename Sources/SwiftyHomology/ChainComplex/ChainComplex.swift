@@ -130,6 +130,10 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         }
     }
     
+    public func describeAll() {
+        base.describeAll()
+    }
+    
     public func describe(_ I: IntList) {
         base.describe(I)
     }
