@@ -27,6 +27,16 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
         return objects[I]!
     }
     
+    public var bottom: Object {
+        let I = IntList([0].repeated(dim))
+        return self[I]
+    }
+    
+    public var top: Object {
+        let I = IntList([1].repeated(dim))
+        return self[I]
+    }
+    
     public var vertices: [IntList] {
         return objects.keys.sorted()
     }
@@ -50,6 +60,11 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
         } else {
             return .zero
         }
+    }
+    
+    public func subCube(matching m: (Object.Summand) -> Bool) -> ModuleCube<A, R> {
+        let objects = self.objects.mapValues{ obj in obj.subSummands(matching: m) }
+        return ModuleCube(dim: dim, objects: objects, edgeMaps: edgeMaps)
     }
     
     public func asChainComplex() -> ChainComplex<A, R> {
