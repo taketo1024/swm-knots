@@ -12,13 +12,6 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
     public let state: IntList
     internal let factors: [E]
     
-    public static func generateBasis(state: IntList, power n: Int) -> [KhBasisElement] {
-        return IntList.binaryCombinations(length: n).map { I in
-            let factors: [E] = I.components.map{ $0 == 0 ? .X : .I  }
-            return KhBasisElement.init(state: state, factors: factors)
-        }.sorted()
-    }
-    
     internal init(state: IntList, factors: [E]) {
         self.state = state
         self.factors = factors
@@ -50,13 +43,20 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
     }
     
     public var hashValue: Int {
-        return factors.reduce(0) { (res, e) in
-            res &<< 2 | (e == .I ? 2 : 1)
-        }
+        let s = state.components.reduce(0) { (res, b) in res &<< 1 | b }
+        let f = factors.reduce(0) { (res, b) in res &<< 1 | b.rawValue }
+        return s &<< 32 | f
     }
     
     public var description: String {
         return factors.map{ "\($0)" }.joined(separator: "⊗") + Format.sub(state.description)
+    }
+    
+    public static func generateBasis(state: IntList, power n: Int) -> [KhBasisElement] {
+        return IntList.binaryCombinations(length: n).map { I in
+            let factors: [E] = I.components.map{ $0 == 0 ? .X : .I  }
+            return KhBasisElement.init(state: state, factors: factors)
+        }.sorted()
     }
     
     public enum E: Int, Comparable, Codable {
