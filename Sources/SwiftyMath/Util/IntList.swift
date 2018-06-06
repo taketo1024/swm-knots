@@ -9,23 +9,23 @@
 import Foundation
 
 public struct IntList: Hashable, Comparable, CustomStringConvertible {
-    internal let elements: [Int]
-    public init(_ elements: Int ...) {
-        self.init(elements)
+    public let components: [Int]
+    public init(_ components: Int ...) {
+        self.init(components)
     }
     
-    public init(_ elements: [Int]) {
+    public init(_ components: [Int]) {
         // TODO trim last 0s.
-        self.elements = elements
+        self.components = components
     }
     
-    public init(_ elements: [Int : Int]) {
-        let n = (elements.keys.max() ?? -1) + 1
-        self.elements = (0 ..< n).map{ elements[$0] ?? 0 }
+    public init(_ components: [Int : Int]) {
+        let n = (components.keys.max() ?? -1) + 1
+        self.components = (0 ..< n).map{ components[$0] ?? 0 }
     }
     
     public subscript(i: Int) -> Int {
-        return (i < elements.count) ? elements[i] : 0
+        return (i < components.count) ? components[i] : 0
     }
     
     public static var empty: IntList {
@@ -33,21 +33,21 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
     }
     
     public var total: Int {
-        return elements.sumAll()
+        return components.sumAll()
     }
     
     public var length: Int {
-        return elements.count
+        return components.count
     }
     
     public func permuted(by p: Permutation) -> IntList {
-        let indices = self.elements.enumerated().map{ (i, j) in (p[i], j)}
+        let indices = self.components.enumerated().map{ (i, j) in (p[i], j)}
         return IntList(Dictionary(pairs: indices))
     }
     
     public func drop(_ i: Int) -> IntList {
         assert(0 <= i && i < length)
-        return IntList(elements.removed(at: i))
+        return IntList(components.removed(at: i))
     }
     
     public static func +(I: IntList, J: IntList) -> IntList {
@@ -56,7 +56,7 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
     }
     
     public static prefix func -(I: IntList) -> IntList {
-        return IntList( I.elements.map{ -$0 } )
+        return IntList( I.components.map{ -$0 } )
     }
     
     public static func -(I: IntList, J: IntList) -> IntList {
@@ -64,35 +64,35 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
     }
     
     public static func ==(I: IntList, J: IntList) -> Bool {
-        return I.elements == J.elements
+        return I.components == J.components
     }
     
     // e.g. (2, 1, 3) -> 2 + (1 * p) + (3 * p^2)
     public var hashValue: Int {
         let p = 31
-        return elements.reversed().reduce(0) { (sum, next) -> Int in
+        return components.reversed().reduce(0) { (sum, next) -> Int in
             p &* sum &+ next
         }
     }
     
     // lex order
     public static func <(I: IntList, J: IntList) -> Bool {
-        return I.elements.lexicographicallyPrecedes(J.elements)
+        return I.components.lexicographicallyPrecedes(J.components)
     }
     
     public var description: String {
-        return "(\( elements.map{ String($0) }.joined(separator: ", ")))"
+        return "(\( components.map{ String($0) }.joined(separator: ", ")))"
     }
 }
 
 extension IntList: Codable {
     public init(from decoder: Decoder) throws {
         let c = try decoder.singleValueContainer()
-        self.elements = try c.decode([Int].self)
+        self.components = try c.decode([Int].self)
     }
     
     public func encode(to encoder: Encoder) throws {
         var c = encoder.singleValueContainer()
-        try c.encode(elements)
+        try c.encode(components)
     }
 }

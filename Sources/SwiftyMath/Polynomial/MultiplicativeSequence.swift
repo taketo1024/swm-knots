@@ -15,7 +15,7 @@ public struct MultiplicativeSequence<K: Field>: CustomStringConvertible {
         self.map = { n in
             let Is = n.partitions
             return Is.sum { I in
-                let c = I.elements.multiply { i in f.coeff(i) }
+                let c = I.components.multiply { i in f.coeff(i) }
                 let s_I = SymmetricPolynomial<K>.monomial(n, I).elementaryDecomposition()
                 return c * s_I
             }

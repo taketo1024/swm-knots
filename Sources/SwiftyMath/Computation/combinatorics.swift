@@ -53,7 +53,7 @@ public extension 𝐙 {
         } else {
             return (lowerBound ... n).flatMap { i -> [IntList] in
                 let ps = (n - i).partitions(lowerBound: Swift.max(i, lowerBound))
-                return ps.map { I in IntList([i] + I.elements) }
+                return ps.map { I in IntList([i] + I.components) }
             } + [IntList(n)]
         }
     }
