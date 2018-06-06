@@ -33,6 +33,10 @@ public struct KauffmanState: Equatable, Comparable, Hashable, CustomStringConver
         self.bits = bits
     }
     
+    public init(_ bits: [Int]) {
+        self.bits = Dictionary(pairs: bits.enumerated().map{ (i, b) in (i, b == 0 ? .O : .I ) })
+    }
+    
     public subscript(i: Int) -> Bit {
         get {
             return bits[i]!

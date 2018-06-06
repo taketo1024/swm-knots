@@ -10,27 +10,73 @@ import SwiftyMath
 import SwiftyHomology
 
 public extension Link {
-    internal func KhChainComplexBase<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhBasisElement, R> {
+    internal func KhCube<R>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>) -> ModuleCube<KhBasisElement, R> {
+        typealias A = KhBasisElement
         
-        let (n, n⁺, n⁻) = (crossingNumber, crossingNumber⁺, crossingNumber⁻)
-        
-        let name = "CKh(\(self.name); \(R.symbol))"
-        let cube = self.KhCube
-        
-        let list = (0 ... n).flatMap { (i) -> [(Int, Int, [KhBasisElement]?)] in
-            let basis = !reduced ? cube.basis(degree: i) : cube.reducedBasis(degree: i)
-            return basis.group(by: { $0.degree }).map{ (j, basis) in (i, j, basis) }
+        let n = crossingNumber
+        let Is = IntList.binaryCombinations(length: n)
+        let Ls = Dictionary(keys: Is){ I in
+            self.spliced(by: KauffmanState(I.components))
         }
         
-        let base = ModuleGrid2<KhBasisElement, R>(name: name, list: list, default: .zeroModule)
-        return normalized ? base.shifted(-n⁻, n⁺ - 2 * n⁻) : base
+        let objects = Dictionary(keys: Is){ I -> ModuleObject<A, R> in
+            let s = KauffmanState(I.components)
+            let r = Ls[I]!.components.count
+            let basis = A.generateBasis(state: s, power: r)
+            return ModuleObject(generators: basis)
+        }
+        
+        let edgeMaps = { (I0: IntList, I1: IntList) -> FreeModuleHom<A, A, R> in
+            let (L0, L1) = (Ls[I0]!, Ls[I1]!)
+            let (c1, c2) = (L0.components, L1.components)
+            let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
+            let state = KauffmanState(I1.components)
+
+            switch (d1.count, d2.count) {
+            case (2, 1):
+                let (i1, i2) = (c1.index(of: d1[0])!, c1.index(of: d1[1])!)
+                let j = c2.index(of: d2[0])!
+                return FreeModuleHom{ (x: A) in x.applied(μ, at: (i1, i2), to: j, state: state) }
+                
+            case (1, 2):
+                let i = c1.index(of: d1[0])!
+                let (j1, j2) = (c2.index(of: d2[0])!, c2.index(of: d2[1])!)
+                return FreeModuleHom{ (x: A) in x.applied(Δ, at: i, to: (j1, j2), state: state) }
+
+            default: fatalError()
+            }
+        }
+        
+        return ModuleCube(dim: n, objects: objects, edgeMaps: edgeMaps)
     }
     
     public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhBasisElement, R> {
-        typealias C = ChainComplex2<KhBasisElement, R>
-        let base = KhChainComplexBase(type, reduced: reduced, normalized: normalized)
-        let d = ChainMap2(bidegree: (1, 0)) { (_, _) in self.KhCube.d(R.self) }
-        return C(base: base, differential: d)
+        
+        let name = "CKh(\(self.name); \(R.symbol))"
+        let (n⁺, n⁻) = (crossingNumber⁺, crossingNumber⁻)
+        
+        let (μ, Δ) = (KhBasisElement.μ(R.self), KhBasisElement.Δ(R.self))
+        let cube = self.KhCube(μ, Δ)
+        
+        let j0 = cube.bottom.generators.map{ $0.degree }.min() ?? 0
+        let j1 =    cube.top.generators.map{ $0.degree }.max() ?? 0
+        let js = (j0 ... j1).filter{ j in (j - j0) % 2 == 0 }
+        
+        let chains = Dictionary(keys: js) { j in
+            cube.subCube{ s in s.generator.degree == j }.asChainComplex()
+        }
+        
+        typealias Object = ModuleObject<KhBasisElement, R>
+        let list = js.flatMap{ j -> [(Int, Int, Object?)] in
+            let c = chains[j]!
+            return c.degrees.map{ i in (i, j, c[i]) }
+        }
+        
+        let base = ModuleGrid2(name: name, list: list, default: .zeroModule)
+        let d = ChainMap2(bidegree: (1, 0)) { (i, j) in chains[j]?.d[i] ?? .zero }
+        let CKh = ChainComplex2(base: base, differential: d)
+        
+        return normalized ? CKh.shifted(-n⁻, n⁺ - 2 * n⁻) : CKh
     }
     
     public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhBasisElement, R> {
