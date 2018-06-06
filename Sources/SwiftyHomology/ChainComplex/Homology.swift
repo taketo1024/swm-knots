@@ -118,7 +118,7 @@ public extension ChainComplexN {
             if R.self == 𝐙.self && self[I]!.torsionCoeffs.forAll({ $0 as! 𝐙 == 2 }) {
                 let free = (freePart.homology(I)! as! ModuleObject<A, 𝐙>)
                 let tor = (self as! ChainComplexN<n, A, 𝐙>).order2torsionPart.homology(I)!
-                let sum = free ⊕ tor.asIntegerQuotients
+                let sum = free.merge(with: tor.asIntegerQuotients) 
                 
                 return .some( sum as! ModuleObject<A, R> )
             } else {

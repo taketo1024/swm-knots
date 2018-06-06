@@ -165,21 +165,23 @@ if T2 * A2 != Matrix<R>.identity(size: s) {
         return subSummands(indices: indices)
     }
     
-    public static func ⊕(M1: ModuleObject<A, R>, M2: ModuleObject<A, R>) -> ModuleObject<A, R> {
-        if M1.basis == M2.basis {
-            let basis = M1.basis
-            let summands = M1.summands + M2.summands
-            let T = M1.transform.concatRows(with: M2.transform)
-            return ModuleObject(summands, basis, T)
+    public func merge(with M2: ModuleObject<A, R>) -> ModuleObject<A, R> {
+        let M1 = self
+        assert( M1.basis == M2.basis )
 
-        } else if M1.basis.isDisjoint(with: M2.basis) {
-            let basis = M1.basis + M2.basis
-            let summands = M1.summands + M2.summands
-            let T = M1.transform ⊕ M2.transform
-            return ModuleObject(summands, basis, T)
-        }
+        let basis = M1.basis
+        let summands = M1.summands + M2.summands
+        let T = M1.transform.concatRows(with: M2.transform)
         
-        fatalError()
+        return ModuleObject(summands, basis, T)
+    }
+    
+    public static func ⊕(M1: ModuleObject<A, R>, M2: ModuleObject<A, R>) -> ModuleObject<A, R> {
+//        assert( M1.basis.isDisjoint(with: M2.basis) ) // commented out for performance
+        let basis = M1.basis + M2.basis
+        let summands = M1.summands + M2.summands
+        let T = M1.transform ⊕ M2.transform
+        return ModuleObject(summands, basis, T)
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
