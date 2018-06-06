@@ -143,13 +143,11 @@ if T2 * A2 != Matrix<R>.identity(size: s) {
     }
     
     public var freePart: ModuleObject<A, R> {
-        let indices = (0 ..< summands.count).filter{ i in self[i].isFree }
-        return subSummands(indices: indices)
+        return subSummands{ s in s.isFree }
     }
     
     public var torsionPart: ModuleObject<A, R> {
-        let indices = (0 ..< summands.count).filter{ i in !self[i].isFree }
-        return subSummands(indices: indices)
+        return subSummands{ s in !s.isFree }
     }
     
     public func subSummands(_ indices: Int ...) -> ModuleObject<A, R> {
@@ -160,6 +158,11 @@ if T2 * A2 != Matrix<R>.identity(size: s) {
         let sub = indices.map{ summands[$0] }
         let T = transform.submatrix(rowsMatching: { i in indices.contains(i)}, colsMatching: { _ in true })
         return ModuleObject(sub, basis, T)
+    }
+    
+    public func subSummands(matching: (Summand) -> Bool) -> ModuleObject<A, R> {
+        let indices = (0 ..< summands.count).filter{ i in matching(self[i]) }
+        return subSummands(indices: indices)
     }
     
     public static func ⊕(M1: ModuleObject<A, R>, M2: ModuleObject<A, R>) -> ModuleObject<A, R> {
@@ -282,8 +285,7 @@ public extension ModuleObject where R == 𝐙 {
         typealias Summand = ModuleObject<A, Q>.Summand
         
         let n = t.intValue
-        let indices = (0 ..< self.summands.count).filter{ i in self[i].divisor == n }
-        let sub = subSummands(indices: indices)
+        let sub = subSummands{ s in s.divisor == n }
         
         let summands = sub.summands.map { s -> Summand in
             Summand(s.generator.mapValues{ Q($0) }, .zero)
