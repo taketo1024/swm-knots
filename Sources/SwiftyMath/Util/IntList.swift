@@ -67,6 +67,13 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
         return I.components == J.components
     }
     
+    public static func binaryCombinations(length n: Int) -> [IntList] {
+        assert(n <= 64)
+        return (0 ..< 2.pow(n)).map { (b: Int) -> IntList in
+            IntList( (0 ..< n).map{ i in (b >> i) & 1 } )
+        }
+    }
+    
     // e.g. (2, 1, 3) -> 2 + (1 * p) + (3 * p^2)
     public var hashValue: Int {
         let p = 31
