@@ -57,20 +57,27 @@ public extension Link {
         let j1 =    cube.top.generators.map{ $0.degree }.max() ?? 0
         let js = (j0 ... j1).filter{ j in (j - j0) % 2 == 0 }
         
-        let chains = Dictionary(keys: js) { j in
-            cube.subCube{ s in s.generator.degree == j }.asChainComplex()
+        let subcubes = Dictionary(keys: js) { j in
+            cube.subCube{ s in s.generator.degree == j }
         }
         
         typealias Object = ModuleObject<KhBasisElement, R>
         let list = js.flatMap{ j -> [(Int, Int, Object?)] in
-            let c = chains[j]!
+            let c = subcubes[j]!.asChainComplex()
             return c.degrees.map{ i in (i, j, c[i]) }
         }
         
         let base = ModuleGrid2(name: name, list: list, default: .zeroModule)
-        let d = ChainMap2(bidegree: (1, 0)) { (i, j) in chains[j]?.d[i] ?? .zero }
-        let CKh = ChainComplex2(base: base, differential: d)
+        let d = ChainMap2(bidegree: (1, 0)) { (i, j) -> FreeModuleHom<KhBasisElement, KhBasisElement, R> in
+            guard let c = subcubes[j] else {
+                return .zero
+            }
+            return FreeModuleHom{ (x: KhBasisElement) in
+                c.d(from: x.state).applied(to: x)
+            }
+        }
         
+        let CKh = ChainComplex2(base: base, differential: d)
         return normalized ? CKh.shifted(-n⁻, n⁺ - 2 * n⁻) : CKh
     }
     

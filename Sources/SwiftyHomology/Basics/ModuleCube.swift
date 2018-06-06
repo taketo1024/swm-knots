@@ -58,9 +58,10 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
             : .zero
     }
     
-    public func subCube(matching m: (Object.Summand) -> Bool) -> ModuleCube<A, R> {
-        let objects = self.objects.mapValues{ obj in obj.subSummands(matching: m) }
-        return ModuleCube(dim: dim, objects: objects, edgeMaps: edgeMaps)
+    public func d(from I0: IntList) -> FreeModuleHom<A, A, R> {
+        return self.targetVertices(from: I0).sum { (ε, I1) in
+            ε * self.edgeMap(from: I0, to: I1)
+        }
     }
     
     public func asChainComplex() -> ChainComplex<A, R> {
@@ -76,16 +77,19 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
                 return .zero
             }
             return FreeModuleHom{ (x: FreeModule<A, R>) in
+                // MEMO finding vertex takes time.
                 guard let I0 = Is.first(where: { I in self[I].contains(x) }) else {
                     return .zero
                 }
-                
-                return self.targetVertices(from: I0).sum { (ε, I1) in
-                    ε * self.edgeMap(from: I0, to: I1).applied(to: x)
-                }
+                return self.d(from: I0).applied(to: x)
             }
         }
         return ChainComplex(base: base, differential: d)
+    }
+    
+    public func subCube(matching m: (Object.Summand) -> Bool) -> ModuleCube<A, R> {
+        let objects = self.objects.mapValues{ obj in obj.subSummands(matching: m) }
+        return ModuleCube(dim: dim, objects: objects, edgeMaps: edgeMaps)
     }
     
     public func describe(_ I: IntList) {
