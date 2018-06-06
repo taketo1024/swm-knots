@@ -9,28 +9,26 @@ import Foundation
 import SwiftyMath
 
 public struct KhBasisElement: BasisElementType, Comparable, Codable {
-    public let state: KauffmanState
+    public let state: IntList
     internal let factors: [E]
     
-    public static func generateBasis(state: KauffmanState, power n: Int) -> [KhBasisElement] {
-        return (0 ..< n).reduce([[]]) { (res, _) -> [[E]] in
-            res.flatMap{ factors -> [[E]] in
-                [factors + [.I], factors + [.X]]
-            }
-            }
-            .map{ factors in KhBasisElement.init(state: state, factors: factors) }
-            .sorted()
+    public static func generateBasis(state: IntList, power n: Int) -> [KhBasisElement] {
+        return IntList.binaryCombinations(length: n).map { I in
+            let factors: [E] = I.components.map{ $0 == 0 ? .X : .I  }
+            return KhBasisElement.init(state: state, factors: factors)
+        }.sorted()
     }
     
-    internal init(state: KauffmanState, factors: [E]) {
+    internal init(state: IntList, factors: [E]) {
         self.state = state
         self.factors = factors
     }
     
     public var degree: Int {
-        return factors.sum{ e in e.degree } + state.degree
+        return factors.sum{ e in e.degree } + state.components.count{ $0 == 1 }
     }
     
+    /*
     public func stateModified(_ i: Int, _ bit: KauffmanState.Bit?) -> KhBasisElement {
         var s = state
         if let bit = bit {
@@ -40,6 +38,7 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
         }
         return KhBasisElement(state: s, factors: factors)
     }
+ */
     
     public static func ==(b1: KhBasisElement, b2: KhBasisElement) -> Bool {
         return b1.state == b2.state && b1.factors == b2.factors
@@ -82,7 +81,7 @@ public extension KhBasisElement {
     public typealias   Product<R: Ring> = (E, E) -> [(E, R)]
     public typealias Coproduct<R: Ring> = (E) -> [(E, E, R)]
     
-    public func applied<R: Ring>(_ μ: Product<R>, at: (Int, Int), to j: Int, state: KauffmanState) -> FreeModule<KhBasisElement, R> {
+    public func applied<R: Ring>(_ μ: Product<R>, at: (Int, Int), to j: Int, state: IntList) -> FreeModule<KhBasisElement, R> {
         let (i1, i2) = at
         let (e1, e2) = (factors[i1], factors[i2])
         
@@ -96,7 +95,7 @@ public extension KhBasisElement {
         }
     }
     
-    public func applied<R: Ring>(_ Δ: Coproduct<R>, at i: Int, to: (Int, Int), state: KauffmanState) -> FreeModule<KhBasisElement, R> {
+    public func applied<R: Ring>(_ Δ: Coproduct<R>, at i: Int, to: (Int, Int), state: IntList) -> FreeModule<KhBasisElement, R> {
         let (j1, j2) = to
         let e = factors[i]
         

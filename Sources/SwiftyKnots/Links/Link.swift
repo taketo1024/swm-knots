@@ -34,7 +34,6 @@ public struct Link: Equatable, CustomStringConvertible {
     
     public let name: String
     internal let crossings: [Crossing]
-    internal let _KhCube: Cache<KhCube> = Cache()
     
     internal init(name: String, crossings: [Crossing]) {
         self.name = name

@@ -13,35 +13,30 @@ public extension Link {
     internal func KhCube<R>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>) -> ModuleCube<KhBasisElement, R> {
         typealias A = KhBasisElement
         
-        let n = crossingNumber
-        let Is = IntList.binaryCombinations(length: n)
-        let Ls = Dictionary(keys: Is){ I in
-            self.spliced(by: KauffmanState(I.components))
-        }
+        let n = self.crossingNumber
+        let states = self.allStates
+        let Ls = Dictionary(keys: states){ s in self.spliced(by: s) }
         
-        let objects = Dictionary(keys: Is){ I -> ModuleObject<A, R> in
-            let s = KauffmanState(I.components)
-            let r = Ls[I]!.components.count
+        let objects = Dictionary(keys: states){ s -> ModuleObject<A, R> in
+            let r = Ls[s]!.components.count
             let basis = A.generateBasis(state: s, power: r)
             return ModuleObject(generators: basis)
         }
         
-        let edgeMaps = { (I0: IntList, I1: IntList) -> FreeModuleHom<A, A, R> in
-            let (L0, L1) = (Ls[I0]!, Ls[I1]!)
+        let edgeMaps = { (s0: IntList, s1: IntList) -> FreeModuleHom<A, A, R> in
+            let (L0, L1) = (Ls[s0]!, Ls[s1]!)
             let (c1, c2) = (L0.components, L1.components)
             let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
-            let state = KauffmanState(I1.components)
-
             switch (d1.count, d2.count) {
             case (2, 1):
                 let (i1, i2) = (c1.index(of: d1[0])!, c1.index(of: d1[1])!)
                 let j = c2.index(of: d2[0])!
-                return FreeModuleHom{ (x: A) in x.applied(μ, at: (i1, i2), to: j, state: state) }
+                return FreeModuleHom{ (x: A) in x.applied(μ, at: (i1, i2), to: j, state: s1) }
                 
             case (1, 2):
                 let i = c1.index(of: d1[0])!
                 let (j1, j2) = (c2.index(of: d2[0])!, c2.index(of: d2[1])!)
-                return FreeModuleHom{ (x: A) in x.applied(Δ, at: i, to: (j1, j2), state: state) }
+                return FreeModuleHom{ (x: A) in x.applied(Δ, at: i, to: (j1, j2), state: s1) }
 
             default: fatalError()
             }
@@ -94,6 +89,7 @@ public extension Link {
         }
     }
     
+    /*
     public func KhLeeChainComplex<R: EuclideanRing>(_ type: R.Type) -> ChainComplex2<KhBasisElement, R> {
         typealias C = ChainComplex2<KhBasisElement, R>
         let base = KhHomology(type)
@@ -105,6 +101,7 @@ public extension Link {
         let name = "KhLee(\(self.name); \(R.symbol))"
         return KhLeeChainComplex(type).homology(name: name)
     }
+ */
 }
 
 public extension GridN where n == _2, Object: _ModuleObject, Object.A == KhBasisElement {
