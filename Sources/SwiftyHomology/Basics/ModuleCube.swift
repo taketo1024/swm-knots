@@ -53,13 +53,9 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
     }
     
     public func edgeMap(from I0: IntList, to I1: IntList) -> FreeModuleHom<A, A, R> {
-        if objects.contains(key: I0) && objects.contains(key: I1) {
-            return FreeModuleHom{ (x: FreeModule<A, R>) in
-                self[I0].contains(x) ? self.edgeMaps(I0, I1).applied(to: x) : .zero
-            }
-        } else {
-            return .zero
-        }
+        return objects.contains(key: I0) && objects.contains(key: I1)
+            ? self.edgeMaps(I0, I1)
+            : .zero
     }
     
     public func subCube(matching m: (Object.Summand) -> Bool) -> ModuleCube<A, R> {
@@ -79,9 +75,13 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
             guard let Is = group[i] else {
                 return .zero
             }
-            return Is.sum { I0 -> FreeModuleHom<A, A, R> in
-                self.targetVertices(from: I0).sum { (ε, I1) in
-                    ε * self.edgeMap(from: I0, to: I1)
+            return FreeModuleHom{ (x: FreeModule<A, R>) in
+                guard let I0 = Is.first(where: { I in self[I].contains(x) }) else {
+                    return .zero
+                }
+                
+                return self.targetVertices(from: I0).sum { (ε, I1) in
+                    ε * self.edgeMap(from: I0, to: I1).applied(to: x)
                 }
             }
         }
