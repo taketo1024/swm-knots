@@ -68,12 +68,9 @@ public extension Link {
         }
         
         let base = ModuleGrid2(name: name, list: list, default: .zeroModule)
-        let d = ChainMap2(bidegree: (1, 0)) { (i, j) -> FreeModuleHom<KhBasisElement, KhBasisElement, R> in
-            guard let c = subcubes[j] else {
-                return .zero
-            }
+        let d = ChainMap2(bidegree: (1, 0)) { (_, _) -> FreeModuleHom<KhBasisElement, KhBasisElement, R> in
             return FreeModuleHom{ (x: KhBasisElement) in
-                c.d(from: x.state).applied(to: x)
+                cube.d(x.state).applied(to: x)
             }
         }
         
@@ -96,11 +93,13 @@ public extension Link {
         }
     }
     
-    /*
     public func KhLeeChainComplex<R: EuclideanRing>(_ type: R.Type) -> ChainComplex2<KhBasisElement, R> {
         typealias C = ChainComplex2<KhBasisElement, R>
         let base = KhHomology(type)
-        let d = ChainMap2(bidegree: (1, 4)) { (_, _) in self.KhCube.d_Lee(R.self) }
+        let cube = self.KhCube(KhBasisElement.μ_Lee(R.self), KhBasisElement.Δ_Lee(R.self))
+        let d = ChainMap2(bidegree: (1, 4)) { (_, _) in
+            FreeModuleHom{ (x: KhBasisElement) in cube.d(x.state).applied(to: x) }
+        }
         return ChainComplex2(base: base, differential: d)
     }
 
@@ -108,7 +107,6 @@ public extension Link {
         let name = "KhLee(\(self.name); \(R.symbol))"
         return KhLeeChainComplex(type).homology(name: name)
     }
- */
 }
 
 public extension GridN where n == _2, Object: _ModuleObject, Object.A == KhBasisElement {

@@ -58,7 +58,7 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
             : .zero
     }
     
-    public func d(from I0: IntList) -> FreeModuleHom<A, A, R> {
+    public func d(_ I0: IntList) -> FreeModuleHom<A, A, R> {
         return self.targetVertices(from: I0).sum { (ε, I1) in
             ε * self.edgeMap(from: I0, to: I1)
         }
@@ -81,7 +81,7 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
                 guard let I0 = Is.first(where: { I in self[I].contains(x) }) else {
                     return .zero
                 }
-                return self.d(from: I0).applied(to: x)
+                return self.d(I0).applied(to: x)
             }
         }
         return ChainComplex(base: base, differential: d)
