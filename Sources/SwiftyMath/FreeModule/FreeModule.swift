@@ -95,6 +95,14 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
         return FreeModule<A, R>(a.elements.mapValues{ $0 * r })
     }
     
+    public static func sum(_ elements: [FreeModule<A, R>]) -> FreeModule<A, R> {
+        var sum = [A : R]()
+        elements.forEach{ x in
+            sum.merge(x.elements) { (r1, r2) in r1 + r2 }
+        }
+        return FreeModule(sum)
+    }
+    
     public var description: String {
         return Format.terms("+", basis.map { a in (self[a], a.description, 1) })
     }

@@ -84,7 +84,7 @@ public extension Sequence where Element: AdditiveGroup {
 
 public extension Sequence {
     @_inlineable public func sum<G: AdditiveGroup>(mapping f: (Element) -> G) -> G {
-        return self.reduce(.zero){ $0 + f($1)}
+        return G.sum( self.map(f) )
     }
 }
 
