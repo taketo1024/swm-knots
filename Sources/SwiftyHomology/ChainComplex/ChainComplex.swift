@@ -51,6 +51,10 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         return d.mDegree
     }
     
+    public var mDegrees: [IntList] {
+        return base.mDegrees
+    }
+    
     public func shifted(_ I: IntList) -> ChainComplexN<n, A, R> {
         return ChainComplexN(base: base.shifted(I), differential: d.shifted(I))
     }
@@ -83,7 +87,7 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         typealias D = ChainComplexN<n, Dual<A>, R>
         
         let dName = name ?? "\(base.name)^*"
-        let dList: [(IntList, [Dual<A>]?)] = base.mDegrees.map { I -> (IntList, [Dual<A>]?) in
+        let dList: [(IntList, [Dual<A>]?)] = mDegrees.map { I -> (IntList, [Dual<A>]?) in
             guard let o = self[I] else {
                 return (I, nil)
             }
@@ -104,7 +108,7 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
             if debug { Swift.print(msg()) }
         }
         
-        for I0 in base.mDegrees {
+        for I0 in mDegrees {
             let I1 = I0 + dDegree
             let I2 = I1 + dDegree
             
@@ -167,6 +171,10 @@ public extension ChainComplexN where n == _1 {
         return base.topDegree
     }
     
+    public var degrees: [Int] {
+        return base.degrees
+    }
+    
     public func shifted(_ i: Int) -> ChainComplex<A, R> {
         return shifted(IntList(i))
     }
@@ -187,6 +195,10 @@ public extension ChainComplexN where n == _2 {
         } set {
             base[i, j] = newValue
         }
+    }
+    
+    public var bidegrees: [(Int, Int)] {
+        return base.bidegrees
     }
     
     public func shifted(_ i: Int, _ j: Int) -> ChainComplex2<A, R> {
