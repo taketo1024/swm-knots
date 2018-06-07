@@ -215,7 +215,7 @@ if T2 * A2 != Matrix<R>.identity(size: s) {
         if !isZero {
             print("\(self) {")
             for (i, x) in generators.enumerated() {
-                print("\t(\(i)) ", x)
+                print("\t(\(i))\t\(x)")
             }
             print("}")
         } else {
