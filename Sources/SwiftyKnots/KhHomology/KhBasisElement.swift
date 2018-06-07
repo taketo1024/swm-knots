@@ -167,3 +167,20 @@ public extension KhBasisElement {
         }
     }
 }
+
+public func +<R: Ring>(m1: @escaping KhBasisElement.Product<R>, m2: @escaping KhBasisElement.Product<R>) -> KhBasisElement.Product<R> {
+    return { (e1, e2) in m1(e1, e2) + m2(e1, e2) }
+}
+
+public func *<R: Ring>(r: R, m: @escaping KhBasisElement.Product<R>) -> KhBasisElement.Product<R> {
+    return { (e1, e2) in m(e1, e2).map{ (x, a) in (x, r * a) } }
+}
+
+public func +<R: Ring>(c1: @escaping KhBasisElement.Coproduct<R>, c2: @escaping KhBasisElement.Coproduct<R>) -> KhBasisElement.Coproduct<R> {
+    return { e in c1(e) + c2(e) }
+}
+
+public func *<R: Ring>(r: R, c: @escaping KhBasisElement.Coproduct<R>) -> KhBasisElement.Coproduct<R> {
+    return { e in c(e).map{ (x, y, a) in (x, y, r * a) } }
+}
+
