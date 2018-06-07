@@ -10,7 +10,7 @@ import SwiftyMath
 import SwiftyHomology
 
 public extension Link {
-    internal func KhCube<R>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>) -> ModuleCube<KhBasisElement, R> {
+    internal func KhCube<R>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, reduced: Bool = false) -> ModuleCube<KhBasisElement, R> {
         typealias A = KhBasisElement
         
         let n = self.crossingNumber
@@ -18,9 +18,15 @@ public extension Link {
         let Ls = Dictionary(keys: states){ s in self.spliced(by: s) }
         
         let objects = Dictionary(keys: states){ s -> ModuleObject<A, R> in
-            let r = Ls[s]!.components.count
-            let basis = A.generateBasis(state: s, power: r)
-            return ModuleObject(generators: basis)
+            let comps = Ls[s]!.components
+            let basis = A.generateBasis(state: s, power: comps.count)
+            
+            if !reduced {
+                return ModuleObject(generators: basis)
+            } else {
+                let rBasis = basis.filter{ $0.factors[0] == .I }
+                return ModuleObject(generators: rBasis)
+            }
         }
         
         let edgeMaps = { (s0: IntList, s1: IntList) -> FreeModuleHom<A, A, R> in
@@ -46,13 +52,16 @@ public extension Link {
     }
     
     public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhBasisElement, R> {
+        let (μ, Δ) = (KhBasisElement.μ(R.self), KhBasisElement.Δ(R.self))
+        return KhChainComplex(μ, Δ, reduced: reduced, normalized: normalized)
+    }
+    
+    public func KhChainComplex<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhBasisElement, R> {
         
         let name = "CKh(\(self.name); \(R.symbol))"
         let (n⁺, n⁻) = (crossingNumber⁺, crossingNumber⁻)
         
-        let (μ, Δ) = (KhBasisElement.μ(R.self), KhBasisElement.Δ(R.self))
-        let cube = self.KhCube(μ, Δ)
-        
+        let cube = self.KhCube(μ, Δ, reduced: reduced)
         let j0 = cube.bottom.generators.map{ $0.degree }.min() ?? 0
         let j1 =    cube.top.generators.map{ $0.degree }.max() ?? 0
         let js = (j0 ... j1).filter{ j in (j - j0) % 2 == 0 }
