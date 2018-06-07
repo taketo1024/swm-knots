@@ -58,7 +58,7 @@ public extension Link {
     
     public func KhChainComplex<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhBasisElement, R> {
         
-        let name = "CKh(\(self.name); \(R.symbol))"
+        let name = "CKh(\(self.name)\( R.self == 𝐙.self ? "" : "; \(R.symbol)"))"
         let (n⁺, n⁻) = (crossingNumber⁺, crossingNumber⁻)
         
         let cube = self.KhCube(μ, Δ, reduced: reduced)
@@ -88,7 +88,7 @@ public extension Link {
     }
     
     public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhBasisElement, R> {
-        let name = "Kh(\(self.name); \(R.symbol))"
+        let name = "Kh(\(self.name)\( R.self == 𝐙.self ? "" : "; \(R.symbol)"))"
         let C = self.KhChainComplex(R.self, reduced: reduced, normalized: normalized)
         return C.homology(name: name)
     }
