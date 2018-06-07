@@ -49,7 +49,7 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
     }
     
     public var description: String {
-        return factors.map{ "\($0)" }.joined(separator: "⊗") + Format.sub(state.description)
+        return factors.map{ "\($0)" }.joined(separator: "⊗") + Format.sub(state.description.replacingOccurrences(of: ", ", with: ""))
     }
     
     public static func generateBasis(state: IntList, power n: Int) -> [KhBasisElement] {

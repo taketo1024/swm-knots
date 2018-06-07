@@ -93,7 +93,9 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
     }
     
     public func describe(_ I: IntList) {
-        print("\(I): \(self[I])")
+        print("\(I): ", terminator: "")
+        self[I].describe()
+        print()
     }
     
     public func describeAll() {
