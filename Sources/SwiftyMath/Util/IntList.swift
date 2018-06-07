@@ -50,6 +50,14 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
         return IntList(components.removed(at: i))
     }
     
+    public func dropLast() -> IntList {
+        return drop(length - 1)
+    }
+    
+    public func append(_ n: Int) -> IntList {
+        return IntList(components + [n])
+    }
+    
     public static func +(I: IntList, J: IntList) -> IntList {
         let l = max(I.length, J.length)
         return IntList( (0 ..< l).map{ i in I[i] + J[i] } )

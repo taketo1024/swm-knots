@@ -21,18 +21,6 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
         return factors.sum{ e in e.degree } + state.components.count{ $0 == 1 }
     }
     
-    /*
-    public func stateModified(_ i: Int, _ bit: KauffmanState.Bit?) -> KhBasisElement {
-        var s = state
-        if let bit = bit {
-            s[i] = bit
-        } else {
-            s.unset(i)
-        }
-        return KhBasisElement(state: s, factors: factors)
-    }
- */
-    
     public static func ==(b1: KhBasisElement, b2: KhBasisElement) -> Bool {
         return b1.state == b2.state && b1.factors == b2.factors
     }
@@ -172,12 +160,12 @@ public func +<R: Ring>(m1: @escaping KhBasisElement.Product<R>, m2: @escaping Kh
     return { (e1, e2) in m1(e1, e2) + m2(e1, e2) }
 }
 
-public func *<R: Ring>(r: R, m: @escaping KhBasisElement.Product<R>) -> KhBasisElement.Product<R> {
-    return { (e1, e2) in m(e1, e2).map{ (x, a) in (x, r * a) } }
-}
-
 public func +<R: Ring>(c1: @escaping KhBasisElement.Coproduct<R>, c2: @escaping KhBasisElement.Coproduct<R>) -> KhBasisElement.Coproduct<R> {
     return { e in c1(e) + c2(e) }
+}
+
+public func *<R: Ring>(r: R, m: @escaping KhBasisElement.Product<R>) -> KhBasisElement.Product<R> {
+    return { (e1, e2) in m(e1, e2).map{ (x, a) in (x, r * a) } }
 }
 
 public func *<R: Ring>(r: R, c: @escaping KhBasisElement.Coproduct<R>) -> KhBasisElement.Coproduct<R> {
