@@ -17,7 +17,7 @@ import SwiftyMath
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
 private func extract<A, R: EuclideanRing>(_ generators: [FreeModule<A, R>]) -> ([A], Matrix<R>, Matrix<R>) {
-    if generators.forAll({ z in z.elements.count == 1 && z.elements.anyElement!.value == .identity }) {
+    if generators.forAll({ z in z.isSingle }) {
         let rootBasis = generators.map{ z in z.basis[0] }
         let I = Matrix<R>.identity(size: generators.count)
         return (rootBasis, I, I)
@@ -53,9 +53,14 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
     // e.g) generators = [(2, 0), (0, 2)]
     
     public init(basis: [FreeModule<A, R>]) {
-        let summands = basis.map{ z in Summand(z) }
-        let (rootBasis, _, T) = extract(basis)
-        self.init(summands, rootBasis, T)
+        if basis.forAll({ $0.isSingle }) {
+            self.init(basis: basis.map{ $0.basis[0] })
+        } else {
+            let summands = basis.map{ z in Summand(z) }
+            let (rootBasis, A, T) = extract(basis)
+            assert(T * A == Matrix.identity(size: basis.count))
+            self.init(summands, rootBasis, T)
+        }
     }
     
     public init(generators: [A], relationMatrix B: Matrix<R>) {
@@ -64,14 +69,24 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
     }
     
     public init(generators: [FreeModule<A, R>], relationMatrix B: Matrix<R>) {
-        let (rootBasis, A, T) = extract(generators)
-        self.init(rootBasis: rootBasis, generatingMatrix: A, transitionMatrix: T, relationMatrix: B)
+        if generators.forAll({ $0.isSingle }) {
+            let basis = generators.map{ $0.basis[0] }
+            self.init(generators: basis, relationMatrix: B)
+        } else {
+            let (rootBasis, A, T) = extract(generators)
+            self.init(rootBasis: rootBasis, generatingMatrix: A, transitionMatrix: T, relationMatrix: B)
+        }
     }
     
     public init(generators: [FreeModule<A, R>], generatingMatrix A: Matrix<R>, transitionMatrix T: Matrix<R>, relationMatrix B: Matrix<R>) {
-        let (rootBasis, A0, T0) = extract(generators)
-        assert(T0 * A0 == Matrix.identity(size: generators.count))
-        self.init(rootBasis: rootBasis, generatingMatrix: A0 * A, transitionMatrix: T * T0, relationMatrix: B)
+        if generators.forAll({ $0.isSingle }) {
+            let basis = generators.map{ $0.basis[0] }
+            self.init(rootBasis: basis, generatingMatrix: A, transitionMatrix: T, relationMatrix: B)
+        } else {
+            let (rootBasis, A0, T0) = extract(generators)
+            assert(T0 * A0 == Matrix.identity(size: generators.count))
+            self.init(rootBasis: rootBasis, generatingMatrix: A0 * A, transitionMatrix: T * T0, relationMatrix: B)
+        }
     }
     
     /*
