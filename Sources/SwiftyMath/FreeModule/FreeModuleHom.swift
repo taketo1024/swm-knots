@@ -16,13 +16,7 @@ public struct FreeModuleHom<A: BasisElementType, B: BasisElementType, R: Ring>: 
     // MEMO: determined by the image of the basis.
     public init(_ f: @escaping (A) -> Codomain) {
         self.init { (m: Domain) in
-            var d: [B : R] = [:]
-            for (a, r) in m.elements {
-                for (b, s) in f(a).elements {
-                    d[b] = d[b, default: .zero] + r * s
-                }
-            }
-            return Codomain(d)
+            m.elements.map{ (a, r) in r * f(a) }.sumAll()
         }
     }
     

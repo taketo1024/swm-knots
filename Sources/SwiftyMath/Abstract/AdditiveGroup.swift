@@ -5,11 +5,16 @@ public protocol AdditiveGroup: SetType {
     static func + (a: Self, b: Self) -> Self
     prefix static func - (x: Self) -> Self
     static func -(a: Self, b: Self) -> Self
+    static func sum(_ elements: [Self]) -> Self
 }
 
 public extension AdditiveGroup {
     public static func -(a: Self, b: Self) -> Self {
         return (a + (-b))
+    }
+    
+    public static func sum(_ elements: [Self]) -> Self {
+        return elements.reduce(.zero){ (res, e) in res + e }
     }
 }
 
@@ -139,6 +144,12 @@ public extension AdditiveGroupHomType {
     
     public prefix static func - (f: Self) -> Self {
         return Self { x in -f.applied(to: x) }
+    }
+    
+    public static func sum(_ elements: [Self]) -> Self {
+        return Self { x in
+            elements.map{ f in f.applied(to: x) }.sumAll()
+        }
     }
 }
 

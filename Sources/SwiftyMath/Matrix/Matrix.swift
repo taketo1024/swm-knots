@@ -124,8 +124,19 @@ public struct _Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
         return Matrix<R>(a.impl ⊕ b.impl)
     }
     
+    public static func ⊗ <n2, m2>(a: _Matrix<n, m, R>, b: _Matrix<n2, m2, R>) -> Matrix<R> {
+        let (n, m) = (b.rows, b.cols)
+        return Matrix<R>(rows: a.rows * b.rows, cols: a.cols * b.cols) { (i, j) in
+            a[i / n, j / m] * b[i % n, j % m]
+        }
+    }
+    
     public func mapValues<R2>(_ f: (R) -> R2) -> _Matrix<n, m, R2> {
         return _Matrix<n, m, R2>(impl.mapValues(f))
+    }
+    
+    public var isZero: Bool {
+        return impl.isZero
     }
 
     public var diagonal: [R] {

@@ -19,7 +19,7 @@ public protocol _ModuleObject: Equatable {
     associatedtype A: BasisElementType
     associatedtype R: EuclideanRing
     
-    init(generators: [A])
+    init(basis: [A])
     var entity: ModuleObject<A, R> { get }
 }
 
@@ -35,7 +35,7 @@ public extension GridN where Object: _ModuleObject {
     
     public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (IntList, [A]?) {
         let grid = Dictionary(pairs: list.map{ (I, basis) in
-            (I, basis.map{ Object(generators: $0) })
+            (I, basis.map{ Object(basis: $0) })
         })
         self.init(name: name, grid: grid, default: defaultObject)
     }
@@ -85,9 +85,11 @@ public extension GridN where Object: _ModuleObject {
     }
     
     public func describeAll() {
+        print(name)
         for I in mDegrees {
             describe(I)
         }
+        print()
     }
 }
 

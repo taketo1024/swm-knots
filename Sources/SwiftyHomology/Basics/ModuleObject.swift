@@ -16,37 +16,77 @@ import SwiftyMath
 // See: https://en.wikipedia.org/wiki/Free_presentation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
+private func extract<A, R: EuclideanRing>(_ generators: [FreeModule<A, R>]) -> ([A], Matrix<R>, Matrix<R>) {
+    if generators.forAll({ z in z.isSingle }) {
+        let rootBasis = generators.map{ z in z.basis[0] }
+        let I = Matrix<R>.identity(size: generators.count)
+        return (rootBasis, I, I)
+    } else {
+        let rootBasis = generators.flatMap{ $0.basis }.unique().sorted()
+        let A = Matrix(rows: rootBasis.count, cols: generators.count) { (i, j) in generators[j][rootBasis[i]] }
+        let T = A.elimination(form: .RowHermite).left.submatrix(rowRange: 0 ..< generators.count)
+        return (rootBasis, A, T)
+    }
+}
+
 public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, CustomStringConvertible {
     public let summands: [Summand]
     
     // MEMO values used for factorization where R: EuclideanRing
-    internal let basis: [A]
-    internal let transform: Matrix<R>
+    internal let rootBasis: [A]
+    internal let transition: Matrix<R>
     
     // root initializer
-    internal init(_ summands: [Summand], _ basis: [A], _ transform: Matrix<R>) {
+    internal init(_ summands: [Summand], _ rootBasis: [A], _ transition: Matrix<R>) {
         self.summands = summands
-        self.basis = basis
-        self.transform = transform
+        self.rootBasis = rootBasis
+        self.transition = transition
     }
     
-    public init(generators: [A]) {
-        self.init(generators: generators, relationMatrix: nil)
-    }
-    
-    public init(generators: [A], relationMatrix B: Matrix<R>?) {
-        let I = Matrix<R>.identity(size: generators.count)
-        self.init(basis: generators, generatingMatrix: I, transitionMatrix: I, relationMatrix: B)
+    public init(basis: [A]) {
+        let summands = basis.map{ z in Summand(z) }
+        let I = Matrix<R>.identity(size: basis.count)
+        self.init(summands, basis, I)
     }
     
     // TODO must consider when `generators` does not form a subbasis of R^n
     // e.g) generators = [(2, 0), (0, 2)]
     
-    public init(generators: [FreeModule<A, R>], relationMatrix B: Matrix<R>? = nil) {
-        let basis = generators.flatMap{ $0.basis }.unique().sorted()
-        let A = Matrix(rows: basis.count, cols: generators.count) { (i, j) in generators[j][basis[i]] }
-        let T = A.elimination(form: .RowEchelon).left.submatrix(rowRange: 0 ..< generators.count)
-        self.init(basis: basis, generatingMatrix: A, transitionMatrix: T, relationMatrix: B)
+    public init(basis: [FreeModule<A, R>]) {
+        if basis.forAll({ $0.isSingle }) {
+            self.init(basis: basis.map{ $0.basis[0] })
+        } else {
+            let summands = basis.map{ z in Summand(z) }
+            let (rootBasis, A, T) = extract(basis)
+            assert(T * A == Matrix.identity(size: basis.count))
+            self.init(summands, rootBasis, T)
+        }
+    }
+    
+    public init(generators: [A], relationMatrix B: Matrix<R>) {
+        let I = Matrix<R>.identity(size: generators.count)
+        self.init(rootBasis: generators, generatingMatrix: I, transitionMatrix: I, relationMatrix: B)
+    }
+    
+    public init(generators: [FreeModule<A, R>], relationMatrix B: Matrix<R>) {
+        if generators.forAll({ $0.isSingle }) {
+            let basis = generators.map{ $0.basis[0] }
+            self.init(generators: basis, relationMatrix: B)
+        } else {
+            let (rootBasis, A, T) = extract(generators)
+            self.init(rootBasis: rootBasis, generatingMatrix: A, transitionMatrix: T, relationMatrix: B)
+        }
+    }
+    
+    public init(generators: [FreeModule<A, R>], generatingMatrix A: Matrix<R>, transitionMatrix T: Matrix<R>, relationMatrix B: Matrix<R>) {
+        if generators.forAll({ $0.isSingle }) {
+            let basis = generators.map{ $0.basis[0] }
+            self.init(rootBasis: basis, generatingMatrix: A, transitionMatrix: T, relationMatrix: B)
+        } else {
+            let (rootBasis, A0, T0) = extract(generators)
+            assert(T0 * A0 == Matrix.identity(size: generators.count))
+            self.init(rootBasis: rootBasis, generatingMatrix: A0 * A, transitionMatrix: T * T0, relationMatrix: B)
+        }
     }
     
     /*
@@ -61,13 +101,10 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
      *  0 -> R^l >---> R^k --->> M' -> 0
      *
      */
-    public init(basis: [A], generatingMatrix A: Matrix<R>, transitionMatrix T:Matrix<R>, relationMatrix _B: Matrix<R>?) {
-        
-        let B = _B ?? Matrix.zero(rows: A.cols, cols: 0)
-        
+    public init(rootBasis: [A], generatingMatrix A: Matrix<R>, transitionMatrix T: Matrix<R>, relationMatrix B: Matrix<R>) {
         let (n, k, l) = (A.rows, A.cols, B.cols)
         
-        assert(n == basis.count)
+        assert(n == rootBasis.count)
         assert(k == B.rows)
         assert(n >= k)
         assert(k >= l)
@@ -81,30 +118,19 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
         let T2 = (elim.left * T).submatrix(rowRange: (k - s) ..< k)
         
         // MEMO see TODO above.
-        assert(T2 * A2 == Matrix<R>.identity(size: s))
+//        assert(T2 * A2 == Matrix<R>.identity(size: s))
         
-        let summands = (0 ..< s)
-            .map { j -> Summand in
-                let d = D[k - s + j]
-                let g = A2.nonZeroComponents(ofCol: j).sum { c in
-                    FreeModule(basis[c.row], c.value)
-                }
-                return Summand(g, d)
+if T2 * A2 != Matrix<R>.identity(size: s) {
+    Logger.write(.warn, "factorize() won't work properly.")
+}
+
+        let generators = rootBasis * A2
+        let summands = generators.enumerated().map { (j, z) -> Summand in
+            let d = D[k - s + j]
+            return Summand(z, d)
         }
         
-        
-        self.init(summands, basis, T2)
-    }
-    
-    public init(basis: [FreeModule<A, R>], generatingMatrix A: Matrix<R>, transitionMatrix T: Matrix<R>, relationMatrix B: Matrix<R>?) {
-        
-        let oBasis = basis.flatMap{ $0.basis }.unique().sorted()
-        let A0 = Matrix(rows: oBasis.count, cols: basis.count) { (i, j) in basis[j][oBasis[i]] }
-        let T0 = A0.elimination(form: .RowHermite).left.submatrix(rowRange: 0 ..< basis.count)
-        
-        assert(T0 * A0 == Matrix.identity(size: basis.count))
-        
-        self.init(basis: oBasis, generatingMatrix: A0 * A, transitionMatrix: T * T0, relationMatrix: B)
+        self.init(summands, rootBasis, T2)
     }
     
     public subscript(i: Int) -> Summand {
@@ -140,13 +166,11 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
     }
     
     public var freePart: ModuleObject<A, R> {
-        let indices = (0 ..< summands.count).filter{ i in self[i].isFree }
-        return subSummands(indices: indices)
+        return subSummands{ s in s.isFree }
     }
     
     public var torsionPart: ModuleObject<A, R> {
-        let indices = (0 ..< summands.count).filter{ i in !self[i].isFree }
-        return subSummands(indices: indices)
+        return subSummands{ s in !s.isFree }
     }
     
     public func subSummands(_ indices: Int ...) -> ModuleObject<A, R> {
@@ -155,29 +179,36 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
     
     public func subSummands(indices: [Int]) -> ModuleObject<A, R> {
         let sub = indices.map{ summands[$0] }
-        let T = transform.submatrix(rowsMatching: { i in indices.contains(i)}, colsMatching: { _ in true })
-        return ModuleObject(sub, basis, T)
+        let T = transition.submatrix(rowsMatching: { i in indices.contains(i)}, colsMatching: { _ in true })
+        return ModuleObject(sub, rootBasis, T)
+    }
+    
+    public func subSummands(matching: (Summand) -> Bool) -> ModuleObject<A, R> {
+        let indices = (0 ..< summands.count).filter{ i in matching(self[i]) }
+        return subSummands(indices: indices)
+    }
+    
+    public func merge(with M2: ModuleObject<A, R>) -> ModuleObject<A, R> {
+        let M1 = self
+        assert( M1.rootBasis == M2.rootBasis )
+
+        let basis = M1.rootBasis
+        let summands = M1.summands + M2.summands
+        let T = M1.transition.concatRows(with: M2.transition)
+        
+        return ModuleObject(summands, basis, T)
     }
     
     public static func ⊕(M1: ModuleObject<A, R>, M2: ModuleObject<A, R>) -> ModuleObject<A, R> {
-        if M1.basis == M2.basis {
-            let basis = M1.basis
-            let summands = M1.summands + M2.summands
-            let T = M1.transform.concatRows(with: M2.transform)
-            return ModuleObject(summands, basis, T)
-
-        } else if M1.basis.isDisjoint(with: M2.basis) {
-            let basis = M1.basis + M2.basis
-            let summands = M1.summands + M2.summands
-            let T = M1.transform ⊕ M2.transform
-            return ModuleObject(summands, basis, T)
-        }
-        
-        fatalError()
+//        assert( M1.basis.isDisjoint(with: M2.basis) ) // commented out for performance
+        let basis = M1.rootBasis + M2.rootBasis
+        let summands = M1.summands + M2.summands
+        let T = M1.transition ⊕ M2.transition
+        return ModuleObject(summands, basis, T)
     }
     
     public func factorize(_ z: FreeModule<A, R>) -> [R] {
-        let v = transform * Vector(z.factorize(by: basis))
+        let v = transition * Vector(z.factorize(by: rootBasis))
         
         return summands.enumerated().map { (i, s) in
             return s.isFree ? v[i] : v[i] % s.divisor
@@ -207,7 +238,7 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
         if !isZero {
             print("\(self) {")
             for (i, x) in generators.enumerated() {
-                print("\t(\(i)) ", x)
+                print("\t(\(i))\t\(x)")
             }
             print("}")
         } else {
@@ -279,15 +310,14 @@ public extension ModuleObject where R == 𝐙 {
         typealias Summand = ModuleObject<A, Q>.Summand
         
         let n = t.intValue
-        let indices = (0 ..< self.summands.count).filter{ i in self[i].divisor == n }
-        let sub = subSummands(indices: indices)
+        let sub = subSummands{ s in s.divisor == n }
         
         let summands = sub.summands.map { s -> Summand in
             Summand(s.generator.mapValues{ Q($0) }, .zero)
         }
-        let transform = sub.transform.mapValues { Q($0) }
+        let transform = sub.transition.mapValues { Q($0) }
         
-        return ModuleObject<A, Q>(summands, basis, transform)
+        return ModuleObject<A, Q>(summands, rootBasis, transform)
     }
     
     public var order2torsionPart: ModuleObject<A, 𝐙₂> {
@@ -301,8 +331,8 @@ public extension ModuleObject where R == 𝐙₂ {
         let summands = self.summands.map { s -> Summand in
             Summand(s.generator.mapValues{ $0.representative }, 2)
         }
-        let T = self.transform.mapValues{ a in a.representative }
-        return ModuleObject<A, 𝐙>(summands, basis, T)
+        let T = self.transition.mapValues{ a in a.representative }
+        return ModuleObject<A, 𝐙>(summands, rootBasis, T)
     }
 }
 
@@ -321,20 +351,20 @@ public extension ModuleObject where R: EuclideanRing {
     public func asAbstract() -> ModuleObject<AbstractBasisElement, R> {
         typealias Summand = ModuleObject<AbstractBasisElement, R>.Summand
         
-        let basis = self.basis.enumerated().map{ (i, a) in
+        let basis = self.rootBasis.enumerated().map{ (i, a) in
             AbstractBasisElement(i, label: a.description)
         }
         let summands = self.summands.map { s in
-            Summand(s.generator.mapKeys { a in basis[self.basis.index(of: a)!] }, s.divisor)
+            Summand(s.generator.mapKeys { a in basis[self.rootBasis.index(of: a)!] }, s.divisor)
         }
         
-        return ModuleObject<AbstractBasisElement, R>(summands, basis, transform)
+        return ModuleObject<AbstractBasisElement, R>(summands, basis, transition)
     }
 }
 
 extension ModuleObject: Codable where A: Codable, R: Codable {
     enum CodingKeys: String, CodingKey {
-        case summands, basis, transform
+        case summands, basis, transform // TODO rename
     }
     
     public init(from decoder: Decoder) throws {
@@ -348,8 +378,8 @@ extension ModuleObject: Codable where A: Codable, R: Codable {
     public func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(summands, forKey: .summands)
-        try c.encode(basis, forKey: .basis)
-        try c.encode(transform, forKey: .transform)
+        try c.encode(rootBasis, forKey: .basis)
+        try c.encode(transition, forKey: .transform)
     }
 }
 

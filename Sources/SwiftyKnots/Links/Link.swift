@@ -34,7 +34,6 @@ public struct Link: Equatable, CustomStringConvertible {
     
     public let name: String
     internal let crossings: [Crossing]
-    internal let _KhCube: Cache<KhCube> = Cache()
     
     internal init(name: String, crossings: [Crossing]) {
         self.name = name
@@ -127,26 +126,29 @@ public struct Link: Equatable, CustomStringConvertible {
         return Set( crossings.flatMap{ x -> [Edge] in x.edges } )
     }
     
+    internal let _components: Cache<[Component]> = .empty
     public var components: [Component] {
-        var queue = edges.sorted()
-        var comps = [Component]()
-        
-        while !queue.isEmpty {
-            var c = [Edge]()
-            var e = queue.first!
-            var x = e.to!
+        return _components.useCacheOrSet {
+            var queue = edges.sorted()
+            var comps = [Component]()
             
-            while queue.contains(e) {
-                queue.remove(element: e)
-                c.append(e)
-                e = x.adjacent(e)
-                x = e.opposite(x)
+            while !queue.isEmpty {
+                var c = [Edge]()
+                var e = queue.first!
+                var x = e.to!
+                
+                while queue.contains(e) {
+                    queue.remove(element: e)
+                    c.append(e)
+                    e = x.adjacent(e)
+                    x = e.opposite(x)
+                }
+                
+                comps.append(Component(c))
             }
             
-            comps.append(Component(c))
+            return comps
         }
-        
-        return comps
     }
     
     public var crossingNumber: Int {

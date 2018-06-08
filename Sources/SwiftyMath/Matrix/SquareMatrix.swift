@@ -10,6 +10,7 @@ import Foundation
 
 public typealias SquareMatrix<n: _Int, R: Ring> = _Matrix<n, n, R>
 
+public typealias Matrix1<R: Ring> = SquareMatrix<_1, R>
 public typealias Matrix2<R: Ring> = SquareMatrix<_2, R>
 public typealias Matrix3<R: Ring> = SquareMatrix<_3, R>
 public typealias Matrix4<R: Ring> = SquareMatrix<_4, R>
@@ -94,6 +95,12 @@ extension SquareMatrix: Ring where n == m {
             print("\t", e, term)
             return e * term
         }
+    }
+}
+
+public extension SquareMatrix where n == m, n == _1 {
+    public var asScalar: R {
+        return self[0, 0]
     }
 }
 

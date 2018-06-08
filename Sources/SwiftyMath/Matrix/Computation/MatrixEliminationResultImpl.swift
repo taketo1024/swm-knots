@@ -32,6 +32,7 @@ internal class MatrixEliminationResultImpl<R: EuclideanRing> {
     final lazy var kernelMatrix: MatrixImpl<R> = _kernelMatrix()
     final lazy var imageMatrix: MatrixImpl<R>  = _imageMatrix()
     final lazy var kernelTransitionMatrix: MatrixImpl<R> = _kernelTransitionMatrix()
+    final lazy var imageTransitionMatrix: MatrixImpl<R>  = _imageTransitionMatrix()
 
     final var nullity: Int {
         return result.cols - rank
@@ -120,6 +121,10 @@ internal class MatrixEliminationResultImpl<R: EuclideanRing> {
     }
     
     func _kernelTransitionMatrix() -> MatrixImpl<R> {
+        fatalError("not available.")
+    }
+    
+    func _imageTransitionMatrix() -> MatrixImpl<R> {
         fatalError("not available.")
     }
 }

@@ -55,6 +55,10 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
         return list.map{ self[$0] }
     }
     
+    public var isSingle: Bool {
+        return elements.count == 1 && elements.anyElement!.value == .identity
+    }
+    
     public static var zero: FreeModule<A, R> {
         return FreeModule([])
     }
@@ -95,6 +99,14 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
         return FreeModule<A, R>(a.elements.mapValues{ $0 * r })
     }
     
+    public static func sum(_ elements: [FreeModule<A, R>]) -> FreeModule<A, R> {
+        var sum = [A : R]()
+        elements.forEach{ x in
+            sum.merge(x.elements) { (r1, r2) in r1 + r2 }
+        }
+        return FreeModule(sum)
+    }
+    
     public var description: String {
         return Format.terms("+", basis.map { a in (self[a], a.description, 1) })
     }
@@ -105,6 +117,19 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
     
     public var hashValue: Int {
         return (self == .zero) ? 0 : 1
+    }
+}
+
+public func *<A, R>(v: [A], a: Matrix<R>) -> [FreeModule<A, R>] {
+    return v.map{ FreeModule<A, R>($0) } * a
+}
+
+public func *<A, R>(v: [FreeModule<A, R>], a: Matrix<R>) -> [FreeModule<A, R>] {
+    assert(v.count == a.rows)
+    return (0 ..< a.cols).map{ j in
+        a.nonZeroComponents(ofCol: j).sum{ c in
+            v[c.row] * c.value
+        }
     }
 }
 

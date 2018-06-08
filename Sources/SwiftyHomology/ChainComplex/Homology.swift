@@ -18,7 +18,17 @@ public extension ChainComplexN {
         }
     }
     
-    internal func kernel(_ I: IntList) -> Matrix<R>? {
+    internal func dMatrix(_ I: IntList) -> Matrix<R>? {
+        if let c = dMatrices[I], let A = c.value {
+            return A // cached.
+        }
+        
+        let A = d.matrix(from: self, to: self, at: I)
+        dMatrices[I]?.value = A
+        return A
+    }
+    
+    internal func dKernel(_ I: IntList) -> Matrix<R>? {
         guard isFreeToFree(I), let A = dMatrix(I) else {
             return nil // indeterminable.
         }
@@ -27,7 +37,7 @@ public extension ChainComplexN {
         return E.kernelMatrix
     }
     
-    internal func kernelTransition(_ I: IntList) -> Matrix<R>? {
+    internal func dKernelTransition(_ I: IntList) -> Matrix<R>? {
         guard isFreeToFree(I), let A = dMatrix(I) else {
             return nil // indeterminable.
         }
@@ -36,13 +46,38 @@ public extension ChainComplexN {
         return E.kernelTransitionMatrix
     }
     
-    internal func image(_ I: IntList) -> Matrix<R>? {
+    internal func dImage(_ I: IntList) -> Matrix<R>? {
         guard isFreeToFree(I), let A = dMatrix(I) else {
             return nil // indeterminable.
         }
         
         let E = A.elimination(form: .Diagonal)
         return E.imageMatrix
+    }
+    
+    internal func dImageTransition(_ I: IntList) -> Matrix<R>? {
+        guard isFreeToFree(I), let A = dMatrix(I) else {
+            return nil // indeterminable.
+        }
+        
+        let E = A.elimination(form: .Diagonal)
+        return E.imageTransitionMatrix
+    }
+    
+    public func cycle(_ I: IntList) -> ModuleObject<A, R>? {
+        if let basis = self[I]?.generators, let Z = dKernel(I) {
+            return ModuleObject(basis: basis * Z)
+        } else {
+            return nil
+        }
+    }
+    
+    public func boundary(_ I: IntList) -> ModuleObject<A, R>? {
+        if let basis = self[I]?.generators, let B = dImage(I - dDegree) {
+            return ModuleObject(basis: basis * B)
+        } else {
+            return nil
+        }
     }
     
     public func homology(_ I: IntList) -> ModuleObject<A, R>? {
@@ -58,19 +93,19 @@ public extension ChainComplexN {
         }
         
         // case: obviously zero
-        if let Z = kernel(I), Z.isZero {
+        if let Z = dKernel(I), Z.isZero {
             return .zeroModule
         }
         
         // case: free
         if isFreeToFree(I) {
-            let basis = self[I]!.generators
-            let Z = kernel(I)!
-            let T = kernelTransition(I)!
-            let B = image(I - dDegree)!
+            let g = self[I]!.generators
+            let Z = dKernel(I)!
+            let T = dKernelTransition(I)!
+            let B = dImage(I - dDegree)!
                 
             let res = ModuleObject(
-                basis: basis,
+                generators: g,
                 generatingMatrix: Z,
                 transitionMatrix: T,
                 relationMatrix: T * B
@@ -83,7 +118,7 @@ public extension ChainComplexN {
             if R.self == 𝐙.self && self[I]!.torsionCoeffs.forAll({ $0 as! 𝐙 == 2 }) {
                 let free = (freePart.homology(I)! as! ModuleObject<A, 𝐙>)
                 let tor = (self as! ChainComplexN<n, A, 𝐙>).order2torsionPart.homology(I)!
-                let sum = free ⊕ tor.asIntegerQuotients
+                let sum = free.merge(with: tor.asIntegerQuotients) 
                 
                 return .some( sum as! ModuleObject<A, R> )
             } else {
@@ -126,6 +161,22 @@ public extension ChainComplexN {
                 return (t0[j].0 == t1[i].0) || B.isZero
             }
         }
+    }
+    
+    public func cycle() -> ModuleGridN<n, A, R> {
+        return ModuleGridN(
+            name: "Z(\(base.name))",
+            list: base.mDegrees.map{ I in (I, cycle(I)) },
+            default: base.defaultObject
+        )
+    }
+    
+    public func boundary() -> ModuleGridN<n, A, R> {
+        return ModuleGridN(
+            name: "B(\(base.name))",
+            list: base.mDegrees.map{ I in (I, boundary(I)) },
+            default: base.defaultObject
+        )
     }
     
     public func homology(name: String? = nil) -> ModuleGridN<n, A, R> {

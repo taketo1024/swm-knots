@@ -51,6 +51,10 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         return d.mDegree
     }
     
+    public var mDegrees: [IntList] {
+        return base.mDegrees
+    }
+    
     public func shifted(_ I: IntList) -> ChainComplexN<n, A, R> {
         return ChainComplexN(base: base.shifted(I), differential: d.shifted(I))
     }
@@ -67,23 +71,13 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         )
     }
     
-    internal func dMatrix(_ I: IntList) -> Matrix<R>? {
-        if let c = dMatrices[I], let A = c.value {
-            return A // cached.
-        }
-
-        let A = d.matrix(from: self, to: self, at: I)
-        dMatrices[I]?.value = A
-        return A
-    }
-    
     // MEMO works only when each generator is a single basis-element.
     
     public func dual(name: String? = nil) -> ChainComplexN<n, Dual<A>, R> {
         typealias D = ChainComplexN<n, Dual<A>, R>
         
         let dName = name ?? "\(base.name)^*"
-        let dList: [(IntList, [Dual<A>]?)] = base.mDegrees.map { I -> (IntList, [Dual<A>]?) in
+        let dList: [(IntList, [Dual<A>]?)] = mDegrees.map { I -> (IntList, [Dual<A>]?) in
             guard let o = self[I] else {
                 return (I, nil)
             }
@@ -101,10 +95,10 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
     
     public func assertChainComplex(debug: Bool = false) {
         func print(_ msg: @autoclosure () -> String) {
-            Swift.print(msg())
+            if debug { Swift.print(msg()) }
         }
         
-        for I0 in base.mDegrees {
+        for I0 in mDegrees {
             let I1 = I0 + dDegree
             let I2 = I1 + dDegree
             
@@ -119,12 +113,19 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
             
             for x in s0.generators {
                 let y = d[I0].applied(to: x)
+                
                 let z = d[I1].applied(to: y)
                 print("\t\(x) ->\t\(y) ->\t\(z)")
                 
+                assert(s1.contains(y))
+                assert(s2.contains(z))
                 assert(s2.elementIsZero(z))
             }
         }
+    }
+    
+    public func describeAll() {
+        base.describeAll()
     }
     
     public func describe(_ I: IntList) {
@@ -160,6 +161,10 @@ public extension ChainComplexN where n == _1 {
         return base.topDegree
     }
     
+    public var degrees: [Int] {
+        return base.degrees
+    }
+    
     public func shifted(_ i: Int) -> ChainComplex<A, R> {
         return shifted(IntList(i))
     }
@@ -180,6 +185,10 @@ public extension ChainComplexN where n == _2 {
         } set {
             base[i, j] = newValue
         }
+    }
+    
+    public var bidegrees: [(Int, Int)] {
+        return base.bidegrees
     }
     
     public func shifted(_ i: Int, _ j: Int) -> ChainComplex2<A, R> {

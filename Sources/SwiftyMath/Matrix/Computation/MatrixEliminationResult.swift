@@ -50,13 +50,16 @@ public struct MatrixEliminationResult<n: _Int, m: _Int, R: EuclideanRing> {
         return _Matrix(impl.kernelMatrix)
     }
     
+    public var kernelTransitionMatrix: _Matrix<Dynamic, m, R> {
+        return _Matrix(impl.kernelTransitionMatrix)
+    }
+    
     public var imageMatrix: _Matrix<n, Dynamic, R> {
         return _Matrix(impl.imageMatrix)
     }
     
-    // The left inverse of kernelMatrix
-    public var kernelTransitionMatrix: _Matrix<Dynamic, m, R> {
-        return _Matrix(impl.kernelTransitionMatrix)
+    public var imageTransitionMatrix: _Matrix<Dynamic, n, R> {
+        return _Matrix(impl.imageTransitionMatrix)
     }
     
     public var isInjective: Bool {

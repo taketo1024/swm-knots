@@ -28,7 +28,9 @@ public extension Link {
         return allStates.sum { s -> KauffmanBracketPolynomial in
             let L = self.spliced(by: s)
             let n = L.components.count
-            return A.pow(s.count0 - s.count1) * B.pow(b ? n - 1 : n)
+            let c0 = s.components.count{ $0 == 0 }
+            let c1 = s.length - c0
+            return A.pow(c0 - c1) * B.pow(b ? n - 1 : n)
         }
     }
 }
