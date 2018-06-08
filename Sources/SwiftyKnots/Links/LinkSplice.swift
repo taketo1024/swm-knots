@@ -23,6 +23,7 @@ public extension Link {
 
     @discardableResult
     public mutating func splice(at i: Int, type: Int) -> Link {
+        _components.clear()
         switch type {
         case 0: crossings[i].splice0()
         case 1: crossings[i].splice1()
