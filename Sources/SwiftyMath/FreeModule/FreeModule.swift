@@ -55,6 +55,10 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
         return list.map{ self[$0] }
     }
     
+    public var isSingle: Bool {
+        return elements.count == 1 && elements.anyElement!.value == .identity
+    }
+    
     public static var zero: FreeModule<A, R> {
         return FreeModule([])
     }
