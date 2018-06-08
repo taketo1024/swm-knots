@@ -18,6 +18,16 @@ public extension ChainComplexN {
         }
     }
     
+    internal func dMatrix(_ I: IntList) -> Matrix<R>? {
+        if let c = dMatrices[I], let A = c.value {
+            return A // cached.
+        }
+        
+        let A = d.matrix(from: self, to: self, at: I)
+        dMatrices[I]?.value = A
+        return A
+    }
+    
     internal func dKernel(_ I: IntList) -> Matrix<R>? {
         guard isFreeToFree(I), let A = dMatrix(I) else {
             return nil // indeterminable.

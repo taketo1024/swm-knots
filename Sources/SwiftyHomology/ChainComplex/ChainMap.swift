@@ -42,8 +42,26 @@ public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Eu
             return .zero(rows: s1.generators.count, cols: s0.generators.count) // trivially zero
         }
         
+        let map = self[I]
+        
+        if  s0.isFree, s0.generators.forAll({ $0.isSingle }),
+            s1.isFree, s1.generators.forAll({ $0.isSingle }) {
+            
+            let (from, to) = (s0.generators.map{ $0.basis[0] }, s1.generators.map{ $0.basis[0] })
+            let toIndexer = to.indexer()
+            
+            let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
+                map.applied(to: x).elements.map { (y, a) -> MatrixComponent<R> in
+                    let i = toIndexer(y)
+                    return MatrixComponent(i, j, a)
+                }
+            }
+            
+            return Matrix(rows: to.count, cols: from.count, components: components)
+        }
+        
         let grid = s0.generators.flatMap { x -> [R] in
-            let y = self[I].applied(to: x)
+            let y = map.applied(to: x)
             return s1.factorize(y)
         }
         

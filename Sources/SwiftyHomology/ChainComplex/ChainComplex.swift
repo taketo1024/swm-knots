@@ -71,16 +71,6 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         )
     }
     
-    internal func dMatrix(_ I: IntList) -> Matrix<R>? {
-        if let c = dMatrices[I], let A = c.value {
-            return A // cached.
-        }
-
-        let A = d.matrix(from: self, to: self, at: I)
-        dMatrices[I]?.value = A
-        return A
-    }
-    
     // MEMO works only when each generator is a single basis-element.
     
     public func dual(name: String? = nil) -> ChainComplexN<n, Dual<A>, R> {
