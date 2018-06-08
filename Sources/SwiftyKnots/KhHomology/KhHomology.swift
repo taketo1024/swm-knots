@@ -22,10 +22,10 @@ public extension Link {
             let basis = A.generateBasis(state: s, power: comps.count)
             
             if !reduced {
-                return ModuleObject(generators: basis)
+                return ModuleObject(basis: basis)
             } else {
                 let rBasis = basis.filter{ $0.factors[0] == .I }
-                return ModuleObject(generators: rBasis)
+                return ModuleObject(basis: rBasis)
             }
         }
         

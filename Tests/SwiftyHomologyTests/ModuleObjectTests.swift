@@ -22,7 +22,7 @@ class ModuleObjectTests: XCTestCase {
         let b = M(basis: basis, components: [0, 1, 0])
         let c = M(basis: basis, components: [0, 0, 1])
         
-        let str = S(generators: [a, b, c])
+        let str = S(basis: [a, b, c])
         
         XCTAssertEqual(str.rank, 3)
         XCTAssertEqual(str.factorize(a), [1, 0, 0])
@@ -35,7 +35,7 @@ class ModuleObjectTests: XCTestCase {
         let a = M(basis: basis, components: [1, 1, 0])
         let b = M(basis: basis, components: [0, 0, 1])
         
-        let str = S(generators: [a, b])
+        let str = S(basis: [a, b])
         
         XCTAssertEqual(str.rank, 2)
         XCTAssertEqual(str.factorize(a), [1, 0])
@@ -151,7 +151,7 @@ class ModuleObjectTests: XCTestCase {
         let basis = (0 ..< 3).map{ A($0) }
         
         let sub0 = S(generators: [basis[0]], relationMatrix: Matrix<R>(rows: 1, cols: 1, grid:[2]))
-        let sub2 = S(generators: [basis[2]])
+        let sub2 = S(basis: [basis[2]])
         let sum = sub0 ⊕ sub2
         
         XCTAssertEqual(sum.structure, [0: 1, 2: 1])

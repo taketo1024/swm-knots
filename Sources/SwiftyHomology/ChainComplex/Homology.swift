@@ -55,26 +55,16 @@ public extension ChainComplexN {
     }
     
     public func cycle(_ I: IntList) -> ModuleObject<A, R>? {
-        if let Z = dKernel(I),
-            let T = dKernelTransition(I) {
-            return ModuleObject(
-                basis: self[I]!.generators,
-                generatingMatrix: Z,
-                transitionMatrix: T
-            )
+        if let basis = self[I]?.generators, let Z = dKernel(I) {
+            return ModuleObject(basis: basis * Z)
         } else {
             return nil
         }
     }
     
     public func boundary(_ I: IntList) -> ModuleObject<A, R>? {
-        if let B = dImage(I - dDegree),
-           let T = dImageTransition(I - dDegree) {
-            return ModuleObject(
-                basis: self[I]!.generators,
-                generatingMatrix: B,
-                transitionMatrix: T
-            )
+        if let basis = self[I]?.generators, let B = dImage(I - dDegree) {
+            return ModuleObject(basis: basis * B)
         } else {
             return nil
         }
@@ -99,13 +89,13 @@ public extension ChainComplexN {
         
         // case: free
         if isFreeToFree(I) {
-            let basis = self[I]!.generators
+            let g = self[I]!.generators
             let Z = dKernel(I)!
             let T = dKernelTransition(I)!
             let B = dImage(I - dDegree)!
                 
             let res = ModuleObject(
-                basis: basis,
+                generators: g,
                 generatingMatrix: Z,
                 transitionMatrix: T,
                 relationMatrix: T * B

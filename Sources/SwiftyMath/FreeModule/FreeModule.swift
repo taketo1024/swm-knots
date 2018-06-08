@@ -116,6 +116,19 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
     }
 }
 
+public func *<A, R>(v: [A], a: Matrix<R>) -> [FreeModule<A, R>] {
+    return v.map{ FreeModule<A, R>($0) } * a
+}
+
+public func *<A, R>(v: [FreeModule<A, R>], a: Matrix<R>) -> [FreeModule<A, R>] {
+    assert(v.count == a.rows)
+    return (0 ..< a.cols).map{ j in
+        a.nonZeroComponents(ofCol: j).sum{ c in
+            v[c.row] * c.value
+        }
+    }
+}
+
 extension FreeModule: VectorSpace where R: Field {}
 
 public func pair<A, R>(_ x: FreeModule<A, R>, _ y: FreeModule<Dual<A>, R>) -> R {
