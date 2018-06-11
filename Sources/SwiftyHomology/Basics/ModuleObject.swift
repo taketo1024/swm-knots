@@ -355,7 +355,7 @@ public extension ModuleObject where R: EuclideanRing {
             AbstractBasisElement(i, label: a.description)
         }
         let summands = self.summands.map { s in
-            Summand(s.generator.mapKeys { a in basis[self.rootBasis.index(of: a)!] }, s.divisor)
+            Summand(s.generator.mapBasis { a in basis[self.rootBasis.index(of: a)!] }, s.divisor)
         }
         
         return ModuleObject<AbstractBasisElement, R>(summands, basis, transition)

@@ -91,7 +91,7 @@ public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Eu
             
             return matrix.nonZeroComponents(ofRow: i).sum { (c: MatrixComponent<R>) in
                 let (j, r) = (c.col, c.value)
-                return r * s0.generator(j).mapKeys{ $0.dual }
+                return r * s0.generator(j).mapBasis{ $0.dual }
             }
         }
     }
