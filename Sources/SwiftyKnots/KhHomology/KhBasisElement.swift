@@ -21,6 +21,25 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
         return tensor.degree + state.components.count{ $0 == 1 }
     }
     
+    public typealias   Product<R: Ring> = Tensor<E>.Product<R>
+    public typealias Coproduct<R: Ring> = Tensor<E>.Coproduct<R>
+    
+    public func applied<R: Ring>(_ μ: Product<R>, at: (Int, Int), to: Int, state: IntList) -> FreeModule<KhBasisElement, R> {
+        return tensor.applied(μ, at: at, to: to).mapBasis {
+            KhBasisElement(state, $0)
+        }
+    }
+    
+    public func applied<R: Ring>(_ Δ: Coproduct<R>, at: Int, to: (Int, Int), state: IntList) -> FreeModule<KhBasisElement, R> {
+        return tensor.applied(Δ, at: at, to: to).mapBasis {
+            KhBasisElement(state, $0)
+        }
+    }
+    
+    public func mapFactors<R: Ring>(_ f: (E) -> [(E, R)]) -> FreeModule<KhBasisElement, R> {
+        return tensor.mapFactors(f).mapBasis { KhBasisElement(state, $0) }
+    }
+    
     public static func ==(b1: KhBasisElement, b2: KhBasisElement) -> Bool {
         return b1.state == b2.state && b1.tensor == b2.tensor
     }
@@ -28,6 +47,13 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
     public static func <(b1: KhBasisElement, b2: KhBasisElement) -> Bool {
         return (b1.state < b2.state)
             || (b1.state == b2.state && b1.tensor < b2.tensor)
+    }
+    
+    public static func generateBasis(state: IntList, power n: Int) -> [KhBasisElement] {
+        return IntList.binaryCombinations(length: n).map { I in
+            let factors: [E] = I.components.map{ $0 == 0 ? .X : .I  }
+            return KhBasisElement.init(state, Tensor(factors))
+            }.sorted()
     }
     
     public var hashValue: Int {
@@ -38,13 +64,6 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
     
     public var description: String {
         return tensor.description + Format.sub(state.description.replacingOccurrences(of: ", ", with: ""))
-    }
-    
-    public static func generateBasis(state: IntList, power n: Int) -> [KhBasisElement] {
-        return IntList.binaryCombinations(length: n).map { I in
-            let factors: [E] = I.components.map{ $0 == 0 ? .X : .I  }
-            return KhBasisElement.init(state, Tensor(factors))
-        }.sorted()
     }
     
     public enum E: Int, BasisElementType, Codable {
@@ -66,21 +85,6 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
 }
 
 public extension KhBasisElement {
-    public typealias   Product<R: Ring> = Tensor<E>.Product<R>
-    public typealias Coproduct<R: Ring> = Tensor<E>.Coproduct<R>
-    
-    public func applied<R: Ring>(_ μ: Product<R>, at: (Int, Int), to: Int, state: IntList) -> FreeModule<KhBasisElement, R> {
-        return tensor.applied(μ, at: at, to: to).mapBasis {
-            KhBasisElement(state, $0)
-        }
-    }
-    
-    public func applied<R: Ring>(_ Δ: Coproduct<R>, at: Int, to: (Int, Int), state: IntList) -> FreeModule<KhBasisElement, R> {
-        return tensor.applied(Δ, at: at, to: to).mapBasis {
-            KhBasisElement(state, $0)
-        }
-    }
-    
     // Khovanov's map
     public static func μ<R: Ring>(_ type: R.Type) -> Product<R> {
         return { (e1, e2) in

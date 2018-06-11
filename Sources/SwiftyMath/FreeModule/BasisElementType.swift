@@ -71,22 +71,6 @@ public struct Tensor<A: BasisElementType>: BasisElementType {
         return factors.sum { $0.degree }
     }
     
-    public static func generateBasis(from basis: [A], pow n: Int) -> [Tensor<A>] {
-        return (0 ..< n).reduce([[]]) { (res, _) -> [[A]] in
-            res.flatMap{ (factors: [A]) -> [[A]] in
-                basis.map{ x in factors + [x] }
-            }
-        }.map{ factors in Tensor(factors) }
-    }
-    
-    public static func ⊗(t1: Tensor<A>, t2: Tensor<A>) -> Tensor<A> {
-        return Tensor(t1.factors + t2.factors)
-    }
-    
-    public static func < (t1: Tensor<A>, t2: Tensor<A>) -> Bool {
-        return t1.factors.lexicographicallyPrecedes(t2.factors)
-    }
-    
     public typealias   Product<R: Ring> = (A, A) -> [(A, R)]
     public typealias Coproduct<R: Ring> = (A) -> [(A, A, R)]
     
@@ -115,7 +99,34 @@ public struct Tensor<A: BasisElementType>: BasisElementType {
             return FreeModule(Tensor(factors))
         }
     }
-
+    
+    public func mapFactors<R>(_ f: (A) -> [(A, R)]) -> FreeModule<Tensor<A>, R> {
+        let all = factors.reduce([([], .identity)]) { (res, e) -> [([A], R)] in
+            f(e).flatMap{ (e, r) in
+                res.map{ (factors, r0) in (factors + [e], r0 * r) }
+            }
+        }
+        return all.sum{ (factors, r) in
+            return FreeModule(Tensor(factors), r)
+        }
+    }
+    
+    public static func ⊗(t1: Tensor<A>, t2: Tensor<A>) -> Tensor<A> {
+        return Tensor(t1.factors + t2.factors)
+    }
+    
+    public static func < (t1: Tensor<A>, t2: Tensor<A>) -> Bool {
+        return t1.factors.lexicographicallyPrecedes(t2.factors)
+    }
+    
+    public static func generateBasis(from basis: [A], pow n: Int) -> [Tensor<A>] {
+        return (0 ..< n).reduce([[]]) { (res, _) -> [[A]] in
+            res.flatMap{ (factors: [A]) -> [[A]] in
+                basis.map{ x in factors + [x] }
+            }
+            }.map{ factors in Tensor(factors) }
+    }
+    
     public var description: String {
         return factors.map{ $0.description }.joined(separator: "⊗")
     }
