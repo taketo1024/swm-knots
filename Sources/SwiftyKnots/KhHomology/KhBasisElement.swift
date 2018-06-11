@@ -47,7 +47,7 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
         }.sorted()
     }
     
-    public enum E: Int, Comparable, Codable {
+    public enum E: Int, Comparable, Codable, CustomStringConvertible {
         case I =  1
         case X = -1
         

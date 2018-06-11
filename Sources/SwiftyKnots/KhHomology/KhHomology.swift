@@ -51,12 +51,7 @@ public extension Link {
         return ModuleCube(dim: n, objects: objects, edgeMaps: edgeMaps)
     }
     
-    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhBasisElement, R> {
-        let (μ, Δ) = (KhBasisElement.μ(R.self), KhBasisElement.Δ(R.self))
-        return KhChainComplex(μ, Δ, reduced: reduced, normalized: normalized)
-    }
-    
-    public func KhChainComplex<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhBasisElement, R> {
+    internal func KhChainComplex<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhBasisElement, R> {
         
         let name = "CKh(\(self.name)\( R.self == 𝐙.self ? "" : "; \(R.symbol)"))"
         let (n⁺, n⁻) = (crossingNumber⁺, crossingNumber⁻)
@@ -72,7 +67,7 @@ public extension Link {
         
         typealias Object = ModuleObject<KhBasisElement, R>
         let list = js.flatMap{ j -> [(Int, Int, Object?)] in
-            let c = subcubes[j]!.asChainComplex()
+            let c = subcubes[j]!.fold()
             return c.degrees.map{ i in (i, j, c[i]) }
         }
         
@@ -85,6 +80,11 @@ public extension Link {
         
         let CKh = ChainComplex2(base: base, differential: d)
         return normalized ? CKh.shifted(-n⁻, n⁺ - 2 * n⁻) : CKh
+    }
+    
+    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhBasisElement, R> {
+        let (μ, Δ) = (KhBasisElement.μ(R.self), KhBasisElement.Δ(R.self))
+        return KhChainComplex(μ, Δ, reduced: reduced, normalized: normalized)
     }
     
     public func KhHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhBasisElement, R> {
