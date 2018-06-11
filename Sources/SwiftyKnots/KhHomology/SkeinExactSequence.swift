@@ -60,6 +60,6 @@ public extension SkeinTriple {
 
 fileprivate extension KhBasisElement {
     func toState(_ state: IntList) -> KhBasisElement {
-        return KhBasisElement(state: state, factors: factors)
+        return KhBasisElement(state, tensor)
     }
 }

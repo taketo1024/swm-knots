@@ -24,7 +24,7 @@ public extension Link {
             if !reduced {
                 return ModuleObject(basis: basis)
             } else {
-                let rBasis = basis.filter{ $0.factors[0] == .I }
+                let rBasis = basis.filter{ $0.tensor[0] == .I }
                 return ModuleObject(basis: rBasis)
             }
         }

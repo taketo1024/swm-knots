@@ -63,6 +63,10 @@ public struct Tensor<A: BasisElementType>: BasisElementType {
         self.init(factors)
     }
     
+    public subscript(i: Int) -> A {
+        return factors[i]
+    }
+    
     public var degree: Int {
         return factors.sum { $0.degree }
     }
@@ -89,5 +93,15 @@ public struct Tensor<A: BasisElementType>: BasisElementType {
     public var hashValue: Int {
         let p = 31
         return factors.reduce(0){ (res, f) in res &* p &+ f.hashValue }
+    }
+}
+
+extension Tensor: Codable where A: Codable {
+    public init(from decoder: Decoder) throws {
+        fatalError()
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        fatalError()
     }
 }
