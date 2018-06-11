@@ -83,7 +83,7 @@ public struct Tensor<A: BasisElementType>: BasisElementType {
             factors.remove(at: i2)
             factors.remove(at: i1)
             factors.insert(e, at: j)
-            return FreeModule(Tensor(factors))
+            return FreeModule(Tensor(factors), a)
         }
     }
     
@@ -96,7 +96,7 @@ public struct Tensor<A: BasisElementType>: BasisElementType {
             factors.remove(at: i)
             factors.insert(e1, at: j1)
             factors.insert(e2, at: j2)
-            return FreeModule(Tensor(factors))
+            return FreeModule(Tensor(factors), a)
         }
     }
     
