@@ -86,6 +86,36 @@ public struct Tensor<A: BasisElementType>: BasisElementType {
     public static func < (t1: Tensor<A>, t2: Tensor<A>) -> Bool {
         return t1.factors.lexicographicallyPrecedes(t2.factors)
     }
+    
+    public typealias   Product<R: Ring> = (A, A) -> [(A, R)]
+    public typealias Coproduct<R: Ring> = (A) -> [(A, A, R)]
+    
+    public func applied<R: Ring>(_ m: Product<R>, at: (Int, Int), to j: Int) -> FreeModule<Tensor<A>, R> {
+        let (i1, i2) = at
+        let (e1, e2) = (self[i1], self[i2])
+        
+        return m(e1, e2).sum { (e, a) in
+            var factors = self.factors
+            factors.remove(at: i2)
+            factors.remove(at: i1)
+            factors.insert(e, at: j)
+            return FreeModule(Tensor(factors))
+        }
+    }
+    
+    public func applied<R: Ring>(_ c: Coproduct<R>, at i: Int, to: (Int, Int)) -> FreeModule<Tensor<A>, R> {
+        let (j1, j2) = to
+        let e = self[i]
+        
+        return c(e).sum { (e1, e2, a)  in
+            var factors = self.factors
+            factors.remove(at: i)
+            factors.insert(e1, at: j1)
+            factors.insert(e2, at: j2)
+            return FreeModule(Tensor(factors))
+        }
+    }
+
     public var description: String {
         return factors.map{ $0.description }.joined(separator: "⊗")
     }

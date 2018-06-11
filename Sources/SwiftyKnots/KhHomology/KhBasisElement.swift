@@ -66,34 +66,18 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
 }
 
 public extension KhBasisElement {
-    public typealias   Product<R: Ring> = (E, E) -> [(E, R)]
-    public typealias Coproduct<R: Ring> = (E) -> [(E, E, R)]
+    public typealias   Product<R: Ring> = Tensor<E>.Product<R>
+    public typealias Coproduct<R: Ring> = Tensor<E>.Coproduct<R>
     
-    public func applied<R: Ring>(_ μ: Product<R>, at: (Int, Int), to j: Int, state: IntList) -> FreeModule<KhBasisElement, R> {
-        let (i1, i2) = at
-        let (e1, e2) = (tensor[i1], tensor[i2])
-        
-        return μ(e1, e2).sum { (e, a) in
-            var factors = self.tensor.factors
-            factors.remove(at: i2)
-            factors.remove(at: i1)
-            factors.insert(e, at: j)
-            let t = KhBasisElement(state, Tensor(factors))
-            return FreeModule(t, a)
+    public func applied<R: Ring>(_ μ: Product<R>, at: (Int, Int), to: Int, state: IntList) -> FreeModule<KhBasisElement, R> {
+        return tensor.applied(μ, at: at, to: to).mapBasis {
+            KhBasisElement(state, $0)
         }
     }
     
-    public func applied<R: Ring>(_ Δ: Coproduct<R>, at i: Int, to: (Int, Int), state: IntList) -> FreeModule<KhBasisElement, R> {
-        let (j1, j2) = to
-        let e = tensor[i]
-        
-        return Δ(e).sum { (e1, e2, a)  in
-            var factors = self.tensor.factors
-            factors.remove(at: i)
-            factors.insert(e1, at: j1)
-            factors.insert(e2, at: j2)
-            let t = KhBasisElement(state, Tensor(factors))
-            return FreeModule(t, a)
+    public func applied<R: Ring>(_ Δ: Coproduct<R>, at: Int, to: (Int, Int), state: IntList) -> FreeModule<KhBasisElement, R> {
+        return tensor.applied(Δ, at: at, to: to).mapBasis {
+            KhBasisElement(state, $0)
         }
     }
     
