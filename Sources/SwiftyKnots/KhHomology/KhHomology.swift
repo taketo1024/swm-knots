@@ -118,12 +118,12 @@ public extension Link {
         return Kh.homology(name: name)
     }
     
-    public func LeeChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ChainComplex<KhBasisElement, R> {
+    public func LeeChainComplex<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ChainComplex<KhBasisElement, R> {
         let name = "Lee(\(self.name); \(R.symbol))"
         let (μ, Δ) = (KhBasisElement.μ(R.self), KhBasisElement.Δ(R.self))
         let (μL, ΔL) = (KhBasisElement.μ_Lee(R.self), KhBasisElement.Δ_Lee(R.self))
         let cube = KhCube(μ + μL, Δ + ΔL)
-        let base = cube.fold()
+        let base = cube.fold().shifted(normalized ? -crossingNumber⁻ : 0)
         let d = ChainMap(degree: 1) { _ in
             FreeModuleHom{ (x: KhBasisElement) in
                 cube.d(x.state).applied(to: x)
