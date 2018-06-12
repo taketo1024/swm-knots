@@ -355,8 +355,6 @@ public struct Link: Equatable, CustomStringConvertible {
         
         public let edges: [Edge]
         internal init(_ edges: [Edge]) {
-            assert(edges.count >= 2)
-//            assert(edges.first!.from == edges.last!.to)
             self.edges = edges.sorted()
         }
     }
