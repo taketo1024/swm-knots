@@ -49,53 +49,43 @@ public struct Link: Equatable, CustomStringConvertible {
         
         // generate crossings.
         
-        let crossings = planarCode.map { c -> Crossing in
+        let crossings = planarCode.enumerated().map { (i, c) -> Crossing in
             let (e0, e1, e2, e3) = (edges[c[0]]!, edges[c[1]]!, edges[c[2]]!, edges[c[3]]!)
-            assert(e0.to == nil)
-            assert(e2.from == nil)
-            
-            let c = Crossing(edges: (e0, e1, e2, e3), mode: .X⁻)
-            e0.to = c
-            e2.from = c
+            let c = Crossing(id: i, edges: (e0, e1, e2, e3), mode: .X⁻)
+            e0.endPoint1 = (c, 0)
+            e2.endPoint0 = (c, 2)
             
             return c
         }
         
         // traverse edges and determine orientation
         
-        var queue = crossings.map{ $0.edge2 }.filter{ $0.to == nil }
+        var queue = crossings
+            .map{ x in x.edge2 }
+            .filter{ e in !e.isDetermined }
+        
         while !queue.isEmpty {
             let e = queue.removeFirst()
-            let nextE: Edge
-            let nextX: Crossing
-            
-            let match1 = { (x: Crossing) in x != e.from && x.edge1 == e }
-            let match3 = { (x: Crossing) in x != e.from && x.edge3 == e }
+            let next: Edge
 
-            if let x = crossings.first(where: match1) {
-                nextX = x
-                nextE = x.edge3
-            } else if let x = crossings.first(where: match3) {
-                nextX = x
-                nextE = x.edge1
+            if let x = crossings.first(where: { x in x.edge1 == e && e.endPoint0 != (x, 1) }) {
+                e.endPoint1 = (x, 1)
+                next = x.edge3
+                next.endPoint0 = (x, 3)
+            } else if let x = crossings.first(where: {x in x.edge3 == e && e.endPoint0 != (x, 3) }) {
+                e.endPoint1 = (x, 3)
+                next = x.edge1
+                next.endPoint0 = (x, 1)
             } else {
                 fatalError()
             }
             
-            e.to       = nextX
-            nextE.from = nextX
-            
-            if nextE.to == nil {
-                queue.insert(nextE, at: 0)
+            if !next.isDetermined {
+                queue.insert(next, at: 0)
             }
         }
         
-        for x in crossings {
-            x.edges.forEach { e in
-                assert(e.from != nil)
-                assert(e.to   != nil)
-            }
-        }
+        assert(crossings.forAll{ x in x.edges.forAll{ e in e.isDetermined } })
         
         self.init(name: (name ?? "L"), crossings: crossings)
     }
@@ -105,50 +95,23 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public func copy(name: String? = nil) -> Link {
-        let edges = Dictionary(pairs: self.edges.map{ e -> (Int, Edge) in (e.id, e) } )
+        let myEdges = Dictionary(pairs: edges.map{ e in (e.id, e) })
+        let cpEdges = myEdges.mapValues{ e in Edge(e.id) }
+        let cpCross = Dictionary(pairs: crossings.map { x -> (Int, Crossing) in
+            let e = x.edges.map{ e in cpEdges[e.id]! }
+            let cpX = Crossing(id: x.id, edges: (e[0], e[1], e[2], e[3]), mode: x.mode)
+            return (x.id, cpX)
+        })
         
-        let copiedEdges = edges.mapValues{ e in Edge(e.id) }
-        let copiedCross = crossings.map { x -> Crossing in
-            let edges = x.edges.map{ copiedEdges[$0.id]! }
-            return Crossing(edges: (edges[0], edges[1], edges[2], edges[3]), mode: x.mode)
+        for (id, e) in cpEdges {
+            let e0 = myEdges[id]!
+            let (p0, p1) = (e0.endPoint0, e0.endPoint1)
+            e.endPoint0 = (cpCross[ p0.crossing.id ]!, p0.index)
+            e.endPoint1 = (cpCross[ p1.crossing.id ]!, p1.index)
         }
         
-        for (id, e) in copiedEdges {
-            let orig = edges[id]!
-            e.from = copiedCross[ crossings.index(of: orig.from)! ]
-            e.to   = copiedCross[ crossings.index(of: orig.to  )! ]
-        }
-        
-        return Link(name: name ?? self.name, crossings: copiedCross)
-    }
-    
-    public var edges: Set<Edge> {
-        return Set( crossings.flatMap{ x -> [Edge] in x.edges } )
-    }
-    
-    internal let _components: Cache<[Component]> = .empty
-    public var components: [Component] {
-        return _components.useCacheOrSet {
-            var queue = edges.sorted()
-            var comps = [Component]()
-            
-            while !queue.isEmpty {
-                var c = [Edge]()
-                var e = queue.first!
-                var x = e.to!
-                
-                while queue.contains(e) {
-                    queue.remove(element: e)
-                    c.append(e)
-                    e = x.adjacent(e)
-                    x = e.opposite(x)
-                }
-                
-                comps.append(Component(c))
-            }
-            
-            return comps
-        }
+        let result = cpCross.sorted{ $0.key }.map{ $0.value }
+        return Link(name: name ?? self.name, crossings: result)
     }
     
     public var crossingNumber: Int {
@@ -183,29 +146,114 @@ public struct Link: Equatable, CustomStringConvertible {
         return L
     }
     
-    public var planarCode: [[Int]] {
-        return crossings.map { c -> [Int] in
-            switch c.mode {
-            case .X⁻:
-                if c.edge0.to == c {
-                    return [c.edge0.id, c.edge1.id, c.edge2.id, c.edge3.id]
-                } else if c.edge2.to == c {
-                    return [c.edge2.id, c.edge3.id, c.edge0.id, c.edge1.id]
-                }
-                fallthrough
+    public var edges: [Edge] {
+        return crossings.flatMap{ x in x.edges }.unique().sorted()
+    }
+    
+    private let _components: Cache<[Component]> = .empty
+    
+    public var components: [Component] {
+        return _components.useCacheOrSet {
+            var queue = edges
+            var comps: [Component] = []
+            
+            while !queue.isEmpty {
+                var comp: [Edge] = []
                 
-            case .X⁺:
-                if c.edge1.to == c {
-                    return [c.edge1.id, c.edge2.id, c.edge3.id, c.edge0.id]
-                } else if c.edge3.to == c {
-                    return [c.edge3.id, c.edge0.id, c.edge1.id, c.edge2.id]
-                }
-                fallthrough
+                let first = queue.first!
+                var e = first
                 
-            default:
-                fatalError()
+                while queue.contains(e) {
+                    queue.remove(element: e)
+                    comp.append(e)
+                    e = e.nextEdge
+                }
+                
+                assert(e == first)
+                
+                comps.append(Component(comp))
             }
+            
+            return comps
         }
+    }
+    
+    /*
+     *     \ /     0     \ /
+     *      /     ===>   | |
+     *     / \           / \
+     *
+     *
+     *     \ /     1     \_/
+     *      /     ===>
+     *     / \           /‾\
+     */
+    
+    private mutating func _splice(at i: Int, type: Int) {
+        switch type {
+        case 0: crossings[i].splice0()
+        case 1: crossings[i].splice1()
+        default: fatalError()
+        }
+    }
+    
+    @discardableResult
+    public mutating func splice(at i: Int, type: Int) -> Link {
+        _components.clear()
+        _splice(at: i, type: type)
+        reorientEdges()
+        return self
+    }
+    
+    public func spliced(at i: Int, type: Int) -> Link {
+        var L = self.copy(name: "\(name)\(Format.sub(type.description))")
+        return L.splice(at: i, type: type)
+    }
+    
+    public func spliced(by state: [Int]) -> Link {
+        var L = self.copy()
+        for (i, s) in state.enumerated() {
+            L._splice(at: i, type: s)
+        }
+        L.reorientEdges()
+        return L
+    }
+    
+    public func spliced(by state: IntList) -> Link {
+        return spliced(by: state.components)
+    }
+    
+    public func splicedPair(at i: Int) -> (Link, Link) {
+        return (self.spliced(at: i, type: 0), self.spliced(at: i, type: 1))
+    }
+    
+    private func reorientEdges() {
+        var queue = edges
+        while !queue.isEmpty {
+            let first = queue.first!
+            var e = first
+            
+            while queue.contains(e) {
+                queue.remove(element: e)
+                
+                let next = e.nextEdge
+                
+                let (x, i) = e.endPoint1
+                let j = x.adjacentEdge(i).index
+                
+                if next.endPoint0 != (x, j) {
+                    next.reverse()
+                    assert(next.endPoint0 == (x, j))
+                }
+                e = next
+            }
+            
+            assert(e == first)
+        }
+    }
+    
+    public var allStates: [IntList] {
+        return IntList.binaryCombinations(length: crossingNumber)
     }
     
     public static func +(L1: Link, L2: Link) -> Link {
@@ -232,38 +280,51 @@ public struct Link: Equatable, CustomStringConvertible {
     
     public class Edge: Equatable, Comparable, Hashable, CustomStringConvertible {
         public internal(set) var id: Int
+        public typealias EndPoint = (crossing: Crossing, index: Int)
         
-        public weak var from: Crossing! = nil
-        public weak var to  : Crossing! = nil
-        
+        internal weak var x0: Crossing! = nil
+        private var      i0: Int = 0
+        private weak var x1: Crossing! = nil
+        private var      i1: Int = 0
+
         internal init(_ id: Int) {
             self.id = id
         }
         
+        public var isDetermined: Bool {
+            return x0 != nil && x1 != nil
+        }
+        
+        public var endPoint0: EndPoint {
+            get { return (x0!, i0) }
+            set { (x0, i0) = (newValue.0, newValue.1) }
+        }
+        
+        public var endPoint1: EndPoint {
+            get { return (x1!, i1) }
+            set { (x1, i1) = (newValue.0, newValue.1) }
+        }
+        
         public func reverse() {
-            let tmp = to
-            to = from
-            from = tmp
+            let tmp = endPoint1
+            endPoint1 = endPoint0
+            endPoint0 = tmp
         }
         
-        public func goesIn(to v: Crossing) -> Bool {
-            return to == v
+        public func goesIn(to x: Crossing) -> Bool {
+            return x1 == x
         }
         
-        public func goesOut(from v: Crossing) -> Bool {
-            return from == v
-        }
-        
-        public func opposite(_ v: Crossing) -> Crossing {
-            return (from == v) ? to : from
+        public func goesOut(from x: Crossing) -> Bool {
+            return x0 == x
         }
         
         public var nextEdge: Edge {
-            return to.adjacent(self)
+            return x1.adjacentEdge(i1).edge
         }
         
         public var prevEdge: Edge {
-            return from.adjacent(self)
+            return x0.adjacentEdge(i0).edge
         }
         
         public static func ==(e1: Edge, e2: Edge) -> Bool {
@@ -312,10 +373,12 @@ public struct Link: Equatable, CustomStringConvertible {
             }
         }
         
+        public let id: Int
         fileprivate let edges: [Edge]
         public var mode: Mode
         
-        internal init(edges e: (Edge, Edge, Edge, Edge), mode: Mode) {
+        internal init(id: Int, edges e: (Edge, Edge, Edge, Edge), mode: Mode) {
+            self.id = id
             self.edges = [e.0, e.1, e.2, e.3]
             self.mode = mode
         }
@@ -325,33 +388,18 @@ public struct Link: Equatable, CustomStringConvertible {
         public var edge2: Edge { return edges[2] }
         public var edge3: Edge { return edges[3] }
         
-        public func position(of e: Edge) -> Int {
-            return edges.index(of: e)!
-        }
-        
-        public func adjacent(_ e: Edge) -> Edge {
-            let i = position(of: e)
-            switch mode {
-            case .X⁻, .X⁺:
-                return edges[(i + 2) % 4]
-            case .V:
-                switch i {
-                case 0: return edge3
-                case 1: return edge2
-                case 2: return edge1
-                case 3: return edge0
-                default: ()
+        public func adjacentEdge(_ i: Int) -> (index: Int, edge: Edge) {
+            let j = { () -> Int in
+                switch mode {
+                case .X⁻, .X⁺:
+                    return (i + 2) % 4
+                case .V:
+                    return 3 - i
+                case .H:
+                    return 2 * (i / 2) + (1 - i % 2)
                 }
-            case .H:
-                switch i {
-                case 0: return edge1
-                case 1: return edge0
-                case 2: return edge3
-                case 3: return edge2
-                default: ()
-                }
-            }
-            fatalError()
+            }()
+            return (j, edges[j])
         }
         
         public var isCrossing: Bool {
@@ -396,10 +444,6 @@ public struct Link: Equatable, CustomStringConvertible {
             }
         }
         
-        private func reorientEgdes(startingFrom e0: Edge) {
-            // TODO
-        }
-        
         public static func ==(c1: Crossing, c2: Crossing) -> Bool {
             return c1.edges == c2.edges
         }
@@ -411,24 +455,5 @@ public struct Link: Equatable, CustomStringConvertible {
         public var description: String {
             return "\(mode)[\(edge0),\(edge1),\(edge2),\(edge3)]"
         }
-    }
-}
-
-extension Link: Codable {
-    enum CodingKeys: String, CodingKey {
-        case name, planarCode
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let name = try c.decode(String.self, forKey: .name)
-        let code = try c.decode([[Int]].self, forKey: .planarCode)
-        self.init(name: name, planarCode: code)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(name, forKey: .name)
-        try c.encode(planarCode, forKey: .planarCode)
     }
 }

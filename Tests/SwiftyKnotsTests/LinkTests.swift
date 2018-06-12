@@ -64,40 +64,4 @@ class LinkTests: XCTestCase {
         XCTAssertEqual(K.crossingNumber, 3)
         XCTAssertEqual(K.writhe, 3)
     }
-    
-    func testPlanarCode() {
-        let K = Link.trefoil
-        print(K.planarCode)
-        
-        let Kr = K.reversed
-        print(Kr.planarCode)
-        
-        let Km = K.mirrored
-        print(Km.planarCode)
-    }
-    
-    func testCoding() {
-        let K = Link.trefoil
-        let d = try! JSONEncoder().encode(K)
-        let K2 = try! JSONDecoder().decode(Link.self, from: d)
-        XCTAssertEqual(K, K2)
-    }
-    
-    func testCodingReversed() {
-        let K = Link.trefoil.reversed
-        let d = try! JSONEncoder().encode(K)
-        let K2 = try! JSONDecoder().decode(Link.self, from: d)
-        
-        XCTAssertEqual(K.crossingNumber, K2.crossingNumber)
-        XCTAssertEqual(K.writhe, K2.writhe)
-    }
-    
-    func testCodingMirrored() {
-        let K = Link.trefoil.mirrored
-        let d = try! JSONEncoder().encode(K)
-        let K2 = try! JSONDecoder().decode(Link.self, from: d)
-        
-        XCTAssertEqual(K.crossingNumber, K2.crossingNumber)
-        XCTAssertEqual(K.writhe, K2.writhe)
-    }
 }

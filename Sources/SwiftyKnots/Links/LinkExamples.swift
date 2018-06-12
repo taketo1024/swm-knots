@@ -30,11 +30,9 @@ public extension Link {
     }
     
     public static var unknot: Link {
-        let (e0, e1) = (Edge(0), Edge(1))
-        let x = Crossing(edges: (e0, e0, e1, e1), mode: .V)
-        (e0.from, e0.to) = (x, x)
-        (e1.from, e1.to) = (x, x)
-        return Link(name: "○", crossings: [x])
+        var L = Link(name: "○", planarCode: [1, 2, 2, 1])
+        L.splice(at: 0, type: 0)
+        return L
     }
     
     public static var trefoil: Link {
