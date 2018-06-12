@@ -102,9 +102,9 @@ public extension Link {
         }
     }
     
-    public func KhLeeChainComplex<R: EuclideanRing>(_ type: R.Type) -> ChainComplex2<KhBasisElement, R> {
+    public func KhLeeChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhBasisElement, R> {
         typealias C = ChainComplex2<KhBasisElement, R>
-        let base = KhHomology(type)
+        let base = KhHomology(type, reduced: reduced, normalized: normalized)
         let cube = self.KhCube(KhBasisElement.μ_Lee(R.self), KhBasisElement.Δ_Lee(R.self))
         let d = ChainMap2(bidegree: (1, 4)) { (_, _) in
             FreeModuleHom{ (x: KhBasisElement) in cube.d(x.state).applied(to: x) }
@@ -112,9 +112,28 @@ public extension Link {
         return ChainComplex2(base: base, differential: d)
     }
 
-    public func KhLeeHomology<R: EuclideanRing>(_ type: R.Type) -> ModuleGrid2<KhBasisElement, R> {
+    public func KhLeeHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid2<KhBasisElement, R> {
         let name = "KhLee(\(self.name); \(R.symbol))"
-        return KhLeeChainComplex(type).homology(name: name)
+        let Kh = KhLeeChainComplex(type, reduced: reduced, normalized: normalized)
+        return Kh.homology(name: name)
+    }
+    
+    public func LeeChainComplex<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ChainComplex<KhBasisElement, R> {
+        let name = "Lee(\(self.name); \(R.symbol))"
+        let (μ, Δ) = (KhBasisElement.μ(R.self), KhBasisElement.Δ(R.self))
+        let (μL, ΔL) = (KhBasisElement.μ_Lee(R.self), KhBasisElement.Δ_Lee(R.self))
+        let cube = KhCube(μ + μL, Δ + ΔL)
+        let base = cube.fold()
+        let d = ChainMap(degree: 1) { _ in
+            FreeModuleHom{ (x: KhBasisElement) in
+                cube.d(x.state).applied(to: x)
+            }
+        }
+        return ChainComplex(base: base, differential: d)
+    }
+    
+    public func LeeHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid1<KhBasisElement, R> {
+        return LeeChainComplex(type).homology()
     }
 }
 
