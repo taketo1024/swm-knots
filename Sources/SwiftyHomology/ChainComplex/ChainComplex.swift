@@ -60,15 +60,15 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
     }
     
     public var freePart: ChainComplexN<n, A, R> {
-        return _freePart.useCacheOrSet(
+        return _freePart.useCacheOrSet {
             ChainComplexN<n, A, R>(base: base.freePart, differential: d)
-        )
+        }
     }
     
     public var torsionPart: ChainComplexN<n, A, R> {
-        return _torPart.useCacheOrSet(
+        return _torPart.useCacheOrSet {
             ChainComplexN(base: base.torsionPart, differential: d)
-        )
+        }
     }
     
     // MEMO works only when each generator is a single basis-element.

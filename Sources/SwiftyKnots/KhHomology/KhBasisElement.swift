@@ -10,44 +10,63 @@ import SwiftyMath
 
 public struct KhBasisElement: BasisElementType, Comparable, Codable {
     public let state: IntList
-    internal let factors: [E]
+    internal let tensor: Tensor<E>
     
-    internal init(state: IntList, factors: [E]) {
+    internal init(_ state: IntList, _ tensor: Tensor<E>) {
         self.state = state
-        self.factors = factors
+        self.tensor = tensor
     }
     
     public var degree: Int {
-        return factors.sum{ e in e.degree } + state.components.count{ $0 == 1 }
+        return tensor.degree + state.components.count{ $0 == 1 }
+    }
+    
+    public typealias   Product<R: Ring> = Tensor<E>.Product<R>
+    public typealias Coproduct<R: Ring> = Tensor<E>.Coproduct<R>
+    
+    public func applied<R: Ring>(_ μ: Product<R>, at: (Int, Int), to: Int, state: IntList) -> FreeModule<KhBasisElement, R> {
+        return tensor.applied(μ, at: at, to: to).mapBasis {
+            KhBasisElement(state, $0)
+        }
+    }
+    
+    public func applied<R: Ring>(_ Δ: Coproduct<R>, at: Int, to: (Int, Int), state: IntList) -> FreeModule<KhBasisElement, R> {
+        return tensor.applied(Δ, at: at, to: to).mapBasis {
+            KhBasisElement(state, $0)
+        }
+    }
+    
+    public func mapFactors<R: Ring>(_ f: (E) -> [(E, R)]) -> FreeModule<KhBasisElement, R> {
+        return tensor.mapFactors(f).mapBasis { KhBasisElement(state, $0) }
     }
     
     public static func ==(b1: KhBasisElement, b2: KhBasisElement) -> Bool {
-        return b1.state == b2.state && b1.factors == b2.factors
+        return b1.state == b2.state && b1.tensor == b2.tensor
     }
     
     public static func <(b1: KhBasisElement, b2: KhBasisElement) -> Bool {
         return (b1.state < b2.state)
-            || (b1.state == b2.state && b1.factors.lexicographicallyPrecedes(b2.factors) )
-    }
-    
-    public var hashValue: Int {
-        let s = state.components.reduce(0) { (res, b) in res &<< 1 | b }
-        let f = factors.reduce(0) { (res, b) in res &<< 1 | b.rawValue }
-        return s &<< 32 | f
-    }
-    
-    public var description: String {
-        return factors.map{ "\($0)" }.joined(separator: "⊗") + Format.sub(state.description.replacingOccurrences(of: ", ", with: ""))
+            || (b1.state == b2.state && b1.tensor < b2.tensor)
     }
     
     public static func generateBasis(state: IntList, power n: Int) -> [KhBasisElement] {
         return IntList.binaryCombinations(length: n).map { I in
             let factors: [E] = I.components.map{ $0 == 0 ? .X : .I  }
-            return KhBasisElement.init(state: state, factors: factors)
-        }.sorted()
+            return KhBasisElement.init(state, Tensor(factors))
+            }.sorted()
     }
     
-    public enum E: Int, Comparable, Codable {
+    public var hashValue: Int {
+        let s = state.components.reduce(0) { (res, b) in res &<< 1 | b }
+        let f = tensor.factors.reduce(0) { (res, b) in res &<< 1 | b.rawValue }
+        return s &<< 32 | f
+    }
+    
+    public var description: String {
+        return tensor.description + Format.sub(state.description.replacingOccurrences(of: ", ", with: ""))
+    }
+    
+    public enum E: Int, BasisElementType, Codable {
         case I =  1
         case X = -1
         
@@ -66,37 +85,6 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
 }
 
 public extension KhBasisElement {
-    public typealias   Product<R: Ring> = (E, E) -> [(E, R)]
-    public typealias Coproduct<R: Ring> = (E) -> [(E, E, R)]
-    
-    public func applied<R: Ring>(_ μ: Product<R>, at: (Int, Int), to j: Int, state: IntList) -> FreeModule<KhBasisElement, R> {
-        let (i1, i2) = at
-        let (e1, e2) = (factors[i1], factors[i2])
-        
-        return μ(e1, e2).sum { (e, a) in
-            var factors = self.factors
-            factors.remove(at: i2)
-            factors.remove(at: i1)
-            factors.insert(e, at: j)
-            let t = KhBasisElement(state: state, factors: factors)
-            return FreeModule(t, a)
-        }
-    }
-    
-    public func applied<R: Ring>(_ Δ: Coproduct<R>, at i: Int, to: (Int, Int), state: IntList) -> FreeModule<KhBasisElement, R> {
-        let (j1, j2) = to
-        let e = factors[i]
-        
-        return Δ(e).sum { (e1, e2, a)  in
-            var factors = self.factors
-            factors.remove(at: i)
-            factors.insert(e1, at: j1)
-            factors.insert(e2, at: j2)
-            let t = KhBasisElement(state: state, factors: factors)
-            return FreeModule(t, a)
-        }
-    }
-    
     // Khovanov's map
     public static func μ<R: Ring>(_ type: R.Type) -> Product<R> {
         return { (e1, e2) in

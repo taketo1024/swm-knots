@@ -44,12 +44,12 @@ public extension SkeinTriple {
             let e = e0.toState(s)
             
             let d = C.d[i, j]
-            return d.applied(to: e).map { (e, a) -> (KhBasisElement, R) in
+            return d.applied(to: e).map { (e, a) -> FreeModule<KhBasisElement, R> in
                 if e.state[n] == 1 {
                     let s = e.state.dropLast()
-                    return (e.toState(s), a)
+                    return FreeModule(e.toState(s), a)
                 } else {
-                    return (e, .zero)
+                    return .zero
                 }
             }
         }
@@ -60,6 +60,6 @@ public extension SkeinTriple {
 
 fileprivate extension KhBasisElement {
     func toState(_ state: IntList) -> KhBasisElement {
-        return KhBasisElement(state: state, factors: factors)
+        return KhBasisElement(state, tensor)
     }
 }

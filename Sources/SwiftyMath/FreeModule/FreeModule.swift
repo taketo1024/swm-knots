@@ -63,16 +63,16 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
         return FreeModule([])
     }
     
-    public func mapKeys<A2>(_ f: (A) -> A2) -> FreeModule<A2, R> {
-        return FreeModule<A2, R>(elements.mapKeys(f))
+    public func mapBasis<A2>(_ f: (A) -> A2) -> FreeModule<A2, R> {
+        return map { (a, r) in FreeModule<A2, R>(f(a), r) }
     }
     
     public func mapValues<R2>(_ f: (R) -> R2) -> FreeModule<A, R2> {
         return FreeModule<A, R2>(elements.mapValues(f))
     }
     
-    public func map<A2, R2>(_ f: (A, R) -> (A2, R2)) -> FreeModule<A2, R2> {
-        return FreeModule<A2, R2>(elements.mapPairs{ (a, r) in f(a, r) })
+    public func map<A2, R2>(_ f: (A, R) -> FreeModule<A2, R2>) -> FreeModule<A2, R2> {
+        return self.elements.map{ (a, r) in f(a, r) }.sumAll()
     }
     
     public static func == (a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {

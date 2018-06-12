@@ -98,7 +98,7 @@ public extension ChainComplexN {
         }
         
         // case: free
-        if isFreeToFree(I) {
+        if isFreeToFree(I) && isFreeToFree(I - dDegree) {
             let g = self[I]!.generators
             let Z = dKernel(I)!
             let T = dKernelTransition(I)!

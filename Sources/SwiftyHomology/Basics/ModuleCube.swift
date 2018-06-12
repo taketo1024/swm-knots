@@ -64,14 +64,25 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
         }
     }
     
-    public func asChainComplex() -> ChainComplex<A, R> {
+    public func subCube(matching m: (Object.Summand) -> Bool) -> ModuleCube<A, R> {
+        let objects = self.objects.mapValues{ obj in obj.subSummands(matching: m) }
+        return ModuleCube(dim: dim, objects: objects, edgeMaps: edgeMaps)
+    }
+    
+    public func fold() -> ModuleGrid1<A, R> {
         let group = vertices.group{ I in I.components.count{ $0 == 1 } }
         let list = group
             .map{ (i, list) -> (Int, Object?) in
                 let sum = list.reduce(.zeroModule) { (res, I) in res ⊕ self[I] }
                 return (i, sum)
         }
-        let base = ModuleGrid1(list: list, default: .zeroModule)
+        return ModuleGrid1(list: list, default: .zeroModule)
+    }
+    
+    public func asChainComplex() -> ChainComplex<A, R> {
+        let base = fold()
+        let group = vertices.group{ I in I.components.count{ $0 == 1 } }
+        
         let d = ChainMap(degree: 1) { i -> FreeModuleHom<A, A, R> in
             guard let Is = group[i] else {
                 return .zero
@@ -85,11 +96,6 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
             }
         }
         return ChainComplex(base: base, differential: d)
-    }
-    
-    public func subCube(matching m: (Object.Summand) -> Bool) -> ModuleCube<A, R> {
-        let objects = self.objects.mapValues{ obj in obj.subSummands(matching: m) }
-        return ModuleCube(dim: dim, objects: objects, edgeMaps: edgeMaps)
     }
     
     public func describe(_ I: IntList) {
