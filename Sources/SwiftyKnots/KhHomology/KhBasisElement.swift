@@ -90,9 +90,9 @@ public extension KhBasisElement {
         return Product { (t: Tensor<E, E>) in
             switch t.factors {
             case (.I, .I):
-                return FreeModule(.I)
+                return .wrap(.I)
             case (.I, .X), (.X, .I):
-                return FreeModule(.X)
+                return .wrap(.X)
             case (.X, .X):
                 return .zero
             }
@@ -103,9 +103,9 @@ public extension KhBasisElement {
         return Coproduct { (e: E) in
             switch e {
             case .I:
-                return FreeModule(Tensor(.I, .X)) + FreeModule(Tensor(.X, .I))
+                return .wrap(Tensor(.I, .X)) + .wrap(Tensor(.X, .I))
             case .X:
-                return FreeModule(Tensor(.X, .X))
+                return .wrap(Tensor(.X, .X))
             }
         }
     }
@@ -115,7 +115,7 @@ public extension KhBasisElement {
         return Product { (t: Tensor<E, E>) in
             switch t.factors {
             case (.X, .X):
-                return FreeModule(.I)
+                return .wrap(.I)
             default:
                 return .zero
             }
@@ -126,7 +126,7 @@ public extension KhBasisElement {
         return Coproduct { (e: E) in
             switch e {
             case .X:
-                return FreeModule(Tensor(.I, .I))
+                return .wrap(Tensor(.I, .I))
             default:
                 return .zero
             }
@@ -138,7 +138,7 @@ public extension KhBasisElement {
         return Product { (t: Tensor<E, E>) in
             switch t.factors {
             case (.X, .X):
-                return FreeModule(.X)
+                return .wrap(.X)
             default:
                 return .zero
             }
@@ -149,7 +149,7 @@ public extension KhBasisElement {
         return Coproduct { (e: E) in
             switch e {
             case .I:
-                return -FreeModule(Tensor(.I, .I))
+                return -.wrap(Tensor(.I, .I))
             default:
                 return .zero
             }

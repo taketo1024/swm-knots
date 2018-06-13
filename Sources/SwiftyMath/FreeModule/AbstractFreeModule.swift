@@ -50,7 +50,7 @@ extension AbstractFreeModule where A == AbstractBasisElement {
     
     public static func standardBasis(dim: Int) -> [AbstractFreeModule<CoeffRing>] {
         let basis = AbstractBasisElement.generateBasis(dim)
-        return basis.map { e in AbstractFreeModule(e) }
+        return basis.map { e in .wrap(e) }
     }
 }
 
@@ -59,8 +59,9 @@ public typealias AbstractTensorModule<R: Ring> = FreeModule<FreeTensor<AbstractB
 public extension AbstractTensorModule where A == FreeTensor<AbstractBasisElement> {
     public static func ⊗(v: AbstractTensorModule<CoeffRing>, w: AbstractTensorModule<CoeffRing>) -> AbstractTensorModule<CoeffRing> {
         return v.basis.allCombinations(with: w.basis).sum { (e1, e2) -> AbstractTensorModule<CoeffRing> in
+            let r = v[e1] * w[e2]
             let t = e1 ⊗ e2
-            return AbstractTensorModule(t, v[e1] * w[e2])
+            return r * .wrap(t)
         }
     }
 }

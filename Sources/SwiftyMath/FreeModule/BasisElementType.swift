@@ -111,7 +111,7 @@ public struct FreeTensor<A: BasisElementType>: BasisElementType {
             factors.remove(at: i2)
             factors.remove(at: i1)
             factors.insert(e, at: j)
-            return FreeModule(FreeTensor(factors), a)
+            return a * .wrap(FreeTensor(factors))
         }
     }
     
@@ -126,7 +126,7 @@ public struct FreeTensor<A: BasisElementType>: BasisElementType {
             factors.remove(at: i)
             factors.insert(e1, at: j1)
             factors.insert(e2, at: j2)
-            return FreeModule(FreeTensor(factors), a)
+            return a * .wrap(FreeTensor(factors))
         }
     }
     
@@ -137,7 +137,7 @@ public struct FreeTensor<A: BasisElementType>: BasisElementType {
             }
         }
         return all.sum{ (factors, r) in
-            return FreeModule(FreeTensor(factors), r)
+            return r * .wrap(FreeTensor(factors))
         }
     }
     

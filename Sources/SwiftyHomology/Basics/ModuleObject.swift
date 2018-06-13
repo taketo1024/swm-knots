@@ -269,7 +269,7 @@ if T2 * A2 != Matrix<R>.identity(size: s) {
         }
         
         public init(_ a: A, _ divisor: R = .zero) {
-            self.init(FreeModule(a), divisor)
+            self.init(.wrap(a), divisor)
         }
         
         public var isFree: Bool {

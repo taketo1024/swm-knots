@@ -27,13 +27,13 @@ public extension SkeinTriple {
         
         let i = M { (_, _, e) in
             let s = e.state.append(1)
-            return FreeModule( e.toState(s) )
+            return .wrap( e.toState(s) )
         }
         
         let j = M { (_, _, e) in
             if e.state[n - 1] == 0 {
                 let s = e.state.dropLast()
-                return FreeModule( e.toState(s) )
+                return .wrap( e.toState(s) )
             } else {
                 return .zero
             }
@@ -47,7 +47,7 @@ public extension SkeinTriple {
             return d.applied(to: e).map { (e, a) -> FreeModule<KhBasisElement, R> in
                 if e.state[n] == 1 {
                     let s = e.state.dropLast()
-                    return FreeModule(e.toState(s), a)
+                    return a * .wrap(e.toState(s))
                 } else {
                     return .zero
                 }

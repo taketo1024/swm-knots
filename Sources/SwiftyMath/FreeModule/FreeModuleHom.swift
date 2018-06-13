@@ -43,7 +43,7 @@ public struct FreeModuleHom<A: BasisElementType, B: BasisElementType, R: Ring>: 
     }
     
     public func applied(to a: A) -> Codomain {
-        return applied(to: FreeModule(a))
+        return applied(to: .wrap(a))
     }
     
     public func applied(to m: Domain) -> Codomain {

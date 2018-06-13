@@ -14,7 +14,7 @@ public extension GeometricComplexMap {
     public func asChainMap<R>(_ type: R.Type) -> ChainMap<Complex.Cell, Complex.Cell, R> {
         return ChainMap(degree: 0) { (i, cell) in
             let t = self.applied(to: cell)
-            return (cell.dim == t.dim) ? FreeModule(t) : .zero
+            return (cell.dim == t.dim) ? .wrap(t) : .zero
         }
     }
 }

@@ -81,10 +81,10 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
             guard let o = self[I] else {
                 return (I, nil)
             }
-            guard o.isFree, o.generators.forAll({ $0.basis.count == 1 }) else {
+            guard o.isFree, o.generators.forAll({ $0.isSingle }) else {
                 fatalError("inavailable")
             }
-            return (I, o.generators.map{ $0.basis.first!.dual })
+            return (I, o.generators.map{ $0.unwrap().dual })
         }
         let dDef = (base.defaultObject == .zeroModule) ? D.Object.zeroModule : nil
         let dBase = D.Base(name: dName, list: dList, default: dDef)

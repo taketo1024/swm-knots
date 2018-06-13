@@ -25,7 +25,7 @@ public extension SimplicialComplex {
         let CXA = X.chainComplex(relativeTo: A, R.self)
         
         let i = SimplicialMap.inclusion(from: A, to: X).asChainMap(R.self)
-        let j = M(degree:  0) { (_, s) in !A.contains(s) ? FreeModule(s) : .zero }
+        let j = M(degree:  0) { (_, s) in !A.contains(s) ? .wrap(s) : .zero }
         let d = M(degree: -1) { (_, s) in s.boundary(R.self) }
         
         return ChainShortExactSequence(CA, i, CX, j, CXA, d)

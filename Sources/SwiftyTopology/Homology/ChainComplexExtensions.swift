@@ -37,7 +37,7 @@ public extension GeometricComplex {
         let base = C.Base(name: name, list: list, default: .zeroModule)
         let d = C.Differential(degree: -1) { (i, cell) -> FreeModule<Cell, R> in
             cell.boundary(R.self).map { (cell, r) in
-                (i > 0 && list[i - 1].contains(cell)) ? FreeModule(cell, r) : .zero
+                (i > 0 && list[i - 1].contains(cell)) ? r * .wrap(cell) : .zero
             }
         }
         return C(base: base, differential: d)

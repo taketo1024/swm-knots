@@ -64,7 +64,8 @@ public extension SimplicialCochain where A == Dual<Simplex> {
         return z.elements.sum { (s, r1) -> C in
             let eval = self.elements.sum { (f, r2) -> C in
                 if let (s2, e) = cap(f, s) {
-                    return C([(s2, e * r2)])
+                    let r = e * r2
+                    return r * .wrap(s2)
                 } else {
                     return .zero
                 }

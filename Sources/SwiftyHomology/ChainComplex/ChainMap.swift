@@ -78,14 +78,14 @@ public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Eu
                     return .zero
             }
             
-            guard s0.isFree, s0.generators.forAll({ $0.basis.count == 1 }),
-                  s1.isFree, s1.generators.forAll({ $0.basis.count == 1 }) else {
+            guard s0.isFree, s0.generators.forAll({ $0.isSingle }),
+                  s1.isFree, s1.generators.forAll({ $0.isSingle }) else {
                 fatalError("inavailable")
             }
             
             // MEMO: the matrix of the dual-map w.r.t the dual-basis is the transpose of the original.
             
-            guard let i = s1.generators.index(where: { $0 == FreeModule(b.base) }) else {
+            guard let i = s1.generators.index(where: { $0.unwrap() == b.base }) else {
                 fatalError()
             }
             
