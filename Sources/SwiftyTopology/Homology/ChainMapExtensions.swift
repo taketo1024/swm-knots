@@ -12,7 +12,7 @@ import SwiftyHomology
 
 public extension GeometricComplexMap {
     public func asChainMap<R>(_ type: R.Type) -> ChainMap<Complex.Cell, Complex.Cell, R> {
-        return ChainMap(degree: 0) { (i, cell) in
+        return ChainMap.uniform(degree: 0) { (cell: Complex.Cell) in
             let t = self.applied(to: cell)
             return (cell.dim == t.dim) ? .wrap(t) : .zero
         }

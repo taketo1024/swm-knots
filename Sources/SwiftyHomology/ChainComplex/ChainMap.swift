@@ -20,9 +20,16 @@ public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Eu
         self.f = f
     }
     
-    public init(mDegree: IntList, _ f: @escaping (IntList, A) -> FreeModule<B, R>) {
-        self.mDegree = mDegree
-        self.f = { I in FreeModuleHom{ a in f(I, a) } }
+    public static func uniform(mDegree: IntList, _ f: FreeModuleHom<A, B, R>) -> ChainMapN<n, A, B, R> {
+        return ChainMapN(mDegree: mDegree) { _ in f }
+    }
+    
+    public static func uniform(mDegree: IntList, _ f: @escaping (A) -> FreeModule<B, R>) -> ChainMapN<n, A, B, R> {
+        return .uniform(mDegree: mDegree, FreeModuleHom(f))
+    }
+    
+    public static func uniform(mDegree: IntList, _ f: @escaping (FreeModule<A, R>) -> FreeModule<B, R>) -> ChainMapN<n, A, B, R> {
+        return .uniform(mDegree: mDegree, FreeModuleHom(f))
     }
     
     public subscript(_ I: IntList) -> FreeModuleHom<A, B, R> {
@@ -70,28 +77,30 @@ public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Eu
 
     public func dual(from: ChainComplexN<n, A, R>, to: ChainComplexN<n, B, R>) -> ChainMapN<n, Dual<B>, Dual<A>, R> {
         typealias F = ChainMapN<n, Dual<B>, Dual<A>, R>
-        return F(mDegree: -mDegree) { (I1, b) -> FreeModule<Dual<A>, R> in
-            let I0 = I1 - self.mDegree
-            guard let s0 = from[I0],
-                  let s1  =  to[I1],
-                  let matrix = self.matrix(from: from, to: to, at: I0) else {
-                    return .zero
-            }
-            
-            guard s0.isFree, s0.generators.forAll({ $0.isSingle }),
-                  s1.isFree, s1.generators.forAll({ $0.isSingle }) else {
-                fatalError("inavailable")
-            }
-            
-            // MEMO: the matrix of the dual-map w.r.t the dual-basis is the transpose of the original.
-            
-            guard let i = s1.generators.index(where: { $0.unwrap() == b.base }) else {
-                fatalError()
-            }
-            
-            return matrix.nonZeroComponents(ofRow: i).sum { (c: MatrixComponent<R>) in
-                let (j, r) = (c.col, c.value)
-                return r * s0.generator(j).mapBasis{ $0.dual }
+        return F(mDegree: -mDegree) { I1 in
+            FreeModuleHom<Dual<B>, Dual<A>, R>{ (b: Dual<B>) in
+                let I0 = I1 - self.mDegree
+                guard let s0 = from[I0],
+                    let s1  =  to[I1],
+                    let matrix = self.matrix(from: from, to: to, at: I0) else {
+                        return .zero
+                }
+                
+                guard s0.isFree, s0.generators.forAll({ $0.isSingle }),
+                    s1.isFree, s1.generators.forAll({ $0.isSingle }) else {
+                        fatalError("inavailable")
+                }
+                
+                // MEMO: the matrix of the dual-map w.r.t the dual-basis is the transpose of the original.
+                
+                guard let i = s1.generators.index(where: { $0.unwrap() == b.base }) else {
+                    fatalError()
+                }
+                
+                return matrix.nonZeroComponents(ofRow: i).sum { (c: MatrixComponent<R>) in
+                    let (j, r) = (c.col, c.value)
+                    return r * s0.generator(j).mapBasis{ $0.dual }
+                }
             }
         }
     }
@@ -140,12 +149,20 @@ public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Eu
 }
 
 public extension ChainMapN where n == _1 {
-    public init(degree: Int = 0, _ f: @escaping (Int) -> FreeModuleHom<A, B, R>) {
+    public init(degree: Int, _ f: @escaping (Int) -> FreeModuleHom<A, B, R>) {
         self.init(mDegree: IntList(degree)) { I in f(I[0]) }
     }
     
-    public init(degree: Int = 0, _ f: @escaping (Int, A) -> FreeModule<B, R>) {
-        self.init(mDegree: IntList(degree)) { (I, a) in f(I[0], a) }
+    public static func uniform(degree: Int, _ f: FreeModuleHom<A, B, R>) -> ChainMap<A, B, R> {
+        return ChainMap(degree: degree) { _ in f }
+    }
+    
+    public static func uniform(degree: Int, _ f: @escaping (A) -> FreeModule<B, R>) -> ChainMap<A, B, R> {
+        return .uniform(degree: degree, FreeModuleHom(f))
+    }
+    
+    public static func uniform(degree: Int, _ f: @escaping (FreeModule<A, R>) -> FreeModule<B, R>) -> ChainMap<A, B, R> {
+        return .uniform(degree: degree, FreeModuleHom(f))
     }
     
     public subscript(_ i: Int) -> FreeModuleHom<A, B, R> {
@@ -162,14 +179,21 @@ public extension ChainMapN where n == _1 {
 }
 
 public extension ChainMapN where n == _2 {
-    public init(bidegree: (Int, Int) = (0, 0), _ f: @escaping (Int, Int) -> FreeModuleHom<A, B, R>) {
+    public init(bidegree: (Int, Int), _ f: @escaping (Int, Int) -> FreeModuleHom<A, B, R>) {
         let (i, j) = bidegree
         self.init(mDegree: IntList(i, j)) { I in f(I[0], I[1]) }
     }
     
-    public init(bidegree: (Int, Int) = (0, 0), _ f: @escaping (Int, Int, A) -> FreeModule<B, R>) {
-        let (i, j) = bidegree
-        self.init(mDegree: IntList(i, j)) { (I, a) in f(I[0], I[1], a) }
+    public static func uniform(bidegree: (Int, Int), _ f: FreeModuleHom<A, B, R>) -> ChainMap2<A, B, R> {
+        return ChainMap2(bidegree: bidegree) { _, _ in f }
+    }
+    
+    public static func uniform(bidegree: (Int, Int), _ f: @escaping (A) -> FreeModule<B, R>) -> ChainMap2<A, B, R> {
+        return .uniform(bidegree: bidegree, FreeModuleHom(f))
+    }
+    
+    public static func uniform(bidegree: (Int, Int), _ f: @escaping (FreeModule<A, R>) -> FreeModule<B, R>) -> ChainMap2<A, B, R> {
+        return .uniform(bidegree: bidegree, FreeModuleHom(f))
     }
     
     public subscript(_ i: Int, _ j: Int) -> FreeModuleHom<A, B, R> {
