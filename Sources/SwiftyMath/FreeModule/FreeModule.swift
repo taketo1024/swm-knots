@@ -107,6 +107,10 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
         return FreeModule(sum)
     }
     
+    public static func wrap(_ a: A) -> FreeModule<A, R> {
+        return FreeModule(a)
+    }
+    
     public var description: String {
         return Format.terms("+", basis.map { a in (self[a], a.description, 1) })
     }
