@@ -10,7 +10,7 @@ import SwiftyMath
 import SwiftyHomology
 
 public extension Link {
-    internal func KhCube<R>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, reduced: Bool = false) -> ModuleCube<KhBasisElement, R> {
+    internal func KhCube<R>(_ μ: KhBasisElement.Product<R>, _ Δ: KhBasisElement.Coproduct<R>, reduced: Bool = false) -> ModuleCube<KhBasisElement, R> {
         typealias A = KhBasisElement
         
         let n = self.crossingNumber
@@ -51,7 +51,7 @@ public extension Link {
         return ModuleCube(dim: n, objects: objects, edgeMaps: edgeMaps)
     }
     
-    internal func KhChainComplex<R: EuclideanRing>(_ μ: @escaping KhBasisElement.Product<R>, _ Δ: @escaping KhBasisElement.Coproduct<R>, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhBasisElement, R> {
+    internal func KhChainComplex<R: EuclideanRing>(_ μ: KhBasisElement.Product<R>, _ Δ: KhBasisElement.Coproduct<R>, reduced: Bool = false, normalized: Bool = true) -> ChainComplex2<KhBasisElement, R> {
         
         let name = "CKh(\(self.name)\( R.self == 𝐙.self ? "" : "; \(R.symbol)"))"
         let (n⁺, n⁻) = (crossingNumber⁺, crossingNumber⁻)

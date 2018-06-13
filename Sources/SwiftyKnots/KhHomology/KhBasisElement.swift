@@ -10,9 +10,9 @@ import SwiftyMath
 
 public struct KhBasisElement: BasisElementType, Comparable, Codable {
     public let state: IntList
-    internal let tensor: Tensor<E>
+    internal let tensor: FreeTensor<E>
     
-    internal init(_ state: IntList, _ tensor: Tensor<E>) {
+    internal init(_ state: IntList, _ tensor: FreeTensor<E>) {
         self.state = state
         self.tensor = tensor
     }
@@ -21,8 +21,8 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
         return tensor.degree + state.components.count{ $0 == 1 }
     }
     
-    public typealias   Product<R: Ring> = Tensor<E>.Product<R>
-    public typealias Coproduct<R: Ring> = Tensor<E>.Coproduct<R>
+    public typealias   Product<R: Ring> = FreeTensor<E>.Product<R>
+    public typealias Coproduct<R: Ring> = FreeTensor<E>.Coproduct<R>
     
     public func applied<R: Ring>(_ μ: Product<R>, at: (Int, Int), to: Int, state: IntList) -> FreeModule<KhBasisElement, R> {
         return tensor.applied(μ, at: at, to: to).mapBasis {
@@ -52,7 +52,7 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
     public static func generateBasis(state: IntList, power n: Int) -> [KhBasisElement] {
         return IntList.binaryCombinations(length: n).map { I in
             let factors: [E] = I.components.map{ $0 == 0 ? .X : .I  }
-            return KhBasisElement.init(state, Tensor(factors))
+            return KhBasisElement.init(state, FreeTensor(factors))
             }.sorted()
     }
     
@@ -87,76 +87,72 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
 public extension KhBasisElement {
     // Khovanov's map
     public static func μ<R: Ring>(_ type: R.Type) -> Product<R> {
-        return { (e1, e2) in
-            switch (e1, e2) {
-            case (.I, .I): return [(.I, .identity)]
-            case (.I, .X), (.X, .I): return [(.X, .identity)]
-            case (.X, .X): return []
+        return Product { (t: Tensor<E, E>) in
+            switch t.factors {
+            case (.I, .I):
+                return FreeModule(.I)
+            case (.I, .X), (.X, .I):
+                return FreeModule(.X)
+            case (.X, .X):
+                return .zero
             }
         }
     }
     
     public static func Δ<R: Ring>(_ type: R.Type) -> Coproduct<R> {
-        return { e in
+        return Coproduct { (e: E) in
             switch e {
-            case .I: return [(.I, .X, .identity), (.X, .I, .identity)]
-            case .X: return [(.X, .X, .identity)]
+            case .I:
+                return FreeModule(Tensor(.I, .X)) + FreeModule(Tensor(.X, .I))
+            case .X:
+                return FreeModule(Tensor(.X, .X))
             }
         }
     }
     
     // Lee's map
     public static func μ_Lee<R: Ring>(_ type: R.Type) -> Product<R> {
-        return { (e1, e2) in
-            switch (e1, e2) {
-            case (.X, .X): return [(.I, .identity)]
-            default: return []
+        return Product { (t: Tensor<E, E>) in
+            switch t.factors {
+            case (.X, .X):
+                return FreeModule(.I)
+            default:
+                return .zero
             }
         }
     }
     
     public static func Δ_Lee<R: Ring>(_ type: R.Type) -> Coproduct<R> {
-        return { e in
+        return Coproduct { (e: E) in
             switch e {
-            case .X: return [(.I, .I, .identity)]
-            default: return []
+            case .X:
+                return FreeModule(Tensor(.I, .I))
+            default:
+                return .zero
             }
         }
     }
     
     // Bar-Natan's map
     public static func μ_BN<R: Ring>(_ type: R.Type) -> Product<R> {
-        return { (e1, e2) in
-            switch (e1, e2) {
-            case (.X, .X): return [(.X, .identity)]
-            default: return []
+        return Product { (t: Tensor<E, E>) in
+            switch t.factors {
+            case (.X, .X):
+                return FreeModule(.X)
+            default:
+                return .zero
             }
         }
     }
     
     public static func Δ_BN<R: Ring>(_ type: R.Type) -> Coproduct<R> {
-        return { e in
+        return Coproduct { (e: E) in
             switch e {
-            case .I: return [(.I, .I, -.identity)]
-            default: return []
+            case .I:
+                return -FreeModule(Tensor(.I, .I))
+            default:
+                return .zero
             }
         }
     }
 }
-
-public func +<R: Ring>(m1: @escaping KhBasisElement.Product<R>, m2: @escaping KhBasisElement.Product<R>) -> KhBasisElement.Product<R> {
-    return { (e1, e2) in m1(e1, e2) + m2(e1, e2) }
-}
-
-public func +<R: Ring>(c1: @escaping KhBasisElement.Coproduct<R>, c2: @escaping KhBasisElement.Coproduct<R>) -> KhBasisElement.Coproduct<R> {
-    return { e in c1(e) + c2(e) }
-}
-
-public func *<R: Ring>(r: R, m: @escaping KhBasisElement.Product<R>) -> KhBasisElement.Product<R> {
-    return { (e1, e2) in m(e1, e2).map{ (x, a) in (x, r * a) } }
-}
-
-public func *<R: Ring>(r: R, c: @escaping KhBasisElement.Coproduct<R>) -> KhBasisElement.Coproduct<R> {
-    return { e in c(e).map{ (x, y, a) in (x, y, r * a) } }
-}
-
