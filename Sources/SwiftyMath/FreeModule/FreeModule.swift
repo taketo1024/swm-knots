@@ -26,13 +26,15 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
         self.init(Dictionary(pairs: zip(basis, vector.grid)))
     }
     
-    // generates a basis element
-    public init(_ a: A) {
-        self.init(a, .identity)
+    @_transparent
+    public static func wrap(_ a: A) -> FreeModule<A, R> {
+        return FreeModule([a : .identity])
     }
-    
-    public init(_ a: A, _ r: R) {
-        self.init([(a, r)])
+
+    @_transparent
+    public func unwrap() -> A {
+        assert(isSingle)
+        return elements.anyElement!.key
     }
     
     public subscript(a: A) -> R {
@@ -64,7 +66,7 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
     }
     
     public func mapBasis<A2>(_ f: (A) -> A2) -> FreeModule<A2, R> {
-        return map { (a, r) in FreeModule<A2, R>(f(a), r) }
+        return FreeModule<A2, R>(elements.mapKeys(f))
     }
     
     public func mapValues<R2>(_ f: (R) -> R2) -> FreeModule<A, R2> {
@@ -121,7 +123,7 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
 }
 
 public func *<A, R>(v: [A], a: Matrix<R>) -> [FreeModule<A, R>] {
-    return v.map{ FreeModule<A, R>($0) } * a
+    return v.map{ .wrap($0) } * a
 }
 
 public func *<A, R>(v: [FreeModule<A, R>], a: Matrix<R>) -> [FreeModule<A, R>] {

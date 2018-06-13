@@ -25,31 +25,33 @@ public extension SkeinTriple {
         
         typealias M = ChainMap2<KhBasisElement, KhBasisElement, R>
         
-        let i = M { (_, _, e) in
+        let i = M.uniform(bidegree: (0, 0)) { (e: KhBasisElement) in
             let s = e.state.append(1)
-            return FreeModule( e.toState(s) )
+            return .wrap( e.toState(s) )
         }
         
-        let j = M { (_, _, e) in
+        let j = M.uniform(bidegree: (0, 0)) { (e: KhBasisElement) in
             if e.state[n - 1] == 0 {
                 let s = e.state.dropLast()
-                return FreeModule( e.toState(s) )
+                return .wrap( e.toState(s) )
             } else {
                 return .zero
             }
         }
         
-        let d = M(bidegree: (1, 0)) { (i, j, e0) in
-            let s = e0.state.append(0)
-            let e = e0.toState(s)
-            
-            let d = C.d[i, j]
-            return d.applied(to: e).map { (e, a) -> FreeModule<KhBasisElement, R> in
-                if e.state[n] == 1 {
-                    let s = e.state.dropLast()
-                    return FreeModule(e.toState(s), a)
-                } else {
-                    return .zero
+        let d = M(bidegree: (1, 0)) { (i, j) in
+            FreeModuleHom { (e0: KhBasisElement) in
+                let s = e0.state.append(0)
+                let e = e0.toState(s)
+                
+                let d = C.d[i, j]
+                return d.applied(to: e).map { (e, a) -> FreeModule<KhBasisElement, R> in
+                    if e.state[n] == 1 {
+                        let s = e.state.dropLast()
+                        return a * .wrap(e.toState(s))
+                    } else {
+                        return .zero
+                    }
                 }
             }
         }

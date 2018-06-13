@@ -90,8 +90,8 @@ public struct CellularComplex: GeometricComplex {
     
     @discardableResult
     public mutating func appendVertex(_ v: Vertex) -> CellularCell {
-        let c = SimplicialChain<𝐙>(Simplex(v))
-        return appendCell(simplices: c)
+        let s = Simplex(v)
+        return appendCell(simplices: .wrap(s))
     }
     
     @discardableResult

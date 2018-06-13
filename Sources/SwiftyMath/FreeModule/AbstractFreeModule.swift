@@ -45,22 +45,23 @@ extension AbstractFreeModule where A == AbstractBasisElement {
     }
     
     public var asTensor: AbstractTensorModule<CoeffRing> {
-        return self.mapBasis{ e in Tensor(e) }
+        return self.mapBasis{ e in FreeTensor(e) }
     }
     
     public static func standardBasis(dim: Int) -> [AbstractFreeModule<CoeffRing>] {
         let basis = AbstractBasisElement.generateBasis(dim)
-        return basis.map { e in AbstractFreeModule(e) }
+        return basis.map { e in .wrap(e) }
     }
 }
 
-public typealias AbstractTensorModule<R: Ring> = FreeModule<Tensor<AbstractBasisElement>, R>
+public typealias AbstractTensorModule<R: Ring> = FreeModule<FreeTensor<AbstractBasisElement>, R>
 
-public extension AbstractTensorModule where A == Tensor<AbstractBasisElement> {
+public extension AbstractTensorModule where A == FreeTensor<AbstractBasisElement> {
     public static func ⊗(v: AbstractTensorModule<CoeffRing>, w: AbstractTensorModule<CoeffRing>) -> AbstractTensorModule<CoeffRing> {
         return v.basis.allCombinations(with: w.basis).sum { (e1, e2) -> AbstractTensorModule<CoeffRing> in
+            let r = v[e1] * w[e2]
             let t = e1 ⊗ e2
-            return AbstractTensorModule(t, v[e1] * w[e2])
+            return r * .wrap(t)
         }
     }
 }
@@ -75,21 +76,21 @@ public extension AbstractFreeModuleHom where A == AbstractBasisElement, A == B {
     }
     
     public var asTensor: AbstractTensorModuleHom<R> {
-        return AbstractTensorModuleHom { (e: Tensor<AbstractBasisElement>) -> AbstractTensorModule<R> in
+        return AbstractTensorModuleHom { (e: FreeTensor<AbstractBasisElement>) -> AbstractTensorModule<R> in
             (e.factors.count == 1) ? self.applied(to: e.factors[0]).asTensor : .zero
         }
     }
 }
 
-public typealias AbstractTensorModuleHom<K: Ring> = FreeModuleHom<Tensor<AbstractBasisElement>, Tensor<AbstractBasisElement>, K>
+public typealias AbstractTensorModuleHom<K: Ring> = FreeModuleHom<FreeTensor<AbstractBasisElement>, FreeTensor<AbstractBasisElement>, K>
 
-public extension AbstractTensorModuleHom where A == Tensor<AbstractBasisElement>, A == B {
+public extension AbstractTensorModuleHom where A == FreeTensor<AbstractBasisElement>, A == B {
     public static func ⊗(f: AbstractTensorModuleHom<CoeffRing>, g: AbstractTensorModuleHom<CoeffRing>) -> AbstractTensorModuleHom<CoeffRing> {
-        return AbstractTensorModuleHom { (e: Tensor<AbstractBasisElement>) -> AbstractTensorModule<CoeffRing> in
+        return AbstractTensorModuleHom { (e: FreeTensor<AbstractBasisElement>) -> AbstractTensorModule<CoeffRing> in
             let n = e.factors.count
             return (0 ..< n).sum { i in
-                let e1 = Tensor(e.factors.prefix(i).toArray())
-                let e2 = Tensor(e.factors.suffix(n - i).toArray())
+                let e1 = FreeTensor(e.factors.prefix(i).toArray())
+                let e2 = FreeTensor(e.factors.suffix(n - i).toArray())
                 return f.applied(to: e1) ⊗ g.applied(to: e2)
             }
         }
