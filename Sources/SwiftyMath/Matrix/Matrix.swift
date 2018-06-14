@@ -138,7 +138,11 @@ public struct _Matrix<n: _Int, m: _Int, R: Ring>: Module, Sequence {
     public var isZero: Bool {
         return impl.isZero
     }
-
+    
+    public var isIdentity: Bool {
+        return impl.isIdentity
+    }
+    
     public var diagonal: [R] {
         return (0 ..< Swift.min(rows, cols)).map{ i in self[i, i] }
     }

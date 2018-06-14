@@ -99,17 +99,34 @@ public extension ChainComplexN {
         
         // case: free
         if isFreeToFree(I) && isFreeToFree(I - dDegree) {
-            let g = self[I]!.generators
+            let s = self[I]!
+            let rootBasis = s.rootBasis
+            let generators = s.generators
+            
             let Z = dKernel(I)!
             let T = dKernelTransition(I)!
             let B = dImage(I - dDegree)!
+            
+            let res: ModuleObject<A, R>
+            
+            if s.transition.isIdentity {
+                res = ModuleObject(
+                    rootBasis: rootBasis,
+                    generatingMatrix: Z,
+                    transitionMatrix: T,
+                    relationMatrix: T * B
+                )
+            } else {
+                let A0 = Matrix(rows: rootBasis.count, cols: generators.count) { (i, j) in generators[j][rootBasis[i]] }
+                let T0 = A0.elimination(form: .RowHermite).left.submatrix(rowRange: 0 ..< generators.count)
                 
-            let res = ModuleObject(
-                generators: g,
-                generatingMatrix: Z,
-                transitionMatrix: T,
-                relationMatrix: T * B
-            )
+                res = ModuleObject(
+                    rootBasis: rootBasis,
+                    generatingMatrix: A0 * Z,
+                    transitionMatrix: T * T0,
+                    relationMatrix: T * B
+                )
+            }
             return !res.isZero ? res : .zeroModule
         }
         

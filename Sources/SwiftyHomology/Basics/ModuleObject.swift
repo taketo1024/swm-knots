@@ -78,17 +78,6 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
         }
     }
     
-    public init(generators: [FreeModule<A, R>], generatingMatrix A: Matrix<R>, transitionMatrix T: Matrix<R>, relationMatrix B: Matrix<R>) {
-        if generators.forAll({ $0.isSingle }) {
-            let basis = generators.map{ $0.basis[0] }
-            self.init(rootBasis: basis, generatingMatrix: A, transitionMatrix: T, relationMatrix: B)
-        } else {
-            let (rootBasis, A0, T0) = extract(generators)
-            assert(T0 * A0 == Matrix.identity(size: generators.count))
-            self.init(rootBasis: rootBasis, generatingMatrix: A0 * A, transitionMatrix: T * T0, relationMatrix: B)
-        }
-    }
-    
     /*
      *                 R^n
      *                 ^|
@@ -190,6 +179,13 @@ if T2 * A2 != Matrix<R>.identity(size: s) {
     
     public func merge(with M2: ModuleObject<A, R>) -> ModuleObject<A, R> {
         let M1 = self
+        
+        if M1.isZero {
+            return M2
+        } else if M2.isZero {
+            return M1
+        }
+        
         assert( M1.rootBasis == M2.rootBasis )
 
         let basis = M1.rootBasis

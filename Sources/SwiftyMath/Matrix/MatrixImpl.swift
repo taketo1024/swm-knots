@@ -125,7 +125,15 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     }
     
     var isDiagonal: Bool {
-        return table.forAll { (i, list) in (list.count == 1) && list.first!.0 == i }
+        return table.forAll { (i, list) in
+            (list.count == 0) || (list.count == 1) && list.first!.0 == i
+        }
+    }
+    
+    var isIdentity: Bool {
+        return rows == cols && table.forAll { (i, list) in
+            (list.count == 1) && list.first! == (i, .identity)
+        }
     }
     
     static func identity(size n: Int, align: Alignment) -> MatrixImpl<R> {
