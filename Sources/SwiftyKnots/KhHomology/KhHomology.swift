@@ -132,8 +132,70 @@ public extension Link {
         return ChainComplex(base: base, differential: d)
     }
     
-    public func LeeHomology<R: EuclideanRing>(_ type: R.Type, reduced: Bool = false, normalized: Bool = true) -> ModuleGrid1<KhBasisElement, R> {
-        return LeeChainComplex(type).homology()
+    public func LeeHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid1<KhBasisElement, R> {
+        return LeeChainComplex(type, normalized: normalized).homology()
+    }
+    
+    public var orientationPreservingState: IntList {
+        return IntList(crossings.map{ $0.crossingSign == 1 ? 0 : 1 })
+    }
+    
+    public func LeeHomologyGenerators<R: EuclideanRing>(_ type: R.Type) -> [FreeModule<KhBasisElement, R>] {
+        assert(self.components.count == 1) // currently supports only knots.
+        
+        let s0 = orientationPreservingState
+        let L0 = self.spliced(by: s0)
+        let comps = L0.components
+        
+        // splits comps into two groups.
+        var queue:  [(Component, Int)] = [(comps[0], 0)]
+        var result:  [Component : Int] = [:]
+        
+        while !queue.isEmpty {
+            let (c, i) = queue.removeFirst()
+            
+            // crossings that touches c
+            let xs = crossings.filter{ x in
+                x.edges.contains{ e in c.edges.contains(e) }
+            }
+            
+            // circles that are connected to c by xs
+            let cs = xs.map{ x -> Component in
+                let e = x.edges.first{ e in !c.edges.contains(e) }!
+                return comps.first{ c1 in c1.edges.contains(e) }!
+            }.unique()
+            
+            // queue circles with opposite color.
+            for c1 in cs where !result.contains(key: c1) {
+                queue.append((c1, 1 - i))
+            }
+            
+            // append result.
+            result[c] = i
+        }
+        
+        assert(result.count == comps.count)
+        
+        typealias A = FreeModule<FreeTensor<KhBasisElement.E>, R>
+        
+        let (X, I) = (A.wrap(FreeTensor(.X)), A.wrap(FreeTensor(.I)))
+        let (a, b) = (X + I, X - I)
+        var (z0, z1) = (A.wrap(.identity), A.wrap(.identity))
+        
+        for c in comps {
+            switch result[c]! {
+            case 0:
+                z0 = z0 ⊗ a
+                z1 = z1 ⊗ b
+            default:
+                z0 = z0 ⊗ b
+                z1 = z1 ⊗ a
+            }
+        }
+        
+        return [z0, z1].map { z in
+            z.mapBasis{ t in KhBasisElement(s0, t) }
+        }
     }
 }
 
