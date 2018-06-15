@@ -278,6 +278,102 @@ public struct Link: Equatable, CustomStringConvertible {
         return "\(name){ \(crossings.map{ $0.description }.joined(separator: ", ")) }"
     }
     
+    public class Crossing: Equatable, Comparable, CustomStringConvertible {
+        public enum Mode {
+            case X⁻ // 0 - 2 is below 1 - 3
+            case X⁺ // 0 - 2 is above 1 - 3
+            case V  // 0 - 3 || 1 - 2
+            case H  // 0 - 1 || 2 - 3
+            
+            public var isCrossing: Bool {
+                return self == .X⁺ || self == .X⁻
+            }
+        }
+        
+        public let id: Int
+        public let edges: [Edge]
+        public var mode: Mode
+        
+        internal init(id: Int, edges e: (Edge, Edge, Edge, Edge), mode: Mode) {
+            self.id = id
+            self.edges = [e.0, e.1, e.2, e.3]
+            self.mode = mode
+        }
+        
+        public var edge0: Edge { return edges[0] }
+        public var edge1: Edge { return edges[1] }
+        public var edge2: Edge { return edges[2] }
+        public var edge3: Edge { return edges[3] }
+        
+        public func adjacentEdge(_ i: Int) -> (index: Int, edge: Edge) {
+            let j = { () -> Int in
+                switch mode {
+                case .X⁻, .X⁺:
+                    return (i + 2) % 4
+                case .V:
+                    return 3 - i
+                case .H:
+                    return 2 * (i / 2) + (1 - i % 2)
+                }
+            }()
+            return (j, edges[j])
+        }
+        
+        public var isCrossing: Bool {
+            return mode.isCrossing
+        }
+        
+        public var crossingSign: Int {
+            func s(_ b: Bool) -> Int {
+                return b ? 1 : -1
+            }
+            
+            if !isCrossing {
+                return 0
+            }
+            
+            return s(edge0.goesIn(to: self))
+                * s(edge1.goesIn(to: self))
+                * s(mode == .X⁺)
+        }
+        
+        public func changeCrossing() {
+            switch mode {
+            case .X⁻: mode = .X⁺
+            case .X⁺: mode = .X⁻
+            default: ()
+            }
+        }
+        
+        public func splice0() {
+            switch mode {
+            case .X⁺: mode = .V
+            case .X⁻: mode = .H
+            default: fatalError()
+            }
+        }
+        
+        public func splice1() {
+            switch mode {
+            case .X⁺: mode = .H
+            case .X⁻: mode = .V
+            default: fatalError()
+            }
+        }
+        
+        public static func ==(c1: Crossing, c2: Crossing) -> Bool {
+            return c1.edges == c2.edges
+        }
+        
+        public static func <(e1: Crossing, e2: Crossing) -> Bool {
+            return e1.edges.lexicographicallyPrecedes(e2.edges)
+        }
+        
+        public var description: String {
+            return "\(mode)[\(edge0),\(edge1),\(edge2),\(edge3)]"
+        }
+    }
+    
     public class Edge: Equatable, Comparable, Hashable, CustomStringConvertible {
         public internal(set) var id: Int
         public typealias EndPoint = (crossing: Crossing, index: Int)
@@ -344,7 +440,13 @@ public struct Link: Equatable, CustomStringConvertible {
         }
     }
     
-    public class Component: Equatable, CustomStringConvertible {
+    public class Component: Equatable, Hashable, CustomStringConvertible {
+        public let edges: [Edge]
+        
+        internal init(_ edges: [Edge]) {
+            self.edges = edges
+        }
+        
         public static func == (a: Component, b: Component) -> Bool {
             return a.edges == b.edges
         }
@@ -353,105 +455,9 @@ public struct Link: Equatable, CustomStringConvertible {
             return "(\(edges.map{ "\($0)" }.joined(separator: "-")))"
         }
         
-        public let edges: [Edge]
-        internal init(_ edges: [Edge]) {
-            self.edges = edges.sorted()
-        }
-    }
-    
-    public class Crossing: Equatable, Comparable, CustomStringConvertible {
-        public enum Mode {
-            case X⁻ // 0 - 2 is below 1 - 3
-            case X⁺ // 0 - 2 is above 1 - 3
-            case V  // 0 - 3 || 1 - 2
-            case H  // 0 - 1 || 2 - 3
-            
-            public var isCrossing: Bool {
-                return self == .X⁺ || self == .X⁻
-            }
-        }
-        
-        public let id: Int
-        fileprivate let edges: [Edge]
-        public var mode: Mode
-        
-        internal init(id: Int, edges e: (Edge, Edge, Edge, Edge), mode: Mode) {
-            self.id = id
-            self.edges = [e.0, e.1, e.2, e.3]
-            self.mode = mode
-        }
-        
-        public var edge0: Edge { return edges[0] }
-        public var edge1: Edge { return edges[1] }
-        public var edge2: Edge { return edges[2] }
-        public var edge3: Edge { return edges[3] }
-        
-        public func adjacentEdge(_ i: Int) -> (index: Int, edge: Edge) {
-            let j = { () -> Int in
-                switch mode {
-                case .X⁻, .X⁺:
-                    return (i + 2) % 4
-                case .V:
-                    return 3 - i
-                case .H:
-                    return 2 * (i / 2) + (1 - i % 2)
-                }
-            }()
-            return (j, edges[j])
-        }
-        
-        public var isCrossing: Bool {
-            return mode.isCrossing
-        }
-        
-        public var crossingSign: Int {
-            func s(_ b: Bool) -> Int {
-                return b ? 1 : -1
-            }
-            
-            if !isCrossing {
-                return 0
-            }
-            
-            return s(edge0.goesIn(to: self))
-                 * s(edge1.goesIn(to: self))
-                 * s(mode == .X⁺)
-        }
-        
-        public func changeCrossing() {
-            switch mode {
-            case .X⁻: mode = .X⁺
-            case .X⁺: mode = .X⁻
-            default: ()
-            }
-        }
-        
-        public func splice0() {
-            switch mode {
-            case .X⁺: mode = .V
-            case .X⁻: mode = .H
-            default: fatalError()
-            }
-        }
-        
-        public func splice1() {
-            switch mode {
-            case .X⁺: mode = .H
-            case .X⁻: mode = .V
-            default: fatalError()
-            }
-        }
-        
-        public static func ==(c1: Crossing, c2: Crossing) -> Bool {
-            return c1.edges == c2.edges
-        }
-        
-        public static func <(e1: Crossing, e2: Crossing) -> Bool {
-            return e1.edges.lexicographicallyPrecedes(e2.edges)
-        }
-        
-        public var description: String {
-            return "\(mode)[\(edge0),\(edge1),\(edge2),\(edge3)]"
+        public var hashValue: Int {
+            let p = 31
+            return edges.reduce(0) { (res, e) in res &* p &+ e.id }
         }
     }
 }
