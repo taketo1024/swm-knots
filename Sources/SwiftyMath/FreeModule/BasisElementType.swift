@@ -98,6 +98,10 @@ public struct FreeTensor<A: BasisElementType>: BasisElementType {
         return factors.sum { $0.degree }
     }
     
+    public static var identity: FreeTensor<A> {
+        return FreeTensor()
+    }
+    
     public typealias   Product<R: Ring> = FreeModuleHom<Tensor<A, A>, A, R>
     public typealias Coproduct<R: Ring> = FreeModuleHom<A, Tensor<A, A>, R>
     
@@ -164,6 +168,16 @@ public struct FreeTensor<A: BasisElementType>: BasisElementType {
     public var hashValue: Int {
         let p = 31
         return factors.reduce(0){ (res, f) in res &* p &+ f.hashValue }
+    }
+}
+
+public func ⊗<A, R>(x1: FreeModule<FreeTensor<A>, R>, x2: FreeModule<FreeTensor<A>, R>) -> FreeModule<FreeTensor<A>, R> {
+    return x1.elements.sum { (t1, r1) in
+        x2.elements.sum { (t2, r2) in
+            let r = r1 * r2
+            let t = t1 ⊗ t2
+            return r * .wrap(t)
+        }
     }
 }
 
