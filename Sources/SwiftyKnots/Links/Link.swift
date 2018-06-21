@@ -254,6 +254,7 @@ public struct Link: Equatable, CustomStringConvertible {
     
     public var allStates: [IntList] {
         return IntList.binaryCombinations(length: crossingNumber)
+            .sorted{ $0.total < $1.total }
     }
     
     public static func +(L1: Link, L2: Link) -> Link {
@@ -440,7 +441,11 @@ public struct Link: Equatable, CustomStringConvertible {
         }
     }
     
-    public class Component: Equatable, Hashable, CustomStringConvertible {
+    public class Component: Equatable, Hashable, Comparable, CustomStringConvertible {
+        public static func < (c1: Link.Component, c2: Link.Component) -> Bool {
+            return c1.edges.map{ $0.id }.min()! < c2.edges.map{ $0.id }.min()!
+        }
+        
         public let edges: [Edge]
         
         internal init(_ edges: [Edge]) {
