@@ -9,6 +9,7 @@ import Foundation
 import SwiftyMath
 import SwiftyHomology
 
+/*
 public extension SkeinTriple {
     
     //                      i           j
@@ -65,3 +66,4 @@ fileprivate extension KhBasisElement {
         return KhBasisElement(state, tensor)
     }
 }
+*/

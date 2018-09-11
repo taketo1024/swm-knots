@@ -12,7 +12,7 @@ public typealias Grid1<Object: Equatable> = GridN<_1, Object>
 public typealias Grid2<Object: Equatable> = GridN<_2, Object>
 
 public struct GridN<n: _Int, Object: Equatable>: CustomStringConvertible {
-    public let name: String
+    public var name: String
     internal var grid: [IntList : Object?]
     internal let defaultObject: Object?
 
@@ -48,6 +48,12 @@ public struct GridN<n: _Int, Object: Equatable>: CustomStringConvertible {
     
     public var isDetermined: Bool {
         return grid.values.forAll{ $0 != nil }
+    }
+    
+    public func named(_ name: String) -> GridN<n, Object> {
+        var base = self
+        base.name = name
+        return base
     }
     
     public func shifted(_ I: IntList) -> GridN<n, Object> {

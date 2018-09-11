@@ -86,72 +86,26 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
 
 public extension KhBasisElement {
     // Khovanov's map
-    public static func μ<R: Ring>(_ type: R.Type) -> Product<R> {
-        return Product { (t: Tensor<E, E>) in
-            switch t.factors {
+    public static func product<R: Ring>(_ type: R.Type, h: R = .zero, t: R = .zero) -> Product<R> {
+        return Product { (x: Tensor<E, E>) -> FreeModule<KhBasisElement.E, R> in
+            switch x.factors {
             case (.I, .I):
                 return .wrap(.I)
             case (.I, .X), (.X, .I):
                 return .wrap(.X)
             case (.X, .X):
-                return .zero
+                return h * .wrap(.X) + t * .wrap(.I)
             }
         }
     }
     
-    public static func Δ<R: Ring>(_ type: R.Type) -> Coproduct<R> {
+    public static func coproduct<R: Ring>(_ type: R.Type, h: R = .zero, t: R = .zero) -> Coproduct<R> {
         return Coproduct { (e: E) in
             switch e {
             case .I:
-                return .wrap(Tensor(.I, .X)) + .wrap(Tensor(.X, .I))
+                return .wrap(Tensor(.I, .X)) + .wrap(Tensor(.X, .I)) - h * .wrap(Tensor(.I, .I))
             case .X:
-                return .wrap(Tensor(.X, .X))
-            }
-        }
-    }
-    
-    // Lee's map
-    public static func μ_Lee<R: Ring>(_ type: R.Type) -> Product<R> {
-        return Product { (t: Tensor<E, E>) in
-            switch t.factors {
-            case (.X, .X):
-                return .wrap(.I)
-            default:
-                return .zero
-            }
-        }
-    }
-    
-    public static func Δ_Lee<R: Ring>(_ type: R.Type) -> Coproduct<R> {
-        return Coproduct { (e: E) in
-            switch e {
-            case .X:
-                return .wrap(Tensor(.I, .I))
-            default:
-                return .zero
-            }
-        }
-    }
-    
-    // Bar-Natan's map
-    public static func μ_BN<R: Ring>(_ type: R.Type) -> Product<R> {
-        return Product { (t: Tensor<E, E>) in
-            switch t.factors {
-            case (.X, .X):
-                return .wrap(.X)
-            default:
-                return .zero
-            }
-        }
-    }
-    
-    public static func Δ_BN<R: Ring>(_ type: R.Type) -> Coproduct<R> {
-        return Coproduct { (e: E) in
-            switch e {
-            case .I:
-                return -.wrap(Tensor(.I, .I))
-            default:
-                return .zero
+                return .wrap(Tensor(.X, .X)) + t * .wrap(Tensor(.I, .I))
             }
         }
     }
