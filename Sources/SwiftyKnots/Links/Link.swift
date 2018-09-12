@@ -94,12 +94,12 @@ public struct Link: Equatable, CustomStringConvertible {
         self.init(name: name, planarCode: planarCode)
     }
     
-    public func copy(name: String? = nil) -> Link {
+    public func copy(name: String? = nil, diffX: Int = 0, diffE: Int = 0) -> Link {
         let myEdges = Dictionary(pairs: edges.map{ e in (e.id, e) })
-        let cpEdges = myEdges.mapValues{ e in Edge(e.id) }
+        let cpEdges = myEdges.mapPairs{ (id, _) in (id, Edge(id + diffE)) }
         let cpCross = Dictionary(pairs: crossings.map { x -> (Int, Crossing) in
             let e = x.edges.map{ e in cpEdges[e.id]! }
-            let cpX = Crossing(id: x.id, edges: (e[0], e[1], e[2], e[3]), mode: x.mode)
+            let cpX = Crossing(id: x.id + diffX, edges: (e[0], e[1], e[2], e[3]), mode: x.mode)
             return (x.id, cpX)
         })
         
@@ -143,6 +143,12 @@ public struct Link: Equatable, CustomStringConvertible {
         for x in L.crossings {
             x.changeCrossing()
         }
+        return L
+    }
+    
+    public func crossingChanged(at i: Int) -> Link {
+        let L = self.copy(name: "\(name)'")
+        L.crossings[i].changeCrossing()
         return L
     }
     
@@ -193,7 +199,7 @@ public struct Link: Equatable, CustomStringConvertible {
         switch type {
         case 0: crossings[i].splice0()
         case 1: crossings[i].splice1()
-        default: fatalError()
+        default: ()
         }
     }
     
@@ -258,12 +264,12 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public static func +(L1: Link, L2: Link) -> Link {
+        let dx = (L1.crossings.max()?.id ?? 0) - (L2.crossings.min()?.id ?? 0) + 1
+        let de = (L1.edges.max()?.id ?? 0) - (L2.edges.min()?.id ?? 0) + 1
+        
         let cL1 = L1.copy()
-        let cL2 = L2.copy()
-        let D = (cL1.edges.max()?.id ?? 0) - (cL2.edges.min()?.id ?? 0) + 1
-        for e in cL2.edges {
-            e.id += D
-        }
+        let cL2 = L2.copy(diffX: dx, diffE: de)
+        
         return Link(name: "\(L1.name) + \(L2.name)", crossings: cL1.crossings + cL2.crossings)
     }
     
@@ -325,17 +331,15 @@ public struct Link: Equatable, CustomStringConvertible {
         }
         
         public var crossingSign: Int {
-            func s(_ b: Bool) -> Int {
-                return b ? 1 : -1
-            }
-            
             if !isCrossing {
                 return 0
             }
             
-            return s(edge0.goesIn(to: self))
-                * s(edge1.goesIn(to: self))
-                * s(mode == .X⁺)
+            let s = { (_ b: Bool) -> Int in b ? 1 : -1 }
+            
+            return s(edge0.goesIn(to: self, 0))
+                 * s(edge1.goesIn(to: self, 1))
+                 * s(mode == .X⁺)
         }
         
         public func changeCrossing() {
@@ -350,7 +354,7 @@ public struct Link: Equatable, CustomStringConvertible {
             switch mode {
             case .X⁺: mode = .V
             case .X⁻: mode = .H
-            default: fatalError()
+            default: ()
             }
         }
         
@@ -358,7 +362,7 @@ public struct Link: Equatable, CustomStringConvertible {
             switch mode {
             case .X⁺: mode = .H
             case .X⁻: mode = .V
-            default: fatalError()
+            default: ()
             }
         }
         
@@ -366,8 +370,8 @@ public struct Link: Equatable, CustomStringConvertible {
             return c1.edges == c2.edges
         }
         
-        public static func <(e1: Crossing, e2: Crossing) -> Bool {
-            return e1.edges.lexicographicallyPrecedes(e2.edges)
+        public static func <(c1: Crossing, c2: Crossing) -> Bool {
+            return c1.id < c2.id
         }
         
         public var description: String {
@@ -408,12 +412,12 @@ public struct Link: Equatable, CustomStringConvertible {
             endPoint0 = tmp
         }
         
-        public func goesIn(to x: Crossing) -> Bool {
-            return x1 == x
+        public func goesOut(from x: Crossing, _ i: Int) -> Bool {
+            return endPoint0 == (x, i)
         }
         
-        public func goesOut(from x: Crossing) -> Bool {
-            return x0 == x
+        public func goesIn(to x: Crossing, _ i: Int) -> Bool {
+            return endPoint1 == (x, i)
         }
         
         public var nextEdge: Edge {
