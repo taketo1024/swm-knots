@@ -35,6 +35,10 @@ extension 𝐙: EuclideanRing {
         return (self % 2 == 0)
     }
     
+    public var isOdd: Bool {
+        return (self % 2 == 1)
+    }
+    
     public func pow(_ n: 𝐙) -> 𝐙 {
         switch  self {
         case 1:
