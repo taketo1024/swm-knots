@@ -76,6 +76,14 @@ public extension Array {
         return (Array<[Element]>(repeating: self, count: count)).flatMap{ $0 }
     }
     
+    public func takeEven() -> [Element] {
+        return self.enumerated().filter{ $0.offset.isEven }.map{ $0.element }
+    }
+    
+    public func takeOdd() -> [Element] {
+        return self.enumerated().filter{ $0.offset.isOdd  }.map{ $0.element }
+    }
+
     public func toDictionary() -> [Index: Element] {
         return Dictionary(pairs: self.enumerated().map{ (i, a) in (i, a) })
     }
