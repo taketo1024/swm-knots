@@ -11,7 +11,7 @@ import SwiftyMath
 import SwiftyHomology
 
 public extension GeometricComplex {
-    public func chainComplex<R: EuclideanRing>(relativeTo L: Self? = nil, _ type: R.Type) -> ChainComplex<Cell, R> {
+    public func chainComplex<R: Ring>(relativeTo L: Self? = nil, _ type: R.Type) -> ChainComplex<Cell, R> {
         if let L = L { // relative: (K, L)
             return _chainComplex(relativeTo: L, type)
         } else {
@@ -19,7 +19,7 @@ public extension GeometricComplex {
         }
     }
 
-    private func _chainComplex<R: EuclideanRing>(_ type: R.Type) -> ChainComplex<Cell, R> {
+    private func _chainComplex<R: Ring>(_ type: R.Type) -> ChainComplex<Cell, R> {
         typealias C = ChainComplex<Cell, R>
         let name = "C(\(self.name); \(R.symbol))"
         let gens = validDims.map { i in cells(ofDim: i) }
@@ -30,7 +30,7 @@ public extension GeometricComplex {
         return C(base: base, differential: d)
     }
     
-    private func _chainComplex<R: EuclideanRing>(relativeTo L: Self, _ type: R.Type) -> ChainComplex<Cell, R> {
+    private func _chainComplex<R: Ring>(relativeTo L: Self, _ type: R.Type) -> ChainComplex<Cell, R> {
         typealias C = ChainComplex<Cell, R>
         let name = "C(\(self.name), \(L.name); \(R.symbol))"
         let gens = validDims.map { i in cells(ofDim: i).subtract(L.cells(ofDim: i)) }

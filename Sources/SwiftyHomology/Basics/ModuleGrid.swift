@@ -8,10 +8,10 @@
 import Foundation
 import SwiftyMath
 
-public typealias ModuleGrid1<A: BasisElementType, R: EuclideanRing> = ModuleGridN<_1, A, R>
-public typealias ModuleGrid2<A: BasisElementType, R: EuclideanRing> = ModuleGridN<_2, A, R>
+public typealias ModuleGrid1<A: BasisElementType, R: Ring> = ModuleGridN<_1, A, R>
+public typealias ModuleGrid2<A: BasisElementType, R: Ring> = ModuleGridN<_2, A, R>
 
-public struct ModuleGridN<n: _Int, A: BasisElementType, R: EuclideanRing>: Sequence {
+public struct ModuleGridN<n: _Int, A: BasisElementType, R: Ring>: Sequence {
     public typealias Object = ModuleObject<A, R>
     internal var grid: GridN<n, Object>
     

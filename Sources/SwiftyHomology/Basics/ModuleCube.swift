@@ -10,7 +10,7 @@ import SwiftyMath
 
 // An n-dim cube with Modules on all vertices I ∈ {0, 1}^n .
 
-public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
+public struct ModuleCube<A: BasisElementType, R: Ring> {
     public typealias Object = ModuleObject<A, R>
     
     public let dim: Int
@@ -77,25 +77,6 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
             }
         
         return ModuleGrid1(data: data)
-    }
-    
-    public func asChainComplex() -> ChainComplex<A, R> {
-        let base = fold()
-        let group = vertices.group{ I in I.components.count{ $0 == 1 } }
-        
-        let d = ChainMap(degree: 1) { i -> FreeModuleHom<A, A, R> in
-            guard let Is = group[i] else {
-                return .zero
-            }
-            return FreeModuleHom{ (x: FreeModule<A, R>) in
-                // MEMO finding vertex takes time.
-                guard let I0 = Is.first(where: { I in self[I].contains(x) }) else {
-                    return .zero
-                }
-                return self.d(I0).applied(to: x)
-            }
-        }
-        return ChainComplex(base: base, differential: d)
     }
     
     public func describe(_ I: IntList) {
