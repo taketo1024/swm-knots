@@ -55,6 +55,10 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         return base.mDegrees
     }
     
+    public func named(_ name: String) -> ChainComplexN<n, A, R> {
+        return ChainComplexN(base: base.named(name), differential: d)
+    }
+    
     public func shifted(_ I: IntList) -> ChainComplexN<n, A, R> {
         return ChainComplexN(base: base.shifted(I), differential: d.shifted(I))
     }

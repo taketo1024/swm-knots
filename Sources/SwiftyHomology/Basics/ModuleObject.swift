@@ -101,7 +101,7 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
         let elim = B.elimination(form: .Smith)
         
         let D = elim.diagonal + [.zero].repeated(k - l)
-        let s = D.count{ $0 != .identity }
+        let s = D.count{ !$0.isInvertible }
         
         let A2 = A * elim.leftInverse.submatrix(colRange: (k - s) ..< k)
         let T2 = (elim.left * T).submatrix(rowRange: (k - s) ..< k)
