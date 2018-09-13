@@ -46,31 +46,71 @@ public struct GridDiagram {
             }
     }
     
-    public var size: Int {
+    public var n: Int {
         return Os.count
     }
     
-    public func I(_ A: [Point], _ B: [Point]) -> Int {
-        return A.allCombinations(with: B).count{ (a, b) in a < b }
+    public var gridSize: Int {
+        return 2 * n
     }
     
-    public func J(_ A: [Point], _ B: [Point]) -> Int {
-        return (I(A, B) + I(B, A)) / 2
+    private func I(_ ps: [Point], _ qs: [Point]) -> Int {
+        return ps.allCombinations(with: qs).count{ (p, q) in p < q }
+    }
+    
+    private func J(_ ps: [Point], _ qs: [Point]) -> Int {
+        return (I(ps, qs) + I(qs, ps)) / 2
     }
 
     // the Maslov grading:
     // M (x) = J (x, x) − 2J (x, O) + J (O, O) + 1.
     
-    public func M(_ x: [Point]) -> Int {
-        return J(x, x) - 2 * J(x, Os) + J(Os, Os) + 1
+    public func MaslovGrading(_ x: Generator) -> Int {
+        let ps = x.points
+        return J(ps, ps) - 2 * J(ps, Os) + J(Os, Os) + 1
     }
     
     // the Alexander grading (currently supports only when l = 1):
     // Ai(x) = J(x − 1/2(X + O), Xi − Oi) − (ni − 1)/2.
     
-    public func A(_ x: [Point]) -> Int {
-        let n = size
-        return J(x, Xs) - J(x, Os) - ( J(Xs, Xs) - J(Xs, Os) + J(Os, Xs) - J(Os, Os) - (n - 1) ) / 2
+    public func AlexanderGrading(_ x: Generator) -> Int {
+        let ps = x.points
+        return J(ps, Xs) - J(ps, Os) - ( J(Xs, Xs) - J(Xs, Os) + J(Os, Xs) - J(Os, Os) - (n - 1) ) / 2
+    }
+    
+    public func isAdjacent(_ x: Generator, _ y: Generator) -> Bool {
+        let (ps, qs) = (x.points, y.points)
+        return Set(ps).subtracting(qs).count == 2
+    }
+    
+    // TODO: consider generating elements directly.
+    public func adjacents(_ x: Generator) -> [Generator] {
+        return generators.filter { y in isAdjacent(x, y) }
+    }
+    
+    public func rectangles(from x: Generator, to y: Generator) -> [Rect] {
+        let (ps, qs) = (x.points, y.points)
+        let diff = Set(ps).subtracting(qs).toArray()
+        
+        guard diff.count == 2 else {
+            return []
+        }
+        
+        let (p, q) = (diff[0], diff[1])
+        
+        func rect(_ p: Point, _ q: Point) -> Rect {
+            let l = gridSize
+            let size = Point((q.x - p.x + l) % l, (q.y - p.y + l) % l)
+            return Rect(point: p, size: size)
+        }
+        
+        return [rect(p, q), rect(q, p)]
+    }
+    
+    public func emptyRectangles(from x: Generator, to y: Generator) -> [Rect] {
+        return rectangles(from: x, to: y).filter{ r in
+            !r.contains(x.points, gridSize: gridSize)
+        }
     }
     
     public func printDiagram() {
@@ -94,14 +134,6 @@ public struct GridDiagram {
             return p.x < q.x && p.y < q.y
         }
         
-        public static func + (p: Point, q: Point) -> Point {
-            return Point(p.x + q.x, p.y + q.y)
-        }
-        
-        public static func % (p: Point, n: Int) -> Point {
-            return Point(p.x % n, p.y % n)
-        }
-        
         public var description: String {
             return "(\(x), \(y))"
         }
@@ -110,51 +142,32 @@ public struct GridDiagram {
     public struct Rect: CustomStringConvertible {
         public let point: Point
         public let size: Point
-        public let mod: Int
         
-        public init(_ x1: Int, _ y1: Int, _ x2: Int, _ y2: Int, mod: Int) {
-            self.init(Point(x1, y1), Point(x2, y2), mod: mod)
+        public init(x: Int, y: Int, w: Int, h: Int) {
+            self.init(point: Point(x, y), size: Point(w, h))
         }
         
-        public init(_ point1: Point, _ point2: Point, mod: Int) {
-            self.point = Point(min(point1.x, point2.x), min(point1.y, point2.y))
-            self.size  = Point(abs(point1.x - point2.x), abs(point1.y - point2.y))
-            self.mod   = mod
+        public init(point: Point, size: Point) {
+            self.point = point
+            self.size  = size
         }
         
-        public func connects(_ x: [Point], to y: [Point]) -> Bool {
-            let x_y = Set(x).subtracting(y)
-            let y_x = Set(y).subtracting(x)
-            
-            guard x_y.count == 2 else {
-                return false
-            }
-            
-            let p1 = point
-            let p2 = (point + Point(size.x, 0)) % mod
-            let p3 = (point + Point(0, size.y)) % mod
-            let p4 = (point + size) % mod
-            
-            return x_y.contains(p1) && x_y.contains(p4)
-                && y_x.contains(p2) && y_x.contains(p3)
+        public func contains(_ points: [Point], gridSize: Int) -> Bool {
+            return countContaining(points, gridSize: gridSize) > 0
         }
         
-        public func contains(_ x: [Point]) -> Bool {
-            return countContaining(x) > 0
-        }
-        
-        public func countContaining(_ x: [Point]) -> Int {
+        public func countContaining(_ points: [Point], gridSize l: Int) -> Int {
             let xRange = (point.x + 1 ..< point.x + size.x)
             let yRange = (point.y + 1 ..< point.y + size.y)
             
-            return x.count { p in
-                (xRange.contains(p.x) || xRange.contains(p.x + mod)) &&
-                (yRange.contains(p.y) || yRange.contains(p.y + mod))
+            return points.count { p in
+                (xRange.contains(p.x) || xRange.contains(p.x + l)) &&
+                (yRange.contains(p.y) || yRange.contains(p.y + l))
             }
         }
         
         public var description: String {
-            return "[\(point), \(point + size)]"
+            return "[point: \(point), size: \(size)]"
         }
     }
     
@@ -168,7 +181,7 @@ public struct GridDiagram {
         }
 
         public var description: String {
-            return "(\(id))"
+            return "(\(id): \(points))"
         }
 
         public var hashValue: Int {
