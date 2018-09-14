@@ -83,8 +83,8 @@ public struct KhovanovChainComplex<R: EuclideanRing> {
         return chainComplex.homology(i)!
     }
     
-    public func homology(name: String? = nil) -> ModuleGrid1<KhBasisElement, R> {
-        return chainComplex.homology(name: name)
+    public func homology() -> ModuleGrid1<KhBasisElement, R> {
+        return chainComplex.homology()
     }
     
     public func bigradedHomology(name: String? = nil) -> ModuleGrid2<KhBasisElement, R> {
@@ -97,8 +97,8 @@ public struct KhovanovChainComplex<R: EuclideanRing> {
                 (IntList(i, normalized ? j + s : j), Hi.subSummands{ $0.degree == j } )
             }
         }
-        let grid = Dictionary(pairs: list)
-        return ModuleGrid2<KhBasisElement, R>(name: name, grid: grid, default: .zeroModule)
+        let data = Dictionary(pairs: list)
+        return ModuleGrid2<KhBasisElement, R>(name: name, data: data)
     }
 }
 
@@ -126,13 +126,13 @@ public extension Link {
     public func LeeHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid1<KhBasisElement, R> {
         let name = "Lee(\(self.name)\( R.self == 𝐙.self ? "" : "; \(R.symbol)"))"
         let C = self.KhovanovChainComplex(type, h: .zero, t: .identity, normalized: normalized)
-        return C.homology(name: name)
+        return C.homology().named(name)
     }
     
     public func BarNatanHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid1<KhBasisElement, R> {
         let name = "BN(\(self.name)\( R.self == 𝐙.self ? "" : "; \(R.symbol)"))"
         let C = self.KhovanovChainComplex(type, h: .identity, t: .zero, normalized: normalized)
-        return C.homology(name: name)
+        return C.homology().named(name)
     }
     
     public var orientationPreservingState: IntList {
@@ -200,9 +200,9 @@ public extension Link {
     }
 }
 
-public extension GridN where n == _2, Object: _ModuleObject, Object.A == KhBasisElement {
+public extension ModuleGridN where n == _2, A == KhBasisElement {
     public var bandWidth: Int {
-        return bidegrees.map{ (i, j) in j - 2 * i }.unique().count
+        return indices.map{ I in I[1] - 2 * I[0] }.unique().count
     }
     
     public var isDiagonal: Bool {
@@ -219,9 +219,9 @@ public extension GridN where n == _2, Object: _ModuleObject, Object.A == KhBasis
     
     public var qEulerCharacteristic: LaurentPolynomial<R, JonesPolynomial_q> {
         let q = LaurentPolynomial<R, JonesPolynomial_q>.indeterminate
-        return bidegrees.sum { (i, j) -> LaurentPolynomial<R, JonesPolynomial_q> in
-            let s = self[i, j]!
-            let a = R(from: (-1).pow(i) * s.entity.rank )
+        return self.sum { (I, s) -> LaurentPolynomial<R, JonesPolynomial_q> in
+            let (i, j) = (I[0], I[1])
+            let a = R(from: (-1).pow(i) * s!.rank )
             return a * q.pow(j)
         }
     }

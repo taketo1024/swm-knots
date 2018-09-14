@@ -15,7 +15,7 @@ public extension LogFlag {
     }
 }
 
-public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomStringConvertible {
+public final class ExactSequenceSolver<R: EuclideanRing>: CustomStringConvertible {
     public typealias Object = ModuleObject<AbstractBasisElement, R>
     public typealias Map    = FreeModuleHom<AbstractBasisElement, AbstractBasisElement, R>
     
@@ -24,9 +24,9 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
     internal var matrices: Grid1<Matrix<R>>
     
     public init(objects: [Object?], maps: [Map?]) {
-        self.objects  = Grid1<Object>(list: objects)
-        self.maps     = Grid1(list: maps)
-        self.matrices = Grid1()
+        self.objects  = Grid1(data: objects.toDictionary())
+        self.maps     = Grid1(data: maps.toDictionary())
+        self.matrices = Grid1.empty
     }
 
     public convenience init() {
@@ -43,11 +43,11 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
     }
     
     public var length: Int {
-        return objects.isEmpty ? 0 : objects.topDegree - objects.bottomDegree + 1
+        return objects.isEmpty ? 0 : objects.topIndex - objects.bottomIndex + 1
     }
     
     public var range: [Int] {
-        return objects.isEmpty ? [] : (objects.degrees.min()! ... objects.degrees.max()!).toArray()
+        return objects.isEmpty ? [] : (objects.bottomIndex ... objects.topIndex).toArray()
     }
     
     public func matrix(_ i: Int) -> Matrix<R>? {
@@ -308,10 +308,6 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
         }
     }
     
-    public func makeIterator() -> AnyIterator<Object?> {
-        return objects.makeIterator()
-    }
-    
     internal func objectDescription(_ i: Int) -> String {
         return self[i]?.description ?? "?"
     }
@@ -326,7 +322,7 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
         if objects.isEmpty {
             return "ExSeq<\(R.symbol)>: empty"
         } else {
-            let (i0, i1) = (objects.degrees.min()!, objects.degrees.max()!)
+            let (i0, i1) = (objects.bottomIndex, objects.topIndex)
             return "ExSeq<\(R.symbol)>: "
                 + (i0 ..< i1).map { i in "\(objectDescription(i)) \(arrowDescription(i)) " }.joined()
                 + objectDescription(i1)

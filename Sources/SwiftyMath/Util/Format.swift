@@ -92,19 +92,24 @@ public struct Format {
         return ts.isEmpty ? "0" : ts
     }
     
-    public static func table<T1, T2, T3>(_ symbol: String, rows: [T1], cols: [T2], op: (T1, T2) -> T3) -> String {
-        let head = ([symbol] + (0 ..< cols.count).map{ j in "\(cols[j])" })
-        let body = (0 ..< rows.count).map { i in
-            ["\(rows[i])"] + (0 ..< cols.count).map { j in "\(op(rows[i], cols[j]))" }
+    public static func table<T1, T2, T3>(rows: [T1], cols: [T2], symbol: String = "", separator s: String = "\t", printHeaders: Bool = true, op: (T1, T2) -> T3) -> String {
+        
+        let head = printHeaders ? [[symbol] + (0 ..< cols.count).map{ j in "\(cols[j])" }] : []
+        let body = (0 ..< rows.count).map { i -> [String] in
+            let head = printHeaders ? ["\(rows[i])"] : []
+            let line = (0 ..< cols.count).map { j in
+                "\(op(rows[i], cols[j]))"
+            }
+            return head + line
         }
-        return ([head] + body).map{ $0.joined(separator: "\t") }.joined(separator: "\n")
+        return (head + body).map{ $0.joined(separator: s) }.joined(separator: "\n")
     }
 }
 
 
 public extension AdditiveGroup {
     public static func printAddTable(values: [Self]) {
-        print( Format.table("+", rows: values, cols: values) { $0 + $1 } )
+        print( Format.table(rows: values, cols: values, symbol: "+") { $0 + $1 } )
     }
 }
 
@@ -116,11 +121,11 @@ public extension AdditiveGroup where Self: FiniteSetType {
 
 public extension Monoid {
     public static func printMulTable(values: [Self]) {
-        print( Format.table("*", rows: values, cols: values) { $0 * $1 } )
+        print( Format.table(rows: values, cols: values, symbol: "*") { $0 * $1 } )
     }
     
     public static func printExpTable(values: [Self], upTo n: Int) {
-        print( Format.table("^", rows: values, cols: Array(0 ... n)) { $0.pow($1) } )
+        print( Format.table(rows: values, cols: Array(0 ... n), symbol: "^") { $0.pow($1) } )
     }
 }
 

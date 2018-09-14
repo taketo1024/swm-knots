@@ -181,27 +181,21 @@ public extension ChainComplexN {
     }
     
     public func cycle() -> ModuleGridN<n, A, R> {
-        return ModuleGridN(
-            name: "Z(\(base.name))",
-            list: base.mDegrees.map{ I in (I, cycle(I)) },
-            default: base.defaultObject
-        )
+        let name = "Z(\(base.name))"
+        let data = Dictionary(pairs: base.indices.map{ I in (I, cycle(I)) })
+        return ModuleGridN(name: name, data: data)
     }
     
     public func boundary() -> ModuleGridN<n, A, R> {
-        return ModuleGridN(
-            name: "B(\(base.name))",
-            list: base.mDegrees.map{ I in (I, boundary(I)) },
-            default: base.defaultObject
-        )
+        let name = "B(\(base.name))"
+        let data = Dictionary(pairs: base.indices.map{ I in (I, boundary(I)) })
+        return ModuleGridN(name: name, data: data)
     }
     
-    public func homology(name: String? = nil) -> ModuleGridN<n, A, R> {
-        return ModuleGridN(
-            name: name ?? "H(\(base.name))",
-            list: base.mDegrees.map{ I in (I, homology(I)) },
-            default: base.defaultObject
-        )
+    public func homology() -> ModuleGridN<n, A, R> {
+        let name = "H(\(base.name))"
+        let data = Dictionary(pairs: base.indices.map{ I in (I, homology(I)) })
+        return ModuleGridN(name: name, data: data)
     }
     
     public var isExact: Bool {

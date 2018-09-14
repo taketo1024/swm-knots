@@ -75,6 +75,10 @@ public extension Array {
     public func repeated(_ count: Int) -> [Element] {
         return (Array<[Element]>(repeating: self, count: count)).flatMap{ $0 }
     }
+    
+    public func toDictionary() -> [Index: Element] {
+        return Dictionary(pairs: self.enumerated().map{ (i, a) in (i, a) })
+    }
 }
 
 public extension Array where Element: Equatable {
