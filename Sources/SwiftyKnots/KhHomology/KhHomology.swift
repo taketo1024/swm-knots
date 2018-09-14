@@ -218,13 +218,4 @@ public extension ModuleGridN where n == _2, A == KhBasisElement {
     public var isHThick: Bool {
         return !isHThin
     }
-    
-    public var qEulerCharacteristic: LaurentPolynomial<R, JonesPolynomial_q> {
-        let q = LaurentPolynomial<R, JonesPolynomial_q>.indeterminate
-        return self.sum { (I, s) -> LaurentPolynomial<R, JonesPolynomial_q> in
-            let (i, j) = (I[0], I[1])
-            let a = R(from: (-1).pow(i) * s!.rank )
-            return a * q.pow(j)
-        }
-    }
 }

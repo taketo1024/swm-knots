@@ -12,11 +12,15 @@ import SwiftyHomology
 
 class KhovanovHomologyTests: XCTestCase {
     
+    private func χ<R: Ring>(_ Kh: ModuleGrid2<KhBasisElement, R>) -> LaurentPolynomial<𝐙, JonesPolynomial_q>  {
+        return Kh.gradedEulerCharacteristic(𝐙.self, JonesPolynomial_q.self)
+    }
+    
     func testUnknot() {
         let K = Link.unknot
         let Kh = K.KhovanovHomology(𝐙.self)
         
-        XCTAssertEqual(Kh.qEulerCharacteristic, K.JonesPolynomial(normalized: false))
+        XCTAssertEqual(χ(Kh), K.JonesPolynomial(normalized: false))
         XCTAssertEqual(Kh.indices.count, 2)
         XCTAssertEqual(Kh[0, -1]!.structure, [0 : 1])
         XCTAssertEqual(Kh[0,  1]!.structure, [0 : 1])
@@ -40,7 +44,7 @@ class KhovanovHomologyTests: XCTestCase {
         let K = Knot(3, 1)
         let Kh = K.KhovanovHomology(𝐙.self)
         
-        XCTAssertEqual(Kh.qEulerCharacteristic, K.JonesPolynomial(normalized: false))
+        XCTAssertEqual(χ(Kh), K.JonesPolynomial(normalized: false))
         
         XCTAssertEqual(Kh.indices.count, 5)
         XCTAssertEqual(Kh[-3, -9]!.structure, [0 : 1])
@@ -54,7 +58,7 @@ class KhovanovHomologyTests: XCTestCase {
         let K = Knot(4, 1)
         let Kh = K.KhovanovHomology(𝐙.self)
         
-        XCTAssertEqual(Kh.qEulerCharacteristic, K.JonesPolynomial(normalized: false))
+        XCTAssertEqual(χ(Kh), K.JonesPolynomial(normalized: false))
         
         XCTAssertEqual(Kh.indices.count, 8)
         XCTAssertEqual(Kh[-2, -5]!.structure, [0 : 1])
