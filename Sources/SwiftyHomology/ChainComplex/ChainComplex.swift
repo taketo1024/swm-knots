@@ -26,12 +26,10 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
     internal let  _torPart = Cache<ChainComplexN<n, A, R>>()
 
     public init(base: ModuleGridN<n, A, R>, differential d: Differential) {
-        assert(base.defaultObject == nil || base.defaultObject == .some(.zeroModule))
-        
         self.base = base
         self.d = d
         
-        let degs = base.mDegrees.flatMap{ I in [I, I - d.mDegree] }.unique()
+        let degs = base.indices.flatMap{ I in [I, I - d.mDegree] }.unique()
         self.dMatrices = Dictionary(pairs: degs.map{ I in (I, .empty) })
     }
     
@@ -43,16 +41,16 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         }
     }
     
-    public var name: String {
-        return base.name
-    }
-    
     internal var dDegree: IntList {
         return d.mDegree
     }
     
-    public var mDegrees: [IntList] {
-        return base.mDegrees
+    public var indices: [IntList] {
+        return base.indices
+    }
+    
+    public var name: String {
+        return base.name
     }
     
     public func named(_ name: String) -> ChainComplexN<n, A, R> {
@@ -81,15 +79,15 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         typealias D = ChainComplexN<n, Dual<A>, R>
         
         let dName = name ?? "\(base.name)^*"
-        let dGrid = Dictionary(pairs:
-            mDegrees.map { I -> (IntList, [Dual<A>]) in
+        let dGens = Dictionary(pairs:
+            indices.map { I -> (IntList, [Dual<A>]) in
                 guard let o = self[I], o.isFree, o.generators.forAll({ $0.isSingle }) else {
                     fatalError("unavailable")
                 }
                 return (I, o.generators.map{ $0.unwrap().dual })
             }
         )
-        let dBase = D.Base(name: dName, grid: dGrid)
+        let dBase = D.Base(name: dName, generators: dGens)
         let dDiff = d.dual(from: self, to: self)
         
         return D(base: dBase, differential: dDiff)
@@ -100,7 +98,7 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
             if debug { Swift.print(msg()) }
         }
         
-        for I0 in mDegrees {
+        for I0 in indices {
             let I1 = I0 + dDegree
             let I2 = I1 + dDegree
             
@@ -163,10 +161,6 @@ public extension ChainComplexN where n == _1 {
         return base.topDegree
     }
     
-    public var degrees: [Int] {
-        return base.degrees
-    }
-    
     public func shifted(_ i: Int) -> ChainComplex<A, R> {
         return shifted(IntList(i))
     }
@@ -187,10 +181,6 @@ public extension ChainComplexN where n == _2 {
         } set {
             base[i, j] = newValue
         }
-    }
-    
-    public var bidegrees: [(Int, Int)] {
-        return base.bidegrees
     }
     
     public func shifted(_ i: Int, _ j: Int) -> ChainComplex2<A, R> {

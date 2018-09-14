@@ -70,13 +70,13 @@ public struct ModuleCube<A: BasisElementType, R: EuclideanRing> {
     }
     
     public func fold() -> ModuleGrid1<A, R> {
-        let grid = vertices
+        let data = vertices
             .group{ I in I.components.count{ $0 == 1 } }
             .mapValues{ list in
                 list.reduce(.zeroModule) { (res, I) in res ⊕ self[I] }
             }
         
-        return ModuleGrid1(grid: grid, default: .zeroModule)
+        return ModuleGrid1(data: data)
     }
     
     public func asChainComplex() -> ChainComplex<A, R> {

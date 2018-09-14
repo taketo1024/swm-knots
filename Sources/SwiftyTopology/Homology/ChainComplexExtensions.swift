@@ -22,8 +22,8 @@ public extension GeometricComplex {
     private func _chainComplex<R: EuclideanRing>(_ type: R.Type) -> ChainComplex<Cell, R> {
         typealias C = ChainComplex<Cell, R>
         let name = "C(\(self.name); \(R.symbol))"
-        let list = validDims.map { i in cells(ofDim: i) }
-        let base = C.Base(name: name, grid: list.toDictionary())
+        let gens = validDims.map { i in cells(ofDim: i) }
+        let base = C.Base(name: name, generators: gens.toDictionary())
         let d = C.Differential.uniform(degree: -1) { (cell: Cell) in
             cell.boundary(R.self)
         }
@@ -33,12 +33,12 @@ public extension GeometricComplex {
     private func _chainComplex<R: EuclideanRing>(relativeTo L: Self, _ type: R.Type) -> ChainComplex<Cell, R> {
         typealias C = ChainComplex<Cell, R>
         let name = "C(\(self.name), \(L.name); \(R.symbol))"
-        let list = validDims.map { i in cells(ofDim: i).subtract(L.cells(ofDim: i)) }
-        let base = C.Base(name: name, grid: list.toDictionary())
+        let gens = validDims.map { i in cells(ofDim: i).subtract(L.cells(ofDim: i)) }
+        let base = C.Base(name: name, generators: gens.toDictionary())
         let d = C.Differential(degree: -1) { i in
             FreeModuleHom { (cell: Cell) in
                 cell.boundary(R.self).map { (cell, r) in
-                    (i > 0 && list[i - 1].contains(cell)) ? r * .wrap(cell) : .zero
+                    (i > 0 && gens[i - 1].contains(cell)) ? r * .wrap(cell) : .zero
                 }
             }
         }

@@ -122,7 +122,7 @@ public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Eu
         
         assert(d0.mDegree == d1.mDegree)
         
-        for I0 in C0.base.mDegrees {
+        for I0 in C0.indices {
             let (I1, I2, I3) = (I0 + d0.mDegree, I0 + f.mDegree, I0 + d0.mDegree + f.mDegree)
             
             guard let s0 = C0[I0], let s3 = C1[I3] else {

@@ -17,7 +17,7 @@ class KhovanovHomologyTests: XCTestCase {
         let Kh = K.KhovanovHomology(𝐙.self)
         
         XCTAssertEqual(Kh.qEulerCharacteristic, K.JonesPolynomial(normalized: false))
-        XCTAssertEqual(Kh.bidegrees.count, 2)
+        XCTAssertEqual(Kh.indices.count, 2)
         XCTAssertEqual(Kh[0, -1]!.structure, [0 : 1])
         XCTAssertEqual(Kh[0,  1]!.structure, [0 : 1])
     }
@@ -42,7 +42,7 @@ class KhovanovHomologyTests: XCTestCase {
         
         XCTAssertEqual(Kh.qEulerCharacteristic, K.JonesPolynomial(normalized: false))
         
-        XCTAssertEqual(Kh.bidegrees.count, 5)
+        XCTAssertEqual(Kh.indices.count, 5)
         XCTAssertEqual(Kh[-3, -9]!.structure, [0 : 1])
         XCTAssertEqual(Kh[-2, -7]!.structure, [2 : 1])
         XCTAssertEqual(Kh[-2, -5]!.structure, [0 : 1])
@@ -56,7 +56,7 @@ class KhovanovHomologyTests: XCTestCase {
         
         XCTAssertEqual(Kh.qEulerCharacteristic, K.JonesPolynomial(normalized: false))
         
-        XCTAssertEqual(Kh.bidegrees.count, 8)
+        XCTAssertEqual(Kh.indices.count, 8)
         XCTAssertEqual(Kh[-2, -5]!.structure, [0 : 1])
         XCTAssertEqual(Kh[-1, -3]!.structure, [2 : 1])
         XCTAssertEqual(Kh[-1, -1]!.structure, [0 : 1])
@@ -71,7 +71,7 @@ class KhovanovHomologyTests: XCTestCase {
         let K = Knot(5, 1)
         let Kh = K.KhovanovHomology(𝐙.self)
         
-        XCTAssertEqual(Kh.bidegrees.count, 8)
+        XCTAssertEqual(Kh.indices.count, 8)
         XCTAssertEqual(Kh[-5, -15]!.structure, [0 : 1])
         XCTAssertEqual(Kh[-4, -13]!.structure, [2 : 1])
         XCTAssertEqual(Kh[-4, -11]!.structure, [0 : 1])

@@ -108,9 +108,8 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
         return sequence.isIsomorphic(seqIndex(n, i))
     }
 
-    public func column(_ i: Int) -> ModuleGrid1<AbstractBasisElement, R> {
-        let grid = Dictionary(pairs: degrees.map{ n in (n, self[n, i]) })
-        return Grid1(grid: grid, default: nil)
+    public func column(_ i: Int) -> Grid1<ModuleObject<AbstractBasisElement, R>> {
+        return Grid1(data: Dictionary(pairs: degrees.map{ n in (n, self[n, i]) }))
     }
     
     public func fill(_ n: Int, _ i: Int) {
