@@ -15,7 +15,7 @@ public extension LogFlag {
     }
 }
 
-public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomStringConvertible {
+public final class ExactSequenceSolver<R: EuclideanRing>: CustomStringConvertible {
     public typealias Object = ModuleObject<AbstractBasisElement, R>
     public typealias Map    = FreeModuleHom<AbstractBasisElement, AbstractBasisElement, R>
     
@@ -24,9 +24,9 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
     internal var matrices: Grid1<Matrix<R>>
     
     public init(objects: [Object?], maps: [Map?]) {
-        self.objects  = Grid1<Object>(list: objects)
-        self.maps     = Grid1(list: maps)
-        self.matrices = Grid1()
+        self.objects  = Grid1(grid: objects.toDictionary(), default: nil)
+        self.maps     = Grid1(grid: maps.toDictionary(), default: nil)
+        self.matrices = Grid1.empty(default: nil)
     }
 
     public convenience init() {
@@ -306,10 +306,6 @@ public final class ExactSequenceSolver<R: EuclideanRing>: Sequence, CustomString
         for i in range {
             assertExactness(at: i, debug: debug)
         }
-    }
-    
-    public func makeIterator() -> AnyIterator<Object?> {
-        return objects.makeIterator()
     }
     
     internal func objectDescription(_ i: Int) -> String {

@@ -83,8 +83,8 @@ public struct KhovanovChainComplex<R: EuclideanRing> {
         return chainComplex.homology(i)!
     }
     
-    public func homology(name: String? = nil) -> ModuleGrid1<KhBasisElement, R> {
-        return chainComplex.homology(name: name)
+    public func homology() -> ModuleGrid1<KhBasisElement, R> {
+        return chainComplex.homology()
     }
     
     public func bigradedHomology(name: String? = nil) -> ModuleGrid2<KhBasisElement, R> {
@@ -126,13 +126,13 @@ public extension Link {
     public func LeeHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid1<KhBasisElement, R> {
         let name = "Lee(\(self.name)\( R.self == 𝐙.self ? "" : "; \(R.symbol)"))"
         let C = self.KhovanovChainComplex(type, h: .zero, t: .identity, normalized: normalized)
-        return C.homology(name: name)
+        return C.homology().named(name)
     }
     
     public func BarNatanHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid1<KhBasisElement, R> {
         let name = "BN(\(self.name)\( R.self == 𝐙.self ? "" : "; \(R.symbol)"))"
         let C = self.KhovanovChainComplex(type, h: .identity, t: .zero, normalized: normalized)
-        return C.homology(name: name)
+        return C.homology().named(name)
     }
     
     public var orientationPreservingState: IntList {

@@ -81,17 +81,15 @@ public struct ChainComplexN<n: _Int, A: BasisElementType, R: EuclideanRing>: Cus
         typealias D = ChainComplexN<n, Dual<A>, R>
         
         let dName = name ?? "\(base.name)^*"
-        let dList: [(IntList, [Dual<A>]?)] = mDegrees.map { I -> (IntList, [Dual<A>]?) in
-            guard let o = self[I] else {
-                return (I, nil)
+        let dGrid = Dictionary(pairs:
+            mDegrees.map { I -> (IntList, [Dual<A>]) in
+                guard let o = self[I], o.isFree, o.generators.forAll({ $0.isSingle }) else {
+                    fatalError("unavailable")
+                }
+                return (I, o.generators.map{ $0.unwrap().dual })
             }
-            guard o.isFree, o.generators.forAll({ $0.isSingle }) else {
-                fatalError("inavailable")
-            }
-            return (I, o.generators.map{ $0.unwrap().dual })
-        }
-        let dDef = (base.defaultObject == .zeroModule) ? D.Object.zeroModule : nil
-        let dBase = D.Base(name: dName, list: dList, default: dDef)
+        )
+        let dBase = D.Base(name: dName, grid: dGrid)
         let dDiff = d.dual(from: self, to: self)
         
         return D(base: dBase, differential: dDiff)

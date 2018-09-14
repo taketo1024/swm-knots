@@ -21,6 +21,7 @@ public protocol _ModuleObject: Equatable {
     
     init(basis: [A])
     var entity: ModuleObject<A, R> { get }
+    static var zeroModule: Self { get }
 }
 
 extension ModuleObject: _ModuleObject {
@@ -33,11 +34,13 @@ public extension GridN where Object: _ModuleObject {
     public typealias A = Object.A
     public typealias R = Object.R
     
-    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (IntList, [A]?) {
-        let grid = Dictionary(pairs: list.map{ (I, basis) in
-            (I, basis.map{ Object(basis: $0) })
-        })
-        self.init(name: name, grid: grid, default: defaultObject)
+    public init(name: String? = nil, grid: [IntList : Object?]) {
+        self.init(name: name, grid: grid, default: .zeroModule)
+    }
+    
+    public init(name: String? = nil, grid: [IntList : [A]]) {
+        let grid2 = grid.mapValues{ Object(basis: $0) }
+        self.init(name: name, grid: grid2, default: .zeroModule)
     }
     
     public var isZero: Bool {
@@ -60,7 +63,7 @@ public extension GridN where Object: _ModuleObject {
         
         typealias Object = ModuleObject<A, R>
         
-        let list = grid.group { (I, _) in I.drop(i) }
+        let grid = Dictionary(pairs: self.grid.group { (I, _) in I.drop(i) }
             .map{ (J, list) -> (IntList, Object?) in
                 let sum = list.reduce(.zeroModule) { (res, next) -> Object? in
                     if let res = res, let next = next.value {
@@ -70,9 +73,9 @@ public extension GridN where Object: _ModuleObject {
                     }
                 }
                 return (J, sum)
-        }
+        })
         
-        return ModuleGridN<m, A, R>(name: name, list: list, default: defaultObject?.entity)
+        return ModuleGridN<m, A, R>(name: name, grid: grid, default: defaultObject?.entity)
     }
     
     public func describe(_ I: IntList) {
@@ -94,12 +97,13 @@ public extension GridN where Object: _ModuleObject {
 }
 
 public extension GridN where n == _1, Object: _ModuleObject {
-    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == [A]? {
-        self.init(name: name, list: list.enumerated().map{ (i, b) in (i, b)}, default: defaultObject)
+    public init(name: String? = nil, grid: [Int: Object?]) {
+        self.init(name: name, grid: grid, default: .zeroModule)
     }
     
-    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (Int, [A]?) {
-        self.init(name: name, list: list.map{ (i, basis) in (IntList(i), basis) }, default: defaultObject)
+    public init(name: String? = nil, grid: [Int: [A]]) {
+        let grid2 = grid.mapValues{ Object(basis: $0) }
+        self.init(name: name, grid: grid2, default: .zeroModule)
     }
     
     public func describe(_ i: Int) {
@@ -108,10 +112,6 @@ public extension GridN where n == _1, Object: _ModuleObject {
 }
 
 public extension GridN where n == _2, Object: _ModuleObject {
-    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (Int, Int, [A]?) {
-        self.init(name: name, list: list.map{ (i, j, basis) in (IntList(i, j), basis) }, default: defaultObject)
-    }
-    
     public func describe(_ i: Int, _ j: Int) {
         describe(IntList(i, j))
     }

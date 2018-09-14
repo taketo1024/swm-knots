@@ -109,7 +109,8 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
     }
 
     public func column(_ i: Int) -> ModuleGrid1<AbstractBasisElement, R> {
-        return ModuleGrid1(list: degrees.map{ n in (n, self[n, i]) })
+        let grid = Dictionary(pairs: degrees.map{ n in (n, self[n, i]) })
+        return Grid1(grid: grid, default: nil)
     }
     
     public func fill(_ n: Int, _ i: Int) {
@@ -195,10 +196,6 @@ public final class HomologyExactSequenceSolver<A: BasisElementType, B: BasisElem
     
     public func assertExactness(debug: Bool = false) {
         sequence.assertExactness(debug: debug)
-    }
-    
-    public func makeIterator() -> AnyIterator<Object?> {
-        return sequence.makeIterator()
     }
     
     public var description: String {

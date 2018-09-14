@@ -16,14 +16,10 @@ public struct GridN<n: _Int, Object: Equatable>: CustomStringConvertible {
     internal var grid: [IntList : Object?]
     internal let defaultObject: Object?
 
-    public init(name: String? = nil, grid: [IntList : Object?] = [:], default defaultObject: Object? = nil) {
+    public init(name: String? = nil, grid: [IntList : Object?], default defaultObject: Object?) {
         self.name = name ?? ""
         self.grid = grid.exclude{ $0.value == defaultObject }
         self.defaultObject = defaultObject
-    }
-    
-    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (IntList, Object?) {
-        self.init(name: name, grid: Dictionary(pairs: list), default: defaultObject)
     }
     
     public subscript(I: IntList) -> Object? {
@@ -32,6 +28,10 @@ public struct GridN<n: _Int, Object: Equatable>: CustomStringConvertible {
         } set {
             grid[I] = newValue
         }
+    }
+    
+    public static func empty(name: String? = nil, default defaultObject: Object?) -> GridN<n, Object> {
+        return GridN(name: name, grid: [:], default: defaultObject)
     }
     
     public var gridDim: Int {
@@ -83,16 +83,13 @@ public struct GridN<n: _Int, Object: Equatable>: CustomStringConvertible {
 }
 
 public extension GridN where n == _1 {
-    public init(name: String? = nil, grid: [Int : Object?], default defaultObject: Object? = nil) {
+    public init(name: String? = nil, grid: [Int: Object?], default defaultObject: Object?) {
         self.init(name: name, grid: grid.mapKeys{ i in IntList(i) }, default: defaultObject)
     }
     
-    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == Object? {
-        self.init(name: name, list: list.enumerated().map{ (i, o) in (i, o) }, default: defaultObject)
-    }
-    
-    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (Int, Object?) {
-        self.init(name: name, list: list.map{ (i, o) in (IntList(i), o) }, default: defaultObject)
+    public init(name: String? = nil, sequence: [Object?], default defaultObject: Object?) {
+        let grid = Dictionary(pairs: sequence.enumerated().map{ (i, o) in (IntList(i), o) })
+        self.init(name: name, grid: grid, default: defaultObject)
     }
     
     public subscript(i: Int) -> Object? {
@@ -124,21 +121,7 @@ public extension GridN where n == _1 {
     }
 }
 
-extension GridN: Sequence where n == _1 {
-    public typealias Element = Object?
-    public typealias Iterator = AnyIterator<Object?>
-    
-    public func makeIterator() -> AnyIterator<Object?> {
-        let itr = (isEmpty ? (bottomDegree ... topDegree).map{ self[$0] } : []).makeIterator()
-        return AnyIterator(itr)
-    }
-}
-
 public extension GridN where n == _2 {
-    public init<S: Sequence>(name: String? = nil, list: S, default defaultObject: Object? = nil) where S.Element == (Int, Int, Object?) {
-        self.init(name: name, list: list.map{ (i, j, o) in (IntList(i, j), o) }, default: defaultObject)
-    }
-    
     public subscript(i: Int, j: Int) -> Object? {
         get {
             return self[IntList(i, j)]
