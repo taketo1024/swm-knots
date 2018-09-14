@@ -8,10 +8,10 @@
 import Foundation
 import SwiftyMath
 
-public typealias  ChainMap<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = ChainMapN<_1, A, B, R>
-public typealias ChainMap2<A: BasisElementType, B: BasisElementType, R: EuclideanRing> = ChainMapN<_2, A, B, R>
+public typealias  ChainMap<A: BasisElementType, B: BasisElementType, R: Ring> = ChainMapN<_1, A, B, R>
+public typealias ChainMap2<A: BasisElementType, B: BasisElementType, R: Ring> = ChainMapN<_2, A, B, R>
 
-public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: EuclideanRing> {
+public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Ring> {
     public var mDegree: IntList
     internal let f: (IntList) -> FreeModuleHom<A, B, R>
     
@@ -40,6 +40,50 @@ public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Eu
         return ChainMapN(mDegree: mDegree) { I in self[I - I0] }
     }
 
+    public func assertChainMap(from C0: ChainComplexN<n, A, R>, to C1: ChainComplexN<n, B, R>, debug: Bool = false) {
+        assert(C0.dDegree == C1.dDegree)
+        
+        //          d0
+        //  C0[I0] -----> C0[I1]
+        //     |           |
+        //   f |           | f
+        //     v           v
+        //  C1[I2] -----> C1[I3]
+        //          d1
+        
+        let (f, d0, d1) = (self, C0.d, C1.d)
+        
+        func print(_ msg: @autoclosure () -> String) {
+            Swift.print(msg())
+        }
+        
+        for I0 in C0.indices {
+            let (I1, I2, I3) = (I0 + d0.mDegree, I0 + f.mDegree, I0 + d0.mDegree + f.mDegree)
+            
+            guard let s0 = C0[I0], let s3 = C1[I3] else {
+                    print("\(I0): undeterminable.")
+                    continue
+            }
+            
+            print("\(I0): \(s0) -> \(s3)")
+            
+            for x in s0.generators {
+                let y0 = d0[I0].applied(to: x)
+                let z0 =  f[I1].applied(to: y0)
+                print("\t\(x) ->\t\(y0) ->\t\(z0)")
+                
+                let y1 =  f[I0].applied(to: x)
+                let z1 = d1[I2].applied(to: y1)
+                print("\t\(x) ->\t\(y1) ->\t\(z1)")
+                print("")
+                
+//                assert(s3.elementsAreEqual(z0, z1))
+            }
+        }
+    }
+}
+
+public extension ChainMapN where R: EuclideanRing {
     public func matrix(from: ChainComplexN<n, A, R>, to: ChainComplexN<n, B, R>, at I: IntList) -> Matrix<R>? {
         guard let s0 = from[I], let s1 = to[I + mDegree] else {
             return nil
@@ -104,48 +148,6 @@ public struct ChainMapN<n: _Int, A: BasisElementType, B: BasisElementType, R: Eu
             }
         }
     }
-    
-    public func assertChainMap(from C0: ChainComplexN<n, A, R>, to C1: ChainComplexN<n, B, R>, debug: Bool = false) {
-        func print(_ msg: @autoclosure () -> String) {
-            Swift.print(msg())
-        }
-        
-        //          d0
-        //  C0[I0] -----> C0[I1]
-        //     |           |
-        //   f |           | f
-        //     v           v
-        //  C1[I2] -----> C1[I3]
-        //          d1
-        
-        let (f, d0, d1) = (self, C0.d, C1.d)
-        
-        assert(d0.mDegree == d1.mDegree)
-        
-        for I0 in C0.indices {
-            let (I1, I2, I3) = (I0 + d0.mDegree, I0 + f.mDegree, I0 + d0.mDegree + f.mDegree)
-            
-            guard let s0 = C0[I0], let s3 = C1[I3] else {
-                    print("\(I0): undeterminable.")
-                    continue
-            }
-            
-            print("\(I0): \(s0) -> \(s3)")
-            
-            for x in s0.generators {
-                let y0 = d0[I0].applied(to: x)
-                let z0 =  f[I1].applied(to: y0)
-                print("\t\(x) ->\t\(y0) ->\t\(z0)")
-                
-                let y1 =  f[I0].applied(to: x)
-                let z1 = d1[I2].applied(to: y1)
-                print("\t\(x) ->\t\(y1) ->\t\(z1)")
-                print("")
-                
-                assert(s3.elementsAreEqual(z0, z1))
-            }
-        }
-    }
 }
 
 public extension ChainMapN where n == _1 {
@@ -172,7 +174,9 @@ public extension ChainMapN where n == _1 {
     public var degree: Int {
         return mDegree[0]
     }
-    
+}
+
+public extension ChainMapN where R: EuclideanRing, n == _1 {
     public func matrix(from: ChainComplex<A, R>, to: ChainComplex<B, R>, at i: Int) -> Matrix<R>? {
         return matrix(from: from, to: to, at: IntList(i))
     }

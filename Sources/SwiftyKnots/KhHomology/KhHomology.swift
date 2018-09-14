@@ -9,7 +9,7 @@ import Foundation
 import SwiftyMath
 import SwiftyHomology
 
-public struct KhovanovChainComplex<R: EuclideanRing> {
+public struct KhovanovChainComplex<R: Ring> {
     public let L: Link
     public let cube: ModuleCube<KhBasisElement, R>
     public let chainComplex: ChainComplex<KhBasisElement, R>
@@ -78,7 +78,9 @@ public struct KhovanovChainComplex<R: EuclideanRing> {
         
         return ModuleCube(dim: n, objects: objects, edgeMaps: edgeMaps)
     }
-    
+}
+
+public extension KhovanovChainComplex where R: EuclideanRing {
     public func homology(_ i: Int) -> ModuleObject<KhBasisElement, R> {
         return chainComplex.homology(i)!
     }
@@ -104,7 +106,7 @@ public struct KhovanovChainComplex<R: EuclideanRing> {
 
 public extension Link {
     @available(*, deprecated)
-    public func KhChainComplex<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> KhovanovChainComplex<R> {
+    public func KhChainComplex<R: Ring>(_ type: R.Type, normalized: Bool = true) -> KhovanovChainComplex<R> {
         return self.KhovanovChainComplex(type, normalized: normalized)
     }
     
@@ -113,7 +115,7 @@ public extension Link {
         return self.KhovanovHomology(type, normalized: normalized)
     }
     
-    public func KhovanovChainComplex<R: EuclideanRing>(_ type: R.Type, h: R = .zero, t: R = .zero, normalized: Bool = true) -> KhovanovChainComplex<R> {
+    public func KhovanovChainComplex<R: Ring>(_ type: R.Type, h: R = .zero, t: R = .zero, normalized: Bool = true) -> KhovanovChainComplex<R> {
         return SwiftyKnots.KhovanovChainComplex<R>(self, h: h, t: t, normalized: normalized)
     }
     
@@ -139,7 +141,7 @@ public extension Link {
         return IntList(crossings.map{ $0.crossingSign == 1 ? 0 : 1 })
     }
     
-    public func canonicalCycles<R: EuclideanRing>(_ type: R.Type, _ u: R, _ v: R) -> [FreeModule<KhBasisElement, R>] {
+    public func canonicalCycles<R: Ring>(_ type: R.Type, _ u: R, _ v: R) -> [FreeModule<KhBasisElement, R>] {
         typealias Component = Link.Component
         
         assert(components.count == 1) // currently supports only knots.

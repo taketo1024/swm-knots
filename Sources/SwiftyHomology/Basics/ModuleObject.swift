@@ -16,20 +16,7 @@ import SwiftyMath
 // See: https://en.wikipedia.org/wiki/Free_presentation
 //      https://en.wikipedia.org/wiki/Structure_theorem_for_finitely_generated_modules_over_a_principal_ideal_domain#Invariant_factor_decomposition
 
-private func extract<A, R: EuclideanRing>(_ generators: [FreeModule<A, R>]) -> ([A], Matrix<R>, Matrix<R>) {
-    if generators.forAll({ z in z.isSingle }) {
-        let rootBasis = generators.map{ z in z.basis[0] }
-        let I = Matrix<R>.identity(size: generators.count)
-        return (rootBasis, I, I)
-    } else {
-        let rootBasis = generators.flatMap{ $0.basis }.unique().sorted()
-        let A = Matrix(rows: rootBasis.count, cols: generators.count) { (i, j) in generators[j][rootBasis[i]] }
-        let T = A.elimination(form: .RowHermite).left.submatrix(rowRange: 0 ..< generators.count)
-        return (rootBasis, A, T)
-    }
-}
-
-public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, CustomStringConvertible {
+public struct ModuleObject<A: BasisElementType, R: Ring>: Equatable, CustomStringConvertible {
     public let summands: [Summand]
     
     // MEMO values used for factorization where R: EuclideanRing
@@ -47,79 +34,6 @@ public struct ModuleObject<A: BasisElementType, R: EuclideanRing>: Equatable, Cu
         let summands = basis.map{ z in Summand(z) }
         let I = Matrix<R>.identity(size: basis.count)
         self.init(summands, basis, I)
-    }
-    
-    // TODO must consider when `generators` does not form a subbasis of R^n
-    // e.g) generators = [(2, 0), (0, 2)]
-    
-    public init(basis: [FreeModule<A, R>]) {
-        if basis.forAll({ $0.isSingle }) {
-            self.init(basis: basis.map{ $0.basis[0] })
-        } else {
-            let summands = basis.map{ z in Summand(z) }
-            let (rootBasis, A, T) = extract(basis)
-            assert(T * A == Matrix.identity(size: basis.count))
-            self.init(summands, rootBasis, T)
-        }
-    }
-    
-    public init(generators: [A], relationMatrix B: Matrix<R>) {
-        let I = Matrix<R>.identity(size: generators.count)
-        self.init(rootBasis: generators, generatingMatrix: I, transitionMatrix: I, relationMatrix: B)
-    }
-    
-    public init(generators: [FreeModule<A, R>], relationMatrix B: Matrix<R>) {
-        if generators.forAll({ $0.isSingle }) {
-            let basis = generators.map{ $0.basis[0] }
-            self.init(generators: basis, relationMatrix: B)
-        } else {
-            let (rootBasis, A, T) = extract(generators)
-            self.init(rootBasis: rootBasis, generatingMatrix: A, transitionMatrix: T, relationMatrix: B)
-        }
-    }
-    
-    /*
-     *                 R^n
-     *                 ^|
-     *                A||T
-     *             B   |v
-     *  0 -> R^l >---> R^k --->> M -> 0
-     *        ^        ^|
-     *        |       P||
-     *        |    D   |v
-     *  0 -> R^l >---> R^k --->> M' -> 0
-     *
-     */
-    public init(rootBasis: [A], generatingMatrix A: Matrix<R>, transitionMatrix T: Matrix<R>, relationMatrix B: Matrix<R>) {
-        let (n, k, l) = (A.rows, A.cols, B.cols)
-        
-        assert(n == rootBasis.count)
-        assert(k == B.rows)
-        assert(n >= k)
-        assert(k >= l)
-        
-        let elim = B.elimination(form: .Smith)
-        
-        let D = elim.diagonal + [.zero].repeated(k - l)
-        let s = D.count{ !$0.isInvertible }
-        
-        let A2 = A * elim.leftInverse.submatrix(colRange: (k - s) ..< k)
-        let T2 = (elim.left * T).submatrix(rowRange: (k - s) ..< k)
-        
-        // MEMO see TODO above.
-//        assert(T2 * A2 == Matrix<R>.identity(size: s))
-        
-if T2 * A2 != Matrix<R>.identity(size: s) {
-    Logger.write(.warn, "factorize() won't work properly.")
-}
-
-        let generators = rootBasis * A2
-        let summands = generators.enumerated().map { (j, z) -> Summand in
-            let d = D[k - s + j]
-            return Summand(z, d)
-        }
-        
-        self.init(summands, rootBasis, T2)
     }
     
     public subscript(i: Int) -> Summand {
@@ -203,29 +117,6 @@ if T2 * A2 != Matrix<R>.identity(size: s) {
         return ModuleObject(summands, basis, T)
     }
     
-    public func factorize(_ z: FreeModule<A, R>) -> [R] {
-        let v = transition * Vector(z.factorize(by: rootBasis))
-        
-        return summands.enumerated().map { (i, s) in
-            return s.isFree ? v[i] : v[i] % s.divisor
-        }
-    }
-    
-    public func contains(_ z: FreeModule<A, R>) -> Bool {
-        let w = factorize(z).enumerated().sum { (i, r) in
-            r * generator(i)
-        }
-        return z == w
-    }
-    
-    public func elementIsZero(_ z: FreeModule<A, R>) -> Bool {
-        return factorize(z).forAll{ $0 == .zero }
-    }
-    
-    public func elementsAreEqual(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {
-        return elementIsZero(z1 - z2)
-    }
-    
     public static func ==(a: ModuleObject<A, R>, b: ModuleObject<A, R>) -> Bool {
         return a.summands == b.summands
     }
@@ -287,6 +178,119 @@ if T2 * A2 != Matrix<R>.identity(size: s) {
             default           : return "\(R.symbol)/\(divisor)"
             }
         }
+    }
+}
+
+public extension ModuleObject where R: EuclideanRing {
+    
+    private static func extract(_ generators: [FreeModule<A, R>]) -> ([A], Matrix<R>, Matrix<R>) {
+        if generators.forAll({ z in z.isSingle }) {
+            let rootBasis = generators.map{ z in z.basis[0] }
+            let I = Matrix<R>.identity(size: generators.count)
+            return (rootBasis, I, I)
+        } else {
+            let rootBasis = generators.flatMap{ $0.basis }.unique().sorted()
+            let A = Matrix(rows: rootBasis.count, cols: generators.count) { (i, j) in generators[j][rootBasis[i]] }
+            let T = A.elimination(form: .RowHermite).left.submatrix(rowRange: 0 ..< generators.count)
+            return (rootBasis, A, T)
+        }
+    }
+    
+
+    // TODO must consider when `generators` does not form a subbasis of R^n
+    // e.g) generators = [(2, 0), (0, 2)]
+    
+    public init(basis: [FreeModule<A, R>]) {
+        if basis.forAll({ $0.isSingle }) {
+            self.init(basis: basis.map{ $0.basis[0] })
+        } else {
+            let summands = basis.map{ z in Summand(z) }
+            let (rootBasis, A, T) = ModuleObject<A, R>.extract(basis)
+            assert(T * A == Matrix.identity(size: basis.count))
+            self.init(summands, rootBasis, T)
+        }
+    }
+    
+    public init(generators: [A], relationMatrix B: Matrix<R>) {
+        let I = Matrix<R>.identity(size: generators.count)
+        self.init(rootBasis: generators, generatingMatrix: I, transitionMatrix: I, relationMatrix: B)
+    }
+    
+    public init(generators: [FreeModule<A, R>], relationMatrix B: Matrix<R>) {
+        if generators.forAll({ $0.isSingle }) {
+            let basis = generators.map{ $0.basis[0] }
+            self.init(generators: basis, relationMatrix: B)
+        } else {
+            let (rootBasis, A, T) = ModuleObject<A, R>.extract(generators)
+            self.init(rootBasis: rootBasis, generatingMatrix: A, transitionMatrix: T, relationMatrix: B)
+        }
+    }
+    
+    /*
+     *                 R^n
+     *                 ^|
+     *                A||T
+     *             B   |v
+     *  0 -> R^l >---> R^k --->> M -> 0
+     *        ^        ^|
+     *        |       P||
+     *        |    D   |v
+     *  0 -> R^l >---> R^k --->> M' -> 0
+     *
+     */
+    public init(rootBasis: [A], generatingMatrix A: Matrix<R>, transitionMatrix T: Matrix<R>, relationMatrix B: Matrix<R>) {
+        let (n, k, l) = (A.rows, A.cols, B.cols)
+        
+        assert(n == rootBasis.count)
+        assert(k == B.rows)
+        assert(n >= k)
+        assert(k >= l)
+        
+        let elim = B.elimination(form: .Smith)
+        
+        let D = elim.diagonal + [.zero].repeated(k - l)
+        let s = D.count{ !$0.isInvertible }
+        
+        let A2 = A * elim.leftInverse.submatrix(colRange: (k - s) ..< k)
+        let T2 = (elim.left * T).submatrix(rowRange: (k - s) ..< k)
+        
+        // MEMO see TODO above.
+        //        assert(T2 * A2 == Matrix<R>.identity(size: s))
+        
+        if T2 * A2 != Matrix<R>.identity(size: s) {
+            Logger.write(.warn, "factorize() won't work properly.")
+        }
+        
+        let generators = rootBasis * A2
+        let summands = generators.enumerated().map { (j, z) -> Summand in
+            let d = D[k - s + j]
+            return Summand(z, d)
+        }
+        
+        self.init(summands, rootBasis, T2)
+    }
+
+    public func factorize(_ z: FreeModule<A, R>) -> [R] {
+        let v = transition * Vector(z.factorize(by: rootBasis))
+        
+        return summands.enumerated().map { (i, s) in
+            return s.isFree ? v[i] : v[i] % s.divisor
+        }
+    }
+    
+    public func contains(_ z: FreeModule<A, R>) -> Bool {
+        let w = factorize(z).enumerated().sum { (i, r) in
+            r * generator(i)
+        }
+        return z == w
+    }
+    
+    public func elementIsZero(_ z: FreeModule<A, R>) -> Bool {
+        return factorize(z).forAll{ $0 == .zero }
+    }
+    
+    public func elementsAreEqual(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {
+        return elementIsZero(z1 - z2)
     }
 }
 

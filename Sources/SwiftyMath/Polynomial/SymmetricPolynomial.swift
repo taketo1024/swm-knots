@@ -8,52 +8,52 @@
 
 import Foundation
 
-public struct SymmetricPolynomial<K: Field>: Subring, Submodule {
-    public typealias Super = MPolynomial<K>
-    public typealias CoeffRing = K
+public struct SymmetricPolynomial<R: Ring>: Subring, Submodule {
+    public typealias Super = MPolynomial<R>
+    public typealias CoeffRing = R
     
-    private let p: MPolynomial<K>
+    private let p: MPolynomial<R>
     
-    public init(_ p: MPolynomial<K>) {
+    public init(_ p: MPolynomial<R>) {
         // TODO check symmetry
         self.p = p
     }
     
-    public init(_ a: K) {
+    public init(_ a: R) {
         self.init([IntList.empty : a])
     }
     
-    public init(_ coeffs: [IntList : K]) {
-        self.init( MPolynomial<K>(coeffs) )
+    public init(_ coeffs: [IntList : R]) {
+        self.init( MPolynomial<R>(coeffs) )
     }
 
-    public var asSuper: MPolynomial<K> {
+    public var asSuper: MPolynomial<R> {
         return p
     }
     
-    public static func contains(_ g: MPolynomial<K>) -> Bool {
+    public static func contains(_ g: MPolynomial<R>) -> Bool {
         fatalError("not implemented yet.")
     }
     
     // see: https://en.wikipedia.org/wiki/Symmetric_polynomial#Elementary_symmetric_polynomials
-    public static func elementary(_ n: Int, _ i: Int) -> SymmetricPolynomial<K> {
+    public static func elementary(_ n: Int, _ i: Int) -> SymmetricPolynomial<R> {
         let mInds = n.choose(i).map { combi -> IntList in
             // e.g.  [0, 1, 3] -> (1, 1, 0, 1)
             let l = combi.last.flatMap{ $0 + 1 } ?? 0
             return IntList( (0 ..< l).map { combi.contains($0) ? 1 : 0 } )
         }
         
-        let coeffs = Dictionary(pairs: mInds.map{ ($0, K.identity) } )
+        let coeffs = Dictionary(pairs: mInds.map{ ($0, R.identity) } )
         return SymmetricPolynomial(MPolynomial(coeffs))
     }
     
     // see: https://en.wikipedia.org/wiki/Symmetric_polynomial#Monomial_symmetric_polynomials
-    public static func monomial(_ n: Int, _ I: IntList) -> SymmetricPolynomial<K> {
+    public static func monomial(_ n: Int, _ I: IntList) -> SymmetricPolynomial<R> {
         assert(n == I.total)
         let Js = Permutation.allPermutations(ofLength: n).map { s in
             I.permuted(by: s)
         }.unique()
-        let elements = Dictionary( pairs: Js.map{ ($0, K.identity) } )
+        let elements = Dictionary( pairs: Js.map{ ($0, R.identity) } )
         return SymmetricPolynomial(MPolynomial(elements))
     }
     
@@ -62,12 +62,12 @@ public struct SymmetricPolynomial<K: Field>: Subring, Submodule {
     //
     // see: https://en.wikipedia.org/wiki/Elementary_symmetric_polynomial#The_fundamental_theorem_of_symmetric_polynomials
     
-    public func elementaryDecomposition() -> MPolynomial<K> {
+    public func elementaryDecomposition() -> MPolynomial<R> {
         var f = self
         var g = MPolynomial(f.constantTerm)
         
         let n = f.numberOfIndeterminates
-        let s = SymmetricPolynomial<K>.elementary
+        let s = SymmetricPolynomial<R>.elementary
         
         while f.maxDegree > 0 {
             let I = f.leadDegree
@@ -102,22 +102,22 @@ public struct SymmetricPolynomial<K: Field>: Subring, Submodule {
     public var maxDegree: Int {
         return p.maxDegree
     }
-    public func coeff(_ indices: Int ...) -> K {
+    public func coeff(_ indices: Int ...) -> R {
         return coeff(IntList(indices))
     }
-    public func coeff(_ I: IntList) -> K {
+    public func coeff(_ I: IntList) -> R {
         return p.coeff(I)
     }
     public var leadDegree: IntList {
         return p.leadDegree
     }
-    public var leadCoeff: K {
+    public var leadCoeff: R {
         return p.leadCoeff
     }
-    public var constantTerm: K {
+    public var constantTerm: R {
         return p.constantTerm
     }
-    public func map(_ f: ((K) -> K)) -> SymmetricPolynomial<K> {
+    public func map(_ f: ((R) -> R)) -> SymmetricPolynomial<R> {
         return SymmetricPolynomial(p.map(f))
     }
 }

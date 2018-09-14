@@ -8,17 +8,17 @@
 
 import Foundation
 
-public struct MPolynomial<K: Field>: Ring, Module {
-    public typealias CoeffRing = K
+public struct MPolynomial<R: Ring>: Ring, Module {
+    public typealias CoeffRing = R
     
     // e.g. [(2, 1, 3) : 5] -> 5 * x^2 * y * z^3
-    private let coeffs: [IntList : K]
+    private let coeffs: [IntList : R]
     
     public init(from n: 𝐙) {
-        self.init(K(from: n))
+        self.init(R(from: n))
     }
     
-    public init(_ a: K) {
+    public init(_ a: R) {
         self.init([IntList.empty : a])
     }
     
@@ -26,20 +26,20 @@ public struct MPolynomial<K: Field>: Ring, Module {
         self.init([I : .identity])
     }
     
-    public init(_ elements: ([Int], K) ...) {
+    public init(_ elements: ([Int], R) ...) {
         let coeffs = Dictionary(pairs: elements.map{ (I, a) in (IntList(I), a) } )
         self.init(coeffs)
     }
     
-    public init(_ coeffs: [IntList : K]) {
+    public init(_ coeffs: [IntList : R]) {
         self.coeffs = coeffs.filter{ $0.value != .zero }
     }
     
-    public static var zero: MPolynomial<K> {
+    public static var zero: MPolynomial<R> {
         return MPolynomial([:])
     }
     
-    public var inverse: MPolynomial<K>? {
+    public var inverse: MPolynomial<R>? {
         return (maxDegree == 0) ? coeff(.empty).inverse.flatMap{ a in MPolynomial(a) } : nil
     }
     
@@ -55,11 +55,11 @@ public struct MPolynomial<K: Field>: Ring, Module {
         return coeffs.keys.reduce(0) { max($0, $1.total) }
     }
     
-    public func coeff(_ indices: Int ...) -> K {
+    public func coeff(_ indices: Int ...) -> R {
         return coeff(IntList(indices))
     }
     
-    public func coeff(_ I: IntList) -> K {
+    public func coeff(_ I: IntList) -> R {
         return coeffs[I] ?? .zero
     }
     
@@ -67,24 +67,24 @@ public struct MPolynomial<K: Field>: Ring, Module {
         return mIndices.last ?? .empty
     }
     
-    public var leadCoeff: K {
+    public var leadCoeff: R {
         return self.coeff(leadDegree)
     }
     
-    public var constantTerm: K {
+    public var constantTerm: R {
         return self.coeff(.empty)
     }
     
-    public func map(_ f: ((K) -> K)) -> MPolynomial<K> {
+    public func map(_ f: ((R) -> R)) -> MPolynomial<R> {
         return MPolynomial( coeffs.mapValues(f) )
     }
     
-    public static func == (f: MPolynomial<K>, g: MPolynomial<K>) -> Bool {
+    public static func == (f: MPolynomial<R>, g: MPolynomial<R>) -> Bool {
         return (f.mIndices == g.mIndices) &&
             f.mIndices.forAll { I in f.coeff(I) == g.coeff(I) }
     }
     
-    public static func + (f: MPolynomial<K>, g: MPolynomial<K>) -> MPolynomial<K> {
+    public static func + (f: MPolynomial<R>, g: MPolynomial<R>) -> MPolynomial<R> {
         var coeffs = f.coeffs
         for (I, a) in g.coeffs {
             coeffs[I] = coeffs[I, default: .zero] + a
@@ -92,12 +92,12 @@ public struct MPolynomial<K: Field>: Ring, Module {
         return MPolynomial(coeffs)
     }
     
-    public static prefix func - (f: MPolynomial<K>) -> MPolynomial<K> {
+    public static prefix func - (f: MPolynomial<R>) -> MPolynomial<R> {
         return f.map { -$0 }
     }
     
-    public static func * (f: MPolynomial<K>, g: MPolynomial<K>) -> MPolynomial<K> {
-        var coeffs = [IntList : K]()
+    public static func * (f: MPolynomial<R>, g: MPolynomial<R>) -> MPolynomial<R> {
+        var coeffs = [IntList : R]()
         for (I, J) in f.mIndices.allCombinations(with: g.mIndices) {
             let K = I + J
             coeffs[K] = coeffs[K, default: .zero] + f.coeff(I) * g.coeff(J)
@@ -105,11 +105,11 @@ public struct MPolynomial<K: Field>: Ring, Module {
         return MPolynomial(coeffs)
     }
     
-    public static func * (r: K, f: MPolynomial<K>) -> MPolynomial<K> {
+    public static func * (r: R, f: MPolynomial<R>) -> MPolynomial<R> {
         return f.map { r * $0 }
     }
     
-    public static func * (f: MPolynomial<K>, r: K) -> MPolynomial<K> {
+    public static func * (f: MPolynomial<R>, r: R) -> MPolynomial<R> {
         return f.map { $0 * r }
     }
     
@@ -138,7 +138,7 @@ public struct MPolynomial<K: Field>: Ring, Module {
     }
     
     public static var symbol: String {
-        return "\(K.symbol)[x₁ … ]"
+        return "\(R.symbol)[x₁ … ]"
     }
     
     public var hashValue: Int {
