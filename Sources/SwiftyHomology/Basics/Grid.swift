@@ -142,8 +142,9 @@ public extension GridN where n == _2 {
         describe(IntList(i, j))
     }
     
-    public func printTable(skipDefault: Bool = true) {
+    public func printTable(separator s: String = "\t", printHeaders: Bool = true, skipDefault: Bool = true, format: (Object) -> String = { "\($0)" }) {
         if data.isEmpty {
+            print("\(name): empty")
             return
         }
         
@@ -157,11 +158,11 @@ public extension GridN where n == _2 {
         let colList = (i0 ... i1).toArray()
         let rowList = (j0 ... j1).reversed().filter{ j in jEvenOnly ? (j - j0).isEven : true }.toArray()
 
-        let table = Format.table("j\\i", rows: rowList, cols: colList) { (j, i) -> String in
+        let table = Format.table(rows: rowList, cols: colList, symbol: "j\\i", separator: s, printHeaders: printHeaders) { (j, i) -> String in
             if skipDefault && !data.contains(key: IntList(i, j)) {
                 return ""
             }
-            return self[i, j].map{ "\($0)" } ?? "?"
+            return self[i, j].map(format) ?? "-"
         }
         
         print(name)

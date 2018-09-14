@@ -183,8 +183,8 @@ public extension ModuleGridN where n == _2 {
         return _fold(i)
     }
 
-    public func printTable() {
-        grid.printTable()
+    public func printTable(separator s: String = "\t", printHeaders: Bool = true, format: (Object) -> String = { "\($0)" }) {
+        grid.printTable(separator: s, printHeaders: printHeaders, format: format)
     }
 }
 
