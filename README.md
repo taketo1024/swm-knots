@@ -51,7 +51,7 @@ $ swift package init --type executable
      dependencies: [
          // Dependencies declare other packages that this package depends on.
 -        // .package(url: /* package url */, from: "1.0.0"),
-+        .package(url: "https://github.com/taketo1024/SwiftyMath.git", from: "0.1.0"),
++        .package(url: "https://github.com/taketo1024/SwiftyMath.git", from: "0.3.0"),
      ],
      targets: [
          // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -103,10 +103,10 @@ a * b  // 6/5
 b / a  // 15/8
 ```
 
-### Matrices (type safe)
+### Matrices
 
 ```swift
-typealias M = Matrix<_2, _2, 𝐙> // Matrix of integers with fixed size 2×2.
+typealias M = SquareMatrix<_2, 𝐙> // Matrix of integers with fixed size 2×2.
 
 let a = M(1, 2, 3, 4)  // [1, 2; 3, 4]
 let b = M(2, 1, 1, 2)  // [2, 1; 1, 2]
