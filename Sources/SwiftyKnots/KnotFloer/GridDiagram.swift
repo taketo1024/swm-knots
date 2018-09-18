@@ -30,10 +30,10 @@ public struct GridDiagram {
         
         let n = Os.count
         
-        assert(Os.forAll{ p in (0 ..< 2 * n).contains(p.x) })
-        assert(Os.forAll{ p in (0 ..< 2 * n).contains(p.y) })
-        assert(Xs.forAll{ p in (0 ..< 2 * n).contains(p.x) })
-        assert(Xs.forAll{ p in (0 ..< 2 * n).contains(p.y) })
+        assert(Os.allSatisfy{ p in (0 ..< 2 * n).contains(p.x) })
+        assert(Os.allSatisfy{ p in (0 ..< 2 * n).contains(p.y) })
+        assert(Xs.allSatisfy{ p in (0 ..< 2 * n).contains(p.x) })
+        assert(Xs.allSatisfy{ p in (0 ..< 2 * n).contains(p.y) })
         
         self.Os = Os
         self.Xs = Xs

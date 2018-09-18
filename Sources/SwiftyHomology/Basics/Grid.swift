@@ -47,7 +47,7 @@ public struct GridN<n: _Int, Object: Equatable>: Sequence, CustomStringConvertib
     }
     
     public var isDetermined: Bool {
-        return data.values.forAll{ $0 != nil }
+        return data.values.allSatisfy{ $0 != nil }
     }
     
     public func named(_ name: String) -> GridN<n, Object> {
@@ -153,7 +153,7 @@ public extension GridN where n == _2 {
         let (i0, i1) = (iList.min()!, iList.max()!)
         let (j0, j1) = (jList.min()!, jList.max()!)
         
-        let jEvenOnly = jList.forAll{ j in (j - j0).isEven }
+        let jEvenOnly = jList.allSatisfy{ j in (j - j0).isEven }
         
         let colList = (i0 ... i1).toArray()
         let rowList = (j0 ... j1).reversed().filter{ j in jEvenOnly ? (j - j0).isEven : true }.toArray()

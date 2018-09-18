@@ -85,7 +85,7 @@ public struct Link: Equatable, CustomStringConvertible {
             }
         }
         
-        assert(crossings.forAll{ x in x.edges.forAll{ e in e.isDetermined } })
+        assert(crossings.allSatisfy{ x in x.edges.allSatisfy{ e in e.isDetermined } })
         
         self.init(name: (name ?? "L"), crossings: crossings)
     }

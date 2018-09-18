@@ -81,7 +81,7 @@ public struct MPolynomial<R: Ring>: Ring, Module {
     
     public static func == (f: MPolynomial<R>, g: MPolynomial<R>) -> Bool {
         return (f.mIndices == g.mIndices) &&
-            f.mIndices.forAll { I in f.coeff(I) == g.coeff(I) }
+            f.mIndices.allSatisfy { I in f.coeff(I) == g.coeff(I) }
     }
     
     public static func + (f: MPolynomial<R>, g: MPolynomial<R>) -> MPolynomial<R> {

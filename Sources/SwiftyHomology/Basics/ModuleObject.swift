@@ -49,7 +49,7 @@ public struct ModuleObject<A: BasisElementType, R: Ring>: Equatable, CustomStrin
     }
     
     public var isFree: Bool {
-        return summands.forAll { $0.isFree }
+        return summands.allSatisfy { $0.isFree }
     }
     
     public var rank: Int {
@@ -184,7 +184,7 @@ public struct ModuleObject<A: BasisElementType, R: Ring>: Equatable, CustomStrin
 public extension ModuleObject where R: EuclideanRing {
     
     private static func extract(_ generators: [FreeModule<A, R>]) -> ([A], Matrix<R>, Matrix<R>) {
-        if generators.forAll({ z in z.isSingle }) {
+        if generators.allSatisfy({ z in z.isSingle }) {
             let rootBasis = generators.map{ z in z.basis[0] }
             let I = Matrix<R>.identity(size: generators.count)
             return (rootBasis, I, I)
@@ -201,7 +201,7 @@ public extension ModuleObject where R: EuclideanRing {
     // e.g) generators = [(2, 0), (0, 2)]
     
     public init(basis: [FreeModule<A, R>]) {
-        if basis.forAll({ $0.isSingle }) {
+        if basis.allSatisfy({ $0.isSingle }) {
             self.init(basis: basis.map{ $0.basis[0] })
         } else {
             let summands = basis.map{ z in Summand(z) }
@@ -217,7 +217,7 @@ public extension ModuleObject where R: EuclideanRing {
     }
     
     public init(generators: [FreeModule<A, R>], relationMatrix B: Matrix<R>) {
-        if generators.forAll({ $0.isSingle }) {
+        if generators.allSatisfy({ $0.isSingle }) {
             let basis = generators.map{ $0.basis[0] }
             self.init(generators: basis, relationMatrix: B)
         } else {
@@ -286,7 +286,7 @@ public extension ModuleObject where R: EuclideanRing {
     }
     
     public func elementIsZero(_ z: FreeModule<A, R>) -> Bool {
-        return factorize(z).forAll{ $0 == .zero }
+        return factorize(z).allSatisfy{ $0 == .zero }
     }
     
     public func elementsAreEqual(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {

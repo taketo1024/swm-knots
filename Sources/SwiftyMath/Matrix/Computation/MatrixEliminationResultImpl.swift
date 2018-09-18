@@ -43,7 +43,7 @@ internal class MatrixEliminationResultImpl<R: EuclideanRing> {
     }
     
     final var isSurjective: Bool {
-        return result.cols >= result.rows && rank == result.rows && diagonal.forAll{ $0.isInvertible }
+        return result.cols >= result.rows && rank == result.rows && diagonal.allSatisfy{ $0.isInvertible }
     }
     
     final var isBijective: Bool {

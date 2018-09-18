@@ -95,8 +95,8 @@ public extension ChainMapN where R: EuclideanRing {
         
         let map = self[I]
         
-        if  s0.isFree, s0.generators.forAll({ $0.isSingle }),
-            s1.isFree, s1.generators.forAll({ $0.isSingle }) {
+        if  s0.isFree, s0.generators.allSatisfy({ $0.isSingle }),
+            s1.isFree, s1.generators.allSatisfy({ $0.isSingle }) {
             
             let (from, to) = (s0.generators.map{ $0.basis[0] }, s1.generators.map{ $0.basis[0] })
             let toIndexer = to.indexer()
@@ -130,8 +130,8 @@ public extension ChainMapN where R: EuclideanRing {
                         return .zero
                 }
                 
-                guard s0.isFree, s0.generators.forAll({ $0.isSingle }),
-                    s1.isFree, s1.generators.forAll({ $0.isSingle }) else {
+                guard s0.isFree, s0.generators.allSatisfy({ $0.isSingle }),
+                    s1.isFree, s1.generators.allSatisfy({ $0.isSingle }) else {
                         fatalError("inavailable")
                 }
                 

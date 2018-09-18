@@ -15,7 +15,7 @@ internal final class DiagonalEliminator<R: EuclideanRing>: MatrixEliminator<R> {
     
     override func isDone() -> Bool {
         let n = target.table.keys.count
-        return target.table.forAll{ (i, list) in
+        return target.table.allSatisfy{ (i, list) in
             i < n && (list.count == 1)
                   && list.first!.0 == i
                   && list.first!.1.normalizeUnit == .identity

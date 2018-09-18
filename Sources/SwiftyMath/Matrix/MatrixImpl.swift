@@ -26,18 +26,18 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     
     private init(_ rows: Int, _ cols: Int, _ align: Alignment, _ table: Table) {
         if _isDebugAssertConfiguration() {
-            assert(table.values.forAll{ !$0.isEmpty })
-            assert(table.values.forAll{ $0.forAll{ $0.1 != .zero }})
+            assert(table.values.allSatisfy{ !$0.isEmpty })
+            assert(table.values.allSatisfy{ $0.allSatisfy{ $0.1 != .zero }})
             
             switch align {
             case .Rows:
-                assert(table.keys.forAll{ (0 ..< rows).contains($0) })
-                assert(table.values.forAll{ $0.forAll{ (0 ..< cols).contains($0.0) } })
-                assert(table.values.forAll{ $0.map{ $0.0 } == $0.map{ $0.0 }.unique().sorted() })
+                assert(table.keys.allSatisfy{ (0 ..< rows).contains($0) })
+                assert(table.values.allSatisfy{ $0.allSatisfy{ (0 ..< cols).contains($0.0) } })
+                assert(table.values.allSatisfy{ $0.map{ $0.0 } == $0.map{ $0.0 }.unique().sorted() })
             case .Cols:
-                assert(table.keys.forAll{ (0 ..< cols).contains($0) })
-                assert(table.values.forAll{ $0.forAll{ (0 ..< rows).contains($0.0) } })
-                assert(table.values.forAll{ $0.map{ $0.0 } == $0.map{ $0.0 }.unique().sorted() })
+                assert(table.keys.allSatisfy{ (0 ..< cols).contains($0) })
+                assert(table.values.allSatisfy{ $0.allSatisfy{ (0 ..< rows).contains($0.0) } })
+                assert(table.values.allSatisfy{ $0.map{ $0.0 } == $0.map{ $0.0 }.unique().sorted() })
             }
         }
         
@@ -125,13 +125,13 @@ internal final class MatrixImpl<R: Ring>: Hashable, CustomStringConvertible {
     }
     
     var isDiagonal: Bool {
-        return table.forAll { (i, list) in
+        return table.allSatisfy { (i, list) in
             (list.count == 0) || (list.count == 1) && list.first!.0 == i
         }
     }
     
     var isIdentity: Bool {
-        return rows == cols && table.forAll { (i, list) in
+        return rows == cols && table.allSatisfy { (i, list) in
             (list.count == 1) && list.first! == (i, .identity)
         }
     }

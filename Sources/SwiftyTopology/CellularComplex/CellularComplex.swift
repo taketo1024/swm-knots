@@ -19,7 +19,7 @@ public struct CellularCell: GeometricCell {
         assert(!simplices.basis.isEmpty)
         assert({
             let n = simplices.basis[0].dim
-            return simplices.basis.forAll{$0.dim == n}
+            return simplices.basis.allSatisfy{$0.dim == n}
         }())
         
         self.simplices = simplices
@@ -96,13 +96,13 @@ public struct CellularComplex: GeometricComplex {
     
     @discardableResult
     public mutating func appendCell(simplices: SimplicialChain<𝐙>, attachedAlong boundary: CellularChain<𝐙> = .zero) -> CellularCell {
-        if !simplices.basis.forAll({ underlyingComplex.contains($0) }) {
+        if !simplices.basis.allSatisfy({ underlyingComplex.contains($0) }) {
             let K = SimplicialComplex(cells: simplices.basis )
             self.underlyingComplex = self.underlyingComplex + K
         }
         
         let n = simplices.basis[0].dim
-        assert(boundary.basis.forAll{ $0.dim == n - 1 }, "only attatching to 1-dim lower cells is supported.")
+        assert(boundary.basis.allSatisfy{ $0.dim == n - 1 }, "only attatching to 1-dim lower cells is supported.")
         
         while table.count - 1 < n {
             table.append([])
