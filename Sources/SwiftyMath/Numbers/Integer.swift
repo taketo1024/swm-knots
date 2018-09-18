@@ -4,7 +4,7 @@ public typealias 𝐙 = Int
 
 fileprivate var _primes: [𝐙] = []
 
-extension 𝐙: EuclideanRing {
+extension 𝐙: EuclideanRing, Randomable {
     public init(from n: 𝐙) {
         self.init(n)
     }
