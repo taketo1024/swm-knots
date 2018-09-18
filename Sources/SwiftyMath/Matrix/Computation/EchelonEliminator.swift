@@ -28,12 +28,8 @@ internal final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R>
     override func iteration() {
         
         // find pivot point
-        
-        let targetElements = pivotCandidates()
-        
-        guard let (i0, a0) = targetElements.min(by: { (e1, e2) in
-            (e1.1.eucDegree < e2.1.eucDegree) || (e1.1.eucDegree == e2.1.eucDegree && weight(e1.0) < weight(e2.0) )
-        }) else {
+        let elements = targetColElements()
+        guard let (i0, a0) = pivot(elements) else {
             targetCol += 1
             return
         }
@@ -42,7 +38,7 @@ internal final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R>
         
         var again = false
         
-        for (i, a) in targetElements {
+        for (i, a) in elements {
             if i == i0 {
                 continue
             }
@@ -74,16 +70,34 @@ internal final class RowEchelonEliminator<R: EuclideanRing>: MatrixEliminator<R>
     }
     
     @_specialize(where R == ComputationSpecializedRing)
-    private func pivotCandidates() -> [(Int, R)] {
+    private func targetColElements() -> [(Int, R)] {
         // Take (i, a)'s from table = [ i : [ (j, a) ] ]
         // where (i >= targetRow && j == targetCol)
         return target.table.compactMap{ (i, list) -> (Int, R)? in
             let (j, a) = list.first!
             return (i >= targetRow && j == targetCol) ? (i, a) : nil
-        }
+        }.sorted{ (i, _) in i}
     }
     
-    private func weight(_ i: Int) -> Int {
+    @_specialize(where R == ComputationSpecializedRing)
+    private func pivot(_ candidates: [(Int, R)]) -> (Int, R)? {
+        if candidates.isEmpty {
+            return nil
+        }
+        
+        var (i0, a0) = candidates.first!
+        var w0 = rowWeight(i0)
+        
+        for (i, a) in candidates {
+            let w = rowWeight(i)
+            if (a.eucDegree < a0.eucDegree) || (a.eucDegree == a0.eucDegree && w < w0) {
+                (i0, a0, w0) = (i, a, w)
+            }
+        }
+        return (i0, a0)
+    }
+    
+    private func rowWeight(_ i: Int) -> Int {
         return target.table[i]!.sum{ $0.1.eucDegree }
     }
 }
