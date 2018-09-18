@@ -2,7 +2,7 @@ import Foundation
 
 public typealias 𝐐 = RationalNumber
 
-public struct RationalNumber: Field, NormedSpace, Comparable, ExpressibleByIntegerLiteral {
+public struct RationalNumber: Field, NormedSpace, Comparable, ExpressibleByIntegerLiteral, Codable {
     public typealias IntegerLiteralType = Int
     internal let p, q: 𝐙  // memo: (p, q) coprime, q > 0.
     
@@ -92,18 +92,5 @@ public struct RationalNumber: Field, NormedSpace, Comparable, ExpressibleByInteg
 extension 𝐙 {
     public static func ./(a: 𝐙, b: 𝐙) -> 𝐐 {
         return 𝐐(a, b)
-    }
-}
-
-extension RationalNumber: Codable {
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.singleValueContainer()
-        let vals = try c.decode([𝐙].self)
-        self.init(vals[0], vals[1])
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.singleValueContainer()
-        try c.encode([p, q])
     }
 }

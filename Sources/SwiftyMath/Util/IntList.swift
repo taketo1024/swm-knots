@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct IntList: Hashable, Comparable, CustomStringConvertible {
+public struct IntList: Hashable, Comparable, CustomStringConvertible, Codable {
     public let components: [Int]
     public init(_ components: Int ...) {
         self.init(components)
@@ -85,17 +85,5 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
     
     public var description: String {
         return "(\( components.map{ String($0) }.joined(separator: ", ")))"
-    }
-}
-
-extension IntList: Codable {
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.singleValueContainer()
-        self.components = try c.decode([Int].self)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.singleValueContainer()
-        try c.encode(components)
     }
 }

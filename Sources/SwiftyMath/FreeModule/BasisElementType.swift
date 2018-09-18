@@ -163,12 +163,4 @@ public func ⊗<A, R>(x1: FreeModule<FreeTensor<A>, R>, x2: FreeModule<FreeTenso
     }
 }
 
-extension FreeTensor: Codable where A: Codable {
-    public init(from decoder: Decoder) throws {
-        fatalError()
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        fatalError()
-    }
-}
+extension FreeTensor: Codable where A: Codable {}

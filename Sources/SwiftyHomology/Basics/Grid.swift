@@ -171,23 +171,4 @@ public extension GridN where n == _2 {
     }
 }
 
-extension GridN: Codable where Object: Codable {
-    enum CodingKeys: String, CodingKey {
-        case name, defaultObject, data
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let name = try c.decode(String.self, forKey: .name)
-        let data = try c.decode([IntList : Object?].self, forKey: .data)
-        let defaultObject = try c.decode(Object?.self, forKey: .defaultObject)
-        self.init(name: name, data: data, default: defaultObject)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(name, forKey: .name)
-        try c.encode(data, forKey: .data)
-        try c.encode(defaultObject, forKey: .defaultObject)
-    }
-}
+extension GridN: Codable where Object: Codable {}

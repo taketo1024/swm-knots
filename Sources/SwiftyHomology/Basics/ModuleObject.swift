@@ -358,42 +358,5 @@ public extension ModuleObject where R: EuclideanRing {
     }
 }
 
-extension ModuleObject: Codable where A: Codable, R: Codable {
-    enum CodingKeys: String, CodingKey {
-        case summands, basis, transform // TODO rename
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let summands = try c.decode([Summand].self, forKey: .summands)
-        let basis = try c.decode([A].self, forKey: .basis)
-        let trans = try c.decode(Matrix<R>.self, forKey: .transform)
-        self.init(summands, basis, trans)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(summands, forKey: .summands)
-        try c.encode(rootBasis, forKey: .basis)
-        try c.encode(transition, forKey: .transform)
-    }
-}
-
-extension ModuleObject.Summand: Codable where A: Codable, R: Codable {
-    enum CodingKeys: String, CodingKey {
-        case generator, divisor
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let g = try c.decode(FreeModule<A, R>.self, forKey: .generator)
-        let d = try c.decode(R.self, forKey: .divisor)
-        self.init(g, d)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(generator, forKey: .generator)
-        try c.encode(divisor, forKey: .divisor)
-    }
-}
+extension ModuleObject: Codable where A: Codable, R: Codable {}
+extension ModuleObject.Summand: Codable where A: Codable, R: Codable {}

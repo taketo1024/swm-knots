@@ -140,19 +140,4 @@ public func pair<A, R>(_ x: FreeModule<Dual<A>, R>, _ y: FreeModule<A, R>) -> R 
     return pair(y, x)
 }
 
-extension FreeModule: Codable where A: Codable, R: Codable {
-    enum CodingKeys: String, CodingKey {
-        case elements
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let elements = try c.decode([A : R].self, forKey: .elements)
-        self.init(elements)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(elements, forKey: .elements)
-    }
-}
+extension FreeModule: Codable where A: Codable, R: Codable {}
