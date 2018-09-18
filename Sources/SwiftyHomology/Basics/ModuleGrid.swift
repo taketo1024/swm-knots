@@ -157,6 +157,13 @@ public extension ModuleGridN where n == _1 {
         return shifted(IntList(i))
     }
     
+    public func EulerCharacteristic<R: Ring>(_ ringType: R.Type) -> R {
+        return self.sum { (I, V) -> R in
+            let i = I[0]
+            return R(from: (-1).pow(i) * V!.rank)
+        }
+    }
+    
     public func describe(_ i: Int) {
         describe(IntList(i))
     }
@@ -183,6 +190,16 @@ public extension ModuleGridN where n == _2 {
         return _fold(i)
     }
 
+    public func gradedEulerCharacteristic<R: Ring, t: Indeterminate>(_ ringType: R.Type, _ tType: t.Type) -> LaurentPolynomial<R, t> {
+        typealias P = LaurentPolynomial<R, t>
+        let t = P.indeterminate
+        
+        return self.sum { (I, V) -> P in
+            let (i, j) = (I[0], I[1])
+            return P(from: (-1).pow(i) * V!.rank) * t.pow(j)
+        }
+    }
+    
     public func printTable(separator s: String = "\t", printHeaders: Bool = true, format: (Object) -> String = { "\($0)" }) {
         grid.printTable(separator: s, printHeaders: printHeaders, format: format)
     }
