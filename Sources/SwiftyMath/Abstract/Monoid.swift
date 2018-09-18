@@ -43,3 +43,16 @@ public protocol MonoidHomType: MapType where Domain: Monoid, Codomain: Monoid {}
 
 public typealias MonoidHom<X: Monoid, Y: Monoid> = Map<X, Y>
 extension MonoidHom: MonoidHomType where Domain: Monoid, Codomain: Monoid {}
+
+
+public extension Sequence where Element: Monoid {
+    public func multiplyAll() -> Element {
+        return multiply{ $0 }
+    }
+}
+
+public extension Sequence {
+    public func multiply<G: Monoid>(mapping f: (Element) -> G) -> G {
+        return self.reduce(.identity){ $0 * f($1) }
+    }
+}

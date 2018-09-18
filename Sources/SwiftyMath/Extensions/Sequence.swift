@@ -66,27 +66,3 @@ public extension Sequence where Element: Hashable {
         return self.group{ $0 }.mapValues{ $0.count }
     }
 }
-
-public extension Sequence where Element: AdditiveGroup {
-    public func sumAll() -> Element {
-        return sum{ $0 }
-    }
-}
-
-public extension Sequence {
-    public func sum<G: AdditiveGroup>(mapping f: (Element) -> G) -> G {
-        return G.sum( self.map(f) )
-    }
-}
-
-public extension Sequence where Element: Monoid {
-    public func multiplyAll() -> Element {
-        return multiply{ $0 }
-    }
-}
-
-public extension Sequence {
-    public func multiply<G: Monoid>(mapping f: (Element) -> G) -> G {
-        return self.reduce(.identity){ $0 * f($1) }
-    }
-}
