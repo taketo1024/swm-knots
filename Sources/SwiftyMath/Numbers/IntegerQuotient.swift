@@ -10,14 +10,7 @@ import Foundation
 
 public typealias 𝐙₂ = IntegerQuotientRing<_2>
 
-// MEMO waiting for parametrized extension.
-// see: https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#parameterized-extensions
-
-public protocol _IntegerIdeal: EuclideanIdeal {
-    associatedtype n: _Int
-}
-
-public struct IntegerIdeal<n: _Int>: _IntegerIdeal {
+public struct IntegerIdeal<n: _Int>: EuclideanIdeal {
     public typealias Super = 𝐙
     public static var mod: 𝐙 {
         return n.intValue
@@ -26,26 +19,39 @@ public struct IntegerIdeal<n: _Int>: _IntegerIdeal {
 
 extension IntegerIdeal: MaximalIdeal where n: _Prime {}
 
-public typealias IntegerQuotientRing<n: _Int> = QuotientRing<𝐙, IntegerIdeal<n>>
-
-extension IntegerQuotientRing: FiniteSetType where Base == 𝐙, Sub: _IntegerIdeal {
-    public static var allElements: [QuotientRing<Base, Sub>] {
-        return (0 ..< Sub.mod).map{ QuotientRing($0) }
+public struct IntegerQuotientRing<n: _Int>: QuotientRingType, FiniteSetType, ExpressibleByIntegerLiteral, Codable {
+    public typealias Base = 𝐙
+    public typealias Sub = IntegerIdeal<n>
+    
+    public let value: 𝐙
+    public init(_ value: 𝐙) {
+        let mod = n.intValue
+        self.value = (value >= 0) ? value % mod : (value % mod + mod)
+    }
+    
+    public init(integerLiteral value: 𝐙) {
+        self.init(value)
+    }
+    
+    public var representative: 𝐙 {
+        return value
+    }
+    
+    public static var mod: 𝐙 {
+        return n.intValue
+    }
+    
+    public static var allElements: [IntegerQuotientRing<n>] {
+        return (0 ..< mod).map{ IntegerQuotientRing($0) }
     }
     
     public static var countElements: Int {
-        return Sub.mod
+        return mod
+    }
+    
+    public static var symbol: String {
+        return "𝐙\(Format.sub(mod))"
     }
 }
 
-extension IntegerQuotientRing: Codable where Base == 𝐙, Sub: _IntegerIdeal {
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.singleValueContainer()
-        try self.init(c.decode(𝐙.self))
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.singleValueContainer()
-        try c.encode(self.representative)
-    }
-}
+extension IntegerQuotientRing: EuclideanRing, Field where n: _Prime {}
