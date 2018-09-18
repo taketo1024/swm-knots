@@ -110,7 +110,7 @@ public struct Quaternion: Ring, NormedSpace, ExpressibleByIntegerLiteral, Expres
         let x = a.x * b.x - (a.y * b.y + a.z * b.z + a.w * b.w)
         let y = a.x * b.y +  a.y * b.x + a.z * b.w - a.w * b.z
         let z = a.x * b.z + -a.y * b.w + a.z * b.x + a.w * b.y
-        let w = a.x * b.w +  a.y * b.z - a.z * b.y - a.w * b.x
+        let w = a.x * b.w +  a.y * b.z - a.z * b.y + a.w * b.x
         return 𝐇(x, y, z, w)
     }
     

@@ -85,8 +85,8 @@ class QuaternionTests: XCTestCase {
         let a = A(1, 2, 3, 4)
         XCTAssertEqual(a.pow(0), A.identity)
         XCTAssertEqual(a.pow(1), A(1, 2, 3, 4))
-        XCTAssertEqual(a.pow(2), A(4, -20, 22, -8))
-        XCTAssertEqual(a.pow(3), A(10, -124, -30, 80))
+        XCTAssertEqual(a.pow(2), A(-28, 4, 6, 8))
+        XCTAssertEqual(a.pow(3), A(-86, -52, -78, -104))
     }
     
     func testAbs() {
