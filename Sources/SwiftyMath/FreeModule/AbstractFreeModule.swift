@@ -28,6 +28,10 @@ public struct AbstractBasisElement: BasisElementType {
         return e1.index < e2.index
     }
     
+    public var hashValue: Int {
+        return index
+    }
+    
     public var description: String {
         return label
     }

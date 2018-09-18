@@ -91,10 +91,6 @@ public struct AdditiveQuotientGroup<Base, Sub: AdditiveSubgroup>: AdditiveQuotie
     public var representative: Base {
         return x
     }
-    
-    public var hashValue: Int {
-        return Sub.contains(x) ? 0 : 1
-    }
 }
 
 public struct AsMulGroup<G: AdditiveGroup>: Group {

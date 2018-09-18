@@ -77,10 +77,6 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
         return self.elements.map{ (a, r) in f(a, r) }.sumAll()
     }
     
-    public static func == (a: FreeModule<A, R>, b: FreeModule<A, R>) -> Bool {
-        return a.elements == b.elements
-    }
-    
     public static func + (a: FreeModule<A, R>, b: FreeModule<A, R>) -> FreeModule<A, R> {
         var d = a.elements
         for (a, r) in b.elements {
@@ -115,10 +111,6 @@ public struct FreeModule<A: BasisElementType, R: Ring>: Module {
     
     public static var symbol: String {
         return "FreeMod(\(R.symbol))"
-    }
-    
-    public var hashValue: Int {
-        return (self == .zero) ? 0 : 1
     }
 }
 

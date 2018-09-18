@@ -40,10 +40,6 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
         return tensor.mapFactors(f).mapBasis { KhBasisElement(state, $0) }
     }
     
-    public static func ==(b1: KhBasisElement, b2: KhBasisElement) -> Bool {
-        return b1.state == b2.state && b1.tensor == b2.tensor
-    }
-    
     public static func <(b1: KhBasisElement, b2: KhBasisElement) -> Bool {
         return (b1.state < b2.state)
             || (b1.state == b2.state && b1.tensor < b2.tensor)
@@ -54,12 +50,6 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
             let factors: [E] = I.components.map{ $0 == 0 ? .X : .I  }
             return KhBasisElement.init(state, FreeTensor(factors))
             }.sorted()
-    }
-    
-    public var hashValue: Int {
-        let s = state.components.reduce(0) { (res, b) in res &<< 1 | b }
-        let f = tensor.factors.reduce(0) { (res, b) in res &<< 1 | b.rawValue }
-        return s &<< 32 | f
     }
     
     public var description: String {

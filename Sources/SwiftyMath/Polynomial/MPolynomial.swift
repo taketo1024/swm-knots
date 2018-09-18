@@ -79,11 +79,6 @@ public struct MPolynomial<R: Ring>: Ring, Module {
         return MPolynomial( coeffs.mapValues(f) )
     }
     
-    public static func == (f: MPolynomial<R>, g: MPolynomial<R>) -> Bool {
-        return (f.mIndices == g.mIndices) &&
-            f.mIndices.allSatisfy { I in f.coeff(I) == g.coeff(I) }
-    }
-    
     public static func + (f: MPolynomial<R>, g: MPolynomial<R>) -> MPolynomial<R> {
         var coeffs = f.coeffs
         for (I, a) in g.coeffs {
@@ -139,10 +134,6 @@ public struct MPolynomial<R: Ring>: Ring, Module {
     
     public static var symbol: String {
         return "\(R.symbol)[x₁ … ]"
-    }
-    
-    public var hashValue: Int {
-        return leadCoeff.hashValue
     }
 }
 

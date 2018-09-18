@@ -34,10 +34,6 @@ public struct CellularCell: GeometricCell {
         return boundary.mapValues{ R(from: $0) }
     }
     
-    public var hashValue: Int {
-        return 0 // TODO
-    }
-    
     public static func < (lhs: CellularCell, rhs: CellularCell) -> Bool {
         return lhs != rhs // TODO
     }

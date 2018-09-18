@@ -61,10 +61,6 @@ public struct RationalNumber: Field, NormedSpace, Comparable, ExpressibleByInteg
         return q
     }
     
-    public static func == (a: 𝐐, b: 𝐐) -> Bool {
-        return (a.p, a.q) == (b.p, b.q)
-    }
-    
     public static func + (a: 𝐐, b: 𝐐) -> 𝐐 {
         return 𝐐(a.p * b.q + a.q * b.p, a.q * b.q)
     }
@@ -90,10 +86,6 @@ public struct RationalNumber: Field, NormedSpace, Comparable, ExpressibleByInteg
     
     public static var symbol: String {
         return "𝐐"
-    }
-    
-    public var hashValue: Int {
-        return (p.hashValue &* 31) &+ q.hashValue
     }
 }
 

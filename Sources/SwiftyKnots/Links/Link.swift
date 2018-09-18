@@ -380,8 +380,9 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public class Edge: Equatable, Comparable, Hashable, CustomStringConvertible {
-        public internal(set) var id: Int
         public typealias EndPoint = (crossing: Crossing, index: Int)
+        
+        public internal(set) var id: Int
         
         internal weak var x0: Crossing! = nil
         private var      i0: Int = 0
@@ -437,7 +438,7 @@ public struct Link: Equatable, CustomStringConvertible {
         }
         
         public var hashValue: Int {
-            return id.hashValue
+            return id
         }
         
         public var description: String {
@@ -446,10 +447,6 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public class Component: Equatable, Hashable, Comparable, CustomStringConvertible {
-        public static func < (c1: Link.Component, c2: Link.Component) -> Bool {
-            return c1.edges.map{ $0.id }.min()! < c2.edges.map{ $0.id }.min()!
-        }
-        
         public let edges: [Edge]
         
         internal init(_ edges: [Edge]) {
@@ -460,13 +457,16 @@ public struct Link: Equatable, CustomStringConvertible {
             return a.edges == b.edges
         }
         
-        public var description: String {
-            return "(\(edges.map{ "\($0)" }.joined(separator: "-")))"
+        public static func < (c1: Link.Component, c2: Link.Component) -> Bool {
+            return c1.edges.map{ $0.id }.min()! < c2.edges.map{ $0.id }.min()!
         }
         
         public var hashValue: Int {
-            let p = 31
-            return edges.reduce(0) { (res, e) in res &* p &+ e.id }
+            return edges.hashValue
+        }
+        
+        public var description: String {
+            return "(\(edges.map{ "\($0)" }.joined(separator: "-")))"
         }
     }
 }

@@ -32,16 +32,8 @@ public struct Dual<A: BasisElementType>: BasisElementType {
         return base.degree
     }
     
-    public var hashValue: Int {
-        return base.hashValue
-    }
-    
     public func pair(_ s: A) -> Int {
         return (base == s) ? 1 : 0
-    }
-    
-    public static func ==(a: Dual<A>, b: Dual<A>) -> Bool {
-        return a.base == b.base
     }
     
     public static func < (a1: Dual<A>, a2: Dual<A>) -> Bool {
@@ -72,11 +64,6 @@ public struct Tensor<A: BasisElementType, B: BasisElementType>: BasisElementType
     
     public var description: String {
         return "\(a)⊗\(b)"
-    }
-    
-    public var hashValue: Int {
-        let p = 31
-        return a.hashValue &* p &+ b.hashValue
     }
 }
 
@@ -163,11 +150,6 @@ public struct FreeTensor<A: BasisElementType>: BasisElementType {
     
     public var description: String {
         return factors.map{ $0.description }.joined(separator: "⊗")
-    }
-    
-    public var hashValue: Int {
-        let p = 31
-        return factors.reduce(0){ (res, f) in res &* p &+ f.hashValue }
     }
 }
 

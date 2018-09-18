@@ -92,10 +92,6 @@ public struct Permutation: MapType {
         return result
     }
     
-    public static func == (a: Permutation, b: Permutation) -> Bool {
-        return a.elements == b.elements
-    }
-    
     public static func *(a: Permutation, b: Permutation) -> Permutation {
         var d = a.elements
         for i in b.elements.keys {
@@ -128,11 +124,6 @@ public struct Permutation: MapType {
     
     public static var symbol: String {
         return "Permutation"
-    }
-    
-    public var hashValue: Int {
-        let p = 31
-        return elements.sum{ (i, j) in i &* p &+ j }
     }
 }
 

@@ -24,10 +24,6 @@ public struct FiniteSubgroupStructure<G: Group>: SubgroupStructure {
         return allElements.contains(g)
     }
     
-    public static func ==(a: FiniteSubgroupStructure<G>, b: FiniteSubgroupStructure<G>) -> Bool {
-        return a.allElements == b.allElements
-    }
-    
     public var description: String {
         return "{\(Array(allElements).map{"\($0)"}.joined(separator: ", "))}"
     }

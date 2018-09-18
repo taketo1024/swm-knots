@@ -80,10 +80,6 @@ public struct AsModule<R: Ring>: Module {
         return AsModule(.zero)
     }
     
-    public static func ==(lhs: AsModule<R>, rhs: AsModule<R>) -> Bool {
-        return lhs.value == rhs.value
-    }
-    
     public static func +(a: AsModule<R>, b: AsModule<R>) -> AsModule<R> {
         return AsModule(a.value + b.value)
     }
@@ -98,10 +94,6 @@ public struct AsModule<R: Ring>: Module {
     
     public static func *(r: R, m: AsModule<R>) -> AsModule<R> {
         return AsModule(r * m.value)
-    }
-    
-    public var hashValue: Int {
-        return value.hashValue
     }
     
     public var description: String {

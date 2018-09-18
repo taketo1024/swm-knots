@@ -70,14 +70,6 @@ public extension MatrixGroup {
         return Self( a.matrix * b.matrix )
     }
     
-    public static func ==(lhs: Self, rhs: Self) -> Bool {
-        return lhs.matrix == rhs.matrix
-    }
-    
-    public var hashValue: Int {
-        return matrix.hashValue
-    }
-    
     public var description: String {
         return matrix.description
     }

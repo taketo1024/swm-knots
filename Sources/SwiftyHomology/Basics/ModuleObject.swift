@@ -167,10 +167,6 @@ public struct ModuleObject<A: BasisElementType, R: Ring>: Equatable, CustomStrin
             return generator.degree
         }
         
-        public static func ==(a: Summand, b: Summand) -> Bool {
-            return (a.generator, a.divisor) == (b.generator, b.divisor)
-        }
-        
         public var description: String {
             switch (isFree, R.self == 𝐙.self) {
             case (true, _)    : return R.symbol
