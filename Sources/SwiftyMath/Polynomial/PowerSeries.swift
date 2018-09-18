@@ -112,9 +112,10 @@ public struct PowerSeries<R: Ring>: Ring, Module {
         return "\(R.symbol)[[x]]"
     }
     
-    public var hashValue: Int {
-        let p = 31
-        return (0 ..< 3).reduce(0){ (res, i) in res &* p &+ (coeff(i).hashValue % p) }
+    public func hash(into hasher: inout Hasher) {
+        for i in 0 ..< 5 {
+            hasher.combine(coeff(i))
+        }
     }
 }
 

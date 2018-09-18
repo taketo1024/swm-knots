@@ -249,7 +249,7 @@ public extension SimplicialComplex {
                 let chain: SimplicialChain<𝐙> = {
                     let b = s2b[s]!
                     let star = SimplicialComplex(cells: bcells.filter{ (bcell) in
-                        bcell.contains(b) && bcell.vertices.forAll{ b2s[$0]!.contains(s) }
+                        bcell.contains(b) && bcell.vertices.allSatisfy{ b2s[$0]!.contains(s) }
                     })
                     let link = star - b
                     return star.orientationCycle(relativeTo: link)!

@@ -91,10 +91,6 @@ public struct AdditiveQuotientGroup<Base, Sub: AdditiveSubgroup>: AdditiveQuotie
     public var representative: Base {
         return x
     }
-    
-    public var hashValue: Int {
-        return Sub.contains(x) ? 0 : 1
-    }
 }
 
 public struct AsMulGroup<G: AdditiveGroup>: Group {
@@ -155,3 +151,16 @@ public extension AdditiveGroupHomType {
 
 public typealias AdditiveGroupHom<X: AdditiveGroup, Y: AdditiveGroup> = Map<X, Y>
 extension AdditiveGroupHom: AdditiveGroup, AdditiveGroupHomType where Domain: AdditiveGroup, Codomain: AdditiveGroup {}
+
+
+public extension Sequence where Element: AdditiveGroup {
+    public func sumAll() -> Element {
+        return sum{ $0 }
+    }
+}
+
+public extension Sequence {
+    public func sum<G: AdditiveGroup>(mapping f: (Element) -> G) -> G {
+        return G.sum( self.map(f) )
+    }
+}

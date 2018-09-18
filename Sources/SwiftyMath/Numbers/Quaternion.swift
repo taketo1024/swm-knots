@@ -98,10 +98,6 @@ public struct Quaternion: Ring, NormedSpace, ExpressibleByIntegerLiteral, Expres
         return r2 == 0 ? nil : 𝐇(x / r2, -y / r2, -z / r2, -w / r2)
     }
     
-    public static func ==(lhs: 𝐇, rhs: 𝐇) -> Bool {
-        return (lhs.x == rhs.x) && (lhs.y == rhs.y)
-    }
-    
     public static func +(a: 𝐇, b: 𝐇) -> 𝐇 {
         return 𝐇(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w)
     }
@@ -114,15 +110,8 @@ public struct Quaternion: Ring, NormedSpace, ExpressibleByIntegerLiteral, Expres
         let x = a.x * b.x - (a.y * b.y + a.z * b.z + a.w * b.w)
         let y = a.x * b.y +  a.y * b.x + a.z * b.w - a.w * b.z
         let z = a.x * b.z + -a.y * b.w + a.z * b.x + a.w * b.y
-        let w = a.x * b.w +  a.y * b.z - a.z * b.y - a.w * b.x
+        let w = a.x * b.w +  a.y * b.z - a.z * b.y + a.w * b.x
         return 𝐇(x, y, z, w)
-    }
-    
-    public var hashValue: Int {
-        let p = 31
-        return [x, y, z, w].reduce(0) { (res, r) in
-            res &* p &+ (r.hashValue % p)
-        }
     }
     
     public var description: String {

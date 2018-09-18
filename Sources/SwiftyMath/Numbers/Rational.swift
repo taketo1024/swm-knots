@@ -2,7 +2,7 @@ import Foundation
 
 public typealias 𝐐 = RationalNumber
 
-public struct RationalNumber: Field, NormedSpace, Comparable, ExpressibleByIntegerLiteral {
+public struct RationalNumber: Field, NormedSpace, Comparable, ExpressibleByIntegerLiteral, Codable {
     public typealias IntegerLiteralType = Int
     internal let p, q: 𝐙  // memo: (p, q) coprime, q > 0.
     
@@ -61,10 +61,6 @@ public struct RationalNumber: Field, NormedSpace, Comparable, ExpressibleByInteg
         return q
     }
     
-    public static func == (a: 𝐐, b: 𝐐) -> Bool {
-        return (a.p, a.q) == (b.p, b.q)
-    }
-    
     public static func + (a: 𝐐, b: 𝐐) -> 𝐐 {
         return 𝐐(a.p * b.q + a.q * b.p, a.q * b.q)
     }
@@ -91,27 +87,29 @@ public struct RationalNumber: Field, NormedSpace, Comparable, ExpressibleByInteg
     public static var symbol: String {
         return "𝐐"
     }
+}
+
+extension 𝐐: Randomable {
+    private static func random(_ x0: 𝐐, _ x1: 𝐐, closed: Bool) -> 𝐐 {
+        let slice = 10
+        let q = lcm(x0.denominator, x1.denominator) * slice
+        let p0 = q * x0.numerator / x0.denominator
+        let p1 = q * x1.numerator / x1.denominator
+        let p = closed ? 𝐙.random(in: p0 ... p1) : 𝐙.random(in: p0 ..< p1)
+        return 𝐐(p, q)
+    }
     
-    public var hashValue: Int {
-        return (p.hashValue &* 31) &+ q.hashValue
+    public static func random(in range: Range<𝐐>) -> 𝐐 {
+        return random(range.lowerBound, range.upperBound, closed: false)
+    }
+    
+    public static func random(in range: ClosedRange<𝐐>) -> 𝐐 {
+        return random(range.lowerBound, range.upperBound, closed: true)
     }
 }
 
 extension 𝐙 {
     public static func ./(a: 𝐙, b: 𝐙) -> 𝐐 {
         return 𝐐(a, b)
-    }
-}
-
-extension RationalNumber: Codable {
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.singleValueContainer()
-        let vals = try c.decode([𝐙].self)
-        self.init(vals[0], vals[1])
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.singleValueContainer()
-        try c.encode([p, q])
     }
 }

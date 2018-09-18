@@ -93,7 +93,7 @@ class ModuleObjectTests: XCTestCase {
         let str = S(generators: basis, relationMatrix: matrix)
         
         XCTAssertEqual(str.rank, 1)
-        XCTAssertEqual(str.generator(0), e0)
+        XCTAssertEqual(str.generator(0), e2)
         
         XCTAssertEqual(str.factorize(e0), [1])
         XCTAssertEqual(str.factorize(e1), [-1])

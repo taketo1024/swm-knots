@@ -9,11 +9,11 @@ public protocol MapType: SetType {
 
 public extension MapType {
     public static func ==(f: Self, g: Self) -> Bool {
-        fatalError("cannot equate general maps.")
+        fatalError("cannot equate maps.")
     }
     
     public var hashValue: Int {
-        return 0
+        fatalError("cannot hash maps.")
     }
     
     public var description: String {
@@ -82,14 +82,6 @@ public protocol AutType: SubsetType, EndType, Group where Super: EndType, Domain
 public extension AutType {
     public static func *(g: Self, f: Self) -> Self {
         return g.composed(with: f)
-    }
-    
-    public static func == (a: Self, b: Self) -> Bool {
-        return a.asSuper == b.asSuper
-    }
-    
-    public var hashValue: Int {
-        return asSuper.hashValue
     }
     
     public var description: String {

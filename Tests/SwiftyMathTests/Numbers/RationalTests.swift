@@ -117,4 +117,18 @@ class RationalTests: XCTestCase {
         XCTAssertEqual(a.norm, 0.8)
         XCTAssertEqual(b.norm, 0.8)
     }
+    
+    func testRandom() {
+        let (x0, x1) = (A(0), A(10, 3))
+        for x in (0 ..< 10).map({ _ in A.random(in: x0 ..< x1) }) {
+            XCTAssertTrue((x0 ..< x1).contains(x))
+        }
+    }
+
+    func testRandomClosed() {
+        let (x0, x1) = (A(0), A(10, 3))
+        for x in (0 ... 10).map({ _ in A.random(in: x0 ..< x1) }) {
+            XCTAssertTrue((x0 ... x1).contains(x))
+        }
+    }
 }

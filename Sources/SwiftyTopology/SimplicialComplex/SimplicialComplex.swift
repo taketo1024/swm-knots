@@ -78,7 +78,7 @@ public struct SimplicialComplex: GeometricComplex {
     static public func filterMaximalCells<S: Sequence>(_ _cells: S) -> [Simplex] where S.Element == Simplex {
         var result = [Simplex]()
         for s in _cells.sorted().reversed() {
-            if result.forAll({ t in !t.contains(s) }) {
+            if result.allSatisfy({ t in !t.contains(s) }) {
                 result.append(s)
             }
         }

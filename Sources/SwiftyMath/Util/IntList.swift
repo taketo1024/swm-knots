@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct IntList: Hashable, Comparable, CustomStringConvertible {
+public struct IntList: Hashable, Comparable, CustomStringConvertible, Codable {
     public let components: [Int]
     public init(_ components: Int ...) {
         self.init(components)
@@ -71,22 +71,10 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
         return I + (-J)
     }
     
-    public static func ==(I: IntList, J: IntList) -> Bool {
-        return I.components == J.components
-    }
-    
     public static func binaryCombinations(length n: Int) -> [IntList] {
         assert(n <= 64)
         return (0 ..< 2.pow(n)).map { (b: Int) -> IntList in
             IntList( (0 ..< n).map{ i in (b >> i) & 1 } )
-        }
-    }
-    
-    // e.g. (2, 1, 3) -> 2 + (1 * p) + (3 * p^2)
-    public var hashValue: Int {
-        let p = 31
-        return components.reversed().reduce(0) { (sum, next) -> Int in
-            p &* sum &+ next
         }
     }
     
@@ -97,17 +85,5 @@ public struct IntList: Hashable, Comparable, CustomStringConvertible {
     
     public var description: String {
         return "(\( components.map{ String($0) }.joined(separator: ", ")))"
-    }
-}
-
-extension IntList: Codable {
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.singleValueContainer()
-        self.components = try c.decode([Int].self)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.singleValueContainer()
-        try c.encode(components)
     }
 }

@@ -52,10 +52,6 @@ public struct SymmetricGroup<n: _Int>: Group, FiniteSetType {
         return n.intValue.factorial
     }
     
-    public static func == (a: SymmetricGroup, b: SymmetricGroup) -> Bool {
-        return a.p == b.p
-    }
-    
     public static func * (a: SymmetricGroup, b: SymmetricGroup) -> SymmetricGroup<n> {
         return SymmetricGroup( a.p * b.p )
     }
@@ -66,9 +62,5 @@ public struct SymmetricGroup<n: _Int>: Group, FiniteSetType {
     
     public static var symbol: String {
         return "S_\(n.intValue)"
-    }
-    
-    public var hashValue: Int {
-        return p.hashValue
     }
 }

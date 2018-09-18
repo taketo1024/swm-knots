@@ -49,10 +49,6 @@ public struct GroupRing<G: Group, R: Ring>: Ring {
         return GroupRing(elements)
     }
     
-    public var hashValue: Int {
-        return 0 // TODO
-    }
-    
     public var description: String {
         return elements.map{ (g, a) in "\(a)(\(g))"}.joined(separator: " + ")
     }

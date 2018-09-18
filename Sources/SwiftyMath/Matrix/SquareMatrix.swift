@@ -15,6 +15,8 @@ public typealias Matrix2<R: Ring> = SquareMatrix<_2, R>
 public typealias Matrix3<R: Ring> = SquareMatrix<_3, R>
 public typealias Matrix4<R: Ring> = SquareMatrix<_4, R>
 
+extension SquareMatrix: Monoid where n == m {}
+
 extension SquareMatrix: Ring where n == m {
     public init(from n : 𝐙) {
         self.init(scalar: R(from: n))
@@ -38,11 +40,11 @@ extension SquareMatrix: Ring where n == m {
     }
     
     public var isZero: Bool {
-        return self.forAll{ (_, _, a) in a == .zero }
+        return self.allSatisfy{ (_, _, a) in a == .zero }
     }
     
     public var isDiagonal: Bool {
-        return self.forAll{ (i, j, a) in i == j || a == .zero }
+        return self.allSatisfy{ (i, j, a) in i == j || a == .zero }
     }
     
     public var isSymmetric: Bool {
@@ -51,8 +53,8 @@ extension SquareMatrix: Ring where n == m {
         if rows <= 1 {
             return true
         }
-        return (0 ..< rows - 1).forAll { i in
-            (i + 1 ..< cols).forAll { j in
+        return (0 ..< rows - 1).allSatisfy { i in
+            (i + 1 ..< cols).allSatisfy { j in
                 self[i, j] == self[j, i]
             }
         }
@@ -64,8 +66,8 @@ extension SquareMatrix: Ring where n == m {
         if rows <= 1 {
             return isZero
         }
-        return (0 ..< rows - 1).forAll { i in
-            (i + 1 ..< cols).forAll { j in
+        return (0 ..< rows - 1).allSatisfy { i in
+            (i + 1 ..< cols).allSatisfy { j in
                 self[i, j] == -self[j, i]
             }
         }
@@ -137,8 +139,8 @@ public extension SquareMatrix where n == m, R == 𝐂 {
         if rows <= 1 {
             return true
         }
-        return (0 ..< rows - 1).forAll { i in
-            (i + 1 ..< cols).forAll { j in
+        return (0 ..< rows - 1).allSatisfy { i in
+            (i + 1 ..< cols).allSatisfy { j in
                 self[i, j] == self[j, i].conjugate
             }
         }
@@ -150,8 +152,8 @@ public extension SquareMatrix where n == m, R == 𝐂 {
         if rows <= 1 {
             return isZero
         }
-        return (0 ..< rows - 1).forAll { i in
-            (i + 1 ..< cols).forAll { j in
+        return (0 ..< rows - 1).allSatisfy { i in
+            (i + 1 ..< cols).allSatisfy { j in
                 self[i, j] == -self[j, i].conjugate
             }
         }

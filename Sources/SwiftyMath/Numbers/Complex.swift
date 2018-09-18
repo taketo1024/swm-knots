@@ -93,10 +93,6 @@ public struct ComplexNumber: Field, NormedSpace, ExpressibleByIntegerLiteral, Ex
         return r2 == 0 ? nil : 𝐂(x / r2, -y / r2)
     }
     
-    public static func ==(lhs: 𝐂, rhs: 𝐂) -> Bool {
-        return (lhs.x == rhs.x) && (lhs.y == rhs.y)
-    }
-    
     public static func +(a: 𝐂, b: 𝐂) -> 𝐂 {
         return 𝐂(a.x + b.x, a.y + b.y)
     }
@@ -107,11 +103,6 @@ public struct ComplexNumber: Field, NormedSpace, ExpressibleByIntegerLiteral, Ex
     
     public static func *(a: 𝐂, b: 𝐂) -> 𝐂 {
         return 𝐂(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x)
-    }
-    
-    public var hashValue: Int {
-        let p = 104743
-        return (x.hashValue % p) &+ (y.hashValue % p) * p
     }
     
     public var description: String {

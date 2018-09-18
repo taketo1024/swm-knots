@@ -49,7 +49,7 @@ public struct ModuleObject<A: BasisElementType, R: Ring>: Equatable, CustomStrin
     }
     
     public var isFree: Bool {
-        return summands.forAll { $0.isFree }
+        return summands.allSatisfy { $0.isFree }
     }
     
     public var rank: Int {
@@ -167,10 +167,6 @@ public struct ModuleObject<A: BasisElementType, R: Ring>: Equatable, CustomStrin
             return generator.degree
         }
         
-        public static func ==(a: Summand, b: Summand) -> Bool {
-            return (a.generator, a.divisor) == (b.generator, b.divisor)
-        }
-        
         public var description: String {
             switch (isFree, R.self == 𝐙.self) {
             case (true, _)    : return R.symbol
@@ -184,7 +180,7 @@ public struct ModuleObject<A: BasisElementType, R: Ring>: Equatable, CustomStrin
 public extension ModuleObject where R: EuclideanRing {
     
     private static func extract(_ generators: [FreeModule<A, R>]) -> ([A], Matrix<R>, Matrix<R>) {
-        if generators.forAll({ z in z.isSingle }) {
+        if generators.allSatisfy({ z in z.isSingle }) {
             let rootBasis = generators.map{ z in z.basis[0] }
             let I = Matrix<R>.identity(size: generators.count)
             return (rootBasis, I, I)
@@ -201,7 +197,7 @@ public extension ModuleObject where R: EuclideanRing {
     // e.g) generators = [(2, 0), (0, 2)]
     
     public init(basis: [FreeModule<A, R>]) {
-        if basis.forAll({ $0.isSingle }) {
+        if basis.allSatisfy({ $0.isSingle }) {
             self.init(basis: basis.map{ $0.basis[0] })
         } else {
             let summands = basis.map{ z in Summand(z) }
@@ -217,7 +213,7 @@ public extension ModuleObject where R: EuclideanRing {
     }
     
     public init(generators: [FreeModule<A, R>], relationMatrix B: Matrix<R>) {
-        if generators.forAll({ $0.isSingle }) {
+        if generators.allSatisfy({ $0.isSingle }) {
             let basis = generators.map{ $0.basis[0] }
             self.init(generators: basis, relationMatrix: B)
         } else {
@@ -286,7 +282,7 @@ public extension ModuleObject where R: EuclideanRing {
     }
     
     public func elementIsZero(_ z: FreeModule<A, R>) -> Bool {
-        return factorize(z).forAll{ $0 == .zero }
+        return factorize(z).allSatisfy{ $0 == .zero }
     }
     
     public func elementsAreEqual(_ z1: FreeModule<A, R>, _ z2: FreeModule<A, R>) -> Bool {
@@ -362,42 +358,5 @@ public extension ModuleObject where R: EuclideanRing {
     }
 }
 
-extension ModuleObject: Codable where A: Codable, R: Codable {
-    enum CodingKeys: String, CodingKey {
-        case summands, basis, transform // TODO rename
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let summands = try c.decode([Summand].self, forKey: .summands)
-        let basis = try c.decode([A].self, forKey: .basis)
-        let trans = try c.decode(Matrix<R>.self, forKey: .transform)
-        self.init(summands, basis, trans)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(summands, forKey: .summands)
-        try c.encode(rootBasis, forKey: .basis)
-        try c.encode(transition, forKey: .transform)
-    }
-}
-
-extension ModuleObject.Summand: Codable where A: Codable, R: Codable {
-    enum CodingKeys: String, CodingKey {
-        case generator, divisor
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let g = try c.decode(FreeModule<A, R>.self, forKey: .generator)
-        let d = try c.decode(R.self, forKey: .divisor)
-        self.init(g, d)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(generator, forKey: .generator)
-        try c.encode(divisor, forKey: .divisor)
-    }
-}
+extension ModuleObject: Codable where A: Codable, R: Codable {}
+extension ModuleObject.Summand: Codable where A: Codable, R: Codable {}

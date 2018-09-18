@@ -131,10 +131,6 @@ public struct _Polynomial<T: PolynomialType, R: Ring, x: Indeterminate>: Ring, M
         return A * B
     }
     
-    public static func == (f: _Polynomial<T, R, x>, g: _Polynomial<T, R, x>) -> Bool {
-        return f.coeffs == g.coeffs
-    }
-    
     public static func + (f: _Polynomial<T, R, x>, g: _Polynomial<T, R, x>) -> _Polynomial<T, R, x> {
         let degs = Set(f.coeffs.keys).union(g.coeffs.keys)
         let coeffs = Dictionary(keys: degs) { i in
@@ -174,10 +170,6 @@ public struct _Polynomial<T: PolynomialType, R: Ring, x: Indeterminate>: Ring, M
     public static var symbol: String {
         let s = x.symbol
         return T.isNormal ? "\(R.symbol)[\(s)]" : "\(R.symbol)[\(s), \(s)⁻¹]"
-    }
-    
-    public var hashValue: Int {
-        return leadCoeff.hashValue
     }
 }
 

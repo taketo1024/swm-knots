@@ -109,7 +109,7 @@ public struct RealNumber: Subfield, NormedSpace, Comparable, ExpressibleByIntege
     }
     
     public var hashValue: Int {
-        return value.hashValue
+        return 0
     }
     
     public var description: String {

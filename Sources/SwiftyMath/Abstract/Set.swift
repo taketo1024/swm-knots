@@ -31,14 +31,6 @@ public protocol SubsetType: SetType {
 }
 
 public extension SubsetType {
-    public static func == (a: Self, b: Self) -> Bool {
-        return a.asSuper == b.asSuper
-    }
-    
-    public var hashValue: Int {
-        return asSuper.hashValue
-    }
-    
     public var description: String {
         return asSuper.description
     }
@@ -61,14 +53,6 @@ public protocol ProductSetType: SetType {
 }
 
 public extension ProductSetType {
-    public static func == (a: Self, b: Self) -> Bool {
-        return (a.left, a.right) == (b.left, b.right)
-    }
-    
-    public var hashValue: Int {
-        return (left.hashValue &* 31) &+ right.hashValue
-    }
-    
     public var description: String {
         return "(\(left), \(right))"
     }

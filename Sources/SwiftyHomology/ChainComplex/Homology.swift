@@ -132,7 +132,7 @@ public extension ChainComplexN where R: EuclideanRing {
         
         if dSplits(I) && dSplits(I - dDegree) {
             // case: splits as 𝐙, 𝐙₂ summands
-            if R.self == 𝐙.self && self[I]!.torsionCoeffs.forAll({ $0 as! 𝐙 == 2 }) {
+            if R.self == 𝐙.self && self[I]!.torsionCoeffs.allSatisfy({ $0 as! 𝐙 == 2 }) {
                 let free = (freePart.homology(I)! as! ModuleObject<A, 𝐙>)
                 let tor = (self as! ChainComplexN<n, A, 𝐙>).order2torsionPart.homology(I)!
                 let sum = free.merge(with: tor.asIntegerQuotients) 
@@ -173,8 +173,8 @@ public extension ChainComplexN where R: EuclideanRing {
         let t1 = t(to)
         
         let blocks = A.blocks(rowSizes: t1.map{ $0.1 }, colSizes: t0.map{ $0.1 })
-        return blocks.enumerated().forAll { (i, Bs) in
-            Bs.enumerated().forAll { (j, B) in
+        return blocks.enumerated().allSatisfy { (i, Bs) in
+            Bs.enumerated().allSatisfy { (j, B) in
                 return (t0[j].0 == t1[i].0) || B.isZero
             }
         }

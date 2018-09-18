@@ -17,15 +17,6 @@ public extension Sequence {
         return first { _ in true }
     }
     
-    public func forAll(_ f: (Element) -> Bool) -> Bool {
-        for e in self {
-            if !f(e) {
-                return false
-            }
-        }
-        return true
-    }
-    
     public func count(where predicate: (Element) -> Bool) -> Int {
         return self.lazy.filter(predicate).count
     }
@@ -54,7 +45,7 @@ public extension Sequence {
 public extension Sequence where Element: Hashable {
     public var isUnique: Bool {
         var alreadyAdded = Set<Element>()
-        return self.forAll { alreadyAdded.insert($0).inserted }
+        return self.allSatisfy { alreadyAdded.insert($0).inserted }
     }
     
     public func unique() -> [Element] {
@@ -73,29 +64,5 @@ public extension Sequence where Element: Hashable {
     
     public func countMultiplicities() -> [Element : Int] {
         return self.group{ $0 }.mapValues{ $0.count }
-    }
-}
-
-public extension Sequence where Element: AdditiveGroup {
-    @_inlineable public func sumAll() -> Element {
-        return sum{ $0 }
-    }
-}
-
-public extension Sequence {
-    @_inlineable public func sum<G: AdditiveGroup>(mapping f: (Element) -> G) -> G {
-        return G.sum( self.map(f) )
-    }
-}
-
-public extension Sequence where Element: Monoid {
-    @_inlineable public func multiplyAll() -> Element {
-        return multiply{ $0 }
-    }
-}
-
-public extension Sequence {
-    @_inlineable public func multiply<G: Monoid>(mapping f: (Element) -> G) -> G {
-        return self.reduce(.identity){ $0 * f($1) }
     }
 }

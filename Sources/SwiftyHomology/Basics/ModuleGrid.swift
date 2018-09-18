@@ -53,7 +53,7 @@ public struct ModuleGridN<n: _Int, A: BasisElementType, R: Ring>: Sequence {
     }
     
     public var isZero: Bool {
-        return grid.forAll { (_, o) in o?.isZero ?? false }
+        return grid.allSatisfy { (_, o) in o?.isZero ?? false }
     }
     
     public var name: String {

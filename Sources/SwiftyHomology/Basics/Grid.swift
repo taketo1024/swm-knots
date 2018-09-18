@@ -47,7 +47,7 @@ public struct GridN<n: _Int, Object: Equatable>: Sequence, CustomStringConvertib
     }
     
     public var isDetermined: Bool {
-        return data.values.forAll{ $0 != nil }
+        return data.values.allSatisfy{ $0 != nil }
     }
     
     public func named(_ name: String) -> GridN<n, Object> {
@@ -153,7 +153,7 @@ public extension GridN where n == _2 {
         let (i0, i1) = (iList.min()!, iList.max()!)
         let (j0, j1) = (jList.min()!, jList.max()!)
         
-        let jEvenOnly = jList.forAll{ j in (j - j0).isEven }
+        let jEvenOnly = jList.allSatisfy{ j in (j - j0).isEven }
         
         let colList = (i0 ... i1).toArray()
         let rowList = (j0 ... j1).reversed().filter{ j in jEvenOnly ? (j - j0).isEven : true }.toArray()
@@ -171,23 +171,4 @@ public extension GridN where n == _2 {
     }
 }
 
-extension GridN: Codable where Object: Codable {
-    enum CodingKeys: String, CodingKey {
-        case name, defaultObject, data
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let name = try c.decode(String.self, forKey: .name)
-        let data = try c.decode([IntList : Object?].self, forKey: .data)
-        let defaultObject = try c.decode(Object?.self, forKey: .defaultObject)
-        self.init(name: name, data: data, default: defaultObject)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(name, forKey: .name)
-        try c.encode(data, forKey: .data)
-        try c.encode(defaultObject, forKey: .defaultObject)
-    }
-}
+extension GridN: Codable where Object: Codable {}

@@ -126,7 +126,7 @@ public extension ChainComplexN where R: EuclideanRing {
         let dName = name ?? "\(base.name)^*"
         let dGens = Dictionary(pairs:
             indices.map { I -> (IntList, [Dual<A>]) in
-                guard let o = self[I], o.isFree, o.generators.forAll({ $0.isSingle }) else {
+                guard let o = self[I], o.isFree, o.generators.allSatisfy({ $0.isSingle }) else {
                     fatalError("unavailable")
                 }
                 return (I, o.generators.map{ $0.unwrap().dual })

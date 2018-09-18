@@ -111,10 +111,6 @@ public struct Simplex: GeometricCell, Comparable {
         return Simplex(s1.unorderedVertices.intersection(s2.unorderedVertices))
     }
     
-    public var hashValue: Int {
-        return id.hashValue
-    }
-    
     public static func ==(a: Simplex, b: Simplex) -> Bool {
         return a.id == b.id
     }
@@ -132,6 +128,10 @@ public struct Simplex: GeometricCell, Comparable {
         } else {
             return a.dim < b.dim
         }
+    }
+    
+    public var hashValue: Int {
+        return id.hashValue
     }
     
     public var description: String {
