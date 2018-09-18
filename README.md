@@ -18,7 +18,7 @@ $ swift -I .build/debug/ -L .build/debug/ -ldSwiftyMath
 Try something like:
 
 ```swift
-:set set print-decls false // suppress print-decl
+:set set print-decls false
 import SwiftyMath
 
 typealias F5 = IntegerQuotientRing<_5>
