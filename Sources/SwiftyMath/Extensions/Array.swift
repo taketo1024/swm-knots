@@ -112,7 +112,8 @@ extension Array: Comparable where Element: Comparable {
 }
 
 public extension Array where Element: Hashable {
-    public func indexer() -> (Element) -> Int {
-        return Dictionary(pairs: self.enumerated().map{ ($1, $0) }).asFunc()
+    public func indexer() -> (Element) -> Int? {
+        let dict = Dictionary(pairs: self.enumerated().map{ ($1, $0) })
+        return { dict[$0] }
     }
 }

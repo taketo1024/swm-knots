@@ -50,10 +50,6 @@ public extension Dictionary {
     public static func + (a: [Key : Value], b: [Key : Value]) -> [Key : Value] {
         return a.merging(b)
     }
-
-    public func asFunc(default v: Value? = nil) -> (Key) -> Value {
-        return { k in self[k] ?? v! }
-    }
 }
 
 public extension Dictionary where Value: Hashable {

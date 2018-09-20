@@ -103,7 +103,9 @@ public extension ChainMapN where R: EuclideanRing {
             
             let components = from.enumerated().flatMap{ (j, x) -> [MatrixComponent<R>] in
                 map.applied(to: x).elements.map { (y, a) -> MatrixComponent<R> in
-                    let i = toIndexer(y)
+                    guard let i = toIndexer(y) else {
+                        fatalError("not an element of the codomain: \(y)")
+                    }
                     return MatrixComponent(i, j, a)
                 }
             }
