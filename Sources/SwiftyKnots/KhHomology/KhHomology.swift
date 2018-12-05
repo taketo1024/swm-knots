@@ -9,6 +9,11 @@ import Foundation
 import SwiftyMath
 import SwiftyHomology
 
+private struct t4: Indeterminate {
+    static var symbol = "t"
+    static var degree = -4
+}
+
 public struct KhovanovChainComplex<R: Ring> {
     public let L: Link
     public let cube: ModuleCube<KhBasisElement, R>
@@ -135,6 +140,24 @@ public extension Link {
         let name = "BN(\(self.name)\( R.self == 𝐙.self ? "" : "; \(R.symbol)"))"
         let C = self.KhovanovChainComplex(type, h: .identity, t: .zero, normalized: normalized)
         return C.homology().named(name)
+    }
+    
+    public var RasmussenInvariant: Int {
+        return RasmussenInvariant(𝐐.self)
+    }
+    
+    public func RasmussenInvariant<F: Field>(_ type: F.Type) -> Int {
+        assert(components.count == 1) // currently supports only knots.
+        
+        typealias R = Polynomial<F, t4> // R = F[t], deg(t) = -4.
+        
+        let L = self
+        let H0 = L.KhovanovChainComplex(R.self, h: .zero, t: R.indeterminate).homology(0).freePart
+        let q = H0.generators.map { z in
+            z.basis.map { x in x.qDegree(in: L) }.min()!
+        }.max()!
+
+        return q - 1
     }
     
     public var orientationPreservingState: IntList {

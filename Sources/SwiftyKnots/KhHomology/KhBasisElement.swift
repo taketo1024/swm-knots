@@ -21,6 +21,11 @@ public struct KhBasisElement: BasisElementType, Comparable, Codable {
         return tensor.degree + state.components.count{ $0 == 1 }
     }
     
+    public func qDegree(in L: Link) -> Int {
+        let (n⁺, n⁻) = (L.crossingNumber⁺, L.crossingNumber⁻)
+        return degree + n⁺ - 2 * n⁻
+    }
+    
     public typealias   Product<R: Ring> = FreeTensor<E>.Product<R>
     public typealias Coproduct<R: Ring> = FreeTensor<E>.Coproduct<R>
     
