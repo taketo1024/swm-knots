@@ -16,8 +16,10 @@
 import Foundation
 import SwiftyMath
 
+
 public struct Link: Equatable, CustomStringConvertible {
-    
+    public typealias PlanarCode = [[Int]]
+
     /* Planer Diagram code, represented by crossings:
      *
      *    3   2
@@ -40,7 +42,7 @@ public struct Link: Equatable, CustomStringConvertible {
         self.crossings = crossings
     }
     
-    public init(name: String? = nil, planarCode: [[Int]]) {
+    public init(name: String? = nil, planarCode: PlanarCode) {
         
         // generate edges.
         
