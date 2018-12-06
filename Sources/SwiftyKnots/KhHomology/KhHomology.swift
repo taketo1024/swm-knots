@@ -168,7 +168,11 @@ public extension Link {
         return IntList(crossings.map{ $0.crossingSign == 1 ? 0 : 1 })
     }
     
-    public func canonicalCycles<R: Ring>(_ type: R.Type, _ u: R, _ v: R) -> [FreeModule<KhBasisElement, R>] {
+    public func LeeCycles<R: Ring>(_ type: R.Type, _ c: R) -> [FreeModule<KhBasisElement, R>] {
+        return LeeCycles(R.self, .zero, c)
+    }
+    
+    public func LeeCycles<R: Ring>(_ type: R.Type, _ u: R, _ v: R) -> [FreeModule<KhBasisElement, R>] {
         typealias Component = Link.Component
         
         assert(components.count == 1) // currently supports only knots.
@@ -226,6 +230,32 @@ public extension Link {
         return [z0, z1].map { z in
             z.mapBasis{ t in KhBasisElement(s0, t) }
         }
+    }
+    
+    public func LeeClassDivisibility<R: EuclideanRing>(_ type: R.Type, _ c: R) -> Int {
+        let K = self
+        let C = K.KhovanovChainComplex(R.self, h: c, t: .zero)
+        let H0 = C.homology(0).freePart
+        let a = K.LeeCycles(R.self, c)[0]
+        
+        var k = 0
+        var v = H0.factorize(a)
+        
+        while (v[0] % c, v[1] % c) == (.zero, .zero) {
+            v = [v[0] / c, v[1] / c]
+            k += 1
+        }
+        
+        return k
+    }
+    
+    public func sHatInvariant<R: EuclideanRing>(_ type: R.Type, _ c: R) -> Int {
+        let K = self
+        let k = K.LeeClassDivisibility(R.self, c)
+        let r = K.spliced(by: K.orientationPreservingState).components.count
+        let w = K.writhe
+        let s = 2 * k - r + w + 1
+        return s
     }
 }
 
