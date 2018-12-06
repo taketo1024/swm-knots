@@ -20,3 +20,10 @@ public extension Encodable {
         }
     }
 }
+
+public extension Decodable {
+    public static func loadJSON(_ stringData: String) -> Self? {
+        let data = stringData.data(using: .utf8)!
+        return try? JSONDecoder().decode(Self.self, from: data)
+    }
+}
