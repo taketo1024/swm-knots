@@ -121,15 +121,15 @@ public struct ModuleObject<A: BasisElementType, R: Ring>: Equatable, CustomStrin
         return a.summands == b.summands
     }
     
-    public func describe() {
-        if !isZero {
+    public func describe(detail: Bool = false) {
+        if !detail || isZero {
+            print(self.description)
+        } else {
             print("\(self) {")
             for (i, x) in generators.enumerated() {
                 print("\t(\(i))\t\(x)")
             }
             print("}")
-        } else {
-            print("\(self)")
         }
     }
     

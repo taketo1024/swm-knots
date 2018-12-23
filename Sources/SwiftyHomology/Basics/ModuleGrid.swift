@@ -78,19 +78,19 @@ public struct ModuleGridN<n: _Int, A: BasisElementType, R: Ring>: Sequence {
                .named("\(grid.name)_tor")
     }
     
-    public func describe(_ I: IntList) {
+    public func describe(_ I: IntList, detail: Bool = false) {
         if let s = self[I] {
             print("\(I) ", terminator: "")
-            s.describe()
+            s.describe(detail: detail)
         } else {
             print("\(I) ?")
         }
     }
     
-    public func describeAll() {
+    public func describeAll(detail: Bool = false) {
         print(grid.name)
         for I in indices {
-            describe(I)
+            describe(I, detail: detail)
         }
         print()
     }
