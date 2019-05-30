@@ -12,7 +12,7 @@ import SwiftyHomology
 
 class KhovanovHomologyTests: XCTestCase {
     
-    private func χ<R: Ring>(_ Kh: ModuleGrid2<KhBasisElement, R>) -> LaurentPolynomial<𝐙, JonesPolynomial_q>  {
+    private func χ<R: Ring>(_ Kh: ModuleGrid2<KhEnhancedState, R>) -> LaurentPolynomial<𝐙, JonesPolynomial_q>  {
         return Kh.gradedEulerCharacteristic(𝐙.self, JonesPolynomial_q.self)
     }
     
