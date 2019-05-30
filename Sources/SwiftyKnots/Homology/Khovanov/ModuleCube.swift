@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftyMath
+import SwiftyHomology
 
 // An n-dim cube with Modules on all vertices I ∈ {0, 1}^n .
 
