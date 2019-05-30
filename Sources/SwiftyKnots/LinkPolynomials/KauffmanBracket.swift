@@ -14,7 +14,7 @@ public struct KauffmanBracket_A: Indeterminate {
 
 public typealias KauffmanBracketPolynomial = LaurentPolynomial<𝐙, KauffmanBracket_A>
 
-public extension Link {
+extension Link {
     
     // a polynomial in 𝐙[A, 1/A]
     public var KauffmanBracket: KauffmanBracketPolynomial {

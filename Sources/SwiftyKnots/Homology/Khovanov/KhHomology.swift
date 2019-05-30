@@ -68,13 +68,13 @@ public struct KhovanovChainComplex<R: Ring> {
             let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
             switch (d1.count, d2.count) {
             case (2, 1):
-                let (i1, i2) = (c1.index(of: d1[0])!, c1.index(of: d1[1])!)
-                let j = c2.index(of: d2[0])!
+                let (i1, i2) = (c1.firstIndex(of: d1[0])!, c1.firstIndex(of: d1[1])!)
+                let j = c2.firstIndex(of: d2[0])!
                 return FreeModuleHom{ (x: A) in x.applied(product, at: (i1, i2), to: j, state: s1) }
                 
             case (1, 2):
-                let i = c1.index(of: d1[0])!
-                let (j1, j2) = (c2.index(of: d2[0])!, c2.index(of: d2[1])!)
+                let i = c1.firstIndex(of: d1[0])!
+                let (j1, j2) = (c2.firstIndex(of: d2[0])!, c2.firstIndex(of: d2[1])!)
                 return FreeModuleHom{ (x: A) in x.applied(coproduct, at: i, to: (j1, j2), state: s1) }
                 
             default: fatalError()
@@ -85,7 +85,7 @@ public struct KhovanovChainComplex<R: Ring> {
     }
 }
 
-public extension KhovanovChainComplex where R: EuclideanRing {
+extension KhovanovChainComplex where R: EuclideanRing {
     public func homology(_ i: Int) -> ModuleObject<KhEnhancedState, R> {
         return chainComplex.homology(i)!
     }
@@ -109,7 +109,7 @@ public extension KhovanovChainComplex where R: EuclideanRing {
     }
 }
 
-public extension Link {
+extension Link {
     @available(*, deprecated)
     public func KhChainComplex<R: Ring>(_ type: R.Type, normalized: Bool = true) -> KhovanovChainComplex<R> {
         return self.KhovanovChainComplex(type, normalized: normalized)
@@ -259,7 +259,7 @@ public extension Link {
     }
 }
 
-public extension ModuleGridN where n == _2, A == KhEnhancedState {
+extension ModuleGridN where n == _2, A == KhEnhancedState {
     public var bandWidth: Int {
         return indices.map{ I in I[1] - 2 * I[0] }.unique().count
     }

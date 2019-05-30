@@ -13,7 +13,7 @@ import Foundation
  * $ cat Rolfsen.rdf | grep "<invariant:PD_Presentation>" | perl -pe 's|<knot:(.*?)> <invariant:PD_Presentation> "(.*)" \.|"$1": [$2],|' | perl -pe 's|</sub> X|</sub>, X|g' | perl -pe 's|X<sub>([0-9]+),?([0-9]+),?([0-9]+),?([0-9]+)</sub>|[\1,\2,\3,\4]|g'
  */
 
-public extension Link {
+extension Link {
     public static func load(_ name: String) -> Link {
         loadTable()
         

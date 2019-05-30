@@ -19,7 +19,7 @@ public func Knot(_ n: Int, _ i: Int) -> Link {
     return Link.load(name)
 }
 
-public extension Link {
+extension Link {
     public enum LinkType {
         case knot, link
     }

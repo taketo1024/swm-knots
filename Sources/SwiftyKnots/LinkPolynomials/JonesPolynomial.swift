@@ -14,7 +14,7 @@ public struct JonesPolynomial_q: Indeterminate {
 
 public typealias JonesPolynomial = LaurentPolynomial<𝐙, JonesPolynomial_q>
 
-public extension Link {
+extension Link {
     // a polynomial in 𝐐[q, 1/q] where q = -A^{-2}
     // TODO replace with t = -q^2 = A^{-4} to get J ∈ 𝐙[√t, 1/√t]
     public var JonesPolynomial: JonesPolynomial {

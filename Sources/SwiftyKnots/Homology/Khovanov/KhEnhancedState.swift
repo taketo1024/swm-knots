@@ -79,7 +79,7 @@ public struct KhEnhancedState: FreeModuleBasis, Comparable, Codable {
     }
 }
 
-public extension KhEnhancedState {
+extension KhEnhancedState {
     // Khovanov's map
     public static func product<R: Ring>(_ type: R.Type, h: R = .zero, t: R = .zero) -> Product<R> {
         return Product { (x: Tensor<E, E>) -> FreeModule<KhEnhancedState.E, R> in
