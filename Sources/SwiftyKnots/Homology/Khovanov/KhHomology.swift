@@ -9,11 +9,6 @@ import Foundation
 import SwiftyMath
 import SwiftyHomology
 
-private struct t4: Indeterminate {
-    static var symbol = "t"
-    static var degree = -4
-}
-
 public struct KhovanovChainComplex<R: Ring> {
     public let L: Link
     public let cube: ModuleCube<KhEnhancedState, R>

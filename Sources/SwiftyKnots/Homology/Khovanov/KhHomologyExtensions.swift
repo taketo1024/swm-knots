@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftyMath
 
 extension Link {
     public func LeeCycles<R: Ring>(_ type: R.Type, _ c: R) -> [FreeModule<KhEnhancedState, R>] {

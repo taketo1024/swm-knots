@@ -6,6 +6,12 @@
 //
 
 import Foundation
+import SwiftyMath
+
+private struct t4: Indeterminate {
+    static var symbol = "t"
+    static var degree = -4
+}
 
 extension Link {
     public var RasmussenInvariant: Int {
