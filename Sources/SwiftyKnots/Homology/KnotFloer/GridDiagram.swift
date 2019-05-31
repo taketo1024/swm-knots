@@ -171,7 +171,7 @@ public struct GridDiagram {
         }
     }
     
-    public struct Generator: FreeModuleBasis {
+    public struct Generator: FreeModuleGenerator {
         public let id: Int
         public let points: [Point]
         

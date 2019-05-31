@@ -24,8 +24,8 @@ public struct CFKTilde {
             let base = ModuleGrid1<A, R>(name: "CFK~", generators: gens)
             
             let d = ChainMap<A, A, R>(degree: -1) { i in
-                FreeModuleHom{ (x: A) -> FreeModule<A, R> in
-                    let ys = base[i - 1]!.generators.map{ $0.basis.anyElement! }
+                ModuleHom.linearlyExtend{ x in
+                    let ys = base[i - 1]!.generators.map{ $0.generators.anyElement! }
                     return ys.map { y in
                         let rs = G.emptyRectangles(from: x, to: y)
                         let a = rs.count { r in

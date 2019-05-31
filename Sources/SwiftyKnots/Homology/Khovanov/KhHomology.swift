@@ -36,8 +36,8 @@ public struct KhovanovChainComplex<R: Ring> {
             let name = "CKh(\(L.name)\( R.self == 𝐙.self ? "" : "; \(R.symbol)"))"
             let base = cube.fold().named(name).shifted(normalized ? -L.crossingNumber⁻ : 0)
             let d = ChainMap(degree: 1) { _ in
-                FreeModuleHom{ (x: KhEnhancedState) in
-                    cube.d(x.state).applied(to: x)
+                ModuleHom.linearlyExtend{ x in
+                    cube.d(x.state).applied(to: .wrap(x))
                 }
             }
             return ChainComplex(base: base, differential: d)
@@ -62,7 +62,7 @@ public struct KhovanovChainComplex<R: Ring> {
             return ModuleObject(basis: basis)
         }
         
-        let edgeMaps = { (s0: IntList, s1: IntList) -> FreeModuleHom<A, A, R> in
+        let edgeMaps = { (s0: IntList, s1: IntList) -> ModuleCube<A, R>.EdgeMap in
             let (L0, L1) = (Ls[s0]!, Ls[s1]!)
             let (c1, c2) = (L0.components, L1.components)
             let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
@@ -70,12 +70,16 @@ public struct KhovanovChainComplex<R: Ring> {
             case (2, 1):
                 let (i1, i2) = (c1.firstIndex(of: d1[0])!, c1.firstIndex(of: d1[1])!)
                 let j = c2.firstIndex(of: d2[0])!
-                return FreeModuleHom{ (x: A) in x.applied(product, at: (i1, i2), to: j, state: s1) }
+                return ModuleHom.linearlyExtend{ x in
+                    x.applied(product, at: (i1, i2), to: j, state: s1)
+                }
                 
             case (1, 2):
                 let i = c1.firstIndex(of: d1[0])!
                 let (j1, j2) = (c2.firstIndex(of: d2[0])!, c2.firstIndex(of: d2[1])!)
-                return FreeModuleHom{ (x: A) in x.applied(coproduct, at: i, to: (j1, j2), state: s1) }
+                return ModuleHom.linearlyExtend{ x in
+                    x.applied(coproduct, at: i, to: (j1, j2), state: s1)
+                }
                 
             default: fatalError()
             }
@@ -110,16 +114,6 @@ extension KhovanovChainComplex where R: EuclideanRing {
 }
 
 extension Link {
-    @available(*, deprecated)
-    public func KhChainComplex<R: Ring>(_ type: R.Type, normalized: Bool = true) -> KhovanovChainComplex<R> {
-        return self.KhovanovChainComplex(type, normalized: normalized)
-    }
-    
-    @available(*, deprecated)
-    public func KhHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid2<KhEnhancedState, R> {
-        return self.KhovanovHomology(type, normalized: normalized)
-    }
-    
     public func KhovanovChainComplex<R: Ring>(_ type: R.Type, h: R = .zero, t: R = .zero, normalized: Bool = true) -> KhovanovChainComplex<R> {
         return SwiftyKnots.KhovanovChainComplex<R>(self, h: h, t: t, normalized: normalized)
     }
@@ -140,122 +134,6 @@ extension Link {
         let name = "BN(\(self.name)\( R.self == 𝐙.self ? "" : "; \(R.symbol)"))"
         let C = self.KhovanovChainComplex(type, h: .identity, t: .zero, normalized: normalized)
         return C.homology().named(name)
-    }
-    
-    public var RasmussenInvariant: Int {
-        return RasmussenInvariant(𝐐.self)
-    }
-    
-    public func RasmussenInvariant<F: Field>(_ type: F.Type, forceCompute: Bool = false) -> Int {
-        if !forceCompute, F.self == 𝐐.self, let s = Link.loadRasmussenInvariant(self.name) {
-            return s
-        }
-        
-        assert(components.count == 1) // currently supports only knots.
-        
-        typealias R = Polynomial<F, t4> // R = F[t], deg(t) = -4.
-        
-        let L = self
-        let H0 = L.KhovanovChainComplex(R.self, h: .zero, t: R.indeterminate).homology(0).freePart
-        let q = H0.generators.map { z in
-            z.basis.map { x in x.qDegree(in: L) }.min()!
-        }.max()!
-
-        return q - 1
-    }
-    
-    public var orientationPreservingState: IntList {
-        return IntList(crossings.map{ $0.crossingSign == 1 ? 0 : 1 })
-    }
-    
-    public func LeeCycles<R: Ring>(_ type: R.Type, _ c: R) -> [FreeModule<KhEnhancedState, R>] {
-        return LeeCycles(R.self, .zero, c)
-    }
-    
-    public func LeeCycles<R: Ring>(_ type: R.Type, _ u: R, _ v: R) -> [FreeModule<KhEnhancedState, R>] {
-        typealias Component = Link.Component
-        
-        assert(components.count == 1) // currently supports only knots.
-        
-        let s0 = orientationPreservingState
-        let L0 = spliced(by: s0)
-        let comps = L0.components
-        
-        // splits comps into two groups.
-        var queue:  [(Component, Int)] = [(comps[0], 0)]
-        var result:  [Component : Int] = [:]
-        
-        while !queue.isEmpty {
-            let (c, i) = queue.removeFirst()
-            
-            // crossings that touches c
-            let xs = crossings.filter{ x in
-                x.edges.contains{ e in c.edges.contains(e) }
-            }
-            
-            // circles that are connected to c by xs
-            let cs = xs.map{ x -> Component in
-                let e = x.edges.first{ e in !c.edges.contains(e) }!
-                return comps.first{ c1 in c1.edges.contains(e) }!
-                }.unique()
-            
-            // queue circles with opposite color.
-            for c1 in cs where !result.contains(key: c1) {
-                queue.append((c1, 1 - i))
-            }
-            
-            // append result.
-            result[c] = i
-        }
-        
-        assert(result.count == comps.count)
-        
-        typealias A = FreeModule<FreeTensor<KhEnhancedState.E>, R>
-        
-        let (X, I) = (A.wrap(FreeTensor(.X)), A.wrap(FreeTensor(.I)))
-        let (a, b) = (X - u * I, X - v * I)
-        var (z0, z1) = (A.wrap(.identity), A.wrap(.identity))
-        
-        for c in comps {
-            switch result[c]! {
-            case 0:
-                z0 = z0 ⊗ a
-                z1 = z1 ⊗ b
-            default:
-                z0 = z0 ⊗ b
-                z1 = z1 ⊗ a
-            }
-        }
-        
-        return [z0, z1].map { z in
-            z.mapBasis{ t in KhEnhancedState(s0, t) }
-        }
-    }
-    
-    public func LeeClassDivisibility<R: EuclideanRing>(_ type: R.Type, _ c: R) -> Int {
-        let K = self
-        let C = K.KhovanovChainComplex(R.self, h: c, t: .zero)
-        let H0 = C.homology(0).freePart
-        let a = K.LeeCycles(R.self, c)[0]
-        
-        var k = 0
-        var v = H0.factorize(a)
-        
-        while (v[0] % c, v[1] % c) == (.zero, .zero) {
-            v = [v[0] / c, v[1] / c]
-            k += 1
-        }
-        
-        return k
-    }
-    
-    public func sHatInvariant<R: EuclideanRing>(_ type: R.Type, _ c: R) -> Int {
-        let K = self
-        let k = K.LeeClassDivisibility(R.self, c)
-        let r = K.spliced(by: K.orientationPreservingState).components.count
-        let w = K.writhe
-        let s = 2 * k - r + w + 1
-        return s
     }
 }
 

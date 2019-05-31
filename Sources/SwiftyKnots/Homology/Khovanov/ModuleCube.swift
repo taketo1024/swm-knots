@@ -11,14 +11,15 @@ import SwiftyHomology
 
 // An n-dim cube with Modules on all vertices I ∈ {0, 1}^n .
 
-public struct ModuleCube<A: FreeModuleBasis, R: Ring> {
+public struct ModuleCube<A: FreeModuleGenerator, R: Ring> {
     public typealias Object = ModuleObject<A, R>
+    public typealias EdgeMap = ModuleEnd<FreeModule<A, R>>
     
     public let dim: Int
     internal let objects: [IntList : Object]
-    internal let edgeMaps: (IntList, IntList) -> FreeModuleHom<A, A, R>
+    internal let edgeMaps: (IntList, IntList) -> EdgeMap
     
-    public init(dim n: Int, objects: [IntList : Object], edgeMaps: @escaping (IntList, IntList) -> FreeModuleHom<A, A, R>) {
+    public init(dim n: Int, objects: [IntList : Object], edgeMaps: @escaping (IntList, IntList) -> EdgeMap) {
         self.dim = n
         self.objects = objects
         self.edgeMaps = edgeMaps
@@ -53,13 +54,13 @@ public struct ModuleCube<A: FreeModuleBasis, R: Ring> {
         }
     }
     
-    public func edgeMap(from I0: IntList, to I1: IntList) -> FreeModuleHom<A, A, R> {
+    public func edgeMap(from I0: IntList, to I1: IntList) -> EdgeMap {
         return objects.contains(key: I0) && objects.contains(key: I1)
             ? self.edgeMaps(I0, I1)
             : .zero
     }
     
-    public func d(_ I0: IntList) -> FreeModuleHom<A, A, R> {
+    public func d(_ I0: IntList) -> EdgeMap {
         return self.targetVertices(from: I0).sum { (ε, I1) in
             ε * self.edgeMap(from: I0, to: I1)
         }

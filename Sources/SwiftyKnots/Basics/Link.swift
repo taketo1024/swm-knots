@@ -265,6 +265,10 @@ public struct Link: Equatable, CustomStringConvertible {
             .sorted{ $0.total < $1.total }
     }
     
+    public var orientationPreservingState: IntList {
+        return IntList(crossings.map{ $0.crossingSign == 1 ? 0 : 1 })
+    }
+    
     public static func +(L1: Link, L2: Link) -> Link {
         let dx = (L1.crossings.max()?.id ?? 0) - (L2.crossings.min()?.id ?? 0) + 1
         let de = (L1.edges.max()?.id ?? 0) - (L2.edges.min()?.id ?? 0) + 1
