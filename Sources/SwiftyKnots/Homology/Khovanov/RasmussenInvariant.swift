@@ -18,11 +18,7 @@ extension Link {
         return RasmussenInvariant(𝐐.self)
     }
     
-    public func RasmussenInvariant<F: Field>(_ type: F.Type, forceCompute: Bool = false) -> Int {
-        if !forceCompute, F.self == 𝐐.self, let s = Link.loadRasmussenInvariant(self.name) {
-            return s
-        }
-        
+    public func RasmussenInvariant<F: Field>(_ type: F.Type) -> Int {
         assert(components.count == 1) // currently supports only knots.
         
         typealias R = Polynomial<F, t4> // R = F[t], deg(t) = -4.
