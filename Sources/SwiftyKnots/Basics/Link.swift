@@ -19,6 +19,7 @@ import SwiftyMath
 
 public struct Link: Equatable, CustomStringConvertible {
     public typealias PlanarCode = [[Int]]
+    public typealias State = IntList
 
     /* Planer Diagram code, represented by crossings:
      *
@@ -227,7 +228,7 @@ public struct Link: Equatable, CustomStringConvertible {
         return L
     }
     
-    public func spliced(by state: IntList) -> Link {
+    public func spliced(by state: State) -> Link {
         return spliced(by: state.components)
     }
     
@@ -260,13 +261,13 @@ public struct Link: Equatable, CustomStringConvertible {
         }
     }
     
-    public var allStates: [IntList] {
-        return IntList.binaryCombinations(length: crossingNumber)
+    public var allStates: [State] {
+        return State.binaryCombinations(length: crossingNumber)
             .sorted{ $0.total < $1.total }
     }
     
-    public var orientationPreservingState: IntList {
-        return IntList(crossings.map{ $0.crossingSign == 1 ? 0 : 1 })
+    public var orientationPreservingState: State {
+        return State(crossings.map{ $0.crossingSign == 1 ? 0 : 1 })
     }
     
     public static func +(L1: Link, L2: Link) -> Link {
