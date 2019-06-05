@@ -24,11 +24,15 @@ extension Link {
         typealias R = Polynomial<F, t4> // R = F[t], deg(t) = -4.
         
         let L = self
-        let H0 = L.KhovanovChainComplex(R.self, h: .zero, t: R.indeterminate).homology(0).freePart
-        let q = H0.generators.map { z in
-            z.generators.map { x in x.qDegree(in: L) }.min()!
-            }.max()!
+        let H0 = L.parameterizedKhovanovHomology(R.self, h: .zero, t: R.indeterminate)[0]
         
-        return q - 1
+        let q = H0.summands.filter{ $0.isFree }.map { summand in
+            summand.generator.generators.map { x in x.degree }.min()!
+        }.max()!
+        
+        let (n⁺, n⁻) = (L.crossingNumber⁺, L.crossingNumber⁻)
+        let qShift = n⁺ - 2 * n⁻
+
+        return q + qShift - 1
     }
 }
