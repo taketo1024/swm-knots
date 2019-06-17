@@ -8,7 +8,7 @@
 import Foundation
 import SwiftyMath
 
-private struct t4: Indeterminate {
+private struct _t: PolynomialIndeterminate {
     static var symbol = "t"
     static var degree = -4
 }
@@ -21,7 +21,7 @@ extension Link {
     public func RasmussenInvariant<F: Field>(_ type: F.Type) -> Int {
         assert(components.count == 1) // currently supports only knots.
         
-        typealias R = Polynomial<F, t4> // R = F[t], deg(t) = -4.
+        typealias R = Polynomial<_t, F> // R = F[t], deg(t) = -4.
         
         let L = self
         let H0 = L.parameterizedKhovanovHomology(R.self, h: .zero, t: R.indeterminate)[0]

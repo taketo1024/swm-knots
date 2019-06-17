@@ -8,11 +8,11 @@
 import Foundation
 import SwiftyMath
 
-public struct KauffmanBracket_A: Indeterminate {
+public struct _A: PolynomialIndeterminate {
     public static let symbol = "A"
 }
 
-public typealias KauffmanBracketPolynomial = LaurentPolynomial<𝐙, KauffmanBracket_A>
+public typealias KauffmanBracketPolynomial = LaurentPolynomial<_A, 𝐙>
 
 extension Link {
     

@@ -8,11 +8,11 @@
 import Foundation
 import SwiftyMath
 
-public struct JonesPolynomial_q: Indeterminate {
+public struct _q: PolynomialIndeterminate {
     public static let symbol = "q"
 }
 
-public typealias JonesPolynomial = LaurentPolynomial<𝐙, JonesPolynomial_q>
+public typealias JonesPolynomial = LaurentPolynomial<_q, 𝐙>
 
 extension Link {
     // a polynomial in 𝐐[q, 1/q] where q = -A^{-2}

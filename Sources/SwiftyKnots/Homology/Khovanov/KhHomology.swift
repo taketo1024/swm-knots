@@ -55,8 +55,8 @@ public struct KhovanovHomology<R: EuclideanRing> {
         homology.grid.printTable(indices1: r1.toArray(), indices2: r2.filter{ ($0 - l) % 2 == 0 })
     }
     
-    public var gradedEulerCharacteristic: LaurentPolynomial<𝐙, JonesPolynomial_q> {
-        typealias P = LaurentPolynomial<𝐙, JonesPolynomial_q>
+    public var gradedEulerCharacteristic: LaurentPolynomial<_q, 𝐙> {
+        typealias P = LaurentPolynomial<_q, 𝐙>
         let q = P.indeterminate
         let (I, J) = supportedArea
         
