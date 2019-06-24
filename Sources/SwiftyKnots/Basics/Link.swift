@@ -444,8 +444,8 @@ public struct Link: Equatable, CustomStringConvertible {
             return e1.id < e2.id
         }
         
-        public var hashValue: Int {
-            return id
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
         }
         
         public var description: String {
@@ -468,8 +468,8 @@ public struct Link: Equatable, CustomStringConvertible {
             return c1.edges.map{ $0.id }.min()! < c2.edges.map{ $0.id }.min()!
         }
         
-        public var hashValue: Int {
-            return edges.hashValue
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(edges)
         }
         
         public var description: String {
