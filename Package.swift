@@ -11,8 +11,8 @@ let package = Package(
             targets: ["SwiftyKnots"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/taketo1024/SwiftyMath.git", .exact("1.0.14")),
-        .package(url: "https://github.com/taketo1024/SwiftyMath-homology.git", .exact("1.0.10")),
+        .package(url: "https://github.com/taketo1024/SwiftyMath.git", .exact("1.0.22")),
+        .package(url: "https://github.com/taketo1024/SwiftyMath-homology.git", .exact("1.0.16")),
     ],
     targets: [
         .target(
@@ -22,5 +22,9 @@ let package = Package(
         .testTarget(
             name: "SwiftyKnotsTests",
             dependencies: ["SwiftyKnots"]),
+        .target(
+            name: "SwiftyKnots-Sample",
+            dependencies: ["SwiftyMath", "SwiftyHomology", "SwiftyKnots"],
+			path: "Sources/Sample"),
     ]
 )
