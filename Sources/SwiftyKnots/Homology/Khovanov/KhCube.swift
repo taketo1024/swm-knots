@@ -11,23 +11,13 @@ import SwiftyHomology
 
 // An n-dim cube with Modules on all vertices I ∈ {0, 1}^n .
 
-extension ModuleObject {
-    public static func generate<A: FreeModuleGenerator>(from generators: [A], over: R.Type) -> ModuleObject<FreeModule<A, R>> {
-        
-        let indexer = generators.indexer()
-        let wrapped = generators.map{ FreeModule<A, R>.wrap($0) }
-        return ModuleObject<FreeModule<A, R>>(basis: wrapped) { z in
-            let comps = z.elements.map{ (a, r) in (indexer(a)!, 0, r) }
-            return DVector(size: generators.count, components: comps)
-        }
-    }
-}
-
 public struct KhCube<R: Ring> {
     public struct Vertex: CustomStringConvertible {
         public let state: Link.State
         public let splicedLink: Link
         public let generators: [KhEnhancedState]
+        
+        fileprivate let targetStates: [(sign: R, state: Link.State)]
         
         init(_ L: Link, _ state: Link.State) {
             self.state = state
@@ -35,11 +25,26 @@ public struct KhCube<R: Ring> {
             
             let r = splicedLink.components.count
             self.generators = KhEnhancedState.generateBasis(state: state, power: r)
+            
+            //  101001  ->  { (-, 111001), (+, 101101), (+, 101011) }
+            self.targetStates = (0 ..< state.length)
+                .filter{ i in state[i] == 0 }
+                .map { i in
+                    let e = state.components[0 ..< i].count{ $0 == 1 }
+                    let sign = R(from: (-1).pow(e))
+                    let target = Link.State( state.components.replaced(at: i, with: 1) )
+                    return (sign, target)
+                }
         }
         
         public var description: String {
             return generators.description
         }
+    }
+    
+    private struct StatePair: Hashable {
+        let from: Link.State
+        let to:   Link.State
     }
     
     public typealias EdgeMap = ModuleEnd<FreeModule<KhEnhancedState, R>>
@@ -48,8 +53,10 @@ public struct KhCube<R: Ring> {
     let product: KhEnhancedState.Product<R>
     let coproduct: KhEnhancedState.Coproduct<R>
     
-    private let verticesCache: Cache<[Link.State : Vertex]> = Cache([:])
-    
+    private let statesCache:   CacheDictionary<Int, Set<Link.State>> = CacheDictionary([:])
+    private let verticesCache: CacheDictionary<Link.State, Vertex>   = CacheDictionary([:])
+    private let edgeMapsCache: CacheDictionary<StatePair, EdgeMap>   = CacheDictionary([:])
+
     init(_ L: Link, _ m: KhEnhancedState.Product<R>, _ Δ: KhEnhancedState.Coproduct<R>) {
         self.link = L
         self.product = m
@@ -61,14 +68,7 @@ public struct KhCube<R: Ring> {
     }
     
     public subscript(s: Link.State) -> Vertex {
-        let v: Vertex
-        if let cached = verticesCache.value![s] {
-            v = cached
-        } else {
-            v = Vertex(link, s)
-            verticesCache.value![s] = v
-        }
-        return v
+        return verticesCache.useCacheOrSet(key: s) { Vertex(link, s) }
     }
     
     public var dim: Int {
@@ -83,38 +83,48 @@ public struct KhCube<R: Ring> {
         return self[Link.State([1].repeated(dim))]
     }
     
-    func targetStates(from s: Link.State) -> [(sign: R, state: Link.State)] {
-        return s.components.enumerated()
-            .filter{ $0.element == 0 }
-            .map { (i, _) in
-                let c = s.components.enumerated().count{ (j, a) in j < i && a == 1 }
-                let sign = R(from: (-1).pow(c))
-                let target = Link.State( s.components.replaced(at: i, with: 1) )
-                return (sign, target)
+    public func states(ofDegree i: Int) -> Set<Link.State> {
+        // {0, 2, 5}  ->  (101001)
+        return statesCache.useCacheOrSet(key: i) {
+            Set(dim.choose(i).map { (I: [Int]) -> Link.State in
+                Link.State( (0 ..< dim).map{ i in I.contains(i) ? 1 : 0 } )
+            })
         }
     }
     
     public func edgeMap(from s0: Link.State, to s1: Link.State) -> EdgeMap {
-        let (L0, L1) = (self[s0].splicedLink, self[s1].splicedLink)
-        let (c1, c2) = (L0.components, L1.components)
-        let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
-        switch (d1.count, d2.count) {
-        case (2, 1):
-            let (i1, i2) = (c1.firstIndex(of: d1[0])!, c1.firstIndex(of: d1[1])!)
-            let j = c2.firstIndex(of: d2[0])!
-            return ModuleHom.linearlyExtend{ x in
-                self.product.applied(to: x, at: (i1, i2), to: j, state: s1)
+        let pair = StatePair(from: s0, to: s1)
+        return edgeMapsCache.useCacheOrSet(key: pair) {
+            let (L0, L1) = (self[s0].splicedLink, self[s1].splicedLink)
+            let (c1, c2) = (L0.components, L1.components)
+            let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
+            switch (d1.count, d2.count) {
+            case (2, 1):
+                let (i1, i2) = (c1.firstIndex(of: d1[0])!, c1.firstIndex(of: d1[1])!)
+                let j = c2.firstIndex(of: d2[0])!
+                return ModuleHom.linearlyExtend{ x in
+                    self.product.applied(to: x, at: (i1, i2), to: j, state: s1)
+                }
+                
+            case (1, 2):
+                let i = c1.firstIndex(of: d1[0])!
+                let (j1, j2) = (c2.firstIndex(of: d2[0])!, c2.firstIndex(of: d2[1])!)
+                return ModuleHom.linearlyExtend{ x in
+                    self.coproduct.applied(to: x, at: i, to: (j1, j2), state: s1)
+                }
+                
+            default:
+                return .zero
             }
-            
-        case (1, 2):
-            let i = c1.firstIndex(of: d1[0])!
-            let (j1, j2) = (c2.firstIndex(of: d2[0])!, c2.firstIndex(of: d2[1])!)
-            return ModuleHom.linearlyExtend{ x in
-                self.coproduct.applied(to: x, at: i, to: (j1, j2), state: s1)
+        }
+    }
+    
+    public func differential(_ i: Int) -> ModuleEnd<FreeModule<KhEnhancedState, R>> {
+        return ModuleHom.linearlyExtend { (x: KhEnhancedState) in
+            let v = self[x.state]
+            return v.targetStates.sum { (ε, target) -> FreeModule<KhEnhancedState, R> in
+                ε * self.edgeMap(from: x.state, to: target).applied(to: .wrap(x))
             }
-            
-        default:
-            return .zero
         }
     }
     
@@ -125,18 +135,11 @@ public struct KhCube<R: Ring> {
                 return .zeroModule
             }
             
-            let states = n.choose(i).map { c in
-                Link.State( (0 ..< n).map{ c.contains($0) ? 1 : 0 } )
-            }
+            let states = self.states(ofDegree: i)
             let generators = states.flatMap{ self[$0].generators }
-            return ModuleObject<FreeModule<KhEnhancedState, R>>.generate(from: generators, over: R.self)
-        }, differential: { i in
-            ModuleHom.linearlyExtend { (x: KhEnhancedState) in
-                self.targetStates(from: x.state).sum { (e, target) in
-                    e * self.edgeMap(from: x.state, to: target).applied(to: .wrap(x))
-                }
-            }
-        })
+            return ModuleObject(basis: generators)
+            
+        }, differential: { i in self.differential(i) })
     }
     
     public func fold2() -> ChainComplex2<FreeModule<KhEnhancedState, R>> {
@@ -147,17 +150,12 @@ public struct KhCube<R: Ring> {
                 return .zeroModule
             }
             
-            let states = n.choose(i).map { c in
-                Link.State( (0 ..< n).map{ c.contains($0) ? 1 : 0 } )
-            }
+            let states = self.states(ofDegree: i)
             let generators = states.flatMap{ self[$0].generators.filter{ $0.degree == j } }
-            return ModuleObject<FreeModule<KhEnhancedState, R>>.generate(from: generators, over: R.self)
+            return ModuleObject(basis: generators)
+            
         }, differential: ChainMap2(multiDegree: IntList(1, 0)) { I in
-            ModuleHom.linearlyExtend { (x: KhEnhancedState) in
-                self.targetStates(from: x.state).sum { (e, target) in
-                    e * self.edgeMap(from: x.state, to: target).applied(to: .wrap(x))
-                }
-            }
+            self.differential(I[0])
         })
     }
     
