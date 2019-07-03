@@ -10,15 +10,27 @@ import SwiftyMath
 import SwiftyHomology
 
 public struct GridDiagram {
+    // Memo:  Os and Xs are placed on  odd points,
+    //       generators are placed on even points.
     public let Os: [Point]
     public let Xs: [Point]
     public let generators: [Generator]
     
-    public init(OX: (Int, Int) ...) {
-        let trans = OX.map{ p in Point(2 * p.0 + 1, 2 * p.1 + 1) }
-        let Os = trans.takeEven()
-        let Xs = trans.takeOdd()
+    public init(arcPresentation code: [Int]) {
+        assert(code.count.isEven)
+        let n = code.count / 2
+        let (Os, Xs) = (0 ..< n).reduce(into: ([], [])) { (res: inout (Os: [Point], Xs: [Point]), i: Int) in
+            let O = 2 * code[2 * i] - 1
+            let X = 2 * code[2 * i + 1] - 1
+            let y = 2 * i + 1
+            res.Os.append(Point(O, y))
+            res.Xs.append(Point(X, y))
+        }
         self.init(Os, Xs)
+    }
+    
+    public init(arcPresentation code: Int...) {
+        self.init(arcPresentation: code)
     }
     
     internal init(_ Os: [Point], _ Xs: [Point]) {
@@ -46,11 +58,15 @@ public struct GridDiagram {
         }
     }
     
-    public var gridSize: Int {
-        return 2 * Os.count
+    public var gridNumber: Int {
+        return Os.count
     }
     
-    public var transposed: GridDiagram {
+    public var gridSize: Int {
+        return 2 * gridNumber
+    }
+    
+    public var rotate90: GridDiagram {
         let n = gridSize
         let t = { (p: Point) -> Point in
             Point(n - p.y, p.x)
@@ -79,7 +95,7 @@ public struct GridDiagram {
     
     public func AlexanderGrading(_ x: Generator) -> Int {
         let ps = x.points
-        return J(ps, Xs) - J(ps, Os) - ( J(Xs, Xs) - J(Xs, Os) + J(Os, Xs) - J(Os, Os) - (gridSize/2 - 1) ) / 2
+        return J(ps, Xs) - J(ps, Os) - ( J(Xs, Xs) - J(Xs, Os) + J(Os, Xs) - J(Os, Os) - (gridNumber - 1) ) / 2
     }
     
     public func isAdjacent(_ x: Generator, _ y: Generator) -> Bool {
@@ -105,7 +121,7 @@ public struct GridDiagram {
         func rect(_ p: Point, _ q: Point) -> Rect {
             let l = gridSize
             let size = Point((q.x - p.x + l) % l, (q.y - p.y + l) % l)
-            return Rect(point: p, size: size)
+            return Rect(point: p, size: size, gridSize: gridSize)
         }
         
         return [rect(p, q), rect(q, p)]
@@ -113,7 +129,7 @@ public struct GridDiagram {
     
     public func emptyRectangles(from x: Generator, to y: Generator) -> [Rect] {
         return rectangles(from: x, to: y).filter{ r in
-            !r.contains(x.points, gridSize: gridSize)
+            !r.contains(x.points)
         }
     }
     
@@ -142,34 +158,32 @@ public struct GridDiagram {
         }
         
         public var description: String {
-            return "(\(x/2), \(y/2))"
+            return "(\(x), \(y))"
         }
     }
     
     public struct Rect: CustomStringConvertible {
         public let point: Point
         public let size: Point
+        public let gridSize: Int
         
-        public init(x: Int, y: Int, w: Int, h: Int) {
-            self.init(point: Point(x, y), size: Point(w, h))
-        }
-        
-        public init(point: Point, size: Point) {
+        public init(point: Point, size: Point, gridSize: Int) {
             self.point = point
             self.size  = size
+            self.gridSize = gridSize
         }
         
-        public func contains(_ points: [Point], gridSize: Int) -> Bool {
-            return countContaining(points, gridSize: gridSize) > 0
+        public func contains(_ points: [Point]) -> Bool {
+            return countContaining(points) > 0
         }
         
-        public func countContaining(_ points: [Point], gridSize l: Int) -> Int {
+        public func countContaining(_ points: [Point]) -> Int {
             let xRange = (point.x + 1 ..< point.x + size.x)
             let yRange = (point.y + 1 ..< point.y + size.y)
             
             return points.count { p in
-                (xRange.contains(p.x) || xRange.contains(p.x + l)) &&
-                    (yRange.contains(p.y) || yRange.contains(p.y + l))
+                (xRange.contains(p.x) || xRange.contains(p.x + gridSize)) &&
+                    (yRange.contains(p.y) || yRange.contains(p.y + gridSize))
             }
         }
         
