@@ -27,12 +27,12 @@ public struct KhCube<R: Ring> {
             self.generators = KhEnhancedState.generateBasis(state: state, power: r)
             
             //  101001  ->  { (-, 111001), (+, 101101), (+, 101011) }
-            self.targetStates = (0 ..< state.length)
+            self.targetStates = (0 ..< L.crossingNumber)
                 .filter{ i in state[i] == 0 }
                 .map { i in
-                    let e = state.components[0 ..< i].count{ $0 == 1 }
+                    let e = state[0 ..< i].count{ $0 == 1 }
                     let sign = R(from: (-1).pow(e))
-                    let target = Link.State( state.components.replaced(at: i, with: 1) )
+                    let target = Link.State( state.replaced(at: i, with: 1) )
                     return (sign, target)
                 }
         }

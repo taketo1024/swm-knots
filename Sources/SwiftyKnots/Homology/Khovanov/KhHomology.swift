@@ -28,13 +28,13 @@ public struct KhovanovHomology<R: EuclideanRing> {
             let (i, j) = (I[0], I[1])
             let Ci = chainCpx[i]
             let gens = Ci.generators.compactMap{ e -> KhEnhancedState? in
-                let x = e.unwrap()
+                let x = e.decomposed()[0].0
                 return (x.degree == j) ? x : nil
             }
             return ModuleObject(basis: gens)
-        }, differential: ChainMap2(multiDegree: IntList(1, 0)) { I in
+        }, differential: ChainMap2(multiDegree: [1, 0]) { I in
             chainCpx.differential[I[0]]
-        }).shifted(normalized ? IntList(-n⁻, n⁺ - 2 * n⁻) : IntList(0, 0))
+        }).shifted(normalized ? [-n⁻, n⁺ - 2 * n⁻] : [0, 0])
         
         self.init(cube: cube, homology: bigraded.homology, normalized: normalized)
     }

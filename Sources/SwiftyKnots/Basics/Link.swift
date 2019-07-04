@@ -16,10 +16,9 @@
 import Foundation
 import SwiftyMath
 
-
 public struct Link: Equatable, CustomStringConvertible {
     public typealias PlanarCode = [[Int]]
-    public typealias State = IntList
+    public typealias State = [Int]
 
     /* Planer Diagram code, represented by crossings:
      *
@@ -219,17 +218,13 @@ public struct Link: Equatable, CustomStringConvertible {
         return L.splice(at: i, type: type)
     }
     
-    public func spliced(by state: [Int]) -> Link {
+    public func spliced(by state: State) -> Link {
         var L = self.copy()
         for (i, s) in state.enumerated() {
             L._splice(at: i, type: s)
         }
         L.reorientEdges()
         return L
-    }
-    
-    public func spliced(by state: State) -> Link {
-        return spliced(by: state.components)
     }
     
     public func splicedPair(at i: Int) -> (Link, Link) {
@@ -263,7 +258,6 @@ public struct Link: Equatable, CustomStringConvertible {
     
     public var allStates: [State] {
         return State.binaryCombinations(length: crossingNumber)
-            .sorted{ $0.total < $1.total }
     }
     
     public var orientationPreservingState: State {
@@ -474,6 +468,15 @@ public struct Link: Equatable, CustomStringConvertible {
         
         public var description: String {
             return "(\(edges.map{ "\($0)" }.joined(separator: "-")))"
+        }
+    }
+}
+
+internal extension Array where Element == Int {
+    static func binaryCombinations(length n: Int) -> [[Int]] {
+        assert(n <= 64)
+        return (0 ..< 2.pow(n)).map { (b: Int) -> [Int] in
+            (0 ..< n).map{ i in (b >> i) & 1 }
         }
     }
 }
