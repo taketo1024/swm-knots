@@ -78,8 +78,9 @@ public struct GridDiagram {
         return ps.allCombinations(with: qs).count{ (p, q) in p < q }
     }
     
+    // MEMO in the paper, the value is divided by 2.
     private func J(_ ps: [Point], _ qs: [Point]) -> Int {
-        return (I(ps, qs) + I(qs, ps)) / 2
+        return I(ps, qs) + I(qs, ps)
     }
     
     // the Maslov grading:
@@ -87,7 +88,7 @@ public struct GridDiagram {
     
     public func MaslovGrading(_ x: Generator) -> Int {
         let ps = x.points
-        return J(ps, ps) - 2 * J(ps, Os) + J(Os, Os) + 1
+        return ( J(ps, ps) - 2 * J(ps, Os) + J(Os, Os) ) / 2 + 1
     }
     
     // the Alexander grading (currently supports only when l = 1):
