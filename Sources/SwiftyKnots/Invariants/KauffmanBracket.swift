@@ -28,8 +28,8 @@ extension Link {
         return allStates.sum { s -> KauffmanBracketPolynomial in
             let L = self.spliced(by: s)
             let n = L.components.count
-            let c0 = s.components.count{ $0 == 0 }
-            let c1 = s.length - c0
+            let c0 = s.count{ $0 == 0 }
+            let c1 = s.count - c0
             return A.pow(c0 - c1) * B.pow(b ? n - 1 : n)
         }
     }

@@ -27,12 +27,12 @@ public struct KhCube<R: Ring> {
             self.generators = KhEnhancedState.generateBasis(state: state, power: r)
             
             //  101001  ->  { (-, 111001), (+, 101101), (+, 101011) }
-            self.targetStates = (0 ..< state.length)
+            self.targetStates = (0 ..< L.crossingNumber)
                 .filter{ i in state[i] == 0 }
                 .map { i in
-                    let e = state.components[0 ..< i].count{ $0 == 1 }
+                    let e = state[0 ..< i].count{ $0 == 1 }
                     let sign = R(from: (-1).pow(e))
-                    let target = Link.State( state.components.replaced(at: i, with: 1) )
+                    let target = Link.State( state.replaced(at: i, with: 1) )
                     return (sign, target)
                 }
         }
@@ -128,7 +128,7 @@ public struct KhCube<R: Ring> {
         }
     }
     
-    public func fold1() -> ChainComplex1<FreeModule<KhEnhancedState, R>> {
+    public func fold() -> ChainComplex1<FreeModule<KhEnhancedState, R>> {
         return ChainComplex1(ascendingSequence: { i in
             let n = self.dim
             guard (0 ... n).contains(i) else {
@@ -140,23 +140,6 @@ public struct KhCube<R: Ring> {
             return ModuleObject(basis: generators)
             
         }, differential: { i in self.differential(i) })
-    }
-    
-    public func fold2() -> ChainComplex2<FreeModule<KhEnhancedState, R>> {
-        return ChainComplex2(grid: ModuleGrid { I in
-            let (i, j) = (I[0], I[1])
-            let n = self.dim
-            guard (0 ... n).contains(i) else {
-                return .zeroModule
-            }
-            
-            let states = self.states(ofDegree: i)
-            let generators = states.flatMap{ self[$0].generators.filter{ $0.degree == j } }
-            return ModuleObject(basis: generators)
-            
-        }, differential: ChainMap2(multiDegree: IntList(1, 0)) { I in
-            self.differential(I[0])
-        })
     }
     
     public func describe(_ s: Link.State) {

@@ -14,14 +14,29 @@ public struct KhovanovHomology<R: EuclideanRing> {
     private let homology: Homology2<FreeModule<KhEnhancedState, R>>
     public let normalized: Bool
     
+    internal init(cube: KhCube<R>, homology: Homology2<FreeModule<KhEnhancedState, R>>, normalized: Bool) {
+        self.cube = cube
+        self.homology = homology
+        self.normalized = normalized
+    }
+    
     public init(link L: Link, type: R.Type, normalized: Bool = true) {
         let (n⁺, n⁻) = (L.crossingNumber⁺, L.crossingNumber⁻)
+        let cube = KhCube<R>(link: L)
+        let chainCpx = cube.fold()
+        let bigraded = ChainComplex2(grid: ModuleGrid { I in
+            let (i, j) = (I[0], I[1])
+            let Ci = chainCpx[i]
+            let gens = Ci.generators.compactMap{ e -> KhEnhancedState? in
+                let x = e.decomposed()[0].0
+                return (x.degree == j) ? x : nil
+            }
+            return ModuleObject(basis: gens)
+        }, differential: ChainMap2(multiDegree: [1, 0]) { I in
+            chainCpx.differential[I[0]]
+        }).shifted(normalized ? [-n⁻, n⁺ - 2 * n⁻] : [0, 0])
         
-        self.cube = KhCube<R>(link: L)
-        let chainComplex = cube.fold2().shifted(normalized ? IntList(-n⁻, n⁺ - 2 * n⁻) : IntList(0, 0))
-        self.homology = chainComplex.homology
-        
-        self.normalized = normalized
+        self.init(cube: cube, homology: bigraded.homology, normalized: normalized)
     }
     
     public subscript(i: Int, j: Int) -> ModuleObject<FreeModule<KhEnhancedState, R>> {
@@ -76,7 +91,7 @@ extension Link {
     public func parameterizedKhovanovHomology<R: EuclideanRing>(_ type: R.Type, h: R, t: R, normalized: Bool = true) -> Homology1<FreeModule<KhEnhancedState, R>> {
         let n⁻ = crossingNumber⁻
         let cube = KhCube<R>(link: self, h: h, t: t)
-        let chainComplex = cube.fold1().shifted(normalized ? -n⁻ : 0)
+        let chainComplex = cube.fold().shifted(normalized ? -n⁻ : 0)
         return chainComplex.homology
     }
     

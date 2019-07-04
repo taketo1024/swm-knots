@@ -18,7 +18,7 @@ public struct KhEnhancedState: FreeModuleGenerator, Comparable, Codable {
     }
 
     public var degree: Int {
-        return tensorFactors.sum { $0.degree } + state.components.count{ $0 == 1 } + tensorFactors.count
+        return tensorFactors.sum { $0.degree } + state.count{ $0 == 1 } + tensorFactors.count
     }
 
     public static func <(b1: KhEnhancedState, b2: KhEnhancedState) -> Bool {
@@ -27,8 +27,8 @@ public struct KhEnhancedState: FreeModuleGenerator, Comparable, Codable {
     }
 
     public static func generateBasis(state: Link.State, power n: Int) -> [KhEnhancedState] {
-        return Link.State.binaryCombinations(length: n).map { I in
-            let factors: [E] = I.components.map{ $0 == 0 ? .X : .I  }
+        return [Int].binaryCombinations(length: n).map { I in
+            let factors: [E] = I.map{ $0 == 0 ? .X : .I  }
             return KhEnhancedState.init(state, factors)
         }.sorted()
     }
@@ -36,7 +36,7 @@ public struct KhEnhancedState: FreeModuleGenerator, Comparable, Codable {
     public var description: String {
         
         return tensorFactors.map{ $0.description }.joined(separator: "⊗")
-            + Format.sub("(" + state.components.map{ $0.description }.joined() + ")")
+            + Format.sub("(" + state.map{ $0.description }.joined() + ")")
     }
 
     public enum E: Int, FreeModuleGenerator, Codable {
