@@ -14,7 +14,9 @@ public struct GridDiagram {
     //       generators are placed on even points.
     public let Os: [Point]
     public let Xs: [Point]
-    public let generators: [Generator]
+    
+    private var _generators: [Generator]
+    private var _generatorsDict: [Int : [Generator]]
     
     public init(arcPresentation code: [Int]) {
         assert(code.count.isEven)
@@ -49,13 +51,17 @@ public struct GridDiagram {
         
         self.Os = Os
         self.Xs = Xs
+        self._generators = []
+        self._generatorsDict = [:]
         
-        self.generators = Permutation.allPermutations(ofLength: n)
+        _generators = Permutation.allPermutations(ofLength: n)
             .enumerated()
             .map{ (i, p) in
                 let points = (0 ..< n).map{ i in Point(2 * i, 2 * p[i]) }
-                return Generator(id: i, points: points)
+                return Generator(id: i, points: points, degree: MaslovGrading(points))
         }
+        
+        _generatorsDict = _generators.group{ $0.degree }
     }
     
     public var gridNumber: Int {
@@ -86,8 +92,7 @@ public struct GridDiagram {
     // the Maslov grading:
     // M (x) = J (x, x) − 2J (x, O) + J (O, O) + 1.
     
-    public func MaslovGrading(_ x: Generator) -> Int {
-        let ps = x.points
+    public func MaslovGrading(_ ps: [Point]) -> Int {
         return ( J(ps, ps) - 2 * J(ps, Os) + J(Os, Os) ) / 2 + 1
     }
     
@@ -99,6 +104,15 @@ public struct GridDiagram {
         return J(ps, Xs) - J(ps, Os) - ( J(Xs, Xs) - J(Xs, Os) + J(Os, Xs) - J(Os, Os) - (gridNumber - 1) ) / 2
     }
     
+    public func generators(ofDegree i: Int) -> [Generator] {
+        return _generatorsDict[i] ?? []
+    }
+    
+    public var degreeRange: ClosedRange<Int> {
+        let degs = _generatorsDict.keys
+        return degs.min()! ... degs.max()!
+    }
+    
     public func isAdjacent(_ x: Generator, _ y: Generator) -> Bool {
         let (ps, qs) = (x.points, y.points)
         return Set(ps).subtracting(qs).count == 2
@@ -106,18 +120,19 @@ public struct GridDiagram {
     
     // TODO: consider generating elements directly.
     public func adjacents(_ x: Generator) -> [Generator] {
-        return generators.filter { y in isAdjacent(x, y) }
+        return _generators.filter { y in isAdjacent(x, y) }
     }
     
     public func rectangles(from x: Generator, to y: Generator) -> [Rect] {
         let (ps, qs) = (x.points, y.points)
-        let diff = Set(ps).subtracting(qs).toArray()
+        let diff = Set(ps).subtracting(qs)
         
         guard diff.count == 2 else {
             return []
         }
         
-        let (p, q) = (diff[0], diff[1])
+        let pq = diff.toArray()
+        let (p, q) = (pq[0], pq[1])
         
         func rect(_ p: Point, _ q: Point) -> Rect {
             let l = gridSize
@@ -129,8 +144,9 @@ public struct GridDiagram {
     }
     
     public func emptyRectangles(from x: Generator, to y: Generator) -> [Rect] {
+        // Note: Int(r) ∩ x = Int(r) ∩ y .
         return rectangles(from: x, to: y).filter{ r in
-            !r.contains(x.points)
+            !r.intersects(x.points)
         }
     }
     
@@ -138,10 +154,10 @@ public struct GridDiagram {
         let range = (0 ..< gridSize / 2).toArray()
         
         let OX = Dictionary(pairs: (Os.map{ p in (p, "O") } + Xs.map{ p in (p, "X") }).map { (p, s) in
-            (IntList((p.x - 1)/2, (p.y - 1)/2), s)
+            ([(p.x - 1)/2, (p.y - 1)/2], s)
         })
         print( Format.table(rows: range.reversed(), cols: range, symbol: "j\\i") { (j, i) -> String in
-            OX[ IntList(i, j) ] ?? ""
+            OX[ [i, j] ] ?? ""
         } )
     }
     
@@ -164,42 +180,42 @@ public struct GridDiagram {
     }
     
     public struct Rect: CustomStringConvertible {
-        public let point: Point
+        public let origin: Point // Left-Bottom point
         public let size: Point
         public let gridSize: Int
         
         public init(point: Point, size: Point, gridSize: Int) {
-            self.point = point
+            self.origin = point
             self.size  = size
             self.gridSize = gridSize
         }
         
-        public func contains(_ points: [Point]) -> Bool {
-            return countContaining(points) > 0
+        public func contains(_ p: Point) -> Bool {
+            let xRange = (origin.x + 1 ..< origin.x + size.x)
+            let yRange = (origin.y + 1 ..< origin.y + size.y)
+            
+            return (xRange.contains(p.x) || xRange.contains(p.x + gridSize)) &&
+                   (yRange.contains(p.y) || yRange.contains(p.y + gridSize))
         }
         
-        public func countContaining(_ points: [Point]) -> Int {
-            let xRange = (point.x + 1 ..< point.x + size.x)
-            let yRange = (point.y + 1 ..< point.y + size.y)
-            
-            return points.count { p in
-                (xRange.contains(p.x) || xRange.contains(p.x + gridSize)) &&
-                    (yRange.contains(p.y) || yRange.contains(p.y + gridSize))
-            }
+        public func intersects(_ points: [Point]) -> Bool {
+            return points.contains{ p in self.contains(p) }
         }
         
         public var description: String {
-            return "[point: \(point), size: \(size)]"
+            return "[point: \(origin), size: \(size)]"
         }
     }
     
     public struct Generator: FreeModuleGenerator {
         public let id: Int
         public let points: [Point]
+        public let degree: Int
         
-        public init(id: Int, points: [Point]) {
+        public init(id: Int, points: [Point], degree: Int) {
             self.id = id
             self.points = points
+            self.degree = degree
         }
         
         public var description: String {
