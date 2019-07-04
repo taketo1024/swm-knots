@@ -129,7 +129,7 @@ public struct KhCube<R: Ring> {
     }
     
     public func fold() -> ChainComplex1<FreeModule<KhEnhancedState, R>> {
-        return ChainComplex1(ascendingSequence: { i in
+        return ChainComplex1.ascending (supported: 0 ... dim, sequence: { i in
             let n = self.dim
             guard (0 ... n).contains(i) else {
                 return .zeroModule

@@ -12,7 +12,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/taketo1024/SwiftyMath.git", from: "1.0.24"),
-        .package(url: "https://github.com/taketo1024/SwiftyMath-homology.git", from: "1.0.18"),
+        .package(url: "https://github.com/taketo1024/SwiftyMath-homology.git", from: "1.0.19"),
     ],
     targets: [
         .target(
