@@ -100,3 +100,36 @@ extension GridDiagram {
         )
     }
 }
+
+extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram.Generator, MPolynomial<_Un, 𝐙₂>> {
+    
+    func flatten(numberOfIndeterminants n: Int) -> ChainComplex1<FreeModule<MonomialGenerator<_Un, GridDiagram.Generator>, 𝐙₂>> {
+        typealias R = 𝐙₂
+        typealias X = MonomialGenerator<_Un, GridDiagram.Generator>
+        typealias Base = FreeModule<X, R>
+        
+        let iMax = grid.supportedCoords.map{ $0[0] }.max()!
+        return ChainComplex1<Base>.descending(
+            supported: grid.supportedCoords.map{ $0[0] },
+            sequence: { i -> ModuleObject<Base> in
+                guard i <= iMax else {
+                    return .zeroModule
+                }
+                
+                let above = (0 ... (iMax - i) / 2).flatMap { k in self[i + 2 * k].generators }
+                let gens = above.flatMap { e -> [Base.Generator] in
+                    let x = e.decomposed()[0].0
+                    return Base.Generator.generate(from: x, degree: i, numberOfIndeterminates: n)
+                }
+                return ModuleObject<Base>(basis: gens)
+            },
+            differential: { i -> ModuleEnd<Base> in
+                let d = self.differential[i]
+                return ModuleEnd { (z: Base) in
+                    let w = d.applied(to: X.recover(z))
+                    return X.flatten(w)
+                }
+            }
+        )
+    }
+}
