@@ -96,10 +96,10 @@ extension GridDiagram {
 
 extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram.Generator, MPolynomial<_Un, 𝐙₂>> {
     
-    func distributeMonomials(numberOfIndeterminants n: Int) -> ChainComplex1<FreeModule<Tensor2<MonomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>> {
+    func distributeMonomials(numberOfIndeterminants n: Int) -> ChainComplex1<FreeModule<TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>> {
         typealias R = 𝐙₂
         typealias P = MPolynomial<_Un, R>
-        typealias Distributed = FreeModule<Tensor2<MonomialGenerator<_Un>, GridDiagram.Generator>, R>
+        typealias Distributed = FreeModule<TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>, R>
         
         let iMax = grid.supportedCoords.map{ $0[0] }.max()!
         return ChainComplex1<Distributed>.descending(
@@ -112,8 +112,8 @@ extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram
                 let above = (0 ... (iMax - i) / 2).flatMap { k in self[i + 2 * k].generators }
                 let gens = above.flatMap { e -> [Distributed.Generator] in
                     let x = e.decomposed()[0].0
-                    let mons = P.generateMonomials(ofDegree: i - x.degree, usingIndeterminates: n)
-                    return mons.map{ m in Tensor2(MonomialGenerator(monomial: m), x) }
+                    let mons = P.monomials(ofDegree: i - x.degree, usingIndeterminates: (0 ..< n).toArray())
+                    return mons.map{ m in TensorGenerator(MonomialGenerator(monomial: m), x) }
                 }
                 return ModuleObject<Distributed>(basis: gens)
             },
@@ -121,7 +121,7 @@ extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram
                 let d = self.differential[i]
                 return ModuleEnd { (z: Distributed) in
                     let w = d.applied(to: combineMonomials(z))
-                    return SwiftyKnots.distributeMonomials(w)
+                    return SwiftyKnots.splitMonomials(w)
                 }
             }
         )
