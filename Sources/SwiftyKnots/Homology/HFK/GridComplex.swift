@@ -8,13 +8,6 @@
 import SwiftyMath
 import SwiftyHomology
 
-// TODO move to SwiftyMath
-extension MPolynomial {
-    public static func indeterminate(_ i: Int) -> MPolynomial {
-        return .init(coeffs: [[0].repeated(i) + [1] : R.identity] )
-    }
-}
-
 public struct _Un: MPolynomialIndeterminate {
     public static let numberOfIndeterminates = Int.max
     public static func degree(_ i: Int) -> Int {
@@ -103,31 +96,32 @@ extension GridDiagram {
 
 extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram.Generator, MPolynomial<_Un, 𝐙₂>> {
     
-    func flatten(numberOfIndeterminants n: Int) -> ChainComplex1<FreeModule<MonomialGenerator<_Un, GridDiagram.Generator>, 𝐙₂>> {
+    func distributeMonomials(numberOfIndeterminants n: Int) -> ChainComplex1<FreeModule<Tensor2<MonomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>> {
         typealias R = 𝐙₂
-        typealias X = MonomialGenerator<_Un, GridDiagram.Generator>
-        typealias Base = FreeModule<X, R>
+        typealias P = MPolynomial<_Un, R>
+        typealias Distributed = FreeModule<Tensor2<MonomialGenerator<_Un>, GridDiagram.Generator>, R>
         
         let iMax = grid.supportedCoords.map{ $0[0] }.max()!
-        return ChainComplex1<Base>.descending(
+        return ChainComplex1<Distributed>.descending(
             supported: grid.supportedCoords.map{ $0[0] },
-            sequence: { i -> ModuleObject<Base> in
+            sequence: { i -> ModuleObject<Distributed> in
                 guard i <= iMax else {
                     return .zeroModule
                 }
                 
                 let above = (0 ... (iMax - i) / 2).flatMap { k in self[i + 2 * k].generators }
-                let gens = above.flatMap { e -> [Base.Generator] in
+                let gens = above.flatMap { e -> [Distributed.Generator] in
                     let x = e.decomposed()[0].0
-                    return Base.Generator.generate(from: x, degree: i, numberOfIndeterminates: n)
+                    let mons = P.generateMonomials(ofDegree: i - x.degree, usingIndeterminates: n)
+                    return mons.map{ m in Tensor2(MonomialGenerator(monomial: m), x) }
                 }
-                return ModuleObject<Base>(basis: gens)
+                return ModuleObject<Distributed>(basis: gens)
             },
-            differential: { i -> ModuleEnd<Base> in
+            differential: { i -> ModuleEnd<Distributed> in
                 let d = self.differential[i]
-                return ModuleEnd { (z: Base) in
-                    let w = d.applied(to: X.recover(z))
-                    return X.flatten(w)
+                return ModuleEnd { (z: Distributed) in
+                    let w = d.applied(to: combineMonomials(z))
+                    return SwiftyKnots.distributeMonomials(w)
                 }
             }
         )
