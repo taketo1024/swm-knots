@@ -127,3 +127,49 @@ extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram
         )
     }
 }
+
+private extension TensorGenerator where A == MonomialGenerator<_Un>, B == GridDiagram.Generator {
+    var algebraicDegree: Int {
+        let m = factors.0 // MonomialGenerator<_Un>
+        return -(m.monomialDegree.indices.contains(0) ? m.monomialDegree[0] : 0)
+    }
+    
+    var AlexanderDegree: Int {
+        let m = factors.0 // MonomialGenerator<_Un>
+        let x = factors.1 // GridDiagram.Generator
+        return _Un.totalDegree(exponents: m.monomialDegree) / 2 + x.AlexanderDegree
+    }
+}
+
+extension FreeModule where A == TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator> {
+    public func groupByDegrees() -> [GridCoords : [FreeModule<GridDiagram.Generator, MPolynomial<_Un, R>>]] {
+        var dict: [GridCoords : [FreeModule<GridDiagram.Generator, MPolynomial<_Un, R>>]] = [:]
+        for (t, r) in decomposed() {
+            let c = [t.algebraicDegree, t.AlexanderDegree]
+            let m = combineMonomials(FreeModule([t : r]))
+            if dict.contains(key: c) {
+                dict[c]!.append(m)
+            } else {
+                dict[c] = [m]
+            }
+        }
+        return dict
+    }
+    
+    public func printDegrees() {
+        let dict = groupByDegrees()
+        if dict.isEmpty {
+            return
+        }
+        
+        let (iMax, iMin) = (dict.keys.map{ $0[0] }.max()!, dict.keys.map{ $0[0] }.min()!)
+        let (jMax, jMin) = (dict.keys.map{ $0[1] }.max()!, dict.keys.map{ $0[1] }.min()!)
+        
+        let table = Format.table(rows: (iMin ... iMax).toArray(), cols: (jMin ... jMax).toArray(), symbol: "j\\i") { (i, j) -> String in
+            let count = dict[[i, j]]?.count ?? 0
+            return count > 0 ? "\(count)" : ""
+        }
+        
+        print(table)
+    }
+}
