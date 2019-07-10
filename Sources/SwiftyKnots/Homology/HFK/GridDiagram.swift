@@ -51,17 +51,35 @@ public struct GridDiagram {
         
         self.Os = Os
         self.Xs = Xs
-        self._generators = []
-        self._generatorsDict = [:]
         
-        _generators = Permutation.allPermutations(ofLength: n)
+        self._generators = Permutation.allPermutations(ofLength: n)
             .enumerated()
             .map{ (i, p) in
                 let points = (0 ..< n).map{ i in Point(2 * i, 2 * p[i]) }
-                return Generator(id: i, points: points, degree: MaslovGrading(points))
+                let degrees = GridDiagram.computeDegrees(points, Os, Xs)
+                return Generator(id: i, points: points, degrees: degrees)
+        }
+        self._generatorsDict = _generators.group{ $0.degree }
+    }
+    
+    private static func computeDegrees(_ x: [Point], _ Os: [Point], _ Xs: [Point]) -> (Int, Int) {
+        func I(_ x: [Point], _ y: [Point]) -> Int {
+            return x.allCombinations(with: y).count{ (p, q) in p < q }
         }
         
-        _generatorsDict = _generators.group{ $0.degree }
+        func J(_ x: [Point], _ y: [Point]) -> Int {
+            return I(x, y) + I(y, x)
+        }
+        
+        func M(_ ref: [Point], _ x: [Point]) -> Int {
+            return ( J(x, x) - 2 * J(x, ref) + J(ref, ref) ) / 2 + 1
+        }
+        
+        func A(_ x: [Point]) -> Int {
+            return ( M(Os, x) - M(Xs, x) - Os.count + 1 ) / 2
+        }
+        
+        return (M(Os, x), A(x))
     }
     
     public var gridNumber: Int {
@@ -78,30 +96,6 @@ public struct GridDiagram {
             Point(n - p.y, p.x)
         }
         return GridDiagram(Os.map(t), Xs.map(t))
-    }
-    
-    private func I(_ ps: [Point], _ qs: [Point]) -> Int {
-        return ps.allCombinations(with: qs).count{ (p, q) in p < q }
-    }
-    
-    // MEMO in the paper, the value is divided by 2.
-    private func J(_ ps: [Point], _ qs: [Point]) -> Int {
-        return I(ps, qs) + I(qs, ps)
-    }
-    
-    // the Maslov grading:
-    // M (x) = J (x, x) − 2J (x, O) + J (O, O) + 1.
-    
-    public func MaslovGrading(_ ps: [Point]) -> Int {
-        return ( J(ps, ps) - 2 * J(ps, Os) + J(Os, Os) ) / 2 + 1
-    }
-    
-    // the Alexander grading (currently supports only when l = 1):
-    // Ai(x) = J(x − 1/2(X + O), Xi − Oi) − (ni − 1)/2.
-    
-    public func AlexanderGrading(_ x: Generator) -> Int {
-        let ps = x.points
-        return J(ps, Xs) - J(ps, Os) - ( J(Xs, Xs) - J(Xs, Os) + J(Os, Xs) - J(Os, Os) - (gridNumber - 1) ) / 2
     }
     
     public func generators(ofDegree i: Int) -> [Generator] {
@@ -210,16 +204,36 @@ public struct GridDiagram {
     public struct Generator: FreeModuleGenerator {
         public let id: Int
         public let points: [Point]
-        public let degree: Int
+        private let degrees: (Int, Int)
         
-        public init(id: Int, points: [Point], degree: Int) {
+        fileprivate init(id: Int, points: [Point], degrees: (Int, Int)) {
             self.id = id
             self.points = points
-            self.degree = degree
+            self.degrees = degrees
+        }
+        
+        public var degree: Int {
+            return MaslovDegree
+        }
+        
+        public var MaslovDegree: Int {
+            return degrees.0
+        }
+        
+        public var AlexanderDegree: Int {
+            return degrees.1
         }
         
         public var description: String {
             return "(\(id): \(points))"
+        }
+        
+        public static func == (a: GridDiagram.Generator, b: GridDiagram.Generator) -> Bool {
+            return a.id == b.id
+        }
+        
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
         }
         
         public static func < (g1: Generator, g2: Generator) -> Bool {
