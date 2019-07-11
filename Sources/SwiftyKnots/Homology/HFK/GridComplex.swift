@@ -18,108 +18,102 @@ public struct _Un: MPolynomialIndeterminate {
     }
 }
 
-extension GridDiagram {
-    // MEMO: GC-tilde. [Book] p.72, Def 4.4.1
-    public func fullyBlockedGridComplex() -> ChainComplex1<FreeModule<GridDiagram.Generator, 𝐙₂>> {
+public typealias GridComplex = ChainComplex1<FreeModule<TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>>
+
+extension GridComplex {
+    // GC-tilde. [Book] p.72, Def 4.4.1
+    // MEMO: not a knot invariant.
+    public static func tilde(_ G: GridDiagram) -> ChainComplex1<FreeModule<GridDiagram.Generator, 𝐙₂>> {
         typealias R = 𝐙₂
         
-        let (Os, Xs) = (self.Os, self.Xs)
-        return _gridComplex { x -> FreeModule<GridDiagram.Generator, R> in
-            self.generators(ofDegree: x.degree - 1).sum { y in
-                let c = self.emptyRectangles(from: x, to: y).exclude{ r in
-                    r.intersects(Xs) || r.intersects(Os)
-                }.count
-                return R(from: c) * .wrap(y)
-            }
+        let (Os, Xs) = (G.Os, G.Xs)
+        return _gridComplex(G) { rect in
+            (rect.intersects(Xs) || rect.intersects(Os))
+                ? .zero
+                : .identity
         }
     }
     
-    // MEMO: GC-hat. [Book] p.80, Def 4.6.12.
-    // Must consider P = F[U_0 ... U_{n - 2}]
-    public func simplyBlockedGridComplex() -> ChainComplex1<FreeModule<GridDiagram.Generator, MPolynomial<_Un, 𝐙₂>>> {
+    // GC-hat. [Book] p.80, Def 4.6.12.
+    public static func hat(_ G: GridDiagram) -> GridComplex {
         typealias P = MPolynomial<_Un, 𝐙₂>
         
-        let (Os, Xs) = (self.Os, self.Xs)
+        let (Os, Xs) = (G.Os, G.Xs)
         let O_last = Os.last!
         
-        return _gridComplex { x -> FreeModule<GridDiagram.Generator, P> in
-            self.adjacents(x).sum { y in
-                let rects = self.emptyRectangles(from: x, to: y).exclude{ r in r.intersects(Xs) || r.contains(O_last) }
-                let c = rects.sum { r in
-                    Os.enumerated().multiply { (i, O) in r.contains(O) ? P.indeterminate(i) : .identity }
-                }
-                return c * .wrap(y)
-            }
-        }
+        return _gridComplex(G) { rect in
+            (rect.intersects(Xs) || rect.contains(O_last))
+                ? .zero
+                : Os.enumerated().multiply { (i, O) in rect.contains(O) ? P.indeterminate(i) : .identity }
+        }.splitMonomials(numberOfIndeterminants: G.gridNumber - 1)
     }
     
-    // MEMO: GC^-. [Book] p.75, Def 4.6.1
-    public func gridComplex() -> ChainComplex1<FreeModule<GridDiagram.Generator, MPolynomial<_Un, 𝐙₂>>> {
+    // GC^-. [Book] p.75, Def 4.6.1
+    public static func minus(_ G: GridDiagram) -> GridComplex {
         typealias P = MPolynomial<_Un, 𝐙₂>
         
-        let (Os, Xs) = (self.Os, self.Xs)
-        return _gridComplex { x -> FreeModule<GridDiagram.Generator, P> in
-            self.adjacents(x).sum { y in
-                let rects = self.emptyRectangles(from: x, to: y).exclude{ r in r.intersects(Xs) }
-                let c = rects.sum { r in
-                    Os.enumerated().multiply { (i, O) in r.contains(O) ? P.indeterminate(i) : .identity }
-                }
-                return c * .wrap(y)
-            }
-        }
+        let (Os, Xs) = (G.Os, G.Xs)
+        return _gridComplex(G) { rect in
+            rect.intersects(Xs)
+                ? .zero
+                : Os.enumerated().multiply { (i, O) in rect.contains(O) ? P.indeterminate(i) : .identity }
+        }.splitMonomials(numberOfIndeterminants: G.gridNumber)
     }
     
     // MEMO: 𝓖𝓒^-. [Book] p.252, Def 13.2.1
-    public func filteredGridComplex() -> ChainComplex1<FreeModule<GridDiagram.Generator, MPolynomial<_Un, 𝐙₂>>> {
+    public static func filtered(_ G: GridDiagram) -> GridComplex {
         typealias P = MPolynomial<_Un, 𝐙₂>
         
-        let Os = self.Os
-        return _gridComplex { x -> FreeModule<GridDiagram.Generator, P> in
-            self.adjacents(x).sum { y in
-                let rects = self.emptyRectangles(from: x, to: y)
-                let c = rects.sum { r in
-                    Os.enumerated().multiply { (i, O) in r.contains(O) ? P.indeterminate(i) : .identity }
-                }
-                return c * .wrap(y)
+        let Os = G.Os
+        return _gridComplex(G) { rect in
+            Os.enumerated().multiply {
+                (i, O) in rect.contains(O) ? P.indeterminate(i) : .identity
             }
-        }
+        }.splitMonomials(numberOfIndeterminants: G.gridNumber)
     }
     
-    private func _gridComplex<R: Ring>(differential: @escaping (GridDiagram.Generator) -> FreeModule<GridDiagram.Generator, R>) -> ChainComplex1<FreeModule<GridDiagram.Generator, R>> {
+    private static func _gridComplex<R: Ring>(_ G: GridDiagram, _ coeff: @escaping (GridDiagram.Rect) -> R) -> ChainComplex1<FreeModule<GridDiagram.Generator, R>> {
         return ChainComplex1.descending(
-            supported: degreeRange,
-            sequence: { i in ModuleObject(basis: self.generators(ofDegree: i)) },
-            differential: { i in ModuleEnd.linearlyExtend(differential) }
+            supported: G.degreeRange,
+            sequence: { i in ModuleObject(basis: G.generators(ofDegree: i)) },
+            differential: { i in
+                ModuleEnd.linearlyExtend {  x -> FreeModule<GridDiagram.Generator, R> in
+                    G.adjacents(x).sum { y in
+                        let rects = G.emptyRectangles(from: x, to: y)
+                        let c = rects.sum { rect in coeff(rect) }
+                        return c * .wrap(y)
+                    }
+                }
+            }
         )
     }
 }
 
 extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram.Generator, MPolynomial<_Un, 𝐙₂>> {
-    
-    func distributeMonomials(numberOfIndeterminants n: Int) -> ChainComplex1<FreeModule<TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>> {
+    func splitMonomials(numberOfIndeterminants n: Int) -> GridComplex {
         typealias R = 𝐙₂
         typealias P = MPolynomial<_Un, R>
-        typealias Distributed = FreeModule<TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>, R>
+        typealias Result = FreeModule<TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>, R>
         
         let iMax = grid.supportedCoords.map{ $0[0] }.max()!
-        return ChainComplex1<Distributed>.descending(
+        return ChainComplex1<Result>.descending(
             supported: grid.supportedCoords.map{ $0[0] },
-            sequence: { i -> ModuleObject<Distributed> in
+            sequence: { i -> ModuleObject<Result> in
                 guard i <= iMax else {
                     return .zeroModule
                 }
                 
                 let above = (0 ... (iMax - i) / 2).flatMap { k in self[i + 2 * k].generators }
-                let gens = above.flatMap { e -> [Distributed.Generator] in
+                let gens = above.flatMap { e -> [Result.Generator] in
                     let x = e.decomposed()[0].0
                     let mons = P.monomials(ofDegree: i - x.degree, usingIndeterminates: (0 ..< n).toArray())
                     return mons.map{ m in TensorGenerator(MonomialGenerator(monomial: m), x) }
                 }
-                return ModuleObject<Distributed>(basis: gens)
+                return ModuleObject<Result>(basis: gens)
             },
-            differential: { i -> ModuleEnd<Distributed> in
+            differential: { i -> ModuleEnd<Result> in
                 let d = self.differential[i]
-                return ModuleEnd { (z: Distributed) in
+                return ModuleEnd { (z: Result) in
                     let w = d.applied(to: combineMonomials(z))
                     return SwiftyKnots.splitMonomials(w)
                 }
@@ -128,16 +122,20 @@ extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram
     }
 }
 
-private extension TensorGenerator where A == MonomialGenerator<_Un>, B == GridDiagram.Generator {
-    var algebraicDegree: Int {
+extension TensorGenerator where A == MonomialGenerator<_Un>, B == GridDiagram.Generator {
+    public var algebraicDegree: Int {
         let m = factors.0 // MonomialGenerator<_Un>
         return -(m.monomialDegree.indices.contains(0) ? m.monomialDegree[0] : 0)
     }
     
-    var AlexanderDegree: Int {
+    public var AlexanderDegree: Int {
         let m = factors.0 // MonomialGenerator<_Un>
         let x = factors.1 // GridDiagram.Generator
         return _Un.totalDegree(exponents: m.monomialDegree) / 2 + x.AlexanderDegree
+    }
+    
+    internal var coords: (Int, Int) {
+        return (algebraicDegree, AlexanderDegree)
     }
 }
 
@@ -159,13 +157,14 @@ extension FreeModule where A == TensorGenerator<MonomialGenerator<_Un>, GridDiag
     public func printDegrees() {
         let dict = groupByDegrees()
         if dict.isEmpty {
+            print("empty")
             return
         }
         
         let (iMax, iMin) = (dict.keys.map{ $0[0] }.max()!, dict.keys.map{ $0[0] }.min()!)
         let (jMax, jMin) = (dict.keys.map{ $0[1] }.max()!, dict.keys.map{ $0[1] }.min()!)
         
-        let table = Format.table(rows: (iMin ... iMax).toArray(), cols: (jMin ... jMax).toArray(), symbol: "j\\i") { (i, j) -> String in
+        let table = Format.table(rows: (jMin ... jMax).reversed().toArray(), cols: (iMin ... iMax).toArray(), symbol: "j\\i") { (j, i) -> String in
             let count = dict[[i, j]]?.count ?? 0
             return count > 0 ? "\(count)" : ""
         }
