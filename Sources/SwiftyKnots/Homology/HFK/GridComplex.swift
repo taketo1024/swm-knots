@@ -161,8 +161,8 @@ extension FreeModule where A == TensorGenerator<MonomialGenerator<_Un>, GridDiag
             return
         }
         
-        let (iMax, iMin) = (dict.keys.map{ $0[0] }.max()!, dict.keys.map{ $0[0] }.min()!)
-        let (jMax, jMin) = (dict.keys.map{ $0[1] }.max()!, dict.keys.map{ $0[1] }.min()!)
+        let (iMax, iMin) = (max(0, dict.keys.map{ $0[0] }.max()!), min(0, dict.keys.map{ $0[0] }.min()!))
+        let (jMax, jMin) = (max(0, dict.keys.map{ $0[1] }.max()!), min(0, dict.keys.map{ $0[1] }.min()!))
         
         let table = Format.table(rows: (jMin ... jMax).reversed().toArray(), cols: (iMin ... iMax).toArray(), symbol: "j\\i") { (j, i) -> String in
             let count = dict[[i, j]]?.count ?? 0
