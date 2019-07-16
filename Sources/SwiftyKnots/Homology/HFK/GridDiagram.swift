@@ -155,6 +155,22 @@ public struct GridDiagram {
         return d(generators.min{ d($0) < d($1) }!) ... d(generators.max{ d($0) < d($1) }!)
     }
     
+    public var knotGenus: Int {
+        let H = GridComplex.tilde(self).asBigraded { x in x.AlexanderDegree }.homology
+        let iRange = MaslovDegreeRange
+        let (jMax, jMin) = (generators.map{ $0.AlexanderDegree }.max()!, generators.map{ $0.AlexanderDegree }.min()!)
+        
+        for j in (jMin ... jMax).reversed() {
+            for i in iRange.reversed() {
+                print((i, j), H[i, j])
+                if !H[i, j].isZero {
+                    return j
+                }
+            }
+        }
+        fatalError()
+    }
+    
     public struct Point: Equatable, Hashable, Comparable, CustomStringConvertible {
         public let x: Int
         public let y: Int
