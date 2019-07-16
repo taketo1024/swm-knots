@@ -74,8 +74,8 @@ extension GridComplex {
     
     private static func _gridComplex<R: Ring>(_ G: GridDiagram, _ coeff: @escaping (GridDiagram.Rect) -> R) -> ChainComplex1<FreeModule<GridDiagram.Generator, R>> {
         return ChainComplex1.descending(
-            supported: G.degreeRange,
-            sequence: { i in ModuleObject(basis: G.generators(ofDegree: i)) },
+            supported: G.MaslovDegreeRange,
+            sequence: { i in ModuleObject(basis: G.generators.filter{ $0.degree == i }) },
             differential: { i in
                 ModuleEnd.linearlyExtend {  x -> FreeModule<GridDiagram.Generator, R> in
                     G.adjacents(x).sum { y in
@@ -112,7 +112,7 @@ extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram
                 return ModuleObject<Result>(basis: gens)
             },
             differential: { i -> ModuleEnd<Result> in
-                let d = self.differential[i]
+                let d = self.differential(at: i)
                 return ModuleEnd { (z: Result) in
                     let w = d.applied(to: combineMonomials(z))
                     return SwiftyKnots.splitMonomials(w)

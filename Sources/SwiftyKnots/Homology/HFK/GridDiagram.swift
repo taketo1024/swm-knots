@@ -14,9 +14,7 @@ public struct GridDiagram {
     //       generators are placed on even points.
     public let Os: [Point]
     public let Xs: [Point]
-    
-    private var _generators: [Generator]
-    private var _generatorsDict: [Int : [Generator]]
+    public let generators: [Generator]
     
     public init(arcPresentation code: [Int]) {
         assert(code.count.isEven)
@@ -52,19 +50,18 @@ public struct GridDiagram {
         self.Os = Os
         self.Xs = Xs
         
-        self._generators = Permutation.allPermutations(ofLength: n)
+        self.generators = DPermutation.rawPermutations(length: n)
             .enumerated()
-            .map{ (i, p) in
-                let points = (0 ..< n).map{ i in Point(2 * i, 2 * p[i]) }
+            .map{ (id, s) in
+                let points = (0 ..< n).map{ i in Point(2 * i, 2 * s[i]) }
                 let degrees = GridDiagram.computeDegrees(points, Os, Xs)
-                return Generator(id: i, points: points, degrees: degrees)
+                return Generator(id: id, points: points, degrees: degrees)
         }
-        self._generatorsDict = _generators.group{ $0.degree }
     }
     
     private static func computeDegrees(_ x: [Point], _ Os: [Point], _ Xs: [Point]) -> (Int, Int) {
         func I(_ x: [Point], _ y: [Point]) -> Int {
-            return x.allCombinations(with: y).count{ (p, q) in p < q }
+            return (x * y).count{ (p, q) in p < q }
         }
         
         func J(_ x: [Point], _ y: [Point]) -> Int {
@@ -98,15 +95,6 @@ public struct GridDiagram {
         return GridDiagram(Os.map(t), Xs.map(t))
     }
     
-    public func generators(ofDegree i: Int) -> [Generator] {
-        return _generatorsDict[i] ?? []
-    }
-    
-    public var degreeRange: ClosedRange<Int> {
-        let degs = _generatorsDict.keys
-        return degs.min()! ... degs.max()!
-    }
-    
     public func isAdjacent(_ x: Generator, _ y: Generator) -> Bool {
         let (ps, qs) = (x.points, y.points)
         return Set(ps).subtracting(qs).count == 2
@@ -114,7 +102,7 @@ public struct GridDiagram {
     
     // TODO: consider generating elements directly.
     public func adjacents(_ x: Generator) -> [Generator] {
-        return _generators.filter { y in isAdjacent(x, y) }
+        return generators.filter { y in isAdjacent(x, y) }
     }
     
     public func rectangles(from x: Generator, to y: Generator) -> [Rect] {
@@ -153,6 +141,18 @@ public struct GridDiagram {
         print( Format.table(rows: range.reversed(), cols: range, symbol: "j\\i") { (j, i) -> String in
             OX[ [i, j] ] ?? ""
         } )
+    }
+    
+    public var MaslovDegreeRange: ClosedRange<Int> {
+        return range { $0.MaslovDegree }
+    }
+    
+    public var AlexanderDegreeRange: ClosedRange<Int> {
+        return range { $0.AlexanderDegree }
+    }
+    
+    private func range(_ d: (Generator) -> Int) -> ClosedRange<Int> {
+        return d(generators.min{ d($0) < d($1) }!) ... d(generators.max{ d($0) < d($1) }!)
     }
     
     public struct Point: Equatable, Hashable, Comparable, CustomStringConvertible {
