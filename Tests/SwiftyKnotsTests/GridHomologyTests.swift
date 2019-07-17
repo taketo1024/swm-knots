@@ -14,7 +14,7 @@ class GridHomologyTests: XCTestCase {
     
     // GC-tilde(unknot)
     func testUnknot_tilde() {
-        let G = GridDiagram(arcPresentation: 1,2,2,1)
+        let G = GridDiagram.load("0_1")
         let C = GridComplex.tilde(G)
         let H = C.homology
         
@@ -35,7 +35,7 @@ class GridHomologyTests: XCTestCase {
     
     // GC-hat(unknot) = F
     func testUnknot_hat() {
-        let G = GridDiagram(arcPresentation: 1,2,2,1)
+        let G = GridDiagram.load("0_1")
         let C = GridComplex.hat(G)
         let H = C.homology
         
@@ -57,7 +57,7 @@ class GridHomologyTests: XCTestCase {
     
     // GC^-(unknot) = F[U]
     func testUnknot_minus() {
-        let G = GridDiagram(arcPresentation: 1,2,2,1)
+        let G = GridDiagram.load("0_1")
         let C = GridComplex.minus(G)
         let H = C.homology
         
@@ -78,7 +78,7 @@ class GridHomologyTests: XCTestCase {
     }
     
     func testTrefoil_minus() {
-        let G = GridDiagram(arcPresentation: 5,2,1,3,2,4,3,5,4,1)
+        let G = GridDiagram.load("3_1")
         let C = GridComplex.minus(G)
         let H = C.homology
         
@@ -90,7 +90,7 @@ class GridHomologyTests: XCTestCase {
     }
 
     func testTrefoil_mirror_minus() {
-        let G = GridDiagram(arcPresentation: 5,2,1,3,2,4,3,5,4,1).rotate90
+        let G = GridDiagram.load("3_1").rotate90
         let C = GridComplex.minus(G)
         let H = C.homology
         
@@ -102,7 +102,7 @@ class GridHomologyTests: XCTestCase {
     }
     
     func testTrefoil_filtered() {
-        let G = GridDiagram(arcPresentation: 5,2,1,3,2,4,3,5,4,1)
+        let G = GridDiagram.load("3_1")
         let C = GridComplex.filtered(G)
         let H = C.homology
         
@@ -114,7 +114,7 @@ class GridHomologyTests: XCTestCase {
     }
     
     func testTrefoil_mirror_filtered() {
-        let G = GridDiagram(arcPresentation: 5,2,1,3,2,4,3,5,4,1).rotate90
+        let G = GridDiagram.load("3_1").rotate90
         let C = GridComplex.filtered(G)
         let H = C.homology
         
