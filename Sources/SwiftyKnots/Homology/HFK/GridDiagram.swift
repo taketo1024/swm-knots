@@ -18,6 +18,7 @@ public struct GridDiagram {
     
     public init(arcPresentation code: [Int]) {
         assert(code.count.isEven)
+        
         let n = code.count / 2
         let (Os, Xs) = (0 ..< n).reduce(into: ([], [])) { (res: inout (Os: [Point], Xs: [Point]), i: Int) in
             let O = 2 * code[2 * i] - 1
@@ -26,6 +27,17 @@ public struct GridDiagram {
             res.Os.append(Point(O, y))
             res.Xs.append(Point(X, y))
         }
+        
+        assert(Os.map{ p in p.x }.isUnique)
+        assert(Os.map{ p in p.y }.isUnique)
+        assert(Xs.map{ p in p.x }.isUnique)
+        assert(Xs.map{ p in p.y }.isUnique)
+        
+        assert(Os.allSatisfy{ p in (0 ..< 2 * n).contains(p.x) })
+        assert(Os.allSatisfy{ p in (0 ..< 2 * n).contains(p.y) })
+        assert(Xs.allSatisfy{ p in (0 ..< 2 * n).contains(p.x) })
+        assert(Xs.allSatisfy{ p in (0 ..< 2 * n).contains(p.y) })
+        
         self.init(Os, Xs)
     }
     
@@ -34,49 +46,36 @@ public struct GridDiagram {
     }
     
     internal init(_ Os: [Point], _ Xs: [Point]) {
-        assert(Os.count == Xs.count)
-        assert(Os.map{ p in p.x }.isUnique)
-        assert(Os.map{ p in p.y }.isUnique)
-        assert(Xs.map{ p in p.x }.isUnique)
-        assert(Xs.map{ p in p.y }.isUnique)
-        
         let n = Os.count
-        
-        assert(Os.allSatisfy{ p in (0 ..< 2 * n).contains(p.x) })
-        assert(Os.allSatisfy{ p in (0 ..< 2 * n).contains(p.y) })
-        assert(Xs.allSatisfy{ p in (0 ..< 2 * n).contains(p.x) })
-        assert(Xs.allSatisfy{ p in (0 ..< 2 * n).contains(p.y) })
         
         self.Os = Os
         self.Xs = Xs
         
+        let x0 = Os.map{ p in Point(p.x - 1, p.y - 1) }.sorted(by: { p in p.x })
+        let M = { (x: [Point]) -> Int in
+            let curve = ClosedCurve(from: x, to: x0)
+            let w = { p in curve.windingNumber(around: p) }
+            let a = (x + x0).sum { p in p.corners.sum{ q in w(q) } }
+            let b = Os.sum { p in w(p) }
+            return a / 4 - 2 * b - (n - 1)
+        }
+
+        let A = { () -> (([Point]) -> Int) in
+            let curve = ClosedCurve(from: Os, to: Xs)
+            let w = { p in curve.windingNumber(around: p) }
+            let b = (Os + Xs).sum { p in p.corners.sum{ q in w(q) } }
+            return { (x: [Point]) -> Int in
+                let a = x.sum { p in w(p) }
+                return -a + ( b / 4 - (n - 1) ) / 2
+            }
+        }()
+        
         self.generators = DPermutation.rawPermutations(length: n)
             .enumerated()
             .map{ (id, s) in
-                let points = (0 ..< n).map{ i in Point(2 * i, 2 * s[i]) }
-                let degrees = GridDiagram.computeDegrees(points, Os, Xs)
-                return Generator(id: id, points: points, degrees: degrees)
+                let x = (0 ..< n).map{ i in Point(2 * i, 2 * s[i]) }
+                return Generator(id: id, points: x, MaslovDegree: M(x), AlexanderDegree: A(x))
         }
-    }
-    
-    private static func computeDegrees(_ x: [Point], _ Os: [Point], _ Xs: [Point]) -> (Int, Int) {
-        func I(_ x: [Point], _ y: [Point]) -> Int {
-            return (x * y).count{ (p, q) in p < q }
-        }
-        
-        func J(_ x: [Point], _ y: [Point]) -> Int {
-            return I(x, y) + I(y, x)
-        }
-        
-        func M(_ ref: [Point], _ x: [Point]) -> Int {
-            return ( J(x, x) - 2 * J(x, ref) + J(ref, ref) ) / 2 + 1
-        }
-        
-        func A(_ x: [Point]) -> Int {
-            return ( M(Os, x) - M(Xs, x) - Os.count + 1 ) / 2
-        }
-        
-        return (M(Os, x), A(x))
     }
     
     public var gridNumber: Int {
@@ -184,6 +183,11 @@ public struct GridDiagram {
             return p.x < q.x && p.y < q.y
         }
         
+        public var corners: [Point] {
+            let p = self
+            return [Point(p.x + 1, p.y + 1), Point(p.x - 1, p.y + 1), Point(p.x - 1, p.y - 1), Point(p.x + 1, p.y - 1)]
+        }
+        
         public var description: String {
             return "(\(x), \(y))"
         }
@@ -220,12 +224,17 @@ public struct GridDiagram {
     public struct Generator: FreeModuleGenerator {
         public let id: Int
         public let points: [Point]
-        private let degrees: (Int, Int)
         
-        fileprivate init(id: Int, points: [Point], degrees: (Int, Int)) {
+        private let MaslovFunc: () -> Int
+        private let AlexanderFunc: () -> Int
+        private let degreeCache: CacheDictionary<String, Int> = .empty
+
+        fileprivate init(id: Int, points: [Point], MaslovDegree: @autoclosure @escaping () -> Int, AlexanderDegree: @autoclosure @escaping () -> Int) {
+            assert(points.enumerated().allSatisfy{ (i, p) in p.x == 2 * i })
             self.id = id
             self.points = points
-            self.degrees = degrees
+            self.MaslovFunc = MaslovDegree
+            self.AlexanderFunc = AlexanderDegree
         }
         
         public var degree: Int {
@@ -233,15 +242,15 @@ public struct GridDiagram {
         }
         
         public var MaslovDegree: Int {
-            return degrees.0
+            return degreeCache.useCacheOrSet(key: "Maslov") {
+                MaslovFunc()
+            }
         }
         
         public var AlexanderDegree: Int {
-            return degrees.1
-        }
-        
-        public var description: String {
-            return "(\(id): \(points))"
+            return degreeCache.useCacheOrSet(key: "Alexander") {
+                AlexanderFunc()
+            }
         }
         
         public static func == (a: GridDiagram.Generator, b: GridDiagram.Generator) -> Bool {
@@ -254,6 +263,60 @@ public struct GridDiagram {
         
         public static func < (g1: Generator, g2: Generator) -> Bool {
             return g1.id < g2.id
+        }
+        
+        public var description: String {
+            return "(\(id): \(points)"
+        }
+    }
+    
+    public struct ClosedCurve {
+        internal typealias Arc = (Point, Point)  // horizontal arcs 0 -> 1
+        internal let arcs: [Arc]
+        internal init(arcs: [Arc]) {
+            assert(arcs.allSatisfy{ arc in arc.0.y == arc.1.y })
+            self.arcs = arcs
+        }
+        
+        public init(from ps: [Point], to qs: [Point]) {
+            var pairs = zip(ps, qs).exclude{ (p, q) in p.y == q.y }.reversed().toArray()
+            var arcs: [Arc] = []
+            
+            while !pairs.isEmpty {
+                //  curr
+                //  ○ --->--- × next.1
+                //            |
+                //            |
+                //            ○ next.0
+                //
+                //            i
+                
+                let start = pairs.popLast()!
+                var curr = start.0
+                while let (i, next) = pairs.enumerated().first(where: { (_, next) in curr.y == next.1.y}) {
+                    pairs.remove(at: i)
+                    arcs.append( (curr, next.1) )
+                    curr = next.0
+                }
+                assert(curr.y == start.1.y)
+                arcs.append( (curr, start.1) ) // curve is closed.
+            }
+            
+            self.init(arcs: arcs)
+        }
+        
+        public func windingNumber(around p: Point) -> Int {
+            return arcs.sum { arc in
+                if p.y < arc.0.y {
+                    let (x0, x1) = (arc.0.x, arc.1.x)
+                    if (x0 < x1) && (x0 + 1 ..< x1).contains(p.x) {
+                        return -1
+                    } else if (x1 < x0) && (x1 + 1 ..< x0).contains(p.x) {
+                        return 1
+                    }
+                }
+                return 0
+            }
         }
     }
 }
