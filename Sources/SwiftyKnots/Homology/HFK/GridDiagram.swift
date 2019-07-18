@@ -15,6 +15,7 @@ public struct GridDiagram {
     public let Os: [Point]
     public let Xs: [Point]
     public let generators: [Generator]
+    private let generatorsDict: [[Int] : Generator]
     
     public init(arcPresentation code: [Int]) {
         assert(code.count.isEven)
@@ -48,10 +49,10 @@ public struct GridDiagram {
     internal init(_ Os: [Point], _ Xs: [Point]) {
         let n = Os.count
         
-        self.Os = Os
-        self.Xs = Xs
+        self.Os = Os.sorted(by: { p in p.x })
+        self.Xs = Xs.sorted(by: { p in p.x })
         
-        let x0 = Os.map{ p in Point(p.x - 1, p.y - 1) }.sorted(by: { p in p.x })
+        let x0 = self.Os.map{ p in Point(p.x - 1, p.y - 1) }
         let M = { (x: [Point]) -> Int in
             let curve = ClosedCurve(from: x, to: x0)
             let w = { p in curve.windingNumber(around: p) }
@@ -76,6 +77,8 @@ public struct GridDiagram {
                 let x = (0 ..< n).map{ i in Point(2 * i, 2 * s[i]) }
                 return Generator(id: id, points: x, MaslovDegree: M(x), AlexanderDegree: A(x))
         }
+        
+        self.generatorsDict = Dictionary(pairs: generators.map{ x in (x.sequence, x) })
     }
     
     public var gridNumber: Int {
@@ -94,14 +97,26 @@ public struct GridDiagram {
         return GridDiagram(Os.map(t), Xs.map(t))
     }
     
+    public func generator(withPoints pts: [Point]) -> Generator {
+        let seq = pts
+            .sorted{ p in p.x }
+            .map { p in p.y }
+        return generatorsDict[seq]!
+    }
+    
     public func isAdjacent(_ x: Generator, _ y: Generator) -> Bool {
         let (ps, qs) = (x.points, y.points)
         return Set(ps).subtracting(qs).count == 2
     }
     
-    // TODO: consider generating elements directly.
     public func adjacents(_ x: Generator) -> [Generator] {
-        return generators.filter { y in isAdjacent(x, y) }
+        let seq = x.sequence
+        let ts = DPermutation.transpositions(within: gridNumber)
+        
+        return ts.map { t in
+            let yseq = seq.permuted(by: t)
+            return generatorsDict[yseq]!
+        }
     }
     
     public func rectangles(from x: Generator, to y: Generator) -> [Rect] {
@@ -152,6 +167,24 @@ public struct GridDiagram {
     
     private func range(_ d: (Generator) -> Int) -> ClosedRange<Int> {
         return d(generators.min{ d($0) < d($1) }!) ... d(generators.max{ d($0) < d($1) }!)
+    }
+    
+    public enum SpecialGenerator: Int {
+        case OTL, OTR, OBL, OBR, XTL, XTR, XBL, XBR
+    }
+    
+    public func specialGenerator(_ type: SpecialGenerator) -> Generator {
+        let target = (type.rawValue < 4) ? Os : Xs
+        let diff = { () -> (Int, Int) in
+            switch type {
+            case .OTL, .XTL: return (-1, +1)
+            case .OTR, .XTR: return (+1, +1)
+            case .OBL, .XBL: return (-1, -1)
+            case .OBR, .XBR: return (+1, -1)
+            }
+        }()
+        let points = target.map{ p in Point((p.x + diff.0) % gridSize, (p.y + diff.1) % gridSize) }
+        return generator(withPoints: points)
     }
     
     public var knotGenus: Int {
@@ -253,6 +286,10 @@ public struct GridDiagram {
             }
         }
         
+        internal var sequence: [Int] {
+            return points.map { p in p.y }
+        }
+        
         public static func == (a: GridDiagram.Generator, b: GridDiagram.Generator) -> Bool {
             return a.id == b.id
         }
@@ -266,7 +303,7 @@ public struct GridDiagram {
         }
         
         public var description: String {
-            return "(\(id): \(points)"
+            return "(\(id): \(points) )"
         }
     }
     
