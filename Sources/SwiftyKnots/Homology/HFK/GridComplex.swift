@@ -133,10 +133,6 @@ extension TensorGenerator where A == MonomialGenerator<_Un>, B == GridDiagram.Ge
         let x = factors.1 // GridDiagram.Generator
         return _Un.totalDegree(exponents: m.monomialDegree) / 2 + x.AlexanderDegree
     }
-    
-    internal var coords: (Int, Int) {
-        return (algebraicDegree, AlexanderDegree)
-    }
 }
 
 extension FreeModule where A == TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator> {
