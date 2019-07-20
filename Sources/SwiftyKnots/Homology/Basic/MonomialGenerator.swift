@@ -26,6 +26,10 @@ public struct MonomialGenerator<xn: MPolynomialIndeterminate>: FreeModuleGenerat
         self.init(monomialDegree: m.leadMultiDegree)
     }
     
+    public static var identity: MonomialGenerator<xn> {
+        return .init(monomialDegree: [])
+    }
+    
     public var degree: Int {
         return xn.totalDegree(exponents: monomialDegree)
     }
