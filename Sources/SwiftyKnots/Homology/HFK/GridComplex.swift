@@ -29,8 +29,7 @@ extension GridComplex {
         let (Os, Xs) = (G.Os, G.Xs)
         return _gridComplex(G) { rect in
             (rect.intersects(Xs) || rect.intersects(Os))
-                ? .zero
-                : .identity
+                ? nil : .identity
         }
     }
     
@@ -43,8 +42,7 @@ extension GridComplex {
         
         return _gridComplex(G) { rect in
             (rect.intersects(Xs) || rect.contains(O_last))
-                ? .zero
-                : Os.enumerated().multiply { (i, O) in rect.contains(O) ? P.indeterminate(i) : .identity }
+                ? nil : P.monomial(ofMultiDegree: Os.map { O in rect.contains(O) ? 1 : 0 })
         }.splitMonomials(numberOfIndeterminants: G.gridNumber - 1)
     }
     
@@ -55,8 +53,7 @@ extension GridComplex {
         let (Os, Xs) = (G.Os, G.Xs)
         return _gridComplex(G) { rect in
             rect.intersects(Xs)
-                ? .zero
-                : Os.enumerated().multiply { (i, O) in rect.contains(O) ? P.indeterminate(i) : .identity }
+                ? nil : P.monomial(ofMultiDegree: Os.map { O in rect.contains(O) ? 1 : 0 })
         }.splitMonomials(numberOfIndeterminants: G.gridNumber)
     }
     
@@ -66,45 +63,24 @@ extension GridComplex {
         
         let Os = G.Os
         return _gridComplex(G) { rect in
-            Os.enumerated().multiply {
-                (i, O) in rect.contains(O) ? P.indeterminate(i) : .identity
-            }
+            P.monomial(ofMultiDegree: Os.map { O in rect.contains(O) ? 1 : 0 })
         }.splitMonomials(numberOfIndeterminants: G.gridNumber)
     }
     
-    private static func _gridComplex<R: Ring>(_ G: GridDiagram, _ coeff: @escaping (GridDiagram.Rect) -> R) -> ChainComplex1<FreeModule<GridDiagram.Generator, R>> {
+    private static func _gridComplex<R: Ring>(_ G: GridDiagram, _ coeff: @escaping (GridDiagram.Rect) -> R?) -> ChainComplex1<FreeModule<GridDiagram.Generator, R>> {
         return ChainComplex1.descending(
             supported: G.MaslovDegreeRange,
             sequence: { i in ModuleObject(basis: G.generators.filter{ $0.degree == i }) },
             differential: { i in
                 ModuleEnd.linearlyExtend {  x -> FreeModule<GridDiagram.Generator, R> in
-                    G.adjacents(x).sum { y in
+                    G.adjacents(x).sum { y -> FreeModule<GridDiagram.Generator, R> in
                         let rects = G.emptyRectangles(from: x, to: y)
-                        let c = rects.sum { rect in coeff(rect) }
-                        return c * .wrap(y)
+                        let c = rects.compactMap { rect in coeff(rect) }.sumAll()
+                        return (c == .zero) ? .zero : c * .wrap(y)
                     }
                 }
             }
         )
-    }
-}
-
-extension GridDiagram {
-    public var knotGenus: Int {
-        let H = GridComplex.tilde(self).asBigraded { x in x.AlexanderDegree }.homology
-        let iRange = MaslovDegreeRange
-        let (jMax, jMin) = (generators.map{ $0.AlexanderDegree }.max()!,
-                            generators.map{ $0.AlexanderDegree }.min()!)
-        
-        for j in (jMin ... jMax).reversed() {
-            for i in iRange.reversed() {
-                print((i, j), H[i, j])
-                if !H[i, j].isZero {
-                    return j
-                }
-            }
-        }
-        fatalError()
     }
 }
 
@@ -132,9 +108,15 @@ extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram
             },
             differential: { i -> ModuleEnd<Result> in
                 let d = self.differential(at: i)
-                return ModuleEnd { (z: Result) in
-                    let w = d.applied(to: combineMonomials(z))
-                    return SwiftyKnots.splitMonomials(w)
+                let cache: CacheDictionary<GridDiagram.Generator, FreeModule<GridDiagram.Generator, P>> = .empty
+                return ModuleEnd.linearlyExtend { (t: TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>) -> Result in
+                    let (m, x) = t.factors
+                    let y = cache.useCacheOrSet(key: x) {
+                        d.applied(to: .wrap(x))
+                    }
+                    return SwiftyKnots.splitMonomials(y).mapGenerators { t in
+                        TensorGenerator(m * t.factors.0, t.factors.1)
+                    }
                 }
             }
         )
@@ -185,5 +167,24 @@ extension FreeModule where A == TensorGenerator<MonomialGenerator<_Un>, GridDiag
         }
         
         print(table)
+    }
+}
+
+extension GridDiagram {
+    public var knotGenus: Int {
+        let H = GridComplex.tilde(self).asBigraded { x in x.AlexanderDegree }.homology
+        let iRange = MaslovDegreeRange
+        let (jMax, jMin) = (generators.map{ $0.AlexanderDegree }.max()!,
+                            generators.map{ $0.AlexanderDegree }.min()!)
+        
+        for j in (jMin ... jMax).reversed() {
+            for i in iRange.reversed() {
+                print((i, j), H[i, j])
+                if !H[i, j].isZero {
+                    return j
+                }
+            }
+        }
+        fatalError()
     }
 }

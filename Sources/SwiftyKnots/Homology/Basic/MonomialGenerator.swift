@@ -39,13 +39,9 @@ public struct MonomialGenerator<xn: MPolynomialIndeterminate>: FreeModuleGenerat
     }
     
     public static func * (a: MonomialGenerator<xn>, b: MonomialGenerator<xn>) -> MonomialGenerator<xn> {
-        func merge(_ I: MultiDegree, _ J: MultiDegree) -> MultiDegree {
-            let l = max(I.count, J.count)
-            return (0 ..< l).map{ i in (I.indices.contains(i) ? I[i] : 0) + (J.indices.contains(i) ? J[i] : 0) }
-        }
-        return .init(monomialDegree: merge(a.monomialDegree, b.monomialDegree))
+        return .init(monomialDegree: a.monomialDegree.merging(b.monomialDegree, with: +))
     }
-    
+
     public static func < (a: MonomialGenerator<xn>, b: MonomialGenerator<xn>) -> Bool {
         return a.degree < b.degree
     }
