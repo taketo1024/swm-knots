@@ -89,6 +89,25 @@ extension GridComplex {
     }
 }
 
+extension GridDiagram {
+    public var knotGenus: Int {
+        let H = GridComplex.tilde(self).asBigraded { x in x.AlexanderDegree }.homology
+        let iRange = MaslovDegreeRange
+        let (jMax, jMin) = (generators.map{ $0.AlexanderDegree }.max()!,
+                            generators.map{ $0.AlexanderDegree }.min()!)
+        
+        for j in (jMin ... jMax).reversed() {
+            for i in iRange.reversed() {
+                print((i, j), H[i, j])
+                if !H[i, j].isZero {
+                    return j
+                }
+            }
+        }
+        fatalError()
+    }
+}
+
 extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram.Generator, MPolynomial<_Un, 𝐙₂>> {
     func splitMonomials(numberOfIndeterminants n: Int) -> GridComplex {
         typealias R = 𝐙₂

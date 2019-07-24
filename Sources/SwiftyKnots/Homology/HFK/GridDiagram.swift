@@ -39,7 +39,7 @@ public struct GridDiagram {
         assert(Xs.allSatisfy{ p in (0 ..< 2 * n).contains(p.x) })
         assert(Xs.allSatisfy{ p in (0 ..< 2 * n).contains(p.y) })
         
-        self.init(Os, Xs)
+        self.init(Os.sorted(by: { p in p.x }), Xs.sorted(by: { p in p.x }))
     }
     
     public init(arcPresentation code: Int...) {
@@ -49,35 +49,64 @@ public struct GridDiagram {
     internal init(_ Os: [Point], _ Xs: [Point]) {
         let n = Os.count
         
-        self.Os = Os.sorted(by: { p in p.x })
-        self.Xs = Xs.sorted(by: { p in p.x })
+        self.Os = Os
+        self.Xs = Xs
         
-        let x0 = self.Os.map{ p in Point(p.x - 1, p.y - 1) }
-        let M = { (x: [Point]) -> Int in
-            let curve = ClosedCurve(from: x, to: x0)
-            let w = { p in curve.windingNumber(around: p) }
-            let a = (x + x0).sum { p in p.corners.sum{ q in w(q) } }
-            let b = Os.sum { p in w(p) }
-            return a / 4 - 2 * b - (n - 1)
-        }
-
-        let A = { () -> (([Point]) -> Int) in
+        let x_TL: Generator = {
+            let seq = Os.map{ p in ((p.y + 1) / 2) % n }
+            let points = seq.enumerated().map { (i, j) in Point(2 * i, 2 * j) }
+            
             let curve = ClosedCurve(from: Os, to: Xs)
             let w = { p in curve.windingNumber(around: p) }
+            
+            let a = points.sum { p in w(p) }
             let b = (Os + Xs).sum { p in p.corners.sum{ q in w(q) } }
-            return { (x: [Point]) -> Int in
-                let a = x.sum { p in w(p) }
-                return -a + ( b / 4 - (n - 1) ) / 2
-            }
+            let A = -a + ( b / 4 - (n - 1) ) / 2
+            
+            return Generator(id: 0, sequence: seq, MaslovDegree: 0, AlexanderDegree: A)
         }()
         
-        self.generators = DPermutation.rawPermutations(length: n)
-            .enumerated()
-            .map{ (id, s) in
-                let x = (0 ..< n).map{ i in Point(2 * i, 2 * s[i]) }
-                return Generator(id: id, points: x, MaslovDegree: M(x), AlexanderDegree: A(x))
+        func next(to x: Generator, swap: (Int, Int)) -> Generator {
+            let seq = x.sequence
+            let (i, j) = swap
+            let (p, q) = (Point(2 * i, 2 * seq[i]),
+                          Point(2 * j, 2 * seq[j]))
+            let rect = Rect(from: p, to: q, gridSize: 2 * n)
+            
+            // M(y) - M(x) = 2 #(r ∩ Os) - 2 #(x ∩ Int(r)) - 1
+            let m = 2 * rect.countIntersections(with: Os) - 2 * rect.countIntersections(with: x.points) - 1
+            
+            // A(y) - A(x) = #(r ∩ Os) - #(r ∩ Xs)
+            let a = rect.countIntersections(with: Os) - rect.countIntersections(with: Xs)
+            
+            return Generator(id: x.id + 1,
+                             sequence: seq.swappedAt(i, j),
+                             MaslovDegree: x.MaslovDegree + m,
+                             AlexanderDegree: x.AlexanderDegree + a)
         }
         
+        // see Heap's algorithm: https://en.wikipedia.org/wiki/Heap%27s_algorithm
+        
+        var generators: [Generator] = []
+        generators.reserveCapacity(n.factorial)
+        generators.append(x_TL)
+        
+        func generate(_ k: Int) {
+            if k <= 1 {
+                return
+            }
+            generate(k - 1)
+            for l in 0 ..< k - 1 {
+                let (i, j) = k.isEven ? (l, k - 1) : (0, k - 1)
+                let x = generators.last!
+                let y = next(to: x, swap: (i, j))
+                generators.append(y)
+                generate(k - 1)
+            }
+        }
+        generate(n)
+        
+        self.generators = generators
         self.generatorsDict = Dictionary(pairs: generators.map{ x in (x.sequence, x) })
     }
     
@@ -94,7 +123,8 @@ public struct GridDiagram {
         let t = { (p: Point) -> Point in
             Point(n - p.y, p.x)
         }
-        return GridDiagram(Os.map(t), Xs.map(t))
+        return GridDiagram(Os.map(t).sorted(by: { p in p.x }),
+                           Xs.map(t).sorted(by: { p in p.x }))
     }
     
     public func generator(withPoints pts: [Point]) -> Generator {
@@ -130,13 +160,8 @@ public struct GridDiagram {
         let pq = diff.toArray()
         let (p, q) = (pq[0], pq[1])
         
-        func rect(_ p: Point, _ q: Point) -> Rect {
-            let l = gridSize
-            let size = Point((q.x - p.x + l) % l, (q.y - p.y + l) % l)
-            return Rect(point: p, size: size, gridSize: gridSize)
-        }
-        
-        return [rect(p, q), rect(q, p)]
+        return [Rect(from: p, to: q, gridSize: gridSize),
+                Rect(from: q, to: p, gridSize: gridSize)]
     }
     
     public func emptyRectangles(from x: Generator, to y: Generator) -> [Rect] {
@@ -187,22 +212,6 @@ public struct GridDiagram {
         return generator(withPoints: points)
     }
     
-    public var knotGenus: Int {
-        let H = GridComplex.tilde(self).asBigraded { x in x.AlexanderDegree }.homology
-        let iRange = MaslovDegreeRange
-        let (jMax, jMin) = (generators.map{ $0.AlexanderDegree }.max()!, generators.map{ $0.AlexanderDegree }.min()!)
-        
-        for j in (jMin ... jMax).reversed() {
-            for i in iRange.reversed() {
-                print((i, j), H[i, j])
-                if !H[i, j].isZero {
-                    return j
-                }
-            }
-        }
-        fatalError()
-    }
-    
     public struct Point: Equatable, Hashable, Comparable, CustomStringConvertible {
         public let x: Int
         public let y: Int
@@ -231,10 +240,16 @@ public struct GridDiagram {
         public let size: Point
         public let gridSize: Int
         
-        public init(point: Point, size: Point, gridSize: Int) {
-            self.origin = point
+        public init(origin: Point, size: Point, gridSize: Int) {
+            self.origin = origin
             self.size  = size
             self.gridSize = gridSize
+        }
+        
+        public init(from p: Point, to q: Point, gridSize: Int) {
+            let l = gridSize
+            let size = Point((q.x - p.x + l) % l, (q.y - p.y + l) % l)
+            self.init(origin: p, size: size, gridSize: gridSize)
         }
         
         public func contains(_ p: Point) -> Bool {
@@ -242,11 +257,15 @@ public struct GridDiagram {
             let yRange = (origin.y + 1 ..< origin.y + size.y)
             
             return (xRange.contains(p.x) || xRange.contains(p.x + gridSize)) &&
-                   (yRange.contains(p.y) || yRange.contains(p.y + gridSize))
+                (yRange.contains(p.y) || yRange.contains(p.y + gridSize))
         }
         
         public func intersects(_ points: [Point]) -> Bool {
             return points.contains{ p in self.contains(p) }
+        }
+        
+        public func countIntersections(with points: [Point]) -> Int {
+            return points.count{ p in self.contains(p) }
         }
         
         public var description: String {
@@ -256,38 +275,24 @@ public struct GridDiagram {
     
     public struct Generator: FreeModuleGenerator {
         public let id: Int
-        public let points: [Point]
+        internal let sequence: [Int]
         
-        private let MaslovFunc: () -> Int
-        private let AlexanderFunc: () -> Int
-        private let degreeCache: CacheDictionary<String, Int> = .empty
-
-        fileprivate init(id: Int, points: [Point], MaslovDegree: @autoclosure @escaping () -> Int, AlexanderDegree: @autoclosure @escaping () -> Int) {
-            assert(points.enumerated().allSatisfy{ (i, p) in p.x == 2 * i })
+        public let MaslovDegree: Int
+        public let AlexanderDegree: Int
+        
+        fileprivate init(id: Int, sequence: [Int], MaslovDegree: Int, AlexanderDegree: Int) {
             self.id = id
-            self.points = points
-            self.MaslovFunc = MaslovDegree
-            self.AlexanderFunc = AlexanderDegree
+            self.sequence = sequence
+            self.MaslovDegree = MaslovDegree
+            self.AlexanderDegree = AlexanderDegree
+        }
+        
+        public var points: [Point] {
+            return sequence.enumerated().map { (i, j) in Point(2 * i, 2 * j) }
         }
         
         public var degree: Int {
             return MaslovDegree
-        }
-        
-        public var MaslovDegree: Int {
-            return degreeCache.useCacheOrSet(key: "Maslov") {
-                MaslovFunc()
-            }
-        }
-        
-        public var AlexanderDegree: Int {
-            return degreeCache.useCacheOrSet(key: "Alexander") {
-                AlexanderFunc()
-            }
-        }
-        
-        internal var sequence: [Int] {
-            return points.map { p in p.y }
         }
         
         public static func == (a: GridDiagram.Generator, b: GridDiagram.Generator) -> Bool {
@@ -303,7 +308,7 @@ public struct GridDiagram {
         }
         
         public var description: String {
-            return "(\(id): \(points) )"
+            return "(\(id): \(sequence) )"
         }
     }
     
