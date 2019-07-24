@@ -127,11 +127,29 @@ public struct GridDiagram {
                            Xs.map(t).sorted(by: { p in p.x }))
     }
     
-    public func generator(withPoints pts: [Point]) -> Generator {
-        let seq = pts
-            .sorted{ p in p.x }
-            .map { p in p.y }
+    public func generator(forSequence seq: [Int]) -> Generator {
         return generatorsDict[seq]!
+    }
+    
+    public enum NamedGenerator: Int {
+        case OTL, OTR, OBL, OBR, XTL, XTR, XBL, XBR
+    }
+    
+    public func generator(named name: NamedGenerator) -> Generator {
+        let target = (name.rawValue < 4) ? Os : Xs
+        let diff = { () -> (Int, Int) in
+            switch name {
+            case .OTL, .XTL: return (-1, +1)
+            case .OTR, .XTR: return (+1, +1)
+            case .OBL, .XBL: return (-1, -1)
+            case .OBR, .XBR: return (+1, -1)
+            }
+        }()
+        let seq = target
+            .map{ p in (x: (p.x + diff.0) % gridSize, y: (p.y + diff.1) % gridSize) }
+            .sorted{ $0.x }
+            .map{ $0.y / 2 }
+        return generator(forSequence: seq)
     }
     
     public func isAdjacent(_ x: Generator, _ y: Generator) -> Bool {
@@ -140,12 +158,10 @@ public struct GridDiagram {
     }
     
     public func adjacents(_ x: Generator) -> [Generator] {
-        let seq = x.sequence
-        let ts = DPermutation.transpositions(within: gridNumber)
-        
-        return ts.map { t in
-            let yseq = seq.permuted(by: t)
-            return generatorsDict[yseq]!
+        let xSeq = x.sequence
+        return DPermutation.rawTranspositions(within: gridNumber).map { t in
+            let ySeq = xSeq.swappedAt(t.0, t.1)
+            return generator(forSequence: ySeq)
         }
     }
     
@@ -192,24 +208,6 @@ public struct GridDiagram {
     
     private func range(_ d: (Generator) -> Int) -> ClosedRange<Int> {
         return d(generators.min{ d($0) < d($1) }!) ... d(generators.max{ d($0) < d($1) }!)
-    }
-    
-    public enum SpecialGenerator: Int {
-        case OTL, OTR, OBL, OBR, XTL, XTR, XBL, XBR
-    }
-    
-    public func specialGenerator(_ type: SpecialGenerator) -> Generator {
-        let target = (type.rawValue < 4) ? Os : Xs
-        let diff = { () -> (Int, Int) in
-            switch type {
-            case .OTL, .XTL: return (-1, +1)
-            case .OTR, .XTR: return (+1, +1)
-            case .OBL, .XBL: return (-1, -1)
-            case .OBR, .XBR: return (+1, -1)
-            }
-        }()
-        let points = target.map{ p in Point((p.x + diff.0) % gridSize, (p.y + diff.1) % gridSize) }
-        return generator(withPoints: points)
     }
     
     public struct Point: Equatable, Hashable, Comparable, CustomStringConvertible {
