@@ -20,10 +20,10 @@ public struct MonomialGenerator<xn: MPolynomialIndeterminate>: FreeModuleGenerat
     }
     
     public init<R: Ring>(monomial: MPolynomial<xn, R>) {
-        guard let (m, r) = monomial.decomposed().first, r == .identity else {
+        guard monomial.isMonic && monomial.isMonomial else {
             fatalError("Not a monic monomial: \(monomial)")
         }
-        self.init(monomialDegree: m.leadMultiDegree)
+        self.init(monomialDegree: monomial.leadMultiDegree)
     }
     
     public static var identity: MonomialGenerator<xn> {

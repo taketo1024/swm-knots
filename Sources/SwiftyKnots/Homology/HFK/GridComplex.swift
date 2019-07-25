@@ -100,7 +100,7 @@ extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram
                 
                 let above = (0 ... (iMax - i) / 2).flatMap { k in self[i + 2 * k].generators }
                 let gens = above.flatMap { e -> [Result.Generator] in
-                    let x = e.decomposed()[0].0
+                    let x = e.unwrap()
                     let mons = P.monomials(ofDegree: i - x.degree, usingIndeterminates: (0 ..< n).toArray())
                     return mons.map{ m in TensorGenerator(MonomialGenerator(monomial: m), x) }
                 }
