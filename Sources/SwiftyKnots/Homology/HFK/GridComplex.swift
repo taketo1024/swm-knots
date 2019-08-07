@@ -179,7 +179,6 @@ extension GridDiagram {
         
         for j in (jMin ... jMax).reversed() {
             for i in iRange.reversed() {
-                print((i, j), H[i, j])
                 if !H[i, j].isZero {
                     return j
                 }
