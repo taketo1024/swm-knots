@@ -269,7 +269,7 @@ public struct GridDiagram {
     
     public struct Generator: FreeModuleGenerator {
         public let id: Int
-        internal let sequence: [Int]
+        public let sequence: [Int]
         
         public let MaslovDegree: Int
         public let AlexanderDegree: Int
