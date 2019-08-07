@@ -69,7 +69,7 @@ extension GridComplex {
     
     private static func _gridComplex<R: Ring>(_ G: GridDiagram, _ coeff: @escaping (GridDiagram.Rect) -> R?) -> ChainComplex1<FreeModule<GridDiagram.Generator, R>> {
         return ChainComplex1.descending(
-            supported: G.MaslovDegreeRange,
+            supported: G.generators.map{ $0.MaslovDegree }.range!,
             sequence: { i in ModuleObject(basis: G.generators.filter{ $0.degree == i }) },
             differential: { i in
                 ModuleEnd.linearlyExtend {  x -> FreeModule<GridDiagram.Generator, R> in
@@ -136,54 +136,19 @@ extension TensorGenerator where A == MonomialGenerator<_Un>, B == GridDiagram.Ge
     }
 }
 
-extension FreeModule where A == TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator> {
-    public func groupByDegrees() -> [GridCoords : [FreeModule<GridDiagram.Generator, MPolynomial<_Un, R>>]] {
-        var dict: [GridCoords : [FreeModule<GridDiagram.Generator, MPolynomial<_Un, R>>]] = [:]
-        for (t, r) in decomposed() {
-            let c = [t.algebraicDegree, t.AlexanderDegree]
-            let m = combineMonomials(FreeModule([t : r]))
-            if dict.contains(key: c) {
-                dict[c]!.append(m)
-            } else {
-                dict[c] = [m]
-            }
-        }
-        return dict
-    }
-    
-    public func printDegrees() {
-        let dict = groupByDegrees()
-        if dict.isEmpty {
-            print("empty")
-            return
-        }
-        
-        let (iMax, iMin) = (max(0, dict.keys.map{ $0[0] }.max()!), min(0, dict.keys.map{ $0[0] }.min()!))
-        let (jMax, jMin) = (max(0, dict.keys.map{ $0[1] }.max()!), min(0, dict.keys.map{ $0[1] }.min()!))
-        
-        let table = Format.table(rows: (jMin ... jMax).reversed().toArray(), cols: (iMin ... iMax).toArray(), symbol: "j\\i") { (j, i) -> String in
-            let count = dict[[i, j]]?.count ?? 0
-            return count > 0 ? "\(count)" : ""
-        }
-        
-        print(table)
-    }
-}
-
 extension GridDiagram {
     public var knotGenus: Int {
         let H = GridComplex.tilde(self).asBigraded { x in x.AlexanderDegree }.homology
-        let iRange = MaslovDegreeRange
-        let (jMax, jMin) = (generators.map{ $0.AlexanderDegree }.max()!,
-                            generators.map{ $0.AlexanderDegree }.min()!)
+        let M = generators.map{ $0.MaslovDegree }.range!
+        let A = generators.map{ $0.AlexanderDegree }.range!
         
-        for j in (jMin ... jMax).reversed() {
-            for i in iRange.reversed() {
-                if !H[i, j].isZero {
-                    return j
-                }
+        for (j, i) in A.reversed() * M.reversed() {
+            print((i, j))
+            if !H[i, j].isZero {
+                return j
             }
         }
+        
         fatalError()
     }
 }

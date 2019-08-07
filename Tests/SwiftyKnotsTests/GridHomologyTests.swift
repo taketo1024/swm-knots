@@ -12,6 +12,17 @@ import SwiftyHomology
 
 class GridHomologyTests: XCTestCase {
     
+    func testKnotGenus() {
+        XCTAssertEqual(GridDiagram.load("0_1").knotGenus, 0)
+        XCTAssertEqual(GridDiagram.load("3_1").knotGenus, 1)
+        XCTAssertEqual(GridDiagram.load("4_1").knotGenus, 1)
+        XCTAssertEqual(GridDiagram.load("5_1").knotGenus, 2)
+        XCTAssertEqual(GridDiagram.load("5_2").knotGenus, 1)
+//        XCTAssertEqual(GridDiagram.load("6_1").knotGenus, 1)
+//        XCTAssertEqual(GridDiagram.load("6_2").knotGenus, 2)
+//        XCTAssertEqual(GridDiagram.load("6_3").knotGenus, 2)
+    }
+    
     // GC-tilde(unknot)
     func testUnknot_tilde() {
         let G = GridDiagram.load("0_1")

@@ -188,26 +188,11 @@ public struct GridDiagram {
     }
     
     public func printDiagram() {
-        let range = (0 ..< gridSize / 2).toArray()
-        
-        let OX = Dictionary(pairs: (Os.map{ p in (p, "O") } + Xs.map{ p in (p, "X") }).map { (p, s) in
-            ([(p.x - 1)/2, (p.y - 1)/2], s)
-        })
-        print( Format.table(rows: range.reversed(), cols: range, symbol: "j\\i") { (j, i) -> String in
-            OX[ [i, j] ] ?? ""
-        } )
-    }
-    
-    public var MaslovDegreeRange: ClosedRange<Int> {
-        return range { $0.MaslovDegree }
-    }
-    
-    public var AlexanderDegreeRange: ClosedRange<Int> {
-        return range { $0.AlexanderDegree }
-    }
-    
-    private func range(_ d: (Generator) -> Int) -> ClosedRange<Int> {
-        return d(generators.min{ d($0) < d($1) }!) ... d(generators.max{ d($0) < d($1) }!)
+        let OXs = Os.map{ p in (p, "O") } + Xs.map{ p in (p, "X") }
+        let elems = OXs.map { (p, s) in
+            ((p.x - 1)/2, (p.y - 1)/2, s)
+        }
+        print( Format.table(elements: elems) )
     }
     
     public struct Point: Equatable, Hashable, Comparable, CustomStringConvertible {
@@ -223,11 +208,14 @@ public struct GridDiagram {
             return p.x < q.x && p.y < q.y
         }
         
-        public var corners: [Point] {
-            let p = self
-            return [Point(p.x + 1, p.y + 1), Point(p.x - 1, p.y + 1), Point(p.x - 1, p.y - 1), Point(p.x + 1, p.y - 1)]
+        public func shift(_ dx: Int, _ dy: Int) -> Point {
+            return Point(x + dx, y + dy)
         }
         
+        public var corners: [Point] {
+            return [shift(1, 1), shift(-1, 1), shift(-1, -1), shift(1, -1)]
+        }
+
         public var description: String {
             return "(\(x), \(y))"
         }
