@@ -12,7 +12,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/taketo1024/SwiftyMath.git", .branch("grid-homology")),
-        .package(url: "https://github.com/taketo1024/SwiftyMath-homology.git", from: "1.0.22"),
+        .package(url: "https://github.com/taketo1024/SwiftyMath-homology.git", .branch("grid-homology")),
     ],
     targets: [
         .target(
