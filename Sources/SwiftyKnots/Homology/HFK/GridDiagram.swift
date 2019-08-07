@@ -74,10 +74,10 @@ public struct GridDiagram {
             let rect = Rect(from: p, to: q, gridSize: 2 * n)
             
             // M(y) - M(x) = 2 #(r ∩ Os) - 2 #(x ∩ Int(r)) - 1
-            let m = 2 * rect.countIntersections(with: Os) - 2 * rect.countIntersections(with: x.points) - 1
+            let m = 2 * Os.count{ O in rect.contains(O) } - 2 * x.points.count{ p in rect.contains(p, interior: true) } - 1
             
             // A(y) - A(x) = #(r ∩ Os) - #(r ∩ Xs)
-            let a = rect.countIntersections(with: Os) - rect.countIntersections(with: Xs)
+            let a = Os.count{ O in rect.contains(O) } - Xs.count{ X in rect.contains(X) }
             
             return Generator(id: x.id + 1,
                              sequence: seq.swappedAt(i, j),
@@ -183,7 +183,7 @@ public struct GridDiagram {
     public func emptyRectangles(from x: Generator, to y: Generator) -> [Rect] {
         // Note: Int(r) ∩ x = Int(r) ∩ y .
         return rectangles(from: x, to: y).filter{ r in
-            !r.intersects(x.points)
+            !r.intersects(x.points, interior: true)
         }
     }
     
@@ -250,20 +250,16 @@ public struct GridDiagram {
             self.init(origin: p, size: size, gridSize: gridSize)
         }
         
-        public func contains(_ p: Point) -> Bool {
-            let xRange = (origin.x + 1 ..< origin.x + size.x)
-            let yRange = (origin.y + 1 ..< origin.y + size.y)
+        public func contains(_ p: Point, interior: Bool = false) -> Bool {
+            let xRange = interior ? (origin.x + 1 ... origin.x + size.x - 1) : (origin.x ... origin.x + size.x)
+            let yRange = interior ? (origin.y + 1 ... origin.y + size.y - 1) : (origin.y ... origin.y + size.y)
             
-            return (xRange.contains(p.x) || xRange.contains(p.x + gridSize)) &&
-                (yRange.contains(p.y) || yRange.contains(p.y + gridSize))
+            return (xRange.contains(p.x) || xRange.contains(p.x + gridSize))
+                && (yRange.contains(p.y) || yRange.contains(p.y + gridSize))
         }
-        
-        public func intersects(_ points: [Point]) -> Bool {
-            return points.contains{ p in self.contains(p) }
-        }
-        
-        public func countIntersections(with points: [Point]) -> Int {
-            return points.count{ p in self.contains(p) }
+
+        public func intersects(_ points: [Point], interior: Bool = false) -> Bool {
+            return points.contains{ p in self.contains(p, interior: interior) }
         }
         
         public var description: String {
@@ -306,7 +302,7 @@ public struct GridDiagram {
         }
         
         public var description: String {
-            return "(\(id): \(sequence) )"
+            return "\(sequence)"
         }
     }
     
