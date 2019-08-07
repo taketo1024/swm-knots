@@ -143,7 +143,6 @@ extension GridDiagram {
         let A = generators.map{ $0.AlexanderDegree }.range!
         
         for (j, i) in A.reversed() * M.reversed() {
-            print((i, j))
             if !H[i, j].isZero {
                 return j
             }
