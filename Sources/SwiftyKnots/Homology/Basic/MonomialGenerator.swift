@@ -55,7 +55,7 @@ public struct MonomialGenerator<xn: MPolynomialIndeterminate>: FreeModuleGenerat
 public func splitMonomials<xn, A, R>(_ z: FreeModule<A, MPolynomial<xn, R>>) -> FreeModule<TensorGenerator<MonomialGenerator<xn>, A>, R> {
     return z.decomposed().sum { (a, p) in
         p.decomposed().sum { (m, r) in
-            let t = TensorGenerator(MonomialGenerator(monomial: m), a)
+            let t = TensorGenerator(MonomialGenerator<xn>(monomialDegree: m), a)
             return FreeModule([t : r])
         }
     }
@@ -72,7 +72,7 @@ public func combineMonomials<xn, A, R>(_ z: FreeModule<TensorGenerator<MonomialG
 public func *<xn, A, R>(p: MPolynomial<xn, R>, z: FreeModule<TensorGenerator<MonomialGenerator<xn>, A>, R>) -> FreeModule<TensorGenerator<MonomialGenerator<xn>, A>, R> {
     p.decomposed().sum { (m, a) -> FreeModule<TensorGenerator<MonomialGenerator<xn>, A>, R> in
         a * z.mapGenerators{ (t: TensorGenerator<MonomialGenerator<xn>, A>) in
-            let prod = MonomialGenerator(monomial: m) * t.factors.0
+            let prod = MonomialGenerator<xn>(monomialDegree: m) * t.factors.0
             return TensorGenerator(prod, t.factors.1)
         }
     }
