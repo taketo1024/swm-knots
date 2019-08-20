@@ -56,7 +56,7 @@ public func splitMonomials<xn, A, R>(_ z: FreeModule<A, MPolynomial<xn, R>>) -> 
     return z.decomposed().sum { (a, p) in
         p.decomposed().sum { (m, r) in
             let t = TensorGenerator(MonomialGenerator<xn>(monomialDegree: m), a)
-            return FreeModule([t : r])
+            return r * .wrap(t)
         }
     }
 }
@@ -65,7 +65,7 @@ public func splitMonomials<xn, A, R>(_ z: FreeModule<A, MPolynomial<xn, R>>) -> 
 public func combineMonomials<xn, A, R>(_ z: FreeModule<TensorGenerator<MonomialGenerator<xn>, A>, R>) -> FreeModule<A, MPolynomial<xn, R>> {
     return z.decomposed().sum { (x, r) in
         let (p, a) = (x.factors.0.asMonomial(over: R.self), x.factors.1)
-        return FreeModule([a : r * p])
+        return (r * p) * .wrap(a)
     }
 }
 
