@@ -8,10 +8,13 @@
 import Foundation
 
 extension GridDiagram {
-    public static func load(_ name: String) -> GridDiagram {
+    public static func load(_ name: String) -> GridDiagram? {
         loadTable()
-        let code = _table[name]!
-        return GridDiagram(arcPresentation: code)
+        if let code = _table[name] {
+            return GridDiagram(arcPresentation: code)
+        } else {
+            return nil
+        }
     }
 }
 
