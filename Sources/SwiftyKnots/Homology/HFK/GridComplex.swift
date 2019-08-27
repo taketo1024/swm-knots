@@ -23,11 +23,11 @@ public typealias GridComplex = ChainComplex1<FreeModule<TensorGenerator<Monomial
 extension GridComplex {
     // GC-tilde. [Book] p.72, Def 4.4.1
     // MEMO: not a knot invariant.
-    public static func tilde(_ G: GridDiagram) -> ChainComplex1<FreeModule<GridDiagram.Generator, 𝐙₂>> {
+    public static func tilde(_ G: GridDiagram) -> GridComplex {
         typealias R = 𝐙₂
         
         let (Os, Xs) = (G.Os, G.Xs)
-        return _gridComplex(G) { rect in
+        return _gridComplex(G, 0) { rect in
             (rect.intersects(Xs) || rect.intersects(Os))
                 ? nil : .identity
         }
@@ -37,46 +37,81 @@ extension GridComplex {
     public static func hat(_ G: GridDiagram) -> GridComplex {
         typealias P = MPolynomial<_Un, 𝐙₂>
         
+        let n = G.gridNumber
         let (Os, Xs) = (G.Os, G.Xs)
         let O_last = Os.last!
         
-        return _gridComplex(G) { rect in
+        return _gridComplex(G, n - 1) { rect in
             (rect.intersects(Xs) || rect.contains(O_last))
-                ? nil : P.monomial(ofMultiDegree: Os.map { O in rect.contains(O) ? 1 : 0 })
-        }.splitMonomials(numberOfIndeterminants: G.gridNumber - 1)
+                ? nil : .init(monomialDegree: Os.map { O in rect.contains(O) ? 1 : 0 })
+        }
     }
     
     // GC^-. [Book] p.75, Def 4.6.1
     public static func minus(_ G: GridDiagram) -> GridComplex {
         typealias P = MPolynomial<_Un, 𝐙₂>
         
+        let n = G.gridNumber
         let (Os, Xs) = (G.Os, G.Xs)
-        return _gridComplex(G) { rect in
+        return _gridComplex(G, n) { rect in
             rect.intersects(Xs)
-                ? nil : P.monomial(ofMultiDegree: Os.map { O in rect.contains(O) ? 1 : 0 })
-        }.splitMonomials(numberOfIndeterminants: G.gridNumber)
+                ? nil : .init(monomialDegree: Os.map { O in rect.contains(O) ? 1 : 0 })
+        }
     }
     
     // MEMO: 𝓖𝓒^-. [Book] p.252, Def 13.2.1
     public static func filtered(_ G: GridDiagram) -> GridComplex {
         typealias P = MPolynomial<_Un, 𝐙₂>
         
+        let n = G.gridNumber
         let Os = G.Os
-        return _gridComplex(G) { rect in
-            P.monomial(ofMultiDegree: Os.map { O in rect.contains(O) ? 1 : 0 })
-        }.splitMonomials(numberOfIndeterminants: G.gridNumber)
+        return _gridComplex(G, n) { rect in
+            .init(monomialDegree: Os.map { O in rect.contains(O) ? 1 : 0 })
+        }
     }
     
-    private static func _gridComplex<R: Ring>(_ G: GridDiagram, _ coeff: @escaping (GridDiagram.Rect) -> R?) -> ChainComplex1<FreeModule<GridDiagram.Generator, R>> {
+    private static func _gridComplex(_ G: GridDiagram, _ n: Int, _ U: @escaping (GridDiagram.Rect) -> MonomialGenerator<_Un>?) -> GridComplex {
+        typealias T = TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>
+        typealias M = FreeModule<T, 𝐙₂>
+        typealias P = MPolynomial<_Un, 𝐙₂>
+        
+        let range = G.generators.map{ $0.MaslovDegree }.range!
+        let iMax = range.max()!
+        let cache: CacheDictionary<GridDiagram.Generator, [T]> = .empty
+        
         return ChainComplex1.descending(
-            supported: G.generators.map{ $0.MaslovDegree }.range!,
-            sequence: { i in ModuleObject(basis: G.generators.filter{ $0.degree == i }) },
+            supported: range,
+            sequence: { i -> ModuleObject<M> in
+                guard i <= iMax else {
+                    return .zeroModule
+                }
+                
+                let above = (0 ... (iMax - i) / 2).flatMap { k in
+                    G.generators.filter{ $0.degree == i + 2 * k }
+                }
+                let gens = above.flatMap { x -> [T] in
+                    let mons = P.monomials(ofDegree: i - x.degree, usingIndeterminates: (0 ..< n).toArray()).map{ m in MonomialGenerator(monomial: m) }
+                    return mons.map{ m in T(m, x) }
+                }
+                return ModuleObject(basis: gens)
+            },
             differential: { i in
-                ModuleEnd.linearlyExtend {  x -> FreeModule<GridDiagram.Generator, R> in
-                    G.adjacents(x).sum { y -> FreeModule<GridDiagram.Generator, R> in
-                        let rects = G.emptyRectangles(from: x, to: y)
-                        let c = rects.compactMap { rect in coeff(rect) }.sumAll()
-                        return (c == .zero) ? .zero : c * .wrap(y)
+                // what we are doing here is:
+                //
+                //   d(U^I x) = U^I d(x) = U^I (Σ U^J y) = Σ U^(I+J) y
+                //
+                // d(x) is cached for performance.
+                ModuleEnd.linearlyExtend { t -> M in
+                    let (m0, x) = t.factors
+                    let dx = cache.useCacheOrSet(key: x) {
+                        G.adjacents(x).flatMap { y  in
+                            G.emptyRectangles(from: x, to: y).compactMap { rect in
+                                U(rect).map{ T($0, y) }
+                            }
+                        }
+                    }
+                    return dx.sum { y in
+                        .wrap(m0 * y)
                     }
                 }
             }
@@ -84,44 +119,6 @@ extension GridComplex {
     }
 }
 
-extension ChainComplex where GridDim == _1, BaseModule == FreeModule<GridDiagram.Generator, MPolynomial<_Un, 𝐙₂>> {
-    func splitMonomials(numberOfIndeterminants n: Int) -> GridComplex {
-        typealias R = 𝐙₂
-        typealias P = MPolynomial<_Un, R>
-        typealias Result = FreeModule<TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>, R>
-        
-        let iMax = grid.supportedCoords.map{ $0[0] }.max()!
-        return ChainComplex1<Result>.descending(
-            supported: grid.supportedCoords.map{ $0[0] },
-            sequence: { i -> ModuleObject<Result> in
-                guard i <= iMax else {
-                    return .zeroModule
-                }
-                
-                let above = (0 ... (iMax - i) / 2).flatMap { k in self[i + 2 * k].generators }
-                let gens = above.flatMap { e -> [Result.Generator] in
-                    let x = e.unwrap()!
-                    let mons = P.monomials(ofDegree: i - x.degree, usingIndeterminates: (0 ..< n).toArray())
-                    return mons.map{ m in TensorGenerator(MonomialGenerator(monomial: m), x) }
-                }
-                return ModuleObject<Result>(basis: gens)
-            },
-            differential: { i -> ModuleEnd<Result> in
-                let d = self.differential(at: i)
-                let cache: CacheDictionary<GridDiagram.Generator, FreeModule<GridDiagram.Generator, P>> = .empty
-                return ModuleEnd.linearlyExtend { (t: TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>) -> Result in
-                    let (m, x) = t.factors
-                    let y = cache.useCacheOrSet(key: x) {
-                        d.applied(to: .wrap(x))
-                    }
-                    return SwiftyKnots.splitMonomials(y).mapGenerators { t in
-                        TensorGenerator(m * t.factors.0, t.factors.1)
-                    }
-                }
-            }
-        )
-    }
-}
 
 extension TensorGenerator where A == MonomialGenerator<_Un>, B == GridDiagram.Generator {
     public var algebraicDegree: Int {
@@ -133,6 +130,10 @@ extension TensorGenerator where A == MonomialGenerator<_Un>, B == GridDiagram.Ge
         let m = factors.0 // MonomialGenerator<_Un>
         let x = factors.1 // GridDiagram.Generator
         return _Un.totalDegree(exponents: m.monomialDegree) / 2 + x.AlexanderDegree
+    }
+    
+    public static func * (a: A, t: TensorGenerator<A, B>) -> TensorGenerator<A, B> {
+        return .init(a * t.factors.0, t.factors.1)
     }
 }
 
