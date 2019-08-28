@@ -93,8 +93,8 @@ class GridHomologyTests: XCTestCase {
         let C = GridComplex.minus(G)
         let H = C.homology
         
-        XCTAssertEqual(H[ 2].dictionaryDescription, [0 : 1])
-        XCTAssertEqual(H[ 1].dictionaryDescription, [0 : 1])
+        XCTAssertEqual(H[ 2].dictionaryDescription, [:])
+        XCTAssertEqual(H[ 1].dictionaryDescription, [:])
         XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
         XCTAssertEqual(H[-1].dictionaryDescription, [:])
         XCTAssertEqual(H[-2].dictionaryDescription, [0 : 1])
@@ -105,8 +105,8 @@ class GridHomologyTests: XCTestCase {
         let C = GridComplex.minus(G)
         let H = C.homology
         
-        XCTAssertEqual(H[ 2].dictionaryDescription, [:])
-        XCTAssertEqual(H[ 1].dictionaryDescription, [:])
+        XCTAssertEqual(H[ 2].dictionaryDescription, [0 : 1])
+        XCTAssertEqual(H[ 1].dictionaryDescription, [0 : 1])
         XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
         XCTAssertEqual(H[-1].dictionaryDescription, [:])
         XCTAssertEqual(H[-2].dictionaryDescription, [0 : 1])
