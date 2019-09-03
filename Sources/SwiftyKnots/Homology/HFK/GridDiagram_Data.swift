@@ -13,17 +13,11 @@ import Foundation
 extension GridDiagram {
     public static func load(_ name: String) -> GridDiagram? {
         loadTable()
-        if let code = _table[name] {
-            let (Os, Xs) = (points(code["O"]!), points(code["X"]!))
-            return GridDiagram(Os, Xs)
+        if let data = _table[name] {
+            let (Os, Xs) = (data["O"]!, data["X"]!)
+            return GridDiagram(name: name, Os: Os, Xs: Xs)
         } else {
             return nil
-        }
-    }
-    
-    private static func points(_ seq: [Int]) -> [Point] {
-        return seq.enumerated().map { (x, y) in
-            Point(2 * x + 1, 2 * y + 1)
         }
     }
 }
@@ -57,7 +51,7 @@ private let _jsonString = """
 "8_1": {"X": [0,5,6,7,4,3,8,1,9,2], "O": [4,2,3,1,9,5,0,6,7,8]},
 "8_2": {"X": [5,4,3,2,1,0,7,6,8,9], "O": [3,2,1,0,8,6,5,9,4,7]},
 "8_3": {"X": [1,8,9,2,5,4,7,0,6,3], "O": [4,0,7,6,3,8,2,5,1,9]},
-"8_4": {"X": [0,9,5,4,3,2,1,6,7,8], "O": [6,4,2,1,7,0,8,9,5,3]},
+"8_4": {"X": [1,8,9,2,5,4,7,0,6,3], "O": [4,0,7,6,3,8,2,5,1,9]},
 "8_5": {"X": [0,9,3,8,4,7,6,5,2,1], "O": [8,4,7,6,2,5,3,1,0,9]},
 "8_6": {"X": [4,2,9,8,6,7,5,0,1,3], "O": [9,8,7,5,4,3,1,2,6,0]},
 "8_7": {"X": [4,8,3,2,9,7,6,0,5,1], "O": [0,2,1,7,6,5,4,8,3,9]},

@@ -12,12 +12,13 @@ import SwiftyHomology
 public struct GridDiagram {
     // Memo:  Os and Xs are placed on  odd points,
     //       generators are placed on even points.
+    public let name: String
     public let Os: [Point]
     public let Xs: [Point]
     public let generators: [Generator]
     private let generatorsDict: [[Int] : Generator]
     
-    public init(arcPresentation code: [Int]) {
+    public init(name: String? = nil, arcPresentation code: [Int]) {
         assert(code.count.isEven)
         
         let n = code.count / 2
@@ -39,18 +40,28 @@ public struct GridDiagram {
         assert(Xs.allSatisfy{ p in (0 ..< 2 * n).contains(p.x) })
         assert(Xs.allSatisfy{ p in (0 ..< 2 * n).contains(p.y) })
         
-        self.init(Os.sorted(by: { p in p.x }), Xs.sorted(by: { p in p.x }))
+        self.init(name: name, Os: Os.sorted(by: { p in p.x }), Xs: Xs.sorted(by: { p in p.x }))
     }
     
-    public init(arcPresentation code: Int...) {
-        self.init(arcPresentation: code)
+    public init(name: String? = nil, arcPresentation code: Int...) {
+        self.init(name: name, arcPresentation: code)
     }
     
-    internal init(_ Os: [Point], _ Xs: [Point]) {
-        let n = Os.count
-        
+    public init(name: String? = nil, Os: [Int], Xs: [Int]) {
+        func points(_ seq: [Int]) -> [Point] {
+            return seq.enumerated().map { (x, y) in
+                Point(2 * x + 1, 2 * y + 1)
+            }
+        }
+        self.init(name: name, Os: points(Os), Xs: points(Xs))
+    }
+    
+    internal init(name: String? = nil, Os: [Point], Xs: [Point]) {
+        self.name = name ?? "G"
         self.Os = Os
         self.Xs = Xs
+        
+        let n = Os.count
         
         let x_TL: Generator = {
             let seq = Os.map{ p in ((p.y + 1) / 2) % n }
@@ -123,8 +134,11 @@ public struct GridDiagram {
         let t = { (p: Point) -> Point in
             Point(n - p.y, p.x)
         }
-        return GridDiagram(Os.map(t).sorted(by: { p in p.x }),
-                           Xs.map(t).sorted(by: { p in p.x }))
+        return GridDiagram(
+            name: name + "m",
+            Os: Os.map(t).sorted(by: { p in p.x }),
+            Xs: Xs.map(t).sorted(by: { p in p.x })
+        )
     }
     
     public func generator(forSequence seq: [Int]) -> Generator {
