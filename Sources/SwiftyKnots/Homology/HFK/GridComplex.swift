@@ -77,7 +77,6 @@ extension GridComplex {
         
         let range = G.generators.map{ $0.MaslovDegree }.range!
         let iMax = range.max()!
-        let cache: CacheDictionary<GridDiagram.Generator, [T]> = .empty
         
         return ChainComplex1.descending(
             supported: range,
@@ -97,17 +96,12 @@ extension GridComplex {
             },
             differential: { i in
                 // what we are doing here is:
-                //
-                //   d(U^I x) = U^I d(x) = U^I (Σ U^J y) = Σ U^(I+J) y
-                //
-                // d(x) is cached for performance.
+                // d(U^I x) = U^I d(x) = U^I (Σ U^J y) = Σ U^(I+J) y
                 ModuleEnd.linearlyExtend { t -> M in
                     let (m0, x) = t.factors
-                    let dx = cache.useCacheOrSet(key: x) {
-                        G.adjacents(x).flatMap { y  in
-                            G.emptyRectangles(from: x, to: y).compactMap { rect in
-                                U(rect).map{ T($0, y) }
-                            }
+                    let dx = G.adjacents(x).flatMap { y  in
+                        G.emptyRectangles(from: x, to: y).compactMap { rect in
+                            U(rect).map{ T($0, y) }
                         }
                     }
                     return dx.sum { y in
