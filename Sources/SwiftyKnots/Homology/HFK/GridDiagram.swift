@@ -82,12 +82,16 @@ public struct GridDiagram {
         )
     }
     
-    public func printDiagram() {
+    public var diagramString: String {
         let OXs = Os.map{ p in (p, "O") } + Xs.map{ p in (p, "X") }
         let elems = OXs.map { (p, s) in
             ((p.x - 1)/2, (p.y - 1)/2, s)
         }
-        print( Format.table(elements: elems) )
+        return Format.table(elements: elems)
+    }
+    
+    public func printDiagram() {
+        print(diagramString)
     }
     
     public struct Point: Equatable, Hashable, Comparable, CustomStringConvertible {
