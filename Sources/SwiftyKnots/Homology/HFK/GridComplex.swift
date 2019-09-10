@@ -99,7 +99,7 @@ extension GridComplex {
                 // d(U^I x) = U^I d(x) = U^I (Σ U^J y) = Σ U^(I+J) y
                 ModuleEnd.linearlyExtend { t -> M in
                     let (m0, x) = t.factors
-                    let dx = G.adjacents(x).flatMap { y  in
+                    let dx = G.generators.adjacents(of: x).flatMap { y  in
                         G.emptyRectangles(from: x, to: y).compactMap { rect in
                             U(rect).map{ T($0, y) }
                         }
