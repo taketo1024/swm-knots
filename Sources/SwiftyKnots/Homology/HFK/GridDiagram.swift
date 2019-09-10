@@ -16,7 +16,7 @@ public struct GridDiagram {
     public let Os: [Point]
     public let Xs: [Point]
     public let generators: [Generator]
-    private let generatorsDict: [[Int] : Generator]
+    private let generatorsDict: [[Int8] : Generator]
     
     public init(name: String? = nil, arcPresentation code: [Int]) {
         assert(code.count.isEven)
@@ -118,7 +118,7 @@ public struct GridDiagram {
         generate(n)
         
         self.generators = generators
-        self.generatorsDict = Dictionary(pairs: generators.map{ x in (x.sequence, x) })
+        self.generatorsDict = Dictionary(pairs: generators.map{ x in (x.int8sequence, x) })
     }
     
     public var gridNumber: Int {
@@ -142,6 +142,10 @@ public struct GridDiagram {
     }
     
     public func generator(forSequence seq: [Int]) -> Generator {
+        return generator(forSequence: seq.map{ Int8($0) })
+    }
+    
+    private func generator(forSequence seq: [Int8]) -> Generator {
         return generatorsDict[seq]!
     }
     
@@ -159,10 +163,12 @@ public struct GridDiagram {
             case .OBR, .XBR: return (+1, -1)
             }
         }()
+        
         let seq = target
             .map{ p in (x: (p.x + diff.0) % gridSize, y: (p.y + diff.1) % gridSize) }
             .sorted{ $0.x }
             .map{ $0.y / 2 }
+        
         return generator(forSequence: seq)
     }
     
@@ -172,7 +178,7 @@ public struct GridDiagram {
     }
     
     public func adjacents(_ x: Generator) -> [Generator] {
-        let xSeq = x.sequence
+        let xSeq = x.int8sequence
         return DPermutation.rawTranspositions(within: gridNumber).map { t in
             let ySeq = xSeq.swappedAt(t.0, t.1)
             return generator(forSequence: ySeq)
@@ -229,7 +235,7 @@ public struct GridDiagram {
         public var corners: [Point] {
             return [shift(1, 1), shift(-1, 1), shift(-1, -1), shift(1, -1)]
         }
-
+        
         public var description: String {
             return "(\(x), \(y))"
         }
@@ -259,7 +265,7 @@ public struct GridDiagram {
             return (xRange.contains(p.x) || xRange.contains(p.x + gridSize))
                 && (yRange.contains(p.y) || yRange.contains(p.y + gridSize))
         }
-
+        
         public func intersects(_ points: [Point], interior: Bool = false) -> Bool {
             return points.contains{ p in self.contains(p, interior: interior) }
         }
@@ -271,24 +277,34 @@ public struct GridDiagram {
     
     public struct Generator: FreeModuleGenerator {
         public let id: Int
-        public let sequence: [Int]
         
-        public let MaslovDegree: Int
-        public let AlexanderDegree: Int
+        fileprivate let int8sequence: [Int8]
+        fileprivate let int8degrees: (Int8, Int8)
         
         fileprivate init(id: Int, sequence: [Int], MaslovDegree: Int, AlexanderDegree: Int) {
             self.id = id
-            self.sequence = sequence
-            self.MaslovDegree = MaslovDegree
-            self.AlexanderDegree = AlexanderDegree
+            self.int8sequence = sequence.map{ Int8($0) }
+            self.int8degrees = (Int8(MaslovDegree), Int8(AlexanderDegree))
+        }
+        
+        public var sequence: [Int] {
+            return int8sequence.map{ Int($0) }
         }
         
         public var points: [Point] {
-            return sequence.enumerated().map { (i, j) in Point(2 * i, 2 * j) }
+            return int8sequence.enumerated().map { (i, j) in Point(2 * i, 2 * Int(j)) }
         }
         
         public var degree: Int {
             return MaslovDegree
+        }
+        
+        public var MaslovDegree: Int {
+            return Int(int8degrees.0)
+        }
+        
+        public var AlexanderDegree: Int {
+            return Int(int8degrees.1)
         }
         
         public static func == (a: GridDiagram.Generator, b: GridDiagram.Generator) -> Bool {
@@ -304,7 +320,7 @@ public struct GridDiagram {
         }
         
         public var description: String {
-            return "\(sequence)"
+            return "\(int8sequence)"
         }
     }
     
