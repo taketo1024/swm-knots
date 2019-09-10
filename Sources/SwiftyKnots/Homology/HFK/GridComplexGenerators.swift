@@ -163,6 +163,10 @@ extension GridDiagram {
         }
     }
     
+    public func clearGeneratorsCache() {
+        generatorsCache.clear()
+    }
+    
     public func rectangles(from x: Generator, to y: Generator) -> [Rect] {
         let (ps, qs) = (x.points, y.points)
         let diff = Set(ps).subtracting(qs)
