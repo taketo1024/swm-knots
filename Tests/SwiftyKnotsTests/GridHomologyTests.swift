@@ -26,7 +26,7 @@ class GridHomologyTests: XCTestCase {
     // GC-tilde(unknot)
     func testUnknot_tilde() {
         let G = GridDiagram.load("0_1")!
-        let C = GridComplex.tilde(G)
+        let C = GridComplex(type: .tilde, diagram: G)
         let H = C.homology
         
         XCTAssertEqual(H[0].dictionaryDescription, [0 : 1])
@@ -36,7 +36,7 @@ class GridHomologyTests: XCTestCase {
     // GC-tilde(unknot')
     func testUnknot_twisted_tilde() {
         let G = GridDiagram(arcPresentation: 1,2,3,1,2,3)
-        let C = GridComplex.tilde(G)
+        let C = GridComplex(type: .tilde, diagram: G)
         let H = C.homology
         
         XCTAssertEqual(H[0].dictionaryDescription, [0 : 1])
@@ -47,7 +47,7 @@ class GridHomologyTests: XCTestCase {
     // GC-hat(unknot) = F
     func testUnknot_hat() {
         let G = GridDiagram.load("0_1")!
-        let C = GridComplex.hat(G)
+        let C = GridComplex(type: .hat, diagram: G)
         let H = C.homology
         
         XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
@@ -58,7 +58,7 @@ class GridHomologyTests: XCTestCase {
     // GC-hat(unknot') = F
     func testUnknot_twisted_hat() {
         let G = GridDiagram(arcPresentation: 1,2,3,1,2,3)
-        let C = GridComplex.hat(G)
+        let C = GridComplex(type: .hat, diagram: G)
         let H = C.homology
         
         XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
@@ -69,7 +69,7 @@ class GridHomologyTests: XCTestCase {
     // GC^-(unknot) = F[U]
     func testUnknot_minus() {
         let G = GridDiagram.load("0_1")!
-        let C = GridComplex.minus(G)
+        let C = GridComplex(type: .minus, diagram: G)
         let H = C.homology
         
         XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
@@ -80,7 +80,7 @@ class GridHomologyTests: XCTestCase {
     // GC^-(unknot) = F[U]
     func testUnknot_twisted_minus() {
         let G = GridDiagram(arcPresentation: 1,2,3,1,2,3)
-        let C = GridComplex.minus(G)
+        let C = GridComplex(type: .minus, diagram: G)
         let H = C.homology
         
         XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
@@ -90,7 +90,7 @@ class GridHomologyTests: XCTestCase {
     
     func testTrefoil_minus() {
         let G = GridDiagram.load("3_1")!
-        let C = GridComplex.minus(G)
+        let C = GridComplex(type: .minus, diagram: G)
         let H = C.homology
         
         XCTAssertEqual(H[ 2].dictionaryDescription, [:])
@@ -102,7 +102,7 @@ class GridHomologyTests: XCTestCase {
 
     func testTrefoil_mirror_minus() {
         let G = GridDiagram.load("3_1")!.rotate90
-        let C = GridComplex.minus(G)
+        let C = GridComplex(type: .minus, diagram: G)
         let H = C.homology
         
         XCTAssertEqual(H[ 2].dictionaryDescription, [0 : 1])
@@ -114,7 +114,7 @@ class GridHomologyTests: XCTestCase {
     
     func testTrefoil_filtered() {
         let G = GridDiagram.load("3_1")!
-        let C = GridComplex.filtered(G)
+        let C = GridComplex(type: .filtered, diagram: G)
         let H = C.homology
         
         XCTAssertEqual(H[ 2].dictionaryDescription, [:])
@@ -126,7 +126,7 @@ class GridHomologyTests: XCTestCase {
     
     func testTrefoil_mirror_filtered() {
         let G = GridDiagram.load("3_1")!.rotate90
-        let C = GridComplex.filtered(G)
+        let C = GridComplex(type: .filtered, diagram: G)
         let H = C.homology
         
         XCTAssertEqual(H[ 2].dictionaryDescription, [:])

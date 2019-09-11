@@ -63,8 +63,9 @@ public struct GridComplexGenerators: Sequence {
         }
     }
     
+    public let degreeRange: ClosedRange<Int>
     private let data: [[Int8] : Generator]
-
+    
     public init(for G: GridDiagram) {
         
         let (Os, Xs) = (G.Os, G.Xs)
@@ -126,6 +127,7 @@ public struct GridComplexGenerators: Sequence {
         generate(n)
         
         self.data = Dictionary(pairs: generators.map{ x in (x.int8sequence, x) })
+        self.degreeRange = generators.map{ $0.degree }.range!
     }
     
     public var generators: Set<Generator> {
