@@ -14,27 +14,27 @@ class GridHomologyTests: XCTestCase {
     
     func testKnotGenus0_1() {
         let G = GridDiagram.load("0_1")!
-        XCTAssertEqual(GridComplex.genus(G), 0)
+        XCTAssertEqual(GridComplex.genus(of: G), 0)
     }
     
     func testKnotGenus3_1() {
         let G = GridDiagram.load("3_1")!
-        XCTAssertEqual(GridComplex.genus(G), 1)
+        XCTAssertEqual(GridComplex.genus(of: G), 1)
     }
 
     func testKnotGenus4_1() {
         let G = GridDiagram.load("4_1")!
-        XCTAssertEqual(GridComplex.genus(G), 1)
+        XCTAssertEqual(GridComplex.genus(of: G), 1)
     }
 
     func testKnotGenus5_1() {
         let G = GridDiagram.load("5_1")!
-        XCTAssertEqual(GridComplex.genus(G), 2)
+        XCTAssertEqual(GridComplex.genus(of: G), 2)
     }
 
     func testKnotGenus5_2() {
         let G = GridDiagram.load("5_2")!
-        XCTAssertEqual(GridComplex.genus(G), 1)
+        XCTAssertEqual(GridComplex.genus(of: G), 1)
     }
     
     // GC-tilde(unknot)
