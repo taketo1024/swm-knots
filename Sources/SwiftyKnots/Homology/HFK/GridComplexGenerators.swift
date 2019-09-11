@@ -131,7 +131,7 @@ public struct GridComplexGenerators: Sequence {
     
     private init(data: [[Int8] : Generator]) {
         self.data = data
-        self.degreeRange = data.values.map{ $0.degree }.range!
+        self.degreeRange = data.values.map{ $0.degree }.range ?? (0 ... 0)
     }
     
     public var generators: Set<Generator> {

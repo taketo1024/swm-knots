@@ -35,15 +35,15 @@ extension GridComplex {
         self.init(type: type, diagram: G, generators: generators)
     }
     
-    public init(type: GridComplexType, diagram G: GridDiagram, generators: GridComplexGenerators) {
+    public init(type: GridComplexType, diagram G: GridDiagram, generators: GridComplexGenerators, filter: @escaping (Element.Generator) -> Bool = { _ in true }) {
         self.init(
             supported:    generators.degreeRange,
-            sequence:     GridComplex.chain(type: type, diagram: G, generators: generators),
-            differential: GridComplex.differential(type: type, diagram: G, generators: generators)
+            sequence:     GridComplex.chain(type: type, diagram: G, generators: generators, filter: filter),
+            differential: GridComplex.differential(type: type, diagram: G, generators: generators, filter: filter)
         )
     }
     
-    public static func chain(type: GridComplexType, diagram G: GridDiagram, generators: GridComplexGenerators) -> ( (Int) -> ModuleObject<Element> ) {
+    private static func chain(type: GridComplexType, diagram G: GridDiagram, generators: GridComplexGenerators, filter: @escaping (Element.Generator) -> Bool) -> ( (Int) -> ModuleObject<Element> ) {
         typealias T = Element.Generator
         
         let iMax = generators.degreeRange.upperBound
@@ -69,14 +69,17 @@ extension GridComplex {
                     .flatMap { x -> [T] in
                         let indeterminates = Array(0 ..< numberOfIndeterminates)
                         let Us = MPolynomial<_Un, 𝐙₂>.monomials(ofDegree: i - x.degree, usingIndeterminates: indeterminates)
-                        return Us.map{ U in T( MonomialGenerator(monomial: U), x ) }
+                        return Us.compactMap{ U in
+                            let t = T( MonomialGenerator(monomial: U), x )
+                            return filter(t) ? t : nil
+                        }
                 }
             }
             return ModuleObject(basis: gens)
         }
     }
     
-    public static func differential(type: GridComplexType, diagram G: GridDiagram, generators: GridComplexGenerators) -> ( (Int) -> ModuleEnd<Element> ) {
+    private static func differential(type: GridComplexType, diagram G: GridDiagram, generators: GridComplexGenerators, filter: @escaping (Element.Generator) -> Bool) -> ( (Int) -> ModuleEnd<Element> ) {
         typealias T = Element.Generator
         
         let (Os, Xs) = (G.Os, G.Xs)
@@ -102,7 +105,8 @@ extension GridComplex {
                 return generators.adjacents(of: x).flatMap { y -> [Element] in
                     G.emptyRectangles(from: x, to: y).compactMap { rect -> Element? in
                         if let Us = U(rect) {
-                            return .wrap( T(m * Us, y) )
+                            let ty = T(m * Us, y)
+                            return filter(ty) ? .wrap(ty) : nil
                         } else {
                             return nil
                         }
