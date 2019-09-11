@@ -16,8 +16,6 @@ public struct GridDiagram {
     public let Os: [Point]
     public let Xs: [Point]
     
-    internal let generatorsCache: Cache<GridComplexGenerators> = .empty
-    
     public init(name: String? = nil, arcPresentation code: [Int]) {
         assert(code.count.isEven)
         

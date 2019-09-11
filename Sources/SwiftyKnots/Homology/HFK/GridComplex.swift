@@ -31,7 +31,8 @@ extension GridComplex {
     public typealias Element = FreeModule<TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>
     
     public init(type: GridComplexType, diagram G: GridDiagram) {
-        self.init(type: type, diagram: G, generators: G.generators)
+        let generators = GridComplexGenerators(for: G)
+        self.init(type: type, diagram: G, generators: generators)
     }
     
     public init(type: GridComplexType, diagram G: GridDiagram, generators: GridComplexGenerators) {
@@ -110,6 +111,25 @@ extension GridComplex {
             }
         }
     }
+    
+    public static func genus(of G: GridDiagram) -> Int {
+        let gens = GridComplexGenerators(for: G)
+        return genus(of: G, generators: gens)
+    }
+    
+    public static func genus(of G: GridDiagram, generators: GridComplexGenerators) -> Int {
+        let C = GridComplex(type: .tilde, diagram: G)
+        let H = C.asBigraded { x in x.AlexanderDegree }.homology
+        let M = generators.degreeRange
+        let A = generators.map{ $0.AlexanderDegree }.range!
+        
+        for (j, i) in A.reversed() * M.reversed() {
+            if !H[i, j].isZero {
+                return j
+            }
+        }
+        fatalError()
+    }
 }
 
 
@@ -123,26 +143,5 @@ extension TensorGenerator where A == MonomialGenerator<_Un>, B == GridDiagram.Ge
         let m = factors.0 // MonomialGenerator<_Un>
         let x = factors.1 // GridDiagram.Generator
         return _Un.totalDegree(exponents: m.monomialDegree) / 2 + x.AlexanderDegree
-    }
-    
-    public static func * (a: A, t: TensorGenerator<A, B>) -> TensorGenerator<A, B> {
-        return .init(a * t.factors.0, t.factors.1)
-    }
-}
-
-extension GridDiagram {
-    public var knotGenus: Int {
-        let C = GridComplex(type: .tilde, diagram: self)
-        let H = C.asBigraded { x in x.AlexanderDegree }.homology
-        let M = generators.degreeRange
-        let A = generators.map{ $0.AlexanderDegree }.range!
-        
-        for (j, i) in A.reversed() * M.reversed() {
-            if !H[i, j].isZero {
-                return j
-            }
-        }
-        
-        fatalError()
     }
 }
