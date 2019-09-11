@@ -63,8 +63,8 @@ public struct GridComplexGenerators: Sequence {
         }
     }
     
-    public let degreeRange: ClosedRange<Int>
     private let data: [[Int8] : Generator]
+    public let degreeRange: ClosedRange<Int>
     
     public init(for G: GridDiagram) {
         
@@ -126,29 +126,38 @@ public struct GridComplexGenerators: Sequence {
         }
         generate(n)
         
-        self.data = Dictionary(pairs: generators.map{ x in (x.int8sequence, x) })
-        self.degreeRange = generators.map{ $0.degree }.range!
+        self.init(data: Dictionary(pairs: generators.map{ x in (x.int8sequence, x) }))
+    }
+    
+    private init(data: [[Int8] : Generator]) {
+        self.data = data
+        self.degreeRange = data.values.map{ $0.degree }.range!
     }
     
     public var generators: Set<Generator> {
         return Set(data.values)
     }
     
-    public func generator(forSequence seq: [Int]) -> Generator {
+    public func generator(forSequence seq: [Int]) -> Generator? {
         return generator(forSequence: seq.map{ Int8($0) })
     }
     
-    private func generator(forSequence seq: [Int8]) -> Generator {
-        return data[seq]!
+    private func generator(forSequence seq: [Int8]) -> Generator? {
+        return data[seq]
     }
     
     public func adjacents(of x: Generator) -> [Generator] {
         let xSeq = x.int8sequence
         let n = x.sequence.count
-        return DPermutation.rawTranspositions(within: n).map { t in
+        return DPermutation.rawTranspositions(within: n).compactMap { t in
             let ySeq = xSeq.swappedAt(t.0, t.1)
             return generator(forSequence: ySeq)
         }
+    }
+    
+    public func filter(_ predicate: (Generator) -> Bool) -> GridComplexGenerators {
+        let data = self.data.filter{ (_, x) in predicate(x) }
+        return .init(data: data)
     }
     
     public func makeIterator() -> Set<Generator>.Iterator {
