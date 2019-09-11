@@ -129,17 +129,21 @@ public struct KhCube<R: Ring> {
     }
     
     public func fold() -> ChainComplex1<FreeModule<KhEnhancedState, R>> {
-        return ChainComplex1.ascending (supported: 0 ... dim, sequence: { i in
-            let n = self.dim
-            guard (0 ... n).contains(i) else {
-                return .zeroModule
-            }
-            
-            let states = self.states(ofDegree: i)
-            let generators = states.flatMap{ self[$0].generators }
-            return ModuleObject(basis: generators)
-            
-        }, differential: { i in self.differential(i) })
+        return ChainComplex1(
+            type: .ascending,
+            supported: 0 ... dim,
+            sequence: { i in
+                let n = self.dim
+                guard (0 ... n).contains(i) else {
+                    return .zeroModule
+                }
+                
+                let states = self.states(ofDegree: i)
+                let generators = states.flatMap{ self[$0].generators }
+                
+                return ModuleObject(basis: generators)
+            },
+            differential: { i in self.differential(i) })
     }
     
     public func describe(_ s: Link.State) {
