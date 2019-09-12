@@ -66,7 +66,7 @@ extension GridComplex {
             let gens = (0 ... (iMax - i) / 2).flatMap { k in
                 generators
                     .filter { $0.degree == i + 2 * k }
-                    .flatMap { x -> [T] in
+                    .parallelFlatMap { x -> [T] in
                         let indeterminates = Array(0 ..< numberOfIndeterminates)
                         let Us = MPolynomial<_Un, 𝐙₂>.monomials(ofDegree: i - x.degree, usingIndeterminates: indeterminates)
                         return Us.compactMap{ U in
@@ -102,7 +102,7 @@ extension GridComplex {
         return { i in
             ModuleEnd.linearlyExtend { t -> Element in
                 let (m, x) = t.factors
-                return generators.adjacents(of: x).flatMap { y -> [Element] in
+                return generators.adjacents(of: x).parallelFlatMap { y -> [Element] in
                     G.emptyRectangles(from: x, to: y).compactMap { rect -> Element? in
                         if let Us = U(rect) {
                             let ty = T(m * Us, y)
