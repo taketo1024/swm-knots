@@ -96,27 +96,29 @@ public struct GridComplexGenerators: Sequence {
             .parallelMap { (seq, trans) -> ([Int8], Int8, Int8) in
                 typealias P = GridDiagram.Point
                 
-                let y = seq.enumerated().map { (i, j) in GridDiagram.Point(2 * i, 2 * Int(j)) }
-                
                 let (i, j) = trans
-                let (xi, xj) = (Int(seq[j]), Int(seq[i]))
-                let xyRect = GridDiagram.Rect(from: P(2 * i, 2 * xi), to: P(2 * j, 2 * xj), gridSize: 2 * n)
-                let yxRect = GridDiagram.Rect(from: P(2 * j, 2 * xi), to: P(2 * i, 2 * xj), gridSize: 2 * n)
+                let x = seq.enumerated().map { (i, j) in GridDiagram.Point(2 * i, 2 * Int(j)) }
+                let rect = GridDiagram.Rect(from: x[i], to: x[j], gridSize: 2 * n)
                 
                 // M(y) - M(x) = 2 #(r ∩ Os) - 2 #(x ∩ Int(r)) - 1
-                // <==> M(x) - M(y) = 2 #(r' ∩ Os) - 2 #(y ∩ Int(r')) - 1,  where r': y -> x
-                let m = -2 * Os.count{ O in yxRect.contains(O) } + 2 * y.count{ p in yxRect.contains(p, interior: true) } + 1
+                let m = 2 * Os.count{ O in rect.contains(O) } - 2 * x.count{ p in rect.contains(p, interior: true) } - 1
                 
                 // A(y) = A(x) + #(r ∩ Os) - #(r ∩ Xs)
-                let a = Os.count{ O in xyRect.contains(O) } - Xs.count{ X in xyRect.contains(X) }
+                let a = Os.count{ O in rect.contains(O) } - Xs.count{ X in rect.contains(X) }
                 
-                return (seq, Int8(m), Int8(a))
-            }.reduce(into: [x_TL]) { (result, next) in
-                let x = result.last!
-                let (seq, m, a) = next
-                let y = Generator(id: x.id + 1, sequence: seq, MaslovDegree: x.int8MaslovDegree + m, AlexanderDegree: x.int8AlexanderDegree + a)
-                result.append(y)
+                return (seq.swappedAt(i, j), Int8(m), Int8(a))
+                
+        }.reduce(into: [x_TL]) { (result, next) in
+            if result.count == 1 {
+                result.reserveCapacity(n.factorial + 1)
             }
+            
+            let x = result.last!
+            let (seq, m, a) = next
+            let y = Generator(id: x.id + 1, sequence: seq, MaslovDegree: x.int8MaslovDegree + m, AlexanderDegree: x.int8AlexanderDegree + a)
+            
+            result.append(y)
+        }
         
         self.init(data: Dictionary(pairs: generators.map{ x in (x.int8sequence, x) }))
     }
@@ -125,7 +127,8 @@ public struct GridComplexGenerators: Sequence {
     private static func generateSequences(ofLength n: Int, from: [Int8]) -> [([Int8], (Int, Int))] {
         var result: [([Int8], (Int, Int))] = []
         result.reserveCapacity(n.factorial)
-        result.append((from, (0, 0)))
+        
+        var prev = from
         
         func generate(_ k: Int) {
             if k <= 1 {
@@ -136,16 +139,14 @@ public struct GridComplexGenerators: Sequence {
             
             for l in 0 ..< k - 1 {
                 let (i, j) = (k % 2 == 0) ? (l, k - 1) : (0, k - 1)
-                let last = result.last!
-                let seq = last.0.swappedAt(i, j)
-                result.append( (seq, (i, j)) )
+                result.append( (prev, (i, j)) )
+                prev.swapAt(i, j)
                 
                 generate(k - 1)
             }
         }
         
         generate(n)
-        result.removeFirst()
         
         return result
     }
