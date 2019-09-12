@@ -12,18 +12,14 @@ public struct GridComplexGenerators: Sequence {
         public let id: Int
         
         fileprivate let int8sequence: [Int8]
-        fileprivate let int8MaslovDegree: Int8
-        fileprivate let int8AlexanderDegree: Int8
+        public let MaslovDegree: Int
+        public let AlexanderDegree: Int
         
-        fileprivate init(id: Int, sequence: [Int], MaslovDegree: Int, AlexanderDegree: Int) {
-            self.init(id: id, sequence: sequence.map{ Int8($0) }, MaslovDegree: Int8(MaslovDegree), AlexanderDegree: Int8(AlexanderDegree))
-        }
-        
-        fileprivate init(id: Int, sequence: [Int8], MaslovDegree: Int8, AlexanderDegree: Int8) {
+        fileprivate init(id: Int, sequence: [Int8], MaslovDegree: Int, AlexanderDegree: Int) {
             self.id = id
             self.int8sequence = sequence
-            self.int8MaslovDegree = MaslovDegree
-            self.int8AlexanderDegree = AlexanderDegree
+            self.MaslovDegree = MaslovDegree
+            self.AlexanderDegree = AlexanderDegree
         }
         
         public var sequence: [Int] {
@@ -36,14 +32,6 @@ public struct GridComplexGenerators: Sequence {
         
         public var degree: Int {
             return MaslovDegree
-        }
-        
-        public var MaslovDegree: Int {
-            return Int(int8MaslovDegree)
-        }
-        
-        public var AlexanderDegree: Int {
-            return Int(int8AlexanderDegree)
         }
         
         public func isAdjacent(to y: Generator) -> Bool {
@@ -78,8 +66,8 @@ public struct GridComplexGenerators: Sequence {
         let n = G.Os.count
         
         let x_TL: Generator = {
-            let seq = Os.map{ p in ((p.y + 1) / 2) % n }
-            let points = seq.enumerated().map { (i, j) in GridDiagram.Point(2 * i, 2 * j) }
+            let seq = Os.map{ p in Int8( ((p.y + 1) / 2) % n ) }
+            let points = seq.enumerated().map { (i, j) in GridDiagram.Point(2 * i, 2 * Int(j)) }
             
             let curve = GridDiagram.ClosedCurve(from: Os, to: Xs)
             let w = { p in curve.windingNumber(around: p) }
@@ -92,43 +80,39 @@ public struct GridComplexGenerators: Sequence {
         }()
         
         let generators = GridComplexGenerators
-            .generateSequences(ofLength: n, from: x_TL.int8sequence)
-            .parallelMap { (seq, trans) -> ([Int8], Int8, Int8) in
-                typealias P = GridDiagram.Point
+            .generateSequences(ofLength: n)
+            .reduce(into: [x_TL]) { (result, next) in
+                if result.count == 1 {
+                    result.reserveCapacity(n.factorial + 1)
+                }
                 
-                let (i, j) = trans
-                let x = seq.enumerated().map { (i, j) in GridDiagram.Point(2 * i, 2 * Int(j)) }
-                let rect = GridDiagram.Rect(from: x[i], to: x[j], gridSize: 2 * n)
+                let x = result.last!
+                let (i, j) = next
+                let rect = GridDiagram.Rect(from: x.points[i], to: x.points[j], gridSize: 2 * n)
                 
                 // M(y) - M(x) = 2 #(r ∩ Os) - 2 #(x ∩ Int(r)) - 1
-                let m = 2 * Os.count{ O in rect.contains(O) } - 2 * x.count{ p in rect.contains(p, interior: true) } - 1
+                let m = 2 * Os.count{ O in rect.contains(O) } - 2 * x.points.count{ p in rect.contains(p, interior: true) } - 1
                 
                 // A(y) = A(x) + #(r ∩ Os) - #(r ∩ Xs)
                 let a = Os.count{ O in rect.contains(O) } - Xs.count{ X in rect.contains(X) }
                 
-                return (seq.swappedAt(i, j), Int8(m), Int8(a))
+                let y = Generator(
+                    id: x.id + 1,
+                    sequence: x.int8sequence.swappedAt(i, j),
+                    MaslovDegree: x.MaslovDegree + m,
+                    AlexanderDegree: x.AlexanderDegree + a
+                )
                 
-        }.reduce(into: [x_TL]) { (result, next) in
-            if result.count == 1 {
-                result.reserveCapacity(n.factorial + 1)
-            }
-            
-            let x = result.last!
-            let (seq, m, a) = next
-            let y = Generator(id: x.id + 1, sequence: seq, MaslovDegree: x.int8MaslovDegree + m, AlexanderDegree: x.int8AlexanderDegree + a)
-            
-            result.append(y)
+                result.append(y)
         }
         
         self.init(data: Dictionary(pairs: generators.map{ x in (x.int8sequence, x) }))
     }
     
     // see Heap's algorithm: https://en.wikipedia.org/wiki/Heap%27s_algorithm
-    private static func generateSequences(ofLength n: Int, from: [Int8]) -> [([Int8], (Int, Int))] {
-        var result: [([Int8], (Int, Int))] = []
+    private static func generateSequences(ofLength n: Int) -> [(Int, Int)] {
+        var result: [(Int, Int)] = []
         result.reserveCapacity(n.factorial)
-        
-        var prev = from
         
         func generate(_ k: Int) {
             if k <= 1 {
@@ -139,8 +123,7 @@ public struct GridComplexGenerators: Sequence {
             
             for l in 0 ..< k - 1 {
                 let (i, j) = (k % 2 == 0) ? (l, k - 1) : (0, k - 1)
-                result.append( (prev, (i, j)) )
-                prev.swapAt(i, j)
+                result.append( (i, j) )
                 
                 generate(k - 1)
             }
