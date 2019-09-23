@@ -13,7 +13,7 @@ import SwiftyHomology
 
 public struct MonomialGenerator<xn: MPolynomialIndeterminate>: FreeModuleGenerator {
     public typealias MultiDegree = [Int]
-    internal let monomialDegree: MultiDegree
+    public let monomialDegree: MultiDegree
     
     public init(monomialDegree: MultiDegree) {
         self.monomialDegree = monomialDegree.droppedLast{ $0 == 0 }
