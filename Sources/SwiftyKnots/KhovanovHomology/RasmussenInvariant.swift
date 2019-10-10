@@ -23,7 +23,8 @@ extension Link {
         typealias R = Polynomial<_t, F> // R = F[t], deg(t) = -4.
         
         let L = self
-        let H0 = L.parameterizedKhovanovHomology(R.self, h: .zero, t: R.indeterminate)[0]
+        let C = KhovanovComplex(link: L, h: .zero, t: R.indeterminate)
+        let H0 = C.homology[0]
         
         let q = H0.summands.filter{ $0.isFree }.map { summand in
             summand.generator.generators.map { x in x.degree }.min()!

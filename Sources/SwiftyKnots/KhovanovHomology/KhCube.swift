@@ -36,6 +36,14 @@ public struct KhCube<R: Ring> {
                 }
         }
         
+        var maxQdegree: Int {
+             generators.map{ $0.degree }.max() ?? 0
+        }
+        
+        var minQdegree: Int {
+             generators.map{ $0.degree }.min() ?? 0
+        }
+        
         public var description: String {
             generators.description
         }

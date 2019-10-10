@@ -14,7 +14,7 @@ class KhovanovHomologyTests: XCTestCase {
     
     func testUnknot() {
         let K = Link.unknot
-        let Kh = K.KhovanovHomology(𝐙.self)
+        let Kh = KhovanovHomology(K, 𝐙.self)
         
         XCTAssertEqual(Kh.gradedEulerCharacteristic, K.JonesPolynomial(normalized: false))
         XCTAssertEqual(Kh[0, -1].dictionaryDescription, [0 : 1])
@@ -23,15 +23,15 @@ class KhovanovHomologyTests: XCTestCase {
     
     func testUnknot_RM1() {
         let K = Link(planarCode: [1,2,2,1])
-        let Kh = K.KhovanovHomology(𝐙.self)
-
+        let Kh = KhovanovHomology(K, 𝐙.self)
+        
         XCTAssertEqual(Kh[0, -1].dictionaryDescription, [0 : 1])
         XCTAssertEqual(Kh[0,  1].dictionaryDescription, [0 : 1])
     }
 
     func testUnknot_RM2() {
         let K = Link(planarCode: [1,4,2,1], [2,4,3,3])
-        let Kh = K.KhovanovHomology(𝐙.self)
+        let Kh = KhovanovHomology(K, 𝐙.self)
 
         XCTAssertEqual(Kh[0, -1].dictionaryDescription, [0 : 1])
         XCTAssertEqual(Kh[0,  1].dictionaryDescription, [0 : 1])
@@ -39,7 +39,7 @@ class KhovanovHomologyTests: XCTestCase {
     
     func test3_1_Z() {
         let K = Knot(3, 1)
-        let Kh = K.KhovanovHomology(𝐙.self)
+        let Kh = KhovanovHomology(K, 𝐙.self)
         
         XCTAssertEqual(Kh.gradedEulerCharacteristic, K.JonesPolynomial(normalized: false))
         
@@ -52,7 +52,7 @@ class KhovanovHomologyTests: XCTestCase {
     
     func test4_1_Z() {
         let K = Knot(4, 1)
-        let Kh = K.KhovanovHomology(𝐙.self)
+        let Kh = KhovanovHomology(K, 𝐙.self)
         
         XCTAssertEqual(Kh.gradedEulerCharacteristic, K.JonesPolynomial(normalized: false))
         
@@ -68,7 +68,7 @@ class KhovanovHomologyTests: XCTestCase {
     
     func test5_1_Z() {
         let K = Knot(5, 1)
-        let Kh = K.KhovanovHomology(𝐙.self)
+        let Kh = KhovanovHomology(K, 𝐙.self)
         
         XCTAssertEqual(Kh[-5, -15].dictionaryDescription, [0 : 1])
         XCTAssertEqual(Kh[-4, -13].dictionaryDescription, [2 : 1])
