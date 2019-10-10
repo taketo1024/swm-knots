@@ -24,7 +24,7 @@ extension Link {
     public func JonesPolynomial(normalized b: Bool) -> JonesPolynomial {
         let A = KauffmanBracketPolynomial.indeterminate
         let f = (-A).pow( -3 * writhe ) * KauffmanBracket(normalized: b)
-        let range = -f.highestPower/2 ... -f.lowestPower/2
+        let range = -f.highestExponent / 2 ... -f.lowestExponent / 2
         let coeffs = Dictionary(keys: range) { i -> 𝐙 in
             (-1).pow(i) * f.coeff(-2 * i)
         }

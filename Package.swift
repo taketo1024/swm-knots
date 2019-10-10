@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.1
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -11,8 +11,8 @@ let package = Package(
             targets: ["SwiftyKnots"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/taketo1024/SwiftyMath.git", .branch("grid-homology")),
-        .package(url: "https://github.com/taketo1024/SwiftyMath-homology.git", .branch("grid-homology")),
+        .package(url: "https://github.com/taketo1024/SwiftyMath.git", .branch("develop")),
+        .package(url: "https://github.com/taketo1024/SwiftyMath-homology.git", .branch("develop")),
     ],
     targets: [
         .target(

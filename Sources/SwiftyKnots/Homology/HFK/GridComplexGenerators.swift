@@ -96,7 +96,7 @@ public struct GridComplexGenerators: Sequence {
             
             let y = Generator(
                 id: x.id + 1,
-                sequence: x.sequence.swappedAt(i, j),
+                sequence: x.sequence.with{ $0.swapAt(i, j) },
                 MaslovDegree: x.MaslovDegree + m,
                 AlexanderDegree: x.AlexanderDegree + a
             )
@@ -153,9 +153,9 @@ public struct GridComplexGenerators: Sequence {
     
     public func adjacents(of x: Generator) -> [Generator] {
         let xSeq = x.sequence
-        let trans = DPermutation.rawTranspositions(within: xSeq.count)
+        let trans = (0 ..< xSeq.count).choose(2)
         return trans.compactMap { t in
-            let ySeq = xSeq.swappedAt(t.0, t.1)
+            let ySeq = xSeq.with{ $0.swapAt(t[0], t[1]) }
             return generator(forSequence: ySeq)
         }
     }

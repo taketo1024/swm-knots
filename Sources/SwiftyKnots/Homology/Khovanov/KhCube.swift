@@ -76,17 +76,17 @@ public struct KhCube<R: Ring> {
     }
     
     public var startVertex: Vertex {
-        return self[Link.State([0].repeated(dim))]
+        return self[Link.State([0] * dim)]
     }
     
     public var endVertex: Vertex {
-        return self[Link.State([1].repeated(dim))]
+        return self[Link.State([1] * dim)]
     }
     
     public func states(ofDegree i: Int) -> Set<Link.State> {
         // {0, 2, 5}  ->  (101001)
         return statesCache.useCacheOrSet(key: i) {
-            Set(dim.choose(i).map { (I: [Int]) -> Link.State in
+            Set((0 ..< dim).choose(i).map { (I: [Int]) -> Link.State in
                 Link.State( (0 ..< dim).map{ i in I.contains(i) ? 1 : 0 } )
             })
         }

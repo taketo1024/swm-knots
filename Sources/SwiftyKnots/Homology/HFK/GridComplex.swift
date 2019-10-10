@@ -8,17 +8,14 @@
 import SwiftyMath
 import SwiftyHomology
 
-public struct _Un: MPolynomialIndeterminate {
-    public static let numberOfIndeterminates = Int.max
-    public static func degree(_ i: Int) -> Int {
-        return -2
-    }
-    public static func symbol(_ i: Int) -> String {
-        return "U\(Format.sub(i))"
-    }
+public struct _U: PolynomialIndeterminate {
+    public static let degree = 2
+    public static var symbol = "U"
 }
 
-public typealias GridComplex = ChainComplex1<FreeModule<TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>>
+public typealias _Un = InfiniteVariatePolynomialIndeterminates<_U>
+
+public typealias GridComplex = ChainComplex1<FreeModule<TensorGenerator<MultivariatePolynomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>>
 
 public enum GridComplexType {
     case tilde    // [Book] p.72,  Def 4.4.1
@@ -28,7 +25,7 @@ public enum GridComplexType {
 }
 
 extension GridComplex {
-    public typealias Element = FreeModule<TensorGenerator<MonomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>
+    public typealias Element = FreeModule<TensorGenerator<MultivariatePolynomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>
     
     public init(type: GridComplexType, diagram G: GridDiagram) {
         let generators = GridComplexGenerators(for: G)
@@ -68,9 +65,9 @@ extension GridComplex {
                     .filter { $0.degree == i + 2 * k }
                     .parallelFlatMap { x -> [T] in
                         let indeterminates = Array(0 ..< numberOfIndeterminates)
-                        let Us = MPolynomial<_Un, 𝐙₂>.monomials(ofDegree: i - x.degree, usingIndeterminates: indeterminates)
-                        return Us.compactMap{ U in
-                            let t = T( MonomialGenerator(monomial: U), x )
+                        let Umons = MultivariatePolynomialGenerator<_Un>.monomials(ofTotalExponent: k, usingIndeterminates: indeterminates)
+                        return Umons.compactMap{ U in
+                            let t = T(U , x)
                             return filter(t) ? t : nil
                         }
                 }
@@ -83,19 +80,19 @@ extension GridComplex {
         typealias T = Element.Generator
         
         let (Os, Xs) = (G.Os, G.Xs)
-        let U: (GridDiagram.Rect) -> MonomialGenerator<_Un>? = { rect in
+        let U: (GridDiagram.Rect) -> MultivariatePolynomialGenerator<_Un>? = { rect in
             switch type {
             case .tilde:
                 return (rect.intersects(Xs) || rect.intersects(Os))
                         ? nil : .identity
             case .hat:
                 return (rect.intersects(Xs) || rect.contains(Os.last!))
-                        ? nil : .init(monomialDegree: Os.map { O in rect.contains(O) ? 1 : 0 })
+                        ? nil : .init( Os.map { O in rect.contains(O) ? 1 : 0 } )
             case .minus:
                 return rect.intersects(Xs)
-                        ? nil : .init(monomialDegree: Os.map { O in rect.contains(O) ? 1 : 0 })
+                        ? nil : .init( Os.map { O in rect.contains(O) ? 1 : 0 } )
             case .filtered:
-                return .init(monomialDegree: Os.map { O in rect.contains(O) ? 1 : 0 })
+                return .init( Os.map { O in rect.contains(O) ? 1 : 0 } )
             }
         }
         
@@ -137,15 +134,15 @@ extension GridComplex {
 }
 
 
-extension TensorGenerator where A == MonomialGenerator<_Un>, B == GridDiagram.Generator {
+extension TensorGenerator where A == MultivariatePolynomialGenerator<_Un>, B == GridDiagram.Generator {
     public var algebraicDegree: Int {
-        let m = factors.0 // MonomialGenerator<_Un>
-        return -(m.monomialDegree.indices.contains(0) ? m.monomialDegree[0] : 0)
+        let m = factors.0 // MultivariatePolynomialGenerator<_Un>
+        return -(m.exponent.indices.contains(0) ? m.exponent[0] : 0)
     }
     
     public var AlexanderDegree: Int {
-        let m = factors.0 // MonomialGenerator<_Un>
+        let m = factors.0 // MultivariatePolynomialGenerator<_Un>
         let x = factors.1 // GridDiagram.Generator
-        return _Un.totalDegree(exponents: m.monomialDegree) / 2 + x.AlexanderDegree
+        return _Un.totalDegree(exponents: m.exponent) / 2 + x.AlexanderDegree
     }
 }

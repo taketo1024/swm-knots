@@ -10,7 +10,47 @@ import SwiftyMath
 import SwiftyHomology
 @testable import SwiftyKnots
 
+extension IntegerQuotientRing: ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: Int) {
+        self.init(value)
+    }
+}
+
 class GridHomologyTests: XCTestCase {
+    
+    func testChainComplex_tilde() {
+        let G = GridDiagram.load("0_1")!
+        let C = GridComplex(type: .tilde, diagram: G)
+        XCTAssertEqual(C[1].rank, 0)
+        XCTAssertEqual(C[0].rank, 1)
+        XCTAssertEqual(C[-1].rank, 1)
+        XCTAssertEqual(C[-2].rank, 0)
+        XCTAssertEqual(C[-3].rank, 0)
+    }
+    
+    func testChainComplex_hat() {
+        let G = GridDiagram.load("0_1")!
+        let C = GridComplex(type: .hat, diagram: G)
+        XCTAssertEqual(C[1].rank, 0)
+        XCTAssertEqual(C[0].rank, 1)
+        XCTAssertEqual(C[-1].rank, 1)
+        XCTAssertEqual(C[-2].rank, 1)
+        XCTAssertEqual(C[-3].rank, 1)
+        XCTAssertEqual(C[-4].rank, 1)
+        XCTAssertEqual(C[-5].rank, 1)
+    }
+    
+    func testChainComplex_minus() {
+        let G = GridDiagram.load("0_1")!
+        let C = GridComplex(type: .minus, diagram: G)
+        XCTAssertEqual(C[1].rank, 0)
+        XCTAssertEqual(C[0].rank, 1)
+        XCTAssertEqual(C[-1].rank, 1)
+        XCTAssertEqual(C[-2].rank, 2)
+        XCTAssertEqual(C[-3].rank, 2)
+        XCTAssertEqual(C[-4].rank, 3)
+        XCTAssertEqual(C[-5].rank, 3)
+    }
     
     func testKnotGenus0_1() {
         let G = GridDiagram.load("0_1")!
@@ -43,8 +83,10 @@ class GridHomologyTests: XCTestCase {
         let C = GridComplex(type: .tilde, diagram: G)
         let H = C.homology
         
-        XCTAssertEqual(H[0].dictionaryDescription, [0 : 1])
-        XCTAssertEqual(H[-1].dictionaryDescription, [0 : 1])
+        print()
+        
+        XCTAssertEqual(H[0].rank, 1)
+        XCTAssertEqual(H[-1].rank, 1)
     }
     
     // GC-tilde(unknot')
@@ -53,9 +95,9 @@ class GridHomologyTests: XCTestCase {
         let C = GridComplex(type: .tilde, diagram: G)
         let H = C.homology
         
-        XCTAssertEqual(H[0].dictionaryDescription, [0 : 1])
+        XCTAssertEqual(H[0].rank, 1)
         XCTAssertEqual(H[-1].dictionaryDescription, [0 : 2])
-        XCTAssertEqual(H[-2].dictionaryDescription, [0 : 1])
+        XCTAssertEqual(H[-2].rank, 1)
     }
     
     // GC-hat(unknot) = F
@@ -64,9 +106,9 @@ class GridHomologyTests: XCTestCase {
         let C = GridComplex(type: .hat, diagram: G)
         let H = C.homology
         
-        XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
-        XCTAssertEqual(H[-1].dictionaryDescription, [:])
-        XCTAssertEqual(H[-2].dictionaryDescription, [:])
+        XCTAssertEqual(H[ 0].rank, 1)
+        XCTAssertEqual(H[-1].rank, 0)
+        XCTAssertEqual(H[-2].rank, 0)
     }
     
     // GC-hat(unknot') = F
@@ -75,9 +117,9 @@ class GridHomologyTests: XCTestCase {
         let C = GridComplex(type: .hat, diagram: G)
         let H = C.homology
         
-        XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
-        XCTAssertEqual(H[-1].dictionaryDescription, [:])
-        XCTAssertEqual(H[-2].dictionaryDescription, [:])
+        XCTAssertEqual(H[ 0].rank, 1)
+        XCTAssertEqual(H[-1].rank, 0)
+        XCTAssertEqual(H[-2].rank, 0)
     }
     
     // GC^-(unknot) = F[U]
@@ -86,9 +128,9 @@ class GridHomologyTests: XCTestCase {
         let C = GridComplex(type: .minus, diagram: G)
         let H = C.homology
         
-        XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
-        XCTAssertEqual(H[-1].dictionaryDescription, [:])
-        XCTAssertEqual(H[-2].dictionaryDescription, [0 : 1])
+        XCTAssertEqual(H[ 0].rank, 1)
+        XCTAssertEqual(H[-1].rank, 0)
+        XCTAssertEqual(H[-2].rank, 1)
     }
     
     // GC^-(unknot) = F[U]
@@ -97,9 +139,9 @@ class GridHomologyTests: XCTestCase {
         let C = GridComplex(type: .minus, diagram: G)
         let H = C.homology
         
-        XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
-        XCTAssertEqual(H[-1].dictionaryDescription, [:])
-        XCTAssertEqual(H[-2].dictionaryDescription, [0 : 1])
+        XCTAssertEqual(H[ 0].rank, 1)
+        XCTAssertEqual(H[-1].rank, 0)
+        XCTAssertEqual(H[-2].rank, 1)
     }
     
     func testTrefoil_minus() {
@@ -107,11 +149,11 @@ class GridHomologyTests: XCTestCase {
         let C = GridComplex(type: .minus, diagram: G)
         let H = C.homology
         
-        XCTAssertEqual(H[ 2].dictionaryDescription, [:])
-        XCTAssertEqual(H[ 1].dictionaryDescription, [:])
-        XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
-        XCTAssertEqual(H[-1].dictionaryDescription, [:])
-        XCTAssertEqual(H[-2].dictionaryDescription, [0 : 1])
+        XCTAssertEqual(H[ 2].rank, 0)
+        XCTAssertEqual(H[ 1].rank, 0)
+        XCTAssertEqual(H[ 0].rank, 1)
+        XCTAssertEqual(H[-1].rank, 0)
+        XCTAssertEqual(H[-2].rank, 1)
     }
 
     func testTrefoil_mirror_minus() {
@@ -119,11 +161,11 @@ class GridHomologyTests: XCTestCase {
         let C = GridComplex(type: .minus, diagram: G)
         let H = C.homology
         
-        XCTAssertEqual(H[ 2].dictionaryDescription, [0 : 1])
-        XCTAssertEqual(H[ 1].dictionaryDescription, [0 : 1])
-        XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
-        XCTAssertEqual(H[-1].dictionaryDescription, [:])
-        XCTAssertEqual(H[-2].dictionaryDescription, [0 : 1])
+        XCTAssertEqual(H[ 2].rank, 1)
+        XCTAssertEqual(H[ 1].rank, 1)
+        XCTAssertEqual(H[ 0].rank, 1)
+        XCTAssertEqual(H[-1].rank, 0)
+        XCTAssertEqual(H[-2].rank, 1)
     }
     
     func testTrefoil_filtered() {
@@ -131,11 +173,11 @@ class GridHomologyTests: XCTestCase {
         let C = GridComplex(type: .filtered, diagram: G)
         let H = C.homology
         
-        XCTAssertEqual(H[ 2].dictionaryDescription, [:])
-        XCTAssertEqual(H[ 1].dictionaryDescription, [:])
-        XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
-        XCTAssertEqual(H[-1].dictionaryDescription, [:])
-        XCTAssertEqual(H[-2].dictionaryDescription, [0 : 1])
+        XCTAssertEqual(H[ 2].rank, 0)
+        XCTAssertEqual(H[ 1].rank, 0)
+        XCTAssertEqual(H[ 0].rank, 1)
+        XCTAssertEqual(H[-1].rank, 0)
+        XCTAssertEqual(H[-2].rank, 1)
     }
     
     func testTrefoil_mirror_filtered() {
@@ -143,10 +185,10 @@ class GridHomologyTests: XCTestCase {
         let C = GridComplex(type: .filtered, diagram: G)
         let H = C.homology
         
-        XCTAssertEqual(H[ 2].dictionaryDescription, [:])
-        XCTAssertEqual(H[ 1].dictionaryDescription, [:])
-        XCTAssertEqual(H[ 0].dictionaryDescription, [0 : 1])
-        XCTAssertEqual(H[-1].dictionaryDescription, [:])
-        XCTAssertEqual(H[-2].dictionaryDescription, [0 : 1])
+        XCTAssertEqual(H[ 2].rank, 0)
+        XCTAssertEqual(H[ 1].rank, 0)
+        XCTAssertEqual(H[ 0].rank, 1)
+        XCTAssertEqual(H[-1].rank, 0)
+        XCTAssertEqual(H[-2].rank, 1)
     }
 }

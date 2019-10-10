@@ -83,7 +83,7 @@ public struct KhEnhancedState: FreeModuleGenerator, Comparable, Codable {
                 factors.insert(e, at: j)
                 return (KhEnhancedState(state, factors), r)
             }
-            return FreeModule(values)
+            return FreeModule(elements: values)
         }
     }
     
@@ -113,7 +113,7 @@ public struct KhEnhancedState: FreeModuleGenerator, Comparable, Codable {
                 factors.insert(e2, at: j2)
                 return (KhEnhancedState(state, factors), r)
             }
-            return FreeModule(values)
+            return FreeModule(elements: values)
         }
     }
 }
