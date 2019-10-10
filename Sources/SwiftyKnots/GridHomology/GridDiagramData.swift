@@ -5,8 +5,6 @@
 //  Created by Taketo Sano on 2019/07/17.
 //
 
-import Foundation
-
 extension GridDiagram {
     public static func load(_ name: String) -> GridDiagram? {
         loadTable()

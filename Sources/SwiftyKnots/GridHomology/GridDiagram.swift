@@ -5,7 +5,6 @@
 //  Created by Taketo Sano on 2019/07/01.
 //
 
-import Foundation
 import SwiftyMath
 import SwiftyHomology
 

@@ -5,7 +5,6 @@
 //  Created by Taketo Sano on 2018/12/06.
 //
 
-import Foundation
 
 /*
  * JSON string extracted from: http://katlas.org/wiki/The_Take_Home_Database

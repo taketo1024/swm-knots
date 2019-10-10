@@ -5,7 +5,6 @@
 //  Created by Taketo Sano on 2019/05/31.
 //
 
-import Foundation
 import SwiftyMath
 
 private struct _t: PolynomialIndeterminate {
