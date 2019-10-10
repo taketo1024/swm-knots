@@ -7,8 +7,10 @@
 
 import SwiftyMath
 
-public enum KhAlgebraGenerator: String, FreeModuleGenerator, Codable {
-    case I, X // A = R[X]/(X^2 + hX + t) = R<1, X>
+// A = R[X]/(X^2 + hX + t) = R<1, X>
+public enum KhAlgebraGenerator: Int8, FreeModuleGenerator, Codable {
+    case I = 0
+    case X = 1
 
     public var degree: Int {
         (self == .I) ? 0 : -2

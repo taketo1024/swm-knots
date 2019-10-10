@@ -29,7 +29,7 @@ extension Link {
     
     public static var unknot: Link {
         var L = Link(name: "○", planarCode: [1, 2, 2, 1])
-        L.splice(at: 0, type: 0)
+        L.resolve(0, .resolution0)
         return L
     }
     

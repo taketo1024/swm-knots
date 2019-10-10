@@ -17,7 +17,7 @@ import SwiftyMath
 
 public struct Link: Equatable, CustomStringConvertible {
     public typealias PlanarCode = [[Int]]
-    public typealias State = [Int]
+    public typealias State = [Resolution]
 
     /* Planer Diagram code, represented by crossings:
      *
@@ -196,38 +196,34 @@ public struct Link: Equatable, CustomStringConvertible {
      *     / \           /‾\
      */
     
-    private mutating func _splice(at i: Int, type: Int) {
-        switch type {
-        case 0: crossings[i].splice0()
-        case 1: crossings[i].splice1()
-        default: ()
-        }
+    private mutating func _resolve(_ i: Int, _ s: Resolution) {
+        crossings[i].resolve(s)
     }
     
     @discardableResult
-    public mutating func splice(at i: Int, type: Int) -> Link {
+    public mutating func resolve(_ i: Int, _ s: Resolution) -> Link {
         _components.clear()
-        _splice(at: i, type: type)
+        _resolve(i, s)
         reorientEdges()
         return self
     }
     
-    public func spliced(at i: Int, type: Int) -> Link {
-        var L = self.copy(name: "\(name)\(Format.sub(type.description))")
-        return L.splice(at: i, type: type)
+    public func resolved(_ i: Int, _ s: Resolution) -> Link {
+        var L = self.copy(name: "\(name)\(Format.sub(s.description))")
+        return L.resolve(i, s)
     }
     
-    public func spliced(by state: State) -> Link {
+    public func resolved(by state: State) -> Link {
         var L = self.copy()
         for (i, s) in state.enumerated() {
-            L._splice(at: i, type: s)
+            L._resolve(i, s)
         }
         L.reorientEdges()
         return L
     }
     
-    public func splicedPair(at i: Int) -> (Link, Link) {
-        (self.spliced(at: i, type: 0), self.spliced(at: i, type: 1))
+    public func resolvedPair(at i: Int) -> (Link, Link) {
+        (resolved(i, .resolution0), resolved(i, .resolution1))
     }
     
     private func reorientEdges() {
@@ -256,11 +252,11 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var allStates: [State] {
-        State.binaryCombinations(length: crossingNumber)
+        generateBinarySequences(with: (.resolution0, .resolution1), length: crossingNumber)
     }
     
     public var orientationPreservingState: State {
-        State(crossings.map{ $0.crossingSign == 1 ? 0 : 1 })
+        State( crossings.map{ $0.crossingSign == 1 ? .resolution0 : .resolution1 } )
     }
     
     public static func +(L1: Link, L2: Link) -> Link {
@@ -283,6 +279,23 @@ public struct Link: Equatable, CustomStringConvertible {
     
     public var detailDescription: String {
         "\(name){ \(crossings.map{ $0.description }.joined(separator: ", ")) }"
+    }
+    
+    public enum Resolution: Int8, Comparable, CustomStringConvertible, Codable {
+        case resolution0 = 0
+        case resolution1 = 1
+        
+        public init(_ i: Int) {
+            self = (i == 0) ? .resolution0 : .resolution1
+        }
+        
+        public static func < (lhs: Self, rhs: Self) -> Bool {
+            lhs.rawValue < rhs.rawValue
+        }
+        
+        public var description: String {
+            rawValue.description
+        }
     }
     
     public class Crossing: Equatable, Comparable, CustomStringConvertible {
@@ -350,18 +363,10 @@ public struct Link: Equatable, CustomStringConvertible {
             }
         }
         
-        public func splice0() {
-            switch mode {
-            case .X⁺: mode = .V
-            case .X⁻: mode = .H
-            default: ()
-            }
-        }
-        
-        public func splice1() {
-            switch mode {
-            case .X⁺: mode = .H
-            case .X⁻: mode = .V
+        public func resolve(_ s: Resolution) {
+            switch (mode, s) {
+            case (.X⁺, .resolution0), (.X⁻, .resolution1): mode = .V
+            case (.X⁺, .resolution1), (.X⁻, .resolution0): mode = .H
             default: ()
             }
         }
@@ -471,11 +476,19 @@ public struct Link: Equatable, CustomStringConvertible {
     }
 }
 
-internal extension Array where Element == Int {
-    static func binaryCombinations(length n: Int) -> [[Int]] {
-        assert(n <= 64)
-        return (0 ..< 2.pow(n)).map { (b: Int) -> [Int] in
-            (0 ..< n).map{ i in (b >> i) & 1 }
+extension Array where Element == Link.Resolution {
+    public var weight: Int {
+        count(where: { $0 == .resolution1 })
+    }
+}
+
+internal func generateBinarySequences<T>(with choice: (T, T), length n: Int) -> [[T]] {
+    assert(n <= 64)
+    return (0 ..< 2.pow(n)).map { (b0: Int) -> [T] in
+        var b = b0
+        return (0 ..< n).reduce(into: []) { (result, _) in
+            result.append( (b & 1 == 0) ? choice.0 : choice.1 )
+            b >>= 1
         }
     }
 }

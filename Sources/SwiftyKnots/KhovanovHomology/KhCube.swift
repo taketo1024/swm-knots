@@ -13,25 +13,25 @@ import SwiftyHomology
 public struct KhCube<R: Ring> {
     public struct Vertex: CustomStringConvertible {
         public let state: Link.State
-        public let splicedLink: Link
+        public let circles: Link
         public let generators: [KhComplexGenerator]
         
         internal let targetStates: [(sign: R, state: Link.State)]
         
         init(_ L: Link, _ state: Link.State) {
             self.state = state 
-            self.splicedLink = L.spliced(by: state)
+            self.circles = L.resolved(by: state)
             
-            let r = splicedLink.components.count
+            let r = circles.components.count
             self.generators = KhComplexGenerator.generateBasis(state: state, power: r)
             
             //  101001  ->  { (-, 111001), (+, 101101), (+, 101011) }
             self.targetStates = (0 ..< L.crossingNumber)
-                .filter{ i in state[i] == 0 }
+                .filter{ i in state[i] == .resolution0 }
                 .map { i in
-                    let e = state[0 ..< i].count{ $0 == 1 }
+                    let e = state[0 ..< i].count{ $0 == .resolution1 }
                     let sign = R(from: (-1).pow(e))
-                    let target = Link.State( state.replaced(at: i, with: 1) )
+                    let target = Link.State( state.replaced(at: i, with: .resolution1) )
                     return (sign, target)
                 }
         }
@@ -87,18 +87,18 @@ public struct KhCube<R: Ring> {
     }
     
     public var startVertex: Vertex {
-        self[Link.State([0] * dim)]
+        self[Link.State(repeating: .resolution0, count: dim)]
     }
     
     public var endVertex: Vertex {
-        self[Link.State([1] * dim)]
+        self[Link.State(repeating: .resolution1, count: dim)]
     }
     
     public func states(ofDegree i: Int) -> Set<Link.State> {
         // {0, 2, 5}  ->  (101001)
         statesCache.useCacheOrSet(key: i) {
             Set((0 ..< dim).choose(i).map { (I: [Int]) -> Link.State in
-                Link.State( (0 ..< dim).map{ i in I.contains(i) ? 1 : 0 } )
+                Link.State( (0 ..< dim).map{ i in I.contains(i) ? .resolution1 : .resolution0 } )
             })
         }
     }
@@ -106,7 +106,7 @@ public struct KhCube<R: Ring> {
     public func edgeMap(from s0: Link.State, to s1: Link.State) -> EdgeMap {
         let pair = StatePair(from: s0, to: s1)
         return edgeMapsCache.useCacheOrSet(key: pair) {
-            let (L0, L1) = (self[s0].splicedLink, self[s1].splicedLink)
+            let (L0, L1) = (self[s0].circles, self[s1].circles)
             let (c1, c2) = (L0.components, L1.components)
             let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
             switch (d1.count, d2.count) {

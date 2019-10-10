@@ -17,13 +17,14 @@ public struct KhComplexGenerator: FreeModuleGenerator, Comparable, Codable {
     }
 
     public static func generateBasis(state: Link.State, power n: Int) -> [Self] {
-        [Int].binaryCombinations(length: n).map { I in
-            .init(state, I.map{ $0 == 0 ? .X : .I  })
-        }.sorted()
+        typealias A = KhAlgebraGenerator
+        return generateBinarySequences(with: (A.I, A.X), length: n).map { factors in
+            .init(state, factors)
+        }
     }
 
     public var degree: Int {
-        tensorFactors.sum { $0.degree } + state.count{ $0 == 1 } + tensorFactors.count
+        tensorFactors.sum { $0.degree } + state.weight + tensorFactors.count
     }
     
     public func applied<R: Ring>(product: KhAlgebraGenerator.Product<R>, at: (Int, Int), to j: Int, state: Link.State) -> FreeModule<KhComplexGenerator, R> {

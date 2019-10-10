@@ -25,10 +25,10 @@ extension Link {
         let B = -A.pow(2) - A.pow(-2)
         
         return allStates.sum { s -> KauffmanBracketPolynomial in
-            let L = self.spliced(by: s)
+            let L = self.resolved(by: s)
             let n = L.components.count
-            let c0 = s.count{ $0 == 0 }
-            let c1 = s.count - c0
+            let c1 = s.weight
+            let c0 = s.count - c1
             return A.pow(c0 - c1) * B.pow(b ? n - 1 : n)
         }
     }
