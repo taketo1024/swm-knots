@@ -47,7 +47,7 @@ public struct GridDiagram {
     
     public init(name: String? = nil, Os: [Int], Xs: [Int]) {
         func points(_ seq: [Int]) -> [Point] {
-            return seq.enumerated().map { (x, y) in
+            seq.enumerated().map { (x, y) in
                 Point(2 * x + 1, 2 * y + 1)
             }
         }
@@ -61,11 +61,11 @@ public struct GridDiagram {
     }
     
     public var gridNumber: Int {
-        return Os.count
+        Os.count
     }
     
     public var gridSize: Int {
-        return 2 * gridNumber
+        2 * gridNumber
     }
     
     public var rotate90: GridDiagram {
@@ -102,19 +102,19 @@ public struct GridDiagram {
         }
         
         public static func < (p: Point, q: Point) -> Bool {
-            return p.x < q.x && p.y < q.y
+            p.x < q.x && p.y < q.y
         }
         
         public func shift(_ dx: Int, _ dy: Int) -> Point {
-            return Point(x + dx, y + dy)
+            Point(x + dx, y + dy)
         }
         
         public var corners: [Point] {
-            return [shift(1, 1), shift(-1, 1), shift(-1, -1), shift(1, -1)]
+            [shift(1, 1), shift(-1, 1), shift(-1, -1), shift(1, -1)]
         }
         
         public var description: String {
-            return "(\(x), \(y))"
+            "(\(x), \(y))"
         }
     }
     
@@ -144,11 +144,11 @@ public struct GridDiagram {
         }
         
         public func intersects(_ points: [Point], interior: Bool = false) -> Bool {
-            return points.contains{ p in self.contains(p, interior: interior) }
+            points.contains{ p in self.contains(p, interior: interior) }
         }
         
         public var description: String {
-            return "[point: \(origin), size: \(size)]"
+            "[point: \(origin), size: \(size)]"
         }
     }
     
@@ -188,7 +188,7 @@ public struct GridDiagram {
         }
         
         public func windingNumber(around p: Point) -> Int {
-            return arcs.sum { arc in
+            arcs.sum { arc in
                 if p.y < arc.0.y {
                     let (x0, x1) = (arc.0.x, arc.1.x)
                     if (x0 < x1) && (x0 + 1 ..< x1).contains(p.x) {

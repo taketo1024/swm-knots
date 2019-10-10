@@ -18,24 +18,22 @@ public struct KhEnhancedState: FreeModuleGenerator, Comparable, Codable {
     }
 
     public var degree: Int {
-        return tensorFactors.sum { $0.degree } + state.count{ $0 == 1 } + tensorFactors.count
+        tensorFactors.sum { $0.degree } + state.count{ $0 == 1 } + tensorFactors.count
     }
 
     public static func <(b1: KhEnhancedState, b2: KhEnhancedState) -> Bool {
-        return (b1.state < b2.state)
+        (b1.state < b2.state)
             || (b1.state == b2.state && b1.tensorFactors < b2.tensorFactors)
     }
 
     public static func generateBasis(state: Link.State, power n: Int) -> [KhEnhancedState] {
-        return [Int].binaryCombinations(length: n).map { I in
-            let factors: [E] = I.map{ $0 == 0 ? .X : .I  }
-            return KhEnhancedState.init(state, factors)
+        [Int].binaryCombinations(length: n).map { I in
+            KhEnhancedState.init(state, I.map{ $0 == 0 ? .X : .I  })
         }.sorted()
     }
 
     public var description: String {
-        
-        return tensorFactors.map{ $0.description }.joined(separator: "⊗")
+        tensorFactors.map{ $0.description }.joined(separator: "⊗")
             + Format.sub("(" + state.map{ $0.description }.joined() + ")")
     }
 
@@ -44,15 +42,15 @@ public struct KhEnhancedState: FreeModuleGenerator, Comparable, Codable {
         case X = -2
 
         public var degree: Int {
-            return rawValue
+            rawValue
         }
 
         public static func <(e1: E, e2: E) -> Bool {
-            return e1.degree < e2.degree
+            e1.degree < e2.degree
         }
 
         public var description: String {
-            return (self == .I) ? "1" : "X"
+            (self == .I) ? "1" : "X"
         }
     }
     

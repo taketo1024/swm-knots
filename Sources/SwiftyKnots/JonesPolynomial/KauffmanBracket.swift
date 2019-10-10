@@ -18,7 +18,7 @@ extension Link {
     
     // a polynomial in 𝐙[A, 1/A]
     public var KauffmanBracket: KauffmanBracketPolynomial {
-        return KauffmanBracket(normalized: false)
+        KauffmanBracket(normalized: false)
     }
     
     public func KauffmanBracket(normalized b: Bool) -> KauffmanBracketPolynomial {

@@ -25,7 +25,7 @@ extension Link {
     }
     
     public static var empty: Link {
-        return Link(name: "∅", crossings: [])
+        Link(name: "∅", crossings: [])
     }
     
     public static var unknot: Link {
@@ -35,10 +35,10 @@ extension Link {
     }
     
     public static var trefoil: Link {
-        return Link.load("3_1")
+        Link.load("3_1")
     }
     
     public static var HopfLink: Link {
-        return Link.load("L2a1")
+        Link.load("L2a1")
     }
 }

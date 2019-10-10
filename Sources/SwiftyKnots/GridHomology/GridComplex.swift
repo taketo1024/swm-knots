@@ -41,8 +41,6 @@ extension GridComplex {
     }
     
     private static func chain(type: GridComplexType, diagram G: GridDiagram, generators: GridComplexGenerators, filter: @escaping (Element.Generator) -> Bool) -> ( (Int) -> ModuleObject<Element> ) {
-        typealias T = Element.Generator
-        
         let iMax = generators.degreeRange.upperBound
         
         let n = G.gridNumber
@@ -63,11 +61,11 @@ extension GridComplex {
             let gens = (0 ... (iMax - i) / 2).flatMap { k in
                 generators
                     .filter { $0.degree == i + 2 * k }
-                    .parallelFlatMap { x -> [T] in
+                    .parallelFlatMap { x -> [Element.Generator] in
                         let indeterminates = Array(0 ..< numberOfIndeterminates)
                         let Umons = MultivariatePolynomialGenerator<_Un>.monomials(ofTotalExponent: k, usingIndeterminates: indeterminates)
                         return Umons.compactMap{ U in
-                            let t = T(U , x)
+                            let t = U ⊗ x
                             return filter(t) ? t : nil
                         }
                 }
@@ -77,8 +75,6 @@ extension GridComplex {
     }
     
     private static func differential(type: GridComplexType, diagram G: GridDiagram, generators: GridComplexGenerators, filter: @escaping (Element.Generator) -> Bool) -> ( (Int) -> ModuleEnd<Element> ) {
-        typealias T = Element.Generator
-        
         let (Os, Xs) = (G.Os, G.Xs)
         let U: (GridDiagram.Rect) -> MultivariatePolynomialGenerator<_Un>? = { rect in
             switch type {
@@ -102,7 +98,7 @@ extension GridComplex {
                 return generators.adjacents(of: x).parallelFlatMap { y -> [Element] in
                     G.emptyRectangles(from: x, to: y).compactMap { rect -> Element? in
                         if let Us = U(rect) {
-                            let ty = T(m * Us, y)
+                            let ty = (m * Us) ⊗ y
                             return filter(ty) ? .wrap(ty) : nil
                         } else {
                             return nil
@@ -114,8 +110,7 @@ extension GridComplex {
     }
     
     public static func genus(of G: GridDiagram) -> Int {
-        let gens = GridComplexGenerators(for: G)
-        return genus(of: G, generators: gens)
+        genus(of: G, generators: GridComplexGenerators(for: G))
     }
     
     public static func genus(of G: GridDiagram, generators: GridComplexGenerators) -> Int {

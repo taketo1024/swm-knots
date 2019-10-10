@@ -38,7 +38,7 @@ public struct KhCube<R: Ring> {
         }
         
         public var description: String {
-            return generators.description
+            generators.description
         }
     }
     
@@ -68,24 +68,24 @@ public struct KhCube<R: Ring> {
     }
     
     public subscript(s: Link.State) -> Vertex {
-        return verticesCache.useCacheOrSet(key: s) { Vertex(link, s) }
+        verticesCache.useCacheOrSet(key: s) { Vertex(link, s) }
     }
     
     public var dim: Int {
-        return link.crossingNumber
+        link.crossingNumber
     }
     
     public var startVertex: Vertex {
-        return self[Link.State([0] * dim)]
+        self[Link.State([0] * dim)]
     }
     
     public var endVertex: Vertex {
-        return self[Link.State([1] * dim)]
+        self[Link.State([1] * dim)]
     }
     
     public func states(ofDegree i: Int) -> Set<Link.State> {
         // {0, 2, 5}  ->  (101001)
-        return statesCache.useCacheOrSet(key: i) {
+        statesCache.useCacheOrSet(key: i) {
             Set((0 ..< dim).choose(i).map { (I: [Int]) -> Link.State in
                 Link.State( (0 ..< dim).map{ i in I.contains(i) ? 1 : 0 } )
             })
@@ -120,7 +120,7 @@ public struct KhCube<R: Ring> {
     }
     
     public func differential(_ i: Int) -> ModuleEnd<FreeModule<KhEnhancedState, R>> {
-        return ModuleHom.linearlyExtend { (x: KhEnhancedState) in
+        ModuleHom.linearlyExtend { (x: KhEnhancedState) in
             let v = self[x.state]
             return v.targetStates.sum { (ε, target) -> FreeModule<KhEnhancedState, R> in
                 ε * self.edgeMap(from: x.state, to: target).applied(to: .wrap(x))
@@ -129,7 +129,7 @@ public struct KhCube<R: Ring> {
     }
     
     public func fold() -> ChainComplex1<FreeModule<KhEnhancedState, R>> {
-        return ChainComplex1(
+        ChainComplex1(
             type: .ascending,
             supported: 0 ... dim,
             sequence: { i in

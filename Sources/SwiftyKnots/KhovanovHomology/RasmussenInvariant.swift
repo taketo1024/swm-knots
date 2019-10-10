@@ -15,7 +15,7 @@ private struct _t: PolynomialIndeterminate {
 
 extension Link {
     public var RasmussenInvariant: Int {
-        return RasmussenInvariant(𝐐.self)
+        RasmussenInvariant(𝐐.self)
     }
     
     public func RasmussenInvariant<F: Field>(_ type: F.Type) -> Int {

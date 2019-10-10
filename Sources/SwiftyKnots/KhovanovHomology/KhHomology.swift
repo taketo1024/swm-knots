@@ -56,10 +56,10 @@ extension Link {
     }
     
     public func LeeHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid1<FreeModule<KhEnhancedState, R>> {
-        return parameterizedKhovanovHomology(R.self, h: .zero, t: .identity, normalized: normalized)
+        parameterizedKhovanovHomology(R.self, h: .zero, t: .identity, normalized: normalized)
     }
 
     public func BarNatanHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid1<FreeModule<KhEnhancedState, R>> {
-        return parameterizedKhovanovHomology(R.self, h: .identity, t: .zero, normalized: normalized)
+        parameterizedKhovanovHomology(R.self, h: .identity, t: .zero, normalized: normalized)
     }
 }

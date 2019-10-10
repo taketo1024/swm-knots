@@ -23,11 +23,11 @@ public struct GridComplexGenerators: Sequence {
         }
         
         public var points: [GridDiagram.Point] {
-            return sequence.enumerated().map { (i, j) in .init(2 * i, 2 * Int(j)) }
+            sequence.enumerated().map { (i, j) in .init(2 * i, 2 * Int(j)) }
         }
         
         public var degree: Int {
-            return MaslovDegree
+            MaslovDegree
         }
         
         public func isAdjacent(to y: Generator) -> Bool {
@@ -37,7 +37,7 @@ public struct GridComplexGenerators: Sequence {
         }
         
         public static func == (a: GridDiagram.Generator, b: GridDiagram.Generator) -> Bool {
-            return a.id == b.id
+            a.id == b.id
         }
         
         public func hash(into hasher: inout Hasher) {
@@ -45,11 +45,11 @@ public struct GridComplexGenerators: Sequence {
         }
         
         public static func < (g1: Generator, g2: Generator) -> Bool {
-            return g1.id < g2.id
+            g1.id < g2.id
         }
         
         public var description: String {
-            return "\(sequence)"
+            "\(sequence)"
         }
     }
     
@@ -144,11 +144,11 @@ public struct GridComplexGenerators: Sequence {
     }
     
     public var generators: Set<Generator> {
-        return Set(data.values)
+        Set(data.values)
     }
     
     public func generator(forSequence seq: [Int8]) -> Generator? {
-        return data[seq]
+        data[seq]
     }
     
     public func adjacents(of x: Generator) -> [Generator] {
@@ -161,12 +161,11 @@ public struct GridComplexGenerators: Sequence {
     }
     
     public func filter(_ predicate: (Generator) -> Bool) -> GridComplexGenerators {
-        let data = self.data.filter{ (_, x) in predicate(x) }
-        return .init(data: data)
+        .init(data: data.filter{ (_, x) in predicate(x) })
     }
     
     public func makeIterator() -> Set<Generator>.Iterator {
-        return generators.makeIterator()
+        generators.makeIterator()
     }
 }
 
@@ -190,7 +189,7 @@ extension GridDiagram {
     
     public func emptyRectangles(from x: Generator, to y: Generator) -> [Rect] {
         // Note: Int(r) ∩ x = Int(r) ∩ y .
-        return rectangles(from: x, to: y).filter{ r in
+        rectangles(from: x, to: y).filter{ r in
             !r.intersects(x.points, interior: true)
         }
     }

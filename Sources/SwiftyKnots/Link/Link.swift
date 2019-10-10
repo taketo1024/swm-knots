@@ -117,19 +117,19 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var crossingNumber: Int {
-        return crossings.count { x in x.isCrossing }
+        crossings.count { x in x.isCrossing }
     }
     
     public var crossingNumber⁺: Int {
-        return crossings.count { x in x.crossingSign == 1 }
+        crossings.count { x in x.crossingSign == 1 }
     }
     
     public var crossingNumber⁻: Int {
-        return crossings.count { x in x.crossingSign == -1 }
+        crossings.count { x in x.crossingSign == -1 }
     }
     
     public var writhe: Int {
-        return crossings.sum { x in x.crossingSign }
+        crossings.sum { x in x.crossingSign }
     }
     
     public var reversed: Link {
@@ -155,13 +155,13 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var edges: [Edge] {
-        return crossings.flatMap{ x in x.edges }.unique().sorted()
+        crossings.flatMap{ x in x.edges }.unique().sorted()
     }
     
     private let _components: Cache<[Component]> = .empty
     
     public var components: [Component] {
-        return _components.useCacheOrSet {
+        _components.useCacheOrSet {
             var queue = edges
             var comps: [Component] = []
             
@@ -228,7 +228,7 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public func splicedPair(at i: Int) -> (Link, Link) {
-        return (self.spliced(at: i, type: 0), self.spliced(at: i, type: 1))
+        (self.spliced(at: i, type: 0), self.spliced(at: i, type: 1))
     }
     
     private func reorientEdges() {
@@ -257,11 +257,11 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var allStates: [State] {
-        return State.binaryCombinations(length: crossingNumber)
+        State.binaryCombinations(length: crossingNumber)
     }
     
     public var orientationPreservingState: State {
-        return State(crossings.map{ $0.crossingSign == 1 ? 0 : 1 })
+        State(crossings.map{ $0.crossingSign == 1 ? 0 : 1 })
     }
     
     public static func +(L1: Link, L2: Link) -> Link {
@@ -275,15 +275,15 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public static func == (lhs: Link, rhs: Link) -> Bool {
-        return lhs.crossings == rhs.crossings
+        lhs.crossings == rhs.crossings
     }
     
     public var description: String {
-        return name
+        name
     }
     
     public var detailDescription: String {
-        return "\(name){ \(crossings.map{ $0.description }.joined(separator: ", ")) }"
+        "\(name){ \(crossings.map{ $0.description }.joined(separator: ", ")) }"
     }
     
     public class Crossing: Equatable, Comparable, CustomStringConvertible {
@@ -294,7 +294,7 @@ public struct Link: Equatable, CustomStringConvertible {
             case H  // 0 - 1 || 2 - 3
             
             public var isCrossing: Bool {
-                return self == .X⁺ || self == .X⁻
+                self == .X⁺ || self == .X⁻
             }
         }
         
@@ -308,10 +308,10 @@ public struct Link: Equatable, CustomStringConvertible {
             self.mode = mode
         }
         
-        public var edge0: Edge { return edges[0] }
-        public var edge1: Edge { return edges[1] }
-        public var edge2: Edge { return edges[2] }
-        public var edge3: Edge { return edges[3] }
+        public var edge0: Edge { edges[0] }
+        public var edge1: Edge { edges[1] }
+        public var edge2: Edge { edges[2] }
+        public var edge3: Edge { edges[3] }
         
         public func adjacentEdge(_ i: Int) -> (index: Int, edge: Edge) {
             let j = { () -> Int in
@@ -328,7 +328,7 @@ public struct Link: Equatable, CustomStringConvertible {
         }
         
         public var isCrossing: Bool {
-            return mode.isCrossing
+            mode.isCrossing
         }
         
         public var crossingSign: Int {
@@ -368,15 +368,15 @@ public struct Link: Equatable, CustomStringConvertible {
         }
         
         public static func ==(c1: Crossing, c2: Crossing) -> Bool {
-            return c1.edges == c2.edges
+            c1.edges == c2.edges
         }
         
         public static func <(c1: Crossing, c2: Crossing) -> Bool {
-            return c1.id < c2.id
+            c1.id < c2.id
         }
         
         public var description: String {
-            return "\(mode)[\(edge0),\(edge1),\(edge2),\(edge3)]"
+            "\(mode)[\(edge0),\(edge1),\(edge2),\(edge3)]"
         }
     }
     
@@ -395,16 +395,16 @@ public struct Link: Equatable, CustomStringConvertible {
         }
         
         public var isDetermined: Bool {
-            return x0 != nil && x1 != nil
+            x0 != nil && x1 != nil
         }
         
         public var endPoint0: EndPoint {
-            get { return (x0!, i0) }
+            get { (x0!, i0) }
             set { (x0, i0) = (newValue.0, newValue.1) }
         }
         
         public var endPoint1: EndPoint {
-            get { return (x1!, i1) }
+            get { (x1!, i1) }
             set { (x1, i1) = (newValue.0, newValue.1) }
         }
         
@@ -415,27 +415,27 @@ public struct Link: Equatable, CustomStringConvertible {
         }
         
         public func goesOut(from x: Crossing, _ i: Int) -> Bool {
-            return endPoint0 == (x, i)
+            endPoint0 == (x, i)
         }
         
         public func goesIn(to x: Crossing, _ i: Int) -> Bool {
-            return endPoint1 == (x, i)
+            endPoint1 == (x, i)
         }
         
         public var nextEdge: Edge {
-            return x1.adjacentEdge(i1).edge
+            x1.adjacentEdge(i1).edge
         }
         
         public var prevEdge: Edge {
-            return x0.adjacentEdge(i0).edge
+            x0.adjacentEdge(i0).edge
         }
         
         public static func ==(e1: Edge, e2: Edge) -> Bool {
-            return e1.id == e2.id
+            e1.id == e2.id
         }
         
         public static func <(e1: Link.Edge, e2: Link.Edge) -> Bool {
-            return e1.id < e2.id
+            e1.id < e2.id
         }
         
         public func hash(into hasher: inout Hasher) {
@@ -443,7 +443,7 @@ public struct Link: Equatable, CustomStringConvertible {
         }
         
         public var description: String {
-            return "\(id)"
+            "\(id)"
         }
     }
     
@@ -455,11 +455,11 @@ public struct Link: Equatable, CustomStringConvertible {
         }
         
         public static func == (a: Component, b: Component) -> Bool {
-            return a.edges == b.edges
+            a.edges == b.edges
         }
         
         public static func < (c1: Link.Component, c2: Link.Component) -> Bool {
-            return c1.edges.map{ $0.id }.min()! < c2.edges.map{ $0.id }.min()!
+            c1.edges.map{ $0.id }.min()! < c2.edges.map{ $0.id }.min()!
         }
         
         public func hash(into hasher: inout Hasher) {
@@ -467,7 +467,7 @@ public struct Link: Equatable, CustomStringConvertible {
         }
         
         public var description: String {
-            return "(\(edges.map{ "\($0)" }.joined(separator: "-")))"
+            "(\(edges.map{ "\($0)" }.joined(separator: "-")))"
         }
     }
 }
