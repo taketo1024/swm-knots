@@ -8,61 +8,39 @@
 import SwiftyMath
 
 public struct KhComplexGenerator: FreeModuleGenerator, Comparable, Codable {
+    public let tensor: MultiTensorGenerator<KhAlgebraGenerator>
     public let state: Link.State
-    internal let tensorFactors: [KhAlgebraGenerator]
 
-    internal init(_ state: Link.State, _ tensorFactors: [KhAlgebraGenerator]) {
+    public init(tensor: MultiTensorGenerator<KhAlgebraGenerator>, state: Link.State) {
+        self.tensor = tensor
         self.state = state
-        self.tensorFactors = tensorFactors
     }
 
     public static func generateBasis(state: Link.State, power n: Int) -> [Self] {
         typealias A = KhAlgebraGenerator
         return generateBinarySequences(with: (A.I, A.X), length: n).map { factors in
-            .init(state, factors)
+            .init(tensor: MultiTensorGenerator(factors), state: state)
         }
     }
 
     public var degree: Int {
-        tensorFactors.sum { $0.degree } + state.weight + tensorFactors.count
+        tensor.degree + state.weight + tensor.factors.count
     }
     
-    public func applied<R: Ring>(product: KhAlgebraGenerator.Product<R>, at: (Int, Int), to j: Int, state: Link.State) -> FreeModule<KhComplexGenerator, R> {
-        let (i1, i2) = at
-        let (e1, e2) = (tensorFactors[i1], tensorFactors[i2])
-        
-        return product.applied(to: e1 ⊗ e2).mapGenerators{ e -> Self in
-            let factors = self.tensorFactors.with { factors in
-                factors.remove(at: i2)
-                factors.remove(at: i1)
-                factors.insert(e, at: j)
-            }
-            return KhComplexGenerator(state, factors)
-        }
-    }
-
-    func applied<R: Ring>(coproduct: KhAlgebraGenerator.Coproduct<R>, at i: Int, to: (Int, Int), state: Link.State) -> FreeModule<KhComplexGenerator, R> {
-        let (j1, j2) = to
-        let e = tensorFactors[i]
-        
-        return coproduct.applied(to: e).mapGenerators { t -> Self in
-            let (e1, e2) = t.factors
-            let factors = self.tensorFactors.with { factors in
-                factors.remove(at: i)
-                factors.insert(e1, at: j1)
-                factors.insert(e2, at: j2)
-            }
-            return KhComplexGenerator(state, factors)
-        }
-    }
-
     public static func <(b1: Self, b2: Self) -> Bool {
         (b1.state < b2.state)
-            || (b1.state == b2.state && b1.tensorFactors < b2.tensorFactors)
+            || (b1.state == b2.state && b1.tensor < b2.tensor)
     }
 
     public var description: String {
-        tensorFactors.map{ $0.description }.joined(separator: "⊗")
-            + Format.sub("(" + state.map{ $0.description }.joined() + ")")
+        tensor.description + Format.sub("(" + state.map{ $0.description }.joined() + ")")
+    }
+}
+
+internal extension ModuleHom where Domain: FreeModuleType, Domain.Generator == MultiTensorGenerator<KhAlgebraGenerator>, Codomain == Domain {
+    func applied(to x: KhComplexGenerator, nextState: Link.State) -> FreeModule<KhComplexGenerator, BaseRing> {
+        self.applied(to: x.tensor).mapGenerators { tensor in
+            KhComplexGenerator(tensor: tensor, state: nextState)
+        }
     }
 }

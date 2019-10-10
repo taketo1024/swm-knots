@@ -109,19 +109,24 @@ public struct KhCube<R: Ring> {
             let (L0, L1) = (self[s0].circles, self[s1].circles)
             let (c1, c2) = (L0.components, L1.components)
             let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
+            
             switch (d1.count, d2.count) {
             case (2, 1):
                 let (i1, i2) = (c1.firstIndex(of: d1[0])!, c1.firstIndex(of: d1[1])!)
                 let j = c2.firstIndex(of: d2[0])!
+                let m = MultiTensorHom(from: product, inputIndices: (i1, i2), outputIndex: j)
+                
                 return ModuleHom.linearlyExtend{ x in
-                    x.applied(product: self.product, at: (i1, i2), to: j, state: s1)
+                    m.applied(to: x, nextState: s1)
                 }
                 
             case (1, 2):
                 let i = c1.firstIndex(of: d1[0])!
                 let (j1, j2) = (c2.firstIndex(of: d2[0])!, c2.firstIndex(of: d2[1])!)
+                let Δ = MultiTensorHom(from: coproduct, inputIndex: i, outputIndices: (j1, j2))
+                
                 return ModuleHom.linearlyExtend{ x in
-                    x.applied(coproduct: self.coproduct, at: i, to: (j1, j2), state: s1)
+                    Δ.applied(to: x, nextState: s1)
                 }
                 
             default:
@@ -134,7 +139,8 @@ public struct KhCube<R: Ring> {
         ModuleHom.linearlyExtend { (x: KhComplexGenerator) in
             let v = self[x.state]
             return v.targetStates.sum { (ε, target) -> FreeModule<KhComplexGenerator, R> in
-                ε * self.edgeMap(from: x.state, to: target).applied(to: .wrap(x))
+                let f = self.edgeMap(from: x.state, to: target)
+                return ε * f.applied(to: x)
             }
         }
     }
