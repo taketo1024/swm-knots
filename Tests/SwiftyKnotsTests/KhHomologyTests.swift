@@ -16,7 +16,7 @@ class KhovanovHomologyTests: XCTestCase {
         let K = Link.unknot
         let Kh = KhovanovHomology(K, 𝐙.self)
         
-        XCTAssertEqual(Kh.gradedEulerCharacteristic, K.JonesPolynomial(normalized: false))
+        XCTAssertEqual(Kh.gradedEulerCharacteristic, JonesPolynomial(K, normalized: false))
         XCTAssertEqual(Kh[0, -1].dictionaryDescription, [0 : 1])
         XCTAssertEqual(Kh[0,  1].dictionaryDescription, [0 : 1])
     }
@@ -41,7 +41,7 @@ class KhovanovHomologyTests: XCTestCase {
         let K = Knot(3, 1)
         let Kh = KhovanovHomology(K, 𝐙.self)
         
-        XCTAssertEqual(Kh.gradedEulerCharacteristic, K.JonesPolynomial(normalized: false))
+        XCTAssertEqual(Kh.gradedEulerCharacteristic, JonesPolynomial(K, normalized: false))
         
         XCTAssertEqual(Kh[-3, -9].dictionaryDescription, [0 : 1])
         XCTAssertEqual(Kh[-2, -7].dictionaryDescription, [2 : 1])
@@ -54,7 +54,7 @@ class KhovanovHomologyTests: XCTestCase {
         let K = Knot(4, 1)
         let Kh = KhovanovHomology(K, 𝐙.self)
         
-        XCTAssertEqual(Kh.gradedEulerCharacteristic, K.JonesPolynomial(normalized: false))
+        XCTAssertEqual(Kh.gradedEulerCharacteristic, JonesPolynomial(K, normalized: false))
         
         XCTAssertEqual(Kh[-2, -5].dictionaryDescription, [0 : 1])
         XCTAssertEqual(Kh[-1, -3].dictionaryDescription, [2 : 1])
