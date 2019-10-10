@@ -14,16 +14,16 @@ public struct KhCube<R: Ring> {
     public struct Vertex: CustomStringConvertible {
         public let state: Link.State
         public let splicedLink: Link
-        public let generators: [KhEnhancedState]
+        public let generators: [KhComplexGenerator]
         
-        fileprivate let targetStates: [(sign: R, state: Link.State)]
+        internal let targetStates: [(sign: R, state: Link.State)]
         
         init(_ L: Link, _ state: Link.State) {
-            self.state = state
+            self.state = state 
             self.splicedLink = L.spliced(by: state)
             
             let r = splicedLink.components.count
-            self.generators = KhEnhancedState.generateBasis(state: state, power: r)
+            self.generators = KhComplexGenerator.generateBasis(state: state, power: r)
             
             //  101001  ->  { (-, 111001), (+, 101101), (+, 101011) }
             self.targetStates = (0 ..< L.crossingNumber)
@@ -46,24 +46,28 @@ public struct KhCube<R: Ring> {
         let to:   Link.State
     }
     
-    public typealias EdgeMap = ModuleEnd<FreeModule<KhEnhancedState, R>>
+    public typealias EdgeMap = ModuleEnd<FreeModule<KhComplexGenerator, R>>
     
     public let link: Link
-    let product: KhEnhancedState.Product<R>
-    let coproduct: KhEnhancedState.Coproduct<R>
+    let product: KhAlgebraGenerator.Product<R>
+    let coproduct: KhAlgebraGenerator.Coproduct<R>
     
     private let statesCache:   CacheDictionary<Int, Set<Link.State>> = CacheDictionary([:])
     private let verticesCache: CacheDictionary<Link.State, Vertex>   = CacheDictionary([:])
     private let edgeMapsCache: CacheDictionary<StatePair, EdgeMap>   = CacheDictionary([:])
 
-    init(_ L: Link, _ m: KhEnhancedState.Product<R>, _ Δ: KhEnhancedState.Coproduct<R>) {
+    init(link L: Link, product: KhAlgebraGenerator.Product<R>, coproduct: KhAlgebraGenerator.Coproduct<R>) {
         self.link = L
-        self.product = m
-        self.coproduct = Δ
+        self.product = product
+        self.coproduct = coproduct
     }
     
     public init(link L: Link, h: R = R.zero, t: R = R.zero) {
-        self.init(L, KhEnhancedState.Product(h, t), KhEnhancedState.Coproduct(h, t))
+        self.init(
+            link: L,
+            product: KhAlgebraGenerator.product(h: h, t: t),
+            coproduct: KhAlgebraGenerator.coproduct(h: h, t: t)
+        )
     }
     
     public subscript(s: Link.State) -> Vertex {
@@ -102,14 +106,14 @@ public struct KhCube<R: Ring> {
                 let (i1, i2) = (c1.firstIndex(of: d1[0])!, c1.firstIndex(of: d1[1])!)
                 let j = c2.firstIndex(of: d2[0])!
                 return ModuleHom.linearlyExtend{ x in
-                    self.product.applied(to: x, at: (i1, i2), to: j, state: s1)
+                    x.applied(product: self.product, at: (i1, i2), to: j, state: s1)
                 }
                 
             case (1, 2):
                 let i = c1.firstIndex(of: d1[0])!
                 let (j1, j2) = (c2.firstIndex(of: d2[0])!, c2.firstIndex(of: d2[1])!)
                 return ModuleHom.linearlyExtend{ x in
-                    self.coproduct.applied(to: x, at: i, to: (j1, j2), state: s1)
+                    x.applied(coproduct: self.coproduct, at: i, to: (j1, j2), state: s1)
                 }
                 
             default:
@@ -118,16 +122,16 @@ public struct KhCube<R: Ring> {
         }
     }
     
-    public func differential(_ i: Int) -> ModuleEnd<FreeModule<KhEnhancedState, R>> {
-        ModuleHom.linearlyExtend { (x: KhEnhancedState) in
+    public func differential(_ i: Int) -> ModuleEnd<FreeModule<KhComplexGenerator, R>> {
+        ModuleHom.linearlyExtend { (x: KhComplexGenerator) in
             let v = self[x.state]
-            return v.targetStates.sum { (ε, target) -> FreeModule<KhEnhancedState, R> in
+            return v.targetStates.sum { (ε, target) -> FreeModule<KhComplexGenerator, R> in
                 ε * self.edgeMap(from: x.state, to: target).applied(to: .wrap(x))
             }
         }
     }
     
-    public func fold() -> ChainComplex1<FreeModule<KhEnhancedState, R>> {
+    public func fold() -> ChainComplex1<FreeModule<KhComplexGenerator, R>> {
         ChainComplex1(
             type: .ascending,
             supported: 0 ... dim,

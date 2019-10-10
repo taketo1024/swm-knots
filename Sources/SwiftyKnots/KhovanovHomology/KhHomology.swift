@@ -21,7 +21,7 @@ extension ModuleGrid where GridDim == _2 {
 }
 
 extension Link {
-    public func KhovanovHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid2<FreeModule<KhEnhancedState, R>> {
+    public func KhovanovHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid2<FreeModule<KhComplexGenerator, R>> {
         let L = self
         let (n⁺, n⁻) = (L.crossingNumber⁺, L.crossingNumber⁻)
         
@@ -35,7 +35,7 @@ extension Link {
         let bigraded = ChainComplex2(grid: ModuleGrid(supportedCoords: support) { I in
             let (i, j) = (I[0], I[1])
             let Ci = chainCpx[i]
-            let gens = Ci.generators.compactMap{ e -> KhEnhancedState? in
+            let gens = Ci.generators.compactMap{ e -> KhComplexGenerator? in
                 let x = e.decomposed()[0].0
                 return (x.degree == j) ? x : nil
             }
@@ -47,18 +47,18 @@ extension Link {
         return bigraded.homology
     }
     
-    public func parameterizedKhovanovHomology<R: EuclideanRing>(_ type: R.Type, h: R, t: R, normalized: Bool = true) -> ModuleGrid1<FreeModule<KhEnhancedState, R>> {
+    public func parameterizedKhovanovHomology<R: EuclideanRing>(_ type: R.Type, h: R, t: R, normalized: Bool = true) -> ModuleGrid1<FreeModule<KhComplexGenerator, R>> {
         let n⁻ = crossingNumber⁻
         let cube = KhCube<R>(link: self, h: h, t: t)
         let chainComplex = cube.fold().shifted(normalized ? -n⁻ : 0)
         return chainComplex.homology
     }
     
-    public func LeeHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid1<FreeModule<KhEnhancedState, R>> {
+    public func LeeHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid1<FreeModule<KhComplexGenerator, R>> {
         parameterizedKhovanovHomology(R.self, h: .zero, t: .identity, normalized: normalized)
     }
 
-    public func BarNatanHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid1<FreeModule<KhEnhancedState, R>> {
+    public func BarNatanHomology<R: EuclideanRing>(_ type: R.Type, normalized: Bool = true) -> ModuleGrid1<FreeModule<KhComplexGenerator, R>> {
         parameterizedKhovanovHomology(R.self, h: .identity, t: .zero, normalized: normalized)
     }
 }
