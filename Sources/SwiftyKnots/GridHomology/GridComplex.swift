@@ -24,9 +24,7 @@ public enum GridComplexType {
     case filtered // [Book] p.252, Def 13.2.1
 }
 
-extension GridComplex {
-    public typealias Element = FreeModule<TensorGenerator<MultivariatePolynomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>
-    
+extension GridComplex where GridDim == _1, BaseModule: FreeModuleType, BaseModule.Generator == TensorGenerator<MultivariatePolynomialGenerator<_Un>, GridDiagram.Generator>, BaseModule.BaseRing == 𝐙₂ {
     public init(type: GridComplexType, diagram G: GridDiagram) {
         let generators = GridComplexGenerators(for: G)
         self.init(type: type, diagram: G, generators: generators)
