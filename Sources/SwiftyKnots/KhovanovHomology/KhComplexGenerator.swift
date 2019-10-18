@@ -7,7 +7,7 @@
 
 import SwiftyMath
 
-public struct KhComplexGenerator: FreeModuleGenerator, Comparable, Codable {
+public struct KhComplexGenerator: FreeModuleGenerator, TensorMonoid, Comparable, Codable {
     public let tensor: MultiTensorGenerator<KhAlgebraGenerator>
     public let state: Link.State
 
@@ -25,6 +25,10 @@ public struct KhComplexGenerator: FreeModuleGenerator, Comparable, Codable {
 
     public var degree: Int {
         tensor.degree + state.weight + tensor.factors.count
+    }
+    
+    public static func ⊗(x1: Self, x2: Self) -> Self {
+        .init(tensor: x1.tensor ⊗ x2.tensor, state: x1.state + x2.state)
     }
     
     public static func <(b1: Self, b2: Self) -> Bool {
