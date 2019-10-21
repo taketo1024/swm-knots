@@ -8,36 +8,6 @@
 import SwiftyMath
 import SwiftyHomology
 
-extension FreeModuleType {
-    func filter(_ predicate: (Generator, BaseRing) -> Bool) -> Self {
-        .init(elements: elements.filter(predicate))
-    }
-}
-
-extension ModuleObject where BaseModule: FreeModuleType {
-    func filter(_ f: @escaping (BaseModule.Generator) -> Bool) -> ModuleObject {
-        let basis = generators.compactMap { z -> BaseModule.Generator? in
-            assert(z.isGenerator)
-            let a = z.unwrap()!
-            return f(a) ? a : nil
-        }
-        return ModuleObject(basis: basis)
-    }
-}
-
-extension ModuleHom where X: FreeModuleType, Y: FreeModuleType {
-    public func asMatrix(from: ModuleObject<X>,to: ModuleObject<Y>) -> DMatrix<BaseRing> {
-        DMatrix(size: (to.generators.count, from.generators.count)) { setEntry in
-            from.generators.enumerated().forEach { (j, z) in
-                let w = self.applied(to: z)
-                to.factorize(w).nonZeroComponents.forEach{ (i, _, a) in
-                    setEntry(i, j, a)
-                }
-            }
-        }
-    }
-}
-
 public func RasmussenInvariant(_ L: Link) -> Int {
     RasmussenInvariant(L, 𝐐.self)
 }
