@@ -5,14 +5,40 @@
 //  Created by Taketo Sano on 2018/12/06.
 //
 
+// see:
+// - Knot Table  http://katlas.org/wiki/The_Rolfsen_Knot_Table
+// - Link Table  http://katlas.org/wiki/The_Thistlethwaite_Link_Table
+// - Torus Knots http://katlas.org/wiki/36_Torus_Knots
 
-/*
- * JSON string extracted from: http://katlas.org/wiki/The_Take_Home_Database
- * using command:
- * $ cat Rolfsen.rdf | grep "<invariant:PD_Presentation>" | perl -pe 's|<knot:(.*?)> <invariant:PD_Presentation> "(.*)" \.|"$1": [$2],|' | perl -pe 's|</sub> X|</sub>, X|g' | perl -pe 's|X<sub>([0-9]+),?([0-9]+),?([0-9]+),?([0-9]+)</sub>|[\1,\2,\3,\4]|g'
- */
+public func Knot(_ n: Int, _ i: Int) -> Link {
+    assert( (3...10).contains(n) )
+    let name = "\(n)_\(i)"
+    return Link.load(name)
+}
 
 extension Link {
+    public enum LinkType {
+        case knot, link
+    }
+    
+    public static var empty: Link {
+        Link(name: "∅", crossings: [])
+    }
+    
+    public static var unknot: Link {
+        var L = Link(name: "○", planarCode: [1, 2, 2, 1])
+        L.resolve(0, .resolution0)
+        return L
+    }
+    
+    public static var trefoil: Link {
+        Link.load("3_1")
+    }
+    
+    public static var HopfLink: Link {
+        Link.load("L2a1")
+    }
+
     public static func load(_ name: String) -> Link {
         loadTable()
         
@@ -62,6 +88,12 @@ private func loadTable() {
         _table = CodeTable.loadJSON(_jsonString)!
     }
 }
+
+/*
+ * JSON string extracted from: http://katlas.org/wiki/The_Take_Home_Database
+ * using command:
+ * $ cat Rolfsen.rdf | grep "<invariant:PD_Presentation>" | perl -pe 's|<knot:(.*?)> <invariant:PD_Presentation> "(.*)" \.|"$1": [$2],|' | perl -pe 's|</sub> X|</sub>, X|g' | perl -pe 's|X<sub>([0-9]+),?([0-9]+),?([0-9]+),?([0-9]+)</sub>|[\1,\2,\3,\4]|g'
+ */
 
 private var _table: CodeTable = [:]
 private let _jsonString = """
