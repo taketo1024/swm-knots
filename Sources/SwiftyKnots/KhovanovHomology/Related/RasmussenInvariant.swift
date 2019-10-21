@@ -50,10 +50,8 @@ public func RasmussenInvariant<F: Field>(_ L: Link, _ type: F.Type) -> Int {
     let (n⁺, n⁻) = (L.crossingNumber⁺, L.crossingNumber⁻)
     let qShift = n⁺ - 2 * n⁻
     
-    let (u, v) = (F.zero, F.identity)
-    
-    let α = L.canonicalCycle(u, v)
-    let C = KhovanovComplex<F>(link: L, h: u + v, t: -u * v)
+    let C = KhovanovComplex<F>(type: .Lee, link: L)
+    let z = C.LeeCycle(L)
     let d = C.differential(at: -1)
     
     let range = C[0].generators.map{ $0.degree }.range!
@@ -64,7 +62,7 @@ public func RasmussenInvariant<F: Field>(_ L: Link, _ type: F.Type) -> Int {
         let FC1 = C[-1].filter{ x in x.degree < j }
         
         let A = d.asMatrix(from: FC1, to: FC0)
-        let b = FC0.factorize(α)
+        let b = FC0.factorize(z)
         
         let E = MatrixEliminator.eliminate(target: A, form: .Diagonal)
         if let x = E.invert(b) {

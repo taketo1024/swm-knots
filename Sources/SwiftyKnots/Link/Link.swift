@@ -116,7 +116,7 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var crossingNumber: Int {
-        crossings.count { x in x.isCrossing }
+        crossings.count { x in !x.isResolved }
     }
     
     public var crossingNumber⁺: Int {
@@ -196,29 +196,29 @@ public struct Link: Equatable, CustomStringConvertible {
      *     / \           /‾\
      */
     
-    private mutating func _resolve(_ i: Int, _ s: Resolution) {
-        crossings[i].resolve(s)
-    }
-    
-    @discardableResult
-    public mutating func resolve(_ i: Int, _ s: Resolution) -> Link {
+    public mutating func resolve(_ i: Int, _ s: Resolution) {
         _components.clear()
-        _resolve(i, s)
+        crossings[i].resolve(s)
         reorientEdges()
-        return self
     }
     
     public func resolved(_ i: Int, _ s: Resolution) -> Link {
         var L = self.copy(name: "\(name)\(Format.sub(s.description))")
-        return L.resolve(i, s)
+        L.resolve(i, s)
+        return L
     }
     
     public func resolved(by state: State) -> Link {
-        var L = self.copy()
-        for (i, s) in state.enumerated() {
-            L._resolve(i, s)
+        let L = self.copy()
+        let xs = L.crossings.filter{ !$0.isResolved }
+        
+        assert(xs.count == state.count)
+        
+        for (x, s) in zip(xs, state) {
+            x.resolve(s)
         }
         L.reorientEdges()
+        
         return L
     }
     
@@ -256,7 +256,12 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var orientationPreservingState: State {
-        State( crossings.map{ $0.crossingSign == 1 ? .resolution0 : .resolution1 } )
+        State( crossings.compactMap{ x in
+            x.isResolved
+                ? nil
+                : x.crossingSign == 1
+                    ? .resolution0 : .resolution1
+        } )
     }
     
     public static func +(L1: Link, L2: Link) -> Link {
@@ -298,16 +303,12 @@ public struct Link: Equatable, CustomStringConvertible {
         }
     }
     
-    public class Crossing: Equatable, Comparable, CustomStringConvertible {
+    public final class Crossing: Equatable, Comparable, CustomStringConvertible {
         public enum Mode {
             case X⁻ // 0 - 2 is below 1 - 3
             case X⁺ // 0 - 2 is above 1 - 3
             case V  // 0 - 3 || 1 - 2
             case H  // 0 - 1 || 2 - 3
-            
-            public var isCrossing: Bool {
-                self == .X⁺ || self == .X⁻
-            }
         }
         
         public let id: Int
@@ -339,12 +340,12 @@ public struct Link: Equatable, CustomStringConvertible {
             return (j, edges[j])
         }
         
-        public var isCrossing: Bool {
-            mode.isCrossing
+        public var isResolved: Bool {
+            mode == .V || mode == .H
         }
         
         public var crossingSign: Int {
-            if !isCrossing {
+            if isResolved {
                 return 0
             }
             
@@ -384,7 +385,7 @@ public struct Link: Equatable, CustomStringConvertible {
         }
     }
     
-    public class Edge: Equatable, Comparable, Hashable, CustomStringConvertible {
+    public final class Edge: Equatable, Comparable, Hashable, CustomStringConvertible {
         public typealias EndPoint = (crossing: Crossing, index: Int)
         
         public internal(set) var id: Int
@@ -451,7 +452,7 @@ public struct Link: Equatable, CustomStringConvertible {
         }
     }
     
-    public class Component: Equatable, Hashable, Comparable, CustomStringConvertible {
+    public final class Component: Equatable, Hashable, Comparable, CustomStringConvertible {
         public let edges: [Edge]
         
         internal init(_ edges: [Edge]) {
