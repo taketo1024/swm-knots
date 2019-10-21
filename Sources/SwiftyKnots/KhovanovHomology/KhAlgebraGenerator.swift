@@ -24,8 +24,8 @@ public enum KhAlgebraGenerator: Int8, FreeModuleGenerator, Codable {
         (self == .I) ? "1" : "X"
     }
     
-    public typealias Product<R: Ring> = ModuleHom<FreeModule<TensorGenerator<Self, Self>, R>, FreeModule<Self, R>>
-    public typealias Coproduct<R: Ring> = ModuleHom<FreeModule<Self, R>, FreeModule<TensorGenerator<Self, Self>, R>>
+    public typealias Product<R: Ring> = ModuleHom<LinearCombination<TensorGenerator<Self, Self>, R>, LinearCombination<Self, R>>
+    public typealias Coproduct<R: Ring> = ModuleHom<LinearCombination<Self, R>, LinearCombination<TensorGenerator<Self, Self>, R>>
     
     public static func product<R: Ring>(h: R = .zero, t: R = .zero) -> Product<R> {
         Product<R>.linearlyExtend { e in

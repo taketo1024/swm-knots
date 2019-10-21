@@ -8,15 +8,15 @@
 import SwiftyMath
 import SwiftyHomology
 
-public typealias KhovanovComplex<R: Ring> = ChainComplex1<FreeModule<KhComplexGenerator, R>>
-public typealias BigradedKhovanovComplex<R: Ring> = ChainComplex2<FreeModule<KhComplexGenerator, R>>
+public typealias KhovanovComplex<R: Ring> = ChainComplex1<LinearCombination<KhComplexGenerator, R>>
+public typealias BigradedKhovanovComplex<R: Ring> = ChainComplex2<LinearCombination<KhComplexGenerator, R>>
 
 public enum KhovanovComplexType {
     case Khovanov, Lee, BarNatan
 }
 
 extension KhCube {
-    func differential<BaseModule: FreeModuleType>(at i: Int) -> ModuleEnd<BaseModule> where BaseModule.Generator == KhComplexGenerator, BaseModule.BaseRing == R {
+    func differential<BaseModule: FreeModule>(at i: Int) -> ModuleEnd<BaseModule> where BaseModule.Generator == KhComplexGenerator, BaseModule.BaseRing == R {
         .linearlyExtend { x in
             let v = self[x.state]
             return v.targetStates.sum { (ε, target) in
@@ -28,7 +28,7 @@ extension KhCube {
 }
 
 // SinglyGraded
-extension ChainComplex where GridDim == _1, BaseModule: FreeModuleType, BaseModule.Generator == KhComplexGenerator {
+extension ChainComplex where GridDim == _1, BaseModule: FreeModule, BaseModule.Generator == KhComplexGenerator {
     public init(type: KhovanovComplexType = .Khovanov, link L: Link, normalized: Bool = true) {
         let (h, t): (R, R)
         switch type {
@@ -68,7 +68,7 @@ extension ChainComplex where GridDim == _1, BaseModule: FreeModuleType, BaseModu
 }
 
 // Bigraded
-extension ChainComplex where GridDim == _2, BaseModule: FreeModuleType, BaseModule.Generator == KhComplexGenerator {
+extension ChainComplex where GridDim == _2, BaseModule: FreeModule, BaseModule.Generator == KhComplexGenerator {
     public init(link L: Link, normalized: Bool = true) {
         self.init(link: L, h: .zero, t: .zero, normalized: normalized)
     }
@@ -106,15 +106,15 @@ extension ChainComplex where GridDim == _2, BaseModule: FreeModuleType, BaseModu
     }
 }
 
-public func KhovanovHomology<R: EuclideanRing>(_ L: Link, _ type: R.Type, normalized: Bool = true) -> ModuleGrid2<FreeModule<KhComplexGenerator, R>> {
+public func KhovanovHomology<R: EuclideanRing>(_ L: Link, _ type: R.Type, normalized: Bool = true) -> ModuleGrid2<LinearCombination<KhComplexGenerator, R>> {
     BigradedKhovanovComplex(link: L, normalized: normalized).homology
 }
 
-public func LeeHomology<R: EuclideanRing>(_ L: Link, _ type: R.Type, normalized: Bool = true) -> ModuleGrid1<FreeModule<KhComplexGenerator, R>> {
+public func LeeHomology<R: EuclideanRing>(_ L: Link, _ type: R.Type, normalized: Bool = true) -> ModuleGrid1<LinearCombination<KhComplexGenerator, R>> {
     KhovanovComplex(type: .Lee, link: L, normalized: normalized).homology
 }
 
-public func BarNatanHomology<R: EuclideanRing>(_ L: Link, _ type: R.Type, normalized: Bool = true) -> ModuleGrid1<FreeModule<KhComplexGenerator, R>> {
+public func BarNatanHomology<R: EuclideanRing>(_ L: Link, _ type: R.Type, normalized: Bool = true) -> ModuleGrid1<LinearCombination<KhComplexGenerator, R>> {
     KhovanovComplex(type: .BarNatan, link: L, normalized: normalized).homology
 }
 

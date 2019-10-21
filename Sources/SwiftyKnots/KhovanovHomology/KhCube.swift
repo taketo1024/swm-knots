@@ -54,7 +54,7 @@ public struct KhCube<R: Ring> {
         let to:   Link.State
     }
     
-    public typealias EdgeMap = ModuleEnd<FreeModule<KhComplexGenerator, R>>
+    public typealias EdgeMap = ModuleEnd<LinearCombination<KhComplexGenerator, R>>
     
     public let link: Link
     let product: KhAlgebraGenerator.Product<R>
@@ -135,17 +135,17 @@ public struct KhCube<R: Ring> {
         }
     }
     
-    public func differential(_ i: Int) -> ModuleEnd<FreeModule<KhComplexGenerator, R>> {
+    public func differential(_ i: Int) -> ModuleEnd<LinearCombination<KhComplexGenerator, R>> {
         ModuleHom.linearlyExtend { (x: KhComplexGenerator) in
             let v = self[x.state]
-            return v.targetStates.sum { (ε, target) -> FreeModule<KhComplexGenerator, R> in
+            return v.targetStates.sum { (ε, target) -> LinearCombination<KhComplexGenerator, R> in
                 let f = self.edgeMap(from: x.state, to: target)
                 return ε * f.applied(to: x)
             }
         }
     }
     
-    public func fold() -> ChainComplex1<FreeModule<KhComplexGenerator, R>> {
+    public func fold() -> ChainComplex1<LinearCombination<KhComplexGenerator, R>> {
         ChainComplex1(
             type: .ascending,
             supported: 0 ... dim,

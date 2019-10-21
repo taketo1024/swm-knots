@@ -15,7 +15,7 @@ public struct _U: PolynomialIndeterminate {
 
 public typealias _Un = InfiniteVariatePolynomialIndeterminates<_U>
 
-public typealias GridComplex = ChainComplex1<FreeModule<TensorGenerator<MultivariatePolynomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>>
+public typealias GridComplex = ChainComplex1<LinearCombination<TensorGenerator<MultivariatePolynomialGenerator<_Un>, GridDiagram.Generator>, 𝐙₂>>
 
 public enum GridComplexType {
     case tilde    // [Book] p.72,  Def 4.4.1
@@ -24,7 +24,7 @@ public enum GridComplexType {
     case filtered // [Book] p.252, Def 13.2.1
 }
 
-extension GridComplex where GridDim == _1, BaseModule: FreeModuleType, BaseModule.Generator == TensorGenerator<MultivariatePolynomialGenerator<_Un>, GridDiagram.Generator>, BaseModule.BaseRing == 𝐙₂ {
+extension ChainComplex where GridDim == _1, BaseModule: FreeModule, BaseModule.Generator == TensorGenerator<MultivariatePolynomialGenerator<_Un>, GridDiagram.Generator>, BaseModule.BaseRing == 𝐙₂ {
     public init(type: GridComplexType, diagram G: GridDiagram) {
         let generators = GridComplexGenerators(for: G)
         self.init(type: type, diagram: G, generators: generators)
@@ -33,8 +33,8 @@ extension GridComplex where GridDim == _1, BaseModule: FreeModuleType, BaseModul
     public init(type: GridComplexType, diagram G: GridDiagram, generators: GridComplexGenerators, filter: @escaping (Element.Generator) -> Bool = { _ in true }) {
         self.init(
             supported:    generators.degreeRange,
-            sequence:     GridComplex.chain(type: type, diagram: G, generators: generators, filter: filter),
-            differential: GridComplex.differential(type: type, diagram: G, generators: generators, filter: filter)
+            sequence:     Self.chain(type: type, diagram: G, generators: generators, filter: filter),
+            differential: Self.differential(type: type, diagram: G, generators: generators, filter: filter)
         )
     }
     

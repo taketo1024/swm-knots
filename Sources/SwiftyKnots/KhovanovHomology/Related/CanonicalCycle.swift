@@ -8,7 +8,7 @@
 import SwiftyMath
 import SwiftyHomology
 
-extension ChainComplex where GridDim == _1, BaseModule: FreeModuleType, BaseModule.Generator == KhComplexGenerator {
+extension ChainComplex where GridDim == _1, BaseModule: FreeModule, BaseModule.Generator == KhComplexGenerator {
     private enum CanonicalCycleColor {
         case a, b
         
