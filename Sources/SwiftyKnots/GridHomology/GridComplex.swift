@@ -9,16 +9,18 @@ import SwiftyMath
 import SwiftyHomology
 
 public struct _U: PolynomialIndeterminate {
-    public static let degree = 2
+    public static let degree = -2
     public static var symbol = "U"
 }
 
 public typealias _Un = InfiniteVariatePolynomialIndeterminates<_U>
 
+public typealias InflatedGridComplexGenerator = TensorGenerator<MultivariatePolynomialGenerator<_Un>, GridDiagram.Generator>
+
 public struct GridComplex: ChainComplexWrapper {
     public typealias R = 𝐙₂
     public typealias GridDim = _1
-    public typealias BaseModule = LinearCombination<TensorGenerator<MultivariatePolynomialGenerator<_Un>, GridDiagram.Generator>, R>
+    public typealias BaseModule = LinearCombination<InflatedGridComplexGenerator, R>
     
     public enum Variant {
         case tilde    // [Book] p.72,  Def 4.4.1
@@ -149,14 +151,19 @@ public struct GridComplex: ChainComplexWrapper {
 
 
 extension TensorGenerator where A == MultivariatePolynomialGenerator<_Un>, B == GridDiagram.Generator {
+    public var monomial: A {
+        factors.0
+    }
+    
+    public var generator: B {
+        factors.1
+    }
+
     public var algebraicDegree: Int {
-        let m = factors.0 // MultivariatePolynomialGenerator<_Un>
-        return -(m.exponent.indices.contains(0) ? m.exponent[0] : 0)
+        return -(monomial.exponent.count > 0 ? monomial.exponent[0] : 0)
     }
     
     public var AlexanderDegree: Int {
-        let m = factors.0 // MultivariatePolynomialGenerator<_Un>
-        let x = factors.1 // GridDiagram.Generator
-        return _Un.totalDegree(exponents: m.exponent) / 2 + x.AlexanderDegree
+        return _Un.totalDegree(exponents: monomial.exponent) / 2 + generator.AlexanderDegree
     }
 }
