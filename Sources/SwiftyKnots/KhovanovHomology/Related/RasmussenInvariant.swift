@@ -21,7 +21,7 @@ public func RasmussenInvariant<F: Field>(_ L: Link, _ type: F.Type) -> Int {
     let qShift = n⁺ - 2 * n⁻
     
     let C = KhovanovComplex<F>(type: .Lee, link: L)
-    let z = C.LeeCycle(L)
+    let z = C.canonicalCycles.0
     let d = C.differential[-1]
     
     let range = C[0].generators.map{ $0.unwrap()!.quantumDegree }.range!

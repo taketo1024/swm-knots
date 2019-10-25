@@ -17,17 +17,34 @@ extension KhovanovComplex {
         }
     }
     
-    public func canonicalCycle(_ L: Link, c: R) -> KhovanovComplex<R>.Element {
-        return LeeCycle(L, u: .zero, v: c)
-    }
+    public var canonicalCycles: (Element, Element) {
+        assert(link.components.count == 1) // currently supports only knots.
 
-    public func LeeCycle(_ L: Link, u: R = -R.identity, v: R = R.identity) -> KhovanovComplex<R>.Element {
-        assert(L.components.count == 1) // currently supports only knots.
+        func wrap(_ x: KhAlgebraGenerator) -> Element {
+            .wrap( Element.Generator(tensor: MultiTensorGenerator([x]), state: []))
+        }
 
-        let s0 = L.orientationPreservingState
-        let L0 = L.resolved(by: s0)
+        let (X, I) = (wrap(.X), wrap(.I))
+        let (u, v) = (-R.identity, R.identity)
+        let (a, b) = (X - u * I, X - v * I)
         
+        let s0 = link.orientationPreservingState
+        var α = Element.wrap( Element.Generator(tensor: .identity, state: s0))
+        var β = Element.wrap( Element.Generator(tensor: .identity, state: s0))
+
+        for (_, color) in coloredSeifertCircles {
+            α = α ⊗ ( (color == .a) ? a : b)
+            β = β ⊗ ( (color == .a) ? b : a)
+        }
+
+        return (α, β)
+    }
+    
+    private var coloredSeifertCircles: [(Link.Component, CanonicalCycleColor)] {
         typealias Circle = Link.Component
+        
+        let s0 = link.orientationPreservingState
+        let L0 = link.resolved(by: s0)
         let circles = L0.components
 
         // color each circle in a / b.
@@ -38,7 +55,7 @@ extension KhovanovComplex {
             let (circle, color) = queue.removeFirst()
 
             // crossings that touches c
-            let xs = L.crossings.filter{ x in
+            let xs = link.crossings.filter{ x in
                 !x.isResolved && x.edges.contains{ e in circle.edges.contains(e) }
             }
 
@@ -59,21 +76,6 @@ extension KhovanovComplex {
 
         assert(result.count == circles.count)
 
-        typealias Element = KhovanovComplex<R>.Element
-        typealias A = Element.Generator
-        
-        func wrap(_ x: KhAlgebraGenerator) -> Element {
-            .wrap( Element.Generator(tensor: MultiTensorGenerator([x]), state: []))
-        }
-
-        let (X, I) = (wrap(.X), wrap(.I))
-        let (a, b) = (X - u * I, X - v * I)
-        var z = Element.wrap( Element.Generator(tensor: .identity, state: s0))
-
-        for c in circles {
-            z = z ⊗ ( (result[c]! == .a) ? a : b)
-        }
-
-        return z
+        return circles.map { c in (c, result[c]!) }
     }
 }
