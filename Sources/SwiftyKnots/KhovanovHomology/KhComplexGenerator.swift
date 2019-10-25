@@ -24,7 +24,11 @@ public struct KhComplexGenerator: FreeModuleGenerator, TensorMonoid, Comparable,
     }
 
     public var degree: Int {
-        tensor.degree + state.weight + tensor.factors.count
+        state.weight
+    }
+    
+    public var quantumDegree: Int {
+        degree + tensor.degree + tensor.factors.count
     }
     
     public static func ⊗(x1: Self, x2: Self) -> Self {

@@ -8,117 +8,89 @@
 import SwiftyMath
 import SwiftyHomology
 
-public typealias KhovanovComplex<R: Ring> = ChainComplex1<LinearCombination<KhComplexGenerator, R>>
-public typealias BigradedKhovanovComplex<R: Ring> = ChainComplex2<LinearCombination<KhComplexGenerator, R>>
-
-public enum KhovanovComplexType {
-    case Khovanov, Lee, BarNatan
-}
-
-extension KhCube {
-    func differential<BaseModule: FreeModule>(at i: Int) -> ModuleEnd<BaseModule> where BaseModule.Generator == KhComplexGenerator, BaseModule.BaseRing == R {
-        .linearlyExtend { x in
-            let v = self[x.state]
-            return v.targetStates.sum { (ε, target) in
-                let f = self.edgeMap(from: x.state, to: target)
-                return BaseModule( ε * f.applied(to: x) )
-            }
-        }
-    }
-}
-
-// SinglyGraded
-extension ChainComplex where GridDim == _1, BaseModule: FreeModule, BaseModule.Generator == KhComplexGenerator {
-    public init(type: KhovanovComplexType = .Khovanov, link L: Link, normalized: Bool = true) {
-        let (h, t): (R, R)
-        switch type {
-        case .Khovanov: (h, t) = (.zero, .zero)
-        case .Lee:      (h, t) = (.zero, .identity)
-        case .BarNatan: (h, t) = (.identity, .zero)
-        }
-        self.init(link: L, h: h, t: t, normalized: normalized)
-    }
-    
-    public init(link L: Link, h: R, t: R, normalized: Bool = true) {
-        let cube = KhCube(link: L, h: h, t: t)
-        self.init(link: L, cube: cube, normalized: normalized)
-    }
-    
-    public init(link L: Link, cube: KhCube<R>, normalized: Bool = true) {
-        let (n, n⁻) = (L.crossingNumber, L.crossingNumber⁻)
-        let s = normalized ? n⁻ : 0
+public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
+    public enum Variant {
+        case Khovanov, Lee, BarNatan
+        case custom(_ h: R, _ t: R)
         
-        self.init(
-            type: .ascending,
-            support: -s ... n - s,
-            sequence: { i in
-                guard (-s ... n - s).contains(i) else {
-                    return .zeroModule
-                }
-                
-                let states = cube.states(ofDegree: i + s)
-                let generators = states.flatMap{ cube[$0].generators }
-                return ModuleObject(basis: generators)
-            },
-            differential: { i in
-                cube.differential(at: i)
+        var parameters: (R, R) {
+            switch self {
+            case .Khovanov:
+                return (.zero, .zero)
+            case .Lee:
+                return (.zero, .identity)
+            case .BarNatan:
+                return (.identity, .zero)
+            case let .custom(h, t):
+                return (h, t)
             }
-        )
+        }
     }
-}
 
-// Bigraded
-extension ChainComplex where GridDim == _2, BaseModule: FreeModule, BaseModule.Generator == KhComplexGenerator {
-    public init(link L: Link, normalized: Bool = true) {
-        self.init(link: L, h: .zero, t: .zero, normalized: normalized)
+    public typealias GridDim = _1
+    public typealias BaseModule = LinearCombination<KhComplexGenerator, R>
+    
+    public let link: Link
+    public let type: Variant
+    public let cube: KhCube<R>
+    public let chainComplex: ChainComplex1<BaseModule>
+    public let normalized: Bool
+    
+    private init(_ link: Link, _ type: Variant, _ cube: KhCube<R>, _ chainComplex: ChainComplex1<BaseModule>, _ normalized: Bool) {
+        self.link = link
+        self.type = type
+        self.cube = cube
+        self.chainComplex = chainComplex
+        self.normalized = normalized
     }
     
-    public init(link L: Link, h: R, t: R, normalized: Bool = true) {
+    public init(type: Variant = .Khovanov, link: Link, normalized: Bool = true) {
+        let n⁻ = link.crossingNumber⁻
+        let (h, t) = type.parameters
+        let cube = KhCube(link: link, h: h, t: t)
+        let chainComplex = cube.fold().shifted(normalized ? -n⁻ : 0)
+        self.init(link, type, cube, chainComplex, normalized)
+    }
+    
+    public func shifted(_ shift: GridCoords<_1>) -> KhovanovComplex<R> {
+        .init(link, type, cube, chainComplex.shifted(shift), normalized)
+    }
+    
+    public var bigraded: ChainComplex2<BaseModule> {
+        let (h, t) = type.parameters
         assert(h.isZero || h.degree == -2)
         assert(t.isZero || t.degree == -4)
         
-        let cube = KhCube(link: L, h: h, t: t)
-        self.init(link: L, cube: cube, normalized: normalized)
-    }
-        
-    public init(link L: Link, cube: KhCube<R>, normalized: Bool = true) {
-        let (n, n⁺, n⁻) = (L.crossingNumber, L.crossingNumber⁺, L.crossingNumber⁻)
-        let (s1, s2) = normalized ? (n⁻, 2 * n⁻ - n⁺) : (0, 0)
-        
+        let (n⁺, n⁻) = (link.crossingNumber⁺, link.crossingNumber⁻)
         let (qmin, qmax) = (cube.startVertex.minQdegree, cube.endVertex.maxQdegree)
-        let supp: ClosedRange<Coords> = [-s1, qmin - s2] ... [n - s1, qmax - s2]
-
-        self.init(
-            grid: ModuleGrid2(support: supp) { I in
-                let (i, j) = (I[0], I[1])
-                guard (-s1 ... n - s1).contains(i) else {
-                    return .zeroModule
-                }
-                
-                let states = cube.states(ofDegree: i + s1)
-                let generators = states.flatMap{ s in cube[s].generators.filter{ x in x.degree == j + s2 } }
-                return ModuleObject(basis: generators)
-            },
-            differential: ChainMap2(multiDegree: [1, 0]) { I in
-                cube.differential(at: I[0])
-            }
-        )
+        
+        return chainComplex.asBigraded(secondarySupport: qmin ... qmax) {
+            x in x.quantumDegree
+        }.shifted(0, normalized ? n⁺ - 2 * n⁻ : 0)
     }
 }
 
-public func KhovanovHomology<R: EuclideanRing>(_ L: Link, _ type: R.Type, normalized: Bool = true) -> ModuleGrid2<LinearCombination<KhComplexGenerator, R>> {
-    BigradedKhovanovComplex(link: L, normalized: normalized).homology
-}
+public struct KhovanovHomology<R: EuclideanRing>: GridWrapper {
+    public typealias Grid = ModuleGrid2<LinearCombination<KhComplexGenerator, R>>
+    public typealias GridDim = _2
+    public typealias Object = Grid.Object
+    
+    public let grid: Grid
+    
+    private init(_ grid: Grid) {
+        self.grid = grid
+    }
 
-public func LeeHomology<R: EuclideanRing>(_ L: Link, _ type: R.Type, normalized: Bool = true) -> ModuleGrid1<LinearCombination<KhComplexGenerator, R>> {
-    KhovanovComplex(type: .Lee, link: L, normalized: normalized).homology
-}
+    public init (_ L: Link, normalized: Bool = true) {
+        let C = KhovanovComplex<R>(link: L, normalized: normalized)
+        let H = C.bigraded.homology
+        self.init(H)
+    }
 
-public func BarNatanHomology<R: EuclideanRing>(_ L: Link, _ type: R.Type, normalized: Bool = true) -> ModuleGrid1<LinearCombination<KhComplexGenerator, R>> {
-    KhovanovComplex(type: .BarNatan, link: L, normalized: normalized).homology
-}
-
-extension ModuleGrid where GridDim == _2 {
+    public func shifted(_ shift: Coords) -> Self {
+        .init(grid.shifted(shift))
+    }
+    
     // Σ_{i, j} (-1)^i q^j rank(H[i, j])
     public var gradedEulerCharacteristic: LaurentPolynomial<_q, 𝐙> {
         guard let support = support else { return .zero }
@@ -130,5 +102,12 @@ extension ModuleGrid where GridDim == _2 {
         return (r1 * r2).sum { (i, j) -> P in
             P((-1).pow(i) * self[i, j].rank) * q.pow(j)
         }
+    }
+    
+    public func printTable() {
+        guard let support = support else { return }
+        let (r0, r1) = support.range
+        let qMin = r1.min() ?? 0
+        grid.printTable(r0, r1.filter{ j in (j - qMin).isEven})
     }
 }
