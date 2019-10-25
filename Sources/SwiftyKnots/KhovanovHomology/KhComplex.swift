@@ -30,15 +30,15 @@ public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
     public typealias GridDim = _1
     public typealias BaseModule = LinearCombination<KhComplexGenerator, R>
     
-    public let link: Link
     public let type: Variant
+    public let link: Link
     public let cube: KhCube<R>
     public let chainComplex: ChainComplex1<BaseModule>
     public let normalized: Bool
     
-    private init(_ link: Link, _ type: Variant, _ cube: KhCube<R>, _ chainComplex: ChainComplex1<BaseModule>, _ normalized: Bool) {
-        self.link = link
+    private init(_ type: Variant, _ link: Link, _ cube: KhCube<R>, _ chainComplex: ChainComplex1<BaseModule>, _ normalized: Bool) {
         self.type = type
+        self.link = link
         self.cube = cube
         self.chainComplex = chainComplex
         self.normalized = normalized
@@ -49,11 +49,11 @@ public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
         let (h, t) = type.parameters
         let cube = KhCube(link: link, h: h, t: t)
         let chainComplex = cube.asChainComplex().shifted(normalized ? -n⁻ : 0)
-        self.init(link, type, cube, chainComplex, normalized)
+        self.init(type, link, cube, chainComplex, normalized)
     }
     
     public func shifted(_ shift: GridCoords<_1>) -> KhovanovComplex<R> {
-        .init(link, type, cube, chainComplex.shifted(shift), normalized)
+        .init(type, link, cube, chainComplex.shifted(shift), normalized)
     }
     
     public var bigraded: ChainComplex2<BaseModule> {
