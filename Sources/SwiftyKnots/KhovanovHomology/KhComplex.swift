@@ -50,7 +50,7 @@ extension ChainComplex where GridDim == _1, BaseModule: FreeModule, BaseModule.G
         
         self.init(
             type: .ascending,
-            supported: -s ... n - s,
+            support: -s ... n - s,
             sequence: { i in
                 guard (-s ... n - s).contains(i) else {
                     return .zeroModule
@@ -86,10 +86,10 @@ extension ChainComplex where GridDim == _2, BaseModule: FreeModule, BaseModule.G
         let (s1, s2) = normalized ? (n⁻, 2 * n⁻ - n⁺) : (0, 0)
         
         let (qmin, qmax) = (cube.startVertex.minQdegree, cube.endVertex.maxQdegree)
-        let supp = ((-s1 ... n - s1) * (qmin - s2 ... qmax - s2)).map{ (i, j) in [i, j] }
+        let supp: ClosedRange<Coords> = [-s1, qmin - s2] ... [n - s1, qmax - s2]
 
         self.init(
-            grid: ModuleGrid2(supportedCoords: supp) { I in
+            grid: ModuleGrid2(support: supp) { I in
                 let (i, j) = (I[0], I[1])
                 guard (-s1 ... n - s1).contains(i) else {
                     return .zeroModule
@@ -121,11 +121,14 @@ public func BarNatanHomology<R: EuclideanRing>(_ L: Link, _ type: R.Type, normal
 extension ModuleGrid where GridDim == _2 {
     // Σ_{i, j} (-1)^i q^j rank(H[i, j])
     public var gradedEulerCharacteristic: LaurentPolynomial<_q, 𝐙> {
+        guard let support = support else { return .zero }
+        let (r1, r2) = support.range
+        
         typealias P = LaurentPolynomial<_q, 𝐙>
         let q = P.indeterminate
-        return supportedCoords.sum{ c in
-            let (i, j) = (c[0], c[1])
-            return P((-1).pow(i) * self[i, j].rank) * q.pow(j)
+        
+        return (r1 * r2).sum { (i, j) -> P in
+            P((-1).pow(i) * self[i, j].rank) * q.pow(j)
         }
     }
 }

@@ -22,7 +22,7 @@ public func RasmussenInvariant<F: Field>(_ L: Link, _ type: F.Type) -> Int {
     
     let C = KhovanovComplex<F>(type: .Lee, link: L)
     let z = C.LeeCycle(L)
-    let d = C.differential(at: -1)
+    let d = C.differential[-1]
     
     let range = C[0].generators.map{ $0.degree }.range!
     let min = range.lowerBound

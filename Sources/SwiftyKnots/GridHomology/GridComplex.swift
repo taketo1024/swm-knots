@@ -32,7 +32,7 @@ extension ChainComplex where GridDim == _1, BaseModule: FreeModule, BaseModule.G
     
     public init(type: GridComplexType, diagram G: GridDiagram, generators: GridComplexGenerators, filter: @escaping (Element.Generator) -> Bool = { _ in true }) {
         self.init(
-            supported:    generators.degreeRange,
+            support: generators.degreeRange,
             sequence:     Self.chain(type: type, diagram: G, generators: generators, filter: filter),
             differential: Self.differential(type: type, diagram: G, generators: generators, filter: filter)
         )
@@ -112,10 +112,11 @@ extension ChainComplex where GridDim == _1, BaseModule: FreeModule, BaseModule.G
     }
     
     public static func genus(of G: GridDiagram, generators: GridComplexGenerators) -> Int {
-        let C = GridComplex(type: .tilde, diagram: G)
-        let H = C.asBigraded { x in x.AlexanderDegree }.homology
         let M = generators.degreeRange
         let A = generators.map{ $0.AlexanderDegree }.range!
+        
+        let C = GridComplex(type: .tilde, diagram: G).asBigraded(secondarySupport: A) { x in x.AlexanderDegree }
+        let H = C.homology
         
         for (j, i) in A.reversed() * M.reversed() {
             if !H[i, j].isZero {
