@@ -11,56 +11,12 @@ import SwiftyHomology
 // An n-dim cube with Modules on all vertices I ∈ {0, 1}^n .
 
 public struct KhCube<R: Ring> {
-    public struct Vertex: CustomStringConvertible {
-        public let state: Link.State
-        public let circles: Link
-        public let generators: [KhComplexGenerator]
-        
-        internal let targetStates: [(sign: R, state: Link.State)]
-        
-        init(_ L: Link, _ state: Link.State) {
-            self.state = state 
-            self.circles = L.resolved(by: state)
-            
-            let r = circles.components.count
-            self.generators = KhComplexGenerator.generateBasis(state: state, power: r)
-            
-            //  101001  ->  { (-, 111001), (+, 101101), (+, 101011) }
-            self.targetStates = (0 ..< L.crossingNumber)
-                .filter{ i in state[i] == .resolution0 }
-                .map { i in
-                    let e = state[0 ..< i].count{ $0 == .resolution1 }
-                    let sign = R(from: (-1).pow(e))
-                    let target = Link.State( state.replaced(at: i, with: .resolution1) )
-                    return (sign, target)
-                }
-        }
-        
-        var maxQdegree: Int {
-             generators.map{ $0.quantumDegree }.max() ?? 0
-        }
-        
-        var minQdegree: Int {
-             generators.map{ $0.quantumDegree }.min() ?? 0
-        }
-        
-        public var description: String {
-            generators.description
-        }
-    }
-    
-    private struct StatePair: Hashable {
-        let from: Link.State
-        let to:   Link.State
-    }
-    
-    public typealias EdgeMap = ModuleEnd<LinearCombination<KhComplexGenerator, R>>
-    
     public let link: Link
     let product: KhAlgebraGenerator.Product<R>
     let coproduct: KhAlgebraGenerator.Coproduct<R>
     
-    private let statesCache:   CacheDictionary<Int, Set<Link.State>> = CacheDictionary([:])
+    public typealias EdgeMap = ModuleEnd<LinearCombination<KhComplexGenerator, R>>
+    
     private let verticesCache: CacheDictionary<Link.State, Vertex>   = CacheDictionary([:])
     private let edgeMapsCache: CacheDictionary<StatePair, EdgeMap>   = CacheDictionary([:])
 
@@ -96,11 +52,9 @@ public struct KhCube<R: Ring> {
     
     public func states(ofDegree i: Int) -> Set<Link.State> {
         // {0, 2, 5}  ->  (101001)
-        statesCache.useCacheOrSet(key: i) {
-            Set((0 ..< dim).choose(i).map { (I: [Int]) -> Link.State in
-                Link.State( (0 ..< dim).map{ i in I.contains(i) ? .resolution1 : .resolution0 } )
-            })
-        }
+        Set((0 ..< dim).choose(i).map { (I: [Int]) -> Link.State in
+            Link.State( (0 ..< dim).map{ i in I.contains(i) ? .resolution1 : .resolution0 } )
+        })
     }
     
     public func edgeMap(from s0: Link.State, to s1: Link.State) -> EdgeMap {
@@ -145,7 +99,7 @@ public struct KhCube<R: Ring> {
         }
     }
     
-    public func fold() -> ChainComplex1<LinearCombination<KhComplexGenerator, R>> {
+    public func asChainComplex() -> ChainComplex1<LinearCombination<KhComplexGenerator, R>> {
         ChainComplex1(
             type: .ascending,
             support: 0 ... dim,
@@ -160,10 +114,57 @@ public struct KhCube<R: Ring> {
                 
                 return ModuleObject(basis: generators)
             },
-            differential: { i in self.differential(i) })
+            differential: { i in self.differential(i) }
+        )
     }
     
     public func describe(_ s: Link.State) {
         print("\(s): \(self[s])")
+    }
+    
+    public struct Vertex: CustomStringConvertible {
+        public let state: Link.State
+        public let circles: Link
+        public let generators: [KhComplexGenerator]
+        private let targetStatesCache: Cache<[(sign: R, state: Link.State)]> = .empty
+        
+        init(_ L: Link, _ state: Link.State) {
+            self.state = state
+            self.circles = L.resolved(by: state)
+            
+            let r = circles.components.count
+            self.generators = KhComplexGenerator.generateBasis(state: state, power: r)
+        }
+        
+        var maxQdegree: Int {
+             generators.map{ $0.quantumDegree }.max() ?? 0
+        }
+        
+        var minQdegree: Int {
+             generators.map{ $0.quantumDegree }.min() ?? 0
+        }
+        
+        //  101001  ->  { (-, 111001), (+, 101101), (+, 101011) }
+        fileprivate var targetStates: [(sign: R, state: Link.State)] {
+            targetStatesCache.useCacheOrSet {
+                (0 ..< state.count)
+                .filter{ i in state[i] == .resolution0 }
+                .map { i in
+                    let e = state[0 ..< i].count{ $0 == .resolution1 }
+                    let sign = R(from: (-1).pow(e))
+                    let target = Link.State( state.replaced(at: i, with: .resolution1) )
+                    return (sign, target)
+                }
+            }
+        }
+        
+        public var description: String {
+            generators.description
+        }
+    }
+    
+    private struct StatePair: Hashable {
+        let from: Link.State
+        let to:   Link.State
     }
 }

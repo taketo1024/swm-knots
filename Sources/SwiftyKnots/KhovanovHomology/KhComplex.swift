@@ -48,7 +48,7 @@ public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
         let n⁻ = link.crossingNumber⁻
         let (h, t) = type.parameters
         let cube = KhCube(link: link, h: h, t: t)
-        let chainComplex = cube.fold().shifted(normalized ? -n⁻ : 0)
+        let chainComplex = cube.asChainComplex().shifted(normalized ? -n⁻ : 0)
         self.init(link, type, cube, chainComplex, normalized)
     }
     
