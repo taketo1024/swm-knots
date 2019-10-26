@@ -137,7 +137,7 @@ public struct GridComplex: ChainComplexWrapper {
     
     public static func genus(of G: GridDiagram, generators: GridComplexGenerators) -> Int {
         let C = GridComplex(type: .tilde, diagram: G).bigraded
-        let H = C.homology
+        let H = C.homology()
         let (r1, r2) = C.support!.range
         
         for (j, i) in r2.reversed() * r1.reversed() {

@@ -32,7 +32,7 @@ public func RasmussenInvariant<F: Field>(_ L: Link, _ type: F.Type) -> Int {
         let FC1 = C[-1].filter{ x in x.quantumDegree < j }
         
         let A = d.asMatrix(from: FC1, to: FC0)
-        let b = FC0.factorize(z)
+        let b = FC0.vectorize(z)
         
         let E = MatrixEliminator.eliminate(target: A, form: .Diagonal)
         if let x = E.invert(b) {

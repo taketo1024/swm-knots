@@ -81,9 +81,9 @@ public struct KhovanovHomology<R: EuclideanRing>: GridWrapper {
         self.grid = grid
     }
 
-    public init (_ L: Link, normalized: Bool = true) {
+    public init (_ L: Link, normalized: Bool = true, withGenerators: Bool = false, withVectorizer: Bool = false) {
         let C = KhovanovComplex<R>(link: L, normalized: normalized)
-        let H = C.bigraded.homology
+        let H = C.bigraded.homology(withGenerators: withGenerators, withVectorizer: withVectorizer)
         self.init(H)
     }
 
