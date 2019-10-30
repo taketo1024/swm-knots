@@ -18,7 +18,7 @@ public typealias _Un = InfiniteVariatePolynomialIndeterminates<_U>
 public typealias InflatedGridComplexGenerator = TensorGenerator<MultivariatePolynomialGenerator<_Un>, GridDiagram.Generator>
 
 public struct GridComplex: ChainComplexWrapper {
-    public typealias R = 𝐙₂
+    public typealias R = 𝐅₂
     public typealias GridDim = _1
     public typealias BaseModule = LinearCombination<InflatedGridComplexGenerator, R>
     
