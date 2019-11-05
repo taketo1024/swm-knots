@@ -7,6 +7,7 @@
 
 import SwiftyMath
 import SwiftyHomology
+import SwiftySolver
 
 public func RasmussenInvariant(_ L: Link) -> Int {
     RasmussenInvariant(L, 𝐐.self)
