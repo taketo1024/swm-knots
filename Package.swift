@@ -11,13 +11,14 @@ let package = Package(
             targets: ["SwiftyKnots"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/taketo1024/SwiftyMath.git", .branch("develop")),
-        .package(url: "https://github.com/taketo1024/SwiftyMath-homology.git", .branch("develop")),
+        .package(url: "https://github.com/taketo1024/SwiftyMath.git", from:"2.0.0"),
+        .package(url: "https://github.com/taketo1024/SwiftyMath-homology.git", from: "2.0.0"),
+        .package(url: "https://github.com/taketo1024/SwiftyMath-solver.git", from: "1.0.0"),
     ],
     targets: [
         .target(
             name: "SwiftyKnots",
-            dependencies: ["SwiftyMath", "SwiftyHomology"],
+            dependencies: ["SwiftyMath", "SwiftyHomology", "SwiftySolver"],
 			path: "Sources/SwiftyKnots"),
         .testTarget(
             name: "SwiftyKnotsTests",
