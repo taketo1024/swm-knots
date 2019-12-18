@@ -86,10 +86,11 @@ public struct GridComplexGenerators: Sequence {
         
         GridComplexGenerators.generateSequences(ofLength: n).forEach { (i, j) in
             let x = prev
-            let rect = GridDiagram.Rect(from: x.points[i], to: x.points[j], gridSize: 2 * n)
+            let points = x.points
+            let rect = GridDiagram.Rect(from: points[i], to: points[j], gridSize: 2 * n)
             
             // M(y) - M(x) = 2 #(r ∩ Os) - 2 #(x ∩ Int(r)) - 1
-            let m = 2 * Os.count{ O in rect.contains(O) } - 2 * x.points.count{ p in rect.contains(p, interior: true) } - 1
+            let m = 2 * Os.count{ O in rect.contains(O) } - 2 * points.count{ p in rect.contains(p, interior: true) } - 1
             
             // A(y) - A(x) = #(r ∩ Os) - #(r ∩ Xs)
             let a = Os.count{ O in rect.contains(O) } - Xs.count{ X in rect.contains(X) }

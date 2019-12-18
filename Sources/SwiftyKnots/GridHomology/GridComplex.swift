@@ -44,16 +44,16 @@ public struct GridComplex: ChainComplexWrapper {
         self.init(type: type, diagram: G, generators: generators)
     }
     
-    public init(type: Variant, diagram G: GridDiagram, generators: GridComplexGenerators, filter: @escaping (Element.Generator) -> Bool = { _ in true }) {
+    public init(type: Variant, diagram G: GridDiagram, generators: GridComplexGenerators) {
         let C = ChainComplex1(
             support: generators.degreeRange,
-            sequence:  Self.chain(type: type, diagram: G, generators: generators, filter: filter),
-            differential: Self.differential(type: type, diagram: G, generators: generators, filter: filter)
+            sequence:  Self.chain(type: type, diagram: G, generators: generators),
+            differential: Self.differential(type: type, diagram: G, generators: generators)
         )
         self.init(G, generators, C)
     }
     
-    private static func chain(type: Variant, diagram G: GridDiagram, generators: GridComplexGenerators, filter: @escaping (Element.Generator) -> Bool) -> ( (Int) -> ModuleObject<Element> ) {
+    public static func chain(type: Variant, diagram G: GridDiagram, generators: GridComplexGenerators) -> ( (Int) -> ModuleObject<Element> ) {
         let iMax = generators.degreeRange.upperBound
         
         let n = G.gridNumber
@@ -77,17 +77,14 @@ public struct GridComplex: ChainComplexWrapper {
                     .parallelFlatMap { x -> [Element.Generator] in
                         let indeterminates = Array(0 ..< numberOfIndeterminates)
                         let Umons = MultivariatePolynomialGenerator<_Un>.monomials(ofTotalExponent: k, usingIndeterminates: indeterminates)
-                        return Umons.compactMap{ U in
-                            let t = U ⊗ x
-                            return filter(t) ? t : nil
-                        }
+                        return Umons.map{ U in U ⊗ x }
                 }
             }
             return ModuleObject(basis: gens)
         }
     }
     
-    private static func differential(type: Variant, diagram G: GridDiagram, generators: GridComplexGenerators, filter: @escaping (Element.Generator) -> Bool) -> ( (Int) -> ModuleEnd<Element> ) {
+    public static func differential(type: Variant, diagram G: GridDiagram, generators: GridComplexGenerators) -> ( (Int) -> ModuleEnd<Element> ) {
         let (Os, Xs) = (G.Os, G.Xs)
         let U: (GridDiagram.Rect) -> MultivariatePolynomialGenerator<_Un>? = { rect in
             switch type {
@@ -105,19 +102,28 @@ public struct GridComplex: ChainComplexWrapper {
             }
         }
         
+        func d(_ x: GridDiagram.Generator) -> Element {
+            let elements = generators.adjacents(of: x).flatMap { y -> [Element.Generator] in
+                G.emptyRectangles(from: x, to: y).compactMap { rect in
+                    U(rect).map{ U in U ⊗ y }
+                }
+            }
+            .countMultiplicities()
+            .exclude { (_, c) in c.isEven }
+            .map { (x, _) in (x, R.identity) }
+            return Element(elements: elements, keysAreUnique: true)
+        }
+        
+        let cache: CacheDictionary<GridDiagram.Generator, Element> = .empty
+        
         return { i in
-            ModuleEnd.linearlyExtend { t -> Element in
-                let (m, x) = t.factors
-                return generators.adjacents(of: x).parallelFlatMap { y -> [Element] in
-                    G.emptyRectangles(from: x, to: y).compactMap { rect -> Element? in
-                        if let Us = U(rect) {
-                            let ty = (m * Us) ⊗ y
-                            return filter(ty) ? .wrap(ty) : nil
-                        } else {
-                            return nil
-                        }
-                    }
-                }.sumAll()
+            ModuleEnd.linearlyExtend { t1 -> Element in
+                let (m1, x) = t1.factors
+                let dx = cache.useCacheOrSet(key: x) { d(x) }
+                return dx.mapGenerators { t2 in
+                    let (m2, y) = t2.factors
+                    return (m1 * m2) ⊗ y
+                }
             }
         }
     }

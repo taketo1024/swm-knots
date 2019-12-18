@@ -135,13 +135,20 @@ public struct GridDiagram {
         }
         
         public func contains(_ p: Point, interior: Bool = false) -> Bool {
-            let xRange = interior ? (origin.x + 1 ... origin.x + size.x - 1) : (origin.x ... origin.x + size.x)
-            let yRange = interior ? (origin.y + 1 ... origin.y + size.y - 1) : (origin.y ... origin.y + size.y)
+            func inRange(_ p: Int, _ a: Int, _ b: Int) -> Bool {
+                if interior {
+                    return (a < p && p < b)
+                        || (a < p + gridSize && p + gridSize < b)
+                } else {
+                    return (a <= p && p <= b)
+                        || (a <= p + gridSize && p + gridSize <= b)
+                }
+            }
             
-            return (xRange.contains(p.x) || xRange.contains(p.x + gridSize))
-                && (yRange.contains(p.y) || yRange.contains(p.y + gridSize))
+            return inRange(p.x, origin.x, origin.x + size.x)
+                && inRange(p.y, origin.y, origin.y + size.y)
         }
-        
+
         public func intersects(_ points: [Point], interior: Bool = false) -> Bool {
             points.contains{ p in self.contains(p, interior: interior) }
         }
