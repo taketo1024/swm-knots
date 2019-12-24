@@ -15,12 +15,16 @@ public struct _U: PolynomialIndeterminate {
 
 public typealias _Un = InfiniteVariatePolynomialIndeterminates<_U>
 
-public typealias InflatedGridComplexGenerator = TensorGenerator<MultivariatePolynomialGenerator<_Un>, GridDiagram.Generator>
-
 public struct GridComplex: ChainComplexWrapper {
+    public typealias InflatedGenerator =
+        TensorGenerator<
+            MultivariatePolynomialGenerator<_Un>,
+            Generator
+        >
+
     public typealias R = 𝐅₂
     public typealias GridDim = _1
-    public typealias BaseModule = LinearCombination<InflatedGridComplexGenerator, R>
+    public typealias BaseModule = LinearCombination<InflatedGenerator, R>
     
     public enum Variant {
         case tilde    // [Book] p.72,  Def 4.4.1
@@ -30,21 +34,21 @@ public struct GridComplex: ChainComplexWrapper {
     }
     
     public var diagram: GridDiagram
-    public var generators: GridComplexGenerators
+    public var generators: GeneratorSet
     public var chainComplex: ChainComplex1<BaseModule>
     
-    private init(_ diagram: GridDiagram, _ generators: GridComplexGenerators, _ chainComplex: ChainComplex1<BaseModule>) {
+    private init(_ diagram: GridDiagram, _ generators: GeneratorSet, _ chainComplex: ChainComplex1<BaseModule>) {
         self.diagram = diagram
         self.generators = generators
         self.chainComplex = chainComplex
     }
     
     public init(type: Variant, diagram G: GridDiagram) {
-        let generators = GridComplexGenerators(for: G)
+        let generators = GeneratorSet(for: G)
         self.init(type: type, diagram: G, generators: generators)
     }
     
-    public init(type: Variant, diagram G: GridDiagram, generators: GridComplexGenerators) {
+    public init(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) {
         let C = ChainComplex1(
             support: generators.degreeRange,
             sequence:  Self.chain(type: type, diagram: G, generators: generators),
@@ -53,7 +57,7 @@ public struct GridComplex: ChainComplexWrapper {
         self.init(G, generators, C)
     }
     
-    public static func chain(type: Variant, diagram G: GridDiagram, generators: GridComplexGenerators) -> ( (Int) -> ModuleObject<Element> ) {
+    public static func chain(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) -> ( (Int) -> ModuleObject<Element> ) {
         let iMax = generators.degreeRange.upperBound
         
         let n = G.gridNumber
@@ -84,7 +88,7 @@ public struct GridComplex: ChainComplexWrapper {
         }
     }
     
-    public static func differential(type: Variant, diagram G: GridDiagram, generators: GridComplexGenerators) -> ( (Int) -> ModuleEnd<Element> ) {
+    public static func differential(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) -> ( (Int) -> ModuleEnd<Element> ) {
         let (Os, Xs) = (G.Os, G.Xs)
         let U: (GridDiagram.Rect) -> MultivariatePolynomialGenerator<_Un>? = { rect in
             switch type {
@@ -102,7 +106,7 @@ public struct GridComplex: ChainComplexWrapper {
             }
         }
         
-        func d(_ x: GridDiagram.Generator) -> Element {
+        func d(_ x: Generator) -> Element {
             let elements = generators.adjacents(of: x).flatMap { y -> [Element.Generator] in
                 G.emptyRectangles(from: x, to: y).compactMap { rect in
                     U(rect).map{ U in U ⊗ y }
@@ -114,7 +118,7 @@ public struct GridComplex: ChainComplexWrapper {
             return Element(elements: elements, keysAreUnique: true)
         }
         
-        let cache: CacheDictionary<GridDiagram.Generator, Element> = .empty
+        let cache: CacheDictionary<Generator, Element> = .empty
         
         return { i in
             ModuleEnd.linearlyExtend { t1 -> Element in
@@ -138,10 +142,10 @@ public struct GridComplex: ChainComplexWrapper {
     }
     
     public static func genus(of G: GridDiagram) -> Int {
-        genus(of: G, generators: GridComplexGenerators(for: G))
+        genus(of: G, generators: GeneratorSet(for: G))
     }
     
-    public static func genus(of G: GridDiagram, generators: GridComplexGenerators) -> Int {
+    public static func genus(of G: GridDiagram, generators: GeneratorSet) -> Int {
         let C = GridComplex(type: .tilde, diagram: G).bigraded
         let H = C.homology()
         let (r1, r2) = C.support!.range
@@ -156,7 +160,7 @@ public struct GridComplex: ChainComplexWrapper {
 }
 
 
-extension TensorGenerator where A == MultivariatePolynomialGenerator<_Un>, B == GridDiagram.Generator {
+extension TensorGenerator where A == MultivariatePolynomialGenerator<_Un>, B == GridComplex.Generator {
     public var monomial: A {
         factors.0
     }
