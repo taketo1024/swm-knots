@@ -208,6 +208,19 @@ extension GridComplex {
         public func makeIterator() -> Set<Generator>.Iterator {
             generators.makeIterator()
         }
+        
+        public var distributionTable: String {
+            let elements = generators
+                .group { x in x.degree }
+                .mapValues { list in
+                    list.group{ x in x.AlexanderDegree }
+                        .map{ (j, list) in (j, list.count) }
+                }
+                .sorted { (i, _) in i }
+                .flatMap { (i, list) in list.map{ (j, c) in (i, j, c) }}
+            
+            return Format.table(elements: elements)
+        }
     }
 }
 
