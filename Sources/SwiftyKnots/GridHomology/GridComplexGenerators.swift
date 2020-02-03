@@ -10,8 +10,8 @@ import Dispatch
 
 extension GridComplex {
     public struct Generator: FreeModuleGenerator {
-        public let code: Int
-        public let size: Int
+        internal let code: Int
+        internal let size: Int
         public let MaslovDegree: Int
         public let AlexanderDegree: Int
         
@@ -92,10 +92,10 @@ extension GridComplex {
         public let degreeRange: ClosedRange<Int>
         
         public init(for G: GridDiagram) {
-            self.init(for: G, filter: { (_, _) in true })
+            self.init(for: G, filter: { _ in true })
         }
         
-        public init(for G: GridDiagram, filter: @escaping (Int, Int) -> Bool) {
+        public init(for G: GridDiagram, filter: @escaping (Generator) -> Bool) {
             let data = Builder(G, filter: filter).build()
             self.init(data: data)
         }
@@ -109,9 +109,15 @@ extension GridComplex {
             self.degreeRange = data.values.map{ $0.degree }.range ?? (0 ... 0)
         }
         
+        public func generator(forSequence seq: [Int]) -> Generator? {
+            let code = Generator.encode(seq)
+            return data[code]
+        }
+        
         public func adjacents(of x: Generator) -> [Generator] {
             let xSeq = x.sequence
-            let trans = (0 ..< xSeq.count).choose(2)
+            let n = xSeq.count
+            let trans = (0 ..< n).choose(2)
             return trans.compactMap { t in
                 let ySeq = xSeq.with{ $0.swapAt(t[0], t[1]) }
                 let yCode = Generator.encode(ySeq)
@@ -148,11 +154,11 @@ extension GridComplex {
         typealias Rect  = GridDiagram.Rect
 
         let G: GridDiagram
-        let filter: (Int, Int) -> Bool
+        let filter: (Generator) -> Bool
         let rects: [Rect : (Int, Int)]
         let trans: [(Int, Int)]
         
-        init(_ G: GridDiagram, filter: @escaping (Int, Int) -> Bool) {
+        init(_ G: GridDiagram, filter: @escaping (Generator) -> Bool) {
             self.G = G
             self.filter = filter
             
@@ -183,53 +189,51 @@ extension GridComplex {
             let n = G.gridNumber
             let (Os, Xs) = (G.Os, G.Xs)
             
-            var offset = i * (n - 1).factorial
             var data: Set<Generator> = []
             data.reserveCapacity((n - 1).factorial)
             
             func add(_ seq: [Int], _ M: Int, _ A: Int) {
-                if !filter(M, A) {
-                    return
-                }
-                
                 let x = Generator(
                     sequence: seq,
                     MaslovDegree: M,
                     AlexanderDegree: A
                 )
                 
-                data.insert(x)
-                offset += 1
+                if filter(x) {
+                    data.insert(x)
+                }
             }
             
             var seq = Array(0 ..< n)
             seq.swapAt(i, n - 1)
             
             var pts = points(seq)
-            var (M, A) = degrees(pts)
+            var (m, a) = (M(pts), A(pts))
 
-            add(seq, M, A)
+            add(seq, m, a)
             
             for (i, j) in trans {
                 // M(y) - M(x) = 2 #(r ∩ Os) - 2 #(x ∩ Int(r)) - 1
                 // A(y) - A(x) = #(r ∩ Os) - #(r ∩ Xs)
 
-                let r = GridDiagram.Rect(from: pts[i], to: pts[j], gridSize: 2 * n)
+                let r = GridDiagram.Rect(from: pts[i], to: pts[j], gridSize: G.gridSize)
                 let (nO, nX) = rects[r]!
-                let c = pts.count{ p in r.contains(p, interior: true) }
+                let c = (i + 1 ..< j).count { i in
+                    r.contains(pts[i], interior: true)
+                }
 
-                let m = 2 * (nO - c) - 1
-                let a = nO - nX
+                let dm = 2 * (nO - c) - 1
+                let da = nO - nX
 
                 seq.swapAt(i, j)
 
-                pts[i] = Point(2 * i, 2 * Int(seq[i]))
-                pts[j] = Point(2 * j, 2 * Int(seq[j]))
+                pts[i] = Point(2 * i, 2 * seq[i])
+                pts[j] = Point(2 * j, 2 * seq[j])
                 
-                M += m
-                A += a
+                m += dm
+                a += da
 
-                add(seq, M, A)
+                add(seq, m, a)
             }
             
             return data
@@ -239,24 +243,24 @@ extension GridComplex {
             seq.enumerated().map { (i, j) in Point(2 * i, 2 * j) }
         }
         
-        private func degrees(_ x: [Point]) -> (Int, Int) {
-            func I(_ x: [Point], _ y: [Point]) -> Int {
-                return (x * y).count{ (p, q) in p < q }
-            }
-            
-            func J(_ x: [Point], _ y: [Point]) -> Int {
-                return I(x, y) + I(y, x)
-            }
-            
-            func M(_ ref: [Point], _ x: [Point]) -> Int {
-                return ( J(x, x) - 2 * J(x, ref) + J(ref, ref) ) / 2 + 1
-            }
-            
-            func A(_ x: [Point]) -> Int {
-                return ( M(G.Os, x) - M(G.Xs, x) - G.Os.count + 1 ) / 2
-            }
-            
-            return (M(G.Os, x), A(x))
+        private func I(_ x: [Point], _ y: [Point]) -> Int {
+            (x * y).count{ (p, q) in p < q }
+        }
+        
+        private func J(_ x: [Point], _ y: [Point]) -> Int {
+            I(x, y) + I(y, x)
+        }
+        
+        private func M(_ ref: [Point], _ x: [Point]) -> Int {
+            ( J(x, x) - 2 * J(x, ref) + J(ref, ref) ) / 2 + 1
+        }
+        
+        private func M(_ x: [Point]) -> Int {
+            M(G.Os, x)
+        }
+        
+        private func A(_ x: [Point]) -> Int {
+            ( M(G.Os, x) - M(G.Xs, x) - G.gridNumber + 1 ) / 2
         }
         
         private static func buildRects(_ G: GridDiagram) -> [Rect : (Int, Int)] {
