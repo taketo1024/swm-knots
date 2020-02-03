@@ -117,7 +117,7 @@ public struct GridDiagram {
         }
     }
     
-    public struct Rect: CustomStringConvertible {
+    public struct Rect: Hashable, CustomStringConvertible {
         public let origin: Point // Left-Bottom point
         public let size: Point
         public let gridSize: Int

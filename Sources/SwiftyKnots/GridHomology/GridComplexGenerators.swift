@@ -109,9 +109,11 @@ extension GridComplex {
     
     private final class Builder {
         typealias Point = GridDiagram.Point
-        
+        typealias Rect  = GridDiagram.Rect
+
         let G: GridDiagram
         let filter: (Int, Int) -> Bool
+        let rects: [Rect : (Int, Int)]
         let trans: [(Int, Int)]
         
         init(_ G: GridDiagram, filter: @escaping (Int, Int) -> Bool) {
@@ -119,6 +121,7 @@ extension GridComplex {
             self.filter = filter
             
             let n = G.gridNumber
+            self.rects = Self.buildRects(G)
             self.trans = Self.heapTranspositions(length: n - 1)
         }
         
@@ -173,14 +176,12 @@ extension GridComplex {
             add(seq, M, A)
             
             for (i, j) in trans {
-                let rect = GridDiagram.Rect(from: pts[i], to: pts[j], gridSize: 2 * n)
-
                 // M(y) - M(x) = 2 #(r ∩ Os) - 2 #(x ∩ Int(r)) - 1
                 // A(y) - A(x) = #(r ∩ Os) - #(r ∩ Xs)
 
-                let c = pts.count{ p in rect.contains(p, interior: true) }
-                let nO = Os.count{ O in rect.contains(O) }
-                let nX = Xs.count{ X in rect.contains(X) }
+                let r = GridDiagram.Rect(from: pts[i], to: pts[j], gridSize: 2 * n)
+                let (nO, nX) = rects[r]!
+                let c = pts.count{ p in r.contains(p, interior: true) }
 
                 let m = 2 * (nO - c) - 1
                 let a = nO - nX
@@ -221,6 +222,27 @@ extension GridComplex {
             }
             
             return (M(G.Os, x), A(x))
+        }
+        
+        private static func buildRects(_ G: GridDiagram) -> [Rect : (Int, Int)] {
+            let n = G.gridNumber
+            let (Os, Xs) = (G.Os, G.Xs)
+
+            let rects = ((0 ..< n) * (0 ..< n)).flatMap { (x, y) -> [Rect] in
+                return ((0 ..< n) * (0 ..< n)).map { (w, h) -> Rect in
+                    return Rect(
+                        origin: Point(2 * x, 2 * y),
+                        size: Point(2 * w, 2 * h),
+                        gridSize: G.gridSize
+                    )
+                }
+            }
+            
+            return Dictionary(keys: rects) { r in
+                let nO = Os.count { O in r.contains(O) }
+                let nX = Xs.count { X in r.contains(X) }
+                return (nO, nX)
+            }
         }
         
         // see Heap's algorithm: https://en.wikipedia.org/wiki/Heap%27s_algorithm
