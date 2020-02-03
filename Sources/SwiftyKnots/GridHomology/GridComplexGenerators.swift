@@ -63,119 +63,7 @@ extension GridComplex {
         }
         
         public init(for G: GridDiagram, filter: @escaping (Generator) -> Bool) {
-            typealias Point = GridDiagram.Point
-            let (Os, Xs) = (G.Os, G.Xs)
-            
-            func points(_ seq: [Int8]) -> [Point] {
-                seq.enumerated().map { (i, j) in Point(2 * i, 2 * Int(j)) }
-            }
-            
-            func degrees(_ x: [Point]) -> (Int, Int) {
-                func I(_ x: [Point], _ y: [Point]) -> Int {
-                    return (x * y).count{ (p, q) in p < q }
-                }
-                
-                func J(_ x: [Point], _ y: [Point]) -> Int {
-                    return I(x, y) + I(y, x)
-                }
-                
-                func M(_ ref: [Point], _ x: [Point]) -> Int {
-                    return ( J(x, x) - 2 * J(x, ref) + J(ref, ref) ) / 2 + 1
-                }
-                
-                func A(_ x: [Point]) -> Int {
-                    return ( M(Os, x) - M(Xs, x) - Os.count + 1 ) / 2
-                }
-                
-                return (M(Os, x), A(x))
-            }
-            
-            // see Heap's algorithm: https://en.wikipedia.org/wiki/Heap%27s_algorithm
-            func heapTranspositions(length n: Int) -> [(Int, Int)] {
-                var result: [(Int, Int)] = []
-                result.reserveCapacity(n.factorial)
-                
-                func generate(_ k: Int) {
-                    if k <= 1 {
-                        return
-                    }
-                    
-                    generate(k - 1)
-                    
-                    for l in 0 ..< k - 1 {
-                        let (i, j) = (k % 2 == 0) ? (l, k - 1) : (0, k - 1)
-                        result.append( (i, j) )
-                        
-                        generate(k - 1)
-                    }
-                }
-                
-                generate(n)
-                
-                return result
-            }
-            
-            let n = G.Os.count
-            let trans = heapTranspositions(length: n - 1)
-            
-            var data: [[Int8] : Generator] = [:]
-            let queue = DispatchQueue(label: "", qos: .userInteractive)
-            
-            Array(0 ..< n).parallelForEach { i in
-                let offset = i * (n - 1).factorial
-                
-                var seq = (0 ..< n).map{ Int8($0) }
-                seq.swapAt(i, n - 1)
-                
-                var x = { () -> Generator in
-                    let pts = points(seq)
-                    let (M, A) = degrees(pts)
-                    return Generator(
-                        id: offset,
-                        sequence: seq,
-                        MaslovDegree: M,
-                        AlexanderDegree: A
-                    )
-                }()
-                
-                var result: [[Int8] : Generator] = [:]
-                result.reserveCapacity((n - 1).factorial)
-                
-                if filter(x) {
-                    result[seq] = x
-                }
-                
-                for (i, j) in trans {
-                    seq.swapAt(i, j)
-                    
-                    let points = x.points
-                    let rect = GridDiagram.Rect(from: points[i], to: points[j], gridSize: 2 * n)
-                    
-                    // M(y) - M(x) = 2 #(r ∩ Os) - 2 #(x ∩ Int(r)) - 1
-                    let m = 2 * Os.count{ O in rect.contains(O) } - 2 * x.points.count{ p in rect.contains(p, interior: true) } - 1
-                    
-                    // A(y) - A(x) = #(r ∩ Os) - #(r ∩ Xs)
-                    let a = Os.count{ O in rect.contains(O) } - Xs.count{ X in rect.contains(X) }
-                    
-                    let y = Generator(
-                        id: x.id + 1,
-                        sequence: seq,
-                        MaslovDegree: x.MaslovDegree + m,
-                        AlexanderDegree: x.AlexanderDegree + a
-                    )
-                    
-                    if filter(y) {
-                        result[seq] = y
-                    }
-                    
-                    x = y
-                }
-                
-                queue.sync {
-                    data.merge(result)
-                }
-            }
-            
+            let data = Builder(G, filter: filter).build()
             self.init(data: data)
         }
         
@@ -216,6 +104,146 @@ extension GridComplex {
                 .flatMap { (i, list) in list.map{ (j, c) in (i, j, c) }}
             
             return Format.table(elements: elements)
+        }
+    }
+    
+    private final class Builder {
+        typealias Point = GridDiagram.Point
+        
+        let G: GridDiagram
+        let filter: (Generator) -> Bool
+        let trans: [(Int, Int)]
+        
+        init(_ G: GridDiagram, filter: @escaping (Generator) -> Bool) {
+            self.G = G
+            self.filter = filter
+            
+            let n = G.gridNumber
+            self.trans = Self.heapTranspositions(length: n - 1)
+        }
+        
+        func build() -> [[Int8] : Generator] {
+            let n = G.gridNumber
+            
+            var data: Set<Generator> = []
+            data.reserveCapacity(n.factorial)
+            
+            let queue = DispatchQueue(label: "", qos: .userInteractive)
+            
+            Array(0 ..< n).parallelForEach { i in
+                let data_i = self.build(step: i)
+                queue.sync {
+                    data.formUnion(data_i)
+                }
+            }
+            
+            return Dictionary(pairs: data.map{ x in (x.sequence, x) })
+        }
+        
+        private func build(step i: Int) -> Set<Generator> {
+            let n = G.gridNumber
+            let (Os, Xs) = (G.Os, G.Xs)
+            
+            let offset = i * (n - 1).factorial
+            
+            var seq = (0 ..< n).map{ Int8($0) }
+            seq.swapAt(i, n - 1)
+            
+            var x = { () -> Generator in
+                let pts = points(seq)
+                let (M, A) = degrees(pts)
+                
+                return Generator(
+                    id: offset,
+                    sequence: seq,
+                    MaslovDegree: M,
+                    AlexanderDegree: A
+                )
+            }()
+            
+            var data: Set<Generator> = []
+            data.reserveCapacity((n - 1).factorial)
+            
+            if filter(x) {
+                data.insert(x)
+            }
+            
+            for (i, j) in trans {
+                seq.swapAt(i, j)
+                
+                let points = x.points
+                let rect = GridDiagram.Rect(from: points[i], to: points[j], gridSize: 2 * n)
+                
+                // M(y) - M(x) = 2 #(r ∩ Os) - 2 #(x ∩ Int(r)) - 1
+                let m = 2 * Os.count{ O in rect.contains(O) } - 2 * x.points.count{ p in rect.contains(p, interior: true) } - 1
+                
+                // A(y) - A(x) = #(r ∩ Os) - #(r ∩ Xs)
+                let a = Os.count{ O in rect.contains(O) } - Xs.count{ X in rect.contains(X) }
+                
+                let y = Generator(
+                    id: x.id + 1,
+                    sequence: seq,
+                    MaslovDegree: x.MaslovDegree + m,
+                    AlexanderDegree: x.AlexanderDegree + a
+                )
+                
+                if filter(y) {
+                    data.insert(y)
+                }
+                
+                x = y
+            }
+            
+            return data
+        }
+        
+        private func points(_ seq: [Int8]) -> [Point] {
+            seq.enumerated().map { (i, j) in Point(2 * i, 2 * Int(j)) }
+        }
+        
+        private func degrees(_ x: [Point]) -> (Int, Int) {
+            func I(_ x: [Point], _ y: [Point]) -> Int {
+                return (x * y).count{ (p, q) in p < q }
+            }
+            
+            func J(_ x: [Point], _ y: [Point]) -> Int {
+                return I(x, y) + I(y, x)
+            }
+            
+            func M(_ ref: [Point], _ x: [Point]) -> Int {
+                return ( J(x, x) - 2 * J(x, ref) + J(ref, ref) ) / 2 + 1
+            }
+            
+            func A(_ x: [Point]) -> Int {
+                return ( M(G.Os, x) - M(G.Xs, x) - G.Os.count + 1 ) / 2
+            }
+            
+            return (M(G.Os, x), A(x))
+        }
+        
+        // see Heap's algorithm: https://en.wikipedia.org/wiki/Heap%27s_algorithm
+        private static func heapTranspositions(length n: Int) -> [(Int, Int)] {
+            var result: [(Int, Int)] = []
+            result.reserveCapacity(n.factorial)
+            
+            func generate(_ k: Int) {
+                if k <= 1 {
+                    return
+                }
+                
+                generate(k - 1)
+                
+                for l in 0 ..< k - 1 {
+                    let (i, j) = (k % 2 == 0) ? (l, k - 1) : (0, k - 1)
+                    result.append( (i, j) )
+                    
+                    generate(k - 1)
+                }
+            }
+            
+            generate(n)
+            
+            return result
         }
     }
 }
