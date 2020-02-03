@@ -59,10 +59,10 @@ extension GridComplex {
         public let degreeRange: ClosedRange<Int>
         
         public init(for G: GridDiagram) {
-            self.init(for: G, filter: { _ in true })
+            self.init(for: G, filter: { (_, _) in true })
         }
         
-        public init(for G: GridDiagram, filter: @escaping (Generator) -> Bool) {
+        public init(for G: GridDiagram, filter: @escaping (Int, Int) -> Bool) {
             let data = Builder(G, filter: filter).build()
             self.init(data: data)
         }
@@ -85,8 +85,8 @@ extension GridComplex {
             }
         }
         
-        public func filter(_ predicate: (Generator) -> Bool) -> Self {
-            .init(data: data.filter{ (_, x) in predicate(x) })
+        public func filter(_ predicate: (Int, Int) -> Bool) -> Self {
+            .init(data: data.filter{ (_, x) in predicate(x.MaslovDegree, x.AlexanderDegree) })
         }
         
         public func makeIterator() -> AnySequence<Generator>.Iterator {
@@ -111,10 +111,10 @@ extension GridComplex {
         typealias Point = GridDiagram.Point
         
         let G: GridDiagram
-        let filter: (Generator) -> Bool
+        let filter: (Int, Int) -> Bool
         let trans: [(Int, Int)]
         
-        init(_ G: GridDiagram, filter: @escaping (Generator) -> Bool) {
+        init(_ G: GridDiagram, filter: @escaping (Int, Int) -> Bool) {
             self.G = G
             self.filter = filter
             
@@ -144,54 +144,56 @@ extension GridComplex {
             let n = G.gridNumber
             let (Os, Xs) = (G.Os, G.Xs)
             
-            let offset = i * (n - 1).factorial
+            var offset = i * (n - 1).factorial
+            var data: Set<Generator> = []
+            data.reserveCapacity((n - 1).factorial)
             
-            var seq = (0 ..< n).map{ Int8($0) }
-            seq.swapAt(i, n - 1)
-            
-            var x = { () -> Generator in
-                let pts = points(seq)
-                let (M, A) = degrees(pts)
+            func add(_ seq: [Int8], _ M: Int, _ A: Int) {
+                if !filter(M, A) {
+                    return
+                }
                 
-                return Generator(
+                let x = Generator(
                     id: offset,
                     sequence: seq,
                     MaslovDegree: M,
                     AlexanderDegree: A
                 )
-            }()
-            
-            var data: Set<Generator> = []
-            data.reserveCapacity((n - 1).factorial)
-            
-            if filter(x) {
+                
                 data.insert(x)
+                offset += 1
             }
             
+            var seq = (0 ..< n).map{ Int8($0) }
+            seq.swapAt(i, n - 1)
+            
+            var pts = points(seq)
+            var (M, A) = degrees(pts)
+
+            add(seq, M, A)
+            
             for (i, j) in trans {
-                seq.swapAt(i, j)
-                
-                let points = x.points
-                let rect = GridDiagram.Rect(from: points[i], to: points[j], gridSize: 2 * n)
-                
+                let rect = GridDiagram.Rect(from: pts[i], to: pts[j], gridSize: 2 * n)
+
                 // M(y) - M(x) = 2 #(r ∩ Os) - 2 #(x ∩ Int(r)) - 1
-                let m = 2 * Os.count{ O in rect.contains(O) } - 2 * x.points.count{ p in rect.contains(p, interior: true) } - 1
-                
                 // A(y) - A(x) = #(r ∩ Os) - #(r ∩ Xs)
-                let a = Os.count{ O in rect.contains(O) } - Xs.count{ X in rect.contains(X) }
+
+                let c = pts.count{ p in rect.contains(p, interior: true) }
+                let nO = Os.count{ O in rect.contains(O) }
+                let nX = Xs.count{ X in rect.contains(X) }
+
+                let m = 2 * (nO - c) - 1
+                let a = nO - nX
+
+                seq.swapAt(i, j)
+
+                pts[i] = Point(2 * i, 2 * Int(seq[i]))
+                pts[j] = Point(2 * j, 2 * Int(seq[j]))
                 
-                let y = Generator(
-                    id: x.id + 1,
-                    sequence: seq,
-                    MaslovDegree: x.MaslovDegree + m,
-                    AlexanderDegree: x.AlexanderDegree + a
-                )
-                
-                if filter(y) {
-                    data.insert(y)
-                }
-                
-                x = y
+                M += m
+                A += a
+
+                add(seq, M, A)
             }
             
             return data
