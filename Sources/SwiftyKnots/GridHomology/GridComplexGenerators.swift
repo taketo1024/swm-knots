@@ -10,21 +10,25 @@ import Dispatch
 
 extension GridComplex {
     public struct Generator: FreeModuleGenerator {
-        public let id: Int
-        
-        public let sequence: [Int8]
+        public let code: Int
+        public let size: Int
         public let MaslovDegree: Int
         public let AlexanderDegree: Int
         
-        public init(id: Int, sequence: [Int8], MaslovDegree: Int, AlexanderDegree: Int) {
-            self.id = id
-            self.sequence = sequence
+        public init(sequence: [Int], MaslovDegree: Int, AlexanderDegree: Int) {
+            let n = sequence.count
+            self.code = Self.encode(sequence)
+            self.size = n
             self.MaslovDegree = MaslovDegree
             self.AlexanderDegree = AlexanderDegree
         }
         
+        public var sequence: [Int] {
+            Self.decode(code, size)
+        }
+        
         public var points: [GridDiagram.Point] {
-            sequence.enumerated().map { (i, j) in .init(2 * i, 2 * Int(j)) }
+            sequence.enumerated().map { (i, j) in .init(2 * i, 2 * j) }
         }
         
         public var degree: Int {
@@ -32,21 +36,50 @@ extension GridComplex {
         }
         
         public func isAdjacent(to y: Self) -> Bool {
-            let x = self
-            let (ps, qs) = (x.points, y.points)
-            return Set(ps).subtracting(qs).count == 2
+            Set(sequence).subtracting(y.sequence).count == 2
         }
         
-        public static func == (a: Self, b: Self) -> Bool {
-            a.id == b.id
+        public static func == (x: Self, y: Self) -> Bool {
+            (x.code, x.size) == (y.code, y.size)
         }
         
         public func hash(into hasher: inout Hasher) {
-            hasher.combine(id)
+            hasher.combine(code)
         }
         
-        public static func < (g1: Self, g2: Self) -> Bool {
-            g1.id < g2.id
+        public static func < (x: Self, y: Self) -> Bool {
+            x.code < y.code
+        }
+        
+        // See: Knuth, Volume 2, Section 3.3.2, Algorithm P
+        fileprivate static func encode(_ _seq: [Int]) -> Int {
+            var (seq, r) = (_seq, _seq.count)
+            var code = 0
+            
+            while r > 0 {
+                let m = (0 ..< r).first { m in
+                    r - seq[m] == 1
+                }!
+                code = code * r + m
+                r -= 1
+                seq.swapAt(r, m)
+            }
+            
+            return code
+        }
+        
+        fileprivate static func decode(_ _code: Int, _ size: Int) -> [Int] {
+            var (code, r) = (_code, 1)
+            var seq = Array(0 ..< size)
+            
+            while r < size {
+                let m = code % (r + 1)
+                code = code / (r + 1)
+                seq.swapAt(r, m)
+                r += 1
+            }
+            
+            return seq
         }
         
         public var description: String {
@@ -55,7 +88,7 @@ extension GridComplex {
     }
     
     public struct GeneratorSet: Sequence {
-        private let data: [[Int8] : Generator]
+        private let data: [Int : Generator]
         public let degreeRange: ClosedRange<Int>
         
         public init(for G: GridDiagram) {
@@ -67,13 +100,13 @@ extension GridComplex {
             self.init(data: data)
         }
         
-        private init(data: [[Int8] : Generator]) {
-            self.data = data
-            self.degreeRange = data.values.map{ $0.degree }.range ?? (0 ... 0)
+        public init(data: Set<Generator>) {
+            self.init(data: Dictionary(pairs: data.map { x in (x.code, x) }))
         }
         
-        public func generator(forSequence seq: [Int8]) -> Generator? {
-            data[seq]
+        private init(data: [Int : Generator]) {
+            self.data = data
+            self.degreeRange = data.values.map{ $0.degree }.range ?? (0 ... 0)
         }
         
         public func adjacents(of x: Generator) -> [Generator] {
@@ -81,12 +114,15 @@ extension GridComplex {
             let trans = (0 ..< xSeq.count).choose(2)
             return trans.compactMap { t in
                 let ySeq = xSeq.with{ $0.swapAt(t[0], t[1]) }
-                return generator(forSequence: ySeq)
+                let yCode = Generator.encode(ySeq)
+                return data[yCode]
             }
         }
         
-        public func filter(_ predicate: (Int, Int) -> Bool) -> Self {
-            .init(data: data.filter{ (_, x) in predicate(x.MaslovDegree, x.AlexanderDegree) })
+        public func filter(_ predicate: (Generator) -> Bool) -> Self {
+            .init(data: data.filter{ (_, x) in
+                predicate(x)
+            })
         }
         
         public func makeIterator() -> AnySequence<Generator>.Iterator {
@@ -125,7 +161,7 @@ extension GridComplex {
             self.trans = Self.heapTranspositions(length: n - 1)
         }
         
-        func build() -> [[Int8] : Generator] {
+        func build() -> Set<Generator> {
             let n = G.gridNumber
             
             var data: Set<Generator> = []
@@ -140,7 +176,7 @@ extension GridComplex {
                 }
             }
             
-            return Dictionary(pairs: data.map{ x in (x.sequence, x) })
+            return data
         }
         
         private func build(step i: Int) -> Set<Generator> {
@@ -151,13 +187,12 @@ extension GridComplex {
             var data: Set<Generator> = []
             data.reserveCapacity((n - 1).factorial)
             
-            func add(_ seq: [Int8], _ M: Int, _ A: Int) {
+            func add(_ seq: [Int], _ M: Int, _ A: Int) {
                 if !filter(M, A) {
                     return
                 }
                 
                 let x = Generator(
-                    id: offset,
                     sequence: seq,
                     MaslovDegree: M,
                     AlexanderDegree: A
@@ -167,7 +202,7 @@ extension GridComplex {
                 offset += 1
             }
             
-            var seq = (0 ..< n).map{ Int8($0) }
+            var seq = Array(0 ..< n)
             seq.swapAt(i, n - 1)
             
             var pts = points(seq)
@@ -200,8 +235,8 @@ extension GridComplex {
             return data
         }
         
-        private func points(_ seq: [Int8]) -> [Point] {
-            seq.enumerated().map { (i, j) in Point(2 * i, 2 * Int(j)) }
+        private func points(_ seq: [Int]) -> [Point] {
+            seq.enumerated().map { (i, j) in Point(2 * i, 2 * j) }
         }
         
         private func degrees(_ x: [Point]) -> (Int, Int) {
