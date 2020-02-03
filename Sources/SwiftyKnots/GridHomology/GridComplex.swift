@@ -107,14 +107,16 @@ public struct GridComplex: ChainComplexWrapper {
         }
         
         func d(_ x: Generator) -> Element {
-            let elements = generators.adjacents(of: x).flatMap { y -> [Element.Generator] in
-                G.emptyRectangles(from: x, to: y).compactMap { rect in
+            let elements = generators
+                .adjacents(of: x)
+                .compactMap { (y, rect) -> Element.Generator? in
                     U(rect).map{ U in U ⊗ y }
                 }
-            }
-            .countMultiplicities()
-            .exclude { (_, c) in c.isEven }
-            .map { (x, _) in (x, R.identity) }
+                .countMultiplicities()
+                .compactMap { (x, c) in
+                    c.isEven ? nil : (x, R.identity)
+                }
+   
             return Element(elements: elements, keysAreUnique: true)
         }
         

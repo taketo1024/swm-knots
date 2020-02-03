@@ -88,8 +88,9 @@ extension GridComplex {
     }
     
     public struct GeneratorSet: Sequence {
+        private let gridNumber: Int
         private let data: [Int : Generator]
-        public let degreeRange: ClosedRange<Int>
+        private let transpositions: [(Int, Int)]
         
         public init(for G: GridDiagram) {
             self.init(for: G, filter: { _ in true })
@@ -97,16 +98,21 @@ extension GridComplex {
         
         public init(for G: GridDiagram, filter: @escaping (Generator) -> Bool) {
             let data = Builder(G, filter: filter).build()
-            self.init(data: data)
+            self.init(gridNumber: G.gridNumber, data: data)
         }
         
-        public init(data: Set<Generator>) {
-            self.init(data: Dictionary(pairs: data.map { x in (x.code, x) }))
+        public init(gridNumber: Int, data: Set<Generator>) {
+            self.init(gridNumber: gridNumber, data: Dictionary(pairs: data.map { x in (x.code, x) }))
         }
         
-        private init(data: [Int : Generator]) {
+        private init(gridNumber: Int, data: [Int : Generator]) {
+            self.gridNumber = gridNumber
             self.data = data
-            self.degreeRange = data.values.map{ $0.degree }.range ?? (0 ... 0)
+            self.transpositions = (0 ..< gridNumber).choose(2).map{ t in (t[0], t[1]) }
+        }
+        
+        public var degreeRange: ClosedRange<Int> {
+            data.values.map{ $0.degree }.range ?? (0 ... 0)
         }
         
         public func generator(forSequence seq: [Int]) -> Generator? {
@@ -114,21 +120,40 @@ extension GridComplex {
             return data[code]
         }
         
-        public func adjacents(of x: Generator) -> [Generator] {
-            let xSeq = x.sequence
-            let n = xSeq.count
-            let trans = (0 ..< n).choose(2)
-            return trans.compactMap { t in
-                let ySeq = xSeq.with{ $0.swapAt(t[0], t[1]) }
+        public func adjacents(of x: Generator) -> [(Generator, GridDiagram.Rect)] {
+            typealias Point = GridDiagram.Point
+            typealias Rect  = GridDiagram.Rect
+            
+            let n = gridNumber
+            let seq = x.sequence
+            let pts = x.points
+            
+            return transpositions.flatMap { (i, j) -> [(Generator, GridDiagram.Rect)] in
+                let ySeq = seq.with{ $0.swapAt(i, j) }
                 let yCode = Generator.encode(ySeq)
-                return data[yCode]
+                
+                guard let y = data[yCode] else {
+                    return []
+                }
+                
+                let p = Point(2 * i, 2 * seq[i])
+                let q = Point(2 * j, 2 * seq[j])
+                let rs = [
+                    Rect(from: p, to: q, gridSize: 2 * n),
+                    Rect(from: q, to: p, gridSize: 2 * n)
+                ]
+                
+                return rs.compactMap { r -> (Generator, GridDiagram.Rect)? in
+                    r.intersects(pts, interior: true) ? nil : (y, r)
+                }
             }
         }
         
         public func filter(_ predicate: (Generator) -> Bool) -> Self {
-            .init(data: data.filter{ (_, x) in
-                predicate(x)
-            })
+            GeneratorSet(
+                gridNumber: gridNumber,
+                data: data.filter{ (_, x) in predicate(x) }
+            )
         }
         
         public func makeIterator() -> AnySequence<Generator>.Iterator {
@@ -307,30 +332,6 @@ extension GridComplex {
             generate(n)
             
             return result
-        }
-    }
-}
-
-extension GridDiagram {
-    public func rectangles(from x: GridComplex.Generator, to y: GridComplex.Generator) -> [Rect] {
-        let (ps, qs) = (x.points, y.points)
-        let diff = Set(ps).subtracting(qs)
-        
-        guard diff.count == 2 else {
-            return []
-        }
-        
-        let pq = diff.toArray()
-        let (p, q) = (pq[0], pq[1])
-        
-        return [Rect(from: p, to: q, gridSize: gridSize),
-                Rect(from: q, to: p, gridSize: gridSize)]
-    }
-    
-    public func emptyRectangles(from x: GridComplex.Generator, to y: GridComplex.Generator) -> [Rect] {
-        // Note: Int(r) ∩ x = Int(r) ∩ y .
-        rectangles(from: x, to: y).filter{ r in
-            !r.intersects(x.points, interior: true)
         }
     }
 }
