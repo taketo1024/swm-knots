@@ -184,10 +184,6 @@ extension GridComplex {
             self.degreeRange = data.values.map{ $0.degree }.range ?? (0 ... 0)
         }
         
-        public var generators: Set<Generator> {
-            Set(data.values)
-        }
-        
         public func generator(forSequence seq: [Int8]) -> Generator? {
             data[seq]
         }
@@ -205,12 +201,12 @@ extension GridComplex {
             .init(data: data.filter{ (_, x) in predicate(x) })
         }
         
-        public func makeIterator() -> Set<Generator>.Iterator {
-            generators.makeIterator()
+        public func makeIterator() -> AnySequence<Generator>.Iterator {
+            AnySequence(data.values).makeIterator()
         }
         
         public var distributionTable: String {
-            let elements = generators
+            let elements = self
                 .group { x in x.degree }
                 .mapValues { list in
                     list.group{ x in x.AlexanderDegree }
