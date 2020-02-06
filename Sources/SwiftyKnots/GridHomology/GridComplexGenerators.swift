@@ -335,3 +335,27 @@ extension GridComplex {
         }
     }
 }
+
+extension GridDiagram {
+    public func rectangles(from x: GridComplex.Generator, to y: GridComplex.Generator) -> [Rect] {
+        let (ps, qs) = (x.points, y.points)
+        let diff = Set(ps).subtracting(qs)
+        
+        guard diff.count == 2 else {
+            return []
+        }
+        
+        let pq = diff.toArray()
+        let (p, q) = (pq[0], pq[1])
+        
+        return [Rect(from: p, to: q, gridSize: gridSize),
+                Rect(from: q, to: p, gridSize: gridSize)]
+    }
+    
+    public func emptyRectangles(from x: GridComplex.Generator, to y: GridComplex.Generator) -> [Rect] {
+        // Note: Int(r) ∩ x = Int(r) ∩ y .
+        rectangles(from: x, to: y).filter{ r in
+            !r.intersects(x.points, interior: true)
+        }
+    }
+}
