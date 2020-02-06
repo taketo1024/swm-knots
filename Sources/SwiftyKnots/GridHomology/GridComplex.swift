@@ -43,21 +43,21 @@ public struct GridComplex: ChainComplexWrapper {
         self.chainComplex = chainComplex
     }
     
-    public init(type: Variant, diagram G: GridDiagram) {
+    public init(type: Variant, diagram G: GridDiagram, useCache: Bool = false) {
         let generators = GeneratorSet(for: G)
         self.init(type: type, diagram: G, generators: generators)
     }
     
-    public init(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) {
+    public init(type: Variant, diagram G: GridDiagram, generators: GeneratorSet, useCache: Bool = false) {
         let C = ChainComplex1(
             support: generators.degreeRange,
             sequence:  Self.chain(type: type, diagram: G, generators: generators),
-            differential: Self.differential(type: type, diagram: G, generators: generators)
+            differential: Self.differential(type: type, diagram: G, generators: generators, useCache: useCache)
         )
         self.init(G, generators, C)
     }
     
-    public static func chain(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) -> ( (Int) -> ModuleObject<Element> ) {
+    static func chain(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) -> ( (Int) -> ModuleObject<Element> ) {
         let iMax = generators.degreeRange.upperBound
         
         let n = G.gridNumber
@@ -88,7 +88,7 @@ public struct GridComplex: ChainComplexWrapper {
         }
     }
     
-    public static func differential(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) -> ( (Int) -> ModuleEnd<Element> ) {
+    static func differential(type: Variant, diagram G: GridDiagram, generators: GeneratorSet, useCache: Bool) -> ( (Int) -> ModuleEnd<Element> ) {
         
         let Uexponents: (GridDiagram.Rect) -> [Int]? = { rect in
             let n = G.gridNumber
@@ -133,7 +133,10 @@ public struct GridComplex: ChainComplexWrapper {
         return { i in
             ModuleEnd.linearlyExtend { t1 -> Element in
                 let (m1, x) = t1.factors
-                let dx = cache.useCacheOrSet(key: x) { d(x) }
+                let dx = useCache
+                    ? cache.useCacheOrSet(key: x) { d(x) }
+                    : d(x)
+                
                 return dx.mapGenerators { t2 in
                     let (m2, y) = t2.factors
                     return (m1 * m2) ⊗ y
