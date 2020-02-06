@@ -89,20 +89,23 @@ public struct GridComplex: ChainComplexWrapper {
     }
     
     public static func differential(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) -> ( (Int) -> ModuleEnd<Element> ) {
-        let (Os, Xs) = (G.Os, G.Xs)
-        let U: (GridDiagram.Rect) -> MultivariatePolynomialGenerator<_Un>? = { rect in
+        
+        let Uexponents: (GridDiagram.Rect) -> [Int]? = { rect in
+            let n = G.gridNumber
+            let rects = generators.rects
+            
             switch type {
             case .tilde:
-                return (rect.intersects(Xs) || rect.intersects(Os))
-                        ? nil : .identity
+                return (!rects.intersects(rect, .X) && !rects.intersects(rect, .O))
+                    ? [] : nil
             case .hat:
-                return (rect.intersects(Xs) || rect.contains(Os.last!))
-                        ? nil : .init( Os.map { O in rect.contains(O) ? 1 : 0 } )
+                return (!rects.intersects(rect, .X) && !rects.intersects(rect, .O, n - 1))
+                    ? rects.intersections(rect, .O) : nil
             case .minus:
-                return rect.intersects(Xs)
-                        ? nil : .init( Os.map { O in rect.contains(O) ? 1 : 0 } )
+                return !rects.intersects(rect, .X)
+                    ? rects.intersections(rect, .O) : nil
             case .filtered:
-                return .init( Os.map { O in rect.contains(O) ? 1 : 0 } )
+                return rects.intersections(rect, .O)
             }
         }
         
@@ -110,7 +113,12 @@ public struct GridComplex: ChainComplexWrapper {
             let elements = generators
                 .adjacents(of: x)
                 .compactMap { (y, rect) -> Element.Generator? in
-                    U(rect).map{ U in U ⊗ y }
+                    if let Uexp = Uexponents(rect) {
+                        let U = MultivariatePolynomialGenerator<_Un>(Uexp)
+                        return U ⊗ y
+                    } else {
+                        return nil
+                    }
                 }
                 .countMultiplicities()
                 .compactMap { (x, c) in

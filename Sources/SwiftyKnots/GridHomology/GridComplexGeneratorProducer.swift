@@ -9,30 +9,30 @@ import SwiftyMath
 import Dispatch
 
 extension GridComplex.Generator {
-    public static func produce(_ G: GridDiagram, filter: @escaping (Self) -> Bool) -> Set<Self> {
-        Builder(G, filter).build()
+    internal static func produce(_ G: GridDiagram, _ rects: GridComplex.GeneratorSet.Rects, _ filter: @escaping (Self) -> Bool) -> Set<Self> {
+        Producer(G, rects, filter).produce()
     }
     
-    private final class Builder {
+    private final class Producer {
         typealias Generator = GridComplex.Generator
         typealias Point = GridDiagram.Point
         typealias Rect  = GridDiagram.Rect
 
         let G: GridDiagram
+        let rects: GridComplex.GeneratorSet.Rects
         let filter: (Generator) -> Bool
-        let rects: [Rect : (Int, Int)]
         let trans: [(Int, Int)]
         
-        init(_ G: GridDiagram, _ filter: @escaping (Generator) -> Bool) {
+        init(_ G: GridDiagram, _ rects: GridComplex.GeneratorSet.Rects, _ filter: @escaping (Generator) -> Bool) {
             self.G = G
+            self.rects = rects
             self.filter = filter
             
             let n = G.gridNumber
-            self.rects = Self.buildRects(G)
             self.trans = Self.heapTranspositions(length: n - 1)
         }
         
-        func build() -> Set<Generator> {
+        func produce() -> Set<Generator> {
             let n = G.gridNumber
             
             var data: Set<Generator> = []
@@ -82,7 +82,9 @@ extension GridComplex.Generator {
                 // A(y) - A(x) = #(r ∩ Os) - #(r ∩ Xs)
 
                 let r = GridDiagram.Rect(from: pts[i], to: pts[j], gridSize: G.gridSize)
-                let (nO, nX) = rects[r]!
+                let nO = rects.countIntersections(r, .O)
+                let nX = rects.countIntersections(r, .X)
+                
                 let c = (i + 1 ..< j).count { i in
                     r.contains(pts[i], interior: true)
                 }
@@ -126,27 +128,6 @@ extension GridComplex.Generator {
         
         private func A(_ x: [Point]) -> Int {
             ( M(G.Os, x) - M(G.Xs, x) - G.gridNumber + 1 ) / 2
-        }
-        
-        private static func buildRects(_ G: GridDiagram) -> [Rect : (Int, Int)] {
-            let n = G.gridNumber
-            let (Os, Xs) = (G.Os, G.Xs)
-
-            let rects = ((0 ..< n) * (0 ..< n)).flatMap { (x, y) -> [Rect] in
-                return ((0 ..< n) * (0 ..< n)).map { (w, h) -> Rect in
-                    return Rect(
-                        origin: Point(2 * x, 2 * y),
-                        size: Point(2 * w, 2 * h),
-                        gridSize: G.gridSize
-                    )
-                }
-            }
-            
-            return Dictionary(keys: rects) { r in
-                let nO = Os.count { O in r.contains(O) }
-                let nX = Xs.count { X in r.contains(X) }
-                return (nO, nX)
-            }
         }
         
         // see Heap's algorithm: https://en.wikipedia.org/wiki/Heap%27s_algorithm
