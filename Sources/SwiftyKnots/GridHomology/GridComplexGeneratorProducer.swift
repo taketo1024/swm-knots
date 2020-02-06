@@ -41,7 +41,7 @@ extension GridComplex.Generator {
             let queue = DispatchQueue(label: "", qos: .userInteractive)
             
             Array(0 ..< n).parallelForEach { i in
-                let data_i = self.build(step: i)
+                let data_i = self.produce(step: i)
                 queue.sync {
                     data.formUnion(data_i)
                 }
@@ -50,7 +50,7 @@ extension GridComplex.Generator {
             return data
         }
         
-        private func build(step i: Int) -> Set<Generator> {
+        private func produce(step i: Int) -> Set<Generator> {
             let n = G.gridNumber
             let (Os, Xs) = (G.Os, G.Xs)
             
@@ -82,8 +82,8 @@ extension GridComplex.Generator {
                 // A(y) - A(x) = #(r ∩ Os) - #(r ∩ Xs)
 
                 let r = GridDiagram.Rect(from: pts[i], to: pts[j], gridSize: G.gridSize)
-                let nO = rects.countIntersections(r, .O)
-                let nX = rects.countIntersections(r, .X)
+                let nO = rects[r].countIntersections(.O)
+                let nX = rects[r].countIntersections(.X)
                 
                 let c = (i + 1 ..< j).count { i in
                     r.contains(pts[i], interior: true)

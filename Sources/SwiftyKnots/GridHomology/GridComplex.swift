@@ -90,42 +90,38 @@ public struct GridComplex: ChainComplexWrapper {
     
     static func differential(type: Variant, diagram G: GridDiagram, generators: GeneratorSet, useCache: Bool) -> ( (Int) -> ModuleEnd<Element> ) {
         
-        let Uexponents: (GridDiagram.Rect) -> [Int]? = { rect in
-            let n = G.gridNumber
-            let rects = generators.rects
-            
+        let n = G.gridNumber
+        let rects = generators.rects
+        let rectCond = { (r: GridDiagram.Rect) -> Bool in
             switch type {
             case .tilde:
-                return (!rects.intersects(rect, .X) && !rects.intersects(rect, .O))
-                    ? [] : nil
+                return (!rects[r].intersects(.X) && !rects[r].intersects(.O))
             case .hat:
-                return (!rects.intersects(rect, .X) && !rects.intersects(rect, .O, n - 1))
-                    ? rects.intersections(rect, .O) : nil
+                return (!rects[r].intersects(.X) && !rects[r].intersects(.O, n - 1))
             case .minus:
-                return !rects.intersects(rect, .X)
-                    ? rects.intersections(rect, .O) : nil
+                return !rects[r].intersects(.X)
             case .filtered:
-                return rects.intersections(rect, .O)
+                return true
             }
         }
         
         func d(_ x: Generator) -> Element {
-            let elements = generators
-                .adjacents(of: x)
-                .compactMap { (y, rect) -> Element.Generator? in
-                    if let Uexp = Uexponents(rect) {
+            let ys = generators
+                .adjacents(of: x, with: rectCond)
+                .map { (y, r) -> Element.Generator in
+                    if !rects[r].intersects(.O) {
+                        return .identity ⊗ y
+                    } else {
+                        let Uexp = rects[r].intersections(.O)
                         let U = MultivariatePolynomialGenerator<_Un>(Uexp)
                         return U ⊗ y
-                    } else {
-                        return nil
                     }
                 }
-                .countMultiplicities()
-                .compactMap { (x, c) in
-                    c.isEven ? nil : (x, R.identity)
-                }
-   
-            return Element(elements: elements, keysAreUnique: true)
+                
+            return Element(
+                elements: ys.map{ y in (y, R.identity) },
+                keysAreUnique: ys.isUnique
+            )
         }
         
         let cache: CacheDictionary<Generator, Element> = .empty
@@ -137,9 +133,13 @@ public struct GridComplex: ChainComplexWrapper {
                     ? cache.useCacheOrSet(key: x) { d(x) }
                     : d(x)
                 
-                return dx.mapGenerators { t2 in
-                    let (m2, y) = t2.factors
-                    return (m1 * m2) ⊗ y
+                if m1 == .identity {
+                    return dx
+                } else {
+                    return dx.mapGenerators { t2 in
+                        let (m2, y) = t2.factors
+                        return (m1 * m2) ⊗ y
+                    }
                 }
             }
         }
