@@ -46,8 +46,8 @@ public struct KhComplexGenerator: FreeModuleGenerator, TensorMonoid, Comparable,
 }
 
 internal extension ModuleHom where Domain: FreeModule, Domain.Generator == MultiTensorGenerator<KhAlgebraGenerator>, Codomain == Domain {
-    func applied(to x: KhComplexGenerator, nextState: Link.State) -> LinearCombination<KhComplexGenerator, BaseRing> {
-        self.applied(to: x.tensor).mapGenerators { tensor in
+    func callAsFunction(_ x: KhComplexGenerator, nextState: Link.State) -> LinearCombination<KhComplexGenerator, BaseRing> {
+        self(x.tensor).mapGenerators { tensor in
             KhComplexGenerator(tensor: tensor, state: nextState)
         }
     }

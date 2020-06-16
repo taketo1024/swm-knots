@@ -52,7 +52,6 @@ extension GridComplex.Generator {
         
         private func produce(step i: Int) -> Set<Generator> {
             let n = G.gridNumber
-            let (Os, Xs) = (G.Os, G.Xs)
             
             var data: Set<Generator> = []
             data.reserveCapacity((n - 1).factorial)

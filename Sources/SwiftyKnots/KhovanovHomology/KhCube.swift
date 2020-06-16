@@ -71,7 +71,7 @@ public struct KhCube<R: Ring> {
                 let m = MultiTensorHom(from: product, inputIndices: (i1, i2), outputIndex: j)
                 
                 return ModuleHom.linearlyExtend{ x in
-                    m.applied(to: x, nextState: s1)
+                    m(x, nextState: s1)
                 }
                 
             case (1, 2):
@@ -80,7 +80,7 @@ public struct KhCube<R: Ring> {
                 let Δ = MultiTensorHom(from: coproduct, inputIndex: i, outputIndices: (j1, j2))
                 
                 return ModuleHom.linearlyExtend{ x in
-                    Δ.applied(to: x, nextState: s1)
+                    Δ(x, nextState: s1)
                 }
                 
             default:
@@ -94,7 +94,7 @@ public struct KhCube<R: Ring> {
             let v = self[x.state]
             return v.targetStates.sum { (ε, target) -> LinearCombination<KhComplexGenerator, R> in
                 let f = self.edgeMap(from: x.state, to: target)
-                return ε * f.applied(to: x)
+                return ε * f(x)
             }
         }
     }

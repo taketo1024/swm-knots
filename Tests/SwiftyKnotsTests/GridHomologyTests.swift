@@ -10,12 +10,6 @@ import SwiftyMath
 import SwiftyHomology
 @testable import SwiftyKnots
 
-extension IntegerQuotientRing: ExpressibleByIntegerLiteral {
-    public init(integerLiteral value: Int) {
-        self.init(value)
-    }
-}
-
 class GridHomologyTests: XCTestCase {
     
     func testChainComplex_tilde() {
