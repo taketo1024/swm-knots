@@ -19,7 +19,7 @@ let package = Package(
         .package(
 			name:"SwiftyHomology",
 			url: "https://github.com/taketo1024/SwiftyMath-homology.git",
-			from: "2.1.0"
+			from: "2.1.1"
 		),
         .package(
 			name:"SwiftySolver",
