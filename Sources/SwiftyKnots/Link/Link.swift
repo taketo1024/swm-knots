@@ -286,12 +286,18 @@ public struct Link: Equatable, CustomStringConvertible {
         "\(name){ \(crossings.map{ $0.description }.joined(separator: ", ")) }"
     }
     
-    public enum Resolution: Int8, Comparable, CustomStringConvertible, Codable {
+    public enum Resolution: Int8, Comparable, ExpressibleByIntegerLiteral, CustomStringConvertible, Codable {
+        public typealias IntegerLiteralType = Int8
+        
         case resolution0 = 0
         case resolution1 = 1
         
-        public init(_ i: Int) {
+        public init(_ i: Int8) {
             self = (i == 0) ? .resolution0 : .resolution1
+        }
+        
+        public init(integerLiteral value: Int8) {
+            self = (value == 0) ? .resolution0 : .resolution1
         }
         
         public static func < (lhs: Self, rhs: Self) -> Bool {
