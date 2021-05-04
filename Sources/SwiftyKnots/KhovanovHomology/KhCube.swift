@@ -10,29 +10,18 @@ import SwiftyHomology
 
 // An n-dim cube with Modules on all vertices I ∈ {0, 1}^n .
 
-public struct KhCube<R: Ring> {
+public struct KhovanovCube<R: Ring> {
+    public let type: KhovanovType<R>
     public let link: Link
-    let product: KhAlgebraGenerator.Product<R>
-    let coproduct: KhAlgebraGenerator.Coproduct<R>
-    
-    public typealias EdgeMap = ModuleEnd<LinearCombination<KhComplexGenerator, R>>
+    public typealias EdgeMap = ModuleEnd<LinearCombination<KhovanovGenerator, R>>
     
     private let verticesCache: CacheDictionary<Link.State, Vertex>   = CacheDictionary([:])
     private let edgeMapsCache: CacheDictionary<StatePair, EdgeMap>   = CacheDictionary([:])
     private let targetStatesCache: CacheDictionary<Link.State, [Link.State]> = .empty
 
-    init(link L: Link, product: KhAlgebraGenerator.Product<R>, coproduct: KhAlgebraGenerator.Coproduct<R>) {
+    init(type: KhovanovType<R>, link L: Link) {
+        self.type = type
         self.link = L
-        self.product = product
-        self.coproduct = coproduct
-    }
-    
-    public init(link L: Link, h: R = R.zero, t: R = R.zero) {
-        self.init(
-            link: L,
-            product: KhAlgebraGenerator.product(h: h, t: t),
-            coproduct: KhAlgebraGenerator.coproduct(h: h, t: t)
-        )
     }
     
     public subscript(s: Link.State) -> Vertex {
@@ -107,28 +96,26 @@ public struct KhCube<R: Ring> {
             let ε = edgeSign(from: s0, to: s1)
             switch self.edgeDescription(from: s0, to: s1) {
             case let .merge(from: (i1, i2), to: j):
-                let m = self.product
                 return ModuleHom.linearlyExtend{ x in
-                    ε * x.applied(m, inputIndices: (i1, i2), outputIndex: j, nextState: s1)
+                    ε * x.merge(type: type, inputIndices: (i1, i2), outputIndex: j, nextState: s1)
                 }
             case let .split(from: i, to: (j1, j2)):
-                let Δ = self.coproduct
                 return ModuleHom.linearlyExtend{ x in
-                    ε * x.applied(Δ, inputIndex: i, outputIndices: (j1, j2), nextState: s1)
+                    ε * x.split(type: type, inputIndex: i, outputIndices: (j1, j2), nextState: s1)
                 }
             }
         }
     }
     
-    public func differential(_ i: Int) -> ModuleEnd<LinearCombination<KhComplexGenerator, R>> {
-        ModuleHom.linearlyExtend { (x: KhComplexGenerator) in
+    public func differential(_ i: Int) -> ModuleEnd<LinearCombination<KhovanovGenerator, R>> {
+        ModuleHom.linearlyExtend { (x: KhovanovGenerator) in
             self.targetStates(from: x.state).sum { target in
                 self.edgeMap(from: x.state, to: target)(x)
             }
         }
     }
     
-    public func asChainComplex() -> ChainComplex1<LinearCombination<KhComplexGenerator, R>> {
+    public func asChainComplex() -> ChainComplex1<LinearCombination<KhovanovGenerator, R>> {
         ChainComplex1(
             type: .ascending,
             support: 0 ... dim,
@@ -154,14 +141,14 @@ public struct KhCube<R: Ring> {
     public struct Vertex: CustomStringConvertible {
         public let state: Link.State
         public let circles: Link
-        public let generators: [KhComplexGenerator]
+        public let generators: [KhovanovGenerator]
         
         init(_ L: Link, _ state: Link.State) {
             self.state = state
             self.circles = L.resolved(by: state)
             
             let r = circles.components.count
-            self.generators = KhComplexGenerator.generateBasis(state: state, power: r)
+            self.generators = KhovanovGenerator.generateBasis(state: state, power: r)
         }
         
         var maxQdegree: Int {

@@ -9,34 +9,16 @@ import SwiftyMath
 import SwiftyHomology
 
 public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
-    public enum Variant {
-        case Khovanov, Lee, BarNatan
-        case custom(_ h: R, _ t: R)
-        
-        var parameters: (R, R) {
-            switch self {
-            case .Khovanov:
-                return (.zero, .zero)
-            case .Lee:
-                return (.zero, .identity)
-            case .BarNatan:
-                return (.identity, .zero)
-            case let .custom(h, t):
-                return (h, t)
-            }
-        }
-    }
-
     public typealias GridDim = _1
-    public typealias BaseModule = LinearCombination<KhComplexGenerator, R>
+    public typealias BaseModule = LinearCombination<KhovanovGenerator, R>
     
-    public let type: Variant
+    public let type: KhovanovType<R>
     public let link: Link
-    public let cube: KhCube<R>
+    public let cube: KhovanovCube<R>
     public let chainComplex: ChainComplex1<BaseModule>
     public let normalized: Bool
     
-    private init(_ type: Variant, _ link: Link, _ cube: KhCube<R>, _ chainComplex: ChainComplex1<BaseModule>, _ normalized: Bool) {
+    private init(_ type: KhovanovType<R>, _ link: Link, _ cube: KhovanovCube<R>, _ chainComplex: ChainComplex1<BaseModule>, _ normalized: Bool) {
         self.type = type
         self.link = link
         self.cube = cube
@@ -44,10 +26,9 @@ public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
         self.normalized = normalized
     }
     
-    public init(type: Variant = .Khovanov, link: Link, normalized: Bool = true) {
+    public init(type: KhovanovType<R> = .Khovanov, link: Link, normalized: Bool = true) {
         let n⁻ = link.crossingNumber⁻
-        let (h, t) = type.parameters
-        let cube = KhCube(link: link, h: h, t: t)
+        let cube = KhovanovCube(type: type, link: link)
         let chainComplex = cube.asChainComplex().shifted(normalized ? -n⁻ : 0)
         self.init(type, link, cube, chainComplex, normalized)
     }
@@ -57,7 +38,7 @@ public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
     }
     
     public var bigraded: ChainComplex2<BaseModule> {
-        let (h, t) = type.parameters
+        let (h, t) = (type.h, type.t)
         assert(h.isZero || h.degree == -2)
         assert(t.isZero || t.degree == -4)
         
@@ -71,7 +52,7 @@ public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
 }
 
 public struct KhovanovHomology<R: EuclideanRing>: GridWrapper {
-    public typealias Grid = ModuleGrid2<LinearCombination<KhComplexGenerator, R>>
+    public typealias Grid = ModuleGrid2<LinearCombination<KhovanovGenerator, R>>
     public typealias GridDim = _2
     public typealias Object = Grid.Object
     

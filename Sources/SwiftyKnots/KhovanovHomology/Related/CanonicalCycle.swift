@@ -19,15 +19,15 @@ extension KhovanovComplex {
     
     public var canonicalCycles: (Element, Element) {
         assert(link.components.count == 1) // currently supports only knots.
-
-        func wrap(_ x: KhAlgebraGenerator) -> Element {
-            .wrap( Element.Generator(tensor: MultiTensorGenerator([x]), state: []))
-        }
-
+        
         let (X, I) = (wrap(.X), wrap(.I))
-        let (u, v) = (-R.identity, R.identity)
+        let (u, v) = (cube.type.u, cube.type.v)
         let (a, b) = (X - u * I, X - v * I)
         
+        return canonicalCycles(a: a, b: b)
+    }
+    
+    public func canonicalCycles(a: Element, b: Element) -> (Element, Element) {
         let s0 = link.orientationPreservingState
         var α = Element.wrap( Element.Generator(tensor: .identity, state: s0))
         var β = Element.wrap( Element.Generator(tensor: .identity, state: s0))
@@ -77,5 +77,9 @@ extension KhovanovComplex {
         assert(result.count == circles.count)
 
         return circles.map { c in (c, result[c]!) }
+    }
+    
+    private func wrap(_ x: KhovanovGenerator.A) -> Element {
+        .wrap( Element.Generator(tensor: MultiTensorGenerator([x]), state: []))
     }
 }
