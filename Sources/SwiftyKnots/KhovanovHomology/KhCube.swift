@@ -19,6 +19,7 @@ public struct KhCube<R: Ring> {
     
     private let verticesCache: CacheDictionary<Link.State, Vertex>   = CacheDictionary([:])
     private let edgeMapsCache: CacheDictionary<StatePair, EdgeMap>   = CacheDictionary([:])
+    private let targetStatesCache: CacheDictionary<Link.State, [Link.State]> = .empty
 
     init(link L: Link, product: KhAlgebraGenerator.Product<R>, coproduct: KhAlgebraGenerator.Coproduct<R>) {
         self.link = L
@@ -57,44 +58,72 @@ public struct KhCube<R: Ring> {
         })
     }
     
+    //  101001  ->  { (-, 111001), (+, 101101), (+, 101011) }
+    public func targetStates(from state: Link.State) -> [Link.State] {
+        return targetStatesCache.useCacheOrSet(key: state) {
+            (0 ..< state.count)
+            .filter{ i in state[i] == .resolution0 }
+            .map { i in Link.State( state.replaced(at: i, with: .resolution1) ) }
+        }
+    }
+    
+    public func edgeSign(from s0: Link.State, to s1: Link.State) -> R {
+        guard let i = (0 ..< s0.count).first(where: { j in s0[j] != s1[j] }) else {
+            fatalError("invalid states: \(s0), \(s1)")
+        }
+        let e = (0 ... i).count{ j in s0[j] == 1 }
+        return R(from: (-1).pow(e))
+    }
+    
+    public enum EdgeDescription {
+        case merge(from: (Int, Int), to: Int)
+        case split(from: Int, to: (Int, Int))
+    }
+    
+    public func edgeDescription(from s0: Link.State, to s1: Link.State) -> EdgeDescription {
+        let (L0, L1) = (self[s0].circles, self[s1].circles)
+        let (c1, c2) = (L0.components, L1.components)
+        let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
+        
+        switch (d1.count, d2.count) {
+        case (2, 1):
+            let (i1, i2) = (c1.firstIndex(of: d1[0])!, c1.firstIndex(of: d1[1])!)
+            let j = c2.firstIndex(of: d2[0])!
+            return .merge(from: (i1, i2), to: j)
+            
+        case (1, 2):
+            let i = c1.firstIndex(of: d1[0])!
+            let (j1, j2) = (c2.firstIndex(of: d2[0])!, c2.firstIndex(of: d2[1])!)
+            return .split(from: i, to: (j1, j2))
+            
+        default:
+            fatalError()
+        }
+    }
+    
     public func edgeMap(from s0: Link.State, to s1: Link.State) -> EdgeMap {
         let pair = StatePair(from: s0, to: s1)
         return edgeMapsCache.useCacheOrSet(key: pair) {
-            let (L0, L1) = (self[s0].circles, self[s1].circles)
-            let (c1, c2) = (L0.components, L1.components)
-            let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
-            
-            switch (d1.count, d2.count) {
-            case (2, 1):
-                let (i1, i2) = (c1.firstIndex(of: d1[0])!, c1.firstIndex(of: d1[1])!)
-                let j = c2.firstIndex(of: d2[0])!
-                let m = MultiTensorHom(from: product, inputIndices: (i1, i2), outputIndex: j)
-                
+            let ε = edgeSign(from: s0, to: s1)
+            switch self.edgeDescription(from: s0, to: s1) {
+            case let .merge(from: (i1, i2), to: j):
+                let m = self.product
                 return ModuleHom.linearlyExtend{ x in
-                    m(x, nextState: s1)
+                    ε * x.applied(m, inputIndices: (i1, i2), outputIndex: j, nextState: s1)
                 }
-                
-            case (1, 2):
-                let i = c1.firstIndex(of: d1[0])!
-                let (j1, j2) = (c2.firstIndex(of: d2[0])!, c2.firstIndex(of: d2[1])!)
-                let Δ = MultiTensorHom(from: coproduct, inputIndex: i, outputIndices: (j1, j2))
-                
+            case let .split(from: i, to: (j1, j2)):
+                let Δ = self.coproduct
                 return ModuleHom.linearlyExtend{ x in
-                    Δ(x, nextState: s1)
+                    ε * x.applied(Δ, inputIndex: i, outputIndices: (j1, j2), nextState: s1)
                 }
-                
-            default:
-                return .zero
             }
         }
     }
     
     public func differential(_ i: Int) -> ModuleEnd<LinearCombination<KhComplexGenerator, R>> {
         ModuleHom.linearlyExtend { (x: KhComplexGenerator) in
-            let v = self[x.state]
-            return v.targetStates.sum { (ε, target) -> LinearCombination<KhComplexGenerator, R> in
-                let f = self.edgeMap(from: x.state, to: target)
-                return ε * f(x)
+            self.targetStates(from: x.state).sum { target in
+                self.edgeMap(from: x.state, to: target)(x)
             }
         }
     }
@@ -126,7 +155,6 @@ public struct KhCube<R: Ring> {
         public let state: Link.State
         public let circles: Link
         public let generators: [KhComplexGenerator]
-        private let targetStatesCache: Cache<[(sign: R, state: Link.State)]> = .empty
         
         init(_ L: Link, _ state: Link.State) {
             self.state = state
@@ -142,20 +170,6 @@ public struct KhCube<R: Ring> {
         
         var minQdegree: Int {
              generators.map{ $0.quantumDegree }.min() ?? 0
-        }
-        
-        //  101001  ->  { (-, 111001), (+, 101101), (+, 101011) }
-        fileprivate var targetStates: [(sign: R, state: Link.State)] {
-            targetStatesCache.useCacheOrSet {
-                (0 ..< state.count)
-                .filter{ i in state[i] == .resolution0 }
-                .map { i in
-                    let e = state[0 ..< i].count{ $0 == .resolution1 }
-                    let sign = R(from: (-1).pow(e))
-                    let target = Link.State( state.replaced(at: i, with: .resolution1) )
-                    return (sign, target)
-                }
-            }
         }
         
         public var description: String {
