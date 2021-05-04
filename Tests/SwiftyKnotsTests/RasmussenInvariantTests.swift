@@ -10,6 +10,14 @@ import SwiftyKnots
 
 class RasmussenInvariantTests: XCTestCase {
     
+    override func setUp() {
+        try! Link.loadTable("K10")
+    }
+    
+    override func tearDown() {
+        Link.unloadTable()
+    }
+    
     let s = RasmussenInvariant(_:)
 
     func testUnknot() {
@@ -28,17 +36,17 @@ class RasmussenInvariantTests: XCTestCase {
     }
     
     func test3_1_Z() {
-        let K = Knot(3, 1)
+        let K = Link.load("3_1")!
         XCTAssertEqual(s(K), -2)
     }
     
     func test4_1_Z() {
-        let K = Knot(4, 1)
+        let K = Link.load("4_1")!
         XCTAssertEqual(s(K), 0)
     }
     
     func test5_1_Z() {
-        let K = Knot(5, 1)
+        let K = Link.load("5_1")!
         XCTAssertEqual(s(K), -4)
     }
 }

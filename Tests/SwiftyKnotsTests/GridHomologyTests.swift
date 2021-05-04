@@ -12,6 +12,14 @@ import SwiftyHomology
 
 class GridHomologyTests: XCTestCase {
     
+    override func setUp() {
+        try! Link.loadTable("K10")
+    }
+    
+    override func tearDown() {
+        Link.unloadTable()
+    }
+    
     func testChainComplex_tilde() {
         let G = GridDiagram.load("0_1")!
         let C = GridComplex(type: .tilde, diagram: G)

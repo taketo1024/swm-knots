@@ -11,6 +11,15 @@ import SwiftyMath
 
 class LinkTests: XCTestCase {
     
+    override func setUp() {
+        try! Link.loadTable("K10")
+        try! Link.loadTable("L10")
+    }
+    
+    override func tearDown() {
+        Link.unloadTable()
+    }
+    
     func testEmpty() {
         let e = Link.empty
         XCTAssertEqual(e.components.count, 0)
@@ -24,42 +33,42 @@ class LinkTests: XCTestCase {
     }
 
     func testHopfLink() {
-        let L = Link.HopfLink
+        let L = Link.load("L2a1")!
         XCTAssertEqual(L.components.count, 2)
         XCTAssertEqual(L.crossingNumber, 2)
         XCTAssertEqual(L.writhe, -2)
     }
     
     func testHopfLinkReversed() {
-        let L = Link.HopfLink.reversed
+        let L = Link.load("L2a1")!.reversed
         XCTAssertEqual(L.components.count, 2)
         XCTAssertEqual(L.crossingNumber, 2)
         XCTAssertEqual(L.writhe, -2)
     }
     
     func testHopfLinkMirrored() {
-        let L = Link.HopfLink.mirrored
+        let L = Link.load("L2a1")!.mirrored
         XCTAssertEqual(L.components.count, 2)
         XCTAssertEqual(L.crossingNumber, 2)
         XCTAssertEqual(L.writhe, 2)
     }
     
     func testTrefoil() {
-        let K = Link.trefoil
+        let K = Link.load("3_1")!
         XCTAssertEqual(K.components.count, 1)
         XCTAssertEqual(K.crossingNumber, 3)
         XCTAssertEqual(K.writhe, -3)
     }
     
     func testTrefoilReversed() {
-        let K = Link.trefoil.reversed
+        let K = Link.load("3_1")!.reversed
         XCTAssertEqual(K.components.count, 1)
         XCTAssertEqual(K.crossingNumber, 3)
         XCTAssertEqual(K.writhe, -3)
     }
     
     func testTrefoilMirrored() {
-        let K = Link.trefoil.mirrored
+        let K = Link.load("3_1")!.mirrored
         XCTAssertEqual(K.components.count, 1)
         XCTAssertEqual(K.crossingNumber, 3)
         XCTAssertEqual(K.writhe, 3)

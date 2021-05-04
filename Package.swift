@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -8,7 +8,8 @@ let package = Package(
     products: [
         .library(
             name: "SwiftyKnots",
-            targets: ["SwiftyKnots"]),
+            targets: ["SwiftyKnots"]
+        ),
     ],
     dependencies: [
         .package(
@@ -31,13 +32,17 @@ let package = Package(
         .target(
             name: "SwiftyKnots",
             dependencies: ["SwiftyMath", "SwiftyHomology", "SwiftySolver"],
-			path: "Sources/SwiftyKnots"),
+			path: "Sources/SwiftyKnots",
+			resources: [.process("Resources")]
+		),
         .testTarget(
             name: "SwiftyKnotsTests",
-            dependencies: ["SwiftyKnots"]),
+            dependencies: ["SwiftyKnots"]
+		),
         .target(
             name: "SwiftyKnots-Sample",
             dependencies: ["SwiftyMath", "SwiftyHomology", "SwiftyKnots"],
-			path: "Sources/Sample"),
+			path: "Sources/Sample"
+		),
     ]
 )

@@ -95,6 +95,16 @@ public struct Link: Equatable, CustomStringConvertible {
         self.init(name: name, planarCode: planarCode)
     }
     
+    public static var empty: Link {
+        Link(name: "∅", crossings: [])
+    }
+    
+    public static var unknot: Link {
+        var L = Link(name: "○", planarCode: [1, 2, 2, 1])
+        L.resolve(0, .resolution0)
+        return L
+    }
+    
     public func copy(name: String? = nil, diffX: Int = 0, diffE: Int = 0) -> Link {
         let myEdges = Dictionary(pairs: edges.map{ e in (e.id, e) })
         let cpEdges = myEdges.mapPairs{ (id, _) in (id, Edge(id + diffE)) }

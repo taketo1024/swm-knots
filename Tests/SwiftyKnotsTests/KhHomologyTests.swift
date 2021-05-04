@@ -14,6 +14,15 @@ class HovanovHomologyTests: XCTestCase {
     
     typealias Kh = KhovanovHomology<𝐙>
     
+    override func setUp() {
+        try! Link.loadTable("K10")
+        try! Link.loadTable("L10")
+    }
+    
+    override func tearDown() {
+        Link.unloadTable()
+    }
+    
     func testUnknot() {
         let K = Link.unknot
         let H = Kh(K)
@@ -40,7 +49,7 @@ class HovanovHomologyTests: XCTestCase {
     }
     
     func test3_1_Z() {
-        let K = Knot(3, 1)
+        let K = Link.load("3_1")!
         let H = Kh(K)
         
         XCTAssertEqual(H.gradedEulerCharacteristic, JonesPolynomial(K, normalized: false))
@@ -53,7 +62,7 @@ class HovanovHomologyTests: XCTestCase {
     }
     
     func test4_1_Z() {
-        let K = Knot(4, 1)
+        let K = Link.load("4_1")!
         let H = Kh(K)
         
         XCTAssertEqual(H.gradedEulerCharacteristic, JonesPolynomial(K, normalized: false))
@@ -69,7 +78,7 @@ class HovanovHomologyTests: XCTestCase {
     }
     
     func test5_1_Z() {
-        let K = Knot(5, 1)
+        let K = Link.load("5_1")!
         let H = Kh(K)
         
         XCTAssertEqual(H[-5, -15].dictionaryDescription, [0 : 1])
