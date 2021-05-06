@@ -274,6 +274,31 @@ public struct Link: Equatable, CustomStringConvertible {
         } )
     }
     
+    public var seifertGraph: SimpleDirectedGraph<Component, Int> {
+        typealias Graph = SimpleDirectedGraph<Component, Int>
+        var G = Graph(options: ["physics": true])
+        let s = orientationPreservingState
+        let D = self.resolved(by: s)
+        
+        for c in D.components {
+            G.addVertex(value: c)
+        }
+        
+        func vertex(containing edge: Edge) -> Graph.Vertex {
+            G.vertices.first{ $0.value.value.edges.contains(edge) }!.value
+        }
+        
+        for x in D.crossings {
+            let (i, j) = (x.mode == .V) ? (0, 1) : (0, 2)
+            let (e1, e2) = (x.edges[i], x.edges[j])
+            let v1 = vertex(containing: e1)
+            let v2 = vertex(containing: e2)
+            G.addEdge(from: v1, to: v2, value: x.id)
+        }
+        
+        return G
+    }
+    
     public static func +(L1: Link, L2: Link) -> Link {
         let dx = (L1.crossings.max()?.id ?? 0) - (L2.crossings.min()?.id ?? 0) + 1
         let de = (L1.edges.max()?.id ?? 0) - (L2.edges.min()?.id ?? 0) + 1
