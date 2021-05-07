@@ -37,6 +37,7 @@ extension CubeType {
 public protocol ModuleCube: CubeType where Vertex == ModuleObject<BaseModule>, Edge == ModuleEnd<BaseModule> {
     associatedtype BaseModule: Module
     typealias R = BaseModule.BaseRing
+    typealias IndexedModule = DirectSum<Coords, BaseModule>
 }
 
 extension ModuleCube {
@@ -51,20 +52,20 @@ extension ModuleCube {
         return e.isEven ? .identity : -.identity
     }
     
-    public func differential(_ i: Int) -> ModuleEnd<DirectSum<BitSequence, BaseModule>> {
-        ModuleEnd { (z: DirectSum<BitSequence, BaseModule>) in
+    public func differential(_ i: Int) -> ModuleEnd<IndexedModule> {
+        ModuleEnd { (z: IndexedModule) in
             z.elements.sum { (v, x) in
                 v.successors.sum { w in
                     let e = edgeSign(from: v, to: w)
                     let f = edge(from: v, to: w)
                     let y = e * f(x)
-                    return DirectSum(index: w, value: y)
+                    return IndexedModule(index: w, value: y)
                 }
             }
         }
     }
     
-    public func asChainComplex() -> ChainComplex1<DirectSum<BitSequence, BaseModule>> {
+    public func asChainComplex() -> ChainComplex1<IndexedModule> {
         ChainComplex1(
             type: .ascending,
             support: 0 ... dim,
