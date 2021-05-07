@@ -70,8 +70,7 @@ public struct KhovanovCube<R: Ring> {
     }
     
     public func edgeDescription(from s0: Link.State, to s1: Link.State) -> EdgeDescription {
-        let (L0, L1) = (self[s0].circles, self[s1].circles)
-        let (c1, c2) = (L0.components, L1.components)
+        let (c1, c2) = (self[s0].circles, self[s1].circles)
         let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
         
         switch (d1.count, d2.count) {
@@ -140,14 +139,14 @@ public struct KhovanovCube<R: Ring> {
     
     public struct Vertex: CustomStringConvertible {
         public let state: Link.State
-        public let circles: Link
+        public let circles: [Link.Component]
         public let generators: [KhovanovGenerator]
         
         init(_ L: Link, _ state: Link.State) {
             self.state = state
-            self.circles = L.resolved(by: state)
+            self.circles = L.resolved(by: state).components
             
-            let r = circles.components.count
+            let r = circles.count
             self.generators = KhovanovGenerator.generateBasis(state: state, power: r)
         }
         

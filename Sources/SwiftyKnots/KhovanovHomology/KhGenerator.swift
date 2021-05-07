@@ -18,7 +18,7 @@ public struct KhovanovGenerator: FreeModuleGenerator, TensorMonoid, Comparable, 
 
     public static func generateBasis(state: Link.State, power n: Int) -> [Self] {
         let (I, X) = (A.I, A.X)
-        return generateBinarySequences(with: (I, X), length: n).map { factors in
+        return Util.generateBinarySequences(with: (I, X), length: n).map { factors in
             .init(tensor: MultiTensorGenerator(factors), state: state)
         }
     }

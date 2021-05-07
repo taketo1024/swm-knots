@@ -98,32 +98,28 @@ public struct Link: Equatable, CustomStringConvertible {
         crossings.flatMap{ x in x.edges }.unique().sorted()
     }
     
-    private let _components: Cache<[Component]> = .empty
-    
     public var components: [Component] {
-        _components.useCacheOrSet {
-            var queue = edges
-            var comps: [Component] = []
+        var queue = edges
+        var comps: [Component] = []
+        
+        while !queue.isEmpty {
+            var comp: [Edge] = []
             
-            while !queue.isEmpty {
-                var comp: [Edge] = []
-                
-                let first = queue.first!
-                var e = first
-                
-                while queue.contains(e) {
-                    queue.remove(element: e)
-                    comp.append(e)
-                    e = e.nextEdge
-                }
-                
-                assert(e == first)
-                
-                comps.append(Component(comp))
+            let first = queue.first!
+            var e = first
+            
+            while queue.contains(e) {
+                queue.remove(element: e)
+                comp.append(e)
+                e = e.nextEdge
             }
             
-            return comps
+            assert(e == first)
+            
+            comps.append(Component(comp))
         }
+        
+        return comps
     }
     
     /*
@@ -138,7 +134,6 @@ public struct Link: Equatable, CustomStringConvertible {
      */
     
     public mutating func resolve(_ i: Int, _ s: Resolution) {
-        _components.clear()
         crossings[i].resolve(s)
         reorientEdges()
     }
@@ -190,10 +185,6 @@ public struct Link: Equatable, CustomStringConvertible {
             
             assert(e == first)
         }
-    }
-    
-    public var allStates: [State] {
-        generateBinarySequences(with: (.resolution0, .resolution1), length: crossingNumber)
     }
     
     public var orientationPreservingState: State {
@@ -453,15 +444,8 @@ extension Array where Element == Link.Resolution {
     public var weight: Int {
         count(where: { $0 == .resolution1 })
     }
-}
-
-internal func generateBinarySequences<T>(with choice: (T, T), length n: Int) -> [[T]] {
-    assert(n <= 64)
-    return (0 ..< 2.pow(n)).map { (b0: Int) -> [T] in
-        var b = b0
-        return (0 ..< n).reduce(into: []) { (result, _) in
-            result.append( (b & 1 == 0) ? choice.0 : choice.1 )
-            b >>= 1
-        }
+    
+    public static func allStates(length: Int) -> [Link.State] {
+        Util.generateBinarySequences(with: (.resolution0, .resolution1), length: length)
     }
 }
