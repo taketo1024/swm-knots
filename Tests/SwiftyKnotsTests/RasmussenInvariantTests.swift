@@ -26,12 +26,12 @@ class RasmussenInvariantTests: XCTestCase {
     }
     
     func testUnknot_RM1() {
-        let K = Link(planarCode: [1,2,2,1])
+        let K = Link(pdCode: [1,2,2,1])
         XCTAssertEqual(s(K), 0)
     }
     
     func testUnknot_RM2() {
-        let K = Link(planarCode: [1,4,2,1], [2,4,3,3])
+        let K = Link(pdCode: [1,4,2,1], [2,4,3,3])
         XCTAssertEqual(s(K), 0)
     }
     

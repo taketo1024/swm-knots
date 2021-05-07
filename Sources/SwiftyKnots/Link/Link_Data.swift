@@ -15,7 +15,7 @@ import Foundation
 extension Link {
     public static func load(_ name: String) -> Link? {
         if let code = _table[name] {
-            return Link(name: name, planarCode: code)
+            return Link(name: name, pdCode: code)
         } else {
             return nil
         }
@@ -36,5 +36,5 @@ extension Link {
     }
 }
 
-private typealias CodeTable = [String: Link.PlanarCode]
+private typealias CodeTable = [String: Link.PDCode]
 private var _table: CodeTable = [:]
