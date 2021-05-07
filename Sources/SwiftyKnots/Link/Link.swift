@@ -215,7 +215,7 @@ public struct Link: Equatable, CustomStringConvertible {
             let (e1, e2) = (x.edges[i], x.edges[j])
             let v1 = vertex(containing: e1)
             let v2 = vertex(containing: e2)
-            G.addEdge(from: v1, to: v2, value: x.id)
+            v1.addEdge(to: v2, value: x.id)
         }
         
         return G
