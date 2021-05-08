@@ -17,7 +17,7 @@ public func KauffmanBracket(_ L: Link, normalized: Bool = false) -> LaurentPolyn
     let B = -A.pow(2) - A.pow(-2)
     
     let n = L.crossingNumber
-    return Link.State.allStates(length: n).sum { s -> P in
+    return Link.State.allSequences(length: n).sum { s -> P in
         let L1 = L.resolved(by: s)
         let n = L1.components.count
         let c1 = s.weight

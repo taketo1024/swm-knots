@@ -16,7 +16,7 @@
 import SwiftyMath
 
 public struct Link: Equatable, CustomStringConvertible {
-    public typealias State = [Resolution]
+    public typealias State = BitSequence
 
     public let name: String
     public let crossings: [Crossing]
@@ -32,7 +32,7 @@ public struct Link: Equatable, CustomStringConvertible {
     
     public static var unknot: Link {
         var L = Link(name: "○", pdCode: [1, 2, 2, 1])
-        L.resolve(0, .resolution0)
+        L.resolve(0, 0)
         return L
     }
     
@@ -133,12 +133,12 @@ public struct Link: Equatable, CustomStringConvertible {
      *     / \           /‾\
      */
     
-    public mutating func resolve(_ i: Int, _ s: Resolution) {
+    public mutating func resolve(_ i: Int, _ s: Bit) {
         crossings[i].resolve(s)
         reorientEdges()
     }
     
-    public func resolved(_ i: Int, _ s: Resolution) -> Link {
+    public func resolved(_ i: Int, _ s: Bit) -> Link {
         var L = self.copy(name: "\(name)\(Format.sub(s.description))")
         L.resolve(i, s)
         return L
@@ -148,7 +148,7 @@ public struct Link: Equatable, CustomStringConvertible {
         let L = self.copy()
         let xs = L.crossings.filter{ !$0.isResolved }
         
-        assert(xs.count == state.count)
+        assert(xs.count == state.length)
         
         for (x, s) in zip(xs, state) {
             x.resolve(s)
@@ -159,7 +159,7 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public func resolvedPair(at i: Int) -> (Link, Link) {
-        (resolved(i, .resolution0), resolved(i, .resolution1))
+        (resolved(i, 0), resolved(i, 1))
     }
     
     private func reorientEdges() {
@@ -188,11 +188,10 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var orientationPreservingState: State {
-        State( crossings.compactMap{ x in
+        State( crossings.compactMap{ x -> Bit? in
             x.isResolved
                 ? nil
-                : x.crossingSign == 1
-                    ? .resolution0 : .resolution1
+                : x.crossingSign == 1 ? 0 : 1
         } )
     }
     
@@ -241,29 +240,6 @@ public struct Link: Equatable, CustomStringConvertible {
     
     public var detailDescription: String {
         "\(name){ \(crossings.map{ $0.description }.joined(separator: ", ")) }"
-    }
-    
-    public enum Resolution: Int8, Comparable, ExpressibleByIntegerLiteral, CustomStringConvertible, Codable {
-        public typealias IntegerLiteralType = Int8
-        
-        case resolution0 = 0
-        case resolution1 = 1
-        
-        public init(_ i: Int8) {
-            self = (i == 0) ? .resolution0 : .resolution1
-        }
-        
-        public init(integerLiteral value: Int8) {
-            self = (value == 0) ? .resolution0 : .resolution1
-        }
-        
-        public static func < (lhs: Self, rhs: Self) -> Bool {
-            lhs.rawValue < rhs.rawValue
-        }
-        
-        public var description: String {
-            rawValue.description
-        }
     }
     
     public final class Crossing: Equatable, Comparable, CustomStringConvertible {
@@ -327,10 +303,10 @@ public struct Link: Equatable, CustomStringConvertible {
             }
         }
         
-        public func resolve(_ s: Resolution) {
+        public func resolve(_ s: Bit) {
             switch (mode, s) {
-            case (.X⁺, .resolution0), (.X⁻, .resolution1): mode = .V
-            case (.X⁺, .resolution1), (.X⁻, .resolution0): mode = .H
+            case (.X⁺, 0), (.X⁻, 1): mode = .V
+            case (.X⁺, 1), (.X⁻, 0): mode = .H
             default: ()
             }
         }
@@ -437,15 +413,5 @@ public struct Link: Equatable, CustomStringConvertible {
         public var description: String {
             "(\(edges.map{ "\($0)" }.joined(separator: "-")))"
         }
-    }
-}
-
-extension Array where Element == Link.Resolution {
-    public var weight: Int {
-        count(where: { $0 == .resolution1 })
-    }
-    
-    public static func allStates(length: Int) -> [Link.State] {
-        Util.generateBinarySequences(with: (.resolution0, .resolution1), length: length)
     }
 }
