@@ -8,7 +8,7 @@
 import SwiftyMath
 import SwiftyHomology
 
-public protocol CubeType {
+public protocol Cube {
     associatedtype Vertex
     associatedtype Edge
     typealias Coords = BitSequence
@@ -18,7 +18,7 @@ public protocol CubeType {
     func edge(from: Coords, to: Coords) -> Edge
 }
 
-extension CubeType {
+extension Cube {
     var startVertex: Vertex {
         self[ Coords.zeros(length: dim) ]
     }
@@ -34,10 +34,10 @@ extension CubeType {
     }
 }
 
-public protocol ModuleCube: CubeType where Vertex == ModuleObject<BaseModule>, Edge == ModuleEnd<BaseModule> {
+public protocol ModuleCube: Cube where Vertex == ModuleObject<BaseModule>, Edge == ModuleEnd<BaseModule> {
     associatedtype BaseModule: Module
     typealias R = BaseModule.BaseRing
-    typealias IndexedModule = DirectSum<Coords, BaseModule>
+    typealias M = IndexedModule<Coords, BaseModule>
 }
 
 extension ModuleCube {
@@ -52,20 +52,20 @@ extension ModuleCube {
         return e.isEven ? .identity : -.identity
     }
     
-    public func differential(_ i: Int) -> ModuleEnd<IndexedModule> {
-        ModuleEnd { (z: IndexedModule) in
+    public func differential(_ i: Int) -> ModuleEnd<M> {
+        ModuleEnd { (z: M) in
             z.elements.sum { (v, x) in
                 v.successors.sum { w in
                     let e = edgeSign(from: v, to: w)
                     let f = edge(from: v, to: w)
                     let y = e * f(x)
-                    return IndexedModule(index: w, value: y)
+                    return M(index: w, value: y)
                 }
             }
         }
     }
     
-    public func asChainComplex() -> ChainComplex1<IndexedModule> {
+    public func asChainComplex() -> ChainComplex1<M> {
         ChainComplex1(
             type: .ascending,
             support: 0 ... dim,
