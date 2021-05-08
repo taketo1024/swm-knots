@@ -10,7 +10,7 @@ import SwiftyMath
 // The defining Frobenius algebra:
 // A = R[X]/(X^2 - hX - t) = R[X]/(X - u)(X - v)
 
-public enum KhovanovType<R: Ring> {
+public enum KhovanovAlgebra<R: Ring> {
     case Khovanov, Lee, BarNatan
     case custom(h: R, t: R, u: R, v: R)
     
@@ -66,9 +66,12 @@ public enum KhovanovType<R: Ring> {
         }
     }
     
-    typealias A = KhovanovGenerator.A
-    typealias Product = ModuleHom<LinearCombination<TensorGenerator<A, A>, R>, LinearCombination<A, R>>
-    var product: Product {
+    // A ⊗ A -> A
+    public typealias Product = ModuleHom<
+        LinearCombination<TensorGenerator<KhovanovAlgebraGenerator, KhovanovAlgebraGenerator>, R>,
+        LinearCombination<KhovanovAlgebraGenerator, R>
+    >
+    public var product: Product {
         Product.linearlyExtend { e in
             switch e.factors {
             case (.X, .X):  // X^2 = hX + t1
@@ -83,9 +86,13 @@ public enum KhovanovType<R: Ring> {
             }
         }
     }
-
-    typealias Coproduct = ModuleHom<LinearCombination<A, R>, LinearCombination<TensorGenerator<A, A>, R>>
-    var coproduct: Coproduct {
+    
+    // A -> A ⊗ A
+    public typealias Coproduct = ModuleHom<
+        LinearCombination<KhovanovAlgebraGenerator, R>,
+        LinearCombination<TensorGenerator<KhovanovAlgebraGenerator, KhovanovAlgebraGenerator>, R>
+    >
+    public var coproduct: Coproduct {
         Coproduct.linearlyExtend { e in
             switch e {
             case .X: // ΔX = X⊗X + t1⊗1
@@ -103,4 +110,3 @@ public enum KhovanovType<R: Ring> {
         }
     }
 }
-

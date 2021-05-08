@@ -10,15 +10,15 @@ import SwiftyHomology
 
 public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
     public typealias GridDim = _1
-    public typealias BaseModule = LinearCombination<KhovanovGenerator, R>
+    public typealias BaseModule = IndexedModule<Cube.Coords, LinearCombination<MultiTensorGenerator<KhovanovAlgebraGenerator>, R>>
     
-    public let type: KhovanovType<R>
+    public let type: KhovanovAlgebra<R>
     public let link: Link
     public let cube: KhovanovCube<R>
     public let chainComplex: ChainComplex1<BaseModule>
     public let normalized: Bool
     
-    private init(_ type: KhovanovType<R>, _ link: Link, _ cube: KhovanovCube<R>, _ chainComplex: ChainComplex1<BaseModule>, _ normalized: Bool) {
+    private init(_ type: KhovanovAlgebra<R>, _ link: Link, _ cube: KhovanovCube<R>, _ chainComplex: ChainComplex1<BaseModule>, _ normalized: Bool) {
         self.type = type
         self.link = link
         self.cube = cube
@@ -26,7 +26,7 @@ public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
         self.normalized = normalized
     }
     
-    public init(type: KhovanovType<R> = .Khovanov, link: Link, normalized: Bool = true) {
+    public init(type: KhovanovAlgebra<R> = .Khovanov, link: Link, normalized: Bool = true) {
         let n⁻ = link.crossingNumber⁻
         let cube = KhovanovCube(type: type, link: link)
         let chainComplex = cube.asChainComplex().shifted(normalized ? -n⁻ : 0)
@@ -43,16 +43,16 @@ public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
         assert(t.isZero || t.degree == -4)
         
         let (n⁺, n⁻) = (link.crossingNumber⁺, link.crossingNumber⁻)
-        let (qmin, qmax) = (cube.startVertex.minQdegree, cube.endVertex.maxQdegree)
+        let (qmin, qmax) = (cube.minQdegree, cube.maxQdegree)
         
         return chainComplex.asBigraded(secondarySupport: qmin ... qmax) {
-            x in x.quantumDegree
+            x in x.qDegree
         }.shifted(0, normalized ? n⁺ - 2 * n⁻ : 0)
     }
 }
 
 public struct KhovanovHomology<R: EuclideanRing>: GridWrapper {
-    public typealias Grid = ModuleGrid2<LinearCombination<KhovanovGenerator, R>>
+    public typealias Grid = ModuleGrid2<KhovanovComplex<R>.BaseModule>
     public typealias GridDim = _2
     public typealias Object = Grid.Object
     

@@ -25,12 +25,12 @@ public func RasmussenInvariant<F: Field>(_ L: Link, _ type: F.Type) -> Int {
     let z = C.canonicalCycles.0
     let d = C.differential[-1]
     
-    let range = C[0].generators.map{ $0.unwrap()!.quantumDegree }.range!
+    let range = C[0].generators.map{ $0.qDegree }.range!
     let min = range.lowerBound
     
     for j in range where (j - min).isEven {
-        let FC0 = C[ 0].filter{ x in x.quantumDegree < j }
-        let FC1 = C[-1].filter{ x in x.quantumDegree < j }
+        let FC0 = C[ 0].filter{ x in x.qDegree < j }
+        let FC1 = C[-1].filter{ x in x.qDegree < j }
         
         let A = d.asMatrix(from: FC1, to: FC0)
         let b = FC0.vectorize(z)

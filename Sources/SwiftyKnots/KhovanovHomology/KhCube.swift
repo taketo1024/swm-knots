@@ -10,67 +10,50 @@ import SwiftyHomology
 
 // An n-dim cube with Modules on all vertices I ∈ {0, 1}^n .
 
-public struct KhovanovCube<R: Ring> {
-    public let type: KhovanovType<R>
-    public let link: Link
-    public typealias EdgeMap = ModuleEnd<LinearCombination<KhovanovGenerator, R>>
+public struct KhovanovCube<R: Ring>: ModuleCube {
+    public typealias BaseModule = LinearCombination<MultiTensorGenerator<KhovanovAlgebraGenerator>, R>
+    public typealias Vertex = ModuleObject<BaseModule>
+    public typealias Edge = ModuleEnd<BaseModule>
     
-    private let verticesCache: CacheDictionary<Link.State, Vertex>   = CacheDictionary([:])
-    private let edgeMapsCache: CacheDictionary<StatePair, EdgeMap>   = CacheDictionary([:])
-    private let targetStatesCache: CacheDictionary<Link.State, [Link.State]> = .empty
-
-    init(type: KhovanovType<R>, link L: Link) {
+    public let type: KhovanovAlgebra<R>
+    public let link: Link
+    
+    public init(type: KhovanovAlgebra<R>, link L: Link) {
         self.type = type
         self.link = L
-    }
-    
-    public subscript(s: Link.State) -> Vertex {
-        verticesCache.useCacheOrSet(key: s) { Vertex(link, s) }
     }
     
     public var dim: Int {
         link.crossingNumber
     }
     
-    public var startVertex: Vertex {
-        self[Link.State(repeating: .resolution0, count: dim)]
+    public subscript(v: Coords) -> ModuleObject<BaseModule> {
+        vertexInfo(v).module
     }
     
-    public var endVertex: Vertex {
-        self[Link.State(repeating: .resolution1, count: dim)]
+    private func vertexInfo(_ s: Coords) -> VertexInfo {
+        assert(s.length == dim)
+        return VertexInfo(link, s)
     }
     
-    public func states(ofDegree i: Int) -> Set<Link.State> {
-        // {0, 2, 5}  ->  (101001)
-        Set((0 ..< dim).choose(i).map { (I: [Int]) -> Link.State in
-            Link.State( (0 ..< dim).map{ i in I.contains(i) ? .resolution1 : .resolution0 } )
-        })
+    public var maxQdegree: Int {
+        let v1 = Coords.ones(length: dim)
+        return vertexInfo(v1).maxQdegree
     }
     
-    //  101001  ->  { (-, 111001), (+, 101101), (+, 101011) }
-    public func targetStates(from state: Link.State) -> [Link.State] {
-        return targetStatesCache.useCacheOrSet(key: state) {
-            (0 ..< state.count)
-            .filter{ i in state[i] == .resolution0 }
-            .map { i in Link.State( state.replaced(at: i, with: .resolution1) ) }
-        }
+    public var minQdegree: Int {
+        let v0 = Coords.zeros(length: dim)
+        return vertexInfo(v0).minQdegree
     }
-    
-    public func edgeSign(from s0: Link.State, to s1: Link.State) -> R {
-        guard let i = (0 ..< s0.count).first(where: { j in s0[j] != s1[j] }) else {
-            fatalError("invalid states: \(s0), \(s1)")
-        }
-        let e = (0 ... i).count{ j in s0[j] == 1 }
-        return R(from: (-1).pow(e))
-    }
-    
+
     public enum EdgeDescription {
         case merge(from: (Int, Int), to: Int)
         case split(from: Int, to: (Int, Int))
     }
     
-    public func edgeDescription(from s0: Link.State, to s1: Link.State) -> EdgeDescription {
-        let (c1, c2) = (self[s0].circles, self[s1].circles)
+    public func edgeDescription(from s0: Coords, to s1: Coords) -> EdgeDescription {
+        let (v0, v1) = (vertexInfo(s0), vertexInfo(s1))
+        let (c1, c2) = (v0.circles, v1.circles)
         let (d1, d2) = (c1.filter{ !c2.contains($0) }, c2.filter{ !c1.contains($0) })
         
         switch (d1.count, d2.count) {
@@ -89,82 +72,44 @@ public struct KhovanovCube<R: Ring> {
         }
     }
     
-    public func edgeMap(from s0: Link.State, to s1: Link.State) -> EdgeMap {
-        let pair = StatePair(from: s0, to: s1)
-        return edgeMapsCache.useCacheOrSet(key: pair) {
-            let ε = edgeSign(from: s0, to: s1)
-            switch self.edgeDescription(from: s0, to: s1) {
-            case let .merge(from: (i1, i2), to: j):
-                return ModuleHom.linearlyExtend{ x in
-                    ε * x.merge(type: type, inputIndices: (i1, i2), outputIndex: j, nextState: s1)
-                }
-            case let .split(from: i, to: (j1, j2)):
-                return ModuleHom.linearlyExtend{ x in
-                    ε * x.split(type: type, inputIndex: i, outputIndices: (j1, j2), nextState: s1)
-                }
-            }
+    public func edge(from s0: Coords, to s1: Coords) -> ModuleEnd<BaseModule> {
+        switch self.edgeDescription(from: s0, to: s1) {
+        case let .merge(from: (i1, i2), to: j):
+            return MultiTensorHom(from: type.product, inputIndices: (i1, i2), outputIndex: j)
+        case let .split(from: i, to: (j1, j2)):
+            return MultiTensorHom(from: type.coproduct, inputIndex: i, outputIndices: (j1, j2))
         }
     }
     
-    public func differential(_ i: Int) -> ModuleEnd<LinearCombination<KhovanovGenerator, R>> {
-        ModuleHom.linearlyExtend { (x: KhovanovGenerator) in
-            self.targetStates(from: x.state).sum { target in
-                self.edgeMap(from: x.state, to: target)(x)
-            }
-        }
-    }
-    
-    public func asChainComplex() -> ChainComplex1<LinearCombination<KhovanovGenerator, R>> {
-        ChainComplex1(
-            type: .ascending,
-            support: 0 ... dim,
-            sequence: { i in
-                let n = self.dim
-                guard (0 ... n).contains(i) else {
-                    return .zeroModule
-                }
-                
-                let states = self.states(ofDegree: i)
-                let generators = states.flatMap{ self[$0].generators }
-                
-                return ModuleObject(basis: generators)
-            },
-            differential: { i in self.differential(i) }
-        )
-    }
-    
-    public func describe(_ s: Link.State) {
-        print("\(s): \(self[s])")
-    }
-    
-    public struct Vertex: CustomStringConvertible {
-        public let state: Link.State
-        public let circles: [Link.Component]
-        public let generators: [KhovanovGenerator]
+    fileprivate struct VertexInfo {
+        let coords: Coords
+        let circles: [Link.Component]
+        let module: ModuleObject<BaseModule>
         
-        init(_ L: Link, _ state: Link.State) {
-            self.state = state
-            self.circles = L.resolved(by: state).components
+        init(_ L: Link, _ v: Coords) {
+            let circles = L.resolved(by: v).components
             
             let r = circles.count
-            self.generators = KhovanovGenerator.generateBasis(state: state, power: r)
+            let (I, X) = (KhovanovAlgebraGenerator.I, KhovanovAlgebraGenerator.X)
+            let generators =  Util.generateBinarySequences(with: (I, X), length: r).map { factors in
+                MultiTensorGenerator(factors)
+            }
+            
+            self.coords = v
+            self.circles = circles
+            self.module = ModuleObject(basis: generators)
+        }
+        
+        private func qDegree(_ x: MultiTensorGenerator<KhovanovAlgebraGenerator>) -> Int {
+            coords.weight + x.degree + circles.count
         }
         
         var maxQdegree: Int {
-             generators.map{ $0.quantumDegree }.max() ?? 0
+            module.generators.map{ qDegree($0.unwrap()!) }.max() ?? 0
         }
         
         var minQdegree: Int {
-             generators.map{ $0.quantumDegree }.min() ?? 0
+            module.generators.map{ qDegree($0.unwrap()!) }.min() ?? 0
         }
-        
-        public var description: String {
-            generators.description
-        }
-    }
-    
-    private struct StatePair: Hashable {
-        let from: Link.State
-        let to:   Link.State
     }
 }
