@@ -8,25 +8,16 @@
 import SwiftyMath
 import SwiftyHomology
 
-public class KRComplexBuilder<R: Ring> {
-    public typealias EdgeRing = KRHomology<R>.EdgeRing
-    public typealias BaseModule = KRHomology<R>.BaseModule
-
-    public let L: Link
-    var connection: [Int : EdgeConnection]
+internal class KREdgeConnection<R: Ring> {
+    let L: Link
     
-    public init(_ L: Link) {
+    init(_ L: Link) {
         self.L = L
-        self.connection = [:]
-        prepare()
     }
     
-    public func horizontalComplex(at coords: Cube.Coords, slice: Int) -> ChainComplex1<IndexedModule<Cube.Coords, BaseModule>> {
-        let cube = KRHorizontalCube(link: L, coords: coords, slice: slice, connection: connection)
-        return cube.asChainComplex()
-    }
-
-    private func prepare() {
+    func compute() -> [Int : KR.EdgeConnection<R>] {
+        var connection: [Int : KR.EdgeConnection<R>] = [:]
+        
         let n = L.crossingNumber
         let res = L.orientationPreservingState
         
@@ -43,7 +34,7 @@ public class KRComplexBuilder<R: Ring> {
         let path = D.components[0].edges
         let mPath = path.map{ e in monomial(at: e) }
         
-        func traverse(from: Link.Edge, to: Link.Edge) -> EdgeRing {
+        func traverse(from: Link.Edge, to: Link.Edge) -> KR.EdgeRing<R> {
             let N = path.count // == 2 * n
             let i = path.firstIndex(of: from)!
             let j = path.firstIndex(of: to)!
@@ -58,13 +49,15 @@ public class KRComplexBuilder<R: Ring> {
                 ? (x.edge0, x.edge3, x.edge2)
                 : (x.edge3, x.edge2, x.edge1)
             
-            let g = EdgeConnection(
+            let g = KR.EdgeConnection(
                 ik: traverse(from: i, to: k),
                 il: traverse(from: i, to: l)
             )
             
             connection[c] = g
         }
+        
+        return connection
     }
 
     /*
@@ -85,27 +78,19 @@ public class KRComplexBuilder<R: Ring> {
         }
     }
 
-    private func monomial(at e: Link.Edge) -> EdgeRing {
+    private func monomial(at e: Link.Edge) -> KR.EdgeRing<R> {
+        typealias P = KR.EdgeRing<R>
         let x = e.endPoint1.crossing
         let rotated = isRotated(x)
         switch (rotated, e) {
         case (false, x.edge0),
              ( true, x.edge3):
-            return EdgeRing.indeterminate(x.id)
+            return P.indeterminate(x.id)
         case (false, x.edge1),
              ( true, x.edge0):
-            return -EdgeRing.indeterminate(x.id)
+            return -P.indeterminate(x.id)
         default:
             fatalError("impossible")
-        }
-    }
-
-    struct EdgeConnection: CustomStringConvertible {
-        let ik: EdgeRing
-        let il: EdgeRing
-        
-        var description: String {
-            "\((ik: ik, il: il))"
         }
     }
 }

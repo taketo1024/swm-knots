@@ -9,21 +9,18 @@ import SwiftyMath
 import SwiftyHomology
 
 internal struct KRHorizontalCube<R: Ring>: ModuleCube {
-    typealias Grading = KRHomology<R>.Grading
-    typealias EdgeRing = KRHomology<R>.EdgeRing
-    typealias BaseModule = KRHomology<R>.BaseModule
-    
+    typealias BaseModule = KR.BaseModule<R>
     typealias Vertex = ModuleObject<BaseModule>
     typealias Edge = ModuleEnd<BaseModule>
-    
+
     let L: Link
-    let coords: Coords // Cubic coord in Cube2
+    let vCoords: Coords // Cubic coord in Cube2
     let slice: Int
-    let connection: [Int : KRComplexBuilder<R>.EdgeConnection]
+    let connection: [Int : KR.EdgeConnection<R>]
     
-    init(link L: Link, coords: Coords, slice: Int, connection: [Int : KRComplexBuilder<R>.EdgeConnection]) {
+    init(link L: Link, vCoords: Coords, slice: Int, connection: [Int : KR.EdgeConnection<R>]) {
         self.L = L
-        self.coords = coords
+        self.vCoords = vCoords
         self.slice = slice
         self.connection = connection
     }
@@ -32,52 +29,29 @@ internal struct KRHorizontalCube<R: Ring>: ModuleCube {
         L.crossingNumber
     }
     
-    var baseGrading: Grading {
+    var baseGrading: KR.Grading {
         let v0 = Coords.zeros(length: dim)
-        return gradingShift(at: v0)
+        return KR.baseGrading(link: L, hCoords: v0, vCoords: v0)
     }
     
-    func gradingShift(at subcoords: Coords) -> Grading {
-        (0 ..< L.crossingNumber).sum { i -> Grading in
-            switch (L.crossings[i].crossingSign, coords[i], subcoords[i]) {
-            case (+1, 0, 0):
-                return [2, -2, -2]
-            case (+1, 0, 1):
-                return [0, 0, -2]
-            case (+1, 1, 0):
-                return [0, -2, 0]
-            case (+1, 1, 1):
-                return [0, 0, 0]
-                
-            case (-1, 0, 0):
-                return [0, -2, 0]
-            case (-1, 0, 1):
-                return [0, 0, 0]
-            case (-1, 1, 0):
-                return [0, -2, 2]
-            case (-1, 1, 1):
-                return [-2, 0, 2]
-                
-            default:
-                fatalError("impossible")
-            }
-        }
+    func gradingShift(at hCoords: Coords) -> KR.Grading {
+        KR.baseGrading(link: L, hCoords: hCoords, vCoords: vCoords)
     }
     
     subscript(v: Coords) -> ModuleObject<BaseModule> {
-        let q = slice + v.weight + (baseGrading - gradingShift(at: v))[0] / 2
-        if q >= 0 {
-            let mons = MultivariatePolynomialGenerator<_xn>.monomials(
-                ofTotalExponent: q,
+        let deg = slice + v.weight + (baseGrading - gradingShift(at: v))[0] / 2
+        if deg >= 0 {
+            let mons = KR.EdgeRing<R>.Generator.monomials(
+                ofTotalExponent: deg,
                 usingIndeterminates: (0 ..< dim).toArray()
             )
-            return ModuleObject(basis: mons)
+            return ModuleObject<BaseModule>(basis: mons)
         } else {
             return .zeroModule
         }
     }
     
-    private func edgeFactor(from: Coords, to: Coords) -> EdgeRing {
+    private func edgeFactor(from: Coords, to: Coords) -> KR.EdgeRing<R> {
         if !(from < to) {
             return .zero
         }
@@ -90,7 +64,7 @@ internal struct KRHorizontalCube<R: Ring>: ModuleCube {
         let c = connection[p]!
         let (ik, il) = (c.ik, c.il)
         
-        switch (L.crossings[p].crossingSign, coords[p]) {
+        switch (L.crossings[p].crossingSign, vCoords[p]) {
         case (+1, 0), (-1, 1):
             return ik * il
         case (+1, 1), (-1, 0):
@@ -103,7 +77,7 @@ internal struct KRHorizontalCube<R: Ring>: ModuleCube {
     func edge(from: Coords, to: Coords) -> ModuleEnd<BaseModule> {
         let p = edgeFactor(from: from, to: to)
         return .linearlyExtend { x -> BaseModule in
-            (EdgeRing.wrap(x) * p).asLinearCombination
+            (.wrap(x) * p).asLinearCombination
         }
     }
 }
