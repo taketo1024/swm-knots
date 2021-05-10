@@ -39,6 +39,7 @@ public struct BitSequence: Sequence, Hashable, Comparable, ExpressibleByArrayLit
     }
     
     public init(_ bits: [Bit]) {
+        assert(bits.count <= 64)
         let val = bits.reduce(0) { (res, b) in
             (res << 1) | Int(b.rawValue)
         }
@@ -84,7 +85,13 @@ public struct BitSequence: Sequence, Hashable, Comparable, ExpressibleByArrayLit
     }
     
     public static func < (lhs: Self, rhs: Self) -> Bool {
-        lhs.intValue < rhs.intValue
+        assert(lhs.length == rhs.length)
+        return lhs != rhs && (0 ..< lhs.length).allSatisfy { i in lhs[i] <= rhs[i] }
+    }
+    
+    public static func -(lhs: Self, rhs: Self) -> Self {
+        assert(lhs.length == rhs.length)
+        return Self(intValue: lhs.intValue & ~rhs.intValue, length: lhs.length)
     }
     
     public var description: String {

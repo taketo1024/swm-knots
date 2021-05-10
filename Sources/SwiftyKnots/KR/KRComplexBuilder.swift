@@ -6,24 +6,26 @@
 //
 
 import SwiftyMath
+import SwiftyHomology
 
-public class KRComplexBuilder {
-    struct _x: PolynomialIndeterminate {
-        public static let degree = 2
-        public static var symbol = "x"
-    }
-    typealias _xn = InfiniteVariatePolynomialIndeterminates<_x>
-    typealias R = MultivariatePolynomial<_xn, 𝐐>
+public class KRComplexBuilder<R: Ring> {
+    public typealias EdgeRing = KRHomology<R>.EdgeRing
+    public typealias BaseModule = KRHomology<R>.BaseModule
 
-    let L: Link
-    var table: [Int : Generator]
+    public let L: Link
+    var connection: [Int : EdgeConnection]
     
     public init(_ L: Link) {
         self.L = L
-        self.table = [:]
+        self.connection = [:]
         prepare()
     }
     
+    public func horizontalComplex(at coords: Cube.Coords, slice: Int) -> ChainComplex1<IndexedModule<Cube.Coords, BaseModule>> {
+        let cube = KRHorizontalCube(link: L, coords: coords, slice: slice, connection: connection)
+        return cube.asChainComplex()
+    }
+
     private func prepare() {
         let n = L.crossingNumber
         let res = L.orientationPreservingState
@@ -39,14 +41,14 @@ public class KRComplexBuilder {
         
         assert(D.components.count == 1)
         let path = D.components[0].edges
-        let vertices = path.map{ vertex($0) }
+        let mPath = path.map{ e in monomial(at: e) }
         
-        func traverse(from: Link.Edge, to: Link.Edge) -> R {
+        func traverse(from: Link.Edge, to: Link.Edge) -> EdgeRing {
             let N = path.count // == 2 * n
             let i = path.firstIndex(of: from)!
             let j = path.firstIndex(of: to)!
             let l = (i < j) ? (j - i) : (j - i + N)
-            return (i ..< i + l).sum { vertices[$0 % N] }
+            return (i ..< i + l).sum { mPath[$0 % N] }
         }
         
         for c in 0 ..< n {
@@ -56,12 +58,12 @@ public class KRComplexBuilder {
                 ? (x.edge0, x.edge3, x.edge2)
                 : (x.edge3, x.edge2, x.edge1)
             
-            let g = Generator(
+            let g = EdgeConnection(
                 ik: traverse(from: i, to: k),
                 il: traverse(from: i, to: l)
             )
             
-            table[c] = g
+            connection[c] = g
         }
     }
 
@@ -83,24 +85,24 @@ public class KRComplexBuilder {
         }
     }
 
-    private func vertex(_ e: Link.Edge) -> R {
+    private func monomial(at e: Link.Edge) -> EdgeRing {
         let x = e.endPoint1.crossing
         let rotated = isRotated(x)
         switch (rotated, e) {
         case (false, x.edge0),
              ( true, x.edge3):
-            return R.indeterminate(x.id)
+            return EdgeRing.indeterminate(x.id)
         case (false, x.edge1),
              ( true, x.edge0):
-            return -R.indeterminate(x.id)
+            return -EdgeRing.indeterminate(x.id)
         default:
             fatalError("impossible")
         }
     }
 
-    struct Generator: CustomStringConvertible {
-        let ik: R
-        let il: R
+    struct EdgeConnection: CustomStringConvertible {
+        let ik: EdgeRing
+        let il: EdgeRing
         
         var description: String {
             "\((ik: ik, il: il))"

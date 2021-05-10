@@ -42,9 +42,11 @@ public struct IndexedModule<Index: Hashable, M: Module>: Module {
     }
     
     public var description: String {
-        elements.map { (index, x) in
-            "{\(index): \(x)}"
-        }.joined(separator: " + ")
+        elements.isEmpty ?
+            "0" :
+            elements.map { (index, x) in
+                "{\(index): \(x)}"
+            }.joined(separator: " + ")
     }
 }
 
