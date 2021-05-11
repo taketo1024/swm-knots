@@ -71,7 +71,7 @@ public struct KRHomology<R: EuclideanRing> {
         
         self.L = L
         self.normalized = normalized
-        self.gradingShift = normalized ? [-w + b - 1, -w + b - 1, w - b + 1] : .zero
+        self.gradingShift = normalized ? [-w + b - 1, w + b - 1, w - b + 1] : .zero
         self.connection = KREdgeConnection(L).compute()
     }
     
