@@ -64,6 +64,7 @@ public struct KRHomology<R: EuclideanRing> {
     
     private let gradingShift: KR.Grading
     private var connection: [Int : KR.EdgeConnection<R>]
+    private let hHomologyCache: CacheDictionary<hKey, ModuleGrid1<KR.HorizontalModule<R>>> = .empty
 
     public init(_ L: Link, normalized: Bool = true) {
         let w = L.writhe
@@ -114,8 +115,11 @@ public struct KRHomology<R: EuclideanRing> {
     
     public func totalComplex(hDegree h: Int, slice: Int) -> ChainComplex1<KR.TotalModule<R>> {
         let cube = KRTotalCube<R>(link: L, connection: connection) { vCoords -> KRTotalCube<R>.Vertex in
-            let C = self.horizontalComplex(at: vCoords, slice: slice)
-            let H = C.homology(withGenerators: true, withVectorizer: true)
+            let H = hHomologyCache.useCacheOrSet(key: hKey(vCoords: vCoords, slice: slice)) {
+                let C = self.horizontalComplex(at: vCoords, slice: slice)
+                let H = C.homology(withGenerators: true, withVectorizer: true)
+                return H
+            }
             return H[h]
         }
         return cube.asChainComplex()
@@ -161,5 +165,10 @@ public struct KRHomology<R: EuclideanRing> {
         let g = baseGrading
         let (a, b, c) = (g[0], g[1], g[2])
         return (a + 2 * h + 2 * s, b + 2 * h, c + 2 * v)
+    }
+    
+    private struct hKey: Hashable {
+        let vCoords: Cube.Coords
+        let slice: Int
     }
 }
