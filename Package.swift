@@ -14,18 +14,18 @@ let package = Package(
     dependencies: [
         .package(
 			name:"SwiftyMath",
-			url: "https://github.com/taketo1024/SwiftyMath.git",
-			from:"2.1.1"
+			url: "../SwiftyMath",
+			.branch("matrix-improve")
 		),
         .package(
 			name:"SwiftyHomology",
-			url: "https://github.com/taketo1024/SwiftyMath-homology.git",
-			from: "2.1.2"
+			url: "../SwiftyHomology",
+			.branch("matrix-improve")
 		),
         .package(
 			name:"SwiftySolver",
-			url: "https://github.com/taketo1024/SwiftyMath-solver.git",
-			from: "1.1.0"
+			url: "../SwiftySolver",
+			.branch("matrix-improve")
 		),
     ],
     targets: [

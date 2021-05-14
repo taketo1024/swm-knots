@@ -58,7 +58,7 @@ public struct KR {
     }
 }
 
-public struct KRHomology<R: EuclideanRing> {
+public struct KRHomology<R: HomologyComputable> {
     public let L: Link
     public let normalized: Bool
     
@@ -117,7 +117,7 @@ public struct KRHomology<R: EuclideanRing> {
         let cube = KRTotalCube<R>(link: L, connection: connection) { vCoords -> KRTotalCube<R>.Vertex in
             let H = hHomologyCache.useCacheOrSet(key: hKey(vCoords: vCoords, slice: slice)) {
                 let C = self.horizontalComplex(at: vCoords, slice: slice)
-                let H = C.homology(withGenerators: true, withVectorizer: true)
+                let H = C.homology(options: [.withGenerators, .withVectorizer])
                 return H
             }
             return H[h]

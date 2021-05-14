@@ -46,12 +46,12 @@ public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
         let (qmin, qmax) = (cube.minQdegree, cube.maxQdegree)
         
         return chainComplex.asBigraded(secondarySupport: qmin ... qmax) {
-            x in x.qDegree
+            summand in summand.generator.qDegree
         }.shifted(0, normalized ? n⁺ - 2 * n⁻ : 0)
     }
 }
 
-public struct KhovanovHomology<R: EuclideanRing>: GridWrapper {
+public struct KhovanovHomology<R: HomologyComputable>: GridWrapper {
     public typealias Grid = ModuleGrid2<KhovanovComplex<R>.BaseModule>
     public typealias GridDim = _2
     public typealias Object = Grid.Object
@@ -62,9 +62,9 @@ public struct KhovanovHomology<R: EuclideanRing>: GridWrapper {
         self.grid = grid
     }
 
-    public init (_ L: Link, normalized: Bool = true, withGenerators: Bool = false, withVectorizer: Bool = false) {
+    public init (_ L: Link, normalized: Bool = true, options: HomologyCalculatorOptions = []) {
         let C = KhovanovComplex<R>(link: L, normalized: normalized)
-        let H = C.bigraded.homology(withGenerators: withGenerators, withVectorizer: withVectorizer)
+        let H = C.bigraded.homology(options: options)
         self.init(H)
     }
 

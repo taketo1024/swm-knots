@@ -45,7 +45,7 @@ internal struct KRHorizontalCube<R: Ring>: ModuleCube {
                 ofTotalExponent: deg,
                 usingIndeterminates: (0 ..< dim).toArray()
             )
-            return ModuleObject<BaseModule>(basis: mons)
+            return ModuleObject<BaseModule>(generators: mons)
         } else {
             return .zeroModule
         }

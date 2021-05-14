@@ -61,18 +61,19 @@ extension ModuleObject {
         }
         
         let N = ranks.last ?? 0
-        let vectorizer = { (z: IndexedModule<Index, BaseModule>) -> DVector<R> in
-            let comps = z.elements.flatMap { (index, x) -> [MatrixComponent<R>] in
-                let vec = objects[index]!.vectorize(x)
-                let shift = shifts[index]!
-                return vec.nonZeroComponents.map{ (i, _, r) in
-                    (i + shift, 0, r)
+        let vectorizer = { (z: IndexedModule<Index, BaseModule>) -> VectorD<R> in
+            .init(size: N) { setEntry in
+                z.elements.forEach { (index, x) in
+                    let vec = objects[index]!.vectorize(x)
+                    let shift = shifts[index]!
+                    vec.nonZeroComponents.forEach{ (i, _, r) in
+                        setEntry(i + shift, r)
+                    }
                 }
             }
-            return DVector(size: (N, 1), components: comps)
         }
         
-        return ModuleObject<IndexedModule<Index, BaseModule>>(basis: generators, vectorizer: vectorizer)
+        return ModuleObject<IndexedModule<Index, BaseModule>>(generators: generators, vectorizer: vectorizer)
     }
 }
 

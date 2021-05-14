@@ -84,7 +84,7 @@ public struct GridComplex: ChainComplexWrapper {
                         return Umons.map{ U in U ⊗ x }
                 }
             }
-            return ModuleObject(basis: gens)
+            return ModuleObject(generators: gens)
         }
     }
     
@@ -147,7 +147,7 @@ public struct GridComplex: ChainComplexWrapper {
     
     public var bigraded: ChainComplex2<BaseModule> {
         let A = generators.map{ $0.AlexanderDegree }.range!
-        return chainComplex.asBigraded(secondarySupport: A) { x in x.AlexanderDegree }
+        return chainComplex.asBigraded(secondarySupport: A) { summand in summand.generator.elements.anyElement!.key.AlexanderDegree }
     }
     
     public func shifted(_ shift: Coords) -> GridComplex {

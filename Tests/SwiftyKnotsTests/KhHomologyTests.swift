@@ -10,7 +10,7 @@ import SwiftyMath
 import SwiftyHomology
 @testable import SwiftyKnots
 
-class HovanovHomologyTests: XCTestCase {
+class KhovanovHomologyTests: XCTestCase {
     
     typealias Kh = KhovanovHomology<𝐙>
     
