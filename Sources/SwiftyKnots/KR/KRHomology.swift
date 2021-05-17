@@ -58,7 +58,7 @@ public struct KR {
     }
 }
 
-public struct KRHomology<R: HomologyComputable> {
+public struct KRHomology<R: EuclideanRing> {
     public let L: Link
     public let normalized: Bool
     

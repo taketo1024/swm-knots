@@ -51,7 +51,7 @@ public struct KhovanovComplex<R: Ring>: ChainComplexWrapper {
     }
 }
 
-public struct KhovanovHomology<R: HomologyComputable>: GridWrapper {
+public struct KhovanovHomology<R: EuclideanRing>: GridWrapper {
     public typealias Grid = ModuleGrid2<KhovanovComplex<R>.BaseModule>
     public typealias GridDim = _2
     public typealias Object = Grid.Object
