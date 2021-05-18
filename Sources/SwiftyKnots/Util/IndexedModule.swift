@@ -66,7 +66,7 @@ extension ModuleObject {
                 z.elements.forEach { (index, x) in
                     let vec = objects[index]!.vectorize(x)
                     let shift = shifts[index]!
-                    vec.nonZeroComponents.forEach{ (i, _, r) in
+                    vec.nonZeroEntries.forEach{ (i, _, r) in
                         setEntry(i + shift, r)
                     }
                 }

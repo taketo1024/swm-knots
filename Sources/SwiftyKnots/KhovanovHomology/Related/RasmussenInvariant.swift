@@ -7,7 +7,6 @@
 
 import SwiftyMath
 import SwiftyHomology
-import SwiftySolver
 
 public func RasmussenInvariant(_ L: Link) -> Int {
     RasmussenInvariant(L, 𝐐.self)
@@ -35,7 +34,7 @@ public func RasmussenInvariant<F: Field>(_ L: Link, _ type: F.Type) -> Int {
         let A = d.asMatrix(from: FC1, to: FC0)
         let b = FC0.vectorize(z)
 
-        let E = MatrixEliminator.eliminate(target: A, form: .Diagonal)
+        let E = A.eliminate(form: .Diagonal)
         if let x = E.invert(b) {
             assert(A * x == b)
         } else {

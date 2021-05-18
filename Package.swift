@@ -22,16 +22,11 @@ let package = Package(
 			url: "../SwiftyHomology",
 			.branch("matrix-improve")
 		),
-        .package(
-			name:"SwiftySolver",
-			url: "../SwiftySolver",
-			.branch("matrix-improve")
-		),
     ],
     targets: [
         .target(
             name: "SwiftyKnots",
-            dependencies: ["SwiftyMath", "SwiftyHomology", "SwiftySolver"],
+            dependencies: ["SwiftyMath", "SwiftyHomology"],
 			path: "Sources/SwiftyKnots",
 			resources: [.process("Resources")]
 		),
