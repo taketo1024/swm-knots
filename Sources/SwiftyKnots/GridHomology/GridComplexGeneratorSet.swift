@@ -36,10 +36,14 @@ extension GridComplex {
             self.transpositions = (0 ..< gridNumber).choose(2).map{ t in (t[0], t[1]) }
         }
         
-        public var degreeRange: ClosedRange<Int> {
+        public var MaslovDegreeRange: ClosedRange<Int> {
             generators.values.map{ $0.degree }.range ?? (0 ... 0)
         }
         
+        public var AlexanderDegreeRange: ClosedRange<Int> {
+            generators.values.map{ $0.AlexanderDegree }.range ?? (0 ... 0)
+        }
+
         public func generator(forSequence seq: [Int]) -> Generator? {
             let code = Generator.encode(seq)
             return generators[code]

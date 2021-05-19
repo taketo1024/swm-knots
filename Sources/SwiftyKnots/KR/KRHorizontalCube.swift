@@ -81,18 +81,3 @@ internal struct KRHorizontalCube<R: Ring>: ModuleCube {
         }
     }
 }
-
-// TODO to be moved to SwiftyHomology
-extension GridCoords: AdditiveGroup {
-    public var dim: Int {
-        GridDim.intValue
-    }
-    
-    public static var zero: GridCoords<GridDim> {
-        Self([0] * GridDim.intValue)
-    }
-    
-    public var description: String {
-        "(" + (0 ..< GridDim.intValue).map{ i in self[i].description }.joined(separator: ", ") + ")"
-    }
-}

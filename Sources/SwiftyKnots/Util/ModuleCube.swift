@@ -67,9 +67,7 @@ extension ModuleCube {
     
     public func asChainComplex() -> ChainComplex1<M> {
         ChainComplex1(
-            type: .ascending,
-            support: 0 ... dim,
-            sequence: { i in
+            grid: { i in
                 let n = self.dim
                 guard (0 ... n).contains(i) else {
                     return .zeroModule
@@ -79,6 +77,7 @@ extension ModuleCube {
                 let modules = Dictionary(keys: vs) { self[$0] }
                 return ModuleObject.formDirectSum(modules)
             },
+            degree: 1,
             differential: { i in self.differential(i) }
         )
     }

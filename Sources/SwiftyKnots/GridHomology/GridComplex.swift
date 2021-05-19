@@ -15,7 +15,7 @@ public struct _U: PolynomialIndeterminate {
 
 public typealias _Un = InfiniteVariatePolynomialIndeterminates<_U>
 
-public struct GridComplex: ChainComplexWrapper {
+public struct GridComplex: ChainComplexType {
     public typealias InflatedGenerator =
         TensorGenerator<
             MultivariatePolynomialGenerator<_Un>,
@@ -23,8 +23,9 @@ public struct GridComplex: ChainComplexWrapper {
         >
 
     public typealias R = 𝐅₂
-    public typealias GridDim = _1
+    public typealias Index = Int
     public typealias BaseModule = LinearCombination<InflatedGenerator, R>
+    public typealias Differential = ChainMap<Index, BaseModule, BaseModule>
     
     public enum Variant {
         case tilde    // [Book] p.72,  Def 4.4.1
@@ -50,15 +51,23 @@ public struct GridComplex: ChainComplexWrapper {
     
     public init(type: Variant, diagram G: GridDiagram, generators: GeneratorSet, useCache: Bool = false) {
         let C = ChainComplex1(
-            support: generators.degreeRange,
-            sequence:  Self.chain(type: type, diagram: G, generators: generators),
+            grid: Self.chain(type: type, diagram: G, generators: generators),
+            degree: -1,
             differential: Self.differential(type: type, diagram: G, generators: generators, useCache: useCache)
         )
         self.init(G, generators, C)
     }
     
-    static func chain(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) -> ( (Int) -> ModuleObject<Element> ) {
-        let iMax = generators.degreeRange.upperBound
+    public subscript(i: Int) -> ModuleObject<BaseModule> {
+        chainComplex[i]
+    }
+    
+    public var differential: Differential {
+        chainComplex.differential
+    }
+    
+    static func chain(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) -> ( (Int) -> ModuleObject<BaseModule> ) {
+        let iMax = generators.MaslovDegreeRange.upperBound
         
         let n = G.gridNumber
         let numberOfIndeterminates: Int = {
@@ -70,7 +79,7 @@ public struct GridComplex: ChainComplexWrapper {
             }
         }()
         
-        return { i -> ModuleObject<Element> in
+        return { i -> ModuleObject<BaseModule> in
             guard i <= iMax else {
                 return .zeroModule
             }
@@ -78,7 +87,7 @@ public struct GridComplex: ChainComplexWrapper {
             let gens = (0 ... (iMax - i) / 2).flatMap { k in
                 generators
                     .filter { $0.degree == i + 2 * k }
-                    .parallelFlatMap { x -> [Element.Generator] in
+                    .parallelFlatMap { x -> [BaseModule.Generator] in
                         let indeterminates = Array(0 ..< numberOfIndeterminates)
                         let Umons = MultivariatePolynomialGenerator<_Un>.monomials(ofTotalExponent: k, usingIndeterminates: indeterminates)
                         return Umons.map{ U in U ⊗ x }
@@ -88,7 +97,7 @@ public struct GridComplex: ChainComplexWrapper {
         }
     }
     
-    static func differential(type: Variant, diagram G: GridDiagram, generators: GeneratorSet, useCache: Bool) -> ( (Int) -> ModuleEnd<Element> ) {
+    static func differential(type: Variant, diagram G: GridDiagram, generators: GeneratorSet, useCache: Bool) -> ( (Int) -> ModuleEnd<BaseModule> ) {
         
         let n = G.gridNumber
         let rects = generators.rects
@@ -105,10 +114,10 @@ public struct GridComplex: ChainComplexWrapper {
             }
         }
         
-        func d(_ x: Generator) -> Element {
+        func d(_ x: Generator) -> BaseModule {
             let ys = generators
                 .adjacents(of: x, with: rectCond)
-                .map { (y, r) -> Element.Generator in
+                .map { (y, r) -> BaseModule.Generator in
                     if !rects[r].intersects(.O) {
                         return .identity ⊗ y
                     } else {
@@ -118,16 +127,16 @@ public struct GridComplex: ChainComplexWrapper {
                     }
                 }
                 
-            return Element(
+            return BaseModule(
                 elements: ys.map{ y in (y, R.identity) },
                 keysAreUnique: ys.isUnique
             )
         }
         
-        let cache: CacheDictionary<Generator, Element> = .empty
+        let cache: CacheDictionary<Generator, BaseModule> = .empty
         
         return { i in
-            ModuleEnd.linearlyExtend { t1 -> Element in
+            ModuleEnd.linearlyExtend { t1 -> BaseModule in
                 let (m1, x) = t1.factors
                 let dx = useCache
                     ? cache.useCacheOrSet(key: x) { d(x) }
@@ -146,11 +155,12 @@ public struct GridComplex: ChainComplexWrapper {
     }
     
     public var bigraded: ChainComplex2<BaseModule> {
-        let A = generators.map{ $0.AlexanderDegree }.range!
-        return chainComplex.asBigraded(secondarySupport: A) { summand in summand.generator.elements.anyElement!.key.AlexanderDegree }
+        chainComplex.asBigraded { summand in
+            summand.generator.elements.anyElement!.key.AlexanderDegree
+        }
     }
     
-    public func shifted(_ shift: Coords) -> GridComplex {
+    public func shifted(_ shift: Index) -> GridComplex {
         .init(diagram, generators, chainComplex.shifted(shift))
     }
     
@@ -161,7 +171,7 @@ public struct GridComplex: ChainComplexWrapper {
     public static func genus(of G: GridDiagram, generators: GeneratorSet) -> Int {
         let C = GridComplex(type: .tilde, diagram: G).bigraded
         let H = C.homology()
-        let (r1, r2) = C.support!.range
+        let (r1, r2) = (generators.MaslovDegreeRange, generators.AlexanderDegreeRange)
         
         for (j, i) in r2.reversed() * r1.reversed() {
             if !H[i, j].isZero {

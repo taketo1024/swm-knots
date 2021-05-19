@@ -15,7 +15,7 @@ public struct KR {
     }
     public typealias _xn = InfiniteVariatePolynomialIndeterminates<_x>
     
-    public typealias Grading = GridCoords<_3>
+    public typealias Grading = MultiIndex<_3>
     public typealias EdgeRing<R: Ring> = MultivariatePolynomial<_xn, R>
     public typealias BaseModule<R: Ring> = LinearCombination<MultivariatePolynomialGenerator<_xn>, R>
     public typealias HorizontalModule<R: Ring> = IndexedModule<Cube.Coords, BaseModule<R>>

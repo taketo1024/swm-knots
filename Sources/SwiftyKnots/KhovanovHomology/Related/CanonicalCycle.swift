@@ -17,7 +17,7 @@ extension KhovanovComplex {
         }
     }
     
-    public var canonicalCycles: (Element, Element) {
+    public var canonicalCycles: (BaseModule, BaseModule) {
         assert(link.components.count == 1) // currently supports only knots.
         
         typealias E = LinearCombination<MultiTensorGenerator<KhovanovAlgebraGenerator>, R>
@@ -36,8 +36,8 @@ extension KhovanovComplex {
         
         let s0 = link.orientationPreservingState
         return (
-            Element(index: s0, value: α),
-            Element(index: s0, value: β)
+            BaseModule(index: s0, value: α),
+            BaseModule(index: s0, value: β)
         )
     }
     
