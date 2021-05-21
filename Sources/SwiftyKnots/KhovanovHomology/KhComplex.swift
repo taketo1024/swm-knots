@@ -10,7 +10,7 @@ import SwiftyHomology
 
 public struct KhovanovComplex<R: Ring>: ChainComplexType {
     public typealias Index = Int
-    public typealias BaseModule = IndexedModule<Cube.Coords, LinearCombination<MultiTensorGenerator<KhovanovAlgebraGenerator>, R>>
+    public typealias BaseModule = IndexedModule<Cube.Coords, LinearCombination<R, MultiTensorGenerator<KhovanovAlgebraGenerator>>>
     public typealias Object = ModuleObject<BaseModule>
     public typealias Differential = ChainMap<Index, BaseModule, BaseModule>
     

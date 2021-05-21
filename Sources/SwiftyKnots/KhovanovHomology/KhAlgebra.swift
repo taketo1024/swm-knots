@@ -68,8 +68,8 @@ public enum KhovanovAlgebra<R: Ring> {
     
     // A ⊗ A -> A
     public typealias Product = ModuleHom<
-        LinearCombination<TensorGenerator<KhovanovAlgebraGenerator, KhovanovAlgebraGenerator>, R>,
-        LinearCombination<KhovanovAlgebraGenerator, R>
+        LinearCombination<R, TensorGenerator<KhovanovAlgebraGenerator, KhovanovAlgebraGenerator>>,
+        LinearCombination<R, KhovanovAlgebraGenerator>
     >
     public var product: Product {
         Product.linearlyExtend { e in
@@ -79,18 +79,18 @@ public enum KhovanovAlgebra<R: Ring> {
                 
             case (.I, .X),
                  (.X, .I):
-                return .wrap(.X)
+                return .init(.X)
                 
             case (.I, .I):
-                return .wrap(.I)
+                return .init(.I)
             }
         }
     }
     
     // A -> A ⊗ A
     public typealias Coproduct = ModuleHom<
-        LinearCombination<KhovanovAlgebraGenerator, R>,
-        LinearCombination<TensorGenerator<KhovanovAlgebraGenerator, KhovanovAlgebraGenerator>, R>
+        LinearCombination<R, KhovanovAlgebraGenerator>,
+        LinearCombination<R, TensorGenerator<KhovanovAlgebraGenerator, KhovanovAlgebraGenerator>>
     >
     public var coproduct: Coproduct {
         Coproduct.linearlyExtend { e in

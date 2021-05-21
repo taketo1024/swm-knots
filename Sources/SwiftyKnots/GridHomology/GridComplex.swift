@@ -23,7 +23,7 @@ public struct GridComplex: ChainComplexType {
     >
 
     public typealias Index = Int
-    public typealias BaseModule = LinearCombination<T, R>
+    public typealias BaseModule = LinearCombination<R, T>
     public typealias Differential = ChainMap<Index, BaseModule, BaseModule>
     
     public enum Variant {
@@ -130,7 +130,7 @@ public struct GridComplex: ChainComplexType {
                 
             return BaseModule(
                 elements: ys.map{ y in (y, R.identity) },
-                keysAreUnique: ys.isUnique
+                generatorsAreUnique: ys.isUnique
             )
         }
         

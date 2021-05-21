@@ -11,7 +11,7 @@ import SwiftyHomology
 // An n-dim cube with Modules on all vertices I ∈ {0, 1}^n .
 
 public struct KhovanovCube<R: Ring>: ModuleCube {
-    public typealias BaseModule = LinearCombination<MultiTensorGenerator<KhovanovAlgebraGenerator>, R>
+    public typealias BaseModule = LinearCombination<R, MultiTensorGenerator<KhovanovAlgebraGenerator>>
     public typealias Vertex = ModuleObject<BaseModule>
     public typealias Edge = ModuleEnd<BaseModule>
     
@@ -105,11 +105,11 @@ public struct KhovanovCube<R: Ring>: ModuleCube {
         }
         
         var maxQdegree: Int {
-            module.generators.map{ qDegree($0.unwrap()!) }.max() ?? 0
+            module.generators.map{ qDegree($0.asGenerator!) }.max() ?? 0
         }
         
         var minQdegree: Int {
-            module.generators.map{ qDegree($0.unwrap()!) }.min() ?? 0
+            module.generators.map{ qDegree($0.asGenerator!) }.min() ?? 0
         }
     }
 }

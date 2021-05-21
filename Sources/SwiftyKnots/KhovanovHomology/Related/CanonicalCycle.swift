@@ -20,14 +20,14 @@ extension KhovanovComplex {
     public var canonicalCycles: (BaseModule, BaseModule) {
         assert(link.components.count == 1) // currently supports only knots.
         
-        typealias E = LinearCombination<MultiTensorGenerator<KhovanovAlgebraGenerator>, R>
+        typealias T = LinearCombination<R, MultiTensorGenerator<KhovanovAlgebraGenerator>>
         
         let (X, I) = (wrap(.X), wrap(.I))
         let (u, v) = (cube.type.u, cube.type.v)
         let (a, b) = (X - u * I, X - v * I)
 
-        var α = E.wrap(.identity)
-        var β = E.wrap(.identity)
+        var α = T(.unit)
+        var β = T(.unit)
 
         for (_, color) in coloredSeifertCircles {
             α = α ⊗ ( (color == .a) ? a : b)
@@ -80,7 +80,7 @@ extension KhovanovComplex {
         return circles.map { c in (c, result[c]!) }
     }
     
-    private func wrap(_ x: KhovanovAlgebraGenerator) -> LinearCombination<MultiTensorGenerator<KhovanovAlgebraGenerator>, R> {
-        .wrap( MultiTensorGenerator([x]) )
+    private func wrap(_ x: KhovanovAlgebraGenerator) -> LinearCombination<R, MultiTensorGenerator<KhovanovAlgebraGenerator>> {
+        .init( MultiTensorGenerator([x]) )
     }
 }

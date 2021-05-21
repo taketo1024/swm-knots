@@ -9,7 +9,7 @@ import SwiftyMath
 import Dispatch
 
 extension GridComplex {
-    public struct Generator: FreeModuleGenerator {
+    public struct Generator: LinearCombinationGenerator {
         public let code: Int
         public let size: Int
         public let MaslovDegree: Int

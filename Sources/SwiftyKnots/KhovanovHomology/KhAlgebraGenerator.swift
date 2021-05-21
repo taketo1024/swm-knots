@@ -7,7 +7,7 @@
 
 import SwiftyMath
 
-public enum KhovanovAlgebraGenerator: Int8, FreeModuleGenerator, Codable {
+public enum KhovanovAlgebraGenerator: Int8, LinearCombinationGenerator, Codable {
     case I = 0
     case X = 1
 
@@ -24,7 +24,7 @@ public enum KhovanovAlgebraGenerator: Int8, FreeModuleGenerator, Codable {
     }
 }
 
-extension IndexedModule where Index == Cube.Coords, M: FreeModule, M.Generator == MultiTensorGenerator<KhovanovAlgebraGenerator> {
+extension IndexedModule where Index == Cube.Coords, M: LinearCombinationType, M.Generator == MultiTensorGenerator<KhovanovAlgebraGenerator> {
     public var qDegree: Int {
         elements.map { (v, z) -> Int in
             z.elements.map { (x, r) -> Int in

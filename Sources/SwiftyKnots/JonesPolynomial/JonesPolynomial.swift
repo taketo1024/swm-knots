@@ -34,8 +34,8 @@ public func JonesPolynomial(_ L: Link, normalized: Bool = true) -> LaurentPolyno
     let A = LaurentPolynomial<𝐙, _A>.indeterminate
     let f = (-A).pow( -3 * L.writhe ) * KauffmanBracket(L, normalized: normalized)
     let range = -f.leadExponent / 2 ... -f.tailExponent / 2
-    let coeffs = Dictionary(keys: range) { i -> 𝐙 in
+    let elements = Dictionary(keys: range) { i -> 𝐙 in
         (-1).pow(i) * f.coeff(-2 * i)
     }
-    return .init(coeffs: coeffs)
+    return .init(elements: elements)
 }

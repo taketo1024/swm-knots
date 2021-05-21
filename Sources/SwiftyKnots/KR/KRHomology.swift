@@ -17,7 +17,7 @@ public struct KR {
     
     public typealias Grading = MultiIndex<_3>
     public typealias EdgeRing<R: Ring> = MultivariatePolynomial<R, _xn>
-    public typealias BaseModule<R: Ring> = LinearCombination<MonomialAsGenerator<_xn>, R>
+    public typealias BaseModule<R: Ring> = LinearCombination<R, MonomialAsGenerator<_xn>>
     public typealias HorizontalModule<R: Ring> = IndexedModule<Cube.Coords, BaseModule<R>>
     public typealias TotalModule<R: Ring> = IndexedModule<Cube.Coords, HorizontalModule<R>>
 
@@ -102,7 +102,7 @@ public struct KRHomology<R: EuclideanRing> {
         
         let (v, x) = z.elements.anyElement!
         let (h, y) = x.elements.anyElement!
-        let q = y.homogeneousDegree
+        let q = y.degree
         
         let g = KR.baseGrading(link: L, hCoords: h, vCoords: v)
         return g + [2 * q, 0, 0] + gradingShift
