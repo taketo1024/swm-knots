@@ -41,10 +41,12 @@ internal struct KRHorizontalCube<R: Ring>: ModuleCube {
     subscript(v: Coords) -> ModuleObject<BaseModule> {
         let deg = slice + v.weight + (baseGrading - gradingShift(at: v))[0] / 2
         if deg >= 0 {
-            let mons = KR.EdgeRing<R>.Generator.monomials(
-                ofTotalExponent: deg,
-                usingIndeterminates: (0 ..< dim).toArray()
-            )
+            let mons = KR.EdgeRing<R>.monomials(
+                ofDegree: deg,
+                usingIndeterminates: 0 ..< dim
+            ).map {
+                BaseModule.Generator(exponent: $0.leadExponent)
+            }
             return ModuleObject<BaseModule>(generators: mons)
         } else {
             return .zeroModule
@@ -76,8 +78,9 @@ internal struct KRHorizontalCube<R: Ring>: ModuleCube {
     
     func edge(from: Coords, to: Coords) -> ModuleEnd<BaseModule> {
         let p = edgeFactor(from: from, to: to)
-        return .linearlyExtend { x -> BaseModule in
-            (.wrap(x) * p).asLinearCombination
+        return .init { z -> BaseModule in
+            let q = MultivariatePolynomial(z)
+            return (p * q).asLinearCombination
         }
     }
 }

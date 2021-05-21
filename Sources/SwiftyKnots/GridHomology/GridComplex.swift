@@ -13,18 +13,17 @@ public struct _U: PolynomialIndeterminate {
     public static var symbol = "U"
 }
 
-public typealias _Un = InfiniteVariatePolynomialIndeterminates<_U>
+public typealias _Un = EnumeratedPolynomialIndeterminates<_U, DynamicSize>
 
 public struct GridComplex: ChainComplexType {
-    public typealias InflatedGenerator =
-        TensorGenerator<
-            MultivariatePolynomialGenerator<_Un>,
-            Generator
-        >
-
     public typealias R = 𝐅₂
+    public typealias T = TensorGenerator<
+        MonomialAsGenerator<_Un>,
+        Generator
+    >
+
     public typealias Index = Int
-    public typealias BaseModule = LinearCombination<InflatedGenerator, R>
+    public typealias BaseModule = LinearCombination<T, R>
     public typealias Differential = ChainMap<Index, BaseModule, BaseModule>
     
     public enum Variant {
@@ -67,7 +66,7 @@ public struct GridComplex: ChainComplexType {
     }
     
     static func chain(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) -> ( (Int) -> ModuleObject<BaseModule> ) {
-        let iMax = generators.MaslovDegreeRange.upperBound
+        typealias P = MultivariatePolynomial<R, _Un>
         
         let n = G.gridNumber
         let numberOfIndeterminates: Int = {
@@ -79,6 +78,8 @@ public struct GridComplex: ChainComplexType {
             }
         }()
         
+        let iMax = generators.MaslovDegreeRange.upperBound
+
         return { i -> ModuleObject<BaseModule> in
             guard i <= iMax else {
                 return .zeroModule
@@ -87,10 +88,11 @@ public struct GridComplex: ChainComplexType {
             let gens = (0 ... (iMax - i) / 2).flatMap { k in
                 generators
                     .filter { $0.degree == i + 2 * k }
-                    .parallelFlatMap { x -> [BaseModule.Generator] in
-                        let indeterminates = Array(0 ..< numberOfIndeterminates)
-                        let Umons = MultivariatePolynomialGenerator<_Un>.monomials(ofTotalExponent: k, usingIndeterminates: indeterminates)
-                        return Umons.map{ U in U ⊗ x }
+                    .parallelFlatMap { x -> [T] in
+                        let mons = P.monomials(ofDegree: -2 * k, usingIndeterminates: 0 ..< numberOfIndeterminates)
+                        return mons.map { mon in
+                            .init(exponent: mon.leadExponent) ⊗ x
+                        }
                 }
             }
             return ModuleObject(generators: gens)
@@ -119,11 +121,10 @@ public struct GridComplex: ChainComplexType {
                 .adjacents(of: x, with: rectCond)
                 .map { (y, r) -> BaseModule.Generator in
                     if !rects[r].intersects(.O) {
-                        return .identity ⊗ y
+                        return .unit ⊗ y
                     } else {
                         let Uexp = rects[r].intersections(.O)
-                        let U = MultivariatePolynomialGenerator<_Un>(Uexp)
-                        return U ⊗ y
+                        return .init(exponent: Uexp) ⊗ y
                     }
                 }
                 
@@ -142,7 +143,7 @@ public struct GridComplex: ChainComplexType {
                     ? cache.useCacheOrSet(key: x) { d(x) }
                     : d(x)
                 
-                if m1 == .identity {
+                if m1 == .unit {
                     return dx
                 } else {
                     return dx.mapGenerators { t2 in
@@ -183,20 +184,12 @@ public struct GridComplex: ChainComplexType {
 }
 
 
-extension TensorGenerator where A == MultivariatePolynomialGenerator<_Un>, B == GridComplex.Generator {
-    public var monomial: A {
-        factors.0
-    }
-    
-    public var generator: B {
-        factors.1
-    }
-
+extension TensorGenerator where A == MonomialAsGenerator<_Un>, B == GridComplex.Generator {
     public var algebraicDegree: Int {
-        return -(monomial.exponent.count > 0 ? monomial.exponent[0] : 0)
+        return -left.exponent[0]
     }
     
     public var AlexanderDegree: Int {
-        return _Un.totalDegree(exponents: monomial.exponent) / 2 + generator.AlexanderDegree
+        return _Un.degreeOfMonomial(withExponent: left.exponent) / 2 + right.AlexanderDegree
     }
 }

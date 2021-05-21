@@ -106,10 +106,10 @@ public struct KhovanovHomology<R: EuclideanRing>: ModuleGridType {
     }
     
     // Σ_{i, j} (-1)^i q^j rank(H[i, j])
-    public var gradedEulerCharacteristic: LaurentPolynomial<_q, 𝐙> {
+    public var gradedEulerCharacteristic: LaurentPolynomial<𝐙, _q> {
         let (r1, r2) = (chainComplex.degreeRange, chainComplex.qDegreeRange)
 
-        typealias P = LaurentPolynomial<_q, 𝐙>
+        typealias P = LaurentPolynomial<𝐙, _q>
         let q = P.indeterminate
 
         return (r1 * r2).sum { (i, j) -> P in

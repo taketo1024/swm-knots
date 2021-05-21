@@ -11,7 +11,7 @@ import SwiftyMath
 
 class JonesPolynomialTests: XCTestCase {
     
-    typealias A = LaurentPolynomial<_q, 𝐙>
+    typealias A = LaurentPolynomial<𝐙, _q>
     
     override func setUp() {
         try! Link.loadTable("K10")

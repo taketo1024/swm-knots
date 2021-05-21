@@ -13,11 +13,11 @@ public struct KR {
         public static let degree = 2
         public static var symbol = "x"
     }
-    public typealias _xn = InfiniteVariatePolynomialIndeterminates<_x>
+    public typealias _xn = EnumeratedPolynomialIndeterminates<_x, DynamicSize>
     
     public typealias Grading = MultiIndex<_3>
-    public typealias EdgeRing<R: Ring> = MultivariatePolynomial<_xn, R>
-    public typealias BaseModule<R: Ring> = LinearCombination<MultivariatePolynomialGenerator<_xn>, R>
+    public typealias EdgeRing<R: Ring> = MultivariatePolynomial<R, _xn>
+    public typealias BaseModule<R: Ring> = LinearCombination<MonomialAsGenerator<_xn>, R>
     public typealias HorizontalModule<R: Ring> = IndexedModule<Cube.Coords, BaseModule<R>>
     public typealias TotalModule<R: Ring> = IndexedModule<Cube.Coords, HorizontalModule<R>>
 
