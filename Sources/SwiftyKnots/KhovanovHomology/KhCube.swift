@@ -12,7 +12,7 @@ import SwiftyHomology
 
 public struct KhovanovCube<R: Ring>: ModuleCube {
     public typealias BaseModule = LinearCombination<R, MultiTensorGenerator<KhovanovAlgebraGenerator>>
-    public typealias Vertex = ModuleObject<BaseModule>
+    public typealias Vertex = ModuleStructure<BaseModule>
     public typealias Edge = ModuleEnd<BaseModule>
     
     public let type: KhovanovAlgebra<R>
@@ -27,7 +27,7 @@ public struct KhovanovCube<R: Ring>: ModuleCube {
         link.crossingNumber
     }
     
-    public subscript(v: Coords) -> ModuleObject<BaseModule> {
+    public subscript(v: Coords) -> ModuleStructure<BaseModule> {
         vertexInfo(v).module
     }
     
@@ -84,7 +84,7 @@ public struct KhovanovCube<R: Ring>: ModuleCube {
     fileprivate struct VertexInfo {
         let coords: Coords
         let circles: [Link.Component]
-        let module: ModuleObject<BaseModule>
+        let module: ModuleStructure<BaseModule>
         
         init(_ L: Link, _ v: Coords) {
             let circles = L.resolved(by: v).components
@@ -97,7 +97,7 @@ public struct KhovanovCube<R: Ring>: ModuleCube {
             
             self.coords = v
             self.circles = circles
-            self.module = ModuleObject(generators: generators)
+            self.module = ModuleStructure(generators: generators)
         }
         
         private func qDegree(_ x: MultiTensorGenerator<KhovanovAlgebraGenerator>) -> Int {

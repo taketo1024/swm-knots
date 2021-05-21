@@ -13,7 +13,7 @@ public struct _U: PolynomialIndeterminate {
     public static var symbol = "U"
 }
 
-public typealias _Un = EnumeratedPolynomialIndeterminates<_U, DynamicSize>
+public typealias _Un = EnumeratedPolynomialIndeterminates<_U, anySize>
 
 public struct GridComplex: ChainComplexType {
     public typealias R = 𝐅₂
@@ -24,7 +24,7 @@ public struct GridComplex: ChainComplexType {
 
     public typealias Index = Int
     public typealias BaseModule = LinearCombination<R, T>
-    public typealias Differential = ChainMap<Index, BaseModule, BaseModule>
+    public typealias Differential = ChainMap<Self, Self>
     
     public enum Variant {
         case tilde    // [Book] p.72,  Def 4.4.1
@@ -57,15 +57,15 @@ public struct GridComplex: ChainComplexType {
         self.init(G, generators, C)
     }
     
-    public subscript(i: Int) -> ModuleObject<BaseModule> {
+    public subscript(i: Int) -> ModuleStructure<BaseModule> {
         chainComplex[i]
     }
     
     public var differential: Differential {
-        chainComplex.differential
+        ChainMap( chainComplex.differential )
     }
     
-    static func chain(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) -> ( (Int) -> ModuleObject<BaseModule> ) {
+    static func chain(type: Variant, diagram G: GridDiagram, generators: GeneratorSet) -> ( (Int) -> ModuleStructure<BaseModule> ) {
         typealias P = MultivariatePolynomial<R, _Un>
         
         let n = G.gridNumber
@@ -80,7 +80,7 @@ public struct GridComplex: ChainComplexType {
         
         let iMax = generators.MaslovDegreeRange.upperBound
 
-        return { i -> ModuleObject<BaseModule> in
+        return { i -> ModuleStructure<BaseModule> in
             guard i <= iMax else {
                 return .zeroModule
             }
@@ -95,7 +95,7 @@ public struct GridComplex: ChainComplexType {
                         }
                 }
             }
-            return ModuleObject(generators: gens)
+            return ModuleStructure(generators: gens)
         }
     }
     
@@ -134,13 +134,13 @@ public struct GridComplex: ChainComplexType {
             )
         }
         
-        let cache: CacheDictionary<Generator, BaseModule> = .empty
+        let cache: Cache<Generator, BaseModule> = .empty
         
         return { i in
             ModuleEnd.linearlyExtend { t1 -> BaseModule in
                 let (m1, x) = t1.factors
                 let dx = useCache
-                    ? cache.useCacheOrSet(key: x) { d(x) }
+                    ? cache.getOrSet(key: x) { d(x) }
                     : d(x)
                 
                 if m1 == .unit {

@@ -24,7 +24,7 @@ public func RasmussenInvariant<F: Field>(_ L: Link, _ type: F.Type) -> Int {
     let z = C.canonicalCycles.0
     let d = C.differential[-1]
 
-    let range = C[0].generators.map{ $0.qDegree }.range!
+    let range = C[0].generators.map{ $0.qDegree }.closureRange!
     let min = range.lowerBound
 
     for j in range where (j - min).isEven {

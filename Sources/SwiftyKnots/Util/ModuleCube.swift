@@ -34,7 +34,7 @@ extension Cube {
     }
 }
 
-public protocol ModuleCube: Cube where Vertex == ModuleObject<BaseModule>, Edge == ModuleEnd<BaseModule> {
+public protocol ModuleCube: Cube where Vertex == ModuleStructure<BaseModule>, Edge == ModuleEnd<BaseModule> {
     associatedtype BaseModule: Module
     typealias R = BaseModule.BaseRing
     typealias M = IndexedModule<Coords, BaseModule>
@@ -75,7 +75,7 @@ extension ModuleCube {
                 
                 let vs = Coords.sequences(length: dim, weight: i)
                 let modules = Dictionary(keys: vs) { self[$0] }
-                return ModuleObject.formDirectSum(modules)
+                return ModuleStructure.formDirectSum(modules)
             },
             degree: 1,
             differential: { i in self.differential(i) }

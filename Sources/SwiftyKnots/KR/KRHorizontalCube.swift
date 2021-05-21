@@ -10,7 +10,7 @@ import SwiftyHomology
 
 internal struct KRHorizontalCube<R: Ring>: ModuleCube {
     typealias BaseModule = KR.BaseModule<R>
-    typealias Vertex = ModuleObject<BaseModule>
+    typealias Vertex = ModuleStructure<BaseModule>
     typealias Edge = ModuleEnd<BaseModule>
 
     let L: Link
@@ -38,7 +38,7 @@ internal struct KRHorizontalCube<R: Ring>: ModuleCube {
         KR.baseGrading(link: L, hCoords: hCoords, vCoords: vCoords)
     }
     
-    subscript(v: Coords) -> ModuleObject<BaseModule> {
+    subscript(v: Coords) -> ModuleStructure<BaseModule> {
         let deg = slice + v.weight + (baseGrading - gradingShift(at: v))[0] / 2
         if deg >= 0 {
             let mons = KR.EdgeRing<R>.monomials(
@@ -47,7 +47,7 @@ internal struct KRHorizontalCube<R: Ring>: ModuleCube {
             ).map {
                 BaseModule.Generator(exponent: $0.leadExponent)
             }
-            return ModuleObject<BaseModule>(generators: mons)
+            return ModuleStructure<BaseModule>(generators: mons)
         } else {
             return .zeroModule
         }

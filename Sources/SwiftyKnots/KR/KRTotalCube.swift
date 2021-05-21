@@ -10,7 +10,7 @@ import SwiftyHomology
 
 internal struct KRTotalCube<R: Ring>: ModuleCube {
     typealias BaseModule = KR.HorizontalModule<R>
-    typealias Vertex = ModuleObject<BaseModule>
+    typealias Vertex = ModuleStructure<BaseModule>
     typealias Edge = ModuleEnd<BaseModule>
 
     let L: Link
@@ -27,7 +27,7 @@ internal struct KRTotalCube<R: Ring>: ModuleCube {
         L.crossingNumber
     }
     
-    subscript(v: Coords) -> ModuleObject<BaseModule> {
+    subscript(v: Coords) -> ModuleStructure<BaseModule> {
         vertex(v)
     }
     

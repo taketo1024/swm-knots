@@ -50,18 +50,18 @@ public struct IndexedModule<Index: Hashable, M: Module>: Module {
     }
 }
 
-extension ModuleObject {
-    public static func formDirectSum<Index: Hashable>(_ objects: [Index : Self]) -> ModuleObject<IndexedModule<Index, BaseModule>> {
+extension ModuleStructure {
+    public static func formDirectSum<Index: Hashable>(_ objects: [Index : Self]) -> ModuleStructure<IndexedModule<Index, BaseModule>> {
         let indices = objects.keys.toArray()
         let ranks = [0] + indices.map { objects[$0]!.rank }.accumulate()
-        let shifts = Dictionary(pairs: zip(indices, ranks))
+        let shifts = Dictionary(zip(indices, ranks))
         
         let generators = indices.flatMap { index -> [IndexedModule<Index, BaseModule>] in
             objects[index]!.generators.map { x in IndexedModule(index: index, value: x) }
         }
         
         let N = ranks.last ?? 0
-        let vectorizer = { (z: IndexedModule<Index, BaseModule>) -> VectorD<R> in
+        let vectorizer = { (z: IndexedModule<Index, BaseModule>) -> AnySizeVector<R> in
             .init(size: N) { setEntry in
                 z.elements.forEach { (index, x) in
                     let vec = objects[index]!.vectorize(x)
@@ -73,14 +73,6 @@ extension ModuleObject {
             }
         }
         
-        return ModuleObject<IndexedModule<Index, BaseModule>>(generators: generators, vectorizer: vectorizer)
-    }
-}
-
-extension Array where Element: AdditiveGroup {
-    public func accumulate() -> Self {
-        self.reduce(into: []) { (res, r) in
-            res.append( (res.last ?? .zero) + r)
-        }
+        return ModuleStructure<IndexedModule<Index, BaseModule>>(generators: generators, vectorizer: vectorizer)
     }
 }

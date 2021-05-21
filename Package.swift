@@ -15,29 +15,23 @@ let package = Package(
         .package(
 			name:"SwiftyMath",
 			url: "../SwiftyMath",
-			.branch("matrix-improve")
+			.branch("master")
 		),
         .package(
 			name:"SwiftyHomology",
 			url: "../SwiftyHomology",
-			.branch("matrix-improve")
+			.branch("master")
 		),
     ],
     targets: [
         .target(
             name: "SwiftyKnots",
             dependencies: ["SwiftyMath", "SwiftyHomology"],
-			path: "Sources/SwiftyKnots",
 			resources: [.process("Resources")]
 		),
         .testTarget(
             name: "SwiftyKnotsTests",
             dependencies: ["SwiftyKnots"]
-		),
-        .target(
-            name: "SwiftyKnots-Sample",
-            dependencies: ["SwiftyMath", "SwiftyHomology", "SwiftyKnots"],
-			path: "Sources/Sample"
 		),
     ]
 )

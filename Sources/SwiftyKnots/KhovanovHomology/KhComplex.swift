@@ -11,8 +11,8 @@ import SwiftyHomology
 public struct KhovanovComplex<R: Ring>: ChainComplexType {
     public typealias Index = Int
     public typealias BaseModule = IndexedModule<Cube.Coords, LinearCombination<R, MultiTensorGenerator<KhovanovAlgebraGenerator>>>
-    public typealias Object = ModuleObject<BaseModule>
-    public typealias Differential = ChainMap<Index, BaseModule, BaseModule>
+    public typealias Object = ModuleStructure<BaseModule>
+    public typealias Differential = ChainMap<Self, Self>
     
     public let type: KhovanovAlgebra<R>
     public let link: Link
@@ -35,12 +35,12 @@ public struct KhovanovComplex<R: Ring>: ChainComplexType {
         self.init(type, link, cube, chainComplex, normalized)
     }
     
-    public subscript(i: Int) -> ModuleObject<BaseModule> {
+    public subscript(i: Int) -> ModuleStructure<BaseModule> {
         chainComplex[i]
     }
     
     public var differential: Differential {
-        chainComplex.differential
+        ChainMap( chainComplex.differential )
     }
     
     public func shifted(_ shift: Int) -> KhovanovComplex<R> {
@@ -77,7 +77,7 @@ public struct KhovanovComplex<R: Ring>: ChainComplexType {
     }
 }
 
-public struct KhovanovHomology<R: EuclideanRing>: ModuleGridType {
+public struct KhovanovHomology<R: EuclideanRing>: GradedModuleStructureType {
     public typealias BaseGrid = ModuleGrid2<KhovanovComplex<R>.BaseModule>
     public typealias BaseModule = BaseGrid.BaseModule
     public typealias Index  = BaseGrid.Index

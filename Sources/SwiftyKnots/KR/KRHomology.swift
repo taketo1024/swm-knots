@@ -13,7 +13,7 @@ public struct KR {
         public static let degree = 2
         public static var symbol = "x"
     }
-    public typealias _xn = EnumeratedPolynomialIndeterminates<_x, DynamicSize>
+    public typealias _xn = EnumeratedPolynomialIndeterminates<_x, anySize>
     
     public typealias Grading = MultiIndex<_3>
     public typealias EdgeRing<R: Ring> = MultivariatePolynomial<R, _xn>
@@ -64,7 +64,7 @@ public struct KRHomology<R: EuclideanRing> {
     
     private let gradingShift: KR.Grading
     private var connection: [Int : KR.EdgeConnection<R>]
-    private let hHomologyCache: CacheDictionary<hKey, ModuleGrid1<KR.HorizontalModule<R>>> = .empty
+    private let hHomologyCache: Cache<hKey, ModuleGrid1<KR.HorizontalModule<R>>> = .empty
 
     public init(_ L: Link, normalized: Bool = true) {
         let w = L.writhe
@@ -76,7 +76,7 @@ public struct KRHomology<R: EuclideanRing> {
         self.connection = KREdgeConnection(L).compute()
     }
     
-    public subscript(i: Int, j: Int, k: Int) -> ModuleObject<KR.TotalModule<R>> {
+    public subscript(i: Int, j: Int, k: Int) -> ModuleStructure<KR.TotalModule<R>> {
         guard let (h, v, s) = ijk2hvs(i, j, k) else {
             return .zeroModule
         }
@@ -115,7 +115,7 @@ public struct KRHomology<R: EuclideanRing> {
     
     public func totalComplex(hDegree h: Int, slice: Int) -> ChainComplex1<KR.TotalModule<R>> {
         let cube = KRTotalCube<R>(link: L, connection: connection) { vCoords -> KRTotalCube<R>.Vertex in
-            let H = hHomologyCache.useCacheOrSet(key: hKey(vCoords: vCoords, slice: slice)) {
+            let H = hHomologyCache.getOrSet(key: hKey(vCoords: vCoords, slice: slice)) {
                 let C = self.horizontalComplex(at: vCoords, slice: slice)
                 let H = C.homology(options: [.withGenerators, .withVectorizer])
                 return H
@@ -125,8 +125,8 @@ public struct KRHomology<R: EuclideanRing> {
         return cube.asChainComplex()
     }
     
-    public func structure() -> [KR.Grading : ModuleObject<KR.TotalModule<R>>] {
-        var res: [KR.Grading : ModuleObject<KR.TotalModule<R>>] = [:]
+    public func structure() -> [KR.Grading : ModuleStructure<KR.TotalModule<R>>] {
+        var res: [KR.Grading : ModuleStructure<KR.TotalModule<R>>] = [:]
         
         let n = L.crossingNumber
         for s in minSlice ... 0 {

@@ -24,7 +24,7 @@ extension GridComplex {
             let generators = Generator.produce(G, rects, filter)
             self.init(
                 gridNumber: G.gridNumber,
-                generators: Dictionary(pairs: generators.map { x in (x.code, x) }),
+                generators: Dictionary(generators.map { x in (x.code, x) }),
                 rects: rects
             )
         }
@@ -37,11 +37,11 @@ extension GridComplex {
         }
         
         public var MaslovDegreeRange: ClosedRange<Int> {
-            generators.values.map{ $0.degree }.range ?? (0 ... 0)
+            generators.values.map{ $0.degree }.closureRange ?? (0 ... 0)
         }
         
         public var AlexanderDegreeRange: ClosedRange<Int> {
-            generators.values.map{ $0.AlexanderDegree }.range ?? (0 ... 0)
+            generators.values.map{ $0.AlexanderDegree }.closureRange ?? (0 ... 0)
         }
 
         public func generator(forSequence seq: [Int]) -> Generator? {

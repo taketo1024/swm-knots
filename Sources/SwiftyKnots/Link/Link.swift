@@ -37,9 +37,9 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public func copy(name: String? = nil, diffX: Int = 0, diffE: Int = 0) -> Link {
-        let myEdges = Dictionary(pairs: edges.map{ e in (e.id, e) })
+        let myEdges = Dictionary(edges.map{ e in (e.id, e) })
         let cpEdges = myEdges.mapPairs{ (id, _) in (id, Edge(id + diffE)) }
-        let cpCross = Dictionary(pairs: crossings.map { x -> (Int, Crossing) in
+        let cpCross = Dictionary(crossings.map { x -> (Int, Crossing) in
             let e = x.edges.map{ e in cpEdges[e.id]! }
             let cpX = Crossing(id: x.id + diffX, edges: (e[0], e[1], e[2], e[3]), mode: x.mode)
             return (x.id, cpX)
@@ -109,7 +109,7 @@ public struct Link: Equatable, CustomStringConvertible {
             var e = first
             
             while queue.contains(e) {
-                queue.remove(element: e)
+                queue.findAndRemove(element: e)
                 comp.append(e)
                 e = e.nextEdge
             }
@@ -169,7 +169,7 @@ public struct Link: Equatable, CustomStringConvertible {
             var e = first
             
             while queue.contains(e) {
-                queue.remove(element: e)
+                queue.findAndRemove(element: e)
                 
                 let next = e.nextEdge
                 
@@ -196,8 +196,8 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var seifertGraph: SimpleDirectedGraph<Component, Int> {
-        typealias Graph = SimpleDirectedGraph<Component, Int>
-        var G = Graph(options: ["physics": true])
+        typealias SeifertGraph = SimpleDirectedGraph<Component, Int>
+        var G = SeifertGraph(options: ["physics": true])
         let s = orientationPreservingState
         let D = self.resolved(by: s)
         
@@ -205,7 +205,7 @@ public struct Link: Equatable, CustomStringConvertible {
             G.addVertex(value: c)
         }
         
-        func vertex(containing edge: Edge) -> Graph.Vertex {
+        func vertex(containing edge: Edge) -> SeifertGraph.Vertex {
             G.vertices.first{ $0.value.value.edges.contains(edge) }!.value
         }
         
