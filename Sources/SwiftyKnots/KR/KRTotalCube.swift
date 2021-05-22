@@ -58,7 +58,7 @@ internal struct KRTotalCube<R: Ring>: ModuleCube {
             x.elements.sum { (subcoords, z) -> BaseModule in
                 let e = edgeFactor(from: from, to: to, subcoords: subcoords)
                 let p = (MultivariatePolynomial(z) * e).asLinearCombination
-                return IndexedModule(index: subcoords, value: p)
+                return GradedModule(index: subcoords, value: p)
             }
         }
     }

@@ -18,8 +18,8 @@ public struct KR {
     public typealias Grading = MultiIndex<_3>
     public typealias EdgeRing<R: Ring> = MultivariatePolynomial<R, _xn>
     public typealias BaseModule<R: Ring> = LinearCombination<R, MonomialAsGenerator<_xn>>
-    public typealias HorizontalModule<R: Ring> = IndexedModule<Cube.Coords, BaseModule<R>>
-    public typealias TotalModule<R: Ring> = IndexedModule<Cube.Coords, HorizontalModule<R>>
+    public typealias HorizontalModule<R: Ring> = GradedModule<Cube.Coords, BaseModule<R>>
+    public typealias TotalModule<R: Ring> = GradedModule<Cube.Coords, HorizontalModule<R>>
 
     static func baseGrading(link L: Link, hCoords: Cube.Coords, vCoords: Cube.Coords) -> KR.Grading {
         (0 ..< L.crossingNumber).sum { i -> KR.Grading in
