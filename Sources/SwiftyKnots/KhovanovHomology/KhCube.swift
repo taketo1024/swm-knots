@@ -91,8 +91,8 @@ public struct KhovanovCube<R: Ring>: ModuleCube {
             
             let r = circles.count
             let (I, X) = (KhovanovAlgebraGenerator.I, KhovanovAlgebraGenerator.X)
-            let generators =  Util.generateBinarySequences(with: (I, X), length: r).map { factors in
-                MultiTensorGenerator(factors)
+            let generators = BitSequence.allSequences(length: r).map { b in
+                MultiTensorGenerator( b.map { $0 == 0 ? I : X } )
             }
             
             self.coords = v

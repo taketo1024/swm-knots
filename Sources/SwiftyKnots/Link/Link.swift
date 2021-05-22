@@ -195,8 +195,8 @@ public struct Link: Equatable, CustomStringConvertible {
         } )
     }
     
-    public var seifertGraph: SimpleDirectedGraph<Component, Int> {
-        typealias SeifertGraph = SimpleDirectedGraph<Component, Int>
+    public var seifertGraph: DirectedGraph<Component, Int> {
+        typealias SeifertGraph = DirectedGraph<Component, Int>
         var G = SeifertGraph(options: ["physics": true])
         let s = orientationPreservingState
         let D = self.resolved(by: s)
