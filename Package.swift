@@ -14,13 +14,13 @@ let package = Package(
     dependencies: [
         .package(
 			name:"SwiftyMath",
-			url: "../SwiftyMath",
-			.branch("master")
+			url: "https://github.com/taketo1024/SwiftyMath.git",
+			from:"3.0.0"
 		),
         .package(
 			name:"SwiftyHomology",
-			url: "../SwiftyHomology",
-			.branch("master")
+			url: "https://github.com/taketo1024/SwiftyMath-homology.git",
+			from: "3.0.0"
 		),
     ],
     targets: [
