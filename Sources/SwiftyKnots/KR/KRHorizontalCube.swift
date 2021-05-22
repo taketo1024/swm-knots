@@ -47,7 +47,7 @@ internal struct KRHorizontalCube<R: Ring>: ModuleCube {
             ).map {
                 BaseModule.Generator(exponent: $0.leadExponent)
             }
-            return ModuleStructure<BaseModule>(generators: mons)
+            return ModuleStructure<BaseModule>(rawGenerators: mons)
         } else {
             return .zeroModule
         }

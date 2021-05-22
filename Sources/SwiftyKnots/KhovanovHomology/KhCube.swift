@@ -97,7 +97,7 @@ public struct KhovanovCube<R: Ring>: ModuleCube {
             
             self.coords = v
             self.circles = circles
-            self.module = ModuleStructure(generators: generators)
+            self.module = ModuleStructure(rawGenerators: generators)
         }
         
         private func qDegree(_ x: MultiTensorGenerator<KhovanovAlgebraGenerator>) -> Int {

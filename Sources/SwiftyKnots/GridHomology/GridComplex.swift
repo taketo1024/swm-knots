@@ -95,7 +95,7 @@ public struct GridComplex: ChainComplexType {
                         }
                 }
             }
-            return ModuleStructure(generators: gens)
+            return ModuleStructure(rawGenerators: gens)
         }
     }
     
