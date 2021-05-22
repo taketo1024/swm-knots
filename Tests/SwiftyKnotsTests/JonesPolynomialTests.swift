@@ -14,12 +14,12 @@ class JonesPolynomialTests: XCTestCase {
     typealias A = LaurentPolynomial<𝐙, _q>
     
     override func setUp() {
-        try! Link.loadTable("K10")
-        try! Link.loadTable("L10")
+        try! Link.loadResource("K10")
+        try! Link.loadResource("L10")
     }
     
     override func tearDown() {
-        Link.unloadTable()
+        Link.unloadResources()
     }
     
     func testEmpty() {
@@ -33,32 +33,32 @@ class JonesPolynomialTests: XCTestCase {
     }
 
     func testHopfLink() {
-        let L = Link.load("L2a1")!
+        let L = try! Link.load("L2a1")
         XCTAssertEqual(JonesPolynomial(L), [-5: 1, -1: 1] )
     }
     
     func testHopfLinkReversed() {
-        let L = Link.load("L2a1")!.reversed
+        let L = try! Link.load("L2a1").reversed
         XCTAssertEqual(JonesPolynomial(L), [-5: 1, -1: 1] )
     }
     
     func testHopfLinkMirrored() {
-        let L = Link.load("L2a1")!.mirrored
+        let L = try! Link.load("L2a1").mirrored
         XCTAssertEqual(JonesPolynomial(L), [5: 1, 1: 1] )
     }
     
     func testTrefoil() {
-        let K = Link.load("3_1")!
+        let K = try! Link.load("3_1")
         XCTAssertEqual(JonesPolynomial(K), [-8: -1, -6: 1, -2: 1])
     }
     
     func testTrefoilReversed() {
-        let K = Link.load("3_1")!.reversed
+        let K = try! Link.load("3_1").reversed
         XCTAssertEqual(JonesPolynomial(K), [-8: -1, -6: 1, -2: 1])
     }
     
     func testTrefoilMirrored() {
-        let K = Link.load("3_1")!.mirrored
+        let K = try! Link.load("3_1").mirrored
         XCTAssertEqual(JonesPolynomial(K), [8: -1, 6: 1, 2: 1])
     }
 }

@@ -13,11 +13,11 @@ import SwiftyHomology
 class GridHomologyTests: XCTestCase {
     
     override func setUp() {
-        try! Link.loadTable("K10")
+        try! Link.loadResource("K10")
     }
     
     override func tearDown() {
-        Link.unloadTable()
+        Link.unloadResources()
     }
     
     func testChainComplex_tilde() {

@@ -7,7 +7,7 @@
 
 extension GridDiagram {
     public static func load(_ name: String) -> GridDiagram? {
-        loadTable()
+        loadResource()
         if let data = _table[name] {
             let (Os, Xs) = (data["O"]!, data["X"]!)
             return GridDiagram(name: name, Os: Os, Xs: Xs)
@@ -19,7 +19,7 @@ extension GridDiagram {
 
 private typealias CodeTable = [String: [String : [Int]]]
 
-private func loadTable() {
+private func loadResource() {
     if _table.isEmpty {
         _table = CodeTable.loadJSON(_jsonString)!
     }
