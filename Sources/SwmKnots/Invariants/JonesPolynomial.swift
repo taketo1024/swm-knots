@@ -5,7 +5,7 @@
 //  Created by Taketo Sano on 2018/04/04.
 //
 
-import SwiftyMath
+import SwmCore
 
 public struct _A: PolynomialIndeterminate {
     public static let symbol = "A"

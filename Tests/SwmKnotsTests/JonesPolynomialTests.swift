@@ -6,8 +6,8 @@
 //
 
 import XCTest
-import SwiftyMath
-@testable import SwiftyKnots
+import SwmCore
+@testable import SwmKnots
 
 class JonesPolynomialTests: XCTestCase {
     

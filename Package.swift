@@ -4,34 +4,30 @@
 import PackageDescription
 
 let package = Package(
-    name: "SwiftyKnots",
+    name: "swm-knots",
     products: [
         .library(
-            name: "SwiftyKnots",
-            targets: ["SwiftyKnots"]
+            name: "SwmKnots",
+            targets: ["SwmKnots"]
         ),
     ],
     dependencies: [
         .package(
-			name:"SwiftyMath",
-			url: "https://github.com/taketo1024/SwiftyMath.git",
-			from:"3.0.0"
-		),
-        .package(
-			name:"SwiftyHomology",
-			url: "https://github.com/taketo1024/SwiftyMath-homology.git",
-			from: "3.0.0"
+			url: "https://github.com/taketo1024/swm-core.git",
+			from:"1.0.0"
 		),
     ],
     targets: [
         .target(
-            name: "SwiftyKnots",
-            dependencies: ["SwiftyMath", "SwiftyHomology"],
+            name: "SwmKnots",
+            dependencies: [
+                .product(name: "SwmCore", package: "swm-core"),
+			],
 			resources: [.process("Resources")]
 		),
         .testTarget(
-            name: "SwiftyKnotsTests",
-            dependencies: ["SwiftyKnots"]
+            name: "SwmKnotsTests",
+            dependencies: ["SwmKnots"]
 		),
     ]
 )
