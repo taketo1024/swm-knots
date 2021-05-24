@@ -42,7 +42,7 @@ internal struct KRHorizontalCube<R: Ring>: ModuleCube {
         let deg = slice + v.weight + (baseGrading - gradingShift(at: v))[0] / 2
         if deg >= 0 {
             let mons = KR.EdgeRing<R>.monomials(
-                ofDegree: deg,
+                ofDegree: 2 * deg,
                 usingIndeterminates: 0 ..< dim
             ).map {
                 BaseModule.Generator(exponent: $0.leadExponent)
