@@ -13,21 +13,21 @@ let package = Package(
     ],
     dependencies: [
         .package(
-			url: "https://github.com/taketo1024/swm-core.git",
-			from:"1.0.0"
-		),
+            url: "https://github.com/taketo1024/swm-core.git",
+            from:"1.0.1"
+        ),
     ],
     targets: [
         .target(
             name: "SwmKnots",
             dependencies: [
                 .product(name: "SwmCore", package: "swm-core"),
-			],
-			resources: [.process("Resources")]
-		),
+            ],
+            resources: [.process("Resources")]
+        ),
         .testTarget(
             name: "SwmKnotsTests",
             dependencies: ["SwmKnots"]
-		),
+        ),
     ]
 )
