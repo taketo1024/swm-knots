@@ -19,6 +19,8 @@
  * see: http://katlas.math.toronto.edu/wiki/Planar_Diagrams
  */
 
+import Foundation
+
 extension Link {
     public typealias PDCode = [[Int]]
     public init(name: String? = nil, pdCode: PDCode) {
@@ -73,5 +75,26 @@ extension Link {
     
     public init(name: String? = nil, pdCode: [Int] ...) {
         self.init(name: name, pdCode: pdCode)
+    }
+    
+    // The resources are extracted from:
+    //
+    // - Knot Table  http://katlas.org/wiki/The_Rolfsen_Knot_Table
+    // - Link Table  http://katlas.org/wiki/The_Thistlethwaite_Link_Table
+    // - Torus Knots http://katlas.org/wiki/36_Torus_Knots
+
+    public static func load(_ name: String) -> Link? {
+        #if os(macOS) || os(Linux)
+        guard
+            let url = Bundle.module.url(forResource: name, withExtension: "json"),
+            let data = try? Data(contentsOf: url),
+            let code = try? JSONDecoder().decode(Link.PDCode.self, from: data)
+        else {
+            return nil
+        }
+        return Link(name: name, pdCode: code)
+        #else
+        return nil
+        #endif
     }
 }

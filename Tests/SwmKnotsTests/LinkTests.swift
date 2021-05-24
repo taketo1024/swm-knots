@@ -12,12 +12,9 @@ import SwmCore
 class LinkTests: XCTestCase {
     
     override func setUp() {
-        try! Link.loadResource("K10")
-        try! Link.loadResource("L10")
     }
     
     override func tearDown() {
-        Link.unloadResources()
     }
     
     func testEmpty() {
@@ -33,42 +30,42 @@ class LinkTests: XCTestCase {
     }
 
     func testHopfLink() {
-        let L = try! Link.load("L2a1")
+        let L = Link.load("L2a1")!
         XCTAssertEqual(L.components.count, 2)
         XCTAssertEqual(L.crossingNumber, 2)
         XCTAssertEqual(L.writhe, -2)
     }
     
     func testHopfLinkReversed() {
-        let L = try! Link.load("L2a1").reversed
+        let L = Link.load("L2a1")!.reversed
         XCTAssertEqual(L.components.count, 2)
         XCTAssertEqual(L.crossingNumber, 2)
         XCTAssertEqual(L.writhe, -2)
     }
     
     func testHopfLinkMirrored() {
-        let L = try! Link.load("L2a1").mirrored
+        let L = Link.load("L2a1")!.mirrored
         XCTAssertEqual(L.components.count, 2)
         XCTAssertEqual(L.crossingNumber, 2)
         XCTAssertEqual(L.writhe, 2)
     }
     
     func testTrefoil() {
-        let K = try! Link.load("3_1")
+        let K = Link.load("3_1")!
         XCTAssertEqual(K.components.count, 1)
         XCTAssertEqual(K.crossingNumber, 3)
         XCTAssertEqual(K.writhe, -3)
     }
     
     func testTrefoilReversed() {
-        let K = try! Link.load("3_1").reversed
+        let K = Link.load("3_1")!.reversed
         XCTAssertEqual(K.components.count, 1)
         XCTAssertEqual(K.crossingNumber, 3)
         XCTAssertEqual(K.writhe, -3)
     }
     
     func testTrefoilMirrored() {
-        let K = try! Link.load("3_1").mirrored
+        let K = Link.load("3_1")!.mirrored
         XCTAssertEqual(K.components.count, 1)
         XCTAssertEqual(K.crossingNumber, 3)
         XCTAssertEqual(K.writhe, 3)
