@@ -13,7 +13,7 @@ public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertib
     
     public init(strands: Int, elements: [(Generator, Int)]) {
         self.strands = strands
-        self.elements = elements // TODO reduce
+        self.elements = elements
     }
     
     public init(strands: Int, code: [Int]) {
@@ -32,7 +32,7 @@ public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertib
     }
     
     public static func allGenerators(strands: Int) -> [Self] {
-        (1 ... n.intValue - 1).map{ generator(strands: strands, index: $0) }
+        (1 ... strands - 1).map{ generator(strands: strands, index: $0) }
     }
     
     public static func identity(strands: Int) -> Self {
@@ -58,34 +58,32 @@ public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertib
         return elements.reduce(""){ (res, s) in res + "\(s.0)\(s.1 == 1 ? "" : Format.sup(s.1))" }
     }
     
-    public func describe() {
-        func printRow(_ index: Int, _ sign: Int) {
-            func printc(_ s: String) {
-                print(s, terminator: "")
-            }
+    public var detailDescription: String {
+        func row(_ index: Int, _ sign: Int) -> String {
+            var res = ""
             
             for r in 0 ..< 3 {
-                for i in 1 ... n.intValue {
+                for i in 1 ... strands {
                     switch i {
                     case index:
                         switch r {
-                        case  0: printc("\\ /")
-                        case  1: printc((sign > 0) ? " / " : " \\ ")
-                        default: printc("/ \\")
+                        case  0: res += "\\ /"
+                        case  1: res += (sign > 0) ? " / " : " \\ "
+                        default: res += "/ \\"
                         }
-                    case index + 1: printc(" ")
-                    default: printc("| ")
+                    case index + 1: res += " "
+                    default: res += "| "
                     }
                 }
-                print()
+                res += "\n"
             }
+            
+            return res
         }
         
-        for (σ, p) in elements {
-            for _ in 0 ..< p.abs {
-                printRow(σ.index, p)
-            }
-        }
+        return elements.flatMap { (σ, p) -> [String] in
+            (0 ..< p.abs).map { _ in row(σ.index, p.sign) }
+        }.joined()
     }
     
     // MEMO { σ_1 ... σ_{n - 1} } are the generators of Braid<n>

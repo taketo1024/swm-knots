@@ -29,6 +29,5 @@ class BraidTests: XCTestCase {
     func testInitByCode() {
         let b = B(code: 1, 1, -2, -1)
         XCTAssertEqual(b.description, "σ₁σ₁σ₂⁻¹σ₁⁻¹")
-        b.describe()
     }
 }
