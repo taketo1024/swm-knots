@@ -21,15 +21,14 @@ class BraidTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testDescription() {
-        let b = B.produce(code: 1, 2, 2, -3, 1, 1)
+    func testInitByElements() {
+        let b = B(elements: [(1, 2), (2, -3), (1, 1)])
         XCTAssertEqual(b.description, "σ₁²σ₂⁻³σ₁")
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
 
-    func test() {
-        let b = B.produce(code: 1, 2, 2, -3, 1, 1, 3, 1)
+    func testInitByCode() {
+        let b = B(code: 1, 1, -2, -1)
+        XCTAssertEqual(b.description, "σ₁σ₁σ₂⁻¹σ₁⁻¹")
         b.describe()
     }
 }

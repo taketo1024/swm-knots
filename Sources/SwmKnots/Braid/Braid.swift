@@ -7,60 +7,55 @@
 
 import SwmCore
 
-public struct Braid<n: FixedSizeType>: Group {
-    internal typealias Word = [(Generator, Int)]
-    internal let word: Word
+public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertible {
+    public let strands: Int
+    public let elements: [(Generator, Int)]
     
-    internal init(_ word: Word) {
-        // TODO reduce
-        self.word = word
+    public init(strands: Int, elements: [(Generator, Int)]) {
+        self.strands = strands
+        self.elements = elements // TODO reduce
     }
     
-    public static func produce(code: Int...) -> Braid<n> {
-        assert(code.count.isEven)
-        
-        var word: Word = []
-        for i in 0 ..< code.count / 2 {
-            word.append( (Generator(code[2 * i]), code[2 * i + 1]) )
+    public init(strands: Int, code: [Int]) {
+        self.strands = strands
+        self.elements = code.map { i in
+            (Generator(i.abs), i.sign)
         }
-        return Braid(word)
     }
     
-    public static var strands: Int {
-        return n.intValue
+    public init(strands: Int, code: Int...) {
+        self.init(strands: strands, code: code)
     }
     
-    public static func generator(_ index: Int) -> Braid<n> {
-        return Braid( [ (Generator(index), index) ] )
+    public static func generator(strands: Int, index: Int) -> Self {
+        .init(strands: strands, elements: [ (Generator(index), index) ] )
     }
     
-    public static var generators: [Braid<n>] {
-        return (1 ... n.intValue - 1).map{ generator($0) }
+    public static func allGenerators(strands: Int) -> [Self] {
+        (1 ... n.intValue - 1).map{ generator(strands: strands, index: $0) }
     }
     
-    public static var identity: Braid<n> {
-        return Braid([])
+    public static func identity(strands: Int) -> Self {
+        .init(strands: strands, elements: [])
     }
     
-    public var inverse: Braid<n>? {
-        return Braid(word.reversed().map{ (σ, n) in (σ, -n) })
+    public var inverse: Self? {
+        .init(strands: strands, elements: elements.reversed().map{ (σ, n) in (σ, -n) })
     }
     
     public static func * (a: Braid<n>, b: Braid<n>) -> Braid<n> {
-        return Braid(a.word + b.word)
+        assert(a.strands == b.strands)
+        return .init(strands: a.strands, elements: a.elements + b.elements)
     }
     
-    public static func == (a: Braid<n>, b: Braid<n>) -> Bool {
-        // TODO must consider relations
-        
-        // return lhs.word == rhs.word
-        
-        return a.word.count == b.word.count &&
-            (0 ..< a.word.count).allSatisfy{ i in a.word[i] == b.word[i] }
+    public static func == (a: Self, b: Self) -> Bool {
+        a.strands == b.strands
+            && a.elements.count == b.elements.count
+            && (0 ..< a.elements.count).allSatisfy{ i in a.elements[i] == b.elements[i] }
     }
     
     public var description: String {
-        return word.reduce(""){ (res, s) in res + "\(s.0)\(s.1 == 1 ? "" : Format.sup(s.1))" }
+        return elements.reduce(""){ (res, s) in res + "\(s.0)\(s.1 == 1 ? "" : Format.sup(s.1))" }
     }
     
     public func describe() {
@@ -86,7 +81,7 @@ public struct Braid<n: FixedSizeType>: Group {
             }
         }
         
-        for (σ, p) in word {
+        for (σ, p) in elements {
             for _ in 0 ..< p.abs {
                 printRow(σ.index, p)
             }
@@ -94,15 +89,46 @@ public struct Braid<n: FixedSizeType>: Group {
     }
     
     // MEMO { σ_1 ... σ_{n - 1} } are the generators of Braid<n>
-    public struct Generator: Equatable, CustomStringConvertible {
+    public struct Generator: Equatable, CustomStringConvertible, ExpressibleByIntegerLiteral {
         public let index: Int
-        internal init(_ index: Int) {
+        
+        public init(integerLiteral value: Int) {
+            self.init(value)
+        }
+        
+        public init(_ index: Int) {
             assert(1 <= index && index < n.intValue)
             self.index = index
         }
         
         public var description: String {
-            return "σ\(Format.sub(index))"
+            "σ\(Format.sub(index))"
         }
+    }
+}
+
+extension Braid: Monoid where n: FixedSizeType {
+    public init(elements: [(Generator, Int)]) {
+        self.init(strands: n.intValue, elements: elements)
+    }
+    
+    public init(code: [Int]) {
+        self.init(strands: n.intValue, code: code)
+    }
+    
+    public init(code: Int...) {
+        self.init(strands: n.intValue, code: code)
+    }
+    
+    public static func generator(index: Int) -> Self {
+        generator(strands: n.intValue, index: index)
+    }
+    
+    public static var allGenerators: [Self] {
+        allGenerators(strands: n.intValue)
+    }
+    
+    public static var identity: Self {
+        identity(strands: n.intValue)
     }
 }
