@@ -195,14 +195,22 @@ public struct Link: Equatable, CustomStringConvertible {
         } )
     }
     
-    public var seifertGraph: DirectedGraph<Component, Int> {
-        typealias SeifertGraph = DirectedGraph<Component, Int>
+    public var seifertCircles: [Component] {
+        resolved(by: orientationPreservingState).components
+    }
+    
+    public var numberOfSeifertCircles: Int {
+        seifertCircles.count
+    }
+    
+    public var seifertGraph: Graph<Int, Component, Int> {
+        typealias SeifertGraph = Graph<Int, Component, Int>
         var G = SeifertGraph(options: ["physics": true])
         let s = orientationPreservingState
         let D = self.resolved(by: s)
         
-        for c in D.components {
-            G.addVertex(value: c)
+        for (i, c) in D.components.enumerated() {
+            G.addVertex(id: i, value: c)
         }
         
         func vertex(containing edge: Edge) -> SeifertGraph.Vertex {

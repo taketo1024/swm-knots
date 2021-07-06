@@ -14,7 +14,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/taketo1024/swm-core.git",
-            from:"1.0.1"
+            from:"1.2.1"
         ),
     ],
     targets: [
