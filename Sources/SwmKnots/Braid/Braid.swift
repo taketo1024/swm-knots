@@ -128,3 +128,48 @@ extension Braid: Monoid where n: FixedSizeType {
         identity(strands: n.intValue)
     }
 }
+
+extension Braid {
+    public var closure: Link {
+        var edges = (0 ..< strands).toArray()
+        var count = edges.count
+        var pdCode: Link.PDCode = []
+        
+        for (s, e) in elements {
+            /*        +       -
+             *  ↓   a   b   a   b
+             *       \ /     \ /
+             *  ↓     /       \
+             *       / \     / \
+             *  ↓   c   d   c   d
+             */
+            let i = s.index
+            let (a, b) = (edges[i - 1], edges[i])
+            let (c, d) = (count, count + 1)
+            
+            if e == 1 {
+                pdCode.append([a, c, d, b])
+            } else {
+                pdCode.append([b, a, c, d])
+            }
+            
+            edges[i - 1] = c
+            edges[i] = d
+            count += 2
+        }
+        
+        assert(
+            edges.enumerated().allSatisfy{ (i, j) in i != j },
+            "braid closure contains free loop."
+        )
+        
+        // identify boundary points.
+        
+        let conn = Dictionary(zip(edges, 0 ..< strands))
+        pdCode = pdCode.map { c in
+            c.map { a in conn[a] ?? a }
+        }
+        
+        return Link(name: description, pdCode: pdCode)
+    }
+}
