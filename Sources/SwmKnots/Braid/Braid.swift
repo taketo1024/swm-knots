@@ -5,9 +5,10 @@
 //  Created by Taketo Sano on 2019/05/31.
 //
 
+import Foundation
 import SwmCore
 
-public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertible {
+public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertible, Codable {
     public typealias Element = (generator: Generator, sign: Int)
     public let strands: Int
     public let elements: [Element]
@@ -27,6 +28,10 @@ public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertib
     
     public init(strands: Int, code: Int...) {
         self.init(strands: strands, code: code)
+    }
+    
+    public var code: [Int] {
+        elements.map{ (s, e) in e * s.index }
     }
     
     public static func generator(strands: Int, index: Int) -> Self {
@@ -104,6 +109,39 @@ public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertib
         public var description: String {
             "σ\(Format.sub(index))"
         }
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case strands, code
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        let strands = try values.decode(Int.self, forKey: .strands)
+        let code = try values.decode([Int].self, forKey: .code)
+        self.init(strands: strands, code: code)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(strands, forKey: .strands)
+        try container.encode(code, forKey: .code)
+    }
+}
+
+extension Braid where n == anySize {
+    public static func load(_ name: String) -> Self? {
+        #if os(macOS) || os(Linux)
+        if
+            let url = Bundle.module.url(forResource: "b_\(name)", withExtension: "json"),
+            let data = try? Data(contentsOf: url),
+            let braid = try? JSONDecoder().decode(Self.self, from: data)
+        {
+            return braid
+        }
+        #endif
+        
+        return nil
     }
 }
 
