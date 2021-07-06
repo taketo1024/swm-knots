@@ -8,10 +8,12 @@
 import SwmCore
 
 public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertible {
+    public typealias Element = (generator: Generator, sign: Int)
     public let strands: Int
-    public let elements: [(Generator, Int)]
+    public let elements: [Element]
     
-    public init(strands: Int, elements: [(Generator, Int)]) {
+    fileprivate init(strands: Int, elements: [Element]) {
+        assert(elements.allSatisfy{ $0.sign.abs == 1 })
         self.strands = strands
         self.elements = elements
     }
@@ -40,7 +42,7 @@ public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertib
     }
     
     public var inverse: Self? {
-        .init(strands: strands, elements: elements.reversed().map{ (σ, n) in (σ, -n) })
+        .init(strands: strands, elements: elements.reversed().map{ (σ, e) in (σ, -e) })
     }
     
     public static func * (a: Braid<n>, b: Braid<n>) -> Braid<n> {
@@ -81,8 +83,8 @@ public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertib
             return res
         }
         
-        return elements.flatMap { (σ, p) -> [String] in
-            (0 ..< p.abs).map { _ in row(σ.index, p.sign) }
+        return elements.map { (σ, e) in
+            row(σ.index, e)
         }.joined()
     }
     
@@ -106,10 +108,6 @@ public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertib
 }
 
 extension Braid: Monoid where n: FixedSizeType {
-    public init(elements: [(Generator, Int)]) {
-        self.init(strands: n.intValue, elements: elements)
-    }
-    
     public init(code: [Int]) {
         self.init(strands: n.intValue, code: code)
     }

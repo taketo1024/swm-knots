@@ -21,13 +21,9 @@ class BraidTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testInitByElements() {
-        let b = B(elements: [(1, 2), (2, -3), (1, 1)])
-        XCTAssertEqual(b.description, "σ₁²σ₂⁻³σ₁")
-    }
-
     func testInitByCode() {
         let b = B(code: 1, 1, -2, -1)
         XCTAssertEqual(b.description, "σ₁σ₁σ₂⁻¹σ₁⁻¹")
+        print(b.detailDescription)
     }
 }
