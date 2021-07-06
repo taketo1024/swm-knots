@@ -11,8 +11,8 @@ import SwmCore
 
 class BraidTests: XCTestCase {
     
-    typealias B = Braid<_5>
-
+    typealias B = Braid<anySize>
+    
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
@@ -22,8 +22,35 @@ class BraidTests: XCTestCase {
     }
 
     func testInitByCode() {
-        let b = B(code: 1, 1, -2, -1)
+        let b = B(strands: 5, code: 1, 1, -2, -1)
         XCTAssertEqual(b.description, "σ₁σ₁σ₂⁻¹σ₁⁻¹")
-        print(b.detailDescription)
+    }
+
+    func testClosure() {
+        let b = B(strands: 5, code: 1, 2, 3, 4)
+        let L = b.closure
+        XCTAssertEqual(L.seifertCircles.count, 5)
+    }
+
+    func test3_1() {
+        let b = B(strands: 2, code: -1, -1, -1)
+        let L = b.closure
+        assertJonesPolynomial(L, "3_1")
+    }
+    
+    func test4_1() {
+        let b = B(strands: 3, code: -1, 2, -1, 2)
+        let L = b.closure
+        assertJonesPolynomial(L, "4_1")
+    }
+    
+    func test5_1() {
+        let b = B(strands: 2, code: -1,-1,-1,-1,-1)
+        let L = b.closure
+        assertJonesPolynomial(L, "5_1")
+    }
+    
+    private func assertJonesPolynomial(_ L: Link, _ name: String) {
+        XCTAssertEqual(JonesPolynomial(L), JonesPolynomial(Link.load(name)!))
     }
 }
