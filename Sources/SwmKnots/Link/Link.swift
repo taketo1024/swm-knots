@@ -95,7 +95,7 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var edges: [Edge] {
-        crossings.flatMap{ x in x.edges }.unique().sorted()
+        crossings.flatMap{ x in x.edges }.uniqued().sorted()
     }
     
     public var components: [Component] {
