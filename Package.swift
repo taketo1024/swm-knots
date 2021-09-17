@@ -16,12 +16,17 @@ let package = Package(
             url: "https://github.com/taketo1024/swm-core.git",
             from:"1.2.1"
         ),
+        .package(
+            url: "https://github.com/davecom/SwiftGraph.git",
+            from: "3.1.0"
+        ),
     ],
     targets: [
         .target(
             name: "SwmKnots",
             dependencies: [
                 .product(name: "SwmCore", package: "swm-core"),
+                "SwiftGraph",
             ],
             resources: [.process("Resources")]
         ),
