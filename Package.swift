@@ -14,7 +14,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/taketo1024/swm-core.git",
-            from:"1.2.1"
+            from:"1.3.1"
         ),
         .package(
             url: "https://github.com/davecom/SwiftGraph.git",
