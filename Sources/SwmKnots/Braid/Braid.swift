@@ -8,13 +8,13 @@
 import Foundation
 import SwmCore
 
-public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertible, Codable {
+public struct Braid<n: SizeType>: MathSet, Multiplicative, ExpressibleByArrayLiteral, CustomStringConvertible, Codable {
     public typealias Element = (generator: Generator, sign: Int)
     public let strands: Int
     public let elements: [Element]
     
     fileprivate init(strands: Int, elements: [Element]) {
-        assert(elements.allSatisfy{ $0.sign.abs == 1 })
+        precondition(elements.allSatisfy{ $0.sign.abs == 1 })
         self.strands = strands
         self.elements = elements
     }
@@ -26,8 +26,14 @@ public struct Braid<n: SizeType>: MathSet, Multiplicative, CustomStringConvertib
         }
     }
     
-    public init(strands: Int, code: Int...) {
+    public init(code: [Int]) {
+        precondition(!code.contains{ $0 == 0})
+        let strands = code.map{ $0.abs }.max()! + 1
         self.init(strands: strands, code: code)
+    }
+    
+    public init(arrayLiteral elements: Int...) {
+        self.init(code: elements)
     }
     
     public var code: [Int] {
