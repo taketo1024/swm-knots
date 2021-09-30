@@ -95,7 +95,7 @@ public struct Link: Equatable, CustomStringConvertible {
     }
     
     public var edges: [Edge] {
-        crossings.flatMap{ x in x.edges }.unique().sorted()
+        crossings.flatMap{ x in x.edges }.uniqued().sorted()
     }
     
     public var components: [Component] {
@@ -201,31 +201,6 @@ public struct Link: Equatable, CustomStringConvertible {
     
     public var numberOfSeifertCircles: Int {
         seifertCircles.count
-    }
-    
-    public var seifertGraph: Graph<Int, Component, Int> {
-        typealias SeifertGraph = Graph<Int, Component, Int>
-        var G = SeifertGraph(options: ["physics": true])
-        let s = orientationPreservingState
-        let D = self.resolved(by: s)
-        
-        for (i, c) in D.components.enumerated() {
-            G.addVertex(id: i, value: c)
-        }
-        
-        func vertex(containing edge: Edge) -> SeifertGraph.Vertex {
-            G.vertices.first{ $0.value.value.edges.contains(edge) }!.value
-        }
-        
-        for x in D.crossings {
-            let (i, j) = (x.mode == .V) ? (0, 1) : (0, 2)
-            let (e1, e2) = (x.edges[i], x.edges[j])
-            let v1 = vertex(containing: e1)
-            let v2 = vertex(containing: e2)
-            v1.addEdge(to: v2, value: x.id)
-        }
-        
-        return G
     }
     
     public static func +(L1: Link, L2: Link) -> Link {
