@@ -68,6 +68,26 @@ extension Link {
             }
         }
         
+        // arbitrarily orient non-oriented edges
+        while let x = crossings.first(where: {!$0.edge1.isDetermined}) {
+            var e = x.edge1
+            e.endPoint0 = (x, 1)
+            
+            while !e.isDetermined {
+                if let y = crossings.first(where: { y in y != e.endPoint0.crossing && y.edge1 == e }) {
+                    e.endPoint1 = (y, 1)
+                    e = y.edge3
+                    e.endPoint0 = (y, 3)
+                } else if let y = crossings.first(where: { y in y != e.endPoint0.crossing && y.edge3 == e }) {
+                    e.endPoint1 = (y, 3)
+                    e = y.edge1
+                    e.endPoint0 = (y, 1)
+                } else {
+                    fatalError()
+                }
+            }
+        }
+        
         assert(crossings.allSatisfy{ x in x.edges.allSatisfy{ e in e.isDetermined } })
         
         self.init(name: (name ?? "L"), crossings: crossings)
